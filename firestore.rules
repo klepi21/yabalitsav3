@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Yabalitsa Management Collections - These are separate from your existing app
+    // Venues collection
+    match /yabalitsa_venues/{venueId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Pitches collection
+    match /yabalitsa_pitches/{pitchId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Bookings collection
+    match /yabalitsa_bookings/{bookingId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Customers collection (renamed from users to avoid conflict)
+    match /yabalitsa_customers/{customerId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // TimeSlots collection
+    match /yabalitsa_timeSlots/{slotId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // BlockedSlots collection
+    match /yabalitsa_blockedSlots/{blockedSlotId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // VenueSettings collection
+    match /yabalitsa_venueSettings/{settingId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // VenueOwners collection
+    match /yabalitsa_venueOwners/{ownerId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Your existing collections - DO NOT MODIFY THESE
+    // These rules ensure your existing app continues to work
+    match /games/{gameId} {
+      allow read, write: if true; // Keep your existing rules
+    }
+    
+    match /notification_logs/{logId} {
+      allow read, write: if true; // Keep your existing rules
+    }
+    
+    match /notification_requests/{requestId} {
+      allow read, write: if true; // Keep your existing rules
+    }
+    
+    match /users/{userId} {
+      allow read, write: if true; // Keep your existing rules
+    }
+    
+    match /venues/{venueId} {
+      allow read, write: if true; // Keep your existing rules
+    }
+  }
+}
