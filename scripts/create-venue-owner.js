@@ -22,7 +22,7 @@ async function createVenueOwnerAndVenue() {
   try {
     // Venue owner details - modify these as needed
     const venueOwnerData = {
-      email: 'admin@example.com',
+      email: 'admin5@example.com',
       password: 'password123',
       name: 'Admin User',
       phone: '+306912345678'
@@ -30,11 +30,13 @@ async function createVenueOwnerAndVenue() {
 
     // Venue details - modify these as needed
     const venueData = {
-      name: 'Example Football Pitch',
-      address: '123 Example Street, Athens, Greece',
-      phone: '+306912345678',
-      email: 'info@examplepitch.com',
-      description: 'A professional football pitch for rent',
+      name: 'Example Football Pitch 4',
+      address: '999 Example Street, Athens, Greece',
+      contactDetails: {
+        phone: '+306912345681',
+        email: 'info4@examplepitch.com'
+      },
+      description: 'Fourth professional football pitch for rent',
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date()
@@ -64,7 +66,7 @@ async function createVenueOwnerAndVenue() {
       updatedAt: new Date()
     };
 
-    await setDoc(doc(db, 'venueOwners', user.uid), venueOwnerDoc);
+    await setDoc(doc(db, 'yabalitsa_venueOwners', user.uid), venueOwnerDoc);
     console.log('✅ Venue owner document created');
 
     // Create venue document
@@ -74,11 +76,11 @@ async function createVenueOwnerAndVenue() {
       ownerEmail: venueOwnerData.email
     };
 
-    const venueRef = await addDoc(collection(db, 'venues'), venueDoc);
+    const venueRef = await addDoc(collection(db, 'yabalitsa_venues'), venueDoc);
     console.log('✅ Venue document created with ID:', venueRef.id);
 
     // Update venue owner with venue ID
-    await setDoc(doc(db, 'venueOwners', user.uid), {
+    await setDoc(doc(db, 'yabalitsa_venueOwners', user.uid), {
       ...venueOwnerDoc,
       venueId: venueRef.id
     }, { merge: true });

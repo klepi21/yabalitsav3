@@ -543,26 +543,33 @@ export default function DashboardPage() {
             
             {isVenueInfoExpanded && (
               <div className="mt-6 pt-6 border-t border-gray-200">
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <dt className="text-sm font-medium text-gray-500 mb-1">📍 Διεύθυνση</dt>
-                    <dd className="text-sm text-gray-900 font-medium">{venue.address}</dd>
+                {!venue ? (
+                  <div className="text-center py-8">
+                    <div className="text-gray-500 mb-2">🔄 Φόρτωση πληροφοριών γηπέδου...</div>
+                    <div className="text-sm text-gray-400">Παρακαλώ περιμένετε</div>
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <dt className="text-sm font-medium text-gray-500 mb-1">📧 Email</dt>
-                    <dd className="text-sm text-gray-900 font-medium">{venue.contactDetails.email}</dd>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <dt className="text-sm font-medium text-gray-500 mb-1">📞 Τηλέφωνο</dt>
-                    <dd className="text-sm text-gray-900 font-medium">{venue.contactDetails.phone}</dd>
-                  </div>
-                  {venue.notes && (
+                ) : (
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <div className="bg-gray-50 rounded-lg p-4">
-                      <dt className="text-sm font-medium text-gray-500 mb-1">📝 Σημειώσεις</dt>
-                      <dd className="text-sm text-gray-900 font-medium">{venue.notes}</dd>
+                      <dt className="text-sm font-medium text-gray-500 mb-1">📍 Διεύθυνση</dt>
+                      <dd className="text-sm text-gray-900 font-medium">{venue.address || 'Δεν έχει οριστεί'}</dd>
                     </div>
-                  )}
-                </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <dt className="text-sm font-medium text-gray-500 mb-1">📧 Email</dt>
+                      <dd className="text-sm text-gray-900 font-medium">{venue.contactDetails?.email || 'Δεν έχει οριστεί'}</dd>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <dt className="text-sm font-medium text-gray-500 mb-1">📞 Τηλέφωνο</dt>
+                      <dd className="text-sm text-gray-900 font-medium">{venue.contactDetails?.phone || 'Δεν έχει οριστεί'}</dd>
+                    </div>
+                    {venue.notes && (
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <dt className="text-sm font-medium text-gray-500 mb-1">📝 Σημειώσεις</dt>
+                        <dd className="text-sm text-gray-900 font-medium">{venue.notes}</dd>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
