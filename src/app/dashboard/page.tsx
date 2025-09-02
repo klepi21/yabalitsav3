@@ -30,11 +30,27 @@ export default function DashboardPage() {
     }
   }, [venueOwner?.venueId]);
 
-  const loadDashboardData = async () => {
-    if (!venueOwner?.venueId) return;
+  // Prevent infinite loading by adding a loading state
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+    const loadDashboardData = async () => {
+    if (!venueOwner?.venueId) {
+      console.log('No venue ID found in venue owner:', venueOwner);
+      return;
+    }
+
+    if (isLoading) {
+      console.log('Already loading data, skipping...');
+      return;
+    }
+
+    setIsLoading(true);
+    setLoadError(null);
 
     try {
       console.log('Loading data for venue:', venueOwner.venueId);
+      console.log('Venue owner data:', venueOwner);
       
       const [bookingsData, pitchesData, venueData] = await Promise.all([
         bookingService.getByVenue(venueOwner.venueId),
@@ -45,12 +61,24 @@ export default function DashboardPage() {
       console.log('Loaded bookings:', bookingsData);
       console.log('Loaded pitches:', pitchesData);
       console.log('Loaded venue:', venueData);
-
+      console.log('Venue data type:', typeof venueData);
+      console.log('Venue data keys:', venueData ? Object.keys(venueData) : 'null');
+      
       setBookings(bookingsData);
       setPitches(pitchesData);
       setVenue(venueData);
+      
+      // If venue data is null but we have a venueId, log an error
+      if (!venueData && venueOwner.venueId) {
+        console.error('❌ Venue data is null but venueId exists:', venueOwner.venueId);
+        console.error('This suggests the venue document does not exist in the database');
+        setLoadError('Venue data not found. Please contact support.');
+      }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
+      setLoadError('Failed to load dashboard data. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -220,16 +248,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (!venue) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-football-green mx-auto mb-4"></div>
-          <p className="text-gray-600">Φόρτωση...</p>
-        </div>
-      </div>
-    );
-  }
+  // Don't block rendering if venue is null - let the error state handle it
 
   return (
     <div className="min-h-screen bg-gray-50 p-4">
@@ -248,6 +267,34 @@ export default function DashboardPage() {
             Γρήγορη Κράτηση
           </button>
         </div>
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="bg-white shadow-lg rounded-2xl border border-gray-100 p-8 text-center">
+            <div className="text-2xl mb-4">🔄</div>
+            <div className="text-lg font-semibold text-gray-700">Φόρτωση δεδομένων...</div>
+            <div className="text-gray-500">Παρακαλώ περιμένετε</div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {loadError && (
+          <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
+            <div className="flex items-center">
+              <div className="text-2xl mr-3">⚠️</div>
+              <div>
+                <h3 className="text-lg font-semibold text-red-800">Σφάλμα φόρτωσης</h3>
+                <p className="text-red-600 mt-1">{loadError}</p>
+                <button
+                  onClick={loadDashboardData}
+                  className="mt-3 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                >
+                  Δοκιμάστε ξανά
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -541,28 +588,41 @@ export default function DashboardPage() {
               </div>
             </button>
             
-            {isVenueInfoExpanded && venue && (
+            {isVenueInfoExpanded && (
               <div className="mt-6 pt-6 border-t border-gray-200">
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <dt className="text-sm font-medium text-gray-500 mb-1">📍 Διεύθυνση</dt>
-                    <dd className="text-sm text-gray-900 font-medium">{venue.address}</dd>
+                {!venue ? (
+                  <div className="text-center py-8">
+                    <div className="text-red-500 mb-2">❌ Δεν βρέθηκαν πληροφορίες γηπέδου</div>
+                    <div className="text-sm text-gray-400">Το γήπεδο δεν υπάρχει στη βάση δεδομένων</div>
+                    <button
+                      onClick={loadDashboardData}
+                      className="mt-3 bg-football-green hover:bg-football-green/90 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+                    >
+                      Δοκιμάστε ξανά
+                    </button>
                   </div>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <dt className="text-sm font-medium text-gray-500 mb-1">📧 Email</dt>
-                    <dd className="text-sm text-gray-900 font-medium">{venue.contactDetails?.email}</dd>
-                  </div>
-                  <div className="bg-gray-50 rounded-lg p-4">
-                    <dt className="text-sm font-medium text-gray-500 mb-1">📞 Τηλέφωνο</dt>
-                    <dd className="text-sm text-gray-900 font-medium">{venue.contactDetails?.phone}</dd>
-                  </div>
-                  {venue.notes && (
+                ) : (
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <div className="bg-gray-50 rounded-lg p-4">
-                      <dt className="text-sm font-medium text-gray-500 mb-1">📝 Σημειώσεις</dt>
-                      <dd className="text-sm text-gray-900 font-medium">{venue.notes}</dd>
+                      <dt className="text-sm font-medium text-gray-500 mb-1">📍 Διεύθυνση</dt>
+                      <dd className="text-sm text-gray-900 font-medium">{venue.address}</dd>
                     </div>
-                  )}
-                </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <dt className="text-sm font-medium text-gray-500 mb-1">📧 Email</dt>
+                      <dd className="text-sm text-gray-900 font-medium">{venue.contactDetails?.email}</dd>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <dt className="text-sm font-medium text-gray-500 mb-1">📞 Τηλέφωνο</dt>
+                      <dd className="text-sm text-gray-900 font-medium">{venue.contactDetails?.phone}</dd>
+                    </div>
+                    {venue.notes && (
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <dt className="text-sm font-medium text-gray-500 mb-1">📝 Σημειώσεις</dt>
+                        <dd className="text-sm text-gray-900 font-medium">{venue.notes}</dd>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
