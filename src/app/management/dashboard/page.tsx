@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { bookingService, pitchService, venueService } from '@/lib/firebase-services';
@@ -8,7 +9,8 @@ import { Booking, Pitch, Venue } from '@/types';
 import { PlusIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 
 export default function DashboardPage() {
-  const { venueOwner } = useAuth();
+  const { user, venueOwner, isLoading: authLoading } = useAuth();
+  const router = useRouter();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [pitches, setPitches] = useState<Pitch[]>([]);
   const [venue, setVenue] = useState<Venue | null>(null);
@@ -24,6 +26,16 @@ export default function DashboardPage() {
     notes: ''
   });
 
+  // Check authentication
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user || !venueOwner) {
+      router.push('/venue-login');
+      return;
+    }
+  }, [user, venueOwner, authLoading, router]);
+
   useEffect(() => {
     if (venueOwner?.venueId) {
       loadDashboardData();
@@ -33,6 +45,20 @@ export default function DashboardPage() {
   // Prevent infinite loading by adding a loading state
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Show loading while checking authentication
+  if (authLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-football-green"></div>
+      </div>
+    );
+  }
+
+  // Redirect if not authenticated
+  if (!user || !venueOwner) {
+    return null; // Will redirect to login
+  }
 
     const loadDashboardData = async () => {
     if (!venueOwner?.venueId) {
@@ -99,6 +125,20 @@ export default function DashboardPage() {
 
   const getLiveBookings = () => {
     return bookings.filter(booking => booking.status === 'confirmed').length;
+  };
+
+  const getTodaysBookings = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    return bookings
+      .filter(booking => {
+        const bookingDate = new Date(booking.startTime);
+        return bookingDate >= today && bookingDate < tomorrow && booking.status !== 'completed';
+      })
+      .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
   };
 
   const getPlayersPerPitch = (pitchType: string) => {
@@ -330,11 +370,11 @@ export default function DashboardPage() {
             <div className="px-6 py-6">
               <div className="flex items-center">
                 <div className="p-2 bg-green-50 rounded-lg mr-4">
-                  <span className="text-2xl">💰</span>
+                  <span className="text-2xl">🎯</span>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Μηνιαία Έσοδα</p>
-                  <p className="text-2xl font-bold text-gray-900">€{getMonthlyRevenue()}</p>
+                  <p className="text-sm font-medium text-gray-500">Σημερινές Κρατήσεις</p>
+                  <p className="text-2xl font-bold text-gray-900">{getTodaysBookings().length}</p>
                 </div>
               </div>
             </div>
@@ -366,30 +406,29 @@ export default function DashboardPage() {
                     <div className="p-2 bg-football-green/10 rounded-lg mr-3">
                       <span className="text-2xl">📅</span>
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900">Πρόσφατες Κρατήσεις</h3>
+                    <h3 className="text-xl font-semibold text-gray-900">Σημερινές Κρατήσεις</h3>
                   </div>
                   <Link
-                    href="/bookings"
+                    href="/management/bookings"
                     className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green transition-all duration-200"
                   >
                     Προβολή Όλων
                   </Link>
                 </div>
 
-                {!bookings || bookings.filter(booking => booking.status !== 'completed').length === 0 ? (
+                {!bookings || getTodaysBookings().length === 0 ? (
                   <div className="text-center py-8">
                     <span className="text-4xl mb-3 block">📅</span>
                     <h3 className="text-sm font-medium text-gray-900">
-                      {!bookings ? 'Φόρτωση κρατήσεων...' : 'Δεν υπάρχουν ενεργές κρατήσεις'}
+                      {!bookings ? 'Φόρτωση κρατήσεων...' : 'Δεν υπάρχουν σημερινές κρατήσεις'}
                     </h3>
                     <p className="text-xs text-gray-500 mt-1">
-                      {!bookings ? 'Παρακαλώ περιμένετε' : 'Όλες οι κρατήσεις είναι ολοκληρωμένες ή δεν υπάρχουν κρατήσεις'}
+                      {!bookings ? 'Παρακαλώ περιμένετε' : 'Δεν υπάρχουν κρατήσεις για σήμερα'}
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {bookings
-                      .filter(booking => booking.status !== 'completed')
+                    {getTodaysBookings()
                       .slice(0, 5)
                       .map((booking) => {
                       const pitch = pitches.find(p => p.id === booking.pitchId);
@@ -432,7 +471,7 @@ export default function DashboardPage() {
                               )}
                             </div>
                             <Link
-                              href={`/bookings/${booking.id}`}
+                              href={`/management/bookings/${booking.id}`}
                               className="text-xs text-football-green hover:text-football-green-light font-medium"
                             >
                               Προβολή →
@@ -459,7 +498,7 @@ export default function DashboardPage() {
                     <h3 className="text-xl font-semibold text-gray-900">Γήπεδα</h3>
                   </div>
                   <Link
-                    href="/pitches/new"
+                    href="/management/pitches/new"
                     className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green transition-all duration-200"
                   >
                     <PlusIcon className="h-4 w-4 mr-1" />
@@ -503,7 +542,7 @@ export default function DashboardPage() {
                     {pitches.length > 3 && (
                       <div className="text-center pt-2">
                         <Link
-                          href="/pitches"
+                          href="/management/pitches"
                           className="text-sm text-football-green hover:text-football-green-light font-medium"
                         >
                           Προβολή όλων ({pitches.length} γήπεδα) →
@@ -528,7 +567,7 @@ export default function DashboardPage() {
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Link
-                href="/bookings"
+                href="/management/bookings"
                 className="relative rounded-xl border border-gray-200 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-football-green hover:shadow-md focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-football-green transition-all duration-200"
               >
                 <span className="text-2xl">📅</span>
@@ -540,8 +579,8 @@ export default function DashboardPage() {
               </Link>
 
               <Link
-                href="/customers"
-                className="relative rounded-xl border border-gray-200 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-football-green hover:shadow-md focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-football-green transition-all duration-200"
+                href="/management/customers"
+                className="relative rounded-xl border border-gray-200 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-football-green hover:shadow-md focus-within:ring-offset-2 focus-within:ring-football-green transition-all duration-200"
               >
                 <span className="text-2xl">👥</span>
                 <div className="flex-1 min-w-0">
@@ -552,8 +591,8 @@ export default function DashboardPage() {
               </Link>
 
               <Link
-                href="/settings"
-                className="relative rounded-xl border border-gray-200 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-football-green hover:shadow-md focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-football-green transition-all duration-200"
+                href="/management/settings"
+                className="relative rounded-xl border border-gray-200 bg-white px-6 py-5 shadow-sm flex items-center space-x-3 hover:border-football-green hover:shadow-md focus-within:ring-offset-2 focus-within:ring-football-green transition-all duration-200"
               >
                 <span className="text-2xl">🏟️</span>
                 <div className="flex-1 min-w-0">

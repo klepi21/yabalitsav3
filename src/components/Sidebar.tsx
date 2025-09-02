@@ -10,11 +10,13 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 
 const navigation = [
-  { name: 'Πίνακας Ελέγχου', href: '/dashboard', emoji: '📊' },
-  { name: 'Γήπεδα', href: '/pitches', emoji: '🏟️' },
-  { name: 'Κρατήσεις', href: '/bookings', emoji: '📅' },
-  { name: 'Πελάτες', href: '/customers', emoji: '👥' },
-  { name: 'Ρυθμίσεις', href: '/settings', emoji: '⚙️' },
+  { name: 'Πίνακας Ελέγχου', href: '/management/dashboard', emoji: '📊' },
+  { name: 'Γήπεδα', href: '/management/pitches', emoji: '🏟️' },
+  { name: 'Κρατήσεις', href: '/management/bookings', emoji: '📅' },
+  { name: 'Πελάτες', href: '/management/customers', emoji: '👥' },
+  { name: 'Αναφορές', href: '/management/reports', emoji: '📈' },
+  { name: 'Οδηγίες', href: '/management/guides', emoji: '📘' },
+  { name: 'Ρυθμίσεις', href: '/management/settings', emoji: '⚙️' },
 ];
 
 export default function Sidebar() {
@@ -45,14 +47,14 @@ export default function Sidebar() {
             </button>
           </div>
           <div className="border-b border-gray-200 mx-4 mb-4"></div>
-          <nav className="flex-1 space-y-4 px-4 py-4">
+          <nav className="flex-1 space-y-2 px-4 py-3">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`group flex flex-col items-center justify-center p-4 text-sm font-medium rounded-xl transition-all duration-200 border-2 ${
+                  className={`group flex flex-col items-center justify-center p-3 text-sm font-medium rounded-xl transition-all duration-200 border-2 ${
                     isActive
                       ? 'bg-football-green text-white shadow-xl transform scale-105 border-football-green'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-lg border-gray-200 hover:border-football-green'
@@ -60,7 +62,7 @@ export default function Sidebar() {
                   onClick={() => setSidebarOpen(false)}
                 >
                   <span
-                    className={`text-3xl mb-2 ${
+                    className={`text-2xl mb-1 ${
                       isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-500'
                     }`}
                   >
@@ -101,21 +103,21 @@ export default function Sidebar() {
             />
           </div>
           <div className="border-b border-gray-200 mx-4 mb-4"></div>
-          <nav className="flex-1 space-y-4 px-4 py-4">
+          <nav className="flex-1 space-y-2 px-4 py-3">
             {navigation.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`group flex flex-col items-center justify-center p-4 text-sm font-medium rounded-xl transition-all duration-200 border-2 ${
+                  className={`group flex flex-col items-center justify-center p-3 text-sm font-medium rounded-xl transition-all duration-200 border-2 ${
                     isActive
                       ? 'bg-football-green text-white shadow-xl transform scale-105 border-football-green'
                       : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-lg border-gray-200 hover:border-football-green'
                   }`}
                 >
                   <span
-                    className={`text-3xl mb-2 ${
+                    className={`text-2xl mb-1 ${
                       isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-500'
                     }`}
                   >

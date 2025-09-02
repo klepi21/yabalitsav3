@@ -1,107 +1,132 @@
 # Venue Owner Creation Script
 
-This script creates a new venue owner account and associated venue in Firebase.
+This script creates a new venue owner with their venue and pitch in the Yabalitsa system.
 
-## Prerequisites
+## 🚀 Quick Start
 
-1. Make sure your Firebase environment variables are set in your `.env.local` file:
-   ```
-   NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
-   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_messaging_sender_id
-   NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-   ```
-
-2. Install Firebase dependencies if not already installed:
-   ```bash
-   npm install firebase
-   ```
-
-## Usage
-
-### Option 1: Using npm script (Recommended)
+### 1. Install Dependencies
 ```bash
-npm run create-venue-owner
+npm install firebase
 ```
 
-### Option 2: Direct execution
-```bash
-node scripts/create-venue-owner.js
+### 2. Configure Firebase
+Edit `create-new-venue-owner.js` and replace the `firebaseConfig` with your actual Firebase configuration:
+
+```javascript
+const firebaseConfig = {
+  apiKey: "your-actual-api-key",
+  authDomain: "your-project.firebaseapp.com",
+  projectId: "your-actual-project-id",
+  storageBucket: "your-project.appspot.com",
+  messagingSenderId: "your-sender-id",
+  appId: "your-app-id"
+};
 ```
 
-## Customization
+### 3. Customize Data
+Edit the following sections in the script:
 
-Before running the script, you can modify the venue owner and venue details in the script:
-
-### Venue Owner Details (lines 20-25):
+#### Venue Owner Details
 ```javascript
 const venueOwnerData = {
-  email: 'admin@example.com',        // Change this
-  password: 'password123',           // Change this
-  name: 'Admin User',                // Change this
-  phone: '+306912345678'             // Change this
+  email: "your-email@example.com",
+  password: "YourSecurePassword123!",
+  firstName: "Your First Name",
+  lastName: "Your Last Name",
+  phone: "+306912345678"
 };
 ```
 
-### Venue Details (lines 27-35):
+#### Venue Details
 ```javascript
 const venueData = {
-  name: 'Example Football Pitch',    // Change this
-  address: '123 Example Street, Athens, Greece',  // Change this
-  phone: '+306912345678',            // Change this
-  email: 'info@examplepitch.com',    // Change this
-  description: 'A professional football pitch for rent',  // Change this
-  isActive: true,
-  createdAt: new Date(),
-  updatedAt: new Date()
+  name: "Your Venue Name",
+  address: "Your Venue Address",
+  description: "Your venue description",
+  // ... customize other fields
 };
 ```
 
-## What the Script Does
+#### Pitch Details
+```javascript
+const pitchData = {
+  name: "Your Pitch Name",
+  type: "5x5", // or "6x6", "7x7", etc.
+  pricePerSlot: 50, // price in euros
+  slotDuration: 60, // duration in minutes
+  // ... customize other fields
+};
+```
 
-1. **Creates Firebase Auth User**: Creates a new user account with email and password
-2. **Creates Venue Owner Document**: Adds a document to the `venueOwners` collection
-3. **Creates Venue Document**: Adds a document to the `venues` collection
-4. **Links Venue Owner to Venue**: Updates the venue owner document with the venue ID
+### 4. Run the Script
+```bash
+node scripts/create-new-venue-owner.js
+```
 
-## Output
+## 📋 What the Script Creates
 
-The script will output:
-- Venue Owner UID
-- Venue ID
-- Email and password for login
-- Success/error messages
+1. **User Account** - Firebase Authentication user
+2. **Venue Owner Profile** - Profile in `yabalitsa_venue_owners` collection
+3. **Venue** - Venue in `yabalitsa_venues` collection
+4. **Pitch** - Pitch in `yabalitsa_pitches` collection
+5. **Relationships** - Links between owner, venue, and pitch
 
-## Security Note
+## 🔐 Generated Credentials
 
-⚠️ **Important**: The default password is weak. Make sure to change it after the first login!
-
-## Error Handling
-
-The script handles common errors:
-- Email already in use
-- Weak password
-- Invalid email format
-- Firebase connection issues
-
-## Example Output
+After successful execution, the script will output:
 
 ```
-Creating venue owner account...
-✅ Venue owner account created with UID: abc123def456
-✅ Venue owner document created
-✅ Venue document created with ID: xyz789uvw012
-✅ Venue owner updated with venue ID
-
-🎉 Success! Venue owner and venue created successfully.
-
-📋 Summary:
-Venue Owner UID: abc123def456
-Venue ID: xyz789uvw012
-Email: admin@example.com
-Password: password123
-
-⚠️  Remember to change the password after first login!
+📋 CREDENTIALS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📧 Email: your-email@example.com
+🔑 Password: YourSecurePassword123!
+🆔 User ID: [generated-uid]
+🏟️ Venue ID: [generated-venue-id]
+⚽ Pitch ID: [generated-pitch-id]
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
+
+## 🚨 Important Notes
+
+- **Save credentials securely** - The password is only shown once
+- **Change default data** - Update names, addresses, and contact info
+- **Check Firebase rules** - Ensure your security rules allow these operations
+- **Test in development** - Run this in a test environment first
+
+## 🛠️ Troubleshooting
+
+### Common Errors
+
+1. **"auth/email-already-in-use"**
+   - Solution: Change the email address in `venueOwnerData.email`
+
+2. **"auth/invalid-api-key"**
+   - Solution: Update `firebaseConfig` with correct values
+
+3. **"permission-denied"**
+   - Solution: Check Firebase security rules and collection names
+
+### Debug Information
+The script provides detailed error messages and suggestions for common issues.
+
+## 🔄 Multiple Venues
+
+To create multiple venue owners, simply:
+1. Copy the script
+2. Change the data variables
+3. Run again
+
+## 📱 Login
+
+After creation, the venue owner can login at:
+- **URL**: `/venue-login`
+- **Email**: The email you specified
+- **Password**: The password you specified
+
+## 🎯 Next Steps
+
+After creating the venue owner:
+1. Test login functionality
+2. Verify venue appears in search results
+3. Check pitch availability
+4. Test booking system

@@ -71,14 +71,14 @@ export default function PitchesPage() {
         </Link>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Γήπεδα</h1>
-          <p className="mt-2 text-gray-600">Διαχείριση των ποδοσφαιρικών γηπέδων του χώρου σας</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Γήπεδα</h1>
+          <p className="mt-1 sm:mt-2 text-gray-600">Διαχείριση των ποδοσφαιρικών γηπέδων του χώρου σας</p>
         </div>
         <Link
-          href="/pitches/new"
-          className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-xl shadow-lg text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green transition-all duration-200 hover:scale-105"
+          href="/management/pitches/new"
+          className="inline-flex justify-center items-center px-5 py-3 border border-transparent text-sm font-medium rounded-xl shadow-lg text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green transition-all duration-200"
         >
           <PlusIcon className="h-5 w-5 mr-2" />
           Προσθήκη Γηπέδου
@@ -105,7 +105,7 @@ export default function PitchesPage() {
       </div>
 
       {/* Search */}
-      <div className="max-w-lg">
+      <div className="w-full sm:max-w-lg">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
@@ -115,7 +115,7 @@ export default function PitchesPage() {
             placeholder="Αναζήτηση γηπέδων..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-football-green focus:border-football-green sm:text-sm shadow-sm"
+            className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-football-green focus:border-football-green text-sm shadow-sm"
           />
         </div>
       </div>
@@ -136,7 +136,7 @@ export default function PitchesPage() {
             {!searchTerm && (
               <div className="mt-6">
                 <Link
-                  href="/pitches/new"
+                  href="/management/pitches/new"
                   className="inline-flex items-center px-6 py-3 border border-transparent shadow-lg text-sm font-medium rounded-xl text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green transition-all duration-200 hover:scale-105"
                 >
                   <PlusIcon className="h-5 w-5 mr-2" />
@@ -147,15 +147,15 @@ export default function PitchesPage() {
           </div>
         ) : (
           <div className="p-6">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {filteredPitches.map((pitch) => (
-                <div key={pitch.id} className="bg-white border border-gray-200 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:border-football-green hover:scale-105">
+                <div key={pitch.id} className="bg-white border border-gray-200 rounded-2xl p-5 sm:p-6 hover:shadow-xl transition-all duration-300 hover:border-football-green">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center">
                       <div className="h-10 w-10 bg-football-green/10 rounded-xl flex items-center justify-center mr-3">
                         <span className="text-xl">⚽</span>
                       </div>
-                      <h4 className="text-lg font-semibold text-gray-900">{pitch.name}</h4>
+                      <h4 className="text-base sm:text-lg font-semibold text-gray-900">{pitch.name}</h4>
                     </div>
                     <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-football-green/10 text-football-green border border-football-green/20">
                       {pitch.type}
@@ -165,7 +165,7 @@ export default function PitchesPage() {
                   <div className="space-y-3 mb-6">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500">💰 Τιμή ανά Κράτηση</span>
-                      <span className="text-lg font-bold text-gray-900">€{pitch.pricePerSlot}</span>
+                      <span className="text-base sm:text-lg font-bold text-gray-900">€{pitch.pricePerSlot}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-500">⏱️ Διάρκεια Κράτησης</span>
@@ -173,15 +173,15 @@ export default function PitchesPage() {
                     </div>
                   </div>
                   
-                  <div className="flex space-x-3 pt-4 border-t border-gray-100">
+                  <div className="flex gap-2 pt-4 border-t border-gray-100">
                     <Link
-                      href={`/pitches/${pitch.id}/edit`}
+                      href={`/management/pitches/${pitch.id}/edit`}
                       className="flex-1 text-center text-sm text-football-green hover:text-football-green-light font-medium py-2 px-3 rounded-lg hover:bg-football-green/5 transition-colors"
                     >
                       ✏️ Επεξεργασία
                     </Link>
                     <Link
-                      href={`/pitches/${pitch.id}`}
+                      href={`/management/pitches/${pitch.id}`}
                       className="flex-1 text-center text-sm text-football-green hover:text-football-green-light font-medium py-2 px-3 rounded-lg hover:bg-football-green/5 transition-colors"
                     >
                       👁️ Προβολή

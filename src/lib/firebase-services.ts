@@ -18,7 +18,7 @@ import {
   User as FirebaseUser
 } from 'firebase/auth';
 import { db, auth } from './firebase';
-import { Venue, Pitch, Booking, User, TimeSlot, VenueOwner } from '../types';
+import { Venue, Pitch, Booking, User, TimeSlot, VenueOwner, BlockedDate } from '../types';
 
 // Venue Services
 export const venueService = {
@@ -442,5 +442,69 @@ export const authService = {
   // Listen to auth state changes
   onAuthStateChanged(callback: (user: FirebaseUser | null) => void) {
     return onAuthStateChanged(auth, callback);
+  }
+};
+
+// Blocked Dates Services
+export const blockedDateService = {
+  // Create a new blocked date
+  async create(blockedDateData: Omit<BlockedDate, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    const docRef = await addDoc(collection(db, 'yabalitsa_blockedDates'), {
+      ...blockedDateData,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    return docRef.id;
+  },
+
+  // Get blocked dates for a pitch
+  async getByPitch(pitchId: string): Promise<BlockedDate[]> {
+    const q = query(
+      collection(db, 'yabalitsa_blockedDates'), 
+      where('pitchId', '==', pitchId)
+    );
+    const querySnapshot = await getDocs(q);
+    
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      startDate: doc.data().startDate?.toDate() || new Date(),
+      endDate: doc.data().endDate?.toDate() || new Date(),
+      createdAt: doc.data().createdAt?.toDate() || new Date(),
+      updatedAt: doc.data().updatedAt?.toDate() || new Date()
+    })) as BlockedDate[];
+  },
+
+  // Get blocked dates for a venue
+  async getByVenue(venueId: string): Promise<BlockedDate[]> {
+    const q = query(
+      collection(db, 'yabalitsa_blockedDates'), 
+      where('venueId', '==', venueId)
+    );
+    const querySnapshot = await getDocs(q);
+    
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      startDate: doc.data().startDate?.toDate() || new Date(),
+      endDate: doc.data().endDate?.toDate() || new Date(),
+      createdAt: doc.data().createdAt?.toDate() || new Date(),
+      updatedAt: doc.data().updatedAt?.toDate() || new Date()
+    })) as BlockedDate[];
+  },
+
+  // Update blocked date
+  async update(id: string, blockedDateData: Partial<BlockedDate>): Promise<void> {
+    const docRef = doc(db, 'yabalitsa_blockedDates', id);
+    await updateDoc(docRef, {
+      ...blockedDateData,
+      updatedAt: serverTimestamp()
+    });
+  },
+
+  // Delete blocked date
+  async delete(id: string): Promise<void> {
+    const docRef = doc(db, 'yabalitsa_blockedDates', id);
+    await deleteDoc(docRef);
   }
 };

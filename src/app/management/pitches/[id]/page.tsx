@@ -10,8 +10,8 @@ import {
   CalendarIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import { pitchService, bookingService } from '@/lib/firebase-services';
-import { Pitch, Booking } from '@/types';
+import { pitchService, bookingService, blockedDateService } from '@/lib/firebase-services';
+import { Pitch, Booking, BlockedDate } from '@/types';
 
 export default function PitchDetailsPage() {
   const router = useRouter();
@@ -20,6 +20,7 @@ export default function PitchDetailsPage() {
   
   const [pitch, setPitch] = useState<Pitch | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -41,9 +42,13 @@ export default function PitchDetailsPage() {
       if (pitchData) {
         setPitch(pitchData);
         
-        // Load bookings for this pitch
-        const bookingsData = await bookingService.getByPitch(pitchId);
+        // Load bookings and blocked dates for this pitch
+        const [bookingsData, blockedDatesData] = await Promise.all([
+          bookingService.getByPitch(pitchId),
+          blockedDateService.getByPitch(pitchId)
+        ]);
         setBookings(bookingsData || []);
+        setBlockedDates(blockedDatesData || []);
       }
     } catch (error) {
       console.error('Error loading pitch data:', error);
@@ -66,7 +71,7 @@ export default function PitchDetailsPage() {
         <h3 className="text-lg font-medium text-gray-900">Το γήπεδο δεν βρέθηκε</h3>
         <p className="mt-1 text-sm text-gray-500">Το γήπεδο που αναζητάτε δεν υπάρχει.</p>
         <Link
-          href="/pitches"
+          href="/management/pitches"
           className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
         >
           Επιστροφή στα Γήπεδα
@@ -81,7 +86,7 @@ export default function PitchDetailsPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
                   <Link
-          href="/pitches"
+          href="/management/pitches"
           className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
         >
           <ArrowLeftIcon className="h-4 w-4 mr-1" />
@@ -89,7 +94,7 @@ export default function PitchDetailsPage() {
         </Link>
         </div>
         <Link
-          href={`/pitches/${pitch.id}/edit`}
+          href={`/management/pitches/${pitch.id}/edit`}
           className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
         >
           Επεξεργασία Γηπέδου
@@ -176,6 +181,43 @@ export default function PitchDetailsPage() {
             </div>
           </div>
         </div>
+
+        {/* Blocked Dates */}
+        {blockedDates.length > 0 && (
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <div className="flex items-center mb-4">
+                <span className="text-2xl mr-3">🚫</span>
+                <h3 className="text-lg font-medium text-gray-900">Κλειστές Ημερομηνίες</h3>
+              </div>
+              
+              <div className="space-y-3">
+                {blockedDates.map((blockedDate) => (
+                  <div key={blockedDate.id} className="border border-red-200 rounded-lg p-3 bg-red-50">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 text-sm">
+                          <span className="font-medium text-gray-900">
+                            {new Date(blockedDate.startDate).toLocaleDateString('el-GR')}
+                            {blockedDate.startDate !== blockedDate.endDate && 
+                              ` - ${new Date(blockedDate.endDate).toLocaleDateString('el-GR')}`
+                            }
+                          </span>
+                          <span className="text-red-600 font-medium text-xs">
+                            {blockedDate.isFullDay ? 'Όλη η ημέρα' : 'Συγκεκριμένες ώρες'}
+                          </span>
+                        </div>
+                        {blockedDate.reason && (
+                          <p className="text-gray-600 text-xs mt-1">{blockedDate.reason}</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Recent Bookings */}
         <div className="bg-white shadow rounded-lg lg:col-span-2">

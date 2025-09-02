@@ -68,7 +68,7 @@ export default function CustomersPage() {
       {/* Header */}
       <div className="flex items-center space-x-4">
         <Link
-          href="/dashboard"
+          href="/management/dashboard"
           className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
         >
           <ArrowLeftIcon className="h-4 w-4 mr-1" />
@@ -82,7 +82,7 @@ export default function CustomersPage() {
           <p className="mt-2 text-gray-600">Διαχείριση πληροφοριών πελατών για το γήπεδό σας</p>
         </div>
         <Link
-          href="/customers/new"
+          href="/management/customers/new"
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
         >
           <PlusIcon className="h-4 w-4 mr-2" />
@@ -120,7 +120,7 @@ export default function CustomersPage() {
             {!searchTerm && (
               <div className="mt-6">
                 <Link
-                  href="/customers/new"
+                  href="/management/customers/new"
                   className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
                 >
                   <PlusIcon className="h-4 w-4 mr-2" />
@@ -154,13 +154,13 @@ export default function CustomersPage() {
                   </div>
                   <div className="flex space-x-2">
                     <Link
-                      href={`/customers/${customer.id}`}
+                      href={`/management/customers/${customer.id}`}
                       className="text-sm text-football-green hover:text-football-green-light"
                     >
                       Προβολή
                     </Link>
                     <Link
-                      href={`/customers/${customer.id}/edit`}
+                      href={`/management/customers/${customer.id}/edit`}
                       className="text-sm text-football-green hover:text-football-green-light"
                     >
                       Επεξεργασία

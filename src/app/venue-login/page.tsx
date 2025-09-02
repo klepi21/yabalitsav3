@@ -38,7 +38,7 @@ export default function VenueLoginPage() {
     
     if (user && venueOwner) {
       // Always redirect to their dashboard (no venueId needed)
-      router.push('/dashboard');
+      router.push('/management/dashboard');
     }
   }, [user, venueOwner, authLoading, router]);
 

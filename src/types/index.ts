@@ -82,6 +82,18 @@ export interface BlockedSlot {
   createdAt: Date;
 }
 
+export interface BlockedDate {
+  id: string;
+  pitchId: string;
+  venueId: string;
+  startDate: Date;
+  endDate: Date;
+  reason: string;
+  isFullDay: boolean; // If true, blocks entire day; if false, blocks specific time slots
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface VenueSettings {
   id: string;
   venueId: string;

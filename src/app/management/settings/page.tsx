@@ -13,6 +13,8 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { venueService } from '@/lib/firebase-services';
 import { Venue } from '@/types';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 // Form validation schema
 const venueSettingsSchema = z.object({
@@ -36,6 +38,7 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [planSaving, setPlanSaving] = useState(false);
 
   const {
     register,
@@ -136,7 +139,7 @@ export default function SettingsPage() {
       {/* Header */}
       <div className="flex items-center space-x-4">
         <Link
-          href="/dashboard"
+          href="/management/dashboard"
           className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
         >
           <ArrowLeftIcon className="h-4 w-4 mr-1" />
@@ -278,6 +281,46 @@ export default function SettingsPage() {
               </button>
             </div>
           </form>
+        </div>
+      </div>
+
+      {/* Divider */}
+      <div className="border-t border-gray-200"></div>
+
+      {/* Subscription Section */}
+      <div className="bg-white shadow rounded-lg">
+        <div className="px-4 py-5 sm:p-6">
+          <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Συνδρομή & Πλάνο</h3>
+          {venue && (
+            <div className="space-y-4">
+              <div className="text-sm text-gray-700">
+                <span className="font-medium">Υπόλοιπο ημερών:</span>{' '}
+                <span className="text-green-700 font-semibold">{(venue as any).daysRemaining ?? 0} ημέρες</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className={`rounded-xl border p-4 ${((venue as any).plan==='subscription') ? 'border-green-600' : 'border-gray-200'}`}>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm">
+                      <div className="font-semibold text-black">Πλήρες Διαχειριστικό</div>
+                      <div className="text-gray-600">30€ / μήνα</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`rounded-xl border p-4 ${((venue as any).plan==='per_booking' || (venue as any).plan==='premium') ? 'border-green-600' : 'border-gray-200'}`}>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm">
+                      <div className="font-semibold text-black">Premium</div>
+                      <div className="text-gray-600">1€ / ανά κράτηση (FSE)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <p className="text-xs text-gray-500">Μετά τη λήξη του trial θα χρειαστεί ενεργοποίηση πληρωμών. Επικοινωνήστε μαζί μας για αναβάθμιση ή αλλαγή πλάνου.</p>
+            </div>
+          )}
         </div>
       </div>
     </div>

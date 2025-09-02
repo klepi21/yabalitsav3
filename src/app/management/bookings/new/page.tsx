@@ -12,8 +12,8 @@ import {
   UserIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import { bookingService, pitchService } from '@/lib/firebase-services';
-import { Pitch, Booking } from '@/types';
+import { bookingService, pitchService, blockedDateService } from '@/lib/firebase-services';
+import { Pitch, Booking, BlockedDate } from '@/types';
 
 // Form validation schema
 const bookingCreateSchema = z.object({
@@ -32,11 +32,19 @@ export default function NewBookingPage() {
   
   const [pitches, setPitches] = useState<Pitch[]>([]);
   const [existingBookings, setExistingBookings] = useState<Booking[]>([]);
+  const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>('');
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringSettings, setRecurringSettings] = useState({
+    frequency: 'weekly', // 'weekly' or 'daily'
+    interval: 1, // every 1 week/day
+    occurrences: 4, // number of bookings to create
+    endDate: '' // alternative end date
+  });
 
   const {
     register,
@@ -53,6 +61,7 @@ export default function NewBookingPage() {
     const urlParams = new URLSearchParams(window.location.search);
     const dateParam = urlParams.get('date');
     const timeParam = urlParams.get('time');
+    const recurringParam = urlParams.get('recurring');
     
     if (dateParam) {
       setSelectedDate(dateParam);
@@ -63,6 +72,10 @@ export default function NewBookingPage() {
       setTimeout(() => {
         setValue('selectedSlot', timeParam);
       }, 100);
+    }
+    
+    if (recurringParam === 'true') {
+      setIsRecurring(true);
     }
   }, [setValue]);
 
@@ -82,13 +95,15 @@ export default function NewBookingPage() {
     if (!venueOwner) return;
     
     try {
-      const [pitchesData, bookingsData] = await Promise.all([
+      const [pitchesData, bookingsData, blockedDatesData] = await Promise.all([
         pitchService.getByVenue(venueOwner.venueId),
-        bookingService.getByVenue(venueOwner.venueId)
+        bookingService.getByVenue(venueOwner.venueId),
+        blockedDateService.getByVenue(venueOwner.venueId)
       ]);
       
       setPitches(pitchesData || []);
       setExistingBookings(bookingsData || []);
+      setBlockedDates(blockedDatesData || []);
     } catch (error) {
       console.error('Error loading data:', error);
       setError('Αποτυχία φόρτωσης δεδομένων');
@@ -127,27 +142,84 @@ export default function NewBookingPage() {
       console.log('Start time:', startDateTime);
       console.log('End time:', endDateTime);
 
-      const newBooking = {
-        venueId: venueOwner.venueId,
-        pitchId: data.pitchId,
-        slotId: '', // Will be generated
-        userId: '', // Will be generated
-        userName: data.customerName,
-        userEmail: '', // No email required
-        userPhone: data.customerPhone,
-        startTime: startDateTime,
-        endTime: endDateTime,
-        price: selectedPitch.pricePerSlot, // Use pitch price
-        status: 'pending' as const, // Default to pending
-        notes: data.notes || '',
-      };
+      if (isRecurring) {
+        // Create multiple recurring bookings
+        const recurringDates = generateRecurringDates(
+          selectedDate, 
+          recurringSettings.frequency, 
+          recurringSettings.interval, 
+          recurringSettings.occurrences
+        );
+        
+        let createdBookings = 0;
+        let failedBookings = 0;
+        
+        for (const date of recurringDates) {
+          // Check if this date and time slot is available
+          if (checkDateAvailability(date, data.pitchId, data.selectedSlot)) {
+            const startDateTime = new Date(date);
+            startDateTime.setHours(hours, minutes, 0, 0);
+            
+            const endDateTime = new Date(startDateTime);
+            endDateTime.setMinutes(endDateTime.getMinutes() + selectedPitch.slotDuration);
+            
+            const newBooking = {
+              venueId: venueOwner.venueId,
+              pitchId: data.pitchId,
+              slotId: '',
+              userId: '',
+              userName: data.customerName,
+              userEmail: '',
+              userPhone: data.customerPhone,
+              startTime: startDateTime,
+              endTime: endDateTime,
+              price: selectedPitch.pricePerSlot,
+              status: 'pending' as const,
+              notes: data.notes || '',
+            };
+            
+            try {
+              await bookingService.create(newBooking);
+              createdBookings++;
+            } catch (error) {
+              console.error(`Failed to create booking for ${date}:`, error);
+              failedBookings++;
+            }
+          } else {
+            failedBookings++;
+          }
+        }
+        
+        if (createdBookings > 0) {
+          alert(`Δημιουργήθηκαν ${createdBookings} κρατήσεις${failedBookings > 0 ? ` (${failedBookings} απέτυχαν)` : ''}`);
+          router.push('/management/bookings');
+        } else {
+          setError('Δεν ήταν δυνατή η δημιουργία καμίας κράτησης');
+        }
+      } else {
+        // Create single booking
+        const newBooking = {
+          venueId: venueOwner.venueId,
+          pitchId: data.pitchId,
+          slotId: '',
+          userId: '',
+          userName: data.customerName,
+          userEmail: '',
+          userPhone: data.customerPhone,
+          startTime: startDateTime,
+          endTime: endDateTime,
+          price: selectedPitch.pricePerSlot,
+          status: 'pending' as const,
+          notes: data.notes || '',
+        };
 
-      console.log('Creating booking with data:', newBooking);
-      
-      const bookingId = await bookingService.create(newBooking);
-      console.log('Booking created with ID:', bookingId);
-      
-      router.push('/bookings');
+        console.log('Creating booking with data:', newBooking);
+        
+        const bookingId = await bookingService.create(newBooking);
+        console.log('Booking created with ID:', bookingId);
+        
+        router.push('/management/bookings');
+      }
     } catch (error) {
       console.error('Error creating booking:', error);
       setError('Αποτυχία δημιουργίας κράτησης');
@@ -161,7 +233,7 @@ export default function NewBookingPage() {
   // Generate available slots when pitch or date changes
   useEffect(() => {
     generateAvailableSlots();
-  }, [watch('pitchId'), selectedDate, existingBookings]);
+  }, [watch('pitchId'), selectedDate, existingBookings, blockedDates]);
 
   const generateAvailableSlots = () => {
     const selectedPitchId = watch('pitchId');
@@ -188,7 +260,28 @@ export default function NewBookingPage() {
     
     if (!openingHours || !openingHours.isOpen) {
       setAvailableSlots([]);
-      return;
+      return [];
+    }
+
+    // Check if the date is blocked
+    const isDateBlocked = blockedDates.some(blockedDate => {
+      if (blockedDate.pitchId !== selectedPitchId) return false;
+      
+      const startDate = new Date(blockedDate.startDate);
+      const endDate = new Date(blockedDate.endDate);
+      const checkDate = new Date(selectedDateObj);
+      
+      // Reset time to compare only dates
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+      checkDate.setHours(12, 0, 0, 0);
+      
+      return checkDate >= startDate && checkDate <= endDate;
+    });
+    
+    if (isDateBlocked) {
+      setAvailableSlots([]);
+      return [];
     }
 
     // Generate time slots based on opening hours and slot duration
@@ -236,6 +329,59 @@ export default function NewBookingPage() {
     const availableSlots = slots.filter(slot => !bookedSlots.includes(slot));
     console.log('Available slots:', availableSlots);
     setAvailableSlots(availableSlots);
+    return availableSlots;
+  };
+
+  const generateRecurringDates = (startDate: string, frequency: string, interval: number, occurrences: number) => {
+    const dates: string[] = [];
+    const baseDate = new Date(startDate);
+    
+    for (let i = 0; i < occurrences; i++) {
+      const newDate = new Date(baseDate);
+      
+      if (frequency === 'weekly') {
+        newDate.setDate(baseDate.getDate() + (i * interval * 7));
+      } else if (frequency === 'daily') {
+        newDate.setDate(baseDate.getDate() + (i * interval));
+      }
+      
+      dates.push(newDate.toISOString().split('T')[0]);
+    }
+    
+    return dates;
+  };
+
+  const checkDateAvailability = (date: string, pitchId: string, timeSlot: string) => {
+    // Check if the date is blocked
+    const isDateBlocked = blockedDates.some(blockedDate => {
+      if (blockedDate.pitchId !== pitchId) return false;
+      
+      const startDate = new Date(blockedDate.startDate);
+      const endDate = new Date(blockedDate.endDate);
+      const checkDate = new Date(date);
+      
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+      checkDate.setHours(12, 0, 0, 0);
+      
+      return checkDate >= startDate && checkDate <= endDate;
+    });
+    
+    if (isDateBlocked) return false;
+    
+    // Check if the time slot is already booked
+    const [slotTime] = timeSlot.split(' - ');
+    const isBooked = existingBookings.some(booking => {
+      const bookingDate = new Date(booking.startTime);
+      const bookingTime = bookingDate.toTimeString().slice(0, 5);
+      return (
+        booking.pitchId === pitchId &&
+        bookingDate.toDateString() === new Date(date).toDateString() &&
+        bookingTime === slotTime
+      );
+    });
+    
+    return !isBooked;
   };
 
   if (authLoading || isLoading) {
@@ -251,7 +397,7 @@ export default function NewBookingPage() {
       {/* Header */}
       <div className="flex items-center space-x-4">
         <Link
-          href="/bookings"
+          href="/management/bookings"
           className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
         >
           <ArrowLeftIcon className="h-4 w-4 mr-1" />
@@ -260,8 +406,15 @@ export default function NewBookingPage() {
       </div>
 
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Νέα Κράτηση</h1>
-        <p className="mt-2 text-gray-600">Δημιουργία νέας κράτησης για το γήπεδό σας</p>
+        <h1 className="text-3xl font-bold text-gray-900">
+          {isRecurring ? '🔄 Επαναλαμβανόμενη Κράτηση' : 'Νέα Κράτηση'}
+        </h1>
+        <p className="mt-2 text-gray-600">
+          {isRecurring 
+            ? 'Δημιουργία επαναλαμβανόμενων κρατήσεων για το γήπεδό σας'
+            : 'Δημιουργία νέας κράτησης για το γήπεδό σας'
+          }
+        </p>
       </div>
 
       {error && (
@@ -362,6 +515,39 @@ export default function NewBookingPage() {
                       className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
                     />
                   </div>
+                  {/* Blocked Date Warning */}
+                  {selectedDate && watch('pitchId') && (() => {
+                    const selectedPitchId = watch('pitchId');
+                    const isDateBlocked = blockedDates.some(blockedDate => {
+                      if (blockedDate.pitchId !== selectedPitchId) return false;
+                      
+                      const startDate = new Date(blockedDate.startDate);
+                      const endDate = new Date(blockedDate.endDate);
+                      const checkDate = new Date(selectedDate);
+                      
+                      startDate.setHours(0, 0, 0, 0);
+                      endDate.setHours(23, 59, 59, 999);
+                      checkDate.setHours(12, 0, 0, 0);
+                      
+                      return checkDate >= startDate && checkDate <= endDate;
+                    });
+                    
+                    if (isDateBlocked) {
+                      const blockedDate = blockedDates.find(bd => bd.pitchId === selectedPitchId);
+                      return (
+                        <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                          <div className="flex items-center">
+                            <span className="text-red-600 mr-2">🚫</span>
+                            <div className="text-sm text-red-800">
+                              <p className="font-medium">Η ημερομηνία είναι κλειστή</p>
+                              <p className="text-xs">{blockedDate?.reason || 'Δεν έχει οριστεί λόγος'}</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
 
                 <div className="sm:col-span-2">
@@ -388,18 +574,143 @@ export default function NewBookingPage() {
                       </div>
                     ) : (
                       <div className="text-center py-4 text-gray-500">
-                        {selectedDate && watch('pitchId') 
-                          ? 'Δεν υπάρχουν διαθέσιμες ώρες για την επιλεγμένη ημερομηνία'
-                          : 'Επιλέξτε γήπεδο και ημερομηνία για να δείτε τις διαθέσιμες ώρες'
+                        {selectedDate && watch('pitchId') ? (() => {
+                          const selectedPitchId = watch('pitchId');
+                          const isDateBlocked = blockedDates.some(blockedDate => {
+                            if (blockedDate.pitchId !== selectedPitchId) return false;
+                            
+                            const startDate = new Date(blockedDate.startDate);
+                            const endDate = new Date(blockedDate.endDate);
+                            const checkDate = new Date(selectedDate);
+                            
+                            startDate.setHours(0, 0, 0, 0);
+                            endDate.setHours(23, 59, 59, 999);
+                            checkDate.setHours(12, 0, 0, 0);
+                            
+                            return checkDate >= startDate && checkDate <= endDate;
+                          });
+                          
+                          if (isDateBlocked) {
+                            return '🚫 Η ημερομηνία είναι κλειστή - δεν είναι δυνατή η κράτηση';
+                          }
+                          return 'Δεν υπάρχουν διαθέσιμες ώρες για την επιλεγμένη ημερομηνία';
+                        })() : 'Επιλέξτε γήπεδο και ημερομηνία για να δείτε τις διαθέσιμες ώρες'
                         }
                       </div>
                     )}
+                                </div>
+              {errors.selectedSlot && (
+                <p className="mt-1 text-sm text-red-600">{errors.selectedSlot.message}</p>
+              )}
+            </div>
+
+            {/* Recurring Booking Options */}
+            <div className="sm:col-span-2">
+              <div className="flex items-center mb-4">
+                <input
+                  type="checkbox"
+                  id="isRecurring"
+                  checked={isRecurring}
+                  onChange={(e) => setIsRecurring(e.target.checked)}
+                  className="h-4 w-4 text-football-green focus:ring-football-green border-gray-300 rounded"
+                />
+                <label htmlFor="isRecurring" className="ml-2 text-sm font-medium text-gray-700">
+                  🔄 Επαναλαμβανόμενη Κράτηση
+                </label>
+              </div>
+
+              {isRecurring && (
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Συχνότητα
+                      </label>
+                      <select
+                        value={recurringSettings.frequency}
+                        onChange={(e) => setRecurringSettings({...recurringSettings, frequency: e.target.value})}
+                        className="block w-full text-sm border border-gray-300 rounded px-3 py-2"
+                      >
+                        <option value="weekly">Εβδομαδιαία</option>
+                        <option value="daily">Ημερήσια</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Κάθε
+                      </label>
+                      <select
+                        value={recurringSettings.interval}
+                        onChange={(e) => setRecurringSettings({...recurringSettings, interval: parseInt(e.target.value)})}
+                        className="block w-full text-sm border border-gray-300 rounded px-3 py-2"
+                      >
+                        <option value={1}>1 {recurringSettings.frequency === 'weekly' ? 'εβδομάδα' : 'ημέρα'}</option>
+                        <option value={2}>2 {recurringSettings.frequency === 'weekly' ? 'εβδομάδες' : 'ημέρες'}</option>
+                        <option value={3}>3 {recurringSettings.frequency === 'weekly' ? 'εβδομάδες' : 'ημέρες'}</option>
+                        <option value={4}>4 {recurringSettings.frequency === 'weekly' ? 'εβδομάδες' : 'ημέρες'}</option>
+                      </select>
+                    </div>
                   </div>
-                  {errors.selectedSlot && (
-                    <p className="mt-1 text-sm text-red-600">{errors.selectedSlot.message}</p>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Αριθμός Κρατήσεων
+                    </label>
+                    <input
+                      type="number"
+                      min="2"
+                      max="52"
+                      value={recurringSettings.occurrences}
+                      onChange={(e) => setRecurringSettings({...recurringSettings, occurrences: parseInt(e.target.value)})}
+                      className="block w-full text-sm border border-gray-300 rounded px-3 py-2"
+                      placeholder="π.χ. 10"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Μέγιστος αριθμός: 52 {recurringSettings.frequency === 'weekly' ? 'εβδομάδες' : 'ημέρες'}
+                    </p>
+                  </div>
+
+                  {/* Preview of recurring dates */}
+                  {selectedDate && watch('pitchId') && (
+                    <div className="mt-4 p-3 bg-white rounded border border-gray-200">
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Προεπισκόπηση Ημερομηνιών:</h4>
+                      <div className="text-xs text-gray-600 space-y-1">
+                        {generateRecurringDates(
+                          selectedDate, 
+                          recurringSettings.frequency, 
+                          recurringSettings.interval, 
+                          Math.min(recurringSettings.occurrences, 5)
+                        ).map((date, index) => (
+                          <div key={date} className="flex items-center justify-between">
+                            <span>{new Date(date).toLocaleDateString('el-GR', { 
+                              weekday: 'long', 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric' 
+                            })}</span>
+                            <span className={`px-2 py-1 rounded text-xs ${
+                              checkDateAvailability(date, watch('pitchId'), watch('selectedSlot'))
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}>
+                              {checkDateAvailability(date, watch('pitchId'), watch('selectedSlot'))
+                                ? 'Διαθέσιμο'
+                                : 'Μη διαθέσιμο'
+                              }
+                            </span>
+                          </div>
+                        ))}
+                        {recurringSettings.occurrences > 5 && (
+                          <div className="text-gray-500 italic">
+                            ... και {recurringSettings.occurrences - 5} ακόμα
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
-              </div>
+              )}
+            </div>
+          </div>
 
               {/* Price Display */}
               {watch('pitchId') && (
@@ -410,6 +721,16 @@ export default function NewBookingPage() {
                       €{pitches.find(p => p.id === watch('pitchId'))?.pricePerSlot?.toFixed(2) || '0.00'}
                     </span>
                   </div>
+                  {isRecurring && recurringSettings.occurrences > 1 && (
+                    <div className="mt-2 pt-2 border-t border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-700">Συνολική Τιμή ({recurringSettings.occurrences} κρατήσεις):</span>
+                        <span className="text-xl font-bold text-football-green">
+                          €{(pitches.find(p => p.id === watch('pitchId'))?.pricePerSlot || 0) * recurringSettings.occurrences}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                   <p className="text-xs text-gray-500 mt-1">
                     Η τιμή καθορίζεται από το επιλεγμένο γήπεδο
                   </p>

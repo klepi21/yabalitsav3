@@ -12,8 +12,8 @@ import {
   TrashIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import { bookingService, pitchService } from '@/lib/firebase-services';
-import { Booking, Pitch } from '@/types';
+import { bookingService, pitchService, blockedDateService } from '@/lib/firebase-services';
+import { Booking, Pitch, BlockedDate } from '@/types';
 import WeeklyCalendar from '@/components/WeeklyCalendar';
 
 export default function BookingsPage() {
@@ -22,6 +22,7 @@ export default function BookingsPage() {
   
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [pitches, setPitches] = useState<Pitch[]>([]);
+  const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('calendar');
@@ -44,12 +45,14 @@ export default function BookingsPage() {
     if (!venueOwner) return;
     
     try {
-      const [bookingsData, pitchesData] = await Promise.all([
+      const [bookingsData, pitchesData, blockedDatesData] = await Promise.all([
         bookingService.getByVenue(venueOwner.venueId),
-        pitchService.getByVenue(venueOwner.venueId)
+        pitchService.getByVenue(venueOwner.venueId),
+        blockedDateService.getByVenue(venueOwner.venueId)
       ]);
       setBookings(bookingsData || []);
       setPitches(pitchesData || []);
+      setBlockedDates(blockedDatesData || []);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -130,16 +133,16 @@ export default function BookingsPage() {
         </Link>
       </div>
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Κρατήσεις</h1>
-          <p className="mt-2 text-gray-600">Διαχείριση κρατήσεων για το γήπεδό σας</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Κρατήσεις</h1>
+          <p className="mt-1 sm:mt-2 text-gray-600">Διαχείριση κρατήσεων για το γήπεδό σας</p>
         </div>
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:space-x-4">
+          <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
             <button
               onClick={() => setViewMode('calendar')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`w-full sm:w-auto px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 viewMode === 'calendar' 
                   ? 'bg-football-green text-white' 
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -150,7 +153,7 @@ export default function BookingsPage() {
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`w-full sm:w-auto px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                 viewMode === 'list' 
                   ? 'bg-football-green text-white' 
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -161,8 +164,8 @@ export default function BookingsPage() {
             </button>
           </div>
           <Link
-            href="/bookings/new"
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
+            href="/management/bookings/new"
+            className="inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
           >
             <PlusIcon className="h-4 w-4 mr-2" />
             Νέα Κράτηση
@@ -174,10 +177,11 @@ export default function BookingsPage() {
         <WeeklyCalendar 
           bookings={bookings}
           pitches={pitches}
+          blockedDates={blockedDates}
           onBookingClick={(booking) => router.push(`/bookings/${booking.id}`)}
           onSlotClick={(date, time) => {
             // Navigate to new booking page with pre-filled date and time
-            router.push(`/bookings/new?date=${date}&time=${time}`);
+            router.push(`/management/bookings/new?date=${date}&time=${time}`);
           }}
           onDeleteBooking={handleDeleteBooking}
           deletingBookingId={deletingBookingId}
@@ -215,13 +219,22 @@ export default function BookingsPage() {
             </p>
             {!searchTerm && (
               <div className="mt-6">
-                <Link
-                  href="/bookings/new"
+                <div className="flex space-x-3">
+                                  <Link
+                  href="/management/bookings/new"
                   className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
                 >
                   <PlusIcon className="h-4 w-4 mr-2" />
                   Δημιουργία Κράτησης
                 </Link>
+                  <Link
+                    href="/management/bookings/new?recurring=true"
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
+                  >
+                    <span className="mr-2">🔄</span>
+                    Επαναλαμβανόμενη Κράτηση
+                  </Link>
+                </div>
               </div>
             )}
           </div>
@@ -231,7 +244,7 @@ export default function BookingsPage() {
               const pitch = pitches.find(p => p.id === booking.pitchId);
               return (
                 <li key={booking.id} className="px-4 py-4 sm:px-6">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div className="flex items-center">
                       <div className="flex-shrink-0">
                         <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -284,28 +297,28 @@ export default function BookingsPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-2xl font-bold text-gray-900">
+                    <div className="text-left sm:text-right">
+                      <div className="text-xl sm:text-2xl font-bold text-gray-900">
                         {new Date(booking.startTime).toLocaleDateString()}
                       </div>
-                      <div className="text-lg font-semibold text-blue-600">
+                      <div className="text-base sm:text-lg font-semibold text-blue-600">
                         {new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit'})}
                       </div>
-                      <div className="text-sm text-gray-500 mt-1">
+                      <div className="text-xs sm:text-sm text-gray-500 mt-1">
                         {new Date(booking.endTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit'})}
                       </div>
                     </div>
                   </div>
-                <div className="mt-4 flex space-x-3">
+                <div className="mt-4 flex flex-wrap gap-3">
                   <Link
-                    href={`/bookings/${booking.id}`}
-                    className="text-sm text-football-green hover:text-football-green-light"
+                    href={`/management/bookings/${booking.id}`}
+                    className="min-h-[44px] inline-flex items-center text-sm text-football-green hover:text-football-green-light"
                   >
                     Προβολή Λεπτομερειών
                   </Link>
                   <Link
-                    href={`/bookings/${booking.id}/edit`}
-                    className="text-sm text-football-green hover:text-football-green-light"
+                    href={`/management/bookings/${booking.id}/edit`}
+                    className="min-h-[44px] inline-flex items-center text-sm text-football-green hover:text-football-green-light"
                   >
                     Επεξεργασία
                   </Link>
@@ -313,7 +326,7 @@ export default function BookingsPage() {
                     <button
                       onClick={() => handleUpdateBookingStatus(booking.id, 'completed')}
                       disabled={updatingBookingId === booking.id}
-                      className="text-sm text-green-600 hover:text-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                      className="min-h-[44px] text-sm text-green-600 hover:text-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                     >
                       <span className="mr-1">✅</span>
                       {updatingBookingId === booking.id ? 'Ενημέρωση...' : 'Ολοκλήρωση'}
@@ -322,7 +335,7 @@ export default function BookingsPage() {
                   <button
                     onClick={() => handleDeleteBooking(booking.id)}
                     disabled={deletingBookingId === booking.id}
-                    className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                    className="min-h-[44px] text-sm text-red-600 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                   >
                     <TrashIcon className="h-4 w-4 mr-1" />
                     {deletingBookingId === booking.id ? 'Διαγραφή...' : 'Διαγραφή'}

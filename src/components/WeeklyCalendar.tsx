@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon, ClockIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { Booking } from '@/types';
+import { Booking, BlockedDate } from '@/types';
 
 interface WeeklyCalendarProps {
   bookings: Booking[];
   pitches?: Pitch[];
+  blockedDates?: BlockedDate[];
   onBookingClick?: (booking: Booking) => void;
   onSlotClick?: (date: Date, time: string) => void;
   onDeleteBooking?: (bookingId: string) => void;
@@ -23,7 +24,7 @@ const timeSlots = [
 
 const greekDaysShort = ['Κυρ', 'Δευ', 'Τρι', 'Τετ', 'Πεμ', 'Παρ', 'Σαβ'];
 
-export default function WeeklyCalendar({ bookings, pitches = [], onBookingClick, onSlotClick, onDeleteBooking, deletingBookingId, onUpdateBookingStatus, updatingBookingId }: WeeklyCalendarProps) {
+export default function WeeklyCalendar({ bookings, pitches = [], blockedDates = [], onBookingClick, onSlotClick, onDeleteBooking, deletingBookingId, onUpdateBookingStatus, updatingBookingId }: WeeklyCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'weekly' | 'daily'>('weekly');
 
@@ -47,6 +48,21 @@ export default function WeeklyCalendar({ bookings, pitches = [], onBookingClick,
       const bookingDate = new Date(booking.startTime);
       const bookingTime = bookingDate.toTimeString().slice(0, 5);
       return bookingDate.toDateString() === date.toDateString() && bookingTime === time;
+    });
+  };
+
+  const isDateBlocked = (date: Date) => {
+    return blockedDates.some(blockedDate => {
+      const startDate = new Date(blockedDate.startDate);
+      const endDate = new Date(blockedDate.endDate);
+      const checkDate = new Date(date);
+      
+      // Reset time to compare only dates
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+      checkDate.setHours(12, 0, 0, 0);
+      
+      return checkDate >= startDate && checkDate <= endDate;
     });
   };
 
@@ -100,37 +116,50 @@ export default function WeeklyCalendar({ bookings, pitches = [], onBookingClick,
     setCurrentDate(newDate);
   };
 
+  // Build responsive date labels
+  const longWeekLabel = `${weekStart.toLocaleDateString('el-GR', { day: 'numeric', month: 'long' })} - ${new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString('el-GR', { day: 'numeric', month: 'long' })}`;
+  const shortWeekLabel = `${weekStart.toLocaleDateString('el-GR', { day: 'numeric', month: 'short' })} - ${new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString('el-GR', { day: 'numeric', month: 'short' })}`;
+  const longDayLabel = currentDate.toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  const shortDayLabel = currentDate.toLocaleDateString('el-GR', { weekday: 'short', day: 'numeric', month: 'short' });
+
   return (
-    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-4 sm:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 sm:mb-6 gap-3 sm:gap-0">
+        <div className="flex items-center gap-2 sm:space-x-4">
           <button
             onClick={viewMode === 'weekly' ? prevWeek : prevDay}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors touch-manipulation"
           >
             <ChevronLeftIcon className="h-5 w-5 text-gray-900" />
           </button>
           
-          <h2 className="text-xl font-semibold text-gray-900">
-            {viewMode === 'weekly' 
-              ? `${weekStart.toLocaleDateString('el-GR', { day: 'numeric', month: 'long' })} - ${new Date(weekStart.getTime() + 6 * 24 * 60 * 60 * 1000).toLocaleDateString('el-GR', { day: 'numeric', month: 'long' })}`
-              : currentDate.toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-            }
+          <h2 className="leading-tight text-lg sm:text-xl font-semibold text-gray-900">
+            {viewMode === 'weekly' ? (
+              <>
+                <span className="sm:hidden">{shortWeekLabel}</span>
+                <span className="hidden sm:inline">{longWeekLabel}</span>
+              </>
+            ) : (
+              <>
+                <span className="sm:hidden">{shortDayLabel}</span>
+                <span className="hidden sm:inline">{longDayLabel}</span>
+              </>
+            )}
           </h2>
           
           <button
             onClick={viewMode === 'weekly' ? nextWeek : nextDay}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors touch-manipulation"
           >
             <ChevronRightIcon className="h-5 w-5 text-gray-900" />
           </button>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => setViewMode('weekly')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-colors min-w-[96px] ${
               viewMode === 'weekly' 
                 ? 'bg-football-green text-white' 
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -141,7 +170,7 @@ export default function WeeklyCalendar({ bookings, pitches = [], onBookingClick,
           </button>
           <button
             onClick={() => setViewMode('daily')}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-colors min-w-[96px] ${
               viewMode === 'daily' 
                 ? 'bg-football-green text-white' 
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -155,15 +184,15 @@ export default function WeeklyCalendar({ bookings, pitches = [], onBookingClick,
 
       {/* Calendar Grid */}
       {viewMode === 'weekly' ? (
-        <div className="overflow-x-auto">
-          <div className="min-w-[800px]">
+        <div className="overflow-x-auto -mx-2 sm:mx-0">
+          <div className="min-w-[720px] sm:min-w-[800px]">
             {/* Header Row */}
-            <div className="grid grid-cols-8 gap-1 mb-2">
+            <div className="grid grid-cols-8 gap-1 mb-2 sticky top-0 z-10 bg-white/90 backdrop-blur-sm">
               <div className="h-12"></div> {/* Empty corner */}
               {weekDays.map((day, index) => (
                 <div key={index} className="h-12 flex flex-col items-center justify-center bg-gray-50 rounded-lg">
-                  <div className="text-sm font-medium text-gray-900">{greekDaysShort[index]}</div>
-                  <div className="text-xs text-gray-500">{day.getDate()}</div>
+                  <div className="text-xs sm:text-sm font-medium text-gray-900">{greekDaysShort[index]}</div>
+                  <div className="text-[11px] sm:text-xs text-gray-500">{day.getDate()}</div>
                 </div>
               ))}
             </div>
@@ -171,18 +200,30 @@ export default function WeeklyCalendar({ bookings, pitches = [], onBookingClick,
             {/* Time Slots */}
             {timeSlots.map((time) => (
               <div key={time} className="grid grid-cols-8 gap-1 mb-1">
-                <div className="h-16 flex items-center justify-center text-sm text-gray-500 font-medium">
+                <div className="h-14 sm:h-16 flex items-center justify-center text-xs sm:text-sm text-gray-500 font-medium sticky left-0 z-10 bg-white">
                   {formatTime(time)}
                 </div>
                 {weekDays.map((day, dayIndex) => {
                   const dayBookings = getBookingsForDateAndTime(day, time);
                   return (
-                    <div
+                                        <div
                       key={dayIndex}
-                      className="h-16 border border-gray-200 rounded-lg p-1 cursor-pointer hover:bg-gray-50 transition-colors"
-                      onClick={() => onSlotClick?.(day, time)}
+                      className={`h-14 sm:h-16 border rounded-lg p-1 transition-colors ${
+                        isDateBlocked(day) 
+                          ? 'border-red-300 bg-red-50 cursor-not-allowed' 
+                          : 'border-gray-200 cursor-pointer hover:bg-gray-50 touch-manipulation'
+                      }`}
+                      onClick={() => !isDateBlocked(day) && onSlotClick?.(day, time)}
                     >
-                                             {dayBookings.map((booking, bookingIndex) => (
+                      {isDateBlocked(day) ? (
+                        <div className="h-full flex items-center justify-center">
+                          <div className="text-center">
+                            <div className="text-red-500 text-xs font-medium">🚫 Κλειστό</div>
+                            <div className="text-red-400 text-[10px]">Μη διαθέσιμο</div>
+                          </div>
+                        </div>
+                      ) : (
+                        dayBookings.map((booking, bookingIndex) => (
                          <div
                            key={bookingIndex}
                            className={`text-xs p-1 rounded mb-1 text-white cursor-pointer ${getStatusColor(booking.status)}`}
@@ -233,7 +274,8 @@ export default function WeeklyCalendar({ bookings, pitches = [], onBookingClick,
                              </div>
                            </div>
                          </div>
-                       ))}
+                       ))
+                      )}
                     </div>
                   );
                 })}
@@ -248,12 +290,23 @@ export default function WeeklyCalendar({ bookings, pitches = [], onBookingClick,
             {timeSlots.map((time) => {
               const dayBookings = getBookingsForDateAndTime(currentDate, time);
               return (
-                <div key={time} className="flex items-center space-x-4 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                <div key={time} className={`flex items-center space-x-4 p-3 border rounded-lg ${
+                  isDateBlocked(currentDate) 
+                    ? 'border-red-300 bg-red-50' 
+                    : 'border-gray-200 hover:bg-gray-50'
+                }`}>
                   <div className="w-16 text-sm font-medium text-gray-500">
                     {formatTime(time)}
                   </div>
                   <div className="flex-1 flex flex-wrap gap-2">
-                    {dayBookings.length > 0 ? (
+                    {isDateBlocked(currentDate) ? (
+                      <div className="flex items-center justify-center w-full py-4">
+                        <div className="text-center">
+                          <div className="text-red-500 text-sm font-medium">🚫 Ημέρα Κλειστή</div>
+                          <div className="text-red-400 text-xs">Δεν είναι δυνατή η κράτηση</div>
+                        </div>
+                      </div>
+                    ) : dayBookings.length > 0 ? (
                       dayBookings.map((booking, index) => (
                         <div
                           key={index}

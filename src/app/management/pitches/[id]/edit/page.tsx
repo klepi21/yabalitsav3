@@ -12,8 +12,8 @@ import {
   ClockIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import { pitchService } from '@/lib/firebase-services';
-import { Pitch } from '@/types';
+import { pitchService, blockedDateService } from '@/lib/firebase-services';
+import { Pitch, BlockedDate } from '@/types';
 
 // Form validation schema
 const pitchEditSchema = z.object({
@@ -76,9 +76,17 @@ export default function EditPitchPage() {
   const { user, venueOwner, isLoading: authLoading } = useAuth();
   
   const [pitch, setPitch] = useState<Pitch | null>(null);
+  const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAddBlockedDate, setShowAddBlockedDate] = useState(false);
+  const [newBlockedDate, setNewBlockedDate] = useState({
+    startDate: '',
+    endDate: '',
+    reason: '',
+    isFullDay: true
+  });
 
   const {
     register,
@@ -109,6 +117,9 @@ export default function EditPitchPage() {
       if (pitchData) {
         setPitch(pitchData);
         reset(pitchData);
+        // Load blocked dates for this pitch
+        const blockedDatesData = await blockedDateService.getByPitch(pitchId);
+        setBlockedDates(blockedDatesData);
       }
     } catch (error) {
       console.error('Error loading pitch data:', error);
@@ -129,12 +140,47 @@ export default function EditPitchPage() {
         ...data,
         type: assertPitchType(data.type)
       });
-      router.push(`/pitches/${pitch.id}`);
+      router.push(`/management/pitches/${pitch.id}`);
     } catch (error) {
       console.error('Error updating pitch:', error);
       setError('Failed to update pitch');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const addBlockedDate = async () => {
+    if (!pitch || !newBlockedDate.startDate || !newBlockedDate.endDate) return;
+    
+    try {
+      await blockedDateService.create({
+        pitchId: pitch.id,
+        venueId: pitch.venueId,
+        startDate: new Date(newBlockedDate.startDate),
+        endDate: new Date(newBlockedDate.endDate),
+        reason: newBlockedDate.reason || 'Δεν έχει οριστεί λόγος',
+        isFullDay: newBlockedDate.isFullDay
+      });
+      
+      // Reset form and reload blocked dates
+      setNewBlockedDate({ startDate: '', endDate: '', reason: '', isFullDay: true });
+      setShowAddBlockedDate(false);
+      await loadPitchData(pitch.id);
+    } catch (error) {
+      console.error('Error adding blocked date:', error);
+      setError('Αποτυχία προσθήκης κλειστής ημερομηνίας');
+    }
+  };
+
+  const removeBlockedDate = async (blockedDateId: string) => {
+    if (!pitch) return;
+    
+    try {
+      await blockedDateService.delete(blockedDateId);
+      await loadPitchData(pitch.id);
+    } catch (error) {
+      console.error('Error removing blocked date:', error);
+      setError('Αποτυχία διαγραφής κλειστής ημερομηνίας');
     }
   };
 
@@ -152,7 +198,7 @@ export default function EditPitchPage() {
         <h3 className="text-lg font-medium text-gray-900">Pitch not found</h3>
         <p className="mt-1 text-sm text-gray-500">The pitch you're looking for doesn't exist.</p>
         <Link
-          href="/pitches"
+          href="/management/pitches"
           className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
         >
           Back to Pitches
@@ -166,7 +212,7 @@ export default function EditPitchPage() {
       {/* Header */}
       <div className="flex items-center space-x-4">
         <Link
-          href={`/pitches/${pitch.id}`}
+          href={`/management/pitches/${pitch.id}`}
           className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
         >
           <ArrowLeftIcon className="h-4 w-4 mr-1" />
@@ -373,11 +419,126 @@ export default function EditPitchPage() {
               </div>
             </div>
 
+            {/* Blocked Dates Management */}
+            <div className="bg-gray-50 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">🚫 Κλειστές Ημερομηνίες</h3>
+                <button
+                  type="button"
+                  onClick={() => setShowAddBlockedDate(!showAddBlockedDate)}
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                >
+                  {showAddBlockedDate ? 'Ακύρωση' : 'Προσθήκη Κλειστής Ημερομηνίας'}
+                </button>
+              </div>
+
+              {/* Add Blocked Date Form */}
+              {showAddBlockedDate && (
+                <div className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Ημερομηνία Έναρξης *
+                      </label>
+                      <input
+                        type="date"
+                        value={newBlockedDate.startDate}
+                        onChange={(e) => setNewBlockedDate({...newBlockedDate, startDate: e.target.value})}
+                        className="block w-full text-sm border border-gray-300 rounded px-3 py-2"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Ημερομηνία Λήξης *
+                      </label>
+                      <input
+                        type="date"
+                        value={newBlockedDate.endDate}
+                        onChange={(e) => setNewBlockedDate({...newBlockedDate, endDate: e.target.value})}
+                        className="block w-full text-sm border border-gray-300 rounded px-3 py-2"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Λόγος Κλεισίματος
+                    </label>
+                    <input
+                      type="text"
+                      value={newBlockedDate.reason}
+                      onChange={(e) => setNewBlockedDate({...newBlockedDate, reason: e.target.value})}
+                      placeholder="π.χ. Συντήρηση, Ειδική Εκδήλωση"
+                      className="block w-full text-sm border border-gray-300 rounded px-3 py-2"
+                    />
+                  </div>
+                  <div className="flex items-center mb-4">
+                    <input
+                      type="checkbox"
+                      id="isFullDay"
+                      checked={newBlockedDate.isFullDay}
+                      onChange={(e) => setNewBlockedDate({...newBlockedDate, isFullDay: e.target.checked})}
+                      className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                    />
+                    <label htmlFor="isFullDay" className="ml-2 text-sm text-gray-700">
+                      Κλείσιμο όλης της ημέρας
+                    </label>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={addBlockedDate}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    Προσθήκη Κλειστής Ημερομηνίας
+                  </button>
+                </div>
+              )}
+
+              {/* Existing Blocked Dates */}
+              {blockedDates.length > 0 ? (
+                <div className="space-y-3">
+                  {blockedDates.map((blockedDate) => (
+                    <div key={blockedDate.id} className="bg-white rounded-lg p-4 border border-red-200">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-4 text-sm">
+                            <span className="font-medium text-gray-900">
+                              {new Date(blockedDate.startDate).toLocaleDateString('el-GR')}
+                              {blockedDate.startDate !== blockedDate.endDate && 
+                                ` - ${new Date(blockedDate.endDate).toLocaleDateString('el-GR')}`
+                              }
+                            </span>
+                            <span className="text-red-600 font-medium">
+                              {blockedDate.isFullDay ? 'Όλη η ημέρα' : 'Συγκεκριμένες ώρες'}
+                            </span>
+                          </div>
+                          {blockedDate.reason && (
+                            <p className="text-gray-600 text-sm mt-1">{blockedDate.reason}</p>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removeBlockedDate(blockedDate.id)}
+                          className="text-red-600 hover:text-red-800 p-1"
+                          title="Διαγραφή"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm">Δεν υπάρχουν κλειστές ημερομηνίες για αυτό το γήπεδο.</p>
+              )}
+            </div>
+
             {/* Submit Buttons */}
             <div className="flex justify-end space-x-3">
               <Link
-                href={`/pitches/${pitch.id}`}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
+                href={`/management/pitches/${pitch.id}`}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
               >
                 Ακύρωση
               </Link>
