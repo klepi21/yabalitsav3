@@ -215,7 +215,7 @@ export default function RootPage() {
                 className="h-16 sm:h-20 w-auto"
               />
             </div>
-            <p className="text-lg sm:text-xl text-gray-600">Βρες και κλείσε γήπεδο ποδοσφαίρου</p>
+            <p className="text-lg sm:text-xl text-gray-900">Βρες και κλείσε γήπεδο ποδοσφαίρου</p>
           </div>
 
           {/* Minimal Search Form */}
