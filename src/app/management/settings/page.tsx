@@ -20,6 +20,7 @@ import { db } from '@/lib/firebase';
 const venueSettingsSchema = z.object({
   name: z.string().min(1, 'Το όνομα του γηπέδου είναι υποχρεωτικό'),
   address: z.string().min(1, 'Η διεύθυνση είναι υποχρεωτική'),
+  city: z.string().min(1, 'Η πόλη είναι υποχρεωτική'),
   contactDetails: z.object({
     email: z.string().email('Μη έγκυρη διεύθυνση email'),
     phone: z.string().min(1, 'Ο αριθμός τηλεφώνου είναι υποχρεωτικός'),
@@ -73,6 +74,7 @@ export default function SettingsPage() {
         reset({
           name: venueData.name,
           address: venueData.address,
+          city: venueData.city || 'Αθήνα', // Default to Athens if not set
           contactDetails: {
             email: venueData.contactDetails.email,
             phone: venueData.contactDetails.phone,
@@ -99,6 +101,7 @@ export default function SettingsPage() {
       await venueService.update(venue.id, {
         name: data.name,
         address: data.address,
+        city: data.city,
         contactDetails: {
           email: data.contactDetails.email,
           phone: data.contactDetails.phone,
@@ -209,6 +212,27 @@ export default function SettingsPage() {
               </div>
               {errors.address && (
                 <p className="mt-1 text-sm text-red-600">{errors.address.message}</p>
+              )}
+            </div>
+
+            {/* City */}
+            <div>
+              <label htmlFor="city" className="block text-sm font-medium text-gray-700">
+                Πόλη
+              </label>
+              <div className="mt-1">
+                <select
+                  id="city"
+                  {...register('city')}
+                  className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 bg-white placeholder-gray-400 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
+                >
+                  <option value="Αθήνα">Αθήνα</option>
+                  <option value="Θεσσαλονίκη">Θεσσαλονίκη</option>
+                  <option value="Πάτρα">Πάτρα</option>
+                </select>
+              </div>
+              {errors.city && (
+                <p className="mt-1 text-sm text-red-600">{errors.city.message}</p>
               )}
             </div>
 

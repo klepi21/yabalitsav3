@@ -5,7 +5,9 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { db, auth } from '@/lib/firebase';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 
 export default function ForVenuesPage() {
   const router = useRouter();
@@ -113,10 +115,21 @@ export default function ForVenuesPage() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-5xl mx-auto px-4 py-12">
-        <div className="text-center mb-10">
-          <div className="flex justify-center mb-4">
+        <div className="flex justify-between items-center mb-10">
+          <Link
+            href="/"
+            className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+          >
+            <ArrowLeftIcon className="h-4 w-4 mr-1" />
+            Επιστροφή στην αρχική
+          </Link>
+          <div className="flex justify-center">
             <Image src="/yabalitsalogo.png" alt="Yabalitsa" width={140} height={48} className="h-12 w-auto" />
           </div>
+          <div className="w-24"></div> {/* Spacer for centering */}
+        </div>
+
+        <div className="text-center mb-10">
           <h1 className="text-3xl font-bold text-black">Διαχειρίζεσαι γηπεδάκια;</h1>
           <p className="text-gray-800 mt-2">Το Yabalitsa σε βοηθά να διαχειριστείς κρατήσεις, πελάτες και έσοδα—εύκολα.</p>
         </div>
@@ -126,8 +139,8 @@ export default function ForVenuesPage() {
           <div className="rounded-xl border border-green-200 bg-green-50 text-green-900 p-4 text-sm">
             Δωρεάν για τις πρώτες 15 ημέρες. Ξεκίνα σήμερα χωρίς κόστος και επίλεξε μοντέλο χρέωσης αργότερα.
           </div>
-          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4 select-none pointer-events-none">
-            <div className="rounded-xl border p-6 text-left border-gray-200 bg-white">
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="rounded-xl border p-6 text-left border-green-600 bg-white">
               <div className="flex items-baseline justify-between">
                 <h3 className="text-xl font-semibold text-black">Πλήρες Διαχειριστικό</h3>
                 <div className="text-2xl font-bold text-green-700">30€ / μήνα</div>
@@ -141,7 +154,10 @@ export default function ForVenuesPage() {
                 <li>• Προτεραιότητα υποστήριξης</li>
               </ul>
             </div>
-            <div className="rounded-xl border p-6 text-left border-gray-200 bg-white">
+            <div className="rounded-xl border p-6 text-left border-gray-200 bg-white relative select-none">
+              <div className="absolute inset-0 bg-white/60 backdrop-blur-[2px] flex items-center justify-center z-10">
+                <span className="text-gray-600 font-medium bg-white/80 px-3 py-1 rounded-full">Προσεχώς</span>
+              </div>
               <div className="flex items-baseline justify-between">
                 <h3 className="text-xl font-semibold text-black">Premium</h3>
                 <div className="text-2xl font-bold text-green-700">1€ / ανά κράτηση</div>
@@ -236,10 +252,8 @@ export default function ForVenuesPage() {
               <label className="block text-xs font-medium text-gray-700 mb-1">Δ.Ο.Υ.</label>
               <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.venueDoy} onChange={e=>setForm({...form, venueDoy:e.target.value})} required />
             </div>
-            {/* Optional venue contact fields removed for now; will be set inside management */}
 
             {error && <div className="md:col-span-2 text-sm text-red-600">{error}</div>}
-            {/* success handled by modal */}
 
             <div className="md:col-span-2 text-xs text-gray-600 flex items-start space-x-2">
               <input
@@ -261,6 +275,7 @@ export default function ForVenuesPage() {
             </div>
           </form>
         </div>
+
         {showCongrats && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 text-center">
@@ -278,5 +293,3 @@ export default function ForVenuesPage() {
     </div>
   );
 }
-
-

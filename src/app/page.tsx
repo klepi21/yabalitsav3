@@ -18,9 +18,9 @@ export default function RootPage() {
   const [searchQuery, setSearchQuery] = useState({
     date: '',
     pitchType: '',
-    time: ''
+    time: '',
+    city: ''
   });
-
 
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -54,6 +54,8 @@ export default function RootPage() {
     if (!searchQuery.date || !searchQuery.pitchType || !searchQuery.time) {
       return;
     }
+    
+    // City is optional - if not selected, show all cities
 
     setHasSearched(true);
     setIsSearching(true);
@@ -78,6 +80,13 @@ export default function RootPage() {
           console.log('Available venue IDs:', venues.map(v => v.id));
           continue;
         }
+
+        // Filter by city if selected
+        if (searchQuery.city && venue?.city !== searchQuery.city) {
+          console.log('❌ Venue city does not match:', venue?.city || 'undefined', 'vs', searchQuery.city);
+          continue;
+        }
+        console.log('✅ Venue city matches or no city filter:', venue?.city || 'undefined', 'vs', searchQuery.city);
 
         // Check if pitch is available for the selected date and time
         const isAvailable = await checkPitchAvailability(pitch, selectedDate, selectedTime);
@@ -161,8 +170,6 @@ export default function RootPage() {
     return true;
   };
 
-
-
   const handleBookNow = (venueId: string, pitchId: string, time: string) => {
     // Redirect to a booking page with pre-filled data
     const params = new URLSearchParams({
@@ -178,8 +185,6 @@ export default function RootPage() {
     const today = new Date();
     return today.toISOString().split('T')[0];
   };
-
-  // Use a static pattern image from /public for maximum reliability
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -198,210 +203,227 @@ export default function RootPage() {
             <a href="/management" className="text-black hover:text-gray-700 font-medium text-sm transition-colors">
               Σύνδεση
             </a>
-              </div>
-          <div className="mb-6 sm:mb-8">
-          <div className="flex justify-center mb-4 sm:mb-6">
-            <Image
-              src="/yabalitsalogo.png"
-              alt="Yabalitsa Logo"
-              width={200}
-              height={80}
-              className="h-16 sm:h-20 w-auto"
-            />
           </div>
-          <p className="text-lg sm:text-xl text-gray-600">Βρες και κλείσε γήπεδο ποδοσφαίρου</p>
+          <div className="mb-6 sm:mb-8">
+            <div className="flex justify-center mb-4 sm:mb-6">
+              <Image
+                src="/yabalitsalogo.png"
+                alt="Yabalitsa Logo"
+                width={200}
+                height={80}
+                className="h-16 sm:h-20 w-auto"
+              />
+            </div>
+            <p className="text-lg sm:text-xl text-gray-600">Βρες και κλείσε γήπεδο ποδοσφαίρου</p>
+          </div>
+
+          {/* Minimal Search Form */}
+          <div className="max-w-5xl mx-auto px-4">
+            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-xl">
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
+                {/* City Selection */}
+                <div className="sm:col-span-1">
+                  <label className="block text-xs font-medium text-gray-700 mb-1 text-left">
+                    Πόλη
+                  </label>
+                  <select
+                    value={searchQuery.city}
+                    onChange={(e) => setSearchQuery({...searchQuery, city: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-green-700 text-sm"
+                  >
+                    <option value="">Όλες οι πόλεις</option>
+                    <option value="Αθήνα">Αθήνα</option>
+                    <option value="Θεσσαλονίκη">Θεσσαλονίκη</option>
+                    <option value="Πάτρα">Πάτρα</option>
+                  </select>
+                </div>
+
+                {/* Date Selection */}
+                <div className="sm:col-span-1">
+                  <label className="block text-xs font-medium text-gray-700 mb-1 text-left">
+                    Ημερομηνία
+                  </label>
+                  <input
+                    type="date"
+                    value={searchQuery.date}
+                    onChange={(e) => setSearchQuery({...searchQuery, date: e.target.value})}
+                    min={getCurrentDate()}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-green-700 text-sm"
+                  />
+                </div>
+
+                {/* Pitch Type Selection */}
+                <div className="sm:col-span-1">
+                  <label className="block text-xs font-medium text-gray-700 mb-1 text-left">
+                    Τύπος Γηπέδου
+                  </label>
+                  <select
+                    value={searchQuery.pitchType}
+                    onChange={(e) => setSearchQuery({...searchQuery, pitchType: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-green-700 text-sm"
+                  >
+                    <option value="">Επιλέξτε τύπο</option>
+                    <option value="5x5">5x5</option>
+                    <option value="6x6">6x6</option>
+                    <option value="7x7">7x7</option>
+                    <option value="8x8">8x8</option>
+                    <option value="9x9">9x9</option>
+                  </select>
+                </div>
+
+                {/* Time Selection */}
+                <div className="sm:col-span-1">
+                  <label className="block text-xs font-medium text-gray-700 mb-1 text-left">
+                    Ώρα
+                  </label>
+                  <select
+                    value={searchQuery.time}
+                    onChange={(e) => setSearchQuery({...searchQuery, time: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-green-700 text-sm"
+                  >
+                    <option value="">Επιλέξτε ώρα</option>
+                    {Array.from({ length: 12 }, (_, i) => {
+                      const hour = i + 12; // Start from 12:00
+                      const timeString = `${hour.toString().padStart(2, '0')}:00`;
+                      return (
+                        <option key={timeString} value={timeString}>
+                          {timeString}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                {/* Search Button */}
+                <button
+                  onClick={handleSearch}
+                  disabled={!searchQuery.date || !searchQuery.pitchType || !searchQuery.time || isSearching}
+                  className="w-full sm:w-auto bg-green-700 hover:bg-green-800 disabled:bg-gray-400 text-white font-medium py-2 px-6 rounded-lg text-sm transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  {isSearching ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <span>Αναζήτηση...</span>
+                    </>
+                  ) : (
+                    <>
+                      <MagnifyingGlassIcon className="h-5 w-5" />
+                      <span>Αναζήτηση</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Minimal Search Form */}
-        <div className="max-w-5xl mx-auto px-4">
-          <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-xl">
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 items-end">
-              {/* Date Selection */}
-              <div className="sm:col-span-1">
-                <label className="block text-xs font-medium text-gray-700 mb-1 text-left">
-                  Ημερομηνία
-                </label>
-                <input
-                  type="date"
-                  value={searchQuery.date}
-                  onChange={(e) => setSearchQuery({...searchQuery, date: e.target.value})}
-                  min={getCurrentDate()}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-green-700 text-sm"
-                />
-      </div>
-
-              {/* Pitch Type Selection */}
-              <div className="sm:col-span-1">
-                <label className="block text-xs font-medium text-gray-700 mb-1 text-left">
-                  Τύπος Γηπέδου
-                </label>
-                <select
-                  value={searchQuery.pitchType}
-                  onChange={(e) => setSearchQuery({...searchQuery, pitchType: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-green-700 text-sm"
-                >
-                  <option value="">Επιλέξτε τύπο</option>
-                  <option value="5x5">5x5</option>
-                  <option value="6x6">6x6</option>
-                  <option value="7x7">7x7</option>
-                  <option value="8x8">8x8</option>
-                  <option value="9x9">9x9</option>
-                </select>
+        {/* Search Results */}
+        {hasSearched && searchResults.length > 0 && (
+          <div className="w-full pb-20">
+            <div className="max-w-5xl mx-auto px-4">
+              <div className="text-left mt-6 mb-3">
+                <h2 className="text-lg text-gray-700">
+                  {searchResults.length === 1 ? 'Βρέθηκε 1 γήπεδο' : `Βρέθηκαν ${searchResults.length} γήπεδα`}
+                </h2>
               </div>
 
-              {/* Time Selection */}
-              <div className="sm:col-span-1">
-                <label className="block text-xs font-medium text-gray-700 mb-1 text-left">
-                  Ώρα
-                </label>
-                <select
-                  value={searchQuery.time}
-                  onChange={(e) => setSearchQuery({...searchQuery, time: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-green-700 text-sm"
-                >
-                  <option value="">Επιλέξτε ώρα</option>
-                  {Array.from({ length: 12 }, (_, i) => {
-                    const hour = i + 12; // Start from 12:00
-                    const timeString = `${hour.toString().padStart(2, '0')}:00`;
-                    return (
-                      <option key={timeString} value={timeString}>
-                        {timeString}
-                      </option>
-                    );
-                  })}
-                </select>
-              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-1 gap-4">
+                {searchResults.map((result, index) => (
+                  <div key={`${result.venue.id}-${result.pitch.id}`} className={`bg-white rounded-xl shadow-lg ${result.venue.name?.toLowerCase().includes('tziolas') ? 'border-2 border-green-700' : 'border border-gray-100'} hover:shadow-xl transition-all duration-300 overflow-hidden mb-3 sm:mb-4 w-full`}>
+                    <div className="p-3 sm:p-4">
+                      {/* Horizontal Layout */}
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
+                        {/* Left Side - Venue & Pitch Info */}
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-1 sm:mb-2">
+                            <h3 className="text-base sm:text-lg font-bold text-gray-900 flex items-center">
+                              {result.venue.name}
+                              {result.venue.name?.toLowerCase().includes('tziolas') && (
+                                <span className="ml-3 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-700/30">
+                                  sponsored
+                                </span>
+                              )}
+                            </h3>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-green-100 text-green-800">
+                              {result.pitch.type}
+                            </span>
+                          </div>
+                          <div className="flex items-center text-gray-600 text-xs sm:text-sm mb-1">
+                            <MapPinIcon className="h-4 w-4 mr-1 hidden sm:inline" />
+                            <span>{result.venue.address}</span>
+                          </div>
+                          <div className="text-xs sm:text-sm text-gray-600">
+                            <span className="font-medium">{result.pitch.name}</span> • Διάρκεια: {result.pitch.slotDuration} λεπτά
+                          </div>
+                        </div>
 
-              {/* Search Button */}
+                        {/* Right Side - Price & Button */}
+                        <div className="flex flex-col sm:items-end space-y-2 sm:space-y-3 sm:ml-6">
+                          <div className="text-right sm:text-right">
+                            <div className="text-lg sm:text-2xl font-bold text-green-600">€{result.price}</div>
+                          </div>
+                          <button
+                            disabled={true}
+                            className="bg-gray-400 cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg text-sm w-full sm:w-auto"
+                          >
+                            Κράτηση Τώρα
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Contact Info - Below */}
+                      {result.venue.contactDetails && (
+                        <div className="border-t border-gray-100 pt-3 mt-3">
+                          <div className="flex items-center space-x-4 text-xs text-gray-600">
+                            {result.venue.contactDetails.phone && (
+                              <div className="flex items-center">
+                                <span className="mr-1">📞</span>
+                                <span>{result.venue.contactDetails.phone}</span>
+                              </div>
+                            )}
+                            {result.venue.contactDetails.email && (
+                              <div className="flex items-center">
+                                <span className="mr-1">📧</span>
+                                <span>{result.venue.contactDetails.email}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* No Results */}
+        {hasSearched && !isSearching && searchResults.length === 0 && (
+          <div className="max-w-5xl mx-auto px-4 pb-20">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-8">
+              <div className="text-6xl mb-4">😔</div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">Δεν βρέθηκαν διαθέσιμα γήπεδα</h3>
+              <p className="text-gray-600 mb-4">
+                Δοκίμασε διαφορετική ημερομηνία, ώρα ή τύπο γηπέδου
+              </p>
               <button
-                onClick={handleSearch}
-                disabled={!searchQuery.date || !searchQuery.pitchType || !searchQuery.time || isSearching}
-                className="w-full sm:w-auto bg-green-700 hover:bg-green-800 disabled:bg-gray-400 text-white font-medium py-2 px-6 rounded-lg text-sm transition-all duration-200 flex items-center justify-center space-x-2"
+                onClick={() => {
+                  setSearchQuery({ date: '', pitchType: '', time: '', city: '' });
+                  setSearchResults([]);
+                }}
+                className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
               >
-                {isSearching ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                    <span>Αναζήτηση...</span>
-                  </>
-                ) : (
-                  <>
-                    <MagnifyingGlassIcon className="h-5 w-5" />
-                    <span>Αναζήτηση</span>
-                  </>
-                )}
+                Νέα Αναζήτηση
               </button>
             </div>
           </div>
-        </div>
-      </div>
+        )}
 
-      {/* Search Results */}
-      {hasSearched && searchResults.length > 0 && (
-        <div className="max-w-6xl mx-auto px-4 pb-20">
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              {searchResults.length === 1 ? 'Βρέθηκε 1 γήπεδο' : `Βρέθηκαν ${searchResults.length} γήπεδα`}
-            </h2>
-                      </div>
-
-          <div className="max-w-5xl mx-auto">
-            {searchResults.map((result, index) => (
-              <div key={`${result.venue.id}-${result.pitch.id}`} className={`bg-white rounded-xl shadow-lg ${result.venue.name?.toLowerCase().includes('tziolas') ? 'border-2 border-green-700' : 'border border-gray-100'} hover:shadow-xl transition-all duration-300 overflow-hidden mb-3 sm:mb-4 w-full`}>
-                <div className="p-3 sm:p-4">
-                  {/* Horizontal Layout */}
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
-                    {/* Left Side - Venue & Pitch Info */}
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-1 sm:mb-2">
-                        <h3 className="text-base sm:text-lg font-bold text-gray-900 flex items-center">
-                          {result.venue.name}
-                          {result.venue.name?.toLowerCase().includes('tziolas') && (
-                            <span className="ml-3 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-700/30">
-                              sponsored
-                            </span>
-                          )}
-                        </h3>
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-green-100 text-green-800">
-                          {result.pitch.type}
-                        </span>
-                      </div>
-                      <div className="flex items-center text-gray-600 text-xs sm:text-sm mb-1">
-                        <MapPinIcon className="h-4 w-4 mr-1 hidden sm:inline" />
-                        <span>{result.venue.address}</span>
-                      </div>
-                      <div className="text-xs sm:text-sm text-gray-600">
-                        <span className="font-medium">{result.pitch.name}</span> • Διάρκεια: {result.pitch.slotDuration} λεπτά
-                      </div>
-                    </div>
-
-                    {/* Right Side - Price & Button */}
-                    <div className="flex flex-col sm:items-end space-y-2 sm:space-y-3 sm:ml-6">
-                      <div className="text-right sm:text-right">
-                        <div className="text-lg sm:text-2xl font-bold text-green-600">€{result.price}</div>
-                      </div>
-                      <button
-                        disabled={true}
-                        className="bg-gray-400 cursor-not-allowed text-white font-medium py-2 px-4 rounded-lg text-sm w-full sm:w-auto"
-                      >
-                        Κράτηση Τώρα
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Contact Info - Below */}
-                  {result.venue.contactDetails && (
-                    <div className="border-t border-gray-100 pt-3 mt-3">
-                      <div className="flex items-center space-x-4 text-xs text-gray-600">
-                        {result.venue.contactDetails.phone && (
-                          <div className="flex items-center">
-                            <span className="mr-1">📞</span>
-                            <span>{result.venue.contactDetails.phone}</span>
-                          </div>
-                        )}
-                        {result.venue.contactDetails.email && (
-                          <div className="flex items-center">
-                            <span className="mr-1">📧</span>
-                            <span>{result.venue.contactDetails.email}</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* No Results */}
-      {hasSearched && !isSearching && searchResults.length === 0 && (
-        <div className="max-w-4xl mx-auto px-4 pb-20">
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-8">
-            <div className="text-6xl mb-4">😔</div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Δεν βρέθηκαν διαθέσιμα γήπεδα</h3>
-            <p className="text-gray-600 mb-4">
-              Δοκίμασε διαφορετική ημερομηνία, ώρα ή τύπο γηπέδου
-            </p>
-            <button
-              onClick={() => {
-                setSearchQuery({ date: '', pitchType: '', time: '' });
-                setSearchResults([]);
-              }}
-              className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-            >
-              Νέα Αναζήτηση
-            </button>
-          </div>
-
-
-            </div>
-      )}
-
-      {/* Footer */}
-      <div className="mt-auto pt-20">
-        <div className="text-center py-8 text-gray-500 border-t border-gray-100">
-          <p>© 2024 Yabalitsa. Όλα τα δικαιώματα διατηρούνται.</p>
+        {/* Footer */}
+        <div className="mt-auto pt-20">
+          <div className="text-center py-8 text-gray-500 border-t border-gray-100">
+            <p>© 2024 Yabalitsa. Όλα τα δικαιώματα διατηρούνται.</p>
           </div>
         </div>
       </div>
