@@ -42,6 +42,17 @@ export default function DashboardPage() {
     }
   }, [venueOwner?.venueId]);
 
+  // Reload data every 30 seconds to keep it fresh
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (venueOwner?.venueId) {
+        loadDashboardData();
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(interval);
+  }, [venueOwner?.venueId]);
+
   // Prevent infinite loading by adding a loading state
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -112,11 +123,26 @@ export default function DashboardPage() {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
     
+    console.log('Calculating monthly revenue...');
+    console.log('All bookings:', bookings);
+    
     const monthlyBookings = bookings.filter(booking => {
       const bookingDate = new Date(booking.startTime);
-      return bookingDate.getMonth() === currentMonth && 
-             bookingDate.getFullYear() === currentYear &&
-             booking.status === 'completed';
+      const isThisMonth = bookingDate.getMonth() === currentMonth;
+      const isThisYear = bookingDate.getFullYear() === currentYear;
+      const isCompleted = booking.status === 'completed';
+      
+      console.log('Booking:', {
+        id: booking.id,
+        date: bookingDate,
+        status: booking.status,
+        price: booking.price,
+        isThisMonth,
+        isThisYear,
+        isCompleted
+      });
+      
+      return isThisMonth && isThisYear && isCompleted;
     });
     
     const total = monthlyBookings.reduce((total, booking) => total + booking.price, 0);

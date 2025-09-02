@@ -85,7 +85,7 @@ export default function ReportsPage() {
   // Filter bookings based on selected period and pitch
   const getFilteredBookings = () => {
     let filtered = bookings.filter(booking => 
-      booking.status !== 'cancelled'
+      booking.status === 'completed'  // Μετράμε μόνο τις ολοκληρωμένες
     );
 
     if (selectedPitch !== 'all') {

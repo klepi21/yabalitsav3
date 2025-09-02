@@ -76,6 +76,9 @@ export default function BookingDetailsPage() {
       
       // Reload booking data
       await loadBookingData(booking.id);
+      
+      // Redirect to bookings page to refresh data
+      router.push('/management/bookings');
     } catch (error) {
       console.error('Error updating booking status:', error);
     } finally {
