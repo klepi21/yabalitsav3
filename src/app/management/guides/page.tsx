@@ -685,47 +685,7 @@ export default function GuidesPage() {
                   </div>
                 </div>
 
-                {/* Booking Rules */}
-                <div className="space-y-3">
-                  <h3 className="text-lg font-medium text-gray-900 flex items-center">
-                    <span className="mr-2">📋</span>
-                    Κανόνες Κρατήσεων
-                  </h3>
-                  <div className="grid gap-4">
-                    <div className="border border-gray-200 rounded-lg p-4">
-                      <h4 className="font-medium text-gray-900 mb-2">Γενικοί Κανόνες</h4>
-                      <ul className="space-y-2 text-gray-600">
-                        <li>• Ελάχιστος χρόνος προειδοποίησης</li>
-                        <li>• Μέγιστες ημέρες προκράτησης</li>
-                        <li>• Πολιτική ακυρώσεων</li>
-                        <li>• Κανόνες επαναλαμβανόμενων κρατήσεων</li>
-          </ul>
-                    </div>
-                  </div>
-                </div>
 
-                {/* User Management */}
-                <div className="space-y-3">
-                  <h3 className="text-lg font-medium text-gray-900 flex items-center">
-                    <span className="mr-2">👥</span>
-                    Διαχείριση Χρηστών
-                  </h3>
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h4 className="font-medium text-yellow-900 mb-2">Ρόλοι & Δικαιώματα:</h4>
-                    <ul className="space-y-2 text-yellow-800">
-                      <li>• Τύποι χρηστών:
-                        <ul className="list-disc ml-6 mt-1">
-                          <li>Ιδιοκτήτης (πλήρη δικαιώματα)</li>
-                          <li>Διαχειριστής</li>
-                          <li>Υπάλληλος</li>
-                        </ul>
-                      </li>
-                      <li>• Διαχείριση δικαιωμάτων πρόσβασης</li>
-                      <li>• Προσθήκη/αφαίρεση χρηστών</li>
-                      <li>• Καταγραφή ενεργειών χρηστών</li>
-          </ul>
-                  </div>
-                </div>
 
                 {/* Tips & Best Practices */}
                 <div className="space-y-3">

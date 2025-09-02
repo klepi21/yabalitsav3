@@ -10,12 +10,13 @@ interface SidebarWrapperProps {
 export default function SidebarWrapper({ children }: SidebarWrapperProps) {
   const pathname = usePathname();
   
-  // Don't show sidebar on root page or login page
+  // Don't show sidebar on public pages
   const isRootPage = pathname === '/';
   const isLoginPage = pathname === '/venue-login';
   const isForVenues = pathname === '/for-venues';
+  const isBookingPage = pathname.startsWith('/book/');
   
-  if (isRootPage || isLoginPage || isForVenues) {
+  if (isRootPage || isLoginPage || isForVenues || isBookingPage) {
     return (
       <div className="min-h-screen bg-gray-50">
         {children}

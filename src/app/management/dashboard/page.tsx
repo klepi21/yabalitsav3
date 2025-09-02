@@ -178,6 +178,11 @@ export default function DashboardPage() {
     }
   };
 
+  const getPricePerPerson = (price: number, pitchType: string) => {
+    const players = getPlayersPerPitch(pitchType);
+    return (price / players).toFixed(0);
+  };
+
   const generateAvailableSlots = (pitchId: string, date: string) => {
     const pitch = pitches.find(p => p.id === pitchId);
     if (!pitch) return [];
@@ -555,7 +560,9 @@ export default function DashboardPage() {
                             {pitch.type}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-500 mb-2">€{pitch.pricePerSlot}/slot</p>
+                        <p className="text-sm text-gray-500 mb-2">
+                          €{pitch.pricePerSlot} (€{getPricePerPerson(pitch.pricePerSlot, pitch.type)}/άτομο)
+                        </p>
                         <div className="flex space-x-2">
                           <Link
                             href={`/pitches/${pitch.id}/edit`}

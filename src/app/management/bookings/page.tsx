@@ -63,7 +63,7 @@ export default function BookingsPage() {
   // Filter bookings based on search term
   const filteredBookings = bookings.filter(booking => 
     booking.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    booking.userEmail?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    booking.userPhone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     booking.status?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -271,8 +271,8 @@ export default function BookingsPage() {
                           </span>
                         </div>
                         <div className="mt-1 flex items-center text-sm text-gray-500">
-                          📧
-                          {booking.userEmail || 'Δεν υπάρχει email'}
+                          📱
+                          {booking.userPhone || 'Δεν υπάρχει τηλέφωνο'}
                         </div>
                         <div className="mt-2 flex items-center space-x-4">
                           <div className="flex items-center">
@@ -303,9 +303,6 @@ export default function BookingsPage() {
                       </div>
                       <div className="text-base sm:text-lg font-semibold text-blue-600">
                         {new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit'})}
-                      </div>
-                      <div className="text-xs sm:text-sm text-gray-500 mt-1">
-                        {new Date(booking.endTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit'})}
                       </div>
                     </div>
                   </div>

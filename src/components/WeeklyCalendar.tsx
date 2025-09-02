@@ -200,7 +200,7 @@ export default function WeeklyCalendar({ bookings, pitches = [], blockedDates = 
             {/* Time Slots */}
             {timeSlots.map((time) => (
               <div key={time} className="grid grid-cols-8 gap-1 mb-1">
-                <div className="h-14 sm:h-16 flex items-center justify-center text-xs sm:text-sm text-gray-500 font-medium sticky left-0 z-10 bg-white">
+                <div className="h-20 sm:h-24 flex items-center justify-center text-xs sm:text-sm text-gray-500 font-medium sticky left-0 z-10 bg-white">
                   {formatTime(time)}
                 </div>
                 {weekDays.map((day, dayIndex) => {
@@ -208,7 +208,7 @@ export default function WeeklyCalendar({ bookings, pitches = [], blockedDates = 
                   return (
                                         <div
                       key={dayIndex}
-                      className={`h-14 sm:h-16 border rounded-lg p-1 transition-colors ${
+                      className={`h-20 sm:h-24 border rounded-lg p-1 transition-colors ${
                         isDateBlocked(day) 
                           ? 'border-red-300 bg-red-50 cursor-not-allowed' 
                           : 'border-gray-200 cursor-pointer hover:bg-gray-50 touch-manipulation'
@@ -235,6 +235,10 @@ export default function WeeklyCalendar({ bookings, pitches = [], blockedDates = 
                            <div className="flex items-center justify-between">
                              <div className="flex-1">
                                <div className="font-medium truncate">{booking.userName || 'Άγνωστος Πελάτης'}</div>
+                               <div className="text-xs opacity-90 flex items-center">
+                                 <span className="mr-1">📱</span>
+                                 {booking.userPhone || 'Χωρίς τηλέφωνο'}
+                               </div>
                                <div className="text-xs opacity-90 flex items-center">
                                  <span className="mr-1">⚽</span>
                                  {(() => {
@@ -316,6 +320,10 @@ export default function WeeklyCalendar({ bookings, pitches = [], blockedDates = 
                           <div className="flex items-center justify-between">
                             <div className="flex-1">
                               <div className="font-medium">{booking.userName || 'Άγνωστος Πελάτης'}</div>
+                              <div className="text-sm opacity-90 flex items-center">
+                                <span className="mr-1">📱</span>
+                                {booking.userPhone || 'Χωρίς τηλέφωνο'}
+                              </div>
                               <div className="text-sm opacity-90 flex items-center">
                                 <span className="mr-1">⚽</span>
                                 {(() => {
