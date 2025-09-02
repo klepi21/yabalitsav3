@@ -24,6 +24,7 @@ export default function ForVenuesPage() {
     // Venue
     venueName: '',
     venueAddress: '',
+    venueCity: 'Αθήνα', // Default to Athens
     venueEmail: '',
     venuePhone: '',
     venueAfm: '',
@@ -55,10 +56,10 @@ export default function ForVenuesPage() {
       if (form.password !== form.confirmPassword) {
         throw new Error('Οι κωδικοί δεν ταιριάζουν.');
       }
-      // AFM validation (10 digits)
-      const afmOk = /^\d{10}$/.test(form.venueAfm);
+      // AFM validation (9 digits)
+      const afmOk = /^\d{9}$/.test(form.venueAfm);
       if (!afmOk) {
-        throw new Error('Το ΑΦΜ πρέπει να έχει 10 ψηφία.');
+        throw new Error('Το ΑΦΜ πρέπει να έχει 9 ψηφία.');
       }
       if (!form.acceptTerms) {
         throw new Error('Πρέπει να αποδεχθείς τους Όρους Χρήσης και την Πολιτική Απορρήτου.');
@@ -72,6 +73,7 @@ export default function ForVenuesPage() {
       const venueDoc = await addDoc(collection(db, 'yabalitsa_venues'), {
         name: form.venueName,
         address: form.venueAddress,
+        city: form.venueCity,
         contactDetails: { email: '', phone: '' },
         ownerId: uid,
         plan: form.plan,
@@ -98,7 +100,7 @@ export default function ForVenuesPage() {
       setShowCongrats(true);
       setForm({
         ownerName: '', ownerEmail: '', ownerPhone: '', password: '', confirmPassword: '',
-        venueName: '', venueAddress: '', venueEmail: '', venuePhone: '', venueAfm: '', venueDoy: '',
+        venueName: '', venueAddress: '', venueCity: 'Αθήνα', venueEmail: '', venuePhone: '', venueAfm: '', venueDoy: '',
         plan: 'subscription', acceptTerms: false
       });
     } catch (err: any) {
@@ -214,8 +216,21 @@ export default function ForVenuesPage() {
               <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.venueAddress} onChange={e=>setForm({...form, venueAddress:e.target.value})} required />
             </div>
             <div>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Πόλη</label>
+              <select 
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white" 
+                value={form.venueCity} 
+                onChange={e=>setForm({...form, venueCity:e.target.value})} 
+                required
+              >
+                <option value="Αθήνα">Αθήνα</option>
+                <option value="Θεσσαλονίκη">Θεσσαλονίκη</option>
+                <option value="Πάτρα">Πάτρα</option>
+              </select>
+            </div>
+            <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">ΑΦΜ Επιχείρησης</label>
-              <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.venueAfm} onChange={e=>setForm({...form, venueAfm:e.target.value})} placeholder="10 ψηφία" required />
+              <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.venueAfm} onChange={e=>setForm({...form, venueAfm:e.target.value})} placeholder="9 ψηφία" required />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Δ.Ο.Υ.</label>

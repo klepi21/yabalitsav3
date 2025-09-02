@@ -183,7 +183,7 @@ export default function RootPage() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-            {/* Header */}
+      {/* Header */}
       <div className="min-h-screen flex flex-col">
         <div className={`text-center px-4 relative transition-all duration-700 ease-in-out ${
           !hasSearched ? 'flex-1 flex flex-col justify-center' : 'pt-12 sm:pt-16 pb-8 sm:pb-12'
@@ -395,7 +395,7 @@ export default function RootPage() {
           </div>
 
 
-        </div>
+            </div>
       )}
 
       {/* Footer */}
