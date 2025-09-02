@@ -172,7 +172,17 @@ export default function PitchDetailsPage() {
                     {dayNames[day as keyof typeof dayNames] || day}
                   </span>
                       <span className="text-sm text-gray-900">
-                        {hours.isOpen ? `${hours.open} - ${hours.close}` : 'Κλειστό'}
+                        {hours.isOpen 
+                          ? hours.slots?.length > 0 
+                            ? hours.slots.map((slot, idx) => (
+                                <span key={idx}>
+                                  {idx > 0 && ', '}
+                                  {slot.start} - {slot.end}
+                                </span>
+                              ))
+                            : 'Δεν έχουν οριστεί ώρες'
+                          : 'Κλειστό'
+                        }
                       </span>
                     </div>
                   );

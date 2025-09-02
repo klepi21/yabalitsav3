@@ -322,21 +322,12 @@ export default function SettingsPage() {
                 <span className="text-green-700 font-semibold">{(venue as any).daysRemaining ?? 0} ημέρες</span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="max-w-md">
                 <div className={`rounded-xl border p-4 ${((venue as any).plan==='subscription') ? 'border-green-600' : 'border-gray-200'}`}>
                   <div className="flex items-center justify-between">
                     <div className="text-sm">
                       <div className="font-semibold text-black">Πλήρες Διαχειριστικό</div>
                       <div className="text-gray-600">30€ / μήνα</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className={`rounded-xl border p-4 ${((venue as any).plan==='per_booking' || (venue as any).plan==='premium') ? 'border-green-600' : 'border-gray-200'}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm">
-                      <div className="font-semibold text-black">Premium</div>
-                      <div className="text-gray-600">1€ / ανά κράτηση (FSE)</div>
                     </div>
                   </div>
                 </div>

@@ -16,6 +16,22 @@ import { pitchService, blockedDateService } from '@/lib/firebase-services';
 import { Pitch, BlockedDate } from '@/types';
 
 // Form validation schema
+// Time slot validation schema
+const timeSlotSchema = z.object({
+  start: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Μη έγκυρη ώρα (HH:MM)'),
+  end: z.string().regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Μη έγκυρη ώρα (HH:MM)')
+}).refine(data => {
+  // Ensure end time is after start time
+  const [startHour, startMin] = data.start.split(':').map(Number);
+  const [endHour, endMin] = data.end.split(':').map(Number);
+  const startMins = startHour * 60 + startMin;
+  const endMins = endHour * 60 + endMin;
+  return endMins > startMins;
+}, {
+  message: 'Η ώρα λήξης πρέπει να είναι μετά την ώρα έναρξης',
+  path: ['end']
+});
+
 const pitchEditSchema = z.object({
   name: z.string().min(1, 'Το όνομα του γηπέδου είναι υποχρεωτικό'),
   type: z.string().min(1, 'Ο τύπος του γηπέδου είναι υποχρεωτικός'),
@@ -23,41 +39,60 @@ const pitchEditSchema = z.object({
   slotDuration: z.number().min(15, 'Η διάρκεια πρέπει να είναι τουλάχιστον 15 λεπτά'),
   defaultOpeningHours: z.object({
     monday: z.object({
-      open: z.string(),
-      close: z.string(),
-      isOpen: z.boolean()
+      isOpen: z.boolean(),
+      slots: z.array(timeSlotSchema)
     }),
     tuesday: z.object({
-      open: z.string(),
-      close: z.string(),
-      isOpen: z.boolean()
+      isOpen: z.boolean(),
+      slots: z.array(timeSlotSchema)
     }),
     wednesday: z.object({
-      open: z.string(),
-      close: z.string(),
-      isOpen: z.boolean()
+      isOpen: z.boolean(),
+      slots: z.array(timeSlotSchema)
     }),
     thursday: z.object({
-      open: z.string(),
-      close: z.string(),
-      isOpen: z.boolean()
+      isOpen: z.boolean(),
+      slots: z.array(timeSlotSchema)
     }),
     friday: z.object({
-      open: z.string(),
-      close: z.string(),
-      isOpen: z.boolean()
+      isOpen: z.boolean(),
+      slots: z.array(timeSlotSchema)
     }),
     saturday: z.object({
-      open: z.string(),
-      close: z.string(),
-      isOpen: z.boolean()
+      isOpen: z.boolean(),
+      slots: z.array(timeSlotSchema)
     }),
     sunday: z.object({
-      open: z.string(),
-      close: z.string(),
-      isOpen: z.boolean()
+      isOpen: z.boolean(),
+      slots: z.array(timeSlotSchema)
     })
   })
+}).refine(data => {
+  // Validate that each day's slots don't overlap
+  const validateDaySlots = (slots: { start: string; end: string }[]) => {
+    if (!slots.length) return true;
+    const sortedSlots = [...slots].sort((a, b) => {
+      const [aHour, aMin] = a.start.split(':').map(Number);
+      const [bHour, bMin] = b.start.split(':').map(Number);
+      return (aHour * 60 + aMin) - (bHour * 60 + bMin);
+    });
+    
+    for (let i = 0; i < sortedSlots.length - 1; i++) {
+      const [endHour, endMin] = sortedSlots[i].end.split(':').map(Number);
+      const [nextStartHour, nextStartMin] = sortedSlots[i + 1].start.split(':').map(Number);
+      const endMins = endHour * 60 + endMin;
+      const nextStartMins = nextStartHour * 60 + nextStartMin;
+      if (endMins >= nextStartMins) return false;
+    }
+    return true;
+  };
+
+  return Object.values(data.defaultOpeningHours).every(day => 
+    !day.isOpen || validateDaySlots(day.slots)
+  );
+}, {
+  message: 'Τα χρονικά διαστήματα δεν πρέπει να επικαλύπτονται',
+  path: ['defaultOpeningHours']
 });
 
 type PitchEditFormData = z.infer<typeof pitchEditSchema>;
@@ -94,8 +129,20 @@ export default function EditPitchPage() {
     formState: { errors },
     reset,
     watch,
+    setValue,
   } = useForm<PitchEditFormData>({
     resolver: zodResolver(pitchEditSchema),
+    defaultValues: {
+      defaultOpeningHours: {
+        monday: { isOpen: false, slots: [] },
+        tuesday: { isOpen: false, slots: [] },
+        wednesday: { isOpen: false, slots: [] },
+        thursday: { isOpen: false, slots: [] },
+        friday: { isOpen: false, slots: [] },
+        saturday: { isOpen: false, slots: [] },
+        sunday: { isOpen: false, slots: [] }
+      }
+    }
   });
 
   useEffect(() => {
@@ -116,7 +163,21 @@ export default function EditPitchPage() {
       const pitchData = await pitchService.getById(pitchId);
       if (pitchData) {
         setPitch(pitchData);
-        reset(pitchData);
+        
+        // Ensure each day has a slots array
+        const formattedData = {
+          ...pitchData,
+          defaultOpeningHours: Object.entries(pitchData.defaultOpeningHours).reduce((acc, [day, hours]) => ({
+            ...acc,
+            [day]: {
+              isOpen: hours.isOpen,
+              slots: hours.slots || []
+            }
+          }), {})
+        };
+        
+        reset(formattedData);
+        
         // Load blocked dates for this pitch
         const blockedDatesData = await blockedDateService.getByPitch(pitchId);
         setBlockedDates(blockedDatesData);
@@ -136,10 +197,27 @@ export default function EditPitchPage() {
     setError(null);
     
     try {
-      await pitchService.update(pitch.id, {
+      // Clean up the opening hours data
+      const cleanedOpeningHours = Object.entries(data.defaultOpeningHours).reduce((acc, [day, hours]) => ({
+        ...acc,
+        [day]: {
+          isOpen: hours.isOpen,
+          slots: hours.isOpen ? hours.slots.filter(slot => slot.start && slot.end) : []
+        }
+      }), {});
+
+      console.log('Saving pitch data:', {
         ...data,
+        defaultOpeningHours: cleanedOpeningHours,
         type: assertPitchType(data.type)
       });
+
+      await pitchService.update(pitch.id, {
+        ...data,
+        defaultOpeningHours: cleanedOpeningHours,
+        type: assertPitchType(data.type)
+      });
+      
       router.push(`/management/pitches/${pitch.id}`);
     } catch (error) {
       console.error('Error updating pitch:', error);
@@ -349,69 +427,70 @@ export default function EditPitchPage() {
                     </div>
                     
                     {watch(`defaultOpeningHours.${day}.isOpen`) && (
-                      <div className="grid grid-cols-2 gap-2">
-                                                 <div>
-                           <label className="block text-xs text-gray-500">Άνοιγμα</label>
-                           <input
-                             type="text"
-                             placeholder="HH:MM"
-                             pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
-                             {...register(`defaultOpeningHours.${day}.open`, {
-                               setValueAs: (value) => {
-                                 if (!value) return '';
-                                 // Convert 12h to 24h format
-                                 const [time, period] = value.split(' ');
-                                 if (period === 'PM' && time !== '12:00') {
-                                   const [hours, minutes] = time.split(':');
-                                   return `${parseInt(hours) + 12}:${minutes}`;
-                                 } else if (period === 'AM' && time === '12:00') {
-                                   return '00:00';
-                                 }
-                                 return value;
-                               }
-                             })}
-                             className="block w-full text-sm border border-gray-300 rounded px-2 py-1"
-                             onBlur={(e) => {
-                               const value = e.target.value;
-                               if (value && !value.includes(':')) {
-                                 // If user enters just numbers, format as HH:MM
-                                 const formatted = value.padStart(4, '0').replace(/(\d{2})(\d{2})/, '$1:$2');
-                                 e.target.value = formatted;
-                               }
-                             }}
-                           />
-                         </div>
-                         <div>
-                           <label className="block text-xs text-gray-500">Κλείσιμο</label>
-                           <input
-                             type="text"
-                             placeholder="HH:MM"
-                             pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
-                             {...register(`defaultOpeningHours.${day}.close`, {
-                               setValueAs: (value) => {
-                                 if (!value) return '';
-                                 // Convert 12h to 24h format
-                                 const [time, period] = value.split(' ');
-                                 if (period === 'PM' && time !== '12:00') {
-                                   const [hours, minutes] = time.split(':');
-                                   return `${parseInt(hours) + 12}:${minutes}`;
-                                 } else if (period === 'AM' && time === '12:00') {
-                                   return '00:00';
-                                 }
-                                 return value;
-                               }
-                             })}
-                             className="block w-full text-sm border border-gray-300 rounded px-2 py-1"
-                             onBlur={(e) => {
-                               const value = e.target.value;
-                               if (value && !value.includes(':')) {
-                                 // If user enters just numbers, format as HH:MM
-                                 const formatted = value.padStart(4, '0').replace(/(\d{2})(\d{2})/, '$1:$2');
-                                 e.target.value = formatted;
-                               }
-                             }}
-                           />
-                         </div>
+                      <div className="space-y-3">
+                        {/* Existing time slots */}
+                        {watch(`defaultOpeningHours.${day}.slots`)?.map((slot: any, index: number) => (
+                          <div key={index} className="flex items-end gap-2">
+                            <div>
+                              <label className="block text-xs text-gray-500">Άνοιγμα</label>
+                              <input
+                                type="text"
+                                placeholder="HH:MM"
+                                pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+                                {...register(`defaultOpeningHours.${day}.slots.${index}.start`)}
+                                className="block w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                onBlur={(e) => {
+                                  const value = e.target.value;
+                                  if (value && !value.includes(':')) {
+                                    const formatted = value.padStart(4, '0').replace(/(\d{2})(\d{2})/, '$1:$2');
+                                    e.target.value = formatted;
+                                  }
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs text-gray-500">Κλείσιμο</label>
+                              <input
+                                type="text"
+                                placeholder="HH:MM"
+                                pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+                                {...register(`defaultOpeningHours.${day}.slots.${index}.end`)}
+                                className="block w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                onBlur={(e) => {
+                                  const value = e.target.value;
+                                  if (value && !value.includes(':')) {
+                                    const formatted = value.padStart(4, '0').replace(/(\d{2})(\d{2})/, '$1:$2');
+                                    e.target.value = formatted;
+                                  }
+                                }}
+                              />
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const slots = watch(`defaultOpeningHours.${day}.slots`) || [];
+                                const newSlots = [...slots];
+                                newSlots.splice(index, 1);
+                                setValue(`defaultOpeningHours.${day}.slots`, newSlots);
+                              }}
+                              className="text-red-600 hover:text-red-800 px-2 py-1"
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        ))}
+                        
+                        {/* Add new slot button */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const slots = watch(`defaultOpeningHours.${day}.slots`) || [];
+                            setValue(`defaultOpeningHours.${day}.slots`, [...slots, { start: '', end: '' }]);
+                          }}
+                          className="text-sm text-green-600 hover:text-green-700 font-medium"
+                        >
+                          + Προσθήκη διαστήματος
+                        </button>
                       </div>
                     )}
                   </div>

@@ -162,34 +162,41 @@ export default function DashboardPage() {
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const dayName = dayNames[dayOfWeek];
     
-    const openingHours = pitch.defaultOpeningHours[dayName];
+    const daySchedule = pitch.defaultOpeningHours[dayName];
+    console.log('Day schedule:', daySchedule);
     
-    if (!openingHours || !openingHours.isOpen) {
+    if (!daySchedule || !daySchedule.isOpen || !daySchedule.slots?.length) {
+      console.log('No slots available for this day');
       return [];
     }
 
-    // Generate time slots based on opening hours and slot duration
+    // Generate time slots based on opening slots and slot duration
     const slots: Array<{time: string, display: string}> = [];
-    const startTime = new Date(`2000-01-01T${openingHours.open}`);
-    const endTime = new Date(`2000-01-01T${openingHours.close}`);
     
-    let currentTime = new Date(startTime);
-    
-    while (currentTime < endTime) {
-      const slotStart = currentTime.toTimeString().slice(0, 5);
-      const slotEnd = new Date(currentTime.getTime() + pitch.slotDuration * 60000);
-      const slotEndTime = slotEnd.toTimeString().slice(0, 5);
+    // For each opening slot
+    daySchedule.slots.forEach(openingSlot => {
+      console.log('Processing slot:', openingSlot);
+      const startTime = new Date(`2000-01-01T${openingSlot.start}`);
+      const endTime = new Date(`2000-01-01T${openingSlot.end}`);
       
-      // Only add slot if it doesn't exceed closing time
-      if (slotEnd <= endTime) {
-        slots.push({
-          time: `${slotStart} - ${slotEndTime}`,
-          display: slotStart
-        });
+      let currentTime = new Date(startTime);
+      
+      while (currentTime < endTime) {
+        const slotStart = currentTime.toTimeString().slice(0, 5);
+        const slotEnd = new Date(currentTime.getTime() + pitch.slotDuration * 60000);
+        const slotEndTime = slotEnd.toTimeString().slice(0, 5);
+        
+        // Only add slot if it doesn't exceed closing time
+        if (slotEnd <= endTime) {
+          slots.push({
+            time: `${slotStart} - ${slotEndTime}`,
+            display: slotStart
+          });
+        }
+        
+        currentTime.setMinutes(currentTime.getMinutes() + pitch.slotDuration);
       }
-      
-      currentTime.setMinutes(currentTime.getMinutes() + pitch.slotDuration);
-    }
+    });
 
     // Filter out already booked slots (including pending bookings)
     const bookedSlots = bookings
@@ -244,7 +251,7 @@ export default function DashboardPage() {
         startTime: startTime,
         endTime: endTime,
         price: pitch.pricePerSlot,
-        status: 'pending',
+        status: 'confirmed',
         notes: quickBookingData.notes,
         createdAt: new Date(),
         updatedAt: new Date()

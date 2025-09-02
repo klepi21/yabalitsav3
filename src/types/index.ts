@@ -12,16 +12,20 @@ export interface Venue {
   updatedAt: Date;
 }
 
+export interface OpeningSlot {
+  start: string; // HH:mm format
+  end: string; // HH:mm format
+}
+
 export interface Pitch {
   id: string;
   venueId: string;
   name: string;
   type: '5x5' | '6x6' | '7x7' | '8x8' | '9x9';
   defaultOpeningHours: {
-    [key: string]: {
-      open: string; // HH:mm format
-      close: string; // HH:mm format
+    [key: string]: { // day of week (sunday, monday, etc.)
       isOpen: boolean;
+      slots: OpeningSlot[]; // Multiple time slots per day
     };
   };
   slotDuration: number; // in minutes

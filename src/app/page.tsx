@@ -120,31 +120,32 @@ export default function RootPage() {
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const dayName = dayNames[dayOfWeek];
     
-    const openingHours = pitch.defaultOpeningHours[dayName];
-    console.log('🕐 Opening hours for', dayName, ':', openingHours);
+    const daySchedule = pitch.defaultOpeningHours[dayName];
+    console.log('🕐 Opening hours for', dayName, ':', daySchedule);
     
-    if (!openingHours || !openingHours.isOpen) {
+    if (!daySchedule || !daySchedule.isOpen || !daySchedule.slots.length) {
       console.log('❌ Pitch is closed on', dayName);
       return false;
     }
 
-    // Check if the time is within opening hours - Fix timezone issue
+    // Check if the time is within any of the opening slots
     const [hours, minutes] = time.split(':').map(Number);
     const selectedTime = new Date(date);
     selectedTime.setHours(hours, minutes, 0, 0);
-    
-    // Create time objects for comparison (avoid timezone issues)
     const selectedTimeString = selectedTime.toTimeString().slice(0, 5);
-    const openTimeString = openingHours.open;
-    const closeTimeString = openingHours.close;
-    
-    console.log('⏰ Time check:', selectedTimeString, 'vs', openTimeString, '-', closeTimeString);
-    
-    // Simple string comparison to avoid timezone issues
-    if (selectedTimeString < openTimeString || selectedTimeString >= closeTimeString) {
-      console.log('❌ Time outside opening hours');
+
+    // Check if the selected time falls within any of the opening slots
+    const isWithinOpeningHours = daySchedule.slots.some(slot => {
+      console.log('⏰ Time check:', selectedTimeString, 'vs', slot.start, '-', slot.end);
+      return selectedTimeString >= slot.start && selectedTimeString < slot.end;
+    });
+
+    if (!isWithinOpeningHours) {
+      console.log('❌ Time outside all opening slots');
       return false;
     }
+
+    console.log('✅ Time is within an opening slot');
 
     // Check if there are conflicting bookings
     const conflictingBookings = bookings.filter(booking => 
@@ -187,7 +188,7 @@ export default function RootPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-green-800/70 via-green-700/50 to-white flex flex-col">
       {/* Header */}
       <div className="min-h-screen flex flex-col">
         <div className={`text-center px-4 relative transition-all duration-700 ease-in-out ${
@@ -219,7 +220,7 @@ export default function RootPage() {
 
           {/* Minimal Search Form */}
           <div className="max-w-5xl mx-auto px-4">
-            <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-xl">
+            <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-xl">
               <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
                 {/* City Selection */}
                 <div className="sm:col-span-1">
@@ -282,15 +283,53 @@ export default function RootPage() {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-green-700 text-sm"
                   >
                     <option value="">Επιλέξτε ώρα</option>
-                    {Array.from({ length: 12 }, (_, i) => {
-                      const hour = i + 12; // Start from 12:00
-                      const timeString = `${hour.toString().padStart(2, '0')}:00`;
-                      return (
-                        <option key={timeString} value={timeString}>
-                          {timeString}
-                        </option>
-                      );
-                    })}
+                    {(() => {
+                      // Get the selected date's day of week
+                      const selectedDate = searchQuery.date ? new Date(searchQuery.date) : null;
+                      const dayOfWeek = selectedDate?.getDay();
+                      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                      const dayName = dayOfWeek !== undefined ? dayNames[dayOfWeek] : null;
+
+                      console.log('Selected day:', dayName);
+
+                      // Get available slots for the selected pitch
+                      const selectedPitch = pitches.find(p => p.type === searchQuery.pitchType);
+                      console.log('Selected pitch:', selectedPitch);
+                      console.log('Opening hours:', selectedPitch?.defaultOpeningHours);
+                      
+                      if (!dayName || !selectedPitch) {
+                        return <option value="">Επιλέξτε ημερομηνία και τύπο γηπέδου</option>;
+                      }
+
+                      const daySchedule = selectedPitch.defaultOpeningHours[dayName];
+                      console.log('Day schedule:', daySchedule);
+
+                      if (!daySchedule?.isOpen || !daySchedule?.slots?.length) {
+                        return <option value="">Δεν υπάρχουν διαθέσιμες ώρες</option>;
+                      }
+
+                      // Generate all possible hours between slot ranges
+                      const availableHours = new Set<string>();
+                      daySchedule.slots.forEach(slot => {
+                        const [startHour] = slot.start.split(':').map(Number);
+                        const [endHour] = slot.end.split(':').map(Number);
+                        
+                        for (let hour = startHour; hour < endHour; hour++) {
+                          availableHours.add(`${hour.toString().padStart(2, '0')}:00`);
+                        }
+                      });
+
+                      console.log('Available hours:', Array.from(availableHours));
+
+                      // Convert to sorted array and create options
+                      return Array.from(availableHours)
+                        .sort()
+                        .map(timeString => (
+                          <option key={timeString} value={timeString}>
+                            {timeString}
+                          </option>
+                        ));
+                    })()}
                   </select>
                 </div>
 
@@ -329,7 +368,7 @@ export default function RootPage() {
 
               <div className="grid grid-cols-1 lg:grid-cols-1 gap-4">
                 {searchResults.map((result, index) => (
-                  <div key={`${result.venue.id}-${result.pitch.id}`} className={`bg-white rounded-xl shadow-lg ${result.venue.name?.toLowerCase().includes('tziolas') ? 'border-2 border-green-700' : 'border border-gray-100'} hover:shadow-xl transition-all duration-300 overflow-hidden mb-3 sm:mb-4 w-full`}>
+                  <div key={`${result.venue.id}-${result.pitch.id}`} className={`bg-white/90 backdrop-blur-sm rounded-xl shadow-lg ${result.venue.name?.toLowerCase().includes('tziolas') ? 'border-2 border-green-700' : 'border border-gray-100'} hover:shadow-xl hover:bg-white transition-all duration-300 overflow-hidden mb-3 sm:mb-4 w-full`}>
                     <div className="p-3 sm:p-4">
                       {/* Horizontal Layout */}
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-3 sm:space-y-0">
@@ -401,7 +440,7 @@ export default function RootPage() {
         {/* No Results */}
         {hasSearched && !isSearching && searchResults.length === 0 && (
           <div className="max-w-5xl mx-auto px-4 pb-20">
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 mb-8">
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-8 mb-8 hover:bg-white transition-all duration-300">
               <div className="text-6xl mb-4">😔</div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Δεν βρέθηκαν διαθέσιμα γήπεδα</h3>
               <p className="text-gray-600 mb-4">

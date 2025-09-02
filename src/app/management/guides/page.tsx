@@ -662,7 +662,7 @@ export default function GuidesPage() {
                           <li>ΔΟΥ</li>
                         </ul>
                       </li>
-                    </ul>
+          </ul>
                   </div>
                 </div>
 
@@ -680,7 +680,7 @@ export default function GuidesPage() {
                         <li>• Επιλογή κλειστών ημερών</li>
                         <li>• Ειδικά ωράρια αργιών</li>
                         <li>• Εποχιακές προσαρμογές</li>
-                      </ul>
+          </ul>
                     </div>
                   </div>
                 </div>
@@ -699,7 +699,7 @@ export default function GuidesPage() {
                         <li>• Μέγιστες ημέρες προκράτησης</li>
                         <li>• Πολιτική ακυρώσεων</li>
                         <li>• Κανόνες επαναλαμβανόμενων κρατήσεων</li>
-                      </ul>
+          </ul>
                     </div>
                   </div>
                 </div>
@@ -723,7 +723,7 @@ export default function GuidesPage() {
                       <li>• Διαχείριση δικαιωμάτων πρόσβασης</li>
                       <li>• Προσθήκη/αφαίρεση χρηστών</li>
                       <li>• Καταγραφή ενεργειών χρηστών</li>
-                    </ul>
+          </ul>
                   </div>
                 </div>
 
@@ -739,7 +739,7 @@ export default function GuidesPage() {
                       <li>✓ Προσαρμόστε τους κανόνες κρατήσεων στις ανάγκες σας</li>
                       <li>✓ Ελέγχετε τακτικά τα δικαιώματα των χρηστών</li>
                       <li>✓ Ενημερώνετε έγκαιρα το ωράριο για ειδικές περιόδους</li>
-                    </ul>
+          </ul>
                   </div>
                 </div>
               </div>
@@ -775,7 +775,7 @@ export default function GuidesPage() {
                       </li>
                       <li>• Εμφάνιση διαθέσιμων slots</li>
                       <li>• Online κρατήσεις</li>
-                    </ul>
+          </ul>
                   </div>
                 </div>
 
@@ -793,7 +793,7 @@ export default function GuidesPage() {
                         <li>• Επιβεβαίωση κρατήσεων</li>
                         <li>• Διαχείριση πληρωμών</li>
                         <li>• Αυτόματες ειδοποιήσεις</li>
-                      </ul>
+          </ul>
                     </div>
                   </div>
                 </div>
@@ -819,7 +819,7 @@ export default function GuidesPage() {
                         </ul>
                       </li>
                       <li>• Δωρεάν δοκιμαστική περίοδος 15 ημερών</li>
-                    </ul>
+          </ul>
                   </div>
                 </div>
 
@@ -837,7 +837,7 @@ export default function GuidesPage() {
                         <li>• Πλήρης περιγραφή εγκαταστάσεων</li>
                         <li>• Ανταγωνιστική τιμολόγηση</li>
                         <li>• Αξιολογήσεις πελατών</li>
-                      </ul>
+          </ul>
                     </div>
                   </div>
                 </div>
@@ -858,7 +858,7 @@ export default function GuidesPage() {
                   </div>
                 </div>
               </div>
-            </div>
+      </div>
           </Tab.Panel>
         </Tab.Panels>
       </Tab.Group>

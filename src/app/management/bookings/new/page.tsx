@@ -174,7 +174,7 @@ export default function NewBookingPage() {
               startTime: startDateTime,
               endTime: endDateTime,
               price: selectedPitch.pricePerSlot,
-              status: 'pending' as const,
+              status: 'confirmed' as const,
               notes: data.notes || '',
             };
             
@@ -209,7 +209,7 @@ export default function NewBookingPage() {
           startTime: startDateTime,
           endTime: endDateTime,
           price: selectedPitch.pricePerSlot,
-          status: 'pending' as const,
+          status: 'confirmed' as const,
           notes: data.notes || '',
         };
 
@@ -256,9 +256,11 @@ export default function NewBookingPage() {
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const dayName = dayNames[dayOfWeek];
     
-    const openingHours = selectedPitch.defaultOpeningHours[dayName];
+    const daySchedule = selectedPitch.defaultOpeningHours[dayName];
+    console.log('Day schedule:', daySchedule);
     
-    if (!openingHours || !openingHours.isOpen) {
+    if (!daySchedule || !daySchedule.isOpen || !daySchedule.slots?.length) {
+      console.log('No slots available for this day');
       setAvailableSlots([]);
       return [];
     }
@@ -280,29 +282,35 @@ export default function NewBookingPage() {
     });
     
     if (isDateBlocked) {
+      console.log('Date is blocked');
       setAvailableSlots([]);
       return [];
     }
 
-    // Generate time slots based on opening hours and slot duration
+    // Generate time slots based on opening slots and slot duration
     const slots: string[] = [];
-    const startTime = new Date(`2000-01-01T${openingHours.open}`);
-    const endTime = new Date(`2000-01-01T${openingHours.close}`);
     
-    const currentTime = new Date(startTime);
-    
-    while (currentTime < endTime) {
-      const slotStart = currentTime.toTimeString().slice(0, 5);
-      const slotEnd = new Date(currentTime.getTime() + selectedPitch.slotDuration * 60000);
-      const slotEndTime = slotEnd.toTimeString().slice(0, 5);
+    // For each opening slot
+    daySchedule.slots.forEach(openingSlot => {
+      console.log('Processing slot:', openingSlot);
+      const startTime = new Date(`2000-01-01T${openingSlot.start}`);
+      const endTime = new Date(`2000-01-01T${openingSlot.end}`);
       
-      // Only add slot if it doesn't exceed closing time
-      if (slotEnd <= endTime) {
-        slots.push(`${slotStart} - ${slotEndTime}`);
+      const currentTime = new Date(startTime);
+      
+      while (currentTime < endTime) {
+        const slotStart = currentTime.toTimeString().slice(0, 5);
+        const slotEnd = new Date(currentTime.getTime() + selectedPitch.slotDuration * 60000);
+        const slotEndTime = slotEnd.toTimeString().slice(0, 5);
+        
+        // Only add slot if it doesn't exceed closing time
+        if (slotEnd <= endTime) {
+          slots.push(`${slotStart} - ${slotEndTime}`);
+        }
+        
+        currentTime.setMinutes(currentTime.getMinutes() + selectedPitch.slotDuration);
       }
-      
-      currentTime.setMinutes(currentTime.getMinutes() + selectedPitch.slotDuration);
-    }
+    });
 
     // Filter out already booked slots (including pending bookings)
     const bookedSlots = existingBookings
