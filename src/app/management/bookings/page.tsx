@@ -178,7 +178,7 @@ export default function BookingsPage() {
           bookings={bookings}
           pitches={pitches}
           blockedDates={blockedDates}
-          onBookingClick={(booking) => router.push(`/bookings/${booking.id}`)}
+          onBookingClick={(booking) => router.push(`/management/bookings/${booking.id}`)}
           onSlotClick={(date, time) => {
             // Navigate to new booking page with pre-filled date and time
             router.push(`/management/bookings/new?date=${date}&time=${time}`);

@@ -139,12 +139,16 @@ export default function EditBookingPage() {
 
         // Format dates for form inputs
         const startDate = new Date(bookingData.startTime);
+        const endDate = new Date(bookingData.endTime);
+        
+        // Find the matching slot format for the current booking time
+        const currentSlotTime = `${startDate.toTimeString().slice(0, 5)} - ${endDate.toTimeString().slice(0, 5)}`;
         
         reset({
           customerName: bookingData.userName || '',
           customerPhone: bookingData.userPhone || '',
           selectedDate: startDate.toISOString().slice(0, 10), // Format for date input
-          selectedSlot: startDate.toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit', hour12: false}),
+          selectedSlot: currentSlotTime,
           status: bookingData.status || 'confirmed',
           notes: bookingData.notes || '',
         });
@@ -204,7 +208,7 @@ export default function EditBookingPage() {
         notes: data.notes,
       });
       
-      router.push(`/bookings/${booking.id}`);
+      router.push(`/management/bookings/${booking.id}`);
     } catch (error) {
       console.error('Error updating booking:', error);
       setError('Αποτυχία ενημέρωσης κράτησης');
@@ -227,7 +231,7 @@ export default function EditBookingPage() {
         <h3 className="text-lg font-medium text-gray-900">Η κράτηση δεν βρέθηκε</h3>
         <p className="mt-1 text-sm text-gray-500">Η κράτηση που αναζητάτε δεν υπάρχει.</p>
         <Link
-          href="/bookings"
+          href="/management/bookings"
           className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
         >
           Επιστροφή στις Κρατήσεις
@@ -242,7 +246,7 @@ export default function EditBookingPage() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-4">
           <Link
-            href={`/bookings/${booking.id}`}
+            href={`/management/bookings/${booking.id}`}
             className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
           >
             <ArrowLeftIcon className="h-4 w-4 mr-1" />
@@ -408,7 +412,7 @@ export default function EditBookingPage() {
         {/* Form Actions */}
         <div className="flex justify-end space-x-3">
           <Link
-            href={`/bookings/${booking.id}`}
+            href={`/management/bookings/${booking.id}`}
             className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
           >
             Ακύρωση

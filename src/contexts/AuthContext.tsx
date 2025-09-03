@@ -21,15 +21,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = authService.onAuthStateChanged(async (firebaseUser) => {
-      console.log('Auth state changed:', firebaseUser ? 'User logged in' : 'User logged out');
+              // Auth state changed
       setUser(firebaseUser);
       
       if (firebaseUser) {
-        console.log('Firebase user email:', firebaseUser.email);
+                  // Firebase user email retrieved
         try {
           // Get venue owner data
           const owner = await venueOwnerService.getByEmail(firebaseUser.email || '');
-          console.log('Venue owner data:', owner);
+                      // Venue owner data loaded
           setVenueOwner(owner);
         } catch (error) {
           console.error('Error loading venue owner:', error);

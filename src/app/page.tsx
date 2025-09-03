@@ -86,8 +86,7 @@ export default function RootPage() {
     setIsSearching(true);
     
     try {
-      console.log('🔍 Starting search with:', searchQuery);
-      console.log('📊 Available data:', { venues: venues.length, pitches: pitches.length, bookings: bookings.length });
+      // Search started with query and available data
       
       const results: SearchResult[] = [];
       const selectedDate = new Date(searchQuery.date);
@@ -95,27 +94,26 @@ export default function RootPage() {
       
       // Filter pitches by type
       const matchingPitches = pitches.filter(pitch => pitch.type === searchQuery.pitchType);
-      console.log('⚽ Matching pitches:', matchingPitches.length, 'for type:', searchQuery.pitchType);
+              // Found matching pitches for pitch type
       
       for (const pitch of matchingPitches) {
-        console.log('🔍 Checking pitch:', pitch.name, pitch.type, 'venueId:', pitch.venueId);
+                  // Checking pitch availability
         const venue = venues.find(v => v.id === pitch.venueId);
         if (!venue) {
-          console.log('❌ No venue found for pitch:', pitch.id, 'venueId:', pitch.venueId);
-          console.log('Available venue IDs:', venues.map(v => v.id));
+                      // No venue found for pitch
           continue;
         }
 
         // Filter by city if selected
         if (searchQuery.city && venue?.city !== searchQuery.city) {
-          console.log('❌ Venue city does not match:', venue?.city || 'undefined', 'vs', searchQuery.city);
+          // Venue city does not match search query
           continue;
         }
-        console.log('✅ Venue city matches or no city filter:', venue?.city || 'undefined', 'vs', searchQuery.city);
+                  // Venue city matches or no city filter applied
 
         // Check if pitch is available for the selected date and time
         const isAvailable = await checkPitchAvailability(pitch, selectedDate, selectedTime);
-        console.log('✅ Pitch availability:', pitch.name, isAvailable);
+                  // Pitch availability checked
         
         if (isAvailable) {
           results.push({
@@ -126,7 +124,7 @@ export default function RootPage() {
         }
       }
 
-      console.log('🎯 Final results:', results.length);
+              // Search completed with results
       // Sort by price (lowest first)
       results.sort((a, b) => a.price - b.price);
       setSearchResults(results);
@@ -206,7 +204,7 @@ export default function RootPage() {
   };
 
   const checkPitchAvailability = async (pitch: Pitch, date: Date, time: string): Promise<boolean> => {
-    console.log('🔍 Checking availability for pitch:', pitch.name, 'on', date.toDateString(), 'at', time);
+          // Checking pitch availability for specific date and time
     
     // Check if the date is blocked
     const dayOfWeek = date.getDay();
@@ -214,10 +212,10 @@ export default function RootPage() {
     const dayName = dayNames[dayOfWeek];
     
     const daySchedule = pitch.defaultOpeningHours[dayName];
-    console.log('🕐 Opening hours for', dayName, ':', daySchedule);
+          // Opening hours for the day
     
     if (!daySchedule || !daySchedule.isOpen) {
-      console.log('❌ Pitch is closed on', dayName);
+              // Pitch is closed on this day
       return false;
     }
 
@@ -233,21 +231,21 @@ export default function RootPage() {
     if ('slots' in daySchedule && daySchedule.slots && daySchedule.slots.length > 0) {
       // New structure with slots array
       isWithinOpeningHours = daySchedule.slots.some(slot => {
-        console.log('⏰ Time check (slots):', selectedTimeString, 'vs', slot.start, '-', slot.end);
+        // Time check for slots format
         return selectedTimeString >= slot.start && selectedTimeString < slot.end;
       });
     } else if ('open' in daySchedule && 'close' in daySchedule && daySchedule.open && daySchedule.close) {
       // Old structure with open/close times
-      console.log('⏰ Time check (open/close):', selectedTimeString, 'vs', daySchedule.open, '-', daySchedule.close);
+              // Time check for open/close format
       isWithinOpeningHours = selectedTimeString >= daySchedule.open && selectedTimeString < daySchedule.close;
     }
 
     if (!isWithinOpeningHours) {
-      console.log('❌ Time outside opening hours');
-      return false;
-    }
-
-    console.log('✅ Time is within opening hours');
+              // Time is outside opening hours
+        return false;
+      }
+      
+      // Time is within opening hours
 
     // Check if there are conflicting bookings
     const conflictingBookings = bookings.filter(booking => 
@@ -256,7 +254,7 @@ export default function RootPage() {
       new Date(booking.startTime).toDateString() === date.toDateString()
     );
 
-    console.log('📅 Conflicting bookings found:', conflictingBookings.length);
+          // Found conflicting bookings
 
     // Check if the selected time conflicts with any existing booking
     for (const booking of conflictingBookings) {
@@ -264,13 +262,13 @@ export default function RootPage() {
       const bookingEnd = new Date(booking.endTime);
       
       if (selectedTime >= bookingStart && selectedTime < bookingEnd) {
-        console.log('❌ Time conflicts with existing booking:', bookingStart.toTimeString(), '-', bookingEnd.toTimeString());
+                  // Time conflicts with existing booking
         return false;
       }
     }
 
-    console.log('✅ Pitch is available!');
-    return true;
+          // Pitch is available for booking
+      return true;
   };
 
   const handleBookNow = (venueId: string, pitchId: string, time: string) => {
@@ -320,10 +318,19 @@ export default function RootPage() {
             <p className="text-lg sm:text-xl text-gray-900">Βρες και κλείσε γήπεδο ποδοσφαίρου</p>
           </div>
 
-          {/* Minimal Search Form */}
+          {/* FSE Coming Soon - Disabled Search Form */}
           <div className="max-w-5xl mx-auto px-4">
+            {/* Non-dismissible Popup */}
+            <div className="bg-green-700 text-white rounded-xl p-4 mb-4 shadow-lg border-2 border-green-600">
+              <div className="text-center">
+                <div className="text-2xl mb-2">🚀</div>
+                <h3 className="text-lg font-bold mb-1">FSE Έρχεται Σύντομα!</h3>
+                <p className="text-sm opacity-90">Η προηγμένη μηχανή αναζήτησής μας βρίσκεται υπό ανάπτυξη</p>
+              </div>
+            </div>
+            
             <div className="bg-white/80 backdrop-blur-sm border border-gray-200 rounded-xl p-6 shadow-xl">
-              <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-3 items-end opacity-50">
                 {/* City Selection */}
                 <div className="sm:col-span-1">
                   <label className="block text-xs font-medium text-gray-700 mb-1 text-left">
@@ -331,8 +338,8 @@ export default function RootPage() {
                   </label>
                   <select
                     value={searchQuery.city}
-                    onChange={(e) => setSearchQuery({...searchQuery, city: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-green-700 text-sm"
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 text-sm cursor-not-allowed"
                   >
                     <option value="">Όλες οι πόλεις</option>
                     <option value="Αθήνα">Αθήνα</option>
@@ -349,9 +356,8 @@ export default function RootPage() {
                   <input
                     type="date"
                     value={searchQuery.date}
-                    onChange={(e) => setSearchQuery({...searchQuery, date: e.target.value})}
-                    min={getCurrentDate()}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-green-700 text-sm"
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 text-sm cursor-not-allowed"
                   />
                 </div>
 
@@ -362,8 +368,8 @@ export default function RootPage() {
                   </label>
                   <select
                     value={searchQuery.pitchType}
-                    onChange={(e) => setSearchQuery({...searchQuery, pitchType: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-green-700 text-sm"
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 text-sm cursor-not-allowed"
                   >
                     <option value="">Επιλέξτε τύπο</option>
                     <option value="5x5">5x5</option>
@@ -381,8 +387,8 @@ export default function RootPage() {
                   </label>
                   <select
                     value={searchQuery.time}
-                    onChange={(e) => setSearchQuery({...searchQuery, time: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-green-700 text-sm"
+                    disabled
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 text-sm cursor-not-allowed"
                   >
                     <option value="">Επιλέξτε ώρα</option>
                     {(() => {
@@ -403,21 +409,11 @@ export default function RootPage() {
 
                 {/* Search Button */}
                 <button
-                  onClick={handleSearch}
-                  disabled={!searchQuery.date || !searchQuery.pitchType || !searchQuery.time || isSearching}
-                  className="w-full sm:w-auto bg-green-700 hover:bg-green-800 disabled:bg-gray-400 text-white font-medium py-2 px-6 rounded-lg text-sm transition-all duration-200 flex items-center justify-center space-x-2"
+                  disabled
+                  className="w-full sm:w-auto bg-gray-400 text-white font-medium py-2 px-6 rounded-lg text-sm cursor-not-allowed flex items-center justify-center space-x-2"
                 >
-                  {isSearching ? (
-                    <>
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                      <span>Αναζήτηση...</span>
-                    </>
-                  ) : (
-                    <>
-                      <MagnifyingGlassIcon className="h-5 w-5" />
-                      <span>Αναζήτηση</span>
-                    </>
-                  )}
+                  <MagnifyingGlassIcon className="h-5 w-5" />
+                  <span>Αναζήτηση</span>
                 </button>
               </div>
             </div>

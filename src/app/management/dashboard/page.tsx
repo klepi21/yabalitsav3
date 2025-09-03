@@ -17,6 +17,13 @@ export default function DashboardPage() {
   const [isVenueInfoExpanded, setIsVenueInfoExpanded] = useState(false);
   const [showQuickBooking, setShowQuickBooking] = useState(false);
   const [isCreatingBooking, setIsCreatingBooking] = useState(false);
+  const [showStatusConfirm, setShowStatusConfirm] = useState(false);
+  const [statusChangeData, setStatusChangeData] = useState<{
+    bookingId: string;
+    newStatus: 'confirmed' | 'pending' | 'completed' | 'cancelled';
+    oldStatus: string;
+    userName: string;
+  } | null>(null);
   const [quickBookingData, setQuickBookingData] = useState({
     userName: '',
     userPhone: '',
@@ -42,15 +49,54 @@ export default function DashboardPage() {
     }
   }, [venueOwner?.venueId]);
 
-  // Reload data every 30 seconds to keep it fresh
+  // Smart refresh: 5 minutes when active, pause when inactive
   useEffect(() => {
-    const interval = setInterval(() => {
-      if (venueOwner?.venueId) {
-        loadDashboardData();
-      }
-    }, 30000); // 30 seconds
+    let interval: NodeJS.Timeout;
+    let isActive = true;
 
-    return () => clearInterval(interval);
+    const startRefresh = () => {
+      interval = setInterval(() => {
+        if (venueOwner?.venueId && isActive) {
+          loadDashboardData();
+        }
+      }, 300000); // 5 minutes
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        isActive = false;
+        if (interval) clearInterval(interval);
+      } else {
+        isActive = true;
+        startRefresh();
+      }
+    };
+
+    const handleUserActivity = () => {
+      if (!isActive) {
+        isActive = true;
+        startRefresh();
+      }
+    };
+
+    // Start refresh when component mounts
+    startRefresh();
+
+    // Pause refresh when tab is hidden
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    // Resume refresh on user activity
+    document.addEventListener('mousemove', handleUserActivity);
+    document.addEventListener('keydown', handleUserActivity);
+    document.addEventListener('click', handleUserActivity);
+
+    return () => {
+      if (interval) clearInterval(interval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener('mousemove', handleUserActivity);
+      document.removeEventListener('keydown', handleUserActivity);
+      document.removeEventListener('click', handleUserActivity);
+    };
   }, [venueOwner?.venueId]);
 
   // Prevent infinite loading by adding a loading state
@@ -73,12 +119,12 @@ export default function DashboardPage() {
 
     const loadDashboardData = async () => {
     if (!venueOwner?.venueId) {
-      console.log('No venue ID found in venue owner:', venueOwner);
+      // No venue ID found in venue owner
       return;
     }
 
     if (isLoading) {
-      console.log('Already loading data, skipping...');
+      // Already loading data, skipping
       return;
     }
 
@@ -86,8 +132,7 @@ export default function DashboardPage() {
     setLoadError(null);
 
     try {
-      console.log('Loading data for venue:', venueOwner.venueId);
-      console.log('Venue owner data:', venueOwner);
+      // Loading data for venue
       
       const [bookingsData, pitchesData, venueData] = await Promise.all([
         bookingService.getByVenue(venueOwner.venueId),
@@ -95,11 +140,7 @@ export default function DashboardPage() {
         venueService.getById(venueOwner.venueId)
       ]);
 
-      console.log('Loaded bookings:', bookingsData);
-      console.log('Loaded pitches:', pitchesData);
-      console.log('Loaded venue:', venueData);
-      console.log('Venue data type:', typeof venueData);
-      console.log('Venue data keys:', venueData ? Object.keys(venueData) : 'null');
+              // Data loaded successfully
       
       setBookings(bookingsData);
       setPitches(pitchesData);
@@ -107,8 +148,7 @@ export default function DashboardPage() {
       
       // If venue data is null but we have a venueId, log an error
       if (!venueData && venueOwner.venueId) {
-        console.error('❌ Venue data is null but venueId exists:', venueOwner.venueId);
-        console.error('This suggests the venue document does not exist in the database');
+        // Venue data is null but venueId exists - venue document may not exist
         setLoadError('Venue data not found. Please contact support.');
       }
     } catch (error) {
@@ -123,8 +163,7 @@ export default function DashboardPage() {
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
     
-    console.log('Calculating monthly revenue...');
-    console.log('All bookings:', bookings);
+            // Calculating monthly revenue
     
     const monthlyBookings = bookings.filter(booking => {
       const bookingDate = new Date(booking.startTime);
@@ -132,15 +171,7 @@ export default function DashboardPage() {
       const isThisYear = bookingDate.getFullYear() === currentYear;
       const isCompleted = booking.status === 'completed';
       
-      console.log('Booking:', {
-        id: booking.id,
-        date: bookingDate,
-        status: booking.status,
-        price: booking.price,
-        isThisMonth,
-        isThisYear,
-        isCompleted
-      });
+      // Processing booking for revenue calculation
       
       return isThisMonth && isThisYear && isCompleted;
     });
@@ -194,10 +225,10 @@ export default function DashboardPage() {
     const dayName = dayNames[dayOfWeek];
     
     const daySchedule = pitch.defaultOpeningHours[dayName];
-    console.log('Day schedule:', daySchedule);
+    // Day schedule loaded
     
     if (!daySchedule || !daySchedule.isOpen) {
-      console.log('No opening hours for this day');
+      // No opening hours for this day
       return [];
     }
 
@@ -206,8 +237,8 @@ export default function DashboardPage() {
     
     if ('slots' in daySchedule && daySchedule.slots && daySchedule.slots.length > 0) {
       // New structure with slots array
-      daySchedule.slots.forEach((openingSlot: { start: string; end: string }) => {
-        console.log('Processing slot:', openingSlot);
+              daySchedule.slots.forEach((openingSlot: { start: string; end: string }) => {
+          // Processing time slot
         const startTime = new Date(`2000-01-01T${openingSlot.start}`);
         const endTime = new Date(`2000-01-01T${openingSlot.end}`);
         
@@ -264,13 +295,11 @@ export default function DashboardPage() {
         const bookingStart = new Date(booking.startTime);
         const bookingEnd = new Date(booking.endTime);
         const slotString = `${bookingStart.toTimeString().slice(0, 5)} - ${bookingEnd.toTimeString().slice(0, 5)}`;
-        console.log(`Dashboard: Booking ${booking.id}: ${booking.userName} at ${slotString} (status: ${booking.status})`);
+        // Dashboard booking information
         return slotString;
       });
 
-    console.log('Dashboard - All slots:', slots.map(s => s.time));
-    console.log('Dashboard - Booked slots:', bookedSlots);
-    console.log('Dashboard - Available slots:', slots.filter(slot => !bookedSlots.includes(slot.time)));
+            // Dashboard slot information
 
     const availableSlots = slots.filter(slot => !bookedSlots.includes(slot.time));
     return availableSlots;
@@ -331,6 +360,36 @@ export default function DashboardPage() {
       console.error('Error creating booking:', error);
     } finally {
       setIsCreatingBooking(false);
+    }
+  };
+
+  const handleStatusChange = (bookingId: string, newStatus: 'confirmed' | 'pending' | 'completed' | 'cancelled', oldStatus: string, userName: string) => {
+    setStatusChangeData({
+      bookingId,
+      newStatus,
+      oldStatus,
+      userName
+    });
+    setShowStatusConfirm(true);
+  };
+
+  const confirmStatusChange = async () => {
+    if (!statusChangeData) return;
+    
+    try {
+      await bookingService.update(statusChangeData.bookingId, {
+        status: statusChangeData.newStatus,
+        updatedAt: new Date()
+      });
+      
+      // Reload data to reflect changes
+      await loadDashboardData();
+      
+      // Close confirmation dialog
+      setShowStatusConfirm(false);
+      setStatusChangeData(null);
+    } catch (error) {
+      console.error('Error updating booking status:', error);
     }
   };
 
@@ -500,16 +559,33 @@ export default function DashboardPage() {
                             <h4 className="text-sm font-medium text-gray-900">
                               {booking.userName || booking.userEmail || 'Άγνωστος Πελάτης'}
                             </h4>
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                              booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                              booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                              booking.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                              'bg-red-100 text-red-800'
-                            }`}>
-                              {booking.status === 'confirmed' ? 'Επιβεβαιωμένη' :
-                               booking.status === 'pending' ? 'Εκκρεμεί' :
-                               booking.status === 'completed' ? 'Ολοκληρωμένη' : 'Ακυρωμένη'}
-                            </span>
+                            <div className="flex items-center space-x-2">
+                              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                                booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                booking.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                                'bg-red-100 text-red-800'
+                              }`}>
+                                {booking.status === 'confirmed' ? 'Επιβεβαιωμένη' :
+                                 booking.status === 'pending' ? 'Εκκρεμεί' :
+                                 booking.status === 'completed' ? 'Ολοκληρωμένη' : 'Ακυρωμένη'}
+                              </span>
+                              <select
+                                value={booking.status}
+                                onChange={(e) => handleStatusChange(
+                                  booking.id,
+                                  e.target.value as 'confirmed' | 'pending' | 'completed' | 'cancelled',
+                                  booking.status,
+                                  booking.userName || 'Άγνωστος'
+                                )}
+                                className="text-xs border border-gray-300 rounded px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-football-green"
+                              >
+                                <option value="pending">Εκκρεμεί</option>
+                                <option value="confirmed">Επιβεβαιωμένη</option>
+                                <option value="completed">Ολοκληρωμένη</option>
+                                <option value="cancelled">Ακυρωμένη</option>
+                              </select>
+                            </div>
                           </div>
                           <div className="flex items-center space-x-4 text-sm text-gray-500">
                             <span>
@@ -860,6 +936,68 @@ export default function DashboardPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Status Change Confirmation Modal */}
+      {showStatusConfirm && statusChangeData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+            <div className="text-center mb-6">
+              <div className="text-4xl mb-4">⚠️</div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Επιβεβαίωση Αλλαγής Κατάστασης</h2>
+              <p className="text-gray-600">
+                Είστε σίγουροι ότι θέλετε να αλλάξετε την κατάσταση της κράτησης για τον{' '}
+                <span className="font-semibold">{statusChangeData.userName}</span>;
+              </p>
+              <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-700">
+                  <span className="font-medium">Από:</span>{' '}
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    statusChangeData.oldStatus === 'confirmed' ? 'bg-green-100 text-green-800' :
+                    statusChangeData.oldStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    statusChangeData.oldStatus === 'completed' ? 'bg-blue-100 text-blue-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {statusChangeData.oldStatus === 'confirmed' ? 'Επιβεβαιωμένη' :
+                     statusChangeData.oldStatus === 'pending' ? 'Εκκρεμεί' :
+                     statusChangeData.oldStatus === 'completed' ? 'Ολοκληρωμένη' : 'Ακυρωμένη'}
+                  </span>
+                </p>
+                <p className="text-sm text-gray-700 mt-2">
+                  <span className="font-medium">Σε:</span>{' '}
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    statusChangeData.newStatus === 'confirmed' ? 'bg-green-100 text-green-800' :
+                    statusChangeData.newStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    statusChangeData.newStatus === 'completed' ? 'bg-blue-100 text-blue-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {statusChangeData.newStatus === 'confirmed' ? 'Επιβεβαιωμένη' :
+                     statusChangeData.newStatus === 'pending' ? 'Εκκρεμεί' :
+                     statusChangeData.newStatus === 'completed' ? 'Ολοκληρωμένη' : 'Ακυρωμένη'}
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => {
+                  setShowStatusConfirm(false);
+                  setStatusChangeData(null);
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
+              >
+                Ακύρωση
+              </button>
+              <button
+                onClick={confirmStatusChange}
+                className="flex-1 px-4 py-2 border border-transparent text-sm font-medium rounded-lg text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
+              >
+                Επιβεβαίωση
+              </button>
+            </div>
           </div>
         </div>
       )}

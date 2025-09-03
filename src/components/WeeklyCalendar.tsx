@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon, ClockIcon, TrashIcon } from '@heroicons/react/24/outline';
-import { Booking, BlockedDate } from '@/types';
+import { Booking, Pitch, BlockedDate } from '@/types';
 
 interface WeeklyCalendarProps {
   bookings: Booking[];

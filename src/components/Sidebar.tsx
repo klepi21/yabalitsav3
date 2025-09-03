@@ -15,7 +15,6 @@ const navigation = [
   { name: 'Κρατήσεις', href: '/management/bookings', emoji: '📅' },
   { name: 'Πελάτες', href: '/management/customers', emoji: '👥' },
   { name: 'Αναφορές', href: '/management/reports', emoji: '📈' },
-  { name: 'Οδηγίες', href: '/management/guides', emoji: '📘' },
   { name: 'Ρυθμίσεις', href: '/management/settings', emoji: '⚙️' },
 ];
 
