@@ -298,7 +298,8 @@ export default function RootPage() {
           <div className={`absolute transition-all duration-700 ease-in-out ${
             !hasSearched ? 'top-4 right-4' : 'top-0 right-4'
           } flex items-center space-x-4`}>
-            <a href="/for-venues" className="text-black hover:text-gray-700 font-medium text-sm transition-colors">
+            <a href="/for-venues" className="text-black hover:text-gray-700 font-medium text-sm transition-colors relative group flex items-center">
+              <span className="mr-2 text-gray-800 animate-bounce text-2xl font-bold">➜</span>
               Έχεις γηπεδάκια?
             </a>
             <a href="/management" className="text-black hover:text-gray-700 font-medium text-sm transition-colors">
