@@ -13,6 +13,14 @@ interface SearchResult {
   price: number;
 }
 
+interface SmartSuggestion {
+  date: string; // YYYY-MM-DD
+  time: string; // HH:mm
+  venue: Venue;
+  pitch: Pitch;
+  price: number;
+}
+
 export default function RootPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState({
@@ -28,6 +36,23 @@ export default function RootPage() {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [pitches, setPitches] = useState<Pitch[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [suggestions, setSuggestions] = useState<SmartSuggestion[]>([]);
+
+  // Format date to Greek format (e.g., "Τετάρτη 15 Σεπτεμβρίου")
+  const formatGreekDate = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    const dayNames = ['Κυριακή', 'Δευτέρα', 'Τρίτη', 'Τετάρτη', 'Πέμπτη', 'Παρασκευή', 'Σάββατο'];
+    const monthNames = [
+      'Ιανουαρίου', 'Φεβρουαρίου', 'Μαρτίου', 'Απριλίου', 'Μαΐου', 'Ιουνίου',
+      'Ιουλίου', 'Αυγούστου', 'Σεπτεμβρίου', 'Οκτωβρίου', 'Νοεμβρίου', 'Δεκεμβρίου'
+    ];
+    
+    const dayName = dayNames[date.getDay()];
+    const day = date.getDate();
+    const month = monthNames[date.getMonth()];
+    
+    return `${dayName} ${day} ${month}`;
+  };
 
   // Load all data on component mount
   useEffect(() => {
@@ -105,11 +130,79 @@ export default function RootPage() {
       // Sort by price (lowest first)
       results.sort((a, b) => a.price - b.price);
       setSearchResults(results);
+
+      // If no exact results, generate smart suggestions
+      if (results.length === 0) {
+        const alt = await generateSmartSuggestions(
+          searchQuery.pitchType,
+          searchQuery.city,
+          new Date(searchQuery.date),
+          searchQuery.time
+        );
+        setSuggestions(alt);
+      } else {
+        setSuggestions([]);
+      }
     } catch (error) {
       console.error('Search error:', error);
     } finally {
       setIsSearching(false);
     }
+  };
+
+  // Suggest next available days and nearby times for same pitch type in the selected city
+  const generateSmartSuggestions = async (
+    pitchType: string,
+    city: string,
+    selectedDate: Date,
+    selectedTime: string
+  ): Promise<SmartSuggestion[]> => {
+    const results: SmartSuggestion[] = [];
+
+    // Filter pitches of the requested type and city
+    const candidatePitches = pitches.filter(p => {
+      const v = venues.find(vn => vn.id === p.venueId);
+      if (!v) return false;
+      if (city && v.city !== city) return false;
+      return p.type === pitchType;
+    });
+
+    // Build time candidates: same time, ±2h (within 08:00-23:00)
+    const [h, m] = selectedTime.split(':').map(Number);
+    const timeCandidates: string[] = [];
+    const pushTime = (hour: number) => {
+      if (hour >= 8 && hour <= 23) timeCandidates.push(`${hour.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
+    };
+    pushTime(h);
+    pushTime(h - 2);
+    pushTime(h - 1);
+    pushTime(h + 1);
+    pushTime(h + 2);
+
+    // Search next 7 days
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(selectedDate);
+      date.setDate(selectedDate.getDate() + d);
+      const dateStr = date.toISOString().split('T')[0];
+
+      for (const pitch of candidatePitches) {
+        const venue = venues.find(v => v.id === pitch.venueId);
+        if (!venue) continue;
+
+        // Check each time candidate and only add if available
+        for (const time of timeCandidates) {
+          const ok = await checkPitchAvailability(pitch, date, time);
+          if (ok) {
+            results.push({ date: dateStr, time, venue, pitch, price: pitch.pricePerSlot });
+          }
+        }
+        
+        // Stop after we find some suggestions per day to avoid flooding
+        if (results.length >= 15) return results;
+      }
+    }
+
+    return results;
   };
 
   const checkPitchAvailability = async (pitch: Pitch, date: Date, time: string): Promise<boolean> => {
@@ -415,22 +508,74 @@ export default function RootPage() {
         {/* No Results */}
         {hasSearched && !isSearching && searchResults.length === 0 && (
           <div className="max-w-5xl mx-auto px-4 pb-20">
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-8 mb-8 hover:bg-white transition-all duration-300">
-              <div className="text-6xl mb-4">😔</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Δεν βρέθηκαν διαθέσιμα γήπεδα</h3>
-              <p className="text-gray-600 mb-4">
-                Δοκίμασε διαφορετική ημερομηνία, ώρα ή τύπο γηπέδου
-              </p>
-              <button
-                onClick={() => {
-                  setSearchQuery({ date: '', pitchType: '', time: '', city: '' });
-                  setSearchResults([]);
-                }}
-                className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
-              >
-                Νέα Αναζήτηση
-              </button>
-            </div>
+            {suggestions.length > 0 ? (
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                {/* No results card - small compact box */}
+                <div className="lg:col-span-1">
+                  <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-6 hover:bg-white transition-all duration-300 h-fit">
+                    <div className="text-4xl mb-3">😔</div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Δεν βρέθηκαν διαθέσιμα γήπεδα</h3>
+                    <p className="text-sm text-gray-600 mb-4">Δοκίμασε διαφορετική ημερομηνία, ώρα ή τύπο γηπέδου</p>
+
+                  </div>
+                </div>
+
+                {/* Suggestions card - takes more space */}
+                <div className="lg:col-span-3 bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-green-100 p-6">
+                  <h4 className="text-xl font-semibold text-gray-900 mb-4">Διαθέσιμες εναλλακτικές</h4>
+                  <p className="text-sm text-gray-600 mb-6">Παρόμοιες ώρες και επόμενες ημέρες για {searchQuery.pitchType}{searchQuery.city ? ` στην ${searchQuery.city}` : ''}</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {suggestions.map((sug, idx) => (
+                      <div key={`${sug.pitch.id}-${sug.date}-${sug.time}-${idx}`} className="bg-gradient-to-br from-green-50 to-white border border-green-200 rounded-xl p-4 hover:shadow-lg hover:border-green-300 transition-all duration-300">
+                        <div className="flex flex-col h-full">
+                          <div className="flex-1">
+                            <div className="font-bold text-gray-900 text-lg mb-1">{sug.venue.name}</div>
+                            <div className="text-xs text-gray-600 mb-2">{sug.venue.address}</div>
+                            <div className="text-xs text-gray-700 font-medium mb-3">{sug.pitch.name} • {sug.pitch.type}</div>
+                            
+                            <div className="bg-green-100 rounded-lg p-3 mb-3">
+                              <div className="text-center">
+                                <div className="text-xs text-gray-600 mb-1">Ημερομηνία</div>
+                                <div className="font-bold text-green-800">{formatGreekDate(sug.date)}</div>
+                                <div className="text-2xl font-bold text-green-700 mt-1">{sug.time}</div>
+                              </div>
+                            </div>
+                            
+                            <div className="text-center">
+                              <div className="text-2xl font-bold text-green-700">€{sug.price}</div>
+                            </div>
+                          </div>
+                          
+                          <div className="mt-4">
+                            <button 
+                              onClick={() => handleBookNow(sug.venue.id, sug.pitch.id, sug.time)} 
+                              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors shadow-sm hover:shadow-md"
+                            >
+                              Επιλογή
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-100 p-8 mb-8 hover:bg-white transition-all duration-300">
+                <div className="text-6xl mb-4">😔</div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">Δεν βρέθηκαν διαθέσιμα γήπεδα</h3>
+                <p className="text-gray-600 mb-4">Δοκίμασε διαφορετική ημερομηνία, ώρα ή τύπο γηπέδου</p>
+                <button
+                  onClick={() => {
+                    setSearchQuery({ date: '', pitchType: '', time: '', city: '' });
+                    setSearchResults([]);
+                  }}
+                  className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                >
+                  Νέα Αναζήτηση
+                </button>
+              </div>
+            )}
           </div>
         )}
 
