@@ -581,7 +581,7 @@ export default function DashboardPage() {
                                 className="text-xs border border-gray-300 rounded px-2 py-1 bg-white focus:outline-none focus:ring-1 focus:ring-football-green"
                               >
                                 <option value="pending">Εκκρεμεί</option>
-                                <option value="confirmed">Επιβεβαιωμένη</option>
+                                <option value="confirmed">Επιβεβαιωμένη</option> 
                                 <option value="completed">Ολοκληρωμένη</option>
                                 <option value="cancelled">Ακυρωμένη</option>
                               </select>
