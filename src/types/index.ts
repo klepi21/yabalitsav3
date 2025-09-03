@@ -150,6 +150,9 @@ export interface Payment {
   amount: number; // float (euros, not cents)
   currency: string; // e.g., "eur"
   paymentDate: string; // ISO string
+  paymentIntentId: string; // Stripe PaymentIntent ID
   subscriptionId: string; // reference to yabalitsa_subscriptions document ID (venueId)
-  status: 'succeeded' | 'failed';
+  planName?: 'Basic' | 'Pro' | 'Enterprise';
+  durationMonths?: number;
+  status: 'requires_payment_method' | 'requires_confirmation' | 'requires_action' | 'processing' | 'requires_capture' | 'canceled' | 'succeeded' | 'failed';
 }

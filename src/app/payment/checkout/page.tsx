@@ -49,7 +49,18 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
         setPaymentStatus('failed');
       } else if (paymentIntent.status === 'succeeded') {
         setPaymentStatus('succeeded');
-        
+
+        // Finalize on server to ensure subscription creation (backup to webhook)
+        try {
+          await fetch('/api/stripe/finalize-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paymentIntentId: paymentIntent.id }),
+          });
+        } catch (finalizeErr) {
+          console.error('Finalize payment call failed:', finalizeErr);
+        }
+
         // Redirect to success page after a short delay
         setTimeout(() => {
           router.push('/management/settings/renewal/success');
