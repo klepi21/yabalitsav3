@@ -13,6 +13,9 @@ const firebaseConfig = {
   measurementId: "G-GWX4K2ZM6J"
 };
 
+// reCAPTCHA site key for Phone Authentication
+export const RECAPTCHA_SITE_KEY = "6Le31rwrAAAAAD-LDr2AUYdmJBBa6SMSYB2jS5UA";
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 

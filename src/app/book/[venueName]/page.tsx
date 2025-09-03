@@ -5,7 +5,7 @@ import { use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, MapPin, Phone, Mail, Calendar, Clock, Users, Star, ArrowLeft, X, RotateCcw } from "lucide-react";
 import { RecaptchaVerifier, signInWithPhoneNumber, PhoneAuthProvider, signInWithCredential } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { auth, RECAPTCHA_SITE_KEY } from '@/lib/firebase';
 
 interface Booking {
   id: string;
@@ -257,37 +257,117 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
     loadVenueData();
   }, [venueName]);
 
-  // Initialize reCAPTCHA
-  useEffect(() => {
-    if (typeof window !== 'undefined' && !recaptchaVerifier) {
-      try {
-        // Create invisible reCAPTCHA verifier
-        const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'size': 'invisible',
-          'callback': () => {
-            console.log('reCAPTCHA solved successfully');
-          },
-          'expired-callback': () => {
-            console.log('reCAPTCHA expired, resetting...');
-            setRecaptchaVerifier(null);
+          // Initialize reCAPTCHA when SMS popup is shown
+    useEffect(() => {
+      let verifier: RecaptchaVerifier | null = null;
+      
+      if (!showSmsValidation || recaptchaVerifier) return;
+      
+      const initRecaptcha = async () => {
+        try {
+          console.log('Initializing reCAPTCHA...');
+          console.log('Auth object:', auth);
+          console.log('Auth config:', auth.config);
+          
+          // Wait for the popup to render and container to exist
+          await new Promise(resolve => setTimeout(resolve, 300));
+          
+          // Check if container exists
+          const container = document.getElementById('recaptcha-container');
+          if (!container) {
+            console.error('reCAPTCHA container not found');
+            return;
           }
-        });
-        
-        // Render the reCAPTCHA
-        verifier.render().then(() => {
-          console.log('reCAPTCHA rendered successfully');
-          setRecaptchaVerifier(verifier);
-        }).catch((error) => {
-          console.error('reCAPTCHA render error:', error);
+          
+          // Check if auth is properly initialized
+          if (!auth || !auth.config) {
+            console.error('Firebase auth not properly initialized');
+            return;
+          }
+          
+          // Check if we're in the right environment
+          console.log('Current domain:', window.location.hostname);
+          console.log('Expected auth domain:', auth.config.authDomain);
+          
+          if (window.location.hostname !== 'localhost' && 
+              auth.config.authDomain && 
+              window.location.hostname !== auth.config.authDomain.replace('.firebaseapp.com', '')) {
+            console.warn('Domain mismatch - this might cause reCAPTCHA issues');
+          }
+          
+          // Create normal reCAPTCHA verifier with site key (more reliable than invisible)
+          try {
+            verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+              'sitekey': RECAPTCHA_SITE_KEY,
+              'size': 'normal',
+              'callback': () => {
+                console.log('reCAPTCHA solved successfully');
+              },
+              'expired-callback': () => {
+                console.log('reCAPTCHA expired, resetting...');
+                setRecaptchaVerifier(null);
+              }
+            });
+            
+            // Render the reCAPTCHA
+            await verifier.render();
+            console.log('reCAPTCHA rendered successfully');
+            setRecaptchaVerifier(verifier);
+            
+          } catch (recaptchaError) {
+            console.error('Error creating reCAPTCHA verifier:', recaptchaError);
+            
+            // Try fallback approach with minimal config
+            try {
+              console.log('Trying fallback reCAPTCHA...');
+              verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                'sitekey': RECAPTCHA_SITE_KEY
+              });
+              
+              await verifier.render();
+              console.log('Fallback reCAPTCHA rendered successfully');
+              setRecaptchaVerifier(verifier);
+              
+            } catch (fallbackError) {
+              console.error('Fallback reCAPTCHA also failed:', fallbackError);
+              
+              // Last resort - try with just the container ID
+              try {
+                console.log('Trying last resort reCAPTCHA...');
+                verifier = new RecaptchaVerifier(auth, 'recaptcha-container');
+                
+                await verifier.render();
+                console.log('Last resort reCAPTCHA rendered successfully');
+                setRecaptchaVerifier(verifier);
+                
+              } catch (lastResortError) {
+                console.error('All reCAPTCHA attempts failed:', lastResortError);
+                throw lastResortError;
+              }
+            }
+          }
+          
+        } catch (error) {
+          console.error('reCAPTCHA initialization error:', error);
           setRecaptchaVerifier(null);
-        });
-        
-      } catch (error) {
-        console.error('reCAPTCHA initialization error:', error);
-        setRecaptchaVerifier(null);
-      }
-    }
-  }, [recaptchaVerifier]);
+        }
+      };
+      
+      // Initialize reCAPTCHA
+      initRecaptcha();
+      
+      // Cleanup function
+      return () => {
+        if (verifier) {
+          try {
+            verifier.clear();
+            console.log('reCAPTCHA cleaned up');
+          } catch (error) {
+            console.error('Error cleaning up reCAPTCHA:', error);
+          }
+        }
+      };
+    }, [showSmsValidation]); // Only run when SMS popup is shown
 
   const generateWeekSchedule = (): DaySchedule[] => {
     if (!selectedPitch) return [];
@@ -418,6 +498,19 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
     setCurrentStep(step);
   };
 
+  // Manual reCAPTCHA reset
+  const resetRecaptcha = () => {
+    if (recaptchaVerifier) {
+      try {
+        recaptchaVerifier.clear();
+        console.log('reCAPTCHA manually cleared');
+      } catch (error) {
+        console.error('Error clearing reCAPTCHA:', error);
+      }
+    }
+    setRecaptchaVerifier(null);
+  };
+
 
 
   // Countdown timer for resend
@@ -439,6 +532,10 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
   // Send SMS verification
   const sendSmsVerification = async () => {
+    console.log('sendSmsVerification called');
+    console.log('recaptchaVerifier:', recaptchaVerifier);
+    console.log('formData.phone:', formData.phone);
+    
     if (!recaptchaVerifier) {
       alert('Παρακαλώ περιμένετε να φορτώσει το reCAPTCHA ή δοκιμάστε ξανά.');
       return;
@@ -454,9 +551,13 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       
       // Format phone number for international format
       const formattedPhone = formData.phone.startsWith('+') ? formData.phone : `+30${formData.phone}`;
+      console.log('Formatted phone:', formattedPhone);
       
       // Use the reCAPTCHA verifier
+      console.log('Calling signInWithPhoneNumber...');
       const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifier);
+      console.log('SMS sent successfully, confirmationResult:', confirmationResult);
+      
       setVerificationId(confirmationResult.verificationId);
       
       // Start countdown (1 minute)
@@ -466,6 +567,8 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       console.log('SMS sent successfully');
     } catch (error: any) {
       console.error('Error sending SMS:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
       
       // Handle specific Firebase errors
       if (error.code === 'auth/invalid-phone-number') {
@@ -474,11 +577,18 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         alert('Πάρα πολλές αιτήσεις. Παρακαλώ περιμένετε λίγο πριν δοκιμάσετε ξανά.');
       } else if (error.code === 'auth/quota-exceeded') {
         alert('Υπέρβαση ορίου SMS. Παρακαλώ δοκιμάστε αργότερα.');
+      } else if (error.code === 'auth/invalid-app-credential') {
+        alert('Το reCAPTCHA δεν είναι έγκυρο. Παρακαλώ ελέγξτε τη σύνδεση σας και δοκιμάστε ξανά.');
+        console.error('reCAPTCHA credential issue - this usually means domain mismatch or site key problem');
+        setRecaptchaVerifier(null);
       } else if (error.code === 'auth/recaptcha-token-expired') {
         alert('Το reCAPTCHA έληξε. Παρακαλώ δοκιμάστε ξανά.');
         setRecaptchaVerifier(null);
+      } else if (error.code === 'auth/recaptcha-not-rendered') {
+        alert('Το reCAPTCHA δεν φορτώθηκε σωστά. Παρακαλώ ανανεώστε τη σελίδα.');
+        setRecaptchaVerifier(null);
       } else {
-        alert('Σφάλμα στην αποστολή SMS. Παρακαλώ δοκιμάστε ξανά.');
+        alert(`Σφάλμα στην αποστολή SMS: ${error.code || error.message}. Παρακαλώ δοκιμάστε ξανά.`);
       }
     } finally {
       setIsSendingSms(false);
@@ -503,6 +613,16 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       setSmsCode('');
       setVerificationId('');
       
+      // Reset reCAPTCHA when closing popup
+      if (recaptchaVerifier) {
+        try {
+          recaptchaVerifier.clear();
+        } catch (error) {
+          console.error('Error clearing reCAPTCHA:', error);
+        }
+      }
+      setRecaptchaVerifier(null);
+      
       // Show success message
       alert('Η κράτηση ολοκληρώθηκε επιτυχώς!');
       
@@ -521,9 +641,8 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
     try {
       const { bookingService } = await import('@/lib/firebase-services');
       
-      // Parse the selected time to get start time
-      const [slotTime] = selectedTimeSlot.time.split(' - ');
-      const [hours, minutes] = slotTime.split(':').map(Number);
+      // Parse the selected time to get start time (format is "HH:00")
+      const [hours, minutes] = selectedTimeSlot.time.split(':').map(Number);
       const startDateTime = new Date(selectedDate);
       startDateTime.setHours(hours, minutes, 0, 0);
       
@@ -1012,7 +1131,18 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900">Επιβεβαίωση Τηλεφώνου</h3>
               <button
-                onClick={() => setShowSmsValidation(false)}
+                onClick={() => {
+                  setShowSmsValidation(false);
+                  // Reset reCAPTCHA when closing popup
+                  if (recaptchaVerifier) {
+                    try {
+                      recaptchaVerifier.clear();
+                    } catch (error) {
+                      console.error('Error clearing reCAPTCHA:', error);
+                    }
+                  }
+                  setRecaptchaVerifier(null);
+                }}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <X className="w-5 h-5 text-gray-500" />
@@ -1034,13 +1164,38 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-600 mx-auto mb-2"></div>
                 <p className="text-sm text-gray-600">Φόρτωση reCAPTCHA...</p>
                 <button
-                  onClick={() => setRecaptchaVerifier(null)}
+                  onClick={resetRecaptcha}
                   className="mt-2 text-sm text-emerald-600 hover:text-emerald-700 underline"
                 >
                   Δοκιμή ξανά
                 </button>
+                <p className="text-xs text-gray-500 mt-2">
+                  Αν δεν φορτώνει, ελέγξτε τη σύνδεση σας
+                </p>
+                <p className="text-xs text-red-500 mt-1">
+                  Site Key: {RECAPTCHA_SITE_KEY.substring(0, 10)}...
+                </p>
               </div>
             )}
+            
+            {/* Debug Info */}
+            <div className="text-xs text-gray-400 mb-4 p-2 bg-gray-100 rounded">
+              <p>Debug: reCAPTCHA Status</p>
+              <p>Verifier: {recaptchaVerifier ? '✅ Loaded' : '❌ Not Loaded'}</p>
+              <p>Container: {typeof document !== 'undefined' && document.getElementById('recaptcha-container') ? '✅ Found' : '❌ Not Found'}</p>
+              <p>Site Key: {RECAPTCHA_SITE_KEY.substring(0, 20)}...</p>
+              <p>Auth Domain: {auth.config.authDomain}</p>
+              <p>Current Domain: {typeof window !== 'undefined' ? window.location.hostname : 'N/A'}</p>
+              <p>Project ID: yabalitsa-6f5e8</p>
+            </div>
+            
+            {/* Help Text */}
+            <div className="text-xs text-blue-600 mb-4 p-2 bg-blue-50 rounded">
+              <p className="font-medium">ℹ️ Αν το reCAPTCHA δεν δουλεύει:</p>
+              <p>1. Ελέγξτε ότι το site key ανήκει στο project: yabalitsa-6f5e8</p>
+              <p>2. Επιβεβαιώστε ότι το domain σας είναι authorized στο reCAPTCHA</p>
+              <p>3. Ελέγξτε ότι το Phone Authentication είναι enabled στο Firebase</p>
+            </div>
 
             
 
