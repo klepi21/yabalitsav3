@@ -70,7 +70,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
   const [pitches, setPitches] = useState<Pitch[]>([]);
   const [selectedPitch, setSelectedPitch] = useState<Pitch | null>(null);
   const [currentStep, setCurrentStep] = useState<'pitch' | 'date' | 'slots' | 'confirmation'>('pitch');
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<{ date: string; time: string } | null>(null);
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [existingBookings, setExistingBookings] = useState<Booking[]>([]);
@@ -90,6 +90,17 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
   const [countdown, setCountdown] = useState(0);
   const [canResend, setCanResend] = useState(false);
   const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
+  
+  // Success popup state
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [successBookingData, setSuccessBookingData] = useState<{
+    userName: string;
+    userPhone: string;
+    pitchName: string;
+    date: string;
+    time: string;
+    price: number;
+  } | null>(null);
 
   // Load real data from Firebase
   useEffect(() => {
@@ -265,94 +276,66 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       
       const initRecaptcha = async () => {
         try {
-          console.log('Initializing reCAPTCHA...');
-          console.log('Auth object:', auth);
-          console.log('Auth config:', auth.config);
-          
           // Wait for the popup to render and container to exist
           await new Promise(resolve => setTimeout(resolve, 300));
           
           // Check if container exists
           const container = document.getElementById('recaptcha-container');
           if (!container) {
-            console.error('reCAPTCHA container not found');
             return;
           }
           
           // Check if auth is properly initialized
           if (!auth || !auth.config) {
-            console.error('Firebase auth not properly initialized');
             return;
           }
           
-          // Check if we're in the right environment
-          console.log('Current domain:', window.location.hostname);
-          console.log('Expected auth domain:', auth.config.authDomain);
-          
-          if (window.location.hostname !== 'localhost' && 
-              auth.config.authDomain && 
-              window.location.hostname !== auth.config.authDomain.replace('.firebaseapp.com', '')) {
-            console.warn('Domain mismatch - this might cause reCAPTCHA issues');
-          }
-          
-          // Create reCAPTCHA v2 verifier with explicit version
-          try {
-            verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-              'sitekey': RECAPTCHA_SITE_KEY,
-              'version': 'v2',
-              'size': 'normal',
-              'callback': () => {
-                console.log('reCAPTCHA v2 solved successfully');
-              },
-              'expired-callback': () => {
-                console.log('reCAPTCHA v2 expired, resetting...');
-                setRecaptchaVerifier(null);
-              }
-            });
-            
-            // Render the reCAPTCHA
-            await verifier.render();
-            console.log('reCAPTCHA rendered successfully');
-            setRecaptchaVerifier(verifier);
-            
-          } catch (recaptchaError) {
-            console.error('Error creating reCAPTCHA verifier:', recaptchaError);
-            
-            // Try fallback approach with explicit v2
+                      // Create reCAPTCHA v2 verifier with explicit version
             try {
-              console.log('Trying fallback reCAPTCHA v2...');
               verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
                 'sitekey': RECAPTCHA_SITE_KEY,
-                'version': 'v2'
+                'version': 'v2',
+                'size': 'normal',
+                'callback': () => {
+                  // reCAPTCHA solved successfully
+                },
+                'expired-callback': () => {
+                  setRecaptchaVerifier(null);
+                }
               });
               
+              // Render the reCAPTCHA
               await verifier.render();
-              console.log('Fallback reCAPTCHA rendered successfully');
               setRecaptchaVerifier(verifier);
               
-            } catch (fallbackError) {
-              console.error('Fallback reCAPTCHA also failed:', fallbackError);
-              
-              // Last resort - try with explicit v2
+            } catch (recaptchaError) {
+              // Try fallback approach with explicit v2
               try {
-                console.log('Trying last resort reCAPTCHA v2...');
                 verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                  'sitekey': RECAPTCHA_SITE_KEY,
                   'version': 'v2'
                 });
                 
                 await verifier.render();
-                console.log('Last resort reCAPTCHA rendered successfully');
                 setRecaptchaVerifier(verifier);
                 
-              } catch (lastResortError) {
-                console.error('All reCAPTCHA attempts failed:', lastResortError);
-                throw lastResortError;
+              } catch (fallbackError) {
+                // Last resort - try with explicit v2
+                try {
+                  verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                    'version': 'v2'
+                  });
+                  
+                  await verifier.render();
+                  setRecaptchaVerifier(verifier);
+                  
+                } catch (lastResortError) {
+                  throw lastResortError;
+                }
               }
             }
-          }
           
         } catch (error) {
-          console.error('reCAPTCHA initialization error:', error);
           setRecaptchaVerifier(null);
         }
       };
@@ -365,9 +348,8 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         if (verifier) {
           try {
             verifier.clear();
-            console.log('reCAPTCHA cleaned up');
           } catch (error) {
-            console.error('Error cleaning up reCAPTCHA:', error);
+            // Silent cleanup error
           }
         }
       };
@@ -471,8 +453,24 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
     setCurrentStep('date');
   };
 
-  const handleDateSelect = (date: string) => {
-    setSelectedDate(date);
+  const handleDateSelect = (dateStr: string) => {
+    // Convert the Greek date string to a proper Date object
+    const [day, month] = dateStr.split(' ');
+    const monthMap: { [key: string]: number } = {
+      'Ιαν': 0, 'Φεβ': 1, 'Μαρ': 2, 'Απρ': 3, 'Μαϊ': 4, 'Ιουν': 5,
+      'Ιουλ': 6, 'Αυγ': 7, 'Σεπ': 8, 'Οκτ': 9, 'Νοε': 10, 'Δεκ': 11
+    };
+    
+    const monthIndex = monthMap[month];
+    if (monthIndex === undefined) {
+      return;
+    }
+    
+    // Use the current week's year instead of current year
+    const selectedDate = new Date(currentWeek);
+    selectedDate.setDate(currentWeek.getDate() + weekSchedule.findIndex(d => d.date === dateStr));
+    
+    setSelectedDate(selectedDate);
     setCurrentStep('slots');
   };
 
@@ -491,6 +489,12 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
   const handleConfirmBooking = () => {
     if (!formData.firstName || !formData.lastName || !formData.phone || !formData.termsAccepted) {
       alert('Παρακαλώ συμπληρώστε όλα τα υποχρεωτικά πεδία και αποδεχτείτε τους όρους χρήσης.');
+      return;
+    }
+
+    // Validate Greek phone number (should be 10 digits starting with 6)
+    if (!/^6\d{9}$/.test(formData.phone)) {
+      alert('Παρακαλώ εισάγετε έναν έγκυρο ελληνικό αριθμό κινητού (10 ψηφία που ξεκινούν από 6).');
       return;
     }
 
@@ -536,9 +540,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
   // Send SMS verification
   const sendSmsVerification = async () => {
-    console.log('sendSmsVerification called');
-    console.log('recaptchaVerifier:', recaptchaVerifier);
-    console.log('formData.phone:', formData.phone);
+    
     
     if (!recaptchaVerifier) {
       alert('Παρακαλώ περιμένετε να φορτώσει το reCAPTCHA ή δοκιμάστε ξανά.');
@@ -553,27 +555,18 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
     try {
       setIsSendingSms(true);
       
-      // Format phone number for international format
+      // Format phone number for international format - always add +30 for Greek numbers
       const formattedPhone = formData.phone.startsWith('+') ? formData.phone : `+30${formData.phone}`;
-      console.log('Formatted phone:', formattedPhone);
       
       // Use the reCAPTCHA verifier
-      console.log('Calling signInWithPhoneNumber...');
       const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifier);
-      console.log('SMS sent successfully, confirmationResult:', confirmationResult);
       
       setVerificationId(confirmationResult.verificationId);
       
       // Start countdown (1 minute)
       setCountdown(60);
       setCanResend(false);
-      
-      console.log('SMS sent successfully');
     } catch (error: any) {
-      console.error('Error sending SMS:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
-      
       // Handle specific Firebase errors
       if (error.code === 'auth/invalid-phone-number') {
         alert('Λάθος αριθμός τηλεφώνου. Παρακαλώ ελέγξτε τον αριθμό σας.');
@@ -583,7 +576,6 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         alert('Υπέρβαση ορίου SMS. Παρακαλώ δοκιμάστε αργότερα.');
       } else if (error.code === 'auth/invalid-app-credential') {
         alert('Το reCAPTCHA δεν είναι έγκυρο. Παρακαλώ ελέγξτε τη σύνδεση σας και δοκιμάστε ξανά.');
-        console.error('reCAPTCHA credential issue - this usually means domain mismatch or site key problem');
         setRecaptchaVerifier(null);
       } else if (error.code === 'auth/recaptcha-token-expired') {
         alert('Το reCAPTCHA έληξε. Παρακαλώ δοκιμάστε ξανά.');
@@ -627,8 +619,25 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       }
       setRecaptchaVerifier(null);
       
-      // Show success message
-      alert('Η κράτηση ολοκληρώθηκε επιτυχώς!');
+      // Set success data for popup
+      if (selectedPitch && selectedDate && selectedTimeSlot) {
+        setSuccessBookingData({
+          userName: `${formData.firstName} ${formData.lastName}`,
+          userPhone: `+30 ${formData.phone}`,
+          pitchName: selectedPitch.name,
+          date: selectedDate.toLocaleDateString('el-GR', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          }),
+          time: selectedTimeSlot.time,
+          price: selectedPitch.pricePerSlot
+        });
+        
+        // Show success popup
+        setShowSuccessPopup(true);
+      }
       
     } catch (error) {
       console.error('Error verifying SMS:', error);
@@ -647,12 +656,28 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       
       // Parse the selected time to get start time (format is "HH:00")
       const [hours, minutes] = selectedTimeSlot.time.split(':').map(Number);
+      
+      // Ensure selectedDate is valid
+      if (!selectedDate) {
+        throw new Error('No date selected');
+      }
+      
       const startDateTime = new Date(selectedDate);
       startDateTime.setHours(hours, minutes, 0, 0);
+      
+      // Validate the final datetime
+      if (isNaN(startDateTime.getTime())) {
+        throw new Error('Invalid start time calculated');
+      }
       
       // Calculate end time based on slot duration
       const endDateTime = new Date(startDateTime);
       endDateTime.setMinutes(endDateTime.getMinutes() + selectedPitch.slotDuration);
+      
+      // Validate the end datetime
+      if (isNaN(endDateTime.getTime())) {
+        throw new Error('Invalid end time calculated');
+      }
 
       const newBooking: Omit<Booking, 'id' | 'createdAt'> = {
         slotId: '', // Will be generated
@@ -900,13 +925,26 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                       Επιλέξτε Ώρα
                     </h2>
                     <p className="text-gray-600">
-                      Διαθέσιμες ώρες για {selectedDate}
+                      Διαθέσιμες ώρες για {selectedDate ? selectedDate.toLocaleDateString('el-GR', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      }) : ''}
                     </p>
                   </div>
 
                   <div className="max-w-4xl mx-auto">
                     {(() => {
-                      const selectedDay = weekSchedule.find(d => d.date === selectedDate);
+                      const selectedDay = weekSchedule.find(d => {
+                        if (!selectedDate) return false;
+                        // Find the day by its position in the week (0-6)
+                        const dayIndex = weekSchedule.findIndex(day => day.date === d.date);
+                        const dayDate = new Date(currentWeek);
+                        dayDate.setDate(currentWeek.getDate() + dayIndex);
+                        
+                        return dayDate.toDateString() === selectedDate.toDateString();
+                      });
                       if (!selectedDay || !selectedDay.hasAvailability) {
                         return (
                           <div className="text-center py-12">
@@ -924,7 +962,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                               key={slot.time}
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
-                              onClick={() => slot.available && handleTimeSlotSelect(selectedDate, slot.time)}
+                              onClick={() => slot.available && selectedDate && handleTimeSlotSelect(selectedDate.toLocaleDateString('el-GR', { day: '2-digit', month: 'short' }), slot.time)}
                               disabled={!slot.available}
                               className={`
                                 p-4 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/50
@@ -992,7 +1030,12 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-gray-800 font-medium">Ημερομηνία:</span>
-                            <span className="font-semibold text-gray-900">{selectedDate}</span>
+                            <span className="font-semibold text-gray-900">{selectedDate ? selectedDate.toLocaleDateString('el-GR', { 
+                              weekday: 'long', 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric' 
+                            }) : ''}</span>
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-gray-800 font-medium">Ώρα:</span>
@@ -1069,14 +1112,27 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                               Τηλέφωνο *
                             </label>
-                            <input
-                              type="tel"
-                              placeholder="Εισάγετε το τηλέφωνό σας"
-                              value={formData.phone}
-                              onChange={(e) => handleFormChange('phone', e.target.value)}
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                              required
-                            />
+                            <div className="relative">
+                              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <span className="text-gray-500 text-lg font-medium">+30</span>
+                              </div>
+                              <input
+                                type="tel"
+                                placeholder="6973625633"
+                                value={formData.phone}
+                                onChange={(e) => {
+                                  // Only allow digits and limit to 10 characters
+                                  const value = e.target.value.replace(/\D/g, '').slice(0, 10);
+                                  handleFormChange('phone', value);
+                                }}
+                                className="w-full pl-16 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                                required
+                                maxLength={10}
+                              />
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1">
+                              Εισάγετε τον αριθμό χωρίς το +30 (π.χ. 6973625633)
+                            </p>
                           </div>
                           <div className="flex items-start space-x-3">
                             <input
@@ -1156,7 +1212,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
             {/* Phone Number Display */}
             <div className="text-center mb-6">
               <p className="text-gray-600 mb-2">Θα σας στείλουμε SMS στο:</p>
-              <p className="text-lg font-semibold text-gray-900">{formData.phone}</p>
+              <p className="text-lg font-semibold text-gray-900">+30 {formData.phone}</p>
             </div>
 
             {/* reCAPTCHA Container */}
@@ -1176,30 +1232,10 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                 <p className="text-xs text-gray-500 mt-2">
                   Αν δεν φορτώνει, ελέγξτε τη σύνδεση σας
                 </p>
-                <p className="text-xs text-red-500 mt-1">
-                  Site Key: {RECAPTCHA_SITE_KEY.substring(0, 10)}...
-                </p>
               </div>
             )}
             
-            {/* Debug Info */}
-            <div className="text-xs text-gray-400 mb-4 p-2 bg-gray-100 rounded">
-              <p>Debug: reCAPTCHA Status</p>
-              <p>Verifier: {recaptchaVerifier ? '✅ Loaded' : '❌ Not Loaded'}</p>
-              <p>Container: {typeof document !== 'undefined' && document.getElementById('recaptcha-container') ? '✅ Found' : '❌ Not Found'}</p>
-              <p>Site Key: {RECAPTCHA_SITE_KEY.substring(0, 25)}...</p>
-              <p>Auth Domain: {auth.config.authDomain}</p>
-              <p>Current Domain: {typeof window !== 'undefined' ? window.location.hostname : 'N/A'}</p>
-              <p>Project ID: yabalitsa-6f5e8</p>
-            </div>
-            
-            {/* Help Text */}
-            <div className="text-xs text-blue-600 mb-4 p-2 bg-blue-50 rounded">
-              <p className="font-medium">ℹ️ Αν το reCAPTCHA δεν δουλεύει:</p>
-              <p>1. Ελέγξτε ότι το site key ανήκει στο project: yabalitsa-6f5e8</p>
-              <p>2. Επιβεβαιώστε ότι το domain σας είναι authorized στο reCAPTCHA</p>
-              <p>3. Ελέγξτε ότι το Phone Authentication είναι enabled στο Firebase</p>
-            </div>
+
 
             
 
@@ -1221,14 +1257,80 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Κωδικός SMS
                   </label>
-                  <input
-                    type="text"
-                    placeholder="Εισάγετε τον 6ψήφιο κωδικό"
-                    value={smsCode}
-                    onChange={(e) => setSmsCode(e.target.value)}
-                    maxLength={6}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent text-center text-lg tracking-widest"
-                  />
+                  
+                  {/* 6-Digit Code Input */}
+                  <div className="flex justify-center space-x-2 mb-4">
+                    {[0, 1, 2, 3, 4, 5].map((index) => (
+                      <input
+                        key={index}
+                        type="text"
+                        maxLength={1}
+                        data-index={index}
+                        value={smsCode[index] || ''}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          if (value && /^\d$/.test(value)) { // Only allow digits
+                            const newCode = smsCode.split('');
+                            newCode[index] = value;
+                            const finalCode = newCode.join('');
+                            setSmsCode(finalCode);
+                            
+                            // Auto-focus next input
+                            if (index < 5) {
+                              setTimeout(() => {
+                                const nextInput = document.querySelector(`input[data-index="${index + 1}"]`) as HTMLInputElement;
+                                if (nextInput) nextInput.focus();
+                              }, 10);
+                            }
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          // Handle backspace
+                          if (e.key === 'Backspace') {
+                            if (!smsCode[index] && index > 0) {
+                              // If current input is empty, go to previous
+                              setTimeout(() => {
+                                const prevInput = document.querySelector(`input[data-index="${index - 1}"]`) as HTMLInputElement;
+                                if (prevInput) prevInput.focus();
+                              }, 10);
+                            } else if (smsCode[index]) {
+                              // If current input has value, clear it first
+                              const newCode = smsCode.split('');
+                              newCode[index] = '';
+                              setSmsCode(newCode.join(''));
+                            }
+                          }
+                        }}
+                        onPaste={(e) => {
+                          e.preventDefault();
+                          const pastedData = e.clipboardData.getData('text');
+                          const digits = pastedData.replace(/\D/g, '').slice(0, 6);
+                          
+                          if (digits.length === 6) {
+                            setSmsCode(digits);
+                            // Focus last input
+                            setTimeout(() => {
+                              const lastInput = document.querySelector(`input[data-index="5"]`) as HTMLInputElement;
+                              if (lastInput) lastInput.focus();
+                            }, 10);
+                          }
+                        }}
+                        className={`
+                          w-12 h-12 text-center text-xl font-bold border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all
+                          ${smsCode[index] 
+                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700' 
+                            : 'border-gray-300 bg-white text-gray-900'
+                          }
+                          ${index === smsCode.length ? 'ring-2 ring-emerald-500' : ''}
+                        `}
+                        placeholder=""
+                      />
+                    ))}
+                  </div>
+                  
+                  <p className="text-sm text-gray-500 text-center mb-4">
+                    Εισάγετε τον 6ψήφιο κωδικό που λάβατε στο SMS
+                  </p>
                 </div>
 
                 {/* Verify Button */}
@@ -1266,6 +1368,91 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
             </div>
           </motion.div>
         </div>
+      )}
+
+      {/* Success Popup */}
+      {showSuccessPopup && successBookingData && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+          onClick={() => {
+            setShowSuccessPopup(false);
+            setSuccessBookingData(null);
+          }}
+        >
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Success Icon */}
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <span className="text-4xl">🎉</span>
+            </div>
+
+            {/* Success Message */}
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">
+              Η κράτηση ολοκληρώθηκε!
+            </h2>
+            <p className="text-gray-600 mb-8">
+              Θα λάβετε επιβεβαίωση στο τηλέφωνό σας
+            </p>
+
+            {/* Booking Details */}
+            <div className="bg-gray-50 rounded-xl p-6 mb-8 text-left">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
+                Λεπτομέρειες Κράτησης
+              </h3>
+              
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">👤 Όνομα:</span>
+                  <span className="font-medium text-gray-900">{successBookingData.userName}</span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-gray-600">📱 Τηλέφωνο:</span>
+                  <span className="font-medium text-gray-900">{successBookingData.userPhone}</span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-gray-600">⚽ Γήπεδο:</span>
+                  <span className="font-medium text-gray-900">{successBookingData.pitchName}</span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-gray-600">📅 Ημερομηνία:</span>
+                  <span className="font-medium text-gray-900">{successBookingData.date}</span>
+                </div>
+                
+                <div className="flex justify-between">
+                  <span className="text-gray-600">🕐 Ώρα:</span>
+                  <span className="font-medium text-gray-900">{successBookingData.time}</span>
+                </div>
+                
+                <div className="flex justify-between border-t pt-3">
+                  <span className="text-gray-600">💰 Τιμή:</span>
+                  <span className="font-bold text-green-600 text-lg">€{successBookingData.price}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setShowSuccessPopup(false);
+                setSuccessBookingData(null);
+              }}
+              className="w-full bg-emerald-500 text-white py-3 px-6 rounded-xl font-medium hover:bg-emerald-600 transition-colors"
+            >
+              Τέλεια! 🎯
+            </button>
+          </motion.div>
+        </motion.div>
       )}
     </div>
   );

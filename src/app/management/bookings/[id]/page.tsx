@@ -67,7 +67,7 @@ export default function BookingDetailsPage() {
     }
   };
 
-  const handleUpdateStatus = async (newStatus: 'completed' | 'cancelled') => {
+  const handleUpdateStatus = async (newStatus: 'confirmed' | 'completed' | 'cancelled') => {
     if (!booking) return;
     
     setIsUpdating(true);
@@ -130,13 +130,23 @@ export default function BookingDetailsPage() {
             Επεξεργασία Κράτησης
           </Link>
           
+          {booking.status === 'pending' && (
+            <button
+              onClick={() => handleUpdateStatus('confirmed')}
+              disabled={isUpdating}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isUpdating ? 'Ενημέρωση...' : '✅ Επιβεβαίωση'}
+            </button>
+          )}
+          
           {booking.status !== 'completed' && (
             <button
               onClick={() => handleUpdateStatus('completed')}
               disabled={isUpdating}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isUpdating ? 'Ενημέρωση...' : '✅ Ολοκλήρωση'}
+              {isUpdating ? 'Ενημέρωση...' : '🏁 Ολοκλήρωση'}
             </button>
           )}
           

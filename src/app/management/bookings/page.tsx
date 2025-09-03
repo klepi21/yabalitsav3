@@ -319,13 +319,23 @@ export default function BookingsPage() {
                   >
                     Επεξεργασία
                   </Link>
+                  {booking.status === 'pending' && (
+                    <button
+                      onClick={() => handleUpdateBookingStatus(booking.id, 'confirmed')}
+                      disabled={updatingBookingId === booking.id}
+                      className="min-h-[44px] text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                    >
+                      <span className="mr-1">✅</span>
+                      {updatingBookingId === booking.id ? 'Ενημέρωση...' : 'Επιβεβαίωση'}
+                    </button>
+                  )}
                   {booking.status !== 'completed' && (
                     <button
                       onClick={() => handleUpdateBookingStatus(booking.id, 'completed')}
                       disabled={updatingBookingId === booking.id}
                       className="min-h-[44px] text-sm text-green-600 hover:text-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                     >
-                      <span className="mr-1">✅</span>
+                      <span className="mr-1">🏁</span>
                       {updatingBookingId === booking.id ? 'Ενημέρωση...' : 'Ολοκλήρωση'}
                     </button>
                   )}
