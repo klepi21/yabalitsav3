@@ -47,12 +47,6 @@ export async function POST(request: NextRequest) {
 
     // Calculate new subscription end date
     const currentDate = new Date();
-    const venue = await venueService.getById(venueId);
-
-    if (venue && venue.daysRemaining) {
-      currentDate.setDate(currentDate.getDate() + venue.daysRemaining);
-    }
-
     currentDate.setMonth(currentDate.getMonth() + parseInt(duration));
 
     // Update/Create subscription
@@ -65,7 +59,7 @@ export async function POST(request: NextRequest) {
       subscriptionData.stripeCustomerId = paymentIntent.customer as string;
     }
 
-    await subscriptionService.set(venueId, subscriptionData);
+    await subscriptionService.create(venueId, subscriptionData);
 
     // Update venue info
     const newDaysRemaining = Math.ceil((currentDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));

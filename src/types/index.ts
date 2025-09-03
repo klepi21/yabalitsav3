@@ -139,7 +139,8 @@ export interface VenueOwner {
 }
 
 export interface Subscription {
-  id: string; // Same as venue id (document ID)
+  id: string; // Auto generated Firebase ID
+  venueId: string; // Venue this subscription belongs to
   stripeCustomerId?: string; // Optional - from Stripe customer
   subscriptionEndDate: string; // ISO string
   subscriptionPlan: 'Basic' | 'Pro' | 'Enterprise';

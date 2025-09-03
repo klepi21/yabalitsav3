@@ -586,6 +586,19 @@ export const blockedDateService = {
 
 // Subscription Services
 export const subscriptionService = {
+  // Create new subscription with auto-generated ID
+  async create(venueId: string, data: Omit<Subscription, 'id'>): Promise<string> {
+    // Remove undefined fields for Firebase
+    const cleanData: any = {};
+    if (data.stripeCustomerId) cleanData.stripeCustomerId = data.stripeCustomerId;
+    cleanData.subscriptionPlan = data.subscriptionPlan;
+    cleanData.subscriptionEndDate = data.subscriptionEndDate;
+    cleanData.venueId = venueId;
+    
+    const ref = await addDoc(collection(db, 'yabalitsa_subscriptions'), cleanData);
+    return ref.id;
+  },
+
   // Create or replace subscription with doc ID equal to venueId
   async set(venueId: string, data: Omit<Subscription, 'id'>): Promise<void> {
     const ref = doc(db, 'yabalitsa_subscriptions', venueId);

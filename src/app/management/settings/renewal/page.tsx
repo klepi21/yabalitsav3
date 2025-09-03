@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { loadStripe } from '@stripe/stripe-js';
+import { pricingConfig, pricingUtils } from '@/lib/pricing';
 
 export default function SubscriptionRenewalPage() {
   const router = useRouter();
@@ -14,64 +15,13 @@ export default function SubscriptionRenewalPage() {
   const [currentDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
 
-  // Pricing constants
-  const BASIC_PRICE = 25;
-  const PRO_PRICE = 45;
-  const ENTERPRISE_PRICE = 75;
-
-  // Calculate final price with VAT (24%)
-  const calcFinal = (price: number) => (price * 1.24).toFixed(2);
-
-  // Calculate monthly price with duration discount
-  const calcMonthlyPrice = (basePrice: number, duration: number) => {
-    let discount = 0;
-    if (duration === 6) discount = 0.07; // 7% discount for 6 months
-    if (duration === 12) discount = 0.12; // 12% discount for 12 months
-    
-    const discountedPrice = basePrice * (1 - discount);
-    return (discountedPrice * 1.24).toFixed(2); // Include VAT
-  };
-
-  // Calculate total price for duration
-  const calcTotalPrice = (basePrice: number, duration: number) => {
-    let discount = 0;
-    if (duration === 6) discount = 0.07;
-    if (duration === 12) discount = 0.12;
-    
-    const discountedPrice = basePrice * (1 - discount);
-    const totalWithoutVAT = discountedPrice * duration;
-    return (totalWithoutVAT * 1.24).toFixed(2); // Include VAT
-  };
-
-  const plans = [
-    {
-      id: 'basic',
-      name: 'Basic',
-      description: '1 γήπεδο, απεριόριστες κρατήσεις',
-      basePrice: BASIC_PRICE,
-      features: ['1 γήπεδο', 'Απεριόριστες κρατήσεις', 'Προηγμένο διαχειριστικό', 'Email υποστήριξη']
-    },
-    {
-      id: 'pro',
-      name: 'Pro',
-      description: '2-3 γήπεδα, απεριόριστες κρατήσεις',
-      basePrice: PRO_PRICE,
-      features: ['2-3 γήπεδα', 'Απεριόριστες κρατήσεις', 'Προηγμένο διαχειριστικό', 'Προτεραιότητα υποστήριξης'],
-      popular: true
-    },
-    {
-      id: 'enterprise',
-      name: 'Enterprise',
-      description: '3+ γήπεδα, unique booking link',
-      basePrice: ENTERPRISE_PRICE,
-      features: ['3+ γήπεδα', 'Unique booking link', 'Πλήρες διαχειριστικό', 'Dedicated υποστήριξη']
-    }
-  ];
+  // Get pricing configuration
+  const plans = pricingUtils.getAllPlans();
 
   const durations = [
-    { months: 1 as const, label: '1 Μήνας', discount: 0 },
-    { months: 6 as const, label: '6 Μήνες', discount: 7 },
-    { months: 12 as const, label: '12 Μήνες', discount: 12 }
+    { months: 1 as const, label: '1 Μήνας', discount: pricingUtils.getDiscountPercentage(1) },
+    { months: 6 as const, label: '6 Μήνες', discount: pricingUtils.getDiscountPercentage(6) },
+    { months: 12 as const, label: '12 Μήνες', discount: pricingUtils.getDiscountPercentage(12) }
   ];
 
   // Fetch venue data for current subscription info
@@ -159,7 +109,7 @@ export default function SubscriptionRenewalPage() {
           duration: selectedDuration,
           basePrice: selectedPlanData.basePrice,
           userUid: auth.currentUser.uid,
-          amount: Math.round(parseFloat(calcTotalPrice(selectedPlanData.basePrice, selectedDuration)) * 100), // Convert to cents
+          amount: pricingUtils.getStripeAmount(selectedPlanData.basePrice, selectedDuration), // Amount in cents
         }),
       });
 
@@ -317,7 +267,7 @@ export default function SubscriptionRenewalPage() {
                       </div>
                       <div className="text-right">
                         <div className="text-lg font-bold text-gray-900">
-                          €{calcMonthlyPrice(selectedPlan ? plans.find(p => p.id === selectedPlan)?.basePrice || 0 : 0, duration.months)}
+                          {pricingUtils.formatPrice(pricingUtils.calculateMonthlyPrice(selectedPlan ? plans.find(p => p.id === selectedPlan)?.basePrice || 0 : 0, duration.months))}
                           <span className="text-sm font-normal text-gray-500">/μήνα</span>
                         </div>
                         <div className="text-xs text-gray-500">με ΦΠΑ</div>
@@ -386,7 +336,7 @@ export default function SubscriptionRenewalPage() {
                     <div className="flex justify-between text-xl font-bold text-gray-900">
                       <span>Σύνολο:</span>
                       <span>
-                        €{calcTotalPrice(plans.find(p => p.id === selectedPlan)?.basePrice || 0, selectedDuration)}
+                        {pricingUtils.formatPrice(pricingUtils.calculateTotalPrice(plans.find(p => p.id === selectedPlan)?.basePrice || 0, selectedDuration))}
                       </span>
                     </div>
                     <div className="text-xs text-gray-500 text-center mt-1">με ΦΠΑ</div>

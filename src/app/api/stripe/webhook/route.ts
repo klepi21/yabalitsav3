@@ -84,14 +84,6 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
 
     // Calculate new subscription end date
     const currentDate = new Date();
-    const venue = await venueService.getById(venueId);
-    
-    if (venue && venue.daysRemaining) {
-      // Add remaining days to current date, then add subscription months
-      currentDate.setDate(currentDate.getDate() + venue.daysRemaining);
-      console.log(`Added ${venue.daysRemaining} existing days to subscription`);
-    }
-    
     currentDate.setMonth(currentDate.getMonth() + parseInt(duration));
     console.log(`New subscription end date: ${currentDate.toISOString()}`);
 
@@ -106,7 +98,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
       subscriptionData.stripeCustomerId = paymentIntent.customer as string;
     }
 
-    await subscriptionService.set(venueId, subscriptionData);
+    await subscriptionService.create(venueId, subscriptionData);
     console.log(`Created/updated subscription for venue ${venueId}`);
 
     // Update venue with new subscription info

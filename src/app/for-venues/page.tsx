@@ -8,6 +8,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { pricingUtils } from '@/lib/pricing';
 
 export default function ForVenuesPage() {
   const router = useRouter();
@@ -282,8 +283,8 @@ export default function ForVenuesPage() {
                 >
                   <div className="flex items-center space-x-4">
                     <h4 className="text-lg font-bold text-gray-900">Basic</h4>
-                    <div className="text-2xl font-bold text-green-600">€25<span className="text-sm font-normal text-gray-500">/μήνα</span></div>
-                    <div className="text-sm text-green-600 font-semibold">€31.00 με ΦΠΑ</div>
+                    <div className="text-2xl font-bold text-green-600">€{pricingUtils.getPlan('basic')?.basePrice}<span className="text-sm font-normal text-gray-500">/μήνα</span></div>
+                    <div className="text-sm text-green-600 font-semibold">{pricingUtils.formatPrice(pricingUtils.calculateFinalPrice(pricingUtils.getPlan('basic')?.basePrice || 25))} με ΦΠΑ</div>
                   </div>
                   <span className="text-gray-400 text-xl font-bold hover:text-gray-600 transition-colors">
                     {expandedPlan === 'basic' ? '−' : '+'}
@@ -324,8 +325,8 @@ export default function ForVenuesPage() {
                 >
                   <div className="flex items-center space-x-4">
                     <h4 className="text-lg font-bold text-gray-900">Pro</h4>
-                    <div className="text-2xl font-bold text-green-600">€45<span className="text-sm font-normal text-gray-500">/μήνα</span></div>
-                    <div className="text-sm text-green-600 font-semibold">€55.80 με ΦΠΑ</div>
+                    <div className="text-2xl font-bold text-green-600">€{pricingUtils.getPlan('pro')?.basePrice}<span className="text-sm font-normal text-gray-500">/μήνα</span></div>
+                    <div className="text-sm text-green-600 font-semibold">{pricingUtils.formatPrice(pricingUtils.calculateFinalPrice(pricingUtils.getPlan('pro')?.basePrice || 45))} με ΦΠΑ</div>
                   </div>
                   <span className="text-gray-400 text-xl font-bold hover:text-gray-600 transition-colors">
                     {expandedPlan === 'pro' ? '−' : '+'}
@@ -363,8 +364,8 @@ export default function ForVenuesPage() {
                 >
                   <div className="flex items-center space-x-4">
                     <h4 className="text-lg font-bold text-gray-900">Enterprise</h4>
-                    <div className="text-2xl font-bold text-green-600">€75<span className="text-sm font-normal text-gray-500">/μήνα</span></div>
-                    <div className="text-sm text-green-600 font-semibold">€93.00 με ΦΠΑ</div>
+                    <div className="text-2xl font-bold text-green-600">€{pricingUtils.getPlan('enterprise')?.basePrice}<span className="text-sm font-normal text-gray-500">/μήνα</span></div>
+                    <div className="text-sm text-green-600 font-semibold">{pricingUtils.formatPrice(pricingUtils.calculateFinalPrice(pricingUtils.getPlan('enterprise')?.basePrice || 75))} με ΦΠΑ</div>
                   </div>
                   <span className="text-gray-400 text-xl font-bold hover:text-gray-600 transition-colors">
                     {expandedPlan === 'enterprise' ? '−' : '+'}
