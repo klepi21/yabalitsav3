@@ -34,6 +34,8 @@ interface FirebaseVenueData {
   };
   ownerId: string;
   daysRemaining?: number;
+  plan?: 'subscription' | 'pay-per-booking' | 'trial';
+  planType?: 'Basic' | 'Pro' | 'Enterprise';
   createdAt?: any;
   updatedAt?: any;
 }
@@ -79,6 +81,8 @@ export const venueService = {
         email: data.contactDetails?.email || data.email || '',
         ownerId: data.ownerId,
         daysRemaining: data.daysRemaining,
+        plan: data.plan || 'trial',
+        planType: data.planType,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date()
       } as Venue;
@@ -103,6 +107,8 @@ export const venueService = {
         email: data.contactDetails?.email || data.email || '',
         ownerId: data.ownerId,
         daysRemaining: data.daysRemaining,
+        plan: data.plan || 'trial',
+        planType: data.planType,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date()
       } as Venue;

@@ -7,6 +7,8 @@ export interface Venue {
   address?: string;
   ownerId: string;
   daysRemaining?: number;
+  plan?: 'subscription' | 'pay-per-booking' | 'trial';
+  planType?: 'Basic' | 'Pro' | 'Enterprise';
   createdAt: Date;
   updatedAt: Date;
 }

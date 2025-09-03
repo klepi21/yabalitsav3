@@ -141,7 +141,10 @@ export default function ForVenuesPage() {
         <div className="mb-8">
           <div className="rounded-xl border border-green-200 bg-green-50 text-green-900 p-6 text-center">
             <h2 className="text-xl font-bold mb-2">🎉 Δωρεάν για τις πρώτες 15 ημέρες!</h2>
-            <p className="text-gray-700">Ξεκίνα σήμερα χωρίς κόστος και επίλεξε το πλάνο που σου ταιριάζει μετά τις 15 ημέρες</p>
+            <p className="text-gray-700 mb-3">Ξεκίνα σήμερα χωρίς κόστος και επίλεξε το πλάνο που σου ταιριάζει μετά τις 15 ημέρες</p>
+            <div className="text-sm text-green-800 bg-green-100 rounded-lg p-3 inline-block">
+              <strong>⚠️ Σημαντικό:</strong> Μετά τις 15 ημέρες, ο λογαριασμός σου θα είναι <strong>trial</strong> και θα χρειαστεί να επιλέξεις πλάνο συνδρομής για να συνεχίσεις να χρησιμοποιείς την πλατφόρμα.
+            </div>
           </div>
         </div>
 

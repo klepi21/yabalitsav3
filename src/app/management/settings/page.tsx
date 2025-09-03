@@ -314,16 +314,23 @@ export default function SettingsPage() {
                       <span className="font-medium">Τρέχον πλάνο:</span>
                     </div>
                     <div className="text-lg font-semibold text-gray-900">
-                      Πλήρες Διαχειριστικό (Trial)
+                      {venue.plan === 'subscription' ? 'Συνδρομή' : 'Δωρεάν Trial'}
                     </div>
+                    {venue.plan === 'subscription' && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        {venue.planType || 'Basic'} Plan
+                      </div>
+                    )}
                   </div>
                 </div>
                 
                 <div className="mt-4 text-center">
-                  <p className="text-xs text-gray-500 mb-3">
-                    Μετά τη λήξη του trial θα χρειαστεί ενεργοποίηση πληρωμών. 
-                    Επικοινωνήστε μαζί μας για αναβάθμιση ή αλλαγή πλάνου.
-                  </p>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
+                    <p className="text-xs text-blue-800">
+                      <strong>ℹ️ Πληροφορίες:</strong> Ο λογαριασμός σου είναι <strong>trial</strong> και θα λήξει σε {venue.daysRemaining ?? 0} ημέρες. 
+                      Μετά τη λήξη θα χρειαστεί να επιλέξεις πλάνο συνδρομής για να συνεχίσεις.
+                    </p>
+                  </div>
                   <Link 
                     href="/management/settings/renewal" 
                     className="inline-flex items-center justify-center w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
