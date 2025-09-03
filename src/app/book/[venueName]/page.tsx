@@ -299,9 +299,15 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
           containerId: 'recaptcha-container'
         });
         
-        // Create reCAPTCHA v2 verifier with minimal configuration
-        verifier = new RecaptchaVerifier(auth, container, {
-          'sitekey': RECAPTCHA_SITE_KEY
+        // Create invisible reCAPTCHA verifier following official docs
+        verifier = new RecaptchaVerifier(auth, 'send-sms-button', {
+          'sitekey': RECAPTCHA_SITE_KEY,
+          'size': 'invisible',
+          'callback': (response: any) => {
+            // reCAPTCHA solved, allow signInWithPhoneNumber
+            console.log('reCAPTCHA solved with response:', response);
+            // The SMS will be sent automatically when this callback fires
+          }
         });
         
         console.log('RecaptchaVerifier created successfully');
@@ -544,7 +550,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       // Format phone number for international format - always add +30 for Greek numbers
       const formattedPhone = formData.phone.startsWith('+') ? formData.phone : `+30${formData.phone}`;
       
-      // Use the reCAPTCHA verifier
+      // Use the reCAPTCHA verifier (invisible reCAPTCHA handles execution automatically)
       const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifier);
       
       setVerificationId(confirmationResult.verificationId);
@@ -1218,38 +1224,15 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
               <p className="text-lg font-semibold text-gray-900">+30 {formData.phone}</p>
             </div>
 
-            {/* reCAPTCHA Container */}
-            <div id="recaptcha-container" className="mb-6"></div>
-            
-            {/* reCAPTCHA Status */}
-            {!recaptchaVerifier && (
-              <div className="text-center mb-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-600 mx-auto mb-2"></div>
-                <p className="text-sm text-gray-600">Φόρτωση reCAPTCHA...</p>
-                <button
-                  onClick={resetRecaptcha}
-                  className="mt-2 text-sm text-emerald-600 hover:text-emerald-700 underline"
-                >
-                  Δοκιμή ξανά
-                </button>
-                <p className="text-xs text-gray-500 mt-2">
-                  Αν δεν φορτώνει, ελέγξτε τη σύνδεση σας
-                </p>
-              </div>
-            )}
-            
-
-
-            
-
-            {/* Send SMS Button */}
+            {/* Send SMS Button with invisible reCAPTCHA */}
             {!verificationId && (
               <button
+                id="send-sms-button"
                 onClick={sendSmsVerification}
-                disabled={isSendingSms}
+                disabled={isSendingSms || !recaptchaVerifier}
                 className="w-full bg-emerald-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4"
               >
-                {isSendingSms ? 'Αποστολή...' : 'Αποστολή SMS'}
+                {isSendingSms ? 'Αποστολή...' : !recaptchaVerifier ? 'Φόρτωση...' : 'Αποστολή SMS'}
               </button>
             )}
 
