@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
@@ -9,6 +9,8 @@ export default function SubscriptionRenewalPage() {
   const router = useRouter();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<1 | 6 | 12>(1);
+  const [venueData, setVenueData] = useState<any>(null);
+  const [currentDate] = useState(new Date());
 
   // Pricing constants
   const BASIC_PRICE = 25;
@@ -65,10 +67,65 @@ export default function SubscriptionRenewalPage() {
   ];
 
   const durations = [
-    { months: 1, label: '1 Μήνας', discount: 0 },
-    { months: 6, label: '6 Μήνες', discount: 7 },
-    { months: 12, label: '12 Μήνες', discount: 12 }
+    { months: 1 as const, label: '1 Μήνας', discount: 0 },
+    { months: 6 as const, label: '6 Μήνες', discount: 7 },
+    { months: 12 as const, label: '12 Μήνες', discount: 12 }
   ];
+
+  // Fetch venue data for current subscription info
+  useEffect(() => {
+    const fetchVenueData = async () => {
+      try {
+        const { collection, query, where, getDocs } = await import('firebase/firestore');
+        const { db } = await import('@/lib/firebase');
+        const { getAuth } = await import('firebase/auth');
+        
+        const auth = getAuth();
+        if (auth.currentUser?.uid) {
+          const venuesRef = collection(db, 'yabalitsa_venues');
+          const q = query(venuesRef, where('ownerId', '==', auth.currentUser.uid));
+          const querySnapshot = await getDocs(q);
+          
+          if (!querySnapshot.empty) {
+            const venueDoc = querySnapshot.docs[0];
+            setVenueData({ id: venueDoc.id, ...venueDoc.data() });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching venue data:', error);
+      }
+    };
+    
+    fetchVenueData();
+  }, []);
+
+  // Calculate subscription end date
+  const calculateSubscriptionEndDate = () => {
+    if (!selectedPlan || !venueData) return null;
+    
+    const baseDate = new Date(currentDate);
+    const remainingDays = venueData.daysRemaining || 0;
+    
+    // Add remaining days to current date
+    baseDate.setDate(baseDate.getDate() + remainingDays);
+    
+    // Add selected duration months
+    baseDate.setMonth(baseDate.getMonth() + Number(selectedDuration));
+    
+    return baseDate;
+  };
+
+  // Format date in Greek
+  const formatGreekDate = (date: Date) => {
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
+    
+    return date.toLocaleDateString('el-GR', options);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -88,6 +145,36 @@ export default function SubscriptionRenewalPage() {
 
         {/* Main Content */}
         <div className="space-y-8">
+          {/* Current Subscription Info */}
+          {venueData && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Τρέχουσα Συνδρομή</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-2xl font-bold text-gray-900 mb-1">
+                    {venueData.daysRemaining || 0}
+                  </div>
+                  <div className="text-sm text-gray-600">ημέρες που απομένουν</div>
+                </div>
+                <div className="text-center p-4 bg-gray-50 rounded-lg">
+                  <div className="text-lg font-semibold text-gray-900 mb-1">
+                    {venueData.plan === 'subscription' ? 'Συνδρομή' : 'Δωρεάν Trial'}
+                  </div>
+                  <div className="text-sm text-gray-600">τρέχον πλάνο</div>
+                </div>
+              </div>
+              
+              {/* Trial Info Message */}
+              {(!venueData.plan || venueData.plan !== 'subscription') && (
+                <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="text-sm text-blue-800 text-center">
+                    🎉 Είσαι στο <strong>δωρεάν trial</strong>! Μετά τις {venueData.daysRemaining || 0} ημέρες θα χρειαστεί να επιλέξεις πλάνο συνδρομής για να συνεχίσεις να χρησιμοποιείς την πλατφόρμα.
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Plan Selection - Horizontal Layout */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
             <h2 className="text-xl font-semibold text-gray-900 mb-6 text-center">Επιλέξτε το Πλάνο Σας</h2>
@@ -196,6 +283,16 @@ export default function SubscriptionRenewalPage() {
                       {durations.find(d => d.months === selectedDuration)?.label}
                     </span>
                   </div>
+                  
+                  {/* Subscription End Date */}
+                  {calculateSubscriptionEndDate() && (
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="text-gray-600">Η συνδρομή θα ισχύει μέχρι:</span>
+                      <span className="font-semibold text-green-700">
+                        {formatGreekDate(calculateSubscriptionEndDate()!)}
+                      </span>
+                    </div>
+                  )}
                   
                   {/* Price Breakdown */}
                   <div className="bg-gray-50 rounded-lg p-4 space-y-2">
