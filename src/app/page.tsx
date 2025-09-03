@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { MagnifyingGlassIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { venueService, pitchService, bookingService } from '@/lib/firebase-services';
@@ -579,6 +580,34 @@ export default function RootPage() {
         {/* Footer */}
         <div className="mt-auto pt-20">
           <div className="text-center py-8 text-gray-500 border-t border-gray-100">
+            <div className="mb-4">
+              <div className="flex flex-wrap justify-center gap-6 text-sm">
+                <Link 
+                  href="/terms" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  📋 Όροι Χρήσης
+                </Link>
+                <Link 
+                  href="/privacy" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  🔒 Πολιτική Απορρήτου
+                </Link>
+                <Link 
+                  href="/for-venues" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  🏟️ Εγγραφή για Γήπεδα
+                </Link>
+              </div>
+            </div>
             <p>© {new Date().getFullYear()} Yabalitsa. Όλα τα δικαιώματα διατηρούνται.</p>
           </div>
         </div>

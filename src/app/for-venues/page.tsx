@@ -36,7 +36,7 @@ export default function ForVenuesPage() {
     acceptTerms: false
   });
 
-  // State for expandable pricing plans
+  // State for expandable pricing plans - start all collapsed
   const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
 
   // Derived password validation states (live feedback)
@@ -141,10 +141,7 @@ export default function ForVenuesPage() {
         <div className="mb-8">
           <div className="rounded-xl border border-green-200 bg-green-50 text-green-900 p-6 text-center">
             <h2 className="text-xl font-bold mb-2">🎉 Δωρεάν για τις πρώτες 15 ημέρες!</h2>
-            <p className="text-gray-700 mb-3">Ξεκίνα σήμερα χωρίς κόστος και επίλεξε το πλάνο που σου ταιριάζει μετά τις 15 ημέρες</p>
-            <div className="text-sm text-green-800 bg-green-100 rounded-lg p-3 inline-block">
-              <strong>⚠️ Σημαντικό:</strong> Μετά τις 15 ημέρες, ο λογαριασμός σου θα είναι <strong>trial</strong> και θα χρειαστεί να επιλέξεις πλάνο συνδρομής για να συνεχίσεις να χρησιμοποιείς την πλατφόρμα.
-            </div>
+            <p className="text-gray-700">Ξεκίνα σήμερα χωρίς κόστος και επίλεξε το πλάνο που σου ταιριάζει μετά τις 15 ημέρες</p>
           </div>
         </div>
 
@@ -239,7 +236,7 @@ export default function ForVenuesPage() {
                 onChange={(e)=>setForm({...form, acceptTerms: e.target.checked})}
               />
               <label htmlFor="acceptTerms" className="select-none">
-                Αποδέχομαι τους <a href="#" className="underline">Όρους Χρήσης</a> και την <a href="#" className="underline">Πολιτική Απορρήτου</a>.
+                Αποδέχομαι τους <Link href="/terms" className="underline text-blue-600 hover:text-blue-800">Όρους Χρήσης</Link> και την <Link href="/privacy" className="underline text-blue-600 hover:text-blue-800">Πολιτική Απορρήτου</Link>.
               </label>
             </div>
 
@@ -275,6 +272,7 @@ export default function ForVenuesPage() {
           {/* Subscription Plans - Collapsible */}
           <div className="mb-8">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">SUBSCRIPTION PLANS</h3>
+            <p className="text-center text-sm text-gray-500 mb-4">Κάντε κλικ στο "+" για να δείτε περισσότερες λεπτομέρειες</p>
             <div className="space-y-4">
               {/* Basic Plan */}
               <div className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden">
@@ -287,7 +285,7 @@ export default function ForVenuesPage() {
                     <div className="text-2xl font-bold text-green-600">€25<span className="text-sm font-normal text-gray-500">/μήνα</span></div>
                     <div className="text-sm text-green-600 font-semibold">€31.00 με ΦΠΑ</div>
                   </div>
-                  <span className="text-gray-400 text-xl">
+                  <span className="text-gray-400 text-xl font-bold hover:text-gray-600 transition-colors">
                     {expandedPlan === 'basic' ? '−' : '+'}
                   </span>
                 </button>
@@ -316,20 +314,20 @@ export default function ForVenuesPage() {
               </div>
 
               {/* Pro Plan */}
-              <div className="bg-white rounded-2xl border-2 border-green-500 overflow-hidden relative">
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">ΠΡΟΤΕΡΑΙΑ</span>
+              <div className="bg-gradient-to-br from-green-50 to-white rounded-2xl border-2 border-green-500 overflow-hidden relative pt-6">
+                <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-20">
+                  <span className="bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-xl border-2 border-white ring-2 ring-green-200">⭐ ΠΡΟΤΕΙΝΟΜΕΝΟ</span>
                 </div>
                 <button 
                   onClick={() => setExpandedPlan(expandedPlan === 'pro' ? null : 'pro')}
-                  className="w-full p-4 text-left hover:bg-gray-50 transition-colors flex items-center justify-between"
+                  className="w-full p-4 text-left hover:bg-green-100 transition-colors flex items-center justify-between"
                 >
                   <div className="flex items-center space-x-4">
                     <h4 className="text-lg font-bold text-gray-900">Pro</h4>
                     <div className="text-2xl font-bold text-green-600">€45<span className="text-sm font-normal text-gray-500">/μήνα</span></div>
                     <div className="text-sm text-green-600 font-semibold">€55.80 με ΦΠΑ</div>
                   </div>
-                  <span className="text-gray-400 text-xl">
+                  <span className="text-gray-400 text-xl font-bold hover:text-gray-600 transition-colors">
                     {expandedPlan === 'pro' ? '−' : '+'}
                   </span>
                 </button>
@@ -368,7 +366,7 @@ export default function ForVenuesPage() {
                     <div className="text-2xl font-bold text-green-600">€75<span className="text-sm font-normal text-gray-500">/μήνα</span></div>
                     <div className="text-sm text-green-600 font-semibold">€93.00 με ΦΠΑ</div>
                   </div>
-                  <span className="text-gray-400 text-xl">
+                  <span className="text-gray-400 text-xl font-bold hover:text-gray-600 transition-colors">
                     {expandedPlan === 'enterprise' ? '−' : '+'}
                   </span>
                 </button>
@@ -399,17 +397,17 @@ export default function ForVenuesPage() {
           </div>
 
           {/* Hybrid Plan - Compact */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200 p-3 max-w-md mx-auto">
-            <h3 className="text-sm font-semibold text-gray-800 mb-2 text-center">HYBRID PAY-PER-BOOKING</h3>
-            <div className="text-center mb-2">
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200 p-4 max-w-md mx-auto">
+            <h3 className="text-sm font-semibold text-gray-800 mb-3 text-center">HYBRID PAY-PER-BOOKING</h3>
+            <div className="text-center mb-3">
               <div className="text-lg font-bold text-blue-600 mb-1">€20<span className="text-xs font-normal text-gray-500">/μήνα</span></div>
               <div className="text-xs text-gray-500">+ΦΠΑ <span className="align-top text-[10px]">τελική τιμή</span></div>
               <div className="text-sm text-blue-600 font-semibold">€24.80</div>
               <div className="text-sm font-bold text-blue-600 mt-1">€0.75/κράτηση</div>
             </div>
             <div className="text-center">
-              <p className="text-xs text-gray-600 mb-1">ΜΕ FSE - Επικοινωνήστε μαζί μας</p>
-              <div className="inline-flex items-center space-x-2 text-blue-600 font-medium text-xs">
+              <p className="text-xs text-gray-600 mb-2">ΜΕ FSE - Επικοινωνήστε μαζί μας</p>
+              <div className="inline-flex items-center space-x-3 text-blue-600 font-medium text-xs">
                 <span>📧</span>
                 <span>📞</span>
                 <span>💬</span>

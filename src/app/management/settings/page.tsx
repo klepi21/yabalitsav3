@@ -325,9 +325,9 @@ export default function SettingsPage() {
                 </div>
                 
                 <div className="mt-4 text-center">
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-3">
-                    <p className="text-xs text-blue-800">
-                      <strong>ℹ️ Πληροφορίες:</strong> Ο λογαριασμός σου είναι <strong>trial</strong> και θα λήξει σε {venue.daysRemaining ?? 0} ημέρες. 
+                  <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4 mb-4">
+                    <p className="text-sm text-yellow-800 font-medium">
+                      <strong>⚠️ Σημαντικό:</strong> Ο λογαριασμός σου είναι <strong>trial</strong> και θα λήξει σε {venue.daysRemaining ?? 0} ημέρες. 
                       Μετά τη λήξη θα χρειαστεί να επιλέξεις πλάνο συνδρομής για να συνεχίσεις.
                     </p>
                   </div>
