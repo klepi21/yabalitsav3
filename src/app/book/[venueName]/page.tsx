@@ -295,20 +295,13 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         console.log('Initializing reCAPTCHA with:', {
           auth: !!auth,
           container: !!container,
-          siteKey: RECAPTCHA_SITE_KEY
+          siteKey: RECAPTCHA_SITE_KEY,
+          containerId: 'recaptcha-container'
         });
         
-        // Create reCAPTCHA v2 verifier with correct configuration
-        verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'sitekey': RECAPTCHA_SITE_KEY,
-          'callback': () => {
-            // reCAPTCHA solved successfully
-            console.log('reCAPTCHA solved');
-          },
-          'expired-callback': () => {
-            console.log('reCAPTCHA expired');
-            setRecaptchaVerifier(null);
-          }
+        // Create reCAPTCHA v2 verifier with minimal configuration
+        verifier = new RecaptchaVerifier(auth, container, {
+          'sitekey': RECAPTCHA_SITE_KEY
         });
         
         console.log('RecaptchaVerifier created successfully');
