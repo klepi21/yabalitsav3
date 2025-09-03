@@ -112,7 +112,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         // Get all venues and find the one matching the URL
         const allVenues = await venueService.getAll();
         const foundVenue = allVenues.find(v => 
-          v.name.toLowerCase().replace(/\s+/g, '') === venueName.toLowerCase().replace(/\s+/g, '')
+          v.name && v.name.toLowerCase().replace(/\s+/g, '') === venueName.toLowerCase().replace(/\s+/g, '')
         );
 
         if (foundVenue) {
@@ -212,10 +212,11 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         }
       } catch (error) {
         console.error('Error loading venue data:', error);
+        console.error('venueName:', venueName);
         // Fallback to mock data if there's an error
         const fallbackVenue: Venue = {
           id: '1',
-          name: decodeURIComponent(venueName),
+          name: venueName ? decodeURIComponent(venueName) : 'Άγνωστο Venue',
           address: 'Entanti Papagewrgiou 123, Thessaloniki',
           phone: '2310565657',
           email: 'info@leontes.gr',
@@ -279,10 +280,10 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         // Wait for the popup to render and button to exist
         await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Check if button exists (for invisible reCAPTCHA)
-        const button = document.getElementById('send-sms-button');
-        if (!button) {
-          console.log('Send SMS button not found');
+        // Check if container exists
+        const container = document.getElementById('recaptcha-container');
+        if (!container) {
+          console.log('reCAPTCHA container not found');
           return;
         }
         
@@ -294,25 +295,29 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         
         console.log('Initializing reCAPTCHA with:', {
           auth: !!auth,
-          button: !!button,
+          container: !!container,
           siteKey: RECAPTCHA_SITE_KEY,
-          buttonId: 'send-sms-button'
+          containerId: 'recaptcha-container'
         });
         
-        // Create invisible reCAPTCHA verifier following official docs
-        verifier = new RecaptchaVerifier(auth, 'send-sms-button', {
+        // Create reCAPTCHA verifier following official docs
+        verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           'sitekey': RECAPTCHA_SITE_KEY,
-          'size': 'invisible',
+          'size': 'normal',
           'callback': (response: any) => {
             // reCAPTCHA solved, allow signInWithPhoneNumber
             console.log('reCAPTCHA solved with response:', response);
-            // The SMS will be sent automatically when this callback fires
+          },
+          'expired-callback': () => {
+            // Response expired. Ask user to solve reCAPTCHA again
+            console.log('reCAPTCHA expired');
+            setRecaptchaVerifier(null);
           }
         });
         
         console.log('RecaptchaVerifier created successfully');
         
-        // Render the reCAPTCHA
+        // Pre-render the reCAPTCHA as suggested in docs
         await verifier.render();
         console.log('reCAPTCHA rendered successfully');
         setRecaptchaVerifier(verifier);
@@ -1224,10 +1229,12 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
               <p className="text-lg font-semibold text-gray-900">+30 {formData.phone}</p>
             </div>
 
-            {/* Send SMS Button with invisible reCAPTCHA */}
+            {/* reCAPTCHA Container */}
+            <div id="recaptcha-container" className="mb-6"></div>
+            
+            {/* Send SMS Button */}
             {!verificationId && (
               <button
-                id="send-sms-button"
                 onClick={sendSmsVerification}
                 disabled={isSendingSms || !recaptchaVerifier}
                 className="w-full bg-emerald-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4"
