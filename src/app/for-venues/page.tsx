@@ -33,7 +33,7 @@ export default function ForVenuesPage() {
     venueAfm: '',
     venueDoy: '',
     // Plan
-    plan: 'subscription',
+    plan: 'trial',
     acceptTerms: false
   });
 
@@ -83,6 +83,7 @@ export default function ForVenuesPage() {
         contactDetails: { email: '', phone: '' },
         ownerId: uid,
         plan: form.plan,
+        active: true,
         tax: { afm: form.venueAfm, doy: form.venueDoy },
         daysRemaining: 15,
         lastDecrementAt: serverTimestamp(),
@@ -107,7 +108,7 @@ export default function ForVenuesPage() {
       setForm({
         ownerName: '', ownerEmail: '', ownerPhone: '', password: '', confirmPassword: '',
         venueName: '', venueAddress: '', venueCity: 'Αθήνα', venueEmail: '', venuePhone: '', venueAfm: '', venueDoy: '',
-        plan: 'subscription', acceptTerms: false
+        plan: 'trial', acceptTerms: false
       });
     } catch (err: any) {
       setError(err?.message || 'Κάτι πήγε στραβά.');
