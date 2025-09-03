@@ -196,19 +196,43 @@ export default function DashboardPage() {
     const daySchedule = pitch.defaultOpeningHours[dayName];
     console.log('Day schedule:', daySchedule);
     
-    if (!daySchedule || !daySchedule.isOpen || !daySchedule.slots?.length) {
-      console.log('No slots available for this day');
+    if (!daySchedule || !daySchedule.isOpen) {
+      console.log('No opening hours for this day');
       return [];
     }
 
-    // Generate time slots based on opening slots and slot duration
+    // Generate time slots based on opening hours and slot duration
     const slots: Array<{time: string, display: string}> = [];
     
-    // For each opening slot
-    daySchedule.slots.forEach(openingSlot => {
-      console.log('Processing slot:', openingSlot);
-      const startTime = new Date(`2000-01-01T${openingSlot.start}`);
-      const endTime = new Date(`2000-01-01T${openingSlot.end}`);
+    if ('slots' in daySchedule && daySchedule.slots && daySchedule.slots.length > 0) {
+      // New structure with slots array
+      daySchedule.slots.forEach((openingSlot: { start: string; end: string }) => {
+        console.log('Processing slot:', openingSlot);
+        const startTime = new Date(`2000-01-01T${openingSlot.start}`);
+        const endTime = new Date(`2000-01-01T${openingSlot.end}`);
+        
+        let currentTime = new Date(startTime);
+        
+        while (currentTime < endTime) {
+          const slotStart = currentTime.toTimeString().slice(0, 5);
+          const slotEnd = new Date(currentTime.getTime() + pitch.slotDuration * 60000);
+          const slotEndTime = slotEnd.toTimeString().slice(0, 5);
+          
+          // Only add slot if it doesn't exceed closing time
+          if (slotEnd <= endTime) {
+            slots.push({
+              time: `${slotStart} - ${slotEndTime}`,
+              display: slotStart
+            });
+          }
+          
+          currentTime.setMinutes(currentTime.getMinutes() + pitch.slotDuration);
+        }
+      });
+    } else if ('open' in daySchedule && 'close' in daySchedule && daySchedule.open && daySchedule.close) {
+      // Old structure with open/close times
+      const startTime = new Date(`2000-01-01T${daySchedule.open}`);
+      const endTime = new Date(`2000-01-01T${daySchedule.close}`);
       
       let currentTime = new Date(startTime);
       
@@ -227,7 +251,7 @@ export default function DashboardPage() {
         
         currentTime.setMinutes(currentTime.getMinutes() + pitch.slotDuration);
       }
-    });
+    }
 
     // Filter out already booked slots (including pending bookings)
     const bookedSlots = bookings
@@ -688,18 +712,13 @@ export default function DashboardPage() {
                     </div>
                     <div className="bg-gray-50 rounded-lg p-4">
                       <dt className="text-sm font-medium text-gray-500 mb-1">📧 Email</dt>
-                      <dd className="text-sm text-gray-900 font-medium">{venue.contactDetails?.email}</dd>
+                                              <dd className="text-sm text-gray-900 font-medium">{venue.email || 'Δεν υπάρχει email'}</dd>
                     </div>
                     <div className="bg-gray-50 rounded-lg p-4">
                       <dt className="text-sm font-medium text-gray-500 mb-1">📞 Τηλέφωνο</dt>
-                      <dd className="text-sm text-gray-900 font-medium">{venue.contactDetails?.phone}</dd>
+                                              <dd className="text-sm text-gray-900 font-medium">{venue.phone || 'Δεν υπάρχει τηλέφωνο'}</dd>
                     </div>
-                    {venue.notes && (
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <dt className="text-sm font-medium text-gray-500 mb-1">📝 Σημειώσεις</dt>
-                        <dd className="text-sm text-gray-900 font-medium">{venue.notes}</dd>
-                      </div>
-                    )}
+                    
                   </div>
                 )}
               </div>

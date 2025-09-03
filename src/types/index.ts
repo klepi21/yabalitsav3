@@ -1,13 +1,12 @@
 export interface Venue {
   id: string;
   name: string;
-  address: string;
   city?: string;
-  contactDetails: {
-    email: string;
-    phone: string;
-  };
-  notes?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  ownerId: string;
+  daysRemaining?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,16 +16,26 @@ export interface OpeningSlot {
   end: string; // HH:mm format
 }
 
+// Legacy opening hours structure for backward compatibility
+export interface LegacyOpeningHours {
+  isOpen: boolean;
+  open: string; // HH:mm format
+  close: string; // HH:mm format
+}
+
+// Union type for opening hours
+export type DayOpeningHours = {
+  isOpen: boolean;
+  slots: OpeningSlot[];
+} | LegacyOpeningHours;
+
 export interface Pitch {
   id: string;
   venueId: string;
   name: string;
   type: '5x5' | '6x6' | '7x7' | '8x8' | '9x9';
   defaultOpeningHours: {
-    [key: string]: { // day of week (sunday, monday, etc.)
-      isOpen: boolean;
-      slots: OpeningSlot[]; // Multiple time slots per day
-    };
+    [key: string]: DayOpeningHours; // day of week (sunday, monday, etc.)
   };
   slotDuration: number; // in minutes
   pricePerSlot: number;

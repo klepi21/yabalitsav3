@@ -123,29 +123,38 @@ export default function RootPage() {
     const daySchedule = pitch.defaultOpeningHours[dayName];
     console.log('🕐 Opening hours for', dayName, ':', daySchedule);
     
-    if (!daySchedule || !daySchedule.isOpen || !daySchedule.slots.length) {
+    if (!daySchedule || !daySchedule.isOpen) {
       console.log('❌ Pitch is closed on', dayName);
       return false;
     }
 
-    // Check if the time is within any of the opening slots
+    // Handle both old and new opening hours structure
+    let isWithinOpeningHours = false;
+    
+    // Create selectedTime object for both cases
     const [hours, minutes] = time.split(':').map(Number);
     const selectedTime = new Date(date);
     selectedTime.setHours(hours, minutes, 0, 0);
     const selectedTimeString = selectedTime.toTimeString().slice(0, 5);
-
-    // Check if the selected time falls within any of the opening slots
-    const isWithinOpeningHours = daySchedule.slots.some(slot => {
-      console.log('⏰ Time check:', selectedTimeString, 'vs', slot.start, '-', slot.end);
-      return selectedTimeString >= slot.start && selectedTimeString < slot.end;
-    });
+    
+    if ('slots' in daySchedule && daySchedule.slots && daySchedule.slots.length > 0) {
+      // New structure with slots array
+      isWithinOpeningHours = daySchedule.slots.some(slot => {
+        console.log('⏰ Time check (slots):', selectedTimeString, 'vs', slot.start, '-', slot.end);
+        return selectedTimeString >= slot.start && selectedTimeString < slot.end;
+      });
+    } else if ('open' in daySchedule && 'close' in daySchedule && daySchedule.open && daySchedule.close) {
+      // Old structure with open/close times
+      console.log('⏰ Time check (open/close):', selectedTimeString, 'vs', daySchedule.open, '-', daySchedule.close);
+      isWithinOpeningHours = selectedTimeString >= daySchedule.open && selectedTimeString < daySchedule.close;
+    }
 
     if (!isWithinOpeningHours) {
-      console.log('❌ Time outside all opening slots');
+      console.log('❌ Time outside opening hours');
       return false;
     }
 
-    console.log('✅ Time is within an opening slot');
+    console.log('✅ Time is within opening hours');
 
     // Check if there are conflicting bookings
     const conflictingBookings = bookings.filter(booking => 
@@ -284,51 +293,17 @@ export default function RootPage() {
                   >
                     <option value="">Επιλέξτε ώρα</option>
                     {(() => {
-                      // Get the selected date's day of week
-                      const selectedDate = searchQuery.date ? new Date(searchQuery.date) : null;
-                      const dayOfWeek = selectedDate?.getDay();
-                      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-                      const dayName = dayOfWeek !== undefined ? dayNames[dayOfWeek] : null;
-
-                      console.log('Selected day:', dayName);
-
-                      // Get available slots for the selected pitch
-                      const selectedPitch = pitches.find(p => p.type === searchQuery.pitchType);
-                      console.log('Selected pitch:', selectedPitch);
-                      console.log('Opening hours:', selectedPitch?.defaultOpeningHours);
+                      // Generate all available hours from 8:00 to 23:00
+                      const availableHours = [];
+                      for (let hour = 8; hour <= 23; hour++) {
+                        availableHours.push(`${hour.toString().padStart(2, '0')}:00`);
+                      }
                       
-                      if (!dayName || !selectedPitch) {
-                        return <option value="">Επιλέξτε ημερομηνία και τύπο γηπέδου</option>;
-                      }
-
-                      const daySchedule = selectedPitch.defaultOpeningHours[dayName];
-                      console.log('Day schedule:', daySchedule);
-
-                      if (!daySchedule?.isOpen || !daySchedule?.slots?.length) {
-                        return <option value="">Δεν υπάρχουν διαθέσιμες ώρες</option>;
-                      }
-
-                      // Generate all possible hours between slot ranges
-                      const availableHours = new Set<string>();
-                      daySchedule.slots.forEach(slot => {
-                        const [startHour] = slot.start.split(':').map(Number);
-                        const [endHour] = slot.end.split(':').map(Number);
-                        
-                        for (let hour = startHour; hour < endHour; hour++) {
-                          availableHours.add(`${hour.toString().padStart(2, '0')}:00`);
-                        }
-                      });
-
-                      console.log('Available hours:', Array.from(availableHours));
-
-                      // Convert to sorted array and create options
-                      return Array.from(availableHours)
-                        .sort()
-                        .map(timeString => (
-                          <option key={timeString} value={timeString}>
-                            {timeString}
-                          </option>
-                        ));
+                      return availableHours.map(timeString => (
+                        <option key={timeString} value={timeString}>
+                          {timeString}
+                        </option>
+                      ));
                     })()}
                   </select>
                 </div>
@@ -411,19 +386,19 @@ export default function RootPage() {
                       </div>
 
                       {/* Contact Info - Below */}
-                      {result.venue.contactDetails && (
+                      {(result.venue.phone || result.venue.email) && (
                         <div className="border-t border-gray-100 pt-3 mt-3">
                           <div className="flex items-center space-x-4 text-xs text-gray-600">
-                            {result.venue.contactDetails.phone && (
+                            {result.venue.phone && (
                               <div className="flex items-center">
                                 <span className="mr-1">📞</span>
-                                <span>{result.venue.contactDetails.phone}</span>
+                                <span>{result.venue.phone}</span>
                               </div>
                             )}
-                            {result.venue.contactDetails.email && (
+                            {result.venue.email && (
                               <div className="flex items-center">
                                 <span className="mr-1">📧</span>
-                                <span>{result.venue.contactDetails.email}</span>
+                                <span>{result.venue.email}</span>
                               </div>
                             )}
                           </div>

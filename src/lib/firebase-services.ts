@@ -20,12 +20,43 @@ import {
 import { db, auth } from './firebase';
 import { Venue, Pitch, Booking, User, TimeSlot, VenueOwner, BlockedDate } from '../types';
 
+// Firebase data structure interfaces
+interface FirebaseVenueData {
+  name: string;
+  address?: string;
+  description?: string;
+  city?: string;
+  phone?: string;
+  email?: string;
+  contactDetails?: {
+    phone?: string;
+    email?: string;
+  };
+  ownerId: string;
+  daysRemaining?: number;
+  createdAt?: any;
+  updatedAt?: any;
+}
+
 // Venue Services
 export const venueService = {
   // Create a new venue
   async create(venueData: Omit<Venue, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    // Convert phone/email to contactDetails structure for Firebase
+    const firebaseData: any = { ...venueData };
+    
+    if (venueData.phone !== undefined || venueData.email !== undefined) {
+      firebaseData.contactDetails = {
+        phone: venueData.phone || '',
+        email: venueData.email || '',
+      };
+      // Remove direct phone/email fields as they're now in contactDetails
+      delete firebaseData.phone;
+      delete firebaseData.email;
+    }
+    
     const docRef = await addDoc(collection(db, 'yabalitsa_venues'), {
-      ...venueData,
+      ...firebaseData,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
@@ -35,12 +66,23 @@ export const venueService = {
   // Get all venues
   async getAll(): Promise<Venue[]> {
     const querySnapshot = await getDocs(collection(db, 'yabalitsa_venues'));
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate() || new Date(),
-      updatedAt: doc.data().updatedAt?.toDate() || new Date()
-    })) as Venue[];
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data() as FirebaseVenueData;
+      return {
+        id: doc.id,
+        name: data.name,
+        address: data.address,
+        description: data.description,
+        city: data.city,
+        // Handle both contactDetails structure and direct phone/email fields
+        phone: data.contactDetails?.phone || data.phone || '',
+        email: data.contactDetails?.email || data.email || '',
+        ownerId: data.ownerId,
+        daysRemaining: data.daysRemaining,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date()
+      } as Venue;
+    });
   },
 
   // Get venue by ID
@@ -49,10 +91,18 @@ export const venueService = {
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
-      const data = docSnap.data();
+      const data = docSnap.data() as FirebaseVenueData;
       return {
         id: docSnap.id,
-        ...data,
+        name: data.name,
+        address: data.address,
+        description: data.description,
+        city: data.city,
+        // Handle both contactDetails structure and direct phone/email fields
+        phone: data.contactDetails?.phone || data.phone || '',
+        email: data.contactDetails?.email || data.email || '',
+        ownerId: data.ownerId,
+        daysRemaining: data.daysRemaining,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date()
       } as Venue;
@@ -63,8 +113,22 @@ export const venueService = {
   // Update venue
   async update(id: string, venueData: Partial<Venue>): Promise<void> {
     const docRef = doc(db, 'yabalitsa_venues', id);
+    
+    // Convert phone/email to contactDetails structure for Firebase
+    const firebaseData: any = { ...venueData };
+    
+    if (venueData.phone !== undefined || venueData.email !== undefined) {
+      firebaseData.contactDetails = {
+        phone: venueData.phone || '',
+        email: venueData.email || '',
+      };
+      // Remove direct phone/email fields as they're now in contactDetails
+      delete firebaseData.phone;
+      delete firebaseData.email;
+    }
+    
     await updateDoc(docRef, {
-      ...venueData,
+      ...firebaseData,
       updatedAt: serverTimestamp()
     });
   },
