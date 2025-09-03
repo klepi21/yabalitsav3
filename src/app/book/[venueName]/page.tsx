@@ -268,92 +268,78 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
     loadVenueData();
   }, [venueName]);
 
-          // Initialize reCAPTCHA when SMS popup is shown
-    useEffect(() => {
-      let verifier: RecaptchaVerifier | null = null;
-      
-      if (!showSmsValidation || recaptchaVerifier) return;
-      
-      const initRecaptcha = async () => {
+  // Initialize reCAPTCHA when SMS popup is shown
+  useEffect(() => {
+    let verifier: RecaptchaVerifier | null = null;
+    
+    if (!showSmsValidation || recaptchaVerifier) return;
+    
+    const initRecaptcha = async () => {
+      try {
+        // Wait for the popup to render and container to exist
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Check if container exists
+        const container = document.getElementById('recaptcha-container');
+        if (!container) {
+          console.log('reCAPTCHA container not found');
+          return;
+        }
+        
+        // Check if auth is properly initialized
+        if (!auth) {
+          console.log('Auth not initialized');
+          return;
+        }
+        
+        // Create reCAPTCHA v2 verifier with minimal configuration
+        verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'sitekey': RECAPTCHA_SITE_KEY,
+          'size': 'normal'
+        });
+        
+        // Render the reCAPTCHA
+        await verifier.render();
+        setRecaptchaVerifier(verifier);
+        
+      } catch (error) {
+        console.error('reCAPTCHA initialization error:', error);
+        setRecaptchaVerifier(null);
+      }
+    };
+    
+    // Initialize reCAPTCHA
+    initRecaptcha();
+    
+    // Cleanup function
+    return () => {
+      if (verifier) {
         try {
-          // Wait for the popup to render and container to exist
-          await new Promise(resolve => setTimeout(resolve, 300));
-          
-          // Check if container exists
-          const container = document.getElementById('recaptcha-container');
-          if (!container) {
-            return;
-          }
-          
-          // Check if auth is properly initialized
-          if (!auth || !auth.config) {
-            return;
-          }
-          
-                      // Create reCAPTCHA v2 verifier with explicit version
-            try {
-              verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                'sitekey': RECAPTCHA_SITE_KEY,
-                'version': 'v2',
-                'size': 'normal',
-                'callback': () => {
-                  // reCAPTCHA solved successfully
-                },
-                'expired-callback': () => {
-                  setRecaptchaVerifier(null);
-                }
-              });
-              
-              // Render the reCAPTCHA
-              await verifier.render();
-              setRecaptchaVerifier(verifier);
-              
-            } catch (recaptchaError) {
-              // Try fallback approach with explicit v2
-              try {
-                verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                  'sitekey': RECAPTCHA_SITE_KEY,
-                  'version': 'v2'
-                });
-                
-                await verifier.render();
-                setRecaptchaVerifier(verifier);
-                
-              } catch (fallbackError) {
-                // Last resort - try with explicit v2
-                try {
-                  verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                    'version': 'v2'
-                  });
-                  
-                  await verifier.render();
-                  setRecaptchaVerifier(verifier);
-                  
-                } catch (lastResortError) {
-                  throw lastResortError;
-                }
-              }
-            }
-          
+          verifier.clear();
         } catch (error) {
-          setRecaptchaVerifier(null);
+          // Silent cleanup error
         }
-      };
-      
-      // Initialize reCAPTCHA
-      initRecaptcha();
-      
-      // Cleanup function
-      return () => {
-        if (verifier) {
-          try {
-            verifier.clear();
-          } catch (error) {
-            // Silent cleanup error
-          }
-        }
-      };
-    }, [showSmsValidation]); // Only run when SMS popup is shown
+      }
+    };
+  }, [showSmsValidation, auth]); // Include auth in dependencies
+
+  // Reset reCAPTCHA function
+  const resetRecaptcha = () => {
+    if (recaptchaVerifier) {
+      try {
+        recaptchaVerifier.clear();
+      } catch (error) {
+        console.error('Error clearing reCAPTCHA:', error);
+      }
+    }
+    setRecaptchaVerifier(null);
+    // Force reinitialization
+    setTimeout(() => {
+      if (showSmsValidation) {
+        setRecaptchaVerifier(null);
+      }
+    }, 100);
+  };
 
   const generateWeekSchedule = (): DaySchedule[] => {
     if (!selectedPitch) return [];
@@ -506,19 +492,6 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
     setCurrentStep(step);
   };
 
-  // Manual reCAPTCHA reset
-  const resetRecaptcha = () => {
-    if (recaptchaVerifier) {
-      try {
-        recaptchaVerifier.clear();
-        console.log('reCAPTCHA manually cleared');
-      } catch (error) {
-        console.error('Error clearing reCAPTCHA:', error);
-      }
-    }
-    setRecaptchaVerifier(null);
-  };
-
 
 
   // Countdown timer for resend
@@ -540,8 +513,6 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
   // Send SMS verification
   const sendSmsVerification = async () => {
-    
-    
     if (!recaptchaVerifier) {
       alert('Παρακαλώ περιμένετε να φορτώσει το reCAPTCHA ή δοκιμάστε ξανά.');
       return;
@@ -567,6 +538,8 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       setCountdown(60);
       setCanResend(false);
     } catch (error: any) {
+      console.error('SMS verification error:', error);
+      
       // Handle specific Firebase errors
       if (error.code === 'auth/invalid-phone-number') {
         alert('Λάθος αριθμός τηλεφώνου. Παρακαλώ ελέγξτε τον αριθμό σας.');
@@ -575,13 +548,28 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       } else if (error.code === 'auth/quota-exceeded') {
         alert('Υπέρβαση ορίου SMS. Παρακαλώ δοκιμάστε αργότερα.');
       } else if (error.code === 'auth/invalid-app-credential') {
-        alert('Το reCAPTCHA δεν είναι έγκυρο. Παρακαλώ ελέγξτε τη σύνδεση σας και δοκιμάστε ξανά.');
+        alert('Το reCAPTCHA δεν είναι έγκυρο. Παρακαλώ δοκιμάστε ξανά.');
+        // Reset reCAPTCHA and try to reinitialize
+        if (recaptchaVerifier) {
+          try {
+            recaptchaVerifier.clear();
+          } catch (clearError) {
+            console.error('Error clearing reCAPTCHA:', clearError);
+          }
+        }
         setRecaptchaVerifier(null);
+        // Try to reinitialize after a short delay
+        setTimeout(() => {
+          if (showSmsValidation) {
+            // Force reCAPTCHA reinitialization
+            setRecaptchaVerifier(null);
+          }
+        }, 1000);
       } else if (error.code === 'auth/recaptcha-token-expired') {
         alert('Το reCAPTCHA έληξε. Παρακαλώ δοκιμάστε ξανά.');
         setRecaptchaVerifier(null);
       } else if (error.code === 'auth/recaptcha-not-rendered') {
-        alert('Το reCAPTCHA δεν φορτώθηκε σωστά. Παρακαλώ ανανεώστε τη σελίδα.');
+        alert('Το reCAPTCHA δεν φορτώθηκε σωστά. Παρακαλώ δοκιμάστε ξανά.');
         setRecaptchaVerifier(null);
       } else {
         alert(`Σφάλμα στην αποστολή SMS: ${error.code || error.message}. Παρακαλώ δοκιμάστε ξανά.`);

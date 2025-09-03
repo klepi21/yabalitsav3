@@ -14,7 +14,7 @@ const firebaseConfig = {
 };
 
 // reCAPTCHA site key for Phone Authentication
-export const RECAPTCHA_SITE_KEY = "6Le9Dr0rAAAAAFbKbdjPkPz8aTj2A6QSF4Dbf1CZ";
+export const RECAPTCHA_SITE_KEY = "6LeXybwrAAAAAN8bzcWCj6CSDIYoiMfMYDInehJ2";
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
