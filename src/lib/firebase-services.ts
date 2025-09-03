@@ -625,6 +625,27 @@ export const subscriptionService = {
     } as Subscription;
   },
 
+  // Get subscription by venueId field (searches all documents)
+  async getByVenueIdField(venueId: string): Promise<Subscription | null> {
+    const q = query(
+      collection(db, 'yabalitsa_subscriptions'),
+      where('venueId', '==', venueId)
+    );
+    const querySnapshot = await getDocs(q);
+    
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      const data = doc.data() as any;
+      return {
+        id: doc.id,
+        stripeCustomerId: data.stripeCustomerId,
+        subscriptionPlan: data.subscriptionPlan,
+        subscriptionEndDate: data.subscriptionEndDate
+      } as Subscription;
+    }
+    return null;
+  },
+
   // Update subscription fields
   async update(venueId: string, data: Partial<Omit<Subscription, 'id'>>): Promise<void> {
     const ref = doc(db, 'yabalitsa_subscriptions', venueId);

@@ -11,7 +11,7 @@ import {
   BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import { venueService } from '@/lib/firebase-services';
+import { venueService, paymentService, subscriptionService } from '@/lib/firebase-services';
 import { Venue } from '@/types';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -33,8 +33,30 @@ export default function SettingsPage() {
   const router = useRouter();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
 
+  // Utility function to safely format dates
+  const formatDateSafely = (dateString: string | null | undefined) => {
+    if (!dateString) return null;
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return null;
+    
+    return date;
+  };
+
+  // Utility function to calculate days difference safely
+  const calculateDaysDifference = (dateString: string | null | undefined) => {
+    const date = formatDateSafely(dateString);
+    if (!date) return null;
+    
+    const now = new Date();
+    const diffTime = date.getTime() - now.getTime();
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  };
+
   
   const [venue, setVenue] = useState<Venue | null>(null);
+  const [lastPayment, setLastPayment] = useState<any>(null);
+  const [subscription, setSubscription] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -80,6 +102,32 @@ export default function SettingsPage() {
             phone: venueData.phone || '',
           },
         });
+        
+        // Load subscription data from the yabalitsa_subscriptions collection
+        try {
+          const subscriptionData = await subscriptionService.getByVenueIdField(venueOwner.venueId);
+          if (subscriptionData) {
+            setSubscription(subscriptionData);
+          }
+        } catch (subscriptionError) {
+          console.error('Error loading subscription data:', subscriptionError);
+          // Don't show error for subscription, just log it
+        }
+        
+        // Load last payment data
+        try {
+          const payments = await paymentService.getBySubscriptionId(venueOwner.venueId);
+          if (payments.length > 0) {
+            // Sort by payment date and get the most recent
+            const sortedPayments = payments.sort((a, b) => 
+              new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()
+            );
+            setLastPayment(sortedPayments[0]);
+          }
+        } catch (paymentError) {
+          console.error('Error loading payment data:', paymentError);
+          // Don't show error for payments, just log it
+        }
       }
     } catch (error) {
       console.error('Error loading venue data:', error);
@@ -146,9 +194,26 @@ export default function SettingsPage() {
         </Link>
       </div>
 
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Ρυθμίσεις Γηπέδου</h1>
-        <p className="mt-2 text-gray-600">Διαμόρφωση προτιμήσεων και ρυθμίσεων του γηπέδου σας</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Ρυθμίσεις Γηπέδου</h1>
+          <p className="mt-2 text-gray-600">Διαμόρφωση προτιμήσεων και ρυθμίσεων του γηπέδου σας</p>
+        </div>
+        
+        {/* Subscription Status Badge */}
+        {venue && (
+          <div className={`px-4 py-2 rounded-lg font-semibold text-sm ${
+            venue.plan === 'subscription' 
+              ? 'bg-green-100 text-green-800 border border-green-300' 
+              : 'bg-yellow-100 text-yellow-800 border border-yellow-300'
+          }`}>
+            {venue.plan === 'subscription' ? (
+              <span>✨ {venue.planType || 'Pro'} Plan</span>
+            ) : (
+              <span>⚠️ Trial Account</span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Success/Error Messages */}
@@ -163,6 +228,8 @@ export default function SettingsPage() {
           <div className="text-sm text-red-700">{error}</div>
         </div>
       )}
+
+
 
       {/* Two Column Layout */}
       <div className="grid lg:grid-cols-2 gap-8">
@@ -318,25 +385,125 @@ export default function SettingsPage() {
                     </div>
                     {venue.plan === 'subscription' && (
                       <div className="text-xs text-gray-500 mt-1">
-                        {venue.planType || 'Basic'} Plan
+                        {subscription?.subscriptionPlan || venue.planType || 'Basic'} Plan
                       </div>
                     )}
                   </div>
+                  
+                  {/* Subscription End Date */}
+                  {venue.plan === 'subscription' && (
+                    <div className="text-center mt-4">
+                      <div className="text-sm text-gray-700 mb-2">
+                        <span className="font-medium">Λήγει στις:</span>
+                      </div>
+                      {subscription?.subscriptionEndDate ? (
+                        (() => {
+                          const endDate = formatDateSafely(subscription.subscriptionEndDate);
+                          if (!endDate) {
+                            return (
+                              <div className="text-lg font-semibold text-orange-600">
+                                ⚠️ Ημερομηνία δεν είναι έγκυρη
+                              </div>
+                            );
+                          }
+                          
+                          const diffDays = calculateDaysDifference(subscription.subscriptionEndDate);
+                          if (diffDays === null) {
+                            return (
+                              <div className="text-lg font-semibold text-orange-600">
+                                ⚠️ Δεν είναι δυνατός ο υπολογισμός ημερών
+                              </div>
+                            );
+                          }
+                          
+                          return (
+                            <>
+                              <div className="text-lg font-semibold text-blue-700">
+                                {endDate.toLocaleDateString('el-GR', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
+                              </div>
+                              
+                              {/* Ανανέωση Συνδρομής Button */}
+                              <div className="mt-3">
+                                <Link 
+                                  href="/management/settings/renewal" 
+                                  className="inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+                                >
+                                  Ανανέωση Συνδρομής
+                                </Link>
+                              </div>
+                            </>
+                          );
+                        })()
+                      ) : (
+                        <div className="text-lg font-semibold text-gray-500">
+                          Ημερομηνία λήξης δεν είναι διαθέσιμη
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
                 
                 <div className="mt-4 text-center">
-                  <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-4 mb-4">
-                    <p className="text-sm text-yellow-800 font-medium">
-                      <strong>⚠️ Σημαντικό:</strong> Ο λογαριασμός σου είναι <strong>trial</strong> και θα λήξει σε {venue.daysRemaining ?? 0} ημέρες. 
-                      Μετά τη λήξη θα χρειαστεί να επιλέξεις πλάνο συνδρομής για να συνεχίσεις.
-                    </p>
+
+                  
+
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Last Payment Info */}
+          {venue && venue.plan === 'subscription' && lastPayment && (
+            <div className="bg-white shadow rounded-lg">
+              <div className="px-4 py-5 sm:p-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">💳 Τελευταία Πληρωμή</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="text-center">
+                    <div className="text-sm text-gray-700 mb-2">
+                      <span className="font-medium">Ποσό:</span>
+                    </div>
+                    <div className="text-2xl font-bold text-green-700">
+                      €{lastPayment.amount}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {lastPayment.planName} Plan - {lastPayment.durationMonths} μήνες
+                    </div>
                   </div>
-                  <Link 
-                    href="/management/settings/renewal" 
-                    className="inline-flex items-center justify-center w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
-                  >
-                    🔄 Ανανέωση Συνδρομής
-                  </Link>
+                  
+                  <div className="text-center">
+                    <div className="text-sm text-gray-700 mb-2">
+                      <span className="font-medium">Ημερομηνία:</span>
+                    </div>
+                    <div className="text-lg font-semibold text-blue-700">
+                      {new Date(lastPayment.paymentDate).toLocaleDateString('el-GR', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {lastPayment.status === 'succeeded' ? 'Επιτυχής πληρωμή' : 'Εκκρεμεί'}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-blue-800">
+                      <span className="font-medium">📊 Σύνοψη:</span> Πληρώθηκε το {lastPayment.planName} Plan για {lastPayment.durationMonths} μήνες
+                    </div>
+                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                      lastPayment.status === 'succeeded' 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {lastPayment.status === 'succeeded' ? '✅ Επιτυχής' : '⏳ Εκκρεμεί'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>

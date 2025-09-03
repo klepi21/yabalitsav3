@@ -9,6 +9,7 @@ export interface Venue {
   daysRemaining?: number;
   plan?: 'subscription' | 'pay-per-booking' | 'trial';
   planType?: 'Basic' | 'Pro' | 'Enterprise';
+  subscriptionEndDate?: string; // ISO string for subscription end date
   active?: boolean;
   createdAt: Date;
   updatedAt: Date;
