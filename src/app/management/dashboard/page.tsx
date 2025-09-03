@@ -33,6 +33,22 @@ export default function DashboardPage() {
     notes: ''
   });
 
+  // Notification state
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  // Close notifications when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (showNotifications && !target.closest('.notification-bell')) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showNotifications]);
+
   // Check authentication
   useEffect(() => {
     if (authLoading) return;
@@ -420,13 +436,99 @@ export default function DashboardPage() {
             <h1 className="text-3xl font-bold text-gray-900">Πίνακας Διαχείρισης Γηπέδου</h1>
             <p className="text-gray-600 mt-1">Καλώς ήρθατε στο σύστημα διαχείρισης σας</p>
           </div>
-          <button
-            onClick={() => setShowQuickBooking(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-lg text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green transition-all duration-200"
-          >
-            <PlusIcon className="h-4 w-4 mr-2" />
-            Γρήγορη Κράτηση
-          </button>
+          <div className="flex items-center space-x-3">
+            {/* Notification Bell */}
+            <div className="relative notification-bell">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all duration-200 hover:scale-110 hover:shadow-lg"
+              >
+                <span className="text-2xl">🔔</span>
+                {/* Badge with pending count */}
+                {bookings.filter(b => b.status === 'pending').length > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                    {bookings.filter(b => b.status === 'pending').length}
+                  </span>
+                )}
+              </button>
+              
+              {/* Notifications Popup */}
+              {showNotifications && (
+                <div className="absolute right-0 top-12 w-80 bg-white shadow-2xl rounded-2xl border-0 z-50 overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                  {/* Header with better contrast */}
+                  <div className="bg-gradient-to-r from-gray-800 to-gray-900 p-5 text-white relative">
+                    {/* Subtle accent line */}
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-football-green to-emerald-500"></div>
+                    <h3 className="text-xl font-bold">🔔 Ειδοποιήσεις</h3>
+                    <p className="text-gray-200 text-sm mt-1">Κρατήσεις που χρειάζονται προσοχή</p>
+                  </div>
+                  
+                  <div className="max-h-96 overflow-y-auto">
+                    {bookings.filter(b => b.status === 'pending').length === 0 ? (
+                      <div className="p-6 text-center text-gray-500">
+                        <span className="text-3xl">✅</span>
+                        <p className="mt-3 text-gray-600 font-medium">Όλες οι κρατήσεις είναι εντάξει!</p>
+                      </div>
+                    ) : (
+                      <>
+                        {bookings
+                          .filter(b => b.status === 'pending')
+                          .slice(0, 4)
+                          .map((booking) => {
+                            const pitch = pitches.find(p => p.id === booking.pitchId);
+                            return (
+                              <div 
+                                key={booking.id} 
+                                className="p-4 border-b border-gray-100 hover:bg-gradient-to-r hover:from-gray-50 hover:to-emerald-50 cursor-pointer transition-all duration-200 group"
+                                onClick={() => {
+                                  setShowNotifications(false);
+                                  router.push(`/management/bookings/${booking.id}`);
+                                }}
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <p className="font-semibold text-gray-900 group-hover:text-football-green transition-colors">
+                                      {booking.userName}
+                                    </p>
+                                    <p className="text-sm text-gray-600 mt-1">{pitch?.name}</p>
+                                    <p className="text-sm text-gray-500 mt-1">
+                                      {new Date(booking.startTime).toLocaleDateString('el-GR')} - {new Date(booking.startTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })}
+                                    </p>
+                                  </div>
+                                  <span className="ml-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-800 border border-yellow-200">
+                                    Εκκρεμεί
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        
+                        {/* Show more link if there are more than 4 pending */}
+                        {bookings.filter(b => b.status === 'pending').length > 4 && (
+                          <div className="p-4 border-t border-gray-200 bg-gray-50">
+                            <Link
+                              href="/management/bookings"
+                              className="block text-center text-football-green hover:text-football-green-light font-semibold py-2 px-4 rounded-lg hover:bg-football-green hover:text-white transition-all duration-200"
+                            >
+                              Προβολή όλων ({bookings.filter(b => b.status === 'pending').length} εκκρεμεί)
+                            </Link>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <button
+              onClick={() => setShowQuickBooking(true)}
+              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-lg text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green transition-all duration-200"
+            >
+              <PlusIcon className="h-4 w-4 mr-2" />
+              Γρήγορη Κράτηση
+            </button>
+          </div>
         </div>
 
         {/* Loading State */}
