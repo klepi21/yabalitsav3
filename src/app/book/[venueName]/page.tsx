@@ -273,7 +273,10 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
   useEffect(() => {
     let verifier: RecaptchaVerifier | null = null;
     
-    if (!showSmsValidation || recaptchaVerifier) return;
+    if (!showSmsValidation) return;
+    
+    // Only initialize if we don't have a verifier yet
+    if (recaptchaVerifier) return;
     
     const initRecaptcha = async () => {
       try {
@@ -619,15 +622,8 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       setSmsCode('');
       setVerificationId('');
       
-      // Reset reCAPTCHA when closing popup
-      if (recaptchaVerifier) {
-        try {
-          recaptchaVerifier.clear();
-        } catch (error) {
-          console.error('Error clearing reCAPTCHA:', error);
-        }
-      }
-      setRecaptchaVerifier(null);
+      // Don't reset reCAPTCHA - keep it for potential reuse
+      // Only clear it when the popup is actually closed
       
       // Set success data for popup
       if (selectedPitch && selectedDate && selectedTimeSlot) {
@@ -1203,15 +1199,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
               <button
                 onClick={() => {
                   setShowSmsValidation(false);
-                  // Reset reCAPTCHA when closing popup
-                  if (recaptchaVerifier) {
-                    try {
-                      recaptchaVerifier.clear();
-                    } catch (error) {
-                      console.error('Error clearing reCAPTCHA:', error);
-                    }
-                  }
-                  setRecaptchaVerifier(null);
+                  // Don't reset reCAPTCHA - keep it for reuse
                 }}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
