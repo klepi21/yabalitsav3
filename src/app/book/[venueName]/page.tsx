@@ -295,16 +295,17 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
             console.warn('Domain mismatch - this might cause reCAPTCHA issues');
           }
           
-          // Create normal reCAPTCHA verifier with site key (more reliable than invisible)
+          // Create reCAPTCHA v2 verifier with explicit version
           try {
             verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
               'sitekey': RECAPTCHA_SITE_KEY,
+              'version': 'v2',
               'size': 'normal',
               'callback': () => {
-                console.log('reCAPTCHA solved successfully');
+                console.log('reCAPTCHA v2 solved successfully');
               },
               'expired-callback': () => {
-                console.log('reCAPTCHA expired, resetting...');
+                console.log('reCAPTCHA v2 expired, resetting...');
                 setRecaptchaVerifier(null);
               }
             });
@@ -317,11 +318,12 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
           } catch (recaptchaError) {
             console.error('Error creating reCAPTCHA verifier:', recaptchaError);
             
-            // Try fallback approach with minimal config
+            // Try fallback approach with explicit v2
             try {
-              console.log('Trying fallback reCAPTCHA...');
+              console.log('Trying fallback reCAPTCHA v2...');
               verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                'sitekey': RECAPTCHA_SITE_KEY
+                'sitekey': RECAPTCHA_SITE_KEY,
+                'version': 'v2'
               });
               
               await verifier.render();
@@ -331,10 +333,12 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
             } catch (fallbackError) {
               console.error('Fallback reCAPTCHA also failed:', fallbackError);
               
-              // Last resort - try with just the container ID
+              // Last resort - try with explicit v2
               try {
-                console.log('Trying last resort reCAPTCHA...');
-                verifier = new RecaptchaVerifier(auth, 'recaptcha-container');
+                console.log('Trying last resort reCAPTCHA v2...');
+                verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+                  'version': 'v2'
+                });
                 
                 await verifier.render();
                 console.log('Last resort reCAPTCHA rendered successfully');
