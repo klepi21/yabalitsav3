@@ -134,6 +134,11 @@ export default function GuidesPage() {
                       <li>Δοκιμάστε να καταχωρήσετε μια κράτηση</li>
                     </ol>
                   </div>
+                  <div className="mt-3">
+                    <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                      <Image src="/pinakaselegxou.png" alt="Πίνακας Ελέγχου" width={1280} height={720} className="w-full h-auto" />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -181,6 +186,11 @@ export default function GuidesPage() {
                       <li>Προαιρετικά προσθέστε σημειώσεις</li>
                       <li>Κλικ στο «Δημιουργία Κράτησης»</li>
                     </ol>
+                    <div className="mt-3">
+                      <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                        <Image src="/newbook.png" alt="Γρήγορη Κράτηση" width={1280} height={720} className="w-full h-auto" />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -199,6 +209,11 @@ export default function GuidesPage() {
                         <li>• Drag & drop για μετακίνηση κρατήσεων</li>
                         <li>• Κλικ σε κενό slot για νέα κράτηση</li>
                       </ul>
+                      <div className="mt-3">
+                        <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                          <Image src="/daily.png" alt="Ημερήσια Προβολή" width={1280} height={720} className="w-full h-auto" />
+                        </div>
+                      </div>
                     </div>
                     <div className="border border-gray-200 rounded-lg p-4">
                       <h4 className="font-medium text-gray-900 mb-2">Εβδομαδιαία Προβολή</h4>
@@ -208,6 +223,11 @@ export default function GuidesPage() {
                         <li>• Εύκολη πλοήγηση με βελάκια</li>
                         <li>• Προβολή συνολικών κρατήσεων/εσόδων</li>
                       </ul>
+                      <div className="mt-3">
+                        <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                          <Image src="/weekly.png" alt="Εβδομαδιαία Προβολή" width={1280} height={720} className="w-full h-auto" />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -289,6 +309,11 @@ export default function GuidesPage() {
                       <li>Ορίστε τα προεπιλεγμένα ωράρια λειτουργίας</li>
                       <li>Αποθηκεύστε τις ρυθμίσεις</li>
                     </ol>
+                    <div className="mt-3">
+                      <div className="rounded-xl overflow-hidden border border-gray-200 shadow-sm">
+                        <Image src="/newpitch.png" alt="Προσθήκη Νέου Γηπέδου" width={1280} height={720} className="w-full h-auto" />
+                      </div>
+                    </div>
                   </div>
                 </div>
 
