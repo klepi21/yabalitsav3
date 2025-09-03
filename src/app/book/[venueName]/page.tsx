@@ -1183,7 +1183,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
               <p>Debug: reCAPTCHA Status</p>
               <p>Verifier: {recaptchaVerifier ? '✅ Loaded' : '❌ Not Loaded'}</p>
               <p>Container: {typeof document !== 'undefined' && document.getElementById('recaptcha-container') ? '✅ Found' : '❌ Not Found'}</p>
-              <p>Site Key: {RECAPTCHA_SITE_KEY.substring(0, 20)}...</p>
+              <p>Site Key: {RECAPTCHA_SITE_KEY.substring(0, 25)}...</p>
               <p>Auth Domain: {auth.config.authDomain}</p>
               <p>Current Domain: {typeof window !== 'undefined' ? window.location.hostname : 'N/A'}</p>
               <p>Project ID: yabalitsa-6f5e8</p>
