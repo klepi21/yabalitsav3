@@ -276,13 +276,13 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
     
     const initRecaptcha = async () => {
       try {
-        // Wait for the popup to render and container to exist
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Wait for the popup to render and button to exist
+        await new Promise(resolve => setTimeout(resolve, 1000));
         
-        // Check if container exists
-        const container = document.getElementById('recaptcha-container');
-        if (!container) {
-          console.log('reCAPTCHA container not found');
+        // Check if button exists (for invisible reCAPTCHA)
+        const button = document.getElementById('send-sms-button');
+        if (!button) {
+          console.log('Send SMS button not found');
           return;
         }
         
@@ -294,9 +294,9 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         
         console.log('Initializing reCAPTCHA with:', {
           auth: !!auth,
-          container: !!container,
+          button: !!button,
           siteKey: RECAPTCHA_SITE_KEY,
-          containerId: 'recaptcha-container'
+          buttonId: 'send-sms-button'
         });
         
         // Create invisible reCAPTCHA verifier following official docs
