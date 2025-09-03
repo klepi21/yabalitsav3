@@ -49,7 +49,7 @@ export default function DashboardPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showNotifications]);
 
-  // Check authentication
+  // Check authentication 
   useEffect(() => {
     if (authLoading) return;
     
