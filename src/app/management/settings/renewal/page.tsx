@@ -1,0 +1,254 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+
+export default function SubscriptionRenewalPage() {
+  const router = useRouter();
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
+  const [selectedDuration, setSelectedDuration] = useState<1 | 6 | 12>(1);
+
+  // Pricing constants
+  const BASIC_PRICE = 25;
+  const PRO_PRICE = 45;
+  const ENTERPRISE_PRICE = 75;
+
+  // Calculate final price with VAT (24%)
+  const calcFinal = (price: number) => (price * 1.24).toFixed(2);
+
+  // Calculate monthly price with duration discount
+  const calcMonthlyPrice = (basePrice: number, duration: number) => {
+    let discount = 0;
+    if (duration === 6) discount = 0.07; // 7% discount for 6 months
+    if (duration === 12) discount = 0.12; // 12% discount for 12 months
+    
+    const discountedPrice = basePrice * (1 - discount);
+    return (discountedPrice * 1.24).toFixed(2); // Include VAT
+  };
+
+  // Calculate total price for duration
+  const calcTotalPrice = (basePrice: number, duration: number) => {
+    let discount = 0;
+    if (duration === 6) discount = 0.07;
+    if (duration === 12) discount = 0.12;
+    
+    const discountedPrice = basePrice * (1 - discount);
+    const totalWithoutVAT = discountedPrice * duration;
+    return (totalWithoutVAT * 1.24).toFixed(2); // Include VAT
+  };
+
+  const plans = [
+    {
+      id: 'basic',
+      name: 'Basic',
+      description: '1 γήπεδο, απεριόριστες κρατήσεις',
+      basePrice: BASIC_PRICE,
+      features: ['1 γήπεδο', 'Απεριόριστες κρατήσεις', 'Προηγμένο διαχειριστικό', 'Email υποστήριξη']
+    },
+    {
+      id: 'pro',
+      name: 'Pro',
+      description: '2-3 γήπεδα, απεριόριστες κρατήσεις',
+      basePrice: PRO_PRICE,
+      features: ['2-3 γήπεδα', 'Απεριόριστες κρατήσεις', 'Προηγμένο διαχειριστικό', 'Προτεραιότητα υποστήριξης'],
+      popular: true
+    },
+    {
+      id: 'enterprise',
+      name: 'Enterprise',
+      description: '3+ γήπεδα, unique booking link',
+      basePrice: ENTERPRISE_PRICE,
+      features: ['3+ γήπεδα', 'Unique booking link', 'Πλήρες διαχειριστικό', 'Dedicated υποστήριξη']
+    }
+  ];
+
+  const durations = [
+    { months: 1, label: '1 Μήνας', discount: 0 },
+    { months: 6, label: '6 Μήνες', discount: 7 },
+    { months: 12, label: '12 Μήνες', discount: 12 }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <Link
+            href="/management/settings"
+            className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+          >
+            <ArrowLeftIcon className="h-4 w-4 mr-1" />
+            Επιστροφή στις Ρυθμίσεις
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900">Ανανέωση Συνδρομής</h1>
+          <div className="w-24"></div> {/* Spacer for centering */}
+        </div>
+
+        {/* Main Content */}
+        <div className="space-y-8">
+          {/* Plan Selection - Horizontal Layout */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6 text-center">Επιλέξτε το Πλάνο Σας</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {plans.map((plan) => (
+                <div
+                  key={plan.id}
+                  className={`relative p-6 rounded-xl border-2 cursor-pointer transition-all hover:shadow-lg ${
+                    selectedPlan === plan.id
+                      ? 'border-green-500 bg-green-50 shadow-lg'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  onClick={() => setSelectedPlan(plan.id)}
+                >
+                  {plan.popular && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <span className="bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                        ΠΟΛΥ ΣΥΝΗΘΙΣΜΕΝΟ
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="text-center">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{plan.name}</h3>
+                    <p className="text-sm text-gray-600 mb-4">{plan.description}</p>
+                    
+                    {/* Price Section */}
+                    <div className="mb-4">
+                      <div className="text-3xl font-bold text-gray-900 mb-1">
+                        €{plan.basePrice}
+                        <span className="text-lg font-normal text-gray-500">/μήνα</span>
+                      </div>
+                      <div className="text-sm text-gray-600">+ΦΠΑ (24%)</div>
+                    </div>
+                    
+                    {/* Features */}
+                    <ul className="space-y-2 text-sm text-gray-600">
+                      {plan.features.map((feature, index) => (
+                        <li key={index} className="flex items-center justify-center">
+                          <span className="text-green-500 mr-2">✓</span>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Duration Selection & Payment Summary */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Duration Selection */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Διάρκεια Συνδρομής</h3>
+              
+              <div className="space-y-3">
+                {durations.map((duration) => (
+                  <div
+                    key={duration.months}
+                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
+                      selectedDuration === duration.months
+                        ? 'border-green-500 bg-green-50 shadow-md'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => setSelectedDuration(duration.months)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="font-semibold text-gray-900 text-lg">{duration.label}</div>
+                        {duration.discount > 0 && (
+                          <div className="text-sm text-green-600 font-medium">
+                            🎉 Έκπτωση {duration.discount}%
+                          </div>
+                        )}
+                      </div>
+                      <div className="text-right">
+                        <div className="text-lg font-bold text-gray-900">
+                          €{calcMonthlyPrice(selectedPlan ? plans.find(p => p.id === selectedPlan)?.basePrice || 0 : 0, duration.months)}
+                          <span className="text-sm font-normal text-gray-500">/μήνα</span>
+                        </div>
+                        <div className="text-xs text-gray-500">με ΦΠΑ</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Payment Summary */}
+            {selectedPlan && (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Σύνοψη Πληρωμής</h3>
+                
+                <div className="space-y-4 text-sm">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600">Πλάνο:</span>
+                    <span className="font-semibold text-gray-900">
+                      {plans.find(p => p.id === selectedPlan)?.name}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600">Διάρκεια:</span>
+                    <span className="font-semibold text-gray-900">
+                      {durations.find(d => d.months === selectedDuration)?.label}
+                    </span>
+                  </div>
+                  
+                  {/* Price Breakdown */}
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Βασική τιμή:</span>
+                      <span className="text-gray-900">
+                        €{plans.find(p => p.id === selectedPlan)?.basePrice}
+                        <span className="text-gray-500"> × {selectedDuration} μήνες</span>
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">ΦΠΑ (24%):</span>
+                      <span className="text-gray-900">
+                        €{((plans.find(p => p.id === selectedPlan)?.basePrice || 0) * selectedDuration * 0.24).toFixed(2)}
+                      </span>
+                    </div>
+                    {selectedDuration > 1 && (
+                      <div className="flex justify-between text-green-600 font-medium">
+                        <span>🎉 Έκπτωση:</span>
+                        <span>
+                          €{((plans.find(p => p.id === selectedPlan)?.basePrice || 0) * selectedDuration * (selectedDuration === 6 ? 0.10 : 0.20)).toFixed(2)}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="border-t border-gray-200 pt-4">
+                    <div className="flex justify-between text-xl font-bold text-gray-900">
+                      <span>Σύνολο:</span>
+                      <span>
+                        €{calcTotalPrice(plans.find(p => p.id === selectedPlan)?.basePrice || 0, selectedDuration)}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500 text-center mt-1">με ΦΠΑ</div>
+                  </div>
+                </div>
+
+                {/* Payment Button */}
+                <button
+                  disabled
+                  className="w-full mt-6 px-4 py-3 bg-gray-400 text-white font-medium rounded-lg cursor-not-allowed"
+                >
+                  💳 Πληρωμή (Σύντομα διαθέσιμο)
+                </button>
+                
+                <p className="text-xs text-gray-500 text-center mt-2">
+                  Η πληρωμή θα είναι διαθέσιμη σύντομα. Επικοινωνήστε μαζί μας για άμεση ενεργοποίηση.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

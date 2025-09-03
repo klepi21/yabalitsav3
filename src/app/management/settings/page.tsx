@@ -328,10 +328,16 @@ export default function SettingsPage() {
                 </div>
                 
                 <div className="mt-4 text-center">
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 mb-3">
                     Μετά τη λήξη του trial θα χρειαστεί ενεργοποίηση πληρωμών. 
                     Επικοινωνήστε μαζί μας για αναβάθμιση ή αλλαγή πλάνου.
                   </p>
+                  <Link 
+                    href="/management/settings/renewal" 
+                    className="inline-flex items-center justify-center w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+                  >
+                    🔄 Ανανέωση Συνδρομής
+                  </Link>
                 </div>
               </div>
             </div>
