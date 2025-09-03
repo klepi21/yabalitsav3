@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
+import { loadStripe } from '@stripe/stripe-js';
 
 export default function SubscriptionRenewalPage() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function SubscriptionRenewalPage() {
   const [selectedDuration, setSelectedDuration] = useState<1 | 6 | 12>(1);
   const [venueData, setVenueData] = useState<any>(null);
   const [currentDate] = useState(new Date());
+  const [isLoading, setIsLoading] = useState(false);
 
   // Pricing constants
   const BASIC_PRICE = 25;
@@ -125,6 +127,67 @@ export default function SubscriptionRenewalPage() {
     };
     
     return date.toLocaleDateString('el-GR', options);
+  };
+
+  // Handle payment
+  const handlePayment = async () => {
+    if (!selectedPlan || !venueData) return;
+
+    setIsLoading(true);
+    try {
+      const selectedPlanData = plans.find(p => p.id === selectedPlan);
+      if (!selectedPlanData) return;
+
+      // Get current user UID
+      const { getAuth } = await import('firebase/auth');
+      const auth = getAuth();
+      
+      if (!auth.currentUser?.uid) {
+        alert('Παρακαλώ συνδεθείτε πρώτα');
+        return;
+      }
+
+      // Create payment intent
+      const response = await fetch('/api/stripe/create-payment-intent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          planId: selectedPlan,
+          planName: selectedPlanData.name,
+          duration: selectedDuration,
+          basePrice: selectedPlanData.basePrice,
+          userUid: auth.currentUser.uid,
+          amount: Math.round(parseFloat(calcTotalPrice(selectedPlanData.basePrice, selectedDuration)) * 100), // Convert to cents
+        }),
+      });
+
+      const { clientSecret, error } = await response.json();
+
+      if (error) {
+        alert('Σφάλμα: ' + error);
+        return;
+      }
+
+      // Redirect to Stripe Checkout or handle with Stripe Elements
+      const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+      
+      if (!stripe) {
+        alert('Σφάλμα φόρτωσης Stripe');
+        return;
+      }
+
+      // For now, we'll use a simple redirect approach
+      // You can implement Stripe Elements for a more integrated experience
+      window.location.href = `/payment/checkout?payment_intent=${clientSecret}`;
+
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert('Υπήρξε σφάλμα με την πληρωμή. Παρακαλώ δοκιμάστε ξανά.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -332,14 +395,15 @@ export default function SubscriptionRenewalPage() {
 
                 {/* Payment Button */}
                 <button
-                  disabled
-                  className="w-full mt-6 px-4 py-3 bg-gray-400 text-white font-medium rounded-lg cursor-not-allowed"
+                  onClick={handlePayment}
+                  disabled={!selectedPlan || isLoading}
+                  className="w-full mt-6 px-4 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
                 >
-                  💳 Πληρωμή (Σύντομα διαθέσιμο)
+                  {isLoading ? '⏳ Επεξεργασία...' : '💳 Πληρωμή με Κάρτα'}
                 </button>
                 
                 <p className="text-xs text-gray-500 text-center mt-2">
-                  Η πληρωμή θα είναι διαθέσιμη σύντομα. Επικοινωνήστε μαζί μας για άμεση ενεργοποίηση.
+                  Ασφαλής πληρωμή μέσω Stripe
                 </p>
               </div>
             )}

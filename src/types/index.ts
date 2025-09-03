@@ -9,6 +9,7 @@ export interface Venue {
   daysRemaining?: number;
   plan?: 'subscription' | 'pay-per-booking' | 'trial';
   planType?: 'Basic' | 'Pro' | 'Enterprise';
+  active?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -135,4 +136,20 @@ export interface VenueOwner {
   permissions: string[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface Subscription {
+  id: string; // Same as venue id (document ID)
+  stripeCustomerId?: string; // Optional - from Stripe customer
+  subscriptionEndDate: string; // ISO string
+  subscriptionPlan: 'Basic' | 'Pro' | 'Enterprise';
+}
+
+export interface Payment {
+  id: string; // Auto generated Firebase ID
+  amount: number; // float (euros, not cents)
+  currency: string; // e.g., "eur"
+  paymentDate: string; // ISO string
+  subscriptionId: string; // reference to yabalitsa_subscriptions document ID (venueId)
+  status: 'succeeded' | 'failed';
 }

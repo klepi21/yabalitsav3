@@ -41,6 +41,25 @@ service cloud.firestore {
     match /yabalitsa_venueOwners/{ownerId} {
       allow read, write: if request.auth != null;
     }
+
+    // Subscriptions collection (one document per venue; doc ID == venueId)
+    match /yabalitsa_subscriptions/{venueId} {
+      // Allow reads for authenticated users who own the venue
+      allow read: if request.auth != null &&
+        get(/databases/$(database)/documents/yabalitsa_venues/$(venueId)).data.ownerId == request.auth.uid;
+      // Allow writes from server-side API (no auth required for payment processing)
+      allow write: if true;
+    }
+
+    // Payments collection (auto IDs)
+    match /yabalitsa_payments/{paymentId} {
+      // Only the owner of the venue can read its payments
+      allow read: if request.auth != null &&
+        exists(/databases/$(database)/documents/yabalitsa_subscriptions/$(resource.data.subscriptionId)) &&
+        get(/databases/$(database)/documents/yabalitsa_venues/$(resource.data.subscriptionId)).data.ownerId == request.auth.uid;
+      // Allow writes from server-side API for payment processing
+      allow write: if true;
+    }
     
     // Your existing collections - DO NOT MODIFY THESE
     // These rules ensure your existing app continues to work

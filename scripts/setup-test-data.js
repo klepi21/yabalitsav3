@@ -47,6 +47,7 @@ async function setupTestData() {
           email: "test@footballarena.com",
           phone: "+30 210 123 4567"
         },
+        active: true,
         notes: "Test venue for development and testing purposes",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()

@@ -2,6 +2,7 @@ import {
   collection, 
   doc, 
   addDoc, 
+  setDoc,
   updateDoc, 
   deleteDoc, 
   getDocs, 
@@ -18,7 +19,7 @@ import {
   User as FirebaseUser
 } from 'firebase/auth';
 import { db, auth } from './firebase';
-import { Venue, Pitch, Booking, User, TimeSlot, VenueOwner, BlockedDate } from '../types';
+import { Venue, Pitch, Booking, User, TimeSlot, VenueOwner, BlockedDate, Subscription, Payment } from '../types';
 
 // Firebase data structure interfaces
 interface FirebaseVenueData {
@@ -36,6 +37,7 @@ interface FirebaseVenueData {
   daysRemaining?: number;
   plan?: 'subscription' | 'pay-per-booking' | 'trial';
   planType?: 'Basic' | 'Pro' | 'Enterprise';
+  active?: boolean;
   createdAt?: any;
   updatedAt?: any;
 }
@@ -59,6 +61,7 @@ export const venueService = {
     
     const docRef = await addDoc(collection(db, 'yabalitsa_venues'), {
       ...firebaseData,
+      active: firebaseData.active ?? true,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
@@ -83,6 +86,7 @@ export const venueService = {
         daysRemaining: data.daysRemaining,
         plan: data.plan || 'trial',
         planType: data.planType,
+        active: (data as any).active ?? true,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date()
       } as Venue;
@@ -109,6 +113,7 @@ export const venueService = {
         daysRemaining: data.daysRemaining,
         plan: data.plan || 'trial',
         planType: data.planType,
+        active: (data as any).active ?? true,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date()
       } as Venue;
@@ -576,5 +581,84 @@ export const blockedDateService = {
   async delete(id: string): Promise<void> {
     const docRef = doc(db, 'yabalitsa_blockedDates', id);
     await deleteDoc(docRef);
+  }
+};
+
+// Subscription Services
+export const subscriptionService = {
+  // Create or replace subscription with doc ID equal to venueId
+  async set(venueId: string, data: Omit<Subscription, 'id'>): Promise<void> {
+    const ref = doc(db, 'yabalitsa_subscriptions', venueId);
+    // Remove undefined fields for Firebase
+    const cleanData: any = {};
+    if (data.stripeCustomerId) cleanData.stripeCustomerId = data.stripeCustomerId;
+    cleanData.subscriptionPlan = data.subscriptionPlan;
+    cleanData.subscriptionEndDate = data.subscriptionEndDate;
+    
+    await setDoc(ref, cleanData);
+  },
+
+  // Get subscription by venueId (document ID)
+  async getByVenueId(venueId: string): Promise<Subscription | null> {
+    const ref = doc(db, 'yabalitsa_subscriptions', venueId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return null;
+    const d = snap.data() as any;
+    return {
+      id: snap.id,
+      stripeCustomerId: d.stripeCustomerId,
+      subscriptionPlan: d.subscriptionPlan,
+      subscriptionEndDate: d.subscriptionEndDate
+    } as Subscription;
+  },
+
+  // Update subscription fields
+  async update(venueId: string, data: Partial<Omit<Subscription, 'id'>>): Promise<void> {
+    const ref = doc(db, 'yabalitsa_subscriptions', venueId);
+    await updateDoc(ref, { ...data });
+  },
+
+  // Delete subscription
+  async delete(venueId: string): Promise<void> {
+    const ref = doc(db, 'yabalitsa_subscriptions', venueId);
+    await deleteDoc(ref);
+  }
+};
+
+// Payment Services
+export const paymentService = {
+  // Create payment with auto ID
+  async create(paymentData: Omit<Payment, 'id'>): Promise<string> {
+    const ref = await addDoc(collection(db, 'yabalitsa_payments'), {
+      ...paymentData
+    });
+    return ref.id;
+  },
+
+  // Get payments by subscription ID (venueId)
+  async getBySubscriptionId(subscriptionId: string): Promise<Payment[]> {
+    const q = query(collection(db, 'yabalitsa_payments'), where('subscriptionId', '==', subscriptionId));
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as Payment[];
+  },
+
+  // Get payment by ID
+  async getById(id: string): Promise<Payment | null> {
+    const ref = doc(db, 'yabalitsa_payments', id);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return null;
+    return { id: snap.id, ...(snap.data() as any) } as Payment;
+  },
+
+  // Update payment
+  async update(id: string, data: Partial<Omit<Payment, 'id'>>): Promise<void> {
+    const ref = doc(db, 'yabalitsa_payments', id);
+    await updateDoc(ref, { ...data });
+  },
+
+  // Delete payment
+  async delete(id: string): Promise<void> {
+    const ref = doc(db, 'yabalitsa_payments', id);
+    await deleteDoc(ref);
   }
 };

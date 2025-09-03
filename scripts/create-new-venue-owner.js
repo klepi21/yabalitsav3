@@ -52,7 +52,8 @@ const venueData = {
     longitude: 23.7275
   },
   amenities: ["Parking", "Showers", "Changing Rooms", "Cafe"],
-  isActive: true
+  isActive: true,
+  active: true
 };
 
 // Pitch details - Customize these
