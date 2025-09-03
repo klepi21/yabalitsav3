@@ -348,22 +348,11 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
     };
   }, [showSmsValidation, auth]); // Include auth in dependencies
 
-  // Reset reCAPTCHA function
+  // Reset reCAPTCHA function (only for true errors)
   const resetRecaptcha = () => {
-    if (recaptchaVerifier) {
-      try {
-        recaptchaVerifier.clear();
-      } catch (error) {
-        console.error('Error clearing reCAPTCHA:', error);
-      }
-    }
-    setRecaptchaVerifier(null);
-    // Force reinitialization
-    setTimeout(() => {
-      if (showSmsValidation) {
-        setRecaptchaVerifier(null);
-      }
-    }, 100);
+    console.log('Manual reset requested - keeping reCAPTCHA for reuse');
+    // Don't clear the reCAPTCHA - it can be reused
+    // Only reset if there's a real error
   };
 
   const generateWeekSchedule = (): DaySchedule[] => {
@@ -582,20 +571,14 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
             console.error('Error clearing reCAPTCHA:', clearError);
           }
         }
-        setRecaptchaVerifier(null);
-        // Try to reinitialize after a short delay
-        setTimeout(() => {
-          if (showSmsValidation) {
-            // Force reCAPTCHA reinitialization
-            setRecaptchaVerifier(null);
-          }
-        }, 1000);
+        // Don't reset reCAPTCHA - it might be reusable
+        console.log('reCAPTCHA error, but keeping for potential reuse');
       } else if (error.code === 'auth/recaptcha-token-expired') {
         alert('Το reCAPTCHA έληξε. Παρακαλώ δοκιμάστε ξανά.');
-        setRecaptchaVerifier(null);
+        // Don't reset - let user try again with same reCAPTCHA
       } else if (error.code === 'auth/recaptcha-not-rendered') {
         alert('Το reCAPTCHA δεν φορτώθηκε σωστά. Παρακαλώ δοκιμάστε ξανά.');
-        setRecaptchaVerifier(null);
+        // Don't reset - let user try again
       } else {
         alert(`Σφάλμα στην αποστολή SMS: ${error.code || error.message}. Παρακαλώ δοκιμάστε ξανά.`);
       }
