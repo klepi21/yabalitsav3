@@ -27,7 +27,7 @@ interface VenueData {
 
 /**
  * Scheduled function that runs daily at midnight Athens time
- * to decrement trial days for venues and deactivate expired trials
+ * to decrement days remaining for all venues and handle expired periods
  */
 export const decrementDaysRemaining = onSchedule(
   {
@@ -41,17 +41,16 @@ export const decrementDaysRemaining = onSchedule(
     const venuesRef = db.collection('yabalitsa_venues');
     const now = Timestamp.now();
     
-    logger.info("Starting daily trial decrement job", { timestamp: now.toDate() });
+    logger.info("Starting daily days remaining decrement job for all venues", { timestamp: now.toDate() });
 
     try {
-      // Get all venues that might need trial day decrements
+      // Get all venues that have a daysRemaining field (all plans can have expiring periods)
       const snapshot = await venuesRef
-        .where('plan', '==', 'trial')
         .where('daysRemaining', '>', 0)
         .get();
 
       if (snapshot.empty) {
-        logger.info("No trial venues found that need decrementing");
+        logger.info("No venues found with days remaining that need decrementing");
         return;
       }
 
@@ -62,10 +61,15 @@ export const decrementDaysRemaining = onSchedule(
       for (const doc of snapshot.docs) {
         const data = doc.data() as VenueData;
         const venueId = doc.id;
+        const daysRemaining = data.daysRemaining || 0;
+        
+        // Skip if venue already has 0 days remaining (shouldn't happen due to query, but safety check)
+        if (daysRemaining <= 0) {
+          continue;
+        }
         
         // Get the last decrement date or creation date as fallback
         const lastDecrementAt = data.lastDecrementAt?.toDate() || data.createdAt?.toDate() || new Date();
-        const daysRemaining = data.daysRemaining || 0;
         const currentDate = now.toDate();
 
         // Calculate days passed since last decrement
@@ -81,12 +85,13 @@ export const decrementDaysRemaining = onSchedule(
             lastDecrementAt: now,
           };
 
-          // If trial has expired, deactivate the venue
+          // If days remaining has expired, deactivate the venue (regardless of plan type)
           if (newDaysRemaining === 0 && data.active !== false) {
             updateData.active = false;
             deactivatedCount++;
-            logger.info(`Trial expired for venue ${venueId}, deactivating`, {
+            logger.info(`Days remaining expired for venue ${venueId} (plan: ${data.plan}), deactivating`, {
               venueId,
+              plan: data.plan,
               originalDays: daysRemaining,
               daysPassed: diffDays
             });
@@ -98,6 +103,7 @@ export const decrementDaysRemaining = onSchedule(
 
           logger.info(`Scheduled update for venue ${venueId}`, {
             venueId,
+            plan: data.plan,
             originalDays: daysRemaining,
             newDays: newDaysRemaining,
             daysPassed: diffDays,
@@ -109,7 +115,7 @@ export const decrementDaysRemaining = onSchedule(
       // Execute all updates in a single batch
       if (updatedCount > 0) {
         await batch.commit();
-        logger.info("Daily trial decrement job completed successfully", {
+        logger.info("Daily days remaining decrement job completed successfully", {
           totalProcessed: snapshot.size,
           updatedVenues: updatedCount,
           deactivatedVenues: deactivatedCount
@@ -119,7 +125,7 @@ export const decrementDaysRemaining = onSchedule(
       }
 
     } catch (error) {
-      logger.error("Error in daily trial decrement job", {
+      logger.error("Error in daily days remaining decrement job", {
         error: error instanceof Error ? error.message : String(error),
         stack: error instanceof Error ? error.stack : undefined
       });
