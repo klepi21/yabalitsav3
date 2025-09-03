@@ -49,21 +49,13 @@ export async function POST(request: NextRequest) {
 
 async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
   try {
-    const { venueId, planName, duration } = paymentIntent.metadata;
-    
-    if (!venueId || !planName || !duration) {
-      console.error('Missing metadata in payment intent:', paymentIntent.metadata);
-      return;
-    }
+    let { planName, duration } = paymentIntent.metadata || ({} as any);
+    let venueId = paymentIntent.metadata?.venueId as string | undefined;
 
     console.log(`Processing successful payment for venue ${venueId}, plan ${planName}, duration ${duration}`);
 
-    // Update payment status in Firebase (new structure)
-    const payments = await paymentService.getBySubscriptionId(venueId);
-    console.log(`Found ${payments.length} payments for venue ${venueId}`);
-    
-    // Find the payment with matching payment intent ID or the most recent one
-    const payment = payments.find(p => p.subscriptionId === venueId);
+    // Find and update the related payment by PaymentIntent ID
+    const payment = await paymentService.getByPaymentIntentId(paymentIntent.id);
     
     if (payment) {
       await paymentService.update(payment.id, {
@@ -71,8 +63,23 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
         paymentDate: new Date().toISOString(),
       });
       console.log(`Updated payment ${payment.id} status to succeeded`);
+      // Use subscriptionId from payment as fallback for venueId
+      if (!venueId) venueId = payment.subscriptionId;
+      // Fallback plan and duration from stored payment record
+      if (!planName && payment.planName) planName = payment.planName;
+      if (!duration && payment.durationMonths != null) duration = String(payment.durationMonths);
     } else {
-      console.log('No matching payment found to update');
+      console.log('No matching payment found to update for PaymentIntent:', paymentIntent.id);
+    }
+
+    if (!venueId || !planName || !duration) {
+      console.error('Missing required metadata or venueId could not be resolved. Skipping subscription update.', {
+        venueId,
+        planName,
+        duration,
+        metadata: paymentIntent.metadata
+      });
+      return;
     }
 
     // Calculate new subscription end date
@@ -121,24 +128,18 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
 
 async function handlePaymentFailure(paymentIntent: Stripe.PaymentIntent) {
   try {
-    const { venueId } = paymentIntent.metadata;
-    
-    if (!venueId) {
-      console.error('Missing venueId in payment intent metadata');
-      return;
-    }
-
-    // Update payment status in Firebase (new structure)
-    const payments = await paymentService.getBySubscriptionId(venueId);
-    const payment = payments.find(p => p.subscriptionId === venueId);
+    let venueId = paymentIntent.metadata?.venueId as string | undefined;
+    // Update payment status in Firebase by PaymentIntent ID
+    const payment = await paymentService.getByPaymentIntentId(paymentIntent.id);
     
     if (payment) {
       await paymentService.update(payment.id, {
         status: 'failed',
       });
+      if (!venueId) venueId = payment.subscriptionId;
     }
 
-    console.log(`Payment failed for venue ${venueId}`);
+    console.log(`Payment failed for venue ${venueId ?? 'unknown'}`);
 
   } catch (error) {
     console.error('Error processing payment failure:', error);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { paymentService } from '@/lib/firebase-services';
+import type { Payment } from '@/types';
 import { auth } from '@/lib/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -53,8 +54,11 @@ export async function POST(request: NextRequest) {
       amount: amount / 100, // Convert from cents to euros (float)
       currency: 'eur',
       paymentDate: new Date().toISOString(),
+      paymentIntentId: paymentIntent.id,
       subscriptionId: venueId, // Reference to yabalitsa_subscriptions document ID (venueId)
-      status: paymentIntent.status as 'succeeded' | 'failed',
+      planName: planName as Payment['planName'],
+      durationMonths: Number(duration),
+      status: paymentIntent.status as Payment['status'],
     });
 
     return NextResponse.json({

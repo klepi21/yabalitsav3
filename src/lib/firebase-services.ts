@@ -661,4 +661,13 @@ export const paymentService = {
     const ref = doc(db, 'yabalitsa_payments', id);
     await deleteDoc(ref);
   }
+  ,
+  // Get payment by PaymentIntent ID
+  async getByPaymentIntentId(paymentIntentId: string): Promise<Payment | null> {
+    const q = query(collection(db, 'yabalitsa_payments'), where('paymentIntentId', '==', paymentIntentId));
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) return null;
+    const d = snapshot.docs[0];
+    return { id: d.id, ...(d.data() as any) } as Payment;
+  }
 };
