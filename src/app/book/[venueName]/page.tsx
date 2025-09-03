@@ -502,7 +502,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
     setShowSmsValidation(true);
   };
 
-  const goToStep = (step: 'pitch' | 'date' | 'slots' | 'confirmation') => {
+  const goToStep = (step: 'pitch' | 'date' | 'slots' | 'confirmation') => { 
     setCurrentStep(step);
   };
 
