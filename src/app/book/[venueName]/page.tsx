@@ -300,20 +300,16 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
           containerId: 'recaptcha-container'
         });
         
-        // Create reCAPTCHA verifier following official docs
-        verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          'sitekey': RECAPTCHA_SITE_KEY,
-          'size': 'normal',
-          'callback': (response: any) => {
-            // reCAPTCHA solved, allow signInWithPhoneNumber
-            console.log('reCAPTCHA solved with response:', response);
-          },
-          'expired-callback': () => {
-            // Response expired. Ask user to solve reCAPTCHA again
-            console.log('reCAPTCHA expired');
-            setRecaptchaVerifier(null);
-          }
-        });
+        // Try with minimal configuration first
+        try {
+          verifier = new RecaptchaVerifier(auth, container, {
+            'sitekey': RECAPTCHA_SITE_KEY
+          });
+        } catch (firstError) {
+          console.log('First attempt failed, trying without sitekey:', firstError);
+          // Fallback: try without sitekey
+          verifier = new RecaptchaVerifier(auth, container);
+        }
         
         console.log('RecaptchaVerifier created successfully');
         
