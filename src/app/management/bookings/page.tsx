@@ -60,12 +60,27 @@ export default function BookingsPage() {
     }
   };
 
-  // Filter bookings based on search term
-  const filteredBookings = bookings.filter(booking => 
-    booking.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    booking.userPhone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    booking.status?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter and sort bookings - pending first, then by date
+  const filteredBookings = bookings
+    .filter(booking => 
+      booking.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.userPhone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.status?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      // First priority: pending status
+      if (a.status === 'pending' && b.status !== 'pending') return -1;
+      if (a.status !== 'pending' && b.status === 'pending') return 1;
+      
+      // Second priority: confirmed status
+      if (a.status === 'confirmed' && b.status !== 'confirmed' && b.status !== 'pending') return -1;
+      if (a.status !== 'confirmed' && a.status !== 'pending' && b.status === 'confirmed') return 1;
+      
+      // Third priority: by start time (newest first)
+      const dateA = new Date(a.startTime);
+      const dateB = new Date(b.startTime);
+      return dateB.getTime() - dateA.getTime();
+    });
 
   const handleDeleteBooking = async (bookingId: string) => {
     if (!confirm('Είστε σίγουροι ότι θέλετε να διαγράψετε αυτή την κράτηση;')) {
