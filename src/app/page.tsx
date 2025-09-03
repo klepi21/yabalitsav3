@@ -579,7 +579,7 @@ export default function RootPage() {
         {/* Footer */}
         <div className="mt-auto pt-20">
           <div className="text-center py-8 text-gray-500 border-t border-gray-100">
-            <p>© 2024 Yabalitsa. Όλα τα δικαιώματα διατηρούνται.</p>
+            <p>© {new Date().getFullYear()} Yabalitsa. Όλα τα δικαιώματα διατηρούνται.</p>
           </div>
         </div>
       </div>
