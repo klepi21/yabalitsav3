@@ -6,6 +6,7 @@ export interface Venue {
   email?: string;
   address?: string;
   ownerId: string;
+  stripeCustomerId?: string; // Stripe Customer ID for payments
   daysRemaining?: number;
   plan?: 'subscription' | 'pay-per-booking' | 'trial';
   planType?: 'Basic' | 'Pro' | 'Enterprise';
@@ -140,22 +141,21 @@ export interface VenueOwner {
   updatedAt: Date;
 }
 
-export interface Subscription {
-  id: string; // Auto generated Firebase ID
-  venueId: string; // Venue this subscription belongs to
-  stripeCustomerId?: string; // Optional - from Stripe customer
-  subscriptionEndDate: string; // ISO string
-  subscriptionPlan: 'Basic' | 'Pro' | 'Enterprise';
-}
+// Subscription interface removed - using one-time payments now
+// Plan information is stored directly in the venue document
 
 export interface Payment {
   id: string; // Auto generated Firebase ID
+  venueId: string; // Venue this payment belongs to
+  stripePaymentIntentId: string; // Stripe PaymentIntent ID
+  stripeCustomerId?: string; // Stripe Customer ID
   amount: number; // float (euros, not cents)
   currency: string; // e.g., "eur"
-  paymentDate: string; // ISO string
-  paymentIntentId: string; // Stripe PaymentIntent ID
-  subscriptionId: string; // reference to yabalitsa_subscriptions document ID (venueId)
+  status: 'pending' | 'succeeded' | 'failed' | 'canceled';
+  paymentDate?: string; // ISO string - when payment was completed
+  paymentType: 'one_time_plan_purchase' | 'subscription_payment' | 'booking_payment';
   planName?: 'Basic' | 'Pro' | 'Enterprise';
   durationMonths?: number;
-  status: 'requires_payment_method' | 'requires_confirmation' | 'requires_action' | 'processing' | 'requires_capture' | 'canceled' | 'succeeded' | 'failed';
+  createdAt: string; // ISO string
+  updatedAt: string; // ISO string
 }

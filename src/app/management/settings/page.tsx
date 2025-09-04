@@ -11,7 +11,7 @@ import {
   BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import { venueService, paymentService, subscriptionService } from '@/lib/firebase-services';
+import { venueService, paymentService } from '@/lib/firebase-services';
 import { Venue } from '@/types';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -57,7 +57,6 @@ export default function SettingsPage() {
   
   const [venue, setVenue] = useState<Venue | null>(null);
   const [lastPayment, setLastPayment] = useState<any>(null);
-  const [subscription, setSubscription] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,25 +103,19 @@ export default function SettingsPage() {
           },
         });
         
-        // Load subscription data from the yabalitsa_subscriptions collection
-        try {
-          const subscriptionData = await subscriptionService.getByVenueIdField(venueOwner.venueId);
-          if (subscriptionData) {
-            setSubscription(subscriptionData);
-          }
-        } catch (subscriptionError) {
-          console.error('Error loading subscription data:', subscriptionError);
-          // Don't show error for subscription, just log it
-        }
+        // Subscription data is now stored directly in venue document
+        // No need to load from separate collection
         
         // Load last payment data
         try {
-          const payments = await paymentService.getBySubscriptionId(venueOwner.venueId);
+          const payments = await paymentService.getByVenueId(venueOwner.venueId);
           if (payments.length > 0) {
             // Sort by payment date and get the most recent
-            const sortedPayments = payments.sort((a, b) => 
-              new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()
-            );
+            const sortedPayments = payments.sort((a, b) => {
+              const dateA = a.paymentDate ? new Date(a.paymentDate).getTime() : 0;
+              const dateB = b.paymentDate ? new Date(b.paymentDate).getTime() : 0;
+              return dateB - dateA;
+            });
             setLastPayment(sortedPayments[0]);
           }
         } catch (paymentError) {
@@ -386,7 +379,7 @@ export default function SettingsPage() {
                     </div>
                     {venue.plan === 'subscription' && (
                       <div className="text-xs text-gray-500 mt-1">
-                        {subscription?.subscriptionPlan || venue.planType || 'Basic'} Plan
+                        {venue.planType || 'Basic'} Plan
                       </div>
                     )}
                   </div>
@@ -397,9 +390,20 @@ export default function SettingsPage() {
                           <div className="text-sm text-gray-700 mb-2">
                             <span className="font-medium">Λήγει στις:</span>
                           </div>
-                          {subscription?.subscriptionEndDate ? (
-                            (() => {
-                              const endDate = formatDateSafely(subscription.subscriptionEndDate);
+{(() => {
+                            // Try to get end date from venue.subscriptionEndDate or calculate from last payment
+                            let endDateString = venue.subscriptionEndDate;
+                            
+                            // If no subscriptionEndDate but we have a recent payment, calculate it
+                            if (!endDateString && lastPayment && lastPayment.paymentDate && lastPayment.durationMonths) {
+                              const paymentDate = new Date(lastPayment.paymentDate);
+                              const calculatedEndDate = new Date(paymentDate);
+                              calculatedEndDate.setMonth(calculatedEndDate.getMonth() + lastPayment.durationMonths);
+                              endDateString = calculatedEndDate.toISOString();
+                            }
+                            
+                            if (endDateString) {
+                              const endDate = formatDateSafely(endDateString);
                               if (!endDate) {
                                 return (
                                   <div className="text-lg font-semibold text-orange-600">
@@ -408,7 +412,7 @@ export default function SettingsPage() {
                                 );
                               }
                               
-                              const diffDays = calculateDaysDifference(subscription.subscriptionEndDate);
+                              const diffDays = calculateDaysDifference(endDateString);
                               if (diffDays === null) {
                                 return (
                                   <div className="text-lg font-semibold text-orange-600">
@@ -431,14 +435,37 @@ export default function SettingsPage() {
                                      diffDays === 0 ? 'Λήγει σήμερα!' : 
                                      `Έληξε πριν ${Math.abs(diffDays)} ημέρες`}
                                   </div>
+                                  {!venue.subscriptionEndDate && lastPayment && (
+                                    <div className="text-xs text-amber-600 mt-1">
+                                      📅 Υπολογισμός από την τελευταία πληρωμή
+                                    </div>
+                                  )}
                                 </>
                               );
-                            })()
-                          ) : (
-                            <div className="text-lg font-semibold text-gray-500">
-                              Ημερομηνία λήξης δεν είναι διαθέσιμη
-                            </div>
-                          )}
+                            } else {
+                              return (
+                                <div className="text-center">
+                                  <div className="text-lg font-semibold text-gray-500 mb-2">
+                                    📅 Δεν βρέθηκε ημερομηνία λήξης
+                                  </div>
+                                  <div className="text-sm text-gray-600 mb-3">
+                                    {venue.plan === 'subscription' ? 
+                                      'Το πλάνο σας είναι ενεργό αλλά δεν έχει καταγραφεί ημερομηνία λήξης' :
+                                      'Δεν έχετε ενεργό πλάνο συνδρομής'
+                                    }
+                                  </div>
+                                  <div className="flex flex-col gap-2">
+                                    <Link 
+                                      href="/management/settings/renewal"
+                                      className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
+                                    >
+                                      🚀 Ενεργοποίηση Πλάνου
+                                    </Link>
+                                  </div>
+                                </div>
+                              );
+                            }
+                          })()}
                           
                           {/* Ανανέωση Συνδρομής Button - Πάντα ορατό */}
                           <div className="mt-3">
@@ -466,49 +493,72 @@ export default function SettingsPage() {
           {venue && venue.plan === 'subscription' && lastPayment && (
             <div className="bg-white shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">💳 Τελευταία Πληρωμή</h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <div className="text-sm text-gray-700 mb-2">
-                      <span className="font-medium">Ποσό:</span>
+                <div className="flex items-center justify-between mb-4">
+                  <h4 className="text-lg font-semibold text-gray-900">💳 Τελευταία Πληρωμή</h4>
+                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                    lastPayment.status === 'succeeded' 
+                      ? 'bg-green-100 text-green-700 border border-green-200' 
+                      : 'bg-amber-100 text-amber-700 border border-amber-200'
+                  }`}>
+                    {lastPayment.status === 'succeeded' ? '✅ Επιτυχής' : '⏳ Εκκρεμεί'}
+                  </span>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="text-sm font-medium text-green-800 mb-2">
+                      Ποσό Πληρωμής
                     </div>
-                    <div className="text-2xl font-bold text-green-700">
-                      €{lastPayment.amount}
+                    <div className="text-3xl font-bold text-green-700">
+                      €{typeof lastPayment.amount === 'number' ? lastPayment.amount.toFixed(2) : parseFloat(lastPayment.amount || '0').toFixed(2)}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {lastPayment.planName} Plan - {lastPayment.durationMonths} μήνες
+                    <div className="text-sm text-green-600 mt-2">
+                      {lastPayment.planName || 'Basic'} Plan · {lastPayment.durationMonths || 1} μήνες
                     </div>
                   </div>
                   
-                  <div className="text-center">
-                    <div className="text-sm text-gray-700 mb-2">
-                      <span className="font-medium">Ημερομηνία:</span>
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="text-sm font-medium text-blue-800 mb-2">
+                      Ημερομηνία Πληρωμής
                     </div>
                     <div className="text-lg font-semibold text-blue-700">
-                      {new Date(lastPayment.paymentDate).toLocaleDateString('el-GR', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}
+                      {lastPayment.paymentDate ? (
+                        new Date(lastPayment.paymentDate).toLocaleDateString('el-GR', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })
+                      ) : (
+                        'Δεν καταγράφηκε'
+                      )}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
-                      {lastPayment.status === 'succeeded' ? 'Επιτυχής πληρωμή' : 'Εκκρεμεί'}
+                    <div className="text-sm text-blue-600 mt-2">
+                      {lastPayment.paymentDate ? (
+                        `Πριν ${Math.ceil((new Date().getTime() - new Date(lastPayment.paymentDate).getTime()) / (1000 * 60 * 60 * 24))} ημέρες`
+                      ) : (
+                        'Ημερομηνία μη διαθέσιμη'
+                      )}
                     </div>
                   </div>
                 </div>
                 
-                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-blue-800">
-                      <span className="font-medium">📊 Σύνοψη:</span> Πληρώθηκε το {lastPayment.planName} Plan για {lastPayment.durationMonths} μήνες
+                {/* Payment Summary */}
+                <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-gray-800 mb-1">
+                        📊 Σύνοψη Πληρωμής
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        Ενεργοποιήθηκε το {lastPayment.planName || 'Basic'} πλάνο 
+                        για {lastPayment.durationMonths || 1} μήνες με συνολικό κόστος €{typeof lastPayment.amount === 'number' ? lastPayment.amount.toFixed(2) : parseFloat(lastPayment.amount || '0').toFixed(2)}
+                      </div>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                      lastPayment.status === 'succeeded' 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {lastPayment.status === 'succeeded' ? '✅ Επιτυχής' : '⏳ Εκκρεμεί'}
-                    </span>
+                    {lastPayment.paymentType === 'one_time_plan_purchase' && (
+                      <div className="ml-4 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                        Εφάπαξ Αγορά
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

@@ -1,75 +1,168 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { paymentService } from '@/lib/firebase-services';
-import type { Payment } from '@/types';
-import { auth } from '@/lib/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { venueService, paymentService } from '@/lib/firebase-services';
+import { pricingUtils } from '@/lib/pricing';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { planId, planName, duration, basePrice, amount, userUid } = body;
+    const { planId, duration, userUid, customerEmail, customerName } = await request.json();
 
-    if (!planId || !planName || !duration || !basePrice || !amount || !userUid) {
+    console.log('Creating payment intent for:', { planId, duration, userUid, customerEmail, customerName });
+
+    if (!planId || !duration || !userUid) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Missing required fields: planId, duration, userUid' },
         { status: 400 }
       );
     }
 
-    // Get venue ID for the authenticated user
-    const venuesRef = collection(db, 'yabalitsa_venues');
-    const q = query(venuesRef, where('ownerId', '==', userUid));
-    const querySnapshot = await getDocs(q);
+    // Get plan details
+    const plan = pricingUtils.getPlan(planId);
+    if (!plan) {
+      return NextResponse.json(
+        { error: 'Invalid plan ID' },
+        { status: 400 }
+      );
+    }
 
-    if (querySnapshot.empty) {
+    // Get venue for this user
+    const venues = await venueService.getAll();
+    const venue = venues.find(v => v.ownerId === userUid);
+    
+    if (!venue) {
       return NextResponse.json(
         { error: 'No venue found for this user' },
         { status: 404 }
       );
     }
 
-    const venueDoc = querySnapshot.docs[0];
-    const venueId = venueDoc.id;
+    // Get Stripe Price ID
+    const stripePriceId = pricingUtils.getStripePriceId(planId, duration as 1 | 6 | 12);
+    if (!stripePriceId) {
+      return NextResponse.json(
+        { 
+          error: 'Price configuration not found for this plan and duration',
+          planId,
+          duration,
+          availablePlans: ['basic', 'pro', 'enterprise'],
+          availableDurations: [1, 6, 12]
+        },
+        { status: 400 }
+      );
+    }
 
-    // Create payment intent
+    console.log('✅ Using Stripe Price ID:', stripePriceId);
+
+    // Calculate the amount
+    const totalPrice = pricingUtils.calculateTotalPrice(plan.basePrice, duration as 1 | 6 | 12);
+    const amountInCents = Math.round(totalPrice * 100);
+
+    console.log('💰 Payment details:', {
+      basePrice: plan.basePrice,
+      duration,
+      totalPrice,
+      amountInCents
+    });
+
+    // Create or get Stripe customer
+    let stripeCustomerId: string;
+    
+    if (venue.stripeCustomerId) {
+      stripeCustomerId = venue.stripeCustomerId;
+      console.log('✅ Using existing Stripe customer:', stripeCustomerId);
+    } else {
+      console.log('📝 Creating new Stripe customer...');
+      const stripeCustomer = await stripe.customers.create({
+        email: customerEmail,
+        name: customerName || venue.name,
+        metadata: {
+          venueId: venue.id,
+          userUid: userUid
+        }
+      });
+      
+      stripeCustomerId = stripeCustomer.id;
+      console.log('✅ Created new Stripe customer:', stripeCustomerId);
+      
+      // Update venue with Stripe customer ID
+      await venueService.update(venue.id, {
+        stripeCustomerId: stripeCustomerId
+      });
+    }
+
+    // Create PaymentIntent for one-time payment
+    console.log('💳 Creating PaymentIntent...');
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount, // Amount in cents
+      amount: amountInCents,
       currency: 'eur',
+      customer: stripeCustomerId,
+      confirmation_method: 'automatic',
+      confirm: false,
       metadata: {
-        venueId,
-        planId,
-        planName,
+        venue_id: venue.id,
+        plan_id: planId,
+        plan_name: plan.name as 'Basic' | 'Pro' | 'Enterprise',
         duration: duration.toString(),
-        basePrice: basePrice.toString(),
+        user_uid: userUid,
+        payment_type: 'one_time_plan_purchase'
       },
-      description: `Subscription ${planName} - ${duration} months for venue ${venueId}`,
+      payment_method_types: ['card']
     });
 
-    // Store payment record in Firebase (new structure)
-    await paymentService.create({
-      amount: amount / 100, // Convert from cents to euros (float)
+    console.log('✅ PaymentIntent created:', paymentIntent.id, paymentIntent.status);
+
+    // Store payment record in Firebase
+    const paymentId = await paymentService.create({
+      venueId: venue.id,
+      stripePaymentIntentId: paymentIntent.id,
+      stripeCustomerId: stripeCustomerId,
+      amount: totalPrice,
       currency: 'eur',
-      paymentDate: new Date().toISOString(),
-      paymentIntentId: paymentIntent.id,
-      subscriptionId: venueId, // Reference to yabalitsa_subscriptions document ID (venueId)
-      planName: planName as Payment['planName'],
-      durationMonths: Number(duration),
-      status: paymentIntent.status as Payment['status'],
+      status: 'pending',
+      planName: plan.name as 'Basic' | 'Pro' | 'Enterprise',
+      durationMonths: duration,
+      paymentType: 'one_time_plan_purchase',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     });
 
-    return NextResponse.json({
+    console.log('💾 Payment record stored in Firebase:', paymentId);
+
+    // Return response
+    const response = {
+      success: true,
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
-    });
+      amount: totalPrice,
+      currency: 'eur',
+      planName: plan.name,
+      duration: duration
+    };
+
+    console.log('✅ Payment intent created successfully:', response);
+
+    return NextResponse.json(response);
 
   } catch (error) {
-    console.error('Error creating payment intent:', error);
+    console.error('Payment intent creation error:', error);
+    
+    // More detailed error logging
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+    
+    // Return more specific error message
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    
     return NextResponse.json(
-      { error: 'Failed to create payment intent' },
+      { 
+        error: 'Failed to create payment intent',
+        details: errorMessage,
+        timestamp: new Date().toISOString()
+      },
       { status: 500 }
     );
   }

@@ -19,7 +19,7 @@ import {
   User as FirebaseUser
 } from 'firebase/auth';
 import { db, auth } from './firebase';
-import { Venue, Pitch, Booking, User, TimeSlot, VenueOwner, BlockedDate, Subscription, Payment } from '../types';
+import { Venue, Pitch, Booking, User, TimeSlot, VenueOwner, BlockedDate, Payment } from '../types';
 
 // Firebase data structure interfaces
 interface FirebaseVenueData {
@@ -619,80 +619,6 @@ export const blockedDateService = {
   }
 };
 
-// Subscription Services
-export const subscriptionService = {
-  // Create new subscription with auto-generated ID
-  async create(venueId: string, data: Omit<Subscription, 'id'>): Promise<string> {
-    // Remove undefined fields for Firebase
-    const cleanData: any = {};
-    if (data.stripeCustomerId) cleanData.stripeCustomerId = data.stripeCustomerId;
-    cleanData.subscriptionPlan = data.subscriptionPlan;
-    cleanData.subscriptionEndDate = data.subscriptionEndDate;
-    cleanData.venueId = venueId;
-    
-    const ref = await addDoc(collection(db, 'yabalitsa_subscriptions'), cleanData);
-    return ref.id;
-  },
-
-  // Create or replace subscription with doc ID equal to venueId
-  async set(venueId: string, data: Omit<Subscription, 'id'>): Promise<void> {
-    const ref = doc(db, 'yabalitsa_subscriptions', venueId);
-    // Remove undefined fields for Firebase
-    const cleanData: any = {};
-    if (data.stripeCustomerId) cleanData.stripeCustomerId = data.stripeCustomerId;
-    cleanData.subscriptionPlan = data.subscriptionPlan;
-    cleanData.subscriptionEndDate = data.subscriptionEndDate;
-    
-    await setDoc(ref, cleanData);
-  },
-
-  // Get subscription by venueId (document ID)
-  async getByVenueId(venueId: string): Promise<Subscription | null> {
-    const ref = doc(db, 'yabalitsa_subscriptions', venueId);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) return null;
-    const d = snap.data() as any;
-    return {
-      id: snap.id,
-      stripeCustomerId: d.stripeCustomerId,
-      subscriptionPlan: d.subscriptionPlan,
-      subscriptionEndDate: d.subscriptionEndDate
-    } as Subscription;
-  },
-
-  // Get subscription by venueId field (searches all documents)
-  async getByVenueIdField(venueId: string): Promise<Subscription | null> {
-    const q = query(
-      collection(db, 'yabalitsa_subscriptions'),
-      where('venueId', '==', venueId)
-    );
-    const querySnapshot = await getDocs(q);
-    
-    if (!querySnapshot.empty) {
-      const doc = querySnapshot.docs[0];
-      const data = doc.data() as any;
-      return {
-        id: doc.id,
-        stripeCustomerId: data.stripeCustomerId,
-        subscriptionPlan: data.subscriptionPlan,
-        subscriptionEndDate: data.subscriptionEndDate
-      } as Subscription;
-    }
-    return null;
-  },
-
-  // Update subscription fields
-  async update(venueId: string, data: Partial<Omit<Subscription, 'id'>>): Promise<void> {
-    const ref = doc(db, 'yabalitsa_subscriptions', venueId);
-    await updateDoc(ref, { ...data });
-  },
-
-  // Delete subscription
-  async delete(venueId: string): Promise<void> {
-    const ref = doc(db, 'yabalitsa_subscriptions', venueId);
-    await deleteDoc(ref);
-  }
-};
 
 // Payment Services
 export const paymentService = {
@@ -704,11 +630,26 @@ export const paymentService = {
     return ref.id;
   },
 
-  // Get payments by subscription ID (venueId)
-  async getBySubscriptionId(subscriptionId: string): Promise<Payment[]> {
-    const q = query(collection(db, 'yabalitsa_payments'), where('subscriptionId', '==', subscriptionId));
+  // Get all payments
+  async getAll(): Promise<Payment[]> {
+    const snapshot = await getDocs(collection(db, 'yabalitsa_payments'));
+    return snapshot.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as Payment[];
+  },
+
+  // Get payments by venue ID
+  async getByVenueId(venueId: string): Promise<Payment[]> {
+    const q = query(collection(db, 'yabalitsa_payments'), where('venueId', '==', venueId));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as Payment[];
+  },
+
+  // Get payment by Stripe PaymentIntent ID
+  async getByPaymentIntentId(paymentIntentId: string): Promise<Payment | null> {
+    const q = query(collection(db, 'yabalitsa_payments'), where('stripePaymentIntentId', '==', paymentIntentId));
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) return null;
+    const d = snapshot.docs[0];
+    return { id: d.id, ...(d.data() as any) } as Payment;
   },
 
   // Get payment by ID
@@ -729,14 +670,5 @@ export const paymentService = {
   async delete(id: string): Promise<void> {
     const ref = doc(db, 'yabalitsa_payments', id);
     await deleteDoc(ref);
-  }
-  ,
-  // Get payment by PaymentIntent ID
-  async getByPaymentIntentId(paymentIntentId: string): Promise<Payment | null> {
-    const q = query(collection(db, 'yabalitsa_payments'), where('paymentIntentId', '==', paymentIntentId));
-    const snapshot = await getDocs(q);
-    if (snapshot.empty) return null;
-    const d = snapshot.docs[0];
-    return { id: d.id, ...(d.data() as any) } as Payment;
   }
 };

@@ -7,6 +7,11 @@ export interface PricingPlan {
   features: string[];
   popular?: boolean;
   maxPitches?: number;
+  stripePriceIds: {
+    monthly: string;
+    semiAnnual: string;
+    annual: string;
+  };
 }
 
 export interface PricingConfig {
@@ -18,6 +23,11 @@ export interface PricingConfig {
   currency: 'eur' | 'usd';
   plans: PricingPlan[];
 }
+
+// Environment variable helpers with fallbacks
+const getEnvString = (key: string, fallback: string): string => {
+  return process.env[key] || fallback;
+};
 
 // Main pricing configuration
 export const pricingConfig: PricingConfig = {
@@ -39,7 +49,12 @@ export const pricingConfig: PricingConfig = {
         'Απεριόριστες κρατήσεις',
         'Προηγμένο διαχειριστικό',
         'Email υποστήριξη'
-      ]
+      ],
+      stripePriceIds: {
+        monthly: getEnvString('STRIPE_BASIC_MONTHLY_PRICE_ID', ''),
+        semiAnnual: getEnvString('STRIPE_BASIC_SEMI_ANNUAL_PRICE_ID', ''),
+        annual: getEnvString('STRIPE_BASIC_ANNUAL_PRICE_ID', '')
+      }
     },
     {
       id: 'pro',
@@ -53,7 +68,12 @@ export const pricingConfig: PricingConfig = {
         'Προηγμένο διαχειριστικό',
         'Προτεραιότητα υποστήριξης'
       ],
-      popular: true
+      popular: true,
+      stripePriceIds: {
+        monthly: getEnvString('STRIPE_PRO_MONTHLY_PRICE_ID', ''),
+        semiAnnual: getEnvString('STRIPE_PRO_SEMI_ANNUAL_PRICE_ID', ''),
+        annual: getEnvString('STRIPE_PRO_ANNUAL_PRICE_ID', '')
+      }
     },
     {
       id: 'enterprise',
@@ -66,7 +86,12 @@ export const pricingConfig: PricingConfig = {
         'Unique booking link',
         'Πλήρες διαχειριστικό',
         'Dedicated υποστήριξη'
-      ]
+      ],
+      stripePriceIds: {
+        monthly: getEnvString('STRIPE_ENTERPRISE_MONTHLY_PRICE_ID', ''),
+        semiAnnual: getEnvString('STRIPE_ENTERPRISE_SEMI_ANNUAL_PRICE_ID', ''),
+        annual: getEnvString('STRIPE_ENTERPRISE_ANNUAL_PRICE_ID', '')
+      }
     }
   ]
 };
@@ -76,6 +101,18 @@ export const pricingUtils = {
   // Get plan by ID
   getPlan(planId: string): PricingPlan | undefined {
     return pricingConfig.plans.find(plan => plan.id === planId);
+  },
+
+  // Get Stripe Price ID for a plan and duration
+  getStripePriceId(planId: string, duration: 1 | 6 | 12): string {
+    const plan = this.getPlan(planId);
+    if (!plan) return '';
+    
+    if (duration === 1) return plan.stripePriceIds.monthly;
+    if (duration === 6) return plan.stripePriceIds.semiAnnual;
+    if (duration === 12) return plan.stripePriceIds.annual;
+    
+    return '';
   },
 
   // Calculate price with VAT

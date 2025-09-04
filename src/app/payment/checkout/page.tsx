@@ -1,11 +1,9 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import Link from 'next/link';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -13,31 +11,36 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
   const stripe = useStripe();
   const elements = useElements();
   const router = useRouter();
-  
-  const [isLoading, setIsLoading] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState<'idle' | 'processing' | 'succeeded' | 'failed'>('idle');
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [cardComplete, setCardComplete] = useState(false);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
     if (!stripe || !elements) {
+      setMessage('Stripe δεν έχει φορτωθεί ακόμα');
       return;
     }
-
-    setIsLoading(true);
-    setPaymentStatus('processing');
-    setErrorMessage('');
 
     const cardElement = elements.getElement(CardElement);
     if (!cardElement) {
-      setErrorMessage('Σφάλμα φόρτωσης στοιχείων κάρτας');
-      setIsLoading(false);
-      setPaymentStatus('failed');
+      setMessage('Σφάλμα με την κάρτα');
       return;
     }
 
+    if (!cardComplete) {
+      setMessage('Παρακαλώ συμπληρώστε όλα τα στοιχεία της κάρτας');
+      return;
+    }
+
+    setIsProcessing(true);
+    setMessage(null);
+
     try {
+      console.log('🔄 Confirming payment with client secret:', clientSecret);
+      
+      // Confirm the payment using the card element
       const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {
           card: cardElement,
@@ -45,174 +48,178 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
       });
 
       if (error) {
-        setErrorMessage(error.message || 'Η πληρωμή απέτυχε');
-        setPaymentStatus('failed');
-      } else if (paymentIntent.status === 'succeeded') {
-        setPaymentStatus('succeeded');
-
-        // Finalize on server to ensure subscription creation (backup to webhook)
-        try {
-          await fetch('/api/stripe/finalize-payment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ paymentIntentId: paymentIntent.id }),
-          });
-        } catch (finalizeErr) {
-          console.error('Finalize payment call failed:', finalizeErr);
-        }
-
-        // Redirect to success page after a short delay
-        setTimeout(() => {
-          router.push('/management/settings/renewal/success');
-        }, 2000);
+        console.error('❌ Payment error:', error);
+        setMessage(error.message || 'Παρουσιάστηκε σφάλμα κατά την πληρωμή');
+        setIsProcessing(false);
+        return;
       }
-    } catch (err) {
-      console.error('Payment error:', err);
-      setErrorMessage('Υπήρξε ένα απροσδόκητο σφάλμα');
-      setPaymentStatus('failed');
+
+      if (paymentIntent && paymentIntent.status === 'succeeded') {
+        console.log('✅ Payment succeeded:', paymentIntent.id);
+        
+        // Call our finalize endpoint
+        const response = await fetch('/api/stripe/finalize-one-time-payment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            paymentIntentId: paymentIntent.id
+          }),
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+          // Redirect to success page
+          router.push('/management/settings/renewal/success');
+        } else {
+          setMessage(result.error || 'Σφάλμα κατά την ενεργοποίηση του πλάνου');
+        }
+      } else {
+        setMessage('Η πληρωμή δεν ολοκληρώθηκε επιτυχώς');
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      setMessage('Παρουσιάστηκε σφάλμα κατά την πληρωμή');
     } finally {
-      setIsLoading(false);
+      setIsProcessing(false);
     }
   };
 
-  if (paymentStatus === 'succeeded') {
-    return (
-      <div className="text-center py-8">
-        <div className="text-6xl mb-4">🎉</div>
-        <h2 className="text-2xl font-bold text-green-700 mb-2">Η πληρωμή ολοκληρώθηκε!</h2>
-        <p className="text-gray-600">Η συνδρομή σας ενεργοποιήθηκε επιτυχώς.</p>
-        <p className="text-sm text-gray-500 mt-2">Θα μεταφερθείτε αυτόματα...</p>
-      </div>
-    );
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Στοιχεία Κάρτας
-        </label>
-        <div className="bg-white border border-gray-300 rounded-md p-3">
-          <CardElement 
-            options={{
-              style: {
-                base: {
-                  fontSize: '16px',
-                  color: '#374151',
-                  '::placeholder': {
-                    color: '#9CA3AF',
+    <div className="max-w-md mx-auto">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="bg-white p-6 rounded-lg shadow-md">
+          <h2 className="text-xl font-semibold mb-4">Πληρωμή με Κάρτα</h2>
+          
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Στοιχεία Κάρτας
+            </label>
+            <div className="p-3 border border-gray-300 rounded-md">
+              <CardElement
+                options={{
+                  style: {
+                    base: {
+                      fontSize: '16px',
+                      color: '#424770',
+                      '::placeholder': {
+                        color: '#aab7c4',
+                      },
+                    },
+                    invalid: {
+                      color: '#9e2146',
+                    },
                   },
-                },
-                invalid: {
-                  color: '#EF4444',
-                },
-              },
-            }}
-          />
-        </div>
-      </div>
-
-      {errorMessage && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="text-sm text-red-800">
-            <strong>Σφάλμα:</strong> {errorMessage}
+                }}
+                onChange={(event) => {
+                  setCardComplete(event.complete);
+                  if (event.error) {
+                    setMessage(event.error.message);
+                  } else {
+                    setMessage(null);
+                  }
+                }}
+              />
+            </div>
           </div>
+          
+          {message && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-red-800 text-sm">{message}</p>
+            </div>
+          )}
         </div>
-      )}
 
-      <button
-        type="submit"
-        disabled={!stripe || isLoading || paymentStatus === 'processing'}
-        className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-      >
-        {paymentStatus === 'processing' ? (
-          <>
-            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Επεξεργασία πληρωμής...
-          </>
-        ) : (
-          'Ολοκλήρωση Πληρωμής'
-        )}
-      </button>
-
-      <p className="text-xs text-gray-500 text-center">
-        Ασφαλής πληρωμή μέσω Stripe. Τα στοιχεία της κάρτας σας κρυπτογραφούνται και δεν αποθηκεύονται.
-      </p>
-    </form>
-  );
-}
-
-function CheckoutPageContent() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const [clientSecret, setClientSecret] = useState<string>('');
-
-  useEffect(() => {
-    const paymentIntent = searchParams.get('payment_intent');
-    if (paymentIntent) {
-      setClientSecret(paymentIntent);
-    } else {
-      // If no payment intent, redirect back
-      router.push('/management/settings/renewal');
-    }
-  }, [searchParams, router]);
-
-  if (!clientSecret) {
-    return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="text-center">
-          <svg className="animate-spin mx-auto h-8 w-8 text-gray-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <p className="text-gray-600">Φόρτωση στοιχείων πληρωμής...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <Elements stripe={stripePromise}>
-      <CheckoutForm clientSecret={clientSecret} />
-    </Elements>
+        <button
+          type="submit"
+          disabled={!stripe || !elements || isProcessing || !cardComplete}
+          className={`w-full py-3 px-4 rounded-md font-medium transition-colors ${
+            isProcessing || !stripe || !elements || !cardComplete
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+              : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
+        >
+          {isProcessing ? 'Επεξεργασία...' : 'Πληρωμή με Κάρτα'}
+        </button>
+      </form>
+    </div>
   );
 }
 
 export default function CheckoutPage() {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-md mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <Link
-            href="/management/settings/renewal"
-            className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-          >
-            <ArrowLeftIcon className="h-4 w-4 mr-1" />
-            Πίσω
-          </Link>
-          <h1 className="text-xl font-bold text-gray-900">Πληρωμή</h1>
-          <div className="w-12"></div>
-        </div>
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
 
-        {/* Main Content */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <Suspense fallback={
-            <div className="flex items-center justify-center min-h-64">
-              <div className="text-center">
-                <svg className="animate-spin mx-auto h-8 w-8 text-gray-600 mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <p className="text-gray-600">Φόρτωση...</p>
-              </div>
-            </div>
-          }>
-            <CheckoutPageContent />
-          </Suspense>
+  useEffect(() => {
+    const paymentIntentParam = searchParams.get('payment_intent');
+    
+    if (!paymentIntentParam) {
+      router.push('/management/settings/renewal');
+      return;
+    }
+
+    // Extract client secret from the parameter
+    // The parameter should be in format: pi_xxxxx_secret_xxxxx
+    if (paymentIntentParam.includes('_secret_')) {
+      setClientSecret(paymentIntentParam);
+    } else {
+      console.error('Invalid payment intent format');
+      router.push('/management/settings/renewal');
+      return;
+    }
+
+    setLoading(false);
+  }, [searchParams, router]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Φόρτωση...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!clientSecret) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600">Σφάλμα: Δεν βρέθηκε έγκυρο payment intent</p>
+          <button 
+            onClick={() => router.push('/management/settings/renewal')}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Επιστροφή
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const options = {
+    appearance: {
+      theme: 'stripe' as const,
+    },
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="container mx-auto px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-2xl font-bold text-gray-900">Πληρωμή Πλάνου</h1>
+            <p className="text-gray-600 mt-2">Ολοκληρώστε την πληρωμή για να ενεργοποιήσετε το πλάνο σας</p>
+          </div>
+
+          <Elements options={options} stripe={stripePromise}>
+            <CheckoutForm clientSecret={clientSecret} />
+          </Elements>
         </div>
       </div>
     </div>
