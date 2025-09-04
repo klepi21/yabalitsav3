@@ -391,65 +391,65 @@ export default function SettingsPage() {
                   </div>
                   
                   {/* Subscription End Date */}
-                  {venue.plan === 'subscription' && (
-                    <div className="text-center mt-4">
-                      <div className="text-sm text-gray-700 mb-2">
-                        <span className="font-medium">Λήγει στις:</span>
-                      </div>
-                      {subscription?.subscriptionEndDate ? (
-                        (() => {
-                          const endDate = formatDateSafely(subscription.subscriptionEndDate);
-                          if (!endDate) {
-                            return (
-                              <div className="text-lg font-semibold text-orange-600">
-                                ⚠️ Ημερομηνία δεν είναι έγκυρη
-                              </div>
-                            );
-                          }
-                          
-                          const diffDays = calculateDaysDifference(subscription.subscriptionEndDate);
-                          if (diffDays === null) {
-                            return (
-                              <div className="text-lg font-semibold text-orange-600">
-                                ⚠️ Δεν είναι δυνατός ο υπολογισμός ημερών
-                              </div>
-                            );
-                          }
-                          
-                          return (
-                            <>
-                              <div className="text-lg font-semibold text-blue-700">
-                                {endDate.toLocaleDateString('el-GR', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric'
-                                })}
-                              </div>
-                              <div className="text-xs text-gray-500 mt-1">
-                                {diffDays > 0 ? `${diffDays} ημέρες ακόμα` : 
-                                 diffDays === 0 ? 'Λήγει σήμερα!' : 
-                                 `Έληξε πριν ${Math.abs(diffDays)} ημέρες`}
-                              </div>
+                                        {venue.plan === 'subscription' && (
+                        <div className="text-center mt-4">
+                          <div className="text-sm text-gray-700 mb-2">
+                            <span className="font-medium">Λήγει στις:</span>
+                          </div>
+                          {subscription?.subscriptionEndDate ? (
+                            (() => {
+                              const endDate = formatDateSafely(subscription.subscriptionEndDate);
+                              if (!endDate) {
+                                return (
+                                  <div className="text-lg font-semibold text-orange-600">
+                                    ⚠️ Ημερομηνία δεν είναι έγκυρη
+                                  </div>
+                                );
+                              }
                               
-                              {/* Ανανέωση Συνδρομής Button */}
-                              <div className="mt-3">
-                                <Link 
-                                  href="/management/settings/renewal" 
-                                  className="inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
-                                >
-                                  Ανανέωση Συνδρομής
-                                </Link>
-                              </div>
-                            </>
-                          );
-                        })()
-                      ) : (
-                        <div className="text-lg font-semibold text-gray-500">
-                          Ημερομηνία λήξης δεν είναι διαθέσιμη
+                              const diffDays = calculateDaysDifference(subscription.subscriptionEndDate);
+                              if (diffDays === null) {
+                                return (
+                                  <div className="text-lg font-semibold text-orange-600">
+                                    ⚠️ Δεν είναι δυνατός ο υπολογισμός ημερών
+                                  </div>
+                                );
+                              }
+                              
+                              return (
+                                <>
+                                  <div className="text-lg font-semibold text-blue-700">
+                                    {endDate.toLocaleDateString('el-GR', {
+                                      year: 'numeric',
+                                      month: 'long',
+                                      day: 'numeric'
+                                    })}
+                                  </div>
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    {diffDays > 0 ? `${diffDays} ημέρες ακόμα` : 
+                                     diffDays === 0 ? 'Λήγει σήμερα!' : 
+                                     `Έληξε πριν ${Math.abs(diffDays)} ημέρες`}
+                                  </div>
+                                </>
+                              );
+                            })()
+                          ) : (
+                            <div className="text-lg font-semibold text-gray-500">
+                              Ημερομηνία λήξης δεν είναι διαθέσιμη
+                            </div>
+                          )}
+                          
+                          {/* Ανανέωση Συνδρομής Button - Πάντα ορατό */}
+                          <div className="mt-3">
+                            <Link 
+                              href="/management/settings/renewal" 
+                              className="inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+                            >
+                              Ανανέωση Συνδρομής
+                            </Link>
+                          </div>
                         </div>
                       )}
-                    </div>
-                  )}
                 </div>
                 
                 <div className="mt-4 text-center">

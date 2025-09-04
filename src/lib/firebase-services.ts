@@ -62,6 +62,7 @@ export const venueService = {
     const docRef = await addDoc(collection(db, 'yabalitsa_venues'), {
       ...firebaseData,
       active: firebaseData.active ?? true,
+      daysRemaining: firebaseData.daysRemaining ?? 15,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
