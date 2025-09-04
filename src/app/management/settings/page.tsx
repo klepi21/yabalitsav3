@@ -425,6 +425,11 @@ export default function SettingsPage() {
                                   day: 'numeric'
                                 })}
                               </div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                {diffDays > 0 ? `${diffDays} ημέρες ακόμα` : 
+                                 diffDays === 0 ? 'Λήγει σήμερα!' : 
+                                 `Έληξε πριν ${Math.abs(diffDays)} ημέρες`}
+                              </div>
                               
                               {/* Ανανέωση Συνδρομής Button */}
                               <div className="mt-3">
