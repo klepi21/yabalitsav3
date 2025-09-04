@@ -15,6 +15,7 @@ import { venueService, paymentService, subscriptionService } from '@/lib/firebas
 import { Venue } from '@/types';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import SupportEmail from '@/components/SupportEmail';
 
 // Form validation schema
 const venueSettingsSchema = z.object({
@@ -514,6 +515,21 @@ export default function SettingsPage() {
             </div>
           )}
 
+          {/* Support Section */}
+          <div className="mt-8 bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">🆘 Χρειάζεστε βοήθεια;</h4>
+              <div className="text-center">
+                <p className="text-gray-600 mb-4">
+                  Η ομάδα υποστήριξης μας είναι εδώ για να σας βοηθήσει με οποιαδήποτε ερώτηση ή πρόβλημα
+                </p>
+                <SupportEmail variant="highlighted" />
+                <p className="text-sm text-gray-500 mt-3">
+                  Απάντηση εντός 24 ωρών
+                </p>
+              </div>
+            </div>
+          </div>
 
         </div>
       </div>

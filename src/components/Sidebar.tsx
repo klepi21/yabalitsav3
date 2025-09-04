@@ -73,6 +73,19 @@ export default function Sidebar() {
             })}
           </nav>
           
+          {/* Support Email - Mobile */}
+          <div className="px-4 py-3 border-t border-gray-200">
+            <div className="text-center">
+              <div className="text-xs text-gray-500 mb-1">Υποστήριξη</div>
+              <a 
+                href="mailto:support@yabalitsa.com"
+                className="text-sm text-football-green hover:text-football-green-light font-medium"
+              >
+                support@yabalitsa.com
+              </a>
+            </div>
+          </div>
+          
           {/* Logout button - Mobile */}
           <div className="px-4 py-4 border-t border-gray-200">
             <button
@@ -127,6 +140,19 @@ export default function Sidebar() {
               );
             })}
           </nav>
+          
+          {/* Support Email - Desktop */}
+          <div className="px-4 py-3 border-t border-gray-200">
+            <div className="text-center">
+              <div className="text-xs text-gray-500 mb-1">Υποστήριξη</div>
+              <a 
+                href="mailto:support@yabalitsa.com"
+                className="text-sm text-football-green hover:text-football-green-light font-medium"
+              >
+                support@yabalitsa.com
+              </a>
+            </div>
+          </div>
           
           {/* Logout button - Desktop */}
           <div className="px-4 py-4 border-t border-gray-200">

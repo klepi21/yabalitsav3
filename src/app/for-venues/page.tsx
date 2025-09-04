@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import { pricingUtils } from '@/lib/pricing';
+import SupportEmail from '@/components/SupportEmail';
 
 export default function ForVenuesPage() {
   const router = useRouter();
@@ -418,6 +419,18 @@ export default function ForVenuesPage() {
           </div>
         </div>
 
+        {/* Support Section */}
+        <div className="text-center py-8">
+          <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-md mx-auto">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">
+              Χρειάζεστε βοήθεια;
+            </h3>
+            <p className="text-gray-600 mb-4">
+              Η ομάδα μας είναι εδώ για να σας βοηθήσει με οποιαδήποτε ερώτηση
+            </p>
+            <SupportEmail variant="highlighted" />
+          </div>
+        </div>
 
       </div>
     </div>
