@@ -467,15 +467,38 @@ export default function SettingsPage() {
                             }
                           })()}
                           
-                          {/* Ανανέωση Συνδρομής Button - Πάντα ορατό */}
-                          <div className="mt-3">
-                            <Link 
-                              href="/management/settings/renewal" 
-                              className="inline-flex items-center justify-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
-                            >
-                              Ανανέωση Συνδρομής
-                            </Link>
-                          </div>
+                          {/* Ανανέωση Συνδρομής Button - Εμφανίζεται μόνο αν απομένουν λιγότερες από 5 ημέρες */}
+                          {(() => {
+                            // Calculate days remaining from subscription end date
+                            let daysRemaining = null;
+                            
+                            if (venue.subscriptionEndDate) {
+                              daysRemaining = calculateDaysDifference(venue.subscriptionEndDate);
+                            } else if (lastPayment && lastPayment.paymentDate && lastPayment.durationMonths) {
+                              // Calculate from last payment if no subscriptionEndDate
+                              const paymentDate = new Date(lastPayment.paymentDate);
+                              const calculatedEndDate = new Date(paymentDate);
+                              calculatedEndDate.setMonth(calculatedEndDate.getMonth() + lastPayment.durationMonths);
+                              daysRemaining = calculateDaysDifference(calculatedEndDate.toISOString());
+                            }
+                            
+                            // Show renewal button only if less than 5 days remaining
+                            if (daysRemaining !== null && daysRemaining < 5) {
+                              return (
+                                <div className="mt-3">
+                                  <Link 
+                                    href="/management/settings/renewal" 
+                                    className="inline-flex items-center justify-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-lg transition-colors"
+                                  >
+                                    ⚠️ Ανανέωση Συνδρομής ({daysRemaining} ημέρες ακόμα)
+                                  </Link>
+                                </div>
+                              );
+                            }
+                            
+                            // Don't show button if more than 5 days remaining
+                            return null;
+                          })()}
                         </div>
                       )}
                 </div>
