@@ -48,6 +48,7 @@ async function setupTestData() {
           phone: "+30 210 123 4567"
         },
         active: true,
+        daysRemaining: 15,
         notes: "Test venue for development and testing purposes",
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
