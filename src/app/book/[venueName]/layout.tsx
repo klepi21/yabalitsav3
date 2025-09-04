@@ -19,7 +19,7 @@ export async function generateMetadata({ params }: VenueLayoutProps): Promise<Me
     },
     twitter: {
       card: 'summary_large_image',
-      title: `Κράτηση - ${decodedVenueName} | Yabalitsa`,
+      title: `Κράτηση - ${decodedVenueName} | Yabalitsa`, 
       description: `Κράτηση γηπέδου στο ${decodedVenueName}.`,
       images: ['/prev.png'], 
     },
