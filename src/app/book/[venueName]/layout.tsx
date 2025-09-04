@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: VenueLayoutProps): Promise<Me
       card: 'summary_large_image',
       title: `Κράτηση - ${decodedVenueName} | Yabalitsa`,
       description: `Κράτηση γηπέδου στο ${decodedVenueName}.`,
-      images: ['/prev.png'],
+      images: ['/prev.png'], 
     },
   };
 }
