@@ -197,7 +197,17 @@ export default function DashboardPage() {
   };
 
   const getLiveBookings = () => {
-    return bookings.filter(booking => booking.status === 'confirmed').length;
+    const now = new Date();
+    return bookings.filter(booking => {
+      // Check if booking is confirmed and currently running
+      if (booking.status !== 'confirmed') return false;
+      
+      const startTime = new Date(booking.startTime);
+      const endTime = new Date(booking.endTime);
+      
+      // A booking is "live" if it started and hasn't ended yet
+      return startTime <= now && endTime > now;
+    }).length;
   };
 
   const getTodaysBookings = () => {

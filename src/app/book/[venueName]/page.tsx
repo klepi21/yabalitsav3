@@ -641,7 +641,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
     if (!selectedPitch || !selectedDate || !selectedTimeSlot) return;
 
     try {
-      const { bookingService } = await import('@/lib/firebase-services');
+      const { bookingService, userService } = await import('@/lib/firebase-services');
       
       // Parse the selected time to get start time (format is "HH:00")
       const [hours, minutes] = selectedTimeSlot.time.split(':').map(Number);
@@ -668,11 +668,48 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         throw new Error('Invalid end time calculated');
       }
 
+      // Check if customer already exists with this phone number
+      let customerId = '';
+      const existingCustomers = await userService.getAll();
+      const existingCustomer = existingCustomers.find(customer => 
+        customer.phone === formData.phone
+      );
+
+      if (existingCustomer) {
+        // Customer exists - check if they have bookings for this venue
+        const hasVenueBookings = existingCustomer.venueIds && 
+          existingCustomer.venueIds.includes(venue?.id || '');
+        
+        if (!hasVenueBookings) {
+          // Customer exists but not for this venue - add this venue to their list
+          customerId = existingCustomer.id;
+          await userService.addVenueToCustomer(customerId, venue?.id || '');
+          console.log('✅ Added venue to existing customer:', customerId);
+        } else {
+          // Customer exists and has bookings for this venue - use existing ID
+          customerId = existingCustomer.id;
+          console.log('✅ Using existing customer:', customerId);
+        }
+      } else {
+        // New customer - create customer record
+        const newCustomerData = {
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: '', // No email provided in booking form
+          phone: formData.phone,
+          venueIds: [venue?.id || ''], // This is their first venue
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        
+        customerId = await userService.create(newCustomerData as any);
+        console.log('✅ New customer created:', customerId);
+      }
+
       const newBooking: Omit<Booking, 'id' | 'createdAt'> = {
         slotId: '', // Will be generated
         pitchId: selectedPitch.id,
         venueId: venue?.id || '',
-        userId: '', // Will be generated
+        userId: customerId, // Use the customer ID we just created/found
         userName: `${formData.firstName} ${formData.lastName}`,
         userEmail: '',
         userPhone: formData.phone,
@@ -739,11 +776,11 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
           <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-4">
             <div className="flex items-center justify-center space-x-8">
               {[
-                { step: 'pitch', label: 'Γήπεδο', icon: '⚽' },
-                { step: 'date', label: 'Ημερομηνία', icon: '📅' },
-                { step: 'slots', label: 'Ώρα', icon: '🕐' },
-                { step: 'confirmation', label: 'Επιβεβαίωση', icon: '✅' }
-              ].map(({ step, label, icon }) => (
+                { step: 'pitch', label: 'Γήπεδο' },
+                { step: 'date', label: 'Ημερομηνία' },
+                { step: 'slots', label: 'Ώρα' },
+                { step: 'confirmation', label: 'Επιβεβαίωση' }
+              ].map(({ step, label }) => (
                 <div key={step} className="flex items-center space-x-2">
                   <div className={`
                     w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
@@ -752,7 +789,9 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                       : 'bg-emerald-500/30 text-white'
                     }
                   `}>
-                    {icon}
+                    {step === 'pitch' ? '1' : 
+                     step === 'date' ? '2' : 
+                     step === 'slots' ? '3' : '4'}
                   </div>
                   <span className={`text-sm font-medium ${
                     currentStep === step ? 'text-white' : 'text-emerald-100'
@@ -793,8 +832,8 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                         className="bg-gray-50 rounded-xl p-6 border-2 border-transparent hover:border-emerald-300 cursor-pointer transition-all"
                       >
                         <div className="text-center space-y-3">
-                          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto">
-                            <span className="text-2xl">⚽</span>
+                          <div className="flex items-center justify-center mx-auto">
+                            <span className="text-4xl">🏟️</span>
                           </div>
                           <h3 className="text-lg font-semibold text-gray-900">{pitch.name}</h3>
                           <p className="text-sm text-gray-600">{pitch.type}</p>
@@ -878,8 +917,17 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                             {day.dayNumber}
                           </div>
                           {day.hasAvailability && (
-                            <div className="text-xs text-emerald-600 hidden sm:block">
-                              {day.slots.length} ώρες
+                            <div className="flex justify-center space-x-1 hidden sm:flex">
+                              {(() => {
+                                const availableSlots = day.slots.length;
+                                if (availableSlots === 0) {
+                                  return <div className="w-2 h-2 bg-red-500 rounded-full"></div>;
+                                } else if (availableSlots < 3) {
+                                  return <div className="w-2 h-2 bg-orange-500 rounded-full"></div>;
+                                } else {
+                                  return <div className="w-2 h-2 bg-green-500 rounded-full"></div>;
+                                }
+                              })()}
                             </div>
                           )}
                         </div>
@@ -946,31 +994,69 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
                       return (
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                          {selectedDay.slots.map((slot) => (
-                            <motion.button
-                              key={slot.time}
-                              whileHover={{ scale: 1.02 }}
-                              whileTap={{ scale: 0.98 }}
-                              onClick={() => slot.available && selectedDate && handleTimeSlotSelect(selectedDate.toLocaleDateString('el-GR', { day: '2-digit', month: 'short' }), slot.time)}
-                              disabled={!slot.available}
-                              className={`
-                                p-4 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/50
-                                ${slot.available
-                                  ? 'border-gray-200 bg-white hover:border-emerald-300 hover:bg-emerald-50 text-gray-900 cursor-pointer'
-                                  : 'border-red-200 bg-red-50 text-red-600 cursor-not-allowed opacity-80'
-                                }
-                              `}
-                            >
-                                                          <div className="text-center">
-                              <div className="text-sm font-medium">{slot.time}</div>
-                              {!slot.available && slot.conflictingBookings && slot.conflictingBookings.length > 0 && (
-                                <div className="text-xs text-red-500 mt-1">
-                                  Κλεισμένο
+                          {(() => {
+                            const now = new Date();
+                            const isToday = selectedDate && selectedDate.toDateString() === now.toDateString();
+                            
+                            // Filter slots based on current time and minimum gap
+                            const filteredSlots = selectedDay.slots.filter(slot => {
+                              if (!isToday) return true; // Show all slots for future dates
+                              
+                              // Extract start time from slot (e.g., "14:00" from "14:00 - 15:00")
+                              const slotStartTime = slot.time.split(' - ')[0];
+                              const [slotHour, slotMinute] = slotStartTime.split(':').map(Number);
+                              
+                              // Create slot time for today
+                              const slotTime = new Date(now);
+                              slotTime.setHours(slotHour, slotMinute, 0, 0);
+                              
+                              // Add minimum 1 hour buffer
+                              const bufferTime = new Date(now);
+                              bufferTime.setHours(now.getHours() + 1, 0, 0, 0);
+                              
+                              // Only show slots that are at least 1 hour in the future
+                              return slotTime >= bufferTime;
+                            });
+                            
+                            if (filteredSlots.length === 0) {
+                              return (
+                                <div className="col-span-full text-center py-12">
+                                  <p className="text-gray-500 text-lg">
+                                    Δεν υπάρχουν διαθέσιμες ώρες για σήμερα
+                                  </p>
+                                  <p className="text-sm text-gray-400 mt-2">
+                                    Όλες οι ώρες έχουν παρέλθει ή είναι πολύ κοντά
+                                  </p>
                                 </div>
-                              )}
-                            </div>
-                            </motion.button>
-                          ))}
+                              );
+                            }
+                            
+                            return filteredSlots.map((slot) => (
+                              <motion.button
+                                key={slot.time}
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => slot.available && selectedDate && handleTimeSlotSelect(selectedDate.toLocaleDateString('el-GR', { day: '2-digit', month: 'short' }), slot.time)}
+                                disabled={!slot.available}
+                                className={`
+                                  p-4 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/50
+                                  ${slot.available
+                                    ? 'border-gray-200 bg-white hover:border-emerald-300 hover:bg-emerald-50 text-gray-900 cursor-pointer'
+                                    : 'border-red-200 bg-red-50 text-red-600 cursor-not-allowed opacity-80'
+                                  }
+                                `}
+                              >
+                                <div className="text-center">
+                                  <div className="text-sm font-medium">{slot.time}</div>
+                                  {!slot.available && slot.conflictingBookings && slot.conflictingBookings.length > 0 && (
+                                    <div className="text-xs text-red-500 mt-1">
+                                      Κλεισμένο
+                                    </div>
+                                  )}
+                                </div>
+                              </motion.button>
+                            ));
+                          })()}
                         </div>
                       );
                     })()}
@@ -1039,6 +1125,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                         </div>
                       </div>
 
+                      {/* Ιαστεράκι - Venue Info (χωρίς αξιολογήσεις) */}
                       <div className="bg-gray-50 rounded-xl p-6">
                         <div className="flex items-center space-x-4">
                           <img
@@ -1048,11 +1135,6 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                           />
                           <div>
                             <h4 className="text-lg font-semibold text-gray-900">{venue.name}</h4>
-                            <div className="flex items-center space-x-1 text-sm text-gray-600">
-                              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                              <span>{venue.rating}</span>
-                              <span className="text-gray-400">({venue.reviewCount} αξιολογήσεις)</span>
-                            </div>
                             <div className="flex items-center space-x-2 text-sm text-gray-600 mt-1">
                               <MapPin className="w-4 h-4" />
                               <span>{venue.address}</span>
@@ -1060,6 +1142,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                           </div>
                         </div>
                       </div>
+
                     </div>
 
                     {/* Right Column - Booking Form */}
@@ -1107,7 +1190,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                               </div>
                               <input
                                 type="tel"
-                                placeholder="6973625633"
+                                placeholder="697xxxxxxx"
                                 value={formData.phone}
                                 onChange={(e) => {
                                   // Only allow digits and limit to 10 characters

@@ -247,10 +247,25 @@ export const userService = {
   },
 
   // Get users by venue (customers associated with this venue's bookings)
-  async getByVenue(): Promise<User[]> {
-    // For now, return all customers since we don't have venue association in customer documents
-    // In a real app, you might want to add venueId to customer documents or query through bookings
-    return this.getAll();
+  async getByVenue(venueId?: string): Promise<User[]> {
+    if (!venueId) {
+      // If no venueId provided, return all customers
+      return this.getAll();
+    }
+    
+    // Get customers that have bookings for this specific venue
+    const querySnapshot = await getDocs(collection(db, 'yabalitsa_customers'));
+    const allCustomers = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+      createdAt: doc.data().createdAt?.toDate() || new Date(),
+      updatedAt: doc.data().updatedAt?.toDate() || new Date()
+    })) as User[];
+    
+    // Filter customers by venueId
+    return allCustomers.filter(customer => 
+      customer.venueIds && customer.venueIds.includes(venueId)
+    );
   },
 
   // Get user by ID
@@ -283,6 +298,25 @@ export const userService = {
   async delete(id: string): Promise<void> {
     const docRef = doc(db, 'yabalitsa_customers', id);
     await deleteDoc(docRef);
+  },
+
+  // Add venue to customer's venueIds array
+  async addVenueToCustomer(customerId: string, venueId: string): Promise<void> {
+    const docRef = doc(db, 'yabalitsa_customers', customerId);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const currentVenueIds = data.venueIds || [];
+      
+      // Only add if not already present
+      if (!currentVenueIds.includes(venueId)) {
+        await updateDoc(docRef, {
+          venueIds: [...currentVenueIds, venueId],
+          updatedAt: serverTimestamp()
+        });
+      }
+    }
   }
 };
 

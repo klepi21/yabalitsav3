@@ -80,6 +80,7 @@ export interface User {
   name: string;
   email: string;
   phone: string;
+  venueIds?: string[]; // Array of venue IDs where this customer has bookings
   createdAt: Date;
   updatedAt: Date;
 }
