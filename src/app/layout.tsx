@@ -8,8 +8,78 @@ import SidebarWrapper from '@/components/SidebarWrapper';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Yabalitsa Management',
-  description: 'Football pitch management system',
+  title: {
+    default: 'Yabalitsa - Βρες και Κλείσε Γήπεδο Ποδοσφαίρου',
+    template: '%s | Yabalitsa'
+  },
+  description: 'Βρες και κλείσε γήπεδο ποδοσφαίρου στην Ελλάδα. Εύκολη κράτηση γηπέδων 5x5, 6x6, 7x7, 8x8. Διαχείριση γηπέδων για ιδιοκτήτες.',
+  keywords: [
+    'γήπεδο ποδοσφαίρου',
+    'κράτηση γηπέδου',
+    '5x5',
+    '6x6', 
+    '7x7',
+    '8x8',
+    'ποδόσφαιρο',
+    'γήπεδα Αθήνα',
+    'γήπεδα Θεσσαλονίκη',
+    'διαχείριση γηπέδων',
+    'booking γηπέδου',
+    'football pitch',
+    'soccer field'
+  ],
+  authors: [{ name: 'Yabalitsa Team' }],
+  creator: 'Yabalitsa',
+  publisher: 'Yabalitsa',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL('https://yabalitsa.com'),
+  alternates: {
+    canonical: '/',
+  },
+  verification: {
+    google: 'your-google-verification-code',
+    yandex: 'your-yandex-verification-code',
+    yahoo: 'your-yahoo-verification-code',
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'el_GR',
+    url: 'https://yabalitsa.com',
+    siteName: 'Yabalitsa',
+    title: 'Yabalitsa - Βρες και Κλείσε Γήπεδο Ποδοσφαίρου',
+    description: 'Βρες και κλείσε γήπεδο ποδοσφαίρου στην Ελλάδα. Εύκολη κράτηση γηπέδων 5x5, 6x6, 7x7, 8x8.',
+    images: [
+      {
+        url: '/prev.png',
+        width: 1200,
+        height: 630,
+        alt: 'Yabalitsa - Γήπεδα Ποδοσφαίρου',
+        type: 'image/png',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Yabalitsa - Βρες και Κλείσε Γήπεδο Ποδοσφαίρου',
+    description: 'Βρες και κλείσε γήπεδο ποδοσφαίρου στην Ελλάδα. Εύκολη κράτηση γηπέδων.',
+    images: ['/prev.png'],
+    creator: '@yabalitsa',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
