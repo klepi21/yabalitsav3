@@ -295,19 +295,7 @@ export default function RootPage() {
         <div className={`text-center px-4 relative transition-all duration-700 ease-in-out ${
           !hasSearched ? 'flex-1 flex flex-col justify-center' : 'pt-12 sm:pt-16 pb-8 sm:pb-12'
         }`}>
-          {/* Upper Right Corner Link */}
-          <div className={`absolute transition-all duration-700 ease-in-out ${
-            !hasSearched ? 'top-2 sm:top-4 right-2 sm:right-4' : 'top-0 right-2 sm:right-4'
-          } flex items-center space-x-2 sm:space-x-4`}>
-            <a href="/for-venues" className="text-black hover:text-gray-700 font-medium text-xs sm:text-sm transition-colors relative group flex items-center">
-              <span className="mr-1 sm:mr-2 text-gray-800 animate-bounce text-lg sm:text-2xl font-bold">➜</span>
-              <span className="hidden xs:inline">Έχεις γηπεδάκια?</span>
-              <span className="xs:hidden">Γήπεδα</span>
-            </a>
-            <a href="/management" className="text-black hover:text-gray-700 font-medium text-xs sm:text-sm transition-colors">
-              Σύνδεση
-            </a>
-          </div>
+          {/* Upper Right Corner Link - Removed as requested */}
           <div className="mb-6 sm:mb-8">
             <div className="flex justify-center mb-4 sm:mb-6">
               <Image
@@ -606,6 +594,14 @@ export default function RootPage() {
                   className="text-gray-600 hover:text-gray-900 transition-colors"
                 >
                   🏟️ Εγγραφή για Γήπεδα
+                </Link>
+                <Link 
+                  href="/venue-login" 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  🔑 Σύνδεση
                 </Link>
               </div>
             </div>
