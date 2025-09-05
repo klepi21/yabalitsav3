@@ -723,6 +723,19 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
             .fx-left, .fx-right, .fx-center { height: auto; }
             .fx-left, .fx-right { justify-items: center; }
             .fx-track { transform: none !important; }
+            
+            /* Hide left and right labels on mobile */
+            .fx-left, .fx-right {
+              display: none !important;
+            }
+            
+            /* Center the content on mobile */
+            .fx-center {
+              width: 100%;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+            }
           }
         `}</style>
       </div>

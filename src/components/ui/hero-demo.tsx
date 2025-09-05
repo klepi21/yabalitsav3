@@ -65,7 +65,7 @@ export default function HeroDemo() {
                 filter: 'brightness(0) invert(1)'
               }} 
             />
-            <div style={{ fontSize: 'clamp(1rem, 2vw, 1.5rem)', fontWeight: '400' }}>Ecosystem</div>
+            <div style={{ fontSize: 'clamp(0.8rem, 1.5vw, 1.2rem)', fontWeight: '400' }}>Ecosystem</div>
           </div>
         }
         footer={<div></div>}
