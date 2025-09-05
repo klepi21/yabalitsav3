@@ -3,6 +3,7 @@
 import React from "react";
 import { FullScreenScrollFX, FullScreenFXAPI } from "@/components/ui/full-screen-scroll-fx";
 import { GetStartedButton } from "@/components/ui/get-started-button";
+import { WaitlistComponent } from "@/components/ui/waitlist";
 
 const sections = [
   {
@@ -11,8 +12,11 @@ const sections = [
       <>
         The App
         <div style={{ marginTop: '1rem', display: 'flex', justifyContent: 'center', gap: '1rem', alignItems: 'center' }}>
-          <img src="/appstore.svg" alt="App Store" style={{ width: '120px', height: 'auto' }} />
-          <img src="/google-play-badge-coming-soon.webp" alt="Google Play" style={{ width: '135px', height: 'auto' }} />
+          <img src="/appstore.svg" alt="App Store" style={{ width: '120px', height: 'auto', opacity: 0.5, cursor: 'not-allowed' }} />
+          <img src="/google-play-badge-coming-soon.webp" alt="Google Play" style={{ width: '135px', height: 'auto', opacity: 0.5, cursor: 'not-allowed' }} />
+        </div>
+        <div style={{ marginTop: '1.5rem' }}>
+          <WaitlistComponent mode="light" />
         </div>
       </>
     ),

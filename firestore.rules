@@ -60,6 +60,14 @@ service cloud.firestore {
       // Allow writes from server-side API for payment processing
       allow write: if true;
     }
+
+    // Waitlist collection (public write for email collection)
+    match /yabalitsa-waitlist/{waitlistId} {
+      // Allow anyone to write (for email collection)
+      allow write: if true;
+      // Only authenticated users can read (for admin purposes)
+      allow read: if request.auth != null;
+    }
     
     // Your existing collections - DO NOT MODIFY THESE
     // These rules ensure your existing app continues to work
