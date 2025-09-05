@@ -4,6 +4,7 @@ import './globals.css';
 
 import { AuthProvider } from '@/contexts/AuthContext';
 import SidebarWrapper from '@/components/SidebarWrapper';
+import ConditionalWrapper from '@/components/ConditionalWrapper';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -95,11 +96,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className} suppressHydrationWarning={true}>
-        <AuthProvider>
-          <SidebarWrapper>
-            {children}
-          </SidebarWrapper>
-        </AuthProvider>
+        <ConditionalWrapper>
+          {children}
+        </ConditionalWrapper>
       </body>
     </html>
   );

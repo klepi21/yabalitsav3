@@ -23,6 +23,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
   const isBookingPage = pathname.startsWith('/book/');
   const isTermsPage = pathname === '/terms';
   const isPrivacyPage = pathname === '/privacy';
+  const isFSEPage = pathname === '/fse';
   
   // Fetch venue data for subscription info
   useEffect(() => {
@@ -49,7 +50,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
     }
   }, [user?.uid]);
   
-  if (isRootPage || isLoginPage || isForVenues || isBookingPage || isTermsPage || isPrivacyPage) {
+  if (isRootPage || isLoginPage || isForVenues || isBookingPage || isTermsPage || isPrivacyPage || isFSEPage) {
     return (
       <div className="min-h-screen bg-gray-50">
         {children}

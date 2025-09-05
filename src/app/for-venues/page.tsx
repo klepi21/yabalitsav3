@@ -8,7 +8,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
-import { pricingUtils } from '@/lib/pricing';
 import SupportEmail from '@/components/SupportEmail';
 
 export default function ForVenuesPage() {
@@ -38,8 +37,6 @@ export default function ForVenuesPage() {
     acceptTerms: false
   });
 
-  // State for expandable pricing plans - start all collapsed
-  const [expandedPlan, setExpandedPlan] = useState<string | null>(null);
 
   // Derived password validation states (live feedback)
   const passHasMinLen = form.password.length >= 6;
@@ -265,159 +262,6 @@ export default function ForVenuesPage() {
           </div>
         )}
 
-        {/* Full Pricing Plans - After Form */}
-        <div className="mt-16">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Πλάνα Συνδρομής</h2>
-            <p className="text-gray-600">Επιλέξεις το πλάνο που σου ταιριάζει μετά τις 15 ημέρες δωρεάν</p>
-          </div>
-
-          {/* Subscription Plans - Collapsible */}
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 text-center">SUBSCRIPTION PLANS</h3>
-            <p className="text-center text-sm text-gray-500 mb-4">Κάντε κλικ στο "+" για να δείτε περισσότερες λεπτομέρειες</p>
-            <div className="space-y-4">
-              {/* Basic Plan */}
-              <div className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden">
-                <button 
-                  onClick={() => setExpandedPlan(expandedPlan === 'basic' ? null : 'basic')}
-                  className="w-full p-4 text-left hover:bg-gray-50 transition-colors flex items-center justify-between"
-                >
-                  <div className="flex items-center space-x-4">
-                    <h4 className="text-lg font-bold text-gray-900">Basic</h4>
-                    <div className="text-2xl font-bold text-green-600">€{pricingUtils.getPlan('basic')?.basePrice}<span className="text-sm font-normal text-gray-500">/μήνα</span></div>
-                    <div className="text-sm text-green-600 font-semibold">{pricingUtils.formatPrice(pricingUtils.calculateFinalPrice(pricingUtils.getPlan('basic')?.basePrice || 25))} με ΦΠΑ</div>
-                  </div>
-                  <span className="text-gray-400 text-xl font-bold hover:text-gray-600 transition-colors">
-                    {expandedPlan === 'basic' ? '−' : '+'}
-                  </span>
-                </button>
-                {expandedPlan === 'basic' && (
-                  <div className="px-4 pb-4 border-t border-gray-100">
-                    <ul className="space-y-2 text-sm text-gray-600 mt-3">
-                      <li className="flex items-start">
-                        <span className="text-green-500 mr-2">✓</span>
-                        1 γήπεδο
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-green-500 mr-2">✓</span>
-                        Απεριόριστες κρατήσεις
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-green-500 mr-2">✓</span>
-                        Προηγμένο διαχειριστικό
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-green-500 mr-2">✓</span>
-                        Email υποστήριξη
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              {/* Pro Plan */}
-              <div className="bg-gradient-to-br from-green-50 to-white rounded-2xl border-2 border-green-500 overflow-hidden relative pt-6">
-                <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-20">
-                  <span className="bg-green-600 text-white px-4 py-2 rounded-full text-sm font-bold shadow-xl border-2 border-white ring-2 ring-green-200">⭐ ΠΡΟΤΕΙΝΟΜΕΝΟ</span>
-                </div>
-                <button 
-                  onClick={() => setExpandedPlan(expandedPlan === 'pro' ? null : 'pro')}
-                  className="w-full p-4 text-left hover:bg-green-100 transition-colors flex items-center justify-between"
-                >
-                  <div className="flex items-center space-x-4">
-                    <h4 className="text-lg font-bold text-gray-900">Pro</h4>
-                    <div className="text-2xl font-bold text-green-600">€{pricingUtils.getPlan('pro')?.basePrice}<span className="text-sm font-normal text-gray-500">/μήνα</span></div>
-                    <div className="text-sm text-green-600 font-semibold">{pricingUtils.formatPrice(pricingUtils.calculateFinalPrice(pricingUtils.getPlan('pro')?.basePrice || 45))} με ΦΠΑ</div>
-                  </div>
-                  <span className="text-gray-400 text-xl font-bold hover:text-gray-600 transition-colors">
-                    {expandedPlan === 'pro' ? '−' : '+'}
-                  </span>
-                </button>
-                {expandedPlan === 'pro' && (
-                  <div className="px-4 pb-4 border-t border-gray-100">
-                    <ul className="space-y-2 text-sm text-gray-600 mt-3">
-                      <li className="flex items-start">
-                        <span className="text-green-500 mr-2">✓</span>
-                        2-3 γήπεδα
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-green-500 mr-2">✓</span>
-                        Απεριόριστες κρατήσεις
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-green-500 mr-2">✓</span>
-                        Προηγμένο διαχειριστικό
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-green-500 mr-2">✓</span>
-                        Προτεραιότητα υποστήριξης
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              {/* Enterprise Plan */}
-              <div className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden">
-                <button 
-                  onClick={() => setExpandedPlan(expandedPlan === 'enterprise' ? null : 'enterprise')}
-                  className="w-full p-4 text-left hover:bg-gray-50 transition-colors flex items-center justify-between"
-                >
-                  <div className="flex items-center space-x-4">
-                    <h4 className="text-lg font-bold text-gray-900">Enterprise</h4>
-                    <div className="text-2xl font-bold text-green-600">€{pricingUtils.getPlan('enterprise')?.basePrice}<span className="text-sm font-normal text-gray-500">/μήνα</span></div>
-                    <div className="text-sm text-green-600 font-semibold">{pricingUtils.formatPrice(pricingUtils.calculateFinalPrice(pricingUtils.getPlan('enterprise')?.basePrice || 75))} με ΦΠΑ</div>
-                  </div>
-                  <span className="text-gray-400 text-xl font-bold hover:text-gray-600 transition-colors">
-                    {expandedPlan === 'enterprise' ? '−' : '+'}
-                  </span>
-                </button>
-                {expandedPlan === 'enterprise' && (
-                  <div className="px-4 pb-4 border-t border-gray-100">
-                    <ul className="space-y-2 text-sm text-gray-600 mt-3">
-                      <li className="flex items-start">
-                        <span className="text-green-500 mr-2">✓</span>
-                        3+ γήπεδα
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-green-500 mr-2">✓</span>
-                        Unique booking link
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-green-500 mr-2">✓</span>
-                        Πλήρες διαχειριστικό
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-green-500 mr-2">✓</span>
-                        Dedicated υποστήριξη
-                      </li>
-                    </ul>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Hybrid Plan - Compact */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border-2 border-blue-200 p-4 max-w-md mx-auto">
-            <h3 className="text-sm font-semibold text-gray-800 mb-3 text-center">HYBRID PAY-PER-BOOKING</h3>
-            <div className="text-center mb-3">
-              <div className="text-lg font-bold text-blue-600 mb-1">€20<span className="text-xs font-normal text-gray-500">/μήνα</span></div>
-              <div className="text-xs text-gray-500">+ΦΠΑ <span className="align-top text-[10px]">τελική τιμή</span></div>
-              <div className="text-sm text-blue-600 font-semibold">€24.80</div>
-              <div className="text-sm font-bold text-blue-600 mt-1">€0.75/κράτηση</div>
-            </div>
-            <div className="text-center">
-              <p className="text-xs text-gray-600 mb-2">ΜΕ FSE - Επικοινωνήστε μαζί μας</p>
-              <div className="inline-flex items-center space-x-3 text-blue-600 font-medium text-xs">
-                <span>📧</span>
-                <span>📞</span>
-                <span>💬</span>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Support Section */}
         <div className="text-center py-8">
