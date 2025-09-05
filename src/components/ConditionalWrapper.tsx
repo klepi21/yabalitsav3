@@ -15,7 +15,6 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
   const isPublicPage = pathname === '/' || 
                       pathname === '/fse' || 
                       pathname === '/venues' ||
-                      pathname === '/venue-login' || 
                       pathname === '/for-venues' || 
                       pathname.startsWith('/book/') || 
                       pathname === '/terms' || 
