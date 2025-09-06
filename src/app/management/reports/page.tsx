@@ -8,7 +8,8 @@ import {
   CalendarIcon,
   CurrencyEuroIcon,
   UsersIcon,
-  ClockIcon
+  ClockIcon,
+  DocumentArrowDownIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { bookingService, pitchService, paymentService } from '@/lib/firebase-services';
@@ -49,6 +50,7 @@ export default function ReportsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
   const [selectedPitch, setSelectedPitch] = useState<string>('all');
+  const [downloadingInvoice, setDownloadingInvoice] = useState<string | null>(null);
 
   // Check authentication
   useEffect(() => {
@@ -114,6 +116,45 @@ export default function ReportsPage() {
   };
 
   const filteredBookings = getFilteredBookings();
+
+  // Download invoice function
+  const handleDownloadInvoice = async (payment: Payment) => {
+    if (!payment.stripePaymentIntentId) {
+      alert('Δεν υπάρχει διαθέσιμο receipt για αυτή την πληρωμή');
+      return;
+    }
+
+    setDownloadingInvoice(payment.id);
+    
+    try {
+      // First try to get the receipt URL from our API
+      const response = await fetch('/api/stripe/download-invoice', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          paymentIntentId: payment.stripePaymentIntentId
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success && result.invoice.receiptUrl) {
+        // Open the Stripe receipt URL in a new tab
+        window.open(result.invoice.receiptUrl, '_blank');
+      } else {
+        // Fallback: redirect to Stripe dashboard
+        const stripeUrl = `https://dashboard.stripe.com/payments/${payment.stripePaymentIntentId}`;
+        window.open(stripeUrl, '_blank');
+      }
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      alert('Σφάλμα κατά τη λήψη του receipt. Παρακαλώ δοκιμάστε ξανά.');
+    } finally {
+      setDownloadingInvoice(null);
+    }
+  };
 
   // Calculate key metrics
   const totalRevenue = filteredBookings.reduce((sum, booking) => sum + (booking.price || 0), 0);
@@ -501,13 +542,7 @@ export default function ReportsPage() {
         ) : (
           <div className="space-y-4">
             {/* Payment Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-green-50 rounded-lg p-4">
-                <div className="text-2xl font-bold text-green-600">
-                  €{payments.filter(p => p.status === 'succeeded').reduce((sum, p) => sum + p.amount, 0).toFixed(2)}
-                </div>
-                <div className="text-sm text-green-600">Συνολικά Έσοδα</div>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="bg-blue-50 rounded-lg p-4">
                 <div className="text-2xl font-bold text-blue-600">
                   {payments.filter(p => p.status === 'succeeded').length}
@@ -550,6 +585,9 @@ export default function ReportsPage() {
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Stripe ID
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Receipt
                     </th>
                   </tr>
                 </thead>
@@ -646,6 +684,29 @@ export default function ReportsPage() {
                           </div>
                         )}
                       </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {payment.status === 'succeeded' ? (
+                          <button
+                            onClick={() => handleDownloadInvoice(payment)}
+                            disabled={downloadingInvoice === payment.id}
+                            className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {downloadingInvoice === payment.id ? (
+                              <>
+                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-1"></div>
+                                Φόρτωση...
+                              </>
+                            ) : (
+                              <>
+                                <DocumentArrowDownIcon className="h-3 w-3 mr-1" />
+                                Λήψη
+                              </>
+                            )}
+                          </button>
+                        ) : (
+                          <span className="text-gray-400 text-xs">Μη διαθέσιμο</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -658,7 +719,7 @@ export default function ReportsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="text-gray-600">Συνολικές πληρωμές:</span>
-                  <span className="ml-2 font-medium">{payments.length}</span>
+                  <span className="ml-2 font-medium text-gray-600">{payments.length}</span>
                 </div>
                 <div>
                   <span className="text-gray-600">Επιτυχημένες:</span>
