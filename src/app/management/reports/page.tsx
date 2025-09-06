@@ -8,13 +8,11 @@ import {
   CalendarIcon,
   CurrencyEuroIcon,
   UsersIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import { bookingService, pitchService } from '@/lib/firebase-services';
-import { Booking, Pitch } from '@/types';
+import { bookingService, pitchService, paymentService } from '@/lib/firebase-services';
+import { Booking, Pitch, Payment } from '@/types';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -47,6 +45,7 @@ export default function ReportsPage() {
   
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [pitches, setPitches] = useState<Pitch[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
   const [selectedPitch, setSelectedPitch] = useState<string>('all');
@@ -68,13 +67,15 @@ export default function ReportsPage() {
     
     setIsLoading(true);
     try {
-      const [bookingsData, pitchesData] = await Promise.all([
+      const [bookingsData, pitchesData, paymentsData] = await Promise.all([
         bookingService.getByVenue(venueOwner.venueId),
-        pitchService.getByVenue(venueOwner.venueId)
+        pitchService.getByVenue(venueOwner.venueId),
+        paymentService.getByVenueId(venueOwner.venueId)
       ]);
       
       setBookings(bookingsData || []);
       setPitches(pitchesData || []);
+      setPayments(paymentsData || []);
     } catch (error) {
       console.error('Error loading data:', error);
     } finally {
@@ -486,6 +487,201 @@ export default function ReportsPage() {
             <div className="text-sm text-gray-600">Εκκρεμεί Κρατήσεις</div>
           </div>
         </div>
+      </div>
+
+      {/* Payment History Section */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 className="text-lg font-semibold text-gray-900 mb-6">💳 Ιστορικό Πληρωμών</h3>
+        
+        {payments.length === 0 ? (
+          <div className="text-center py-8">
+            <div className="text-gray-400 text-6xl mb-4">💳</div>
+            <p className="text-gray-500">Δεν υπάρχουν καταγεγραμμένες πληρωμές</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {/* Payment Summary */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-green-50 rounded-lg p-4">
+                <div className="text-2xl font-bold text-green-600">
+                  €{payments.filter(p => p.status === 'succeeded').reduce((sum, p) => sum + p.amount, 0).toFixed(2)}
+                </div>
+                <div className="text-sm text-green-600">Συνολικά Έσοδα</div>
+              </div>
+              <div className="bg-blue-50 rounded-lg p-4">
+                <div className="text-2xl font-bold text-blue-600">
+                  {payments.filter(p => p.status === 'succeeded').length}
+                </div>
+                <div className="text-sm text-blue-600">Επιτυχημένες Πληρωμές</div>
+              </div>
+              <div className="bg-orange-50 rounded-lg p-4">
+                <div className="text-2xl font-bold text-orange-600">
+                  {payments.filter(p => p.status === 'pending').length}
+                </div>
+                <div className="text-sm text-orange-600">Εκκρεμεί</div>
+              </div>
+              <div className="bg-red-50 rounded-lg p-4">
+                <div className="text-2xl font-bold text-red-600">
+                  {payments.filter(p => p.status === 'failed').length}
+                </div>
+                <div className="text-sm text-red-600">Αποτυχημένες</div>
+              </div>
+            </div>
+
+            {/* Payment History Table */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Ημερομηνία
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Σχέδιο
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Διάρκεια
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Ποσό
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Κατάσταση
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Stripe ID
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {payments
+                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                    .map((payment) => (
+                    <tr key={payment.id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div>
+                          <div className="font-medium">
+                            {payment.paymentDate 
+                              ? new Date(payment.paymentDate).toLocaleDateString('el-GR', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })
+                              : new Date(payment.createdAt).toLocaleDateString('el-GR', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })
+                            }
+                          </div>
+                          <div className="text-gray-500 text-xs">
+                            Δημιουργήθηκε: {new Date(payment.createdAt).toLocaleDateString('el-GR')}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="flex-shrink-0">
+                            <div className={`w-3 h-3 rounded-full ${
+                              payment.planName === 'Basic' ? 'bg-blue-400' :
+                              payment.planName === 'Pro' ? 'bg-purple-400' :
+                              payment.planName === 'Enterprise' ? 'bg-green-400' :
+                              'bg-gray-400'
+                            }`}></div>
+                          </div>
+                          <div className="ml-3">
+                            <div className="text-sm font-medium text-gray-900">
+                              {payment.planName || 'Άγνωστο Σχέδιο'}
+                            </div>
+                            <div className="text-sm text-gray-500">
+                              {payment.paymentType === 'one_time_plan_purchase' ? 'Μιας Χρήσης' :
+                               payment.paymentType === 'subscription_payment' ? 'Συνδρομή' :
+                               payment.paymentType === 'booking_payment' ? 'Κράτηση' : 'Άγνωστο'}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {payment.durationMonths ? (
+                          <div>
+                            <div className="font-medium">{payment.durationMonths} μήνες</div>
+                            {payment.durationMonths === 1 && <div className="text-xs text-gray-500">Μηνιαία</div>}
+                            {payment.durationMonths === 6 && <div className="text-xs text-green-600">7% έκπτωση</div>}
+                            {payment.durationMonths === 12 && <div className="text-xs text-green-600">12% έκπτωση</div>}
+                          </div>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div className="font-medium">€{payment.amount.toFixed(2)}</div>
+                        <div className="text-xs text-gray-500">{payment.currency?.toUpperCase()}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                          payment.status === 'succeeded' ? 'bg-green-100 text-green-800' :
+                          payment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          payment.status === 'failed' ? 'bg-red-100 text-red-800' :
+                          payment.status === 'canceled' ? 'bg-gray-100 text-gray-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {payment.status === 'succeeded' ? 'Επιτυχής' :
+                           payment.status === 'pending' ? 'Εκκρεμεί' :
+                           payment.status === 'failed' ? 'Αποτυχημένη' :
+                           payment.status === 'canceled' ? 'Ακυρωμένη' :
+                           payment.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                        <div className="truncate max-w-32" title={payment.stripePaymentIntentId}>
+                          {payment.stripePaymentIntentId}
+                        </div>
+                        {payment.stripeCustomerId && (
+                          <div className="text-xs text-gray-400 truncate max-w-32" title={payment.stripeCustomerId}>
+                            {payment.stripeCustomerId}
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Payment Details Summary */}
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-900 mb-3">Σύνοψη Πληρωμών</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-600">Συνολικές πληρωμές:</span>
+                  <span className="ml-2 font-medium">{payments.length}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Επιτυχημένες:</span>
+                  <span className="ml-2 font-medium text-green-600">
+                    {payments.filter(p => p.status === 'succeeded').length}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Εκκρεμεί:</span>
+                  <span className="ml-2 font-medium text-yellow-600">
+                    {payments.filter(p => p.status === 'pending').length}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Αποτυχημένες:</span>
+                  <span className="ml-2 font-medium text-red-600">
+                    {payments.filter(p => p.status === 'failed').length}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
