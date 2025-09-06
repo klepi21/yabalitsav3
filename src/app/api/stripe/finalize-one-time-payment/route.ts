@@ -50,13 +50,20 @@ export async function POST(request: NextRequest) {
       console.log('✅ Updated payment record in Firebase');
     }
 
-    // Calculate plan end date
+    // Get current venue data to get existing daysRemaining
+    const venue = await venueService.getById(venueId);
+    const currentDaysRemaining = venue?.daysRemaining || 0;
+    
+    // Calculate new days to add based on duration (months to days)
+    const newDays = duration * 30; // Approximate: 1 month = 30 days
+    
+    // Add new days to existing days
+    const daysRemaining = currentDaysRemaining + newDays;
+    
+    // Calculate new subscription end date from today + total days remaining
     const currentDate = new Date();
-    const planEndDate = new Date();
-    planEndDate.setMonth(planEndDate.getMonth() + duration);
-
-    // Calculate days remaining
-    const daysRemaining = Math.ceil((planEndDate.getTime() - currentDate.getTime()) / (1000 * 60 * 60 * 24));
+    const planEndDate = new Date(currentDate);
+    planEndDate.setDate(planEndDate.getDate() + daysRemaining);
 
     // Convert planName to planType
     const planTypeMap: { [key: string]: 'Basic' | 'Pro' | 'Enterprise' } = {
