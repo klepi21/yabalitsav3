@@ -159,8 +159,8 @@ export const pricingUtils = {
 
   // Get discount percentage for display
   getDiscountPercentage(duration: 1 | 6 | 12): number {
-    if (duration === 6) return pricingConfig.discounts.sixMonths * 100;
-    if (duration === 12) return pricingConfig.discounts.twelveMonths * 100;
+    if (duration === 6) return Math.round(pricingConfig.discounts.sixMonths * 100);
+    if (duration === 12) return Math.round(pricingConfig.discounts.twelveMonths * 100);
     return 0;
   }
 };

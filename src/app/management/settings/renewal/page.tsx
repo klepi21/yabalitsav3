@@ -1,14 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 import { loadStripe } from '@stripe/stripe-js';
-import { pricingConfig, pricingUtils } from '@/lib/pricing';
+import { pricingUtils } from '@/lib/pricing';
 
 export default function SubscriptionRenewalPage() {
-  const router = useRouter();
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<1 | 6 | 12>(1);
   const [venueData, setVenueData] = useState<any>(null);
@@ -33,15 +31,26 @@ export default function SubscriptionRenewalPage() {
         const { getAuth } = await import('firebase/auth');
         
         const auth = getAuth();
+        console.log('Auth user:', auth.currentUser?.uid);
+        
         if (auth.currentUser?.uid) {
           const venuesRef = collection(db, 'yabalitsa_venues');
           const q = query(venuesRef, where('ownerId', '==', auth.currentUser.uid));
           const querySnapshot = await getDocs(q);
           
+          console.log('Query snapshot empty:', querySnapshot.empty);
+          console.log('Number of venues found:', querySnapshot.docs.length);
+          
           if (!querySnapshot.empty) {
             const venueDoc = querySnapshot.docs[0];
-            setVenueData({ id: venueDoc.id, ...venueDoc.data() });
+            const venueData = { id: venueDoc.id, ...venueDoc.data() };
+            console.log('Venue data found:', venueData);
+            setVenueData(venueData);
+          } else {
+            console.log('No venues found for user:', auth.currentUser.uid);
           }
+        } else {
+          console.log('No authenticated user found');
         }
       } catch (error) {
         console.error('Error fetching venue data:', error);
@@ -81,6 +90,7 @@ export default function SubscriptionRenewalPage() {
 
   // Handle payment
   const handlePayment = async () => {
+    console.log('Payment button clicked', { selectedPlan, venueData, isLoading });
     if (!selectedPlan || !venueData) return;
 
     setIsLoading(true);
@@ -240,46 +250,46 @@ export default function SubscriptionRenewalPage() {
           </div>
 
           {/* Duration Selection & Payment Summary */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Duration Selection */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Διάρκεια Συνδρομής</h3>
-              
-              <div className="space-y-3">
-                {durations.map((duration) => (
-                  <div
-                    key={duration.months}
-                    className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
-                      selectedDuration === duration.months
-                        ? 'border-green-500 bg-green-50 shadow-md'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    onClick={() => setSelectedDuration(duration.months)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="font-semibold text-gray-900 text-lg">{duration.label}</div>
-                        {duration.discount > 0 && (
-                          <div className="text-sm text-green-600 font-medium">
-                            🎉 Έκπτωση {duration.discount}%
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-bold text-gray-900">
-                          {pricingUtils.formatPrice(pricingUtils.calculateMonthlyPrice(selectedPlan ? plans.find(p => p.id === selectedPlan)?.basePrice || 0 : 0, duration.months))}
-                          <span className="text-sm font-normal text-gray-500">/μήνα</span>
+          {selectedPlan && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Duration Selection */}
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Διάρκεια Συνδρομής</h3>
+                
+                <div className="space-y-3">
+                  {durations.map((duration) => (
+                    <div
+                      key={duration.months}
+                      className={`p-4 rounded-lg border-2 cursor-pointer transition-all hover:shadow-md ${
+                        selectedDuration === duration.months
+                          ? 'border-green-500 bg-green-50 shadow-md'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => setSelectedDuration(duration.months)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-semibold text-gray-900 text-lg">{duration.label}</div>
+                          {duration.discount > 0 && (
+                            <div className="text-sm text-green-600 font-medium">
+                              🎉 Έκπτωση {duration.discount}%
+                            </div>
+                          )}
                         </div>
-                        <div className="text-xs text-gray-500">με ΦΠΑ</div>
+                        <div className="text-right">
+                          <div className="text-lg font-bold text-gray-900">
+                            {pricingUtils.formatPrice(pricingUtils.calculateMonthlyPrice(selectedPlan ? plans.find(p => p.id === selectedPlan)?.basePrice || 0 : 0, duration.months))}
+                            <span className="text-sm font-normal text-gray-500">/μήνα</span>
+                          </div>
+                          <div className="text-xs text-gray-500">με ΦΠΑ</div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* Payment Summary */}
-            {selectedPlan && (
+              {/* Payment Summary */}
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Σύνοψη Πληρωμής</h3>
                 
@@ -345,7 +355,11 @@ export default function SubscriptionRenewalPage() {
 
                 {/* Payment Button */}
                 <button
-                  onClick={handlePayment}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    console.log('Button click event fired');
+                    handlePayment();
+                  }}
                   disabled={!selectedPlan || isLoading}
                   className="w-full mt-6 px-4 py-3 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed"
                 >
@@ -356,8 +370,8 @@ export default function SubscriptionRenewalPage() {
                   Ασφαλής πληρωμή μέσω Stripe
                 </p>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
