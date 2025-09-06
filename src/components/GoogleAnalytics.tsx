@@ -19,11 +19,11 @@ function GoogleAnalyticsInner() {
       
       window.gtag('config', 'G-GWX4K2ZM6J', {
         page_path: url,
-        page_title: document.title,
+        page_title: document.title, 
         page_location: window.location.href,
       });
     }
-  }, [pathname, searchParams]);
+  }, [pathname, searchParams]); 
 
   return null;
 }
