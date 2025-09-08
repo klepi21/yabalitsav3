@@ -4,6 +4,7 @@ import React from "react";
 import { FullScreenScrollFX, FullScreenFXAPI } from "@/components/ui/full-screen-scroll-fx";
 import { GetStartedButton } from "@/components/ui/get-started-button";
 import { WaitlistComponent } from "@/components/ui/waitlist";
+import Link from "next/link";
 
 const sections = [
   {
@@ -30,6 +31,19 @@ const sections = [
         Management
         <div style={{ marginTop: '1.5rem' }}>
           <GetStartedButton />
+          <div style={{ marginTop: '0.5rem' }}>
+            <Link 
+              href="/venue-login" 
+              style={{ 
+                color: 'white', 
+                textDecoration: 'underline', 
+                fontSize: '0.9em',
+                opacity: 0.8
+              }}
+            >
+              Already an Owner? Log in here
+            </Link>
+          </div>
         </div>
       </>
     ),
