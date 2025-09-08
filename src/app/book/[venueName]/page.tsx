@@ -90,6 +90,8 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
   const [countdown, setCountdown] = useState(0);
   const [canResend, setCanResend] = useState(false);
   const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
+  const [smsError, setSmsError] = useState<string | null>(null);
+  const [isRateLimited, setIsRateLimited] = useState(false);
   
   // Success popup state
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
@@ -512,6 +514,8 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         setCountdown(prev => {
           if (prev <= 1) {
             setCanResend(true);
+            setIsRateLimited(false);
+            setSmsError(null);
             return 0;
           }
           return prev - 1;
@@ -535,6 +539,8 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
     try {
       setIsSendingSms(true);
+      setSmsError(null);
+      setIsRateLimited(false);
       
       // Format phone number for international format - always add +30 for Greek numbers
       const formattedPhone = formData.phone.startsWith('+') ? formData.phone : `+30${formData.phone}`;
@@ -557,7 +563,11 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       if (error.code === 'auth/invalid-phone-number') {
         alert('Λάθος αριθμός τηλεφώνου. Παρακαλώ ελέγξτε τον αριθμό σας.');
       } else if (error.code === 'auth/too-many-requests') {
-        alert('Πάρα πολλές αιτήσεις. Παρακαλώ περιμένετε λίγο πριν δοκιμάσετε ξανά.');
+        setSmsError('Πάρα πολλές προσπάθειες. Παρακαλώ περιμένετε πριν δοκιμάσετε ξανά.');
+        setIsRateLimited(true);
+        // Start a longer cooldown (2 minutes)
+        setCountdown(120);
+        setCanResend(false);
       } else if (error.code === 'auth/quota-exceeded') {
         alert('Υπέρβαση ορίου SMS. Παρακαλώ δοκιμάστε αργότερα.');
       } else if (error.code === 'auth/invalid-app-credential') {
@@ -1285,10 +1295,10 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
             {!verificationId && (
               <button
                 onClick={sendSmsVerification}
-                disabled={isSendingSms || !recaptchaVerifier}
+                disabled={isSendingSms || !recaptchaVerifier || isRateLimited}
                 className="w-full bg-emerald-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4"
               >
-                {isSendingSms ? 'Αποστολή...' : !recaptchaVerifier ? 'Φόρτωση...' : 'Αποστολή SMS'}
+                {isSendingSms ? 'Αποστολή...' : !recaptchaVerifier ? 'Φόρτωση...' : isRateLimited ? 'Περιμένετε...' : 'Αποστολή SMS'}
               </button>
             )}
 
@@ -1399,6 +1409,9 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                       <RotateCcw className="w-4 h-4" />
                       <span>Επαναποστολή SMS</span>
                     </button>
+                  )}
+                  {smsError && (
+                    <p className="text-xs text-red-600 mt-2">{smsError}</p>
                   )}
                 </div>
               </div>
