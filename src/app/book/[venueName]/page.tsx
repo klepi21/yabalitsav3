@@ -92,6 +92,31 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
   const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
   const [smsError, setSmsError] = useState<string | null>(null);
   const [isRateLimited, setIsRateLimited] = useState(false);
+
+  // Helper: (re)create invisible reCAPTCHA
+  const recreateRecaptcha = async () => {
+    try {
+      // Ensure persistent container exists
+      let container = document.getElementById('recaptcha-container');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'recaptcha-container';
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
+        document.body.appendChild(container);
+      }
+      if (!auth) return;
+      const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        size: 'invisible',
+        callback: () => {},
+        'expired-callback': () => {}
+      });
+      await verifier.render();
+      setRecaptchaVerifier(verifier);
+    } catch (e) {
+      console.error('Failed to recreate reCAPTCHA:', e);
+    }
+  };
   
   // Success popup state
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
@@ -570,6 +595,16 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         setCanResend(false);
       } else if (error.code === 'auth/quota-exceeded') {
         alert('Υπέρβαση ορίου SMS. Παρακαλώ δοκιμάστε αργότερα.');
+      } else if (error.code === 'auth/invalid-recaptcha-token' || error.code === 'auth/missing-recaptcha-token') {
+        setSmsError('Το reCAPTCHA δεν ήταν έγκυρο. Παρακαλώ δοκιμάστε ξανά.');
+        try {
+          // Recreate a fresh verifier
+          if (recaptchaVerifier) {
+            try { recaptchaVerifier.clear(); } catch (_) {}
+            setRecaptchaVerifier(null);
+          }
+          await recreateRecaptcha();
+        } catch (_) {}
       } else if (error.code === 'auth/invalid-app-credential') {
         alert('Το reCAPTCHA δεν είναι έγκυρο. Παρακαλώ δοκιμάστε ξανά.');
         // Reset reCAPTCHA and try to reinitialize
