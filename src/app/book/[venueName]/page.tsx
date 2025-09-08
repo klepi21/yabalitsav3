@@ -5,7 +5,7 @@ import { use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, MapPin, Phone, Mail, Calendar, Clock, Users, Star, ArrowLeft, X, RotateCcw } from "lucide-react";
 import { RecaptchaVerifier, signInWithPhoneNumber, PhoneAuthProvider, signInWithCredential } from 'firebase/auth';
-import { auth, RECAPTCHA_SITE_KEY } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 
 interface Booking {
   id: string;
@@ -298,10 +298,9 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         
         console.log('Initializing invisible reCAPTCHA');
         
-        // Create invisible reCAPTCHA with explicit site key
-        verifier = new RecaptchaVerifier(auth, container, {
+        // Create invisible reCAPTCHA with (auth, containerId, params)
+        verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           size: 'invisible',
-          sitekey: RECAPTCHA_SITE_KEY,
           callback: () => {
             // Automatically proceeds when reCAPTCHA resolves
           },
