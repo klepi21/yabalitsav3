@@ -588,10 +588,10 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       if (error.code === 'auth/invalid-phone-number') {
         alert('Λάθος αριθμός τηλεφώνου. Παρακαλώ ελέγξτε τον αριθμό σας.');
       } else if (error.code === 'auth/too-many-requests') {
-        setSmsError('Πάρα πολλές προσπάθειες. Παρακαλώ περιμένετε πριν δοκιμάσετε ξανά.');
+        setSmsError('Πάρα πολλές προσπάθειες SMS. Το σύστημα έχει περιορίσει την αποστολή για αυτόν τον αριθμό. Παρακαλώ δοκιμάστε αργότερα ή χρησιμοποιήστε άλλον αριθμό.');
         setIsRateLimited(true);
-        // Start a longer cooldown (2 minutes)
-        setCountdown(120);
+        // Start a much longer cooldown (10 minutes) for rate limiting
+        setCountdown(600);
         setCanResend(false);
       } else if (error.code === 'auth/quota-exceeded') {
         alert('Υπέρβαση ορίου SMS. Παρακαλώ δοκιμάστε αργότερα.');
@@ -1446,7 +1446,14 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                     </button>
                   )}
                   {smsError && (
-                    <p className="text-xs text-red-600 mt-2">{smsError}</p>
+                    <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <p className="text-sm text-red-800 font-medium">{smsError}</p>
+                      {isRateLimited && (
+                        <p className="text-xs text-red-600 mt-1">
+                          💡 Συμβουλή: Δοκιμάστε να χρησιμοποιήσετε διαφορετικό αριθμό τηλεφώνου ή περιμένετε λίγο περισσότερο.
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
               </div>
