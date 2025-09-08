@@ -296,23 +296,19 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
           return;
         }
         
-        console.log('Initializing reCAPTCHA with:', {
-          auth: !!auth,
-          container: !!container,
-          siteKey: RECAPTCHA_SITE_KEY,
-          containerId: 'recaptcha-container'
-        });
+        console.log('Initializing invisible reCAPTCHA');
         
-        // Try with minimal configuration first
-        try {
-          verifier = new RecaptchaVerifier(auth, container, {
-            'sitekey': RECAPTCHA_SITE_KEY
-          });
-        } catch (firstError) {
-          console.log('First attempt failed, trying without sitekey:', firstError);
-          // Fallback: try without sitekey
-          verifier = new RecaptchaVerifier(auth, container);
-        }
+        // Create invisible reCAPTCHA with explicit site key
+        verifier = new RecaptchaVerifier(auth, container, {
+          size: 'invisible',
+          sitekey: RECAPTCHA_SITE_KEY,
+          callback: () => {
+            // Automatically proceeds when reCAPTCHA resolves
+          },
+          'expired-callback': () => {
+            // Token expired; nothing to do, user can retry
+          }
+        });
         
         console.log('RecaptchaVerifier created successfully');
         
@@ -346,7 +342,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         }
       }
     };
-  }, [showSmsValidation, auth]); // Include auth in dependencies
+  }, [showSmsValidation, auth, recaptchaVerifier]); // Include auth and verifier in dependencies
 
   // Reset reCAPTCHA function (only for true errors)
   const resetRecaptcha = () => {

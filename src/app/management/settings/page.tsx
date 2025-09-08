@@ -61,6 +61,9 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [pinSuccess, setPinSuccess] = useState<string | null>(null);
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [isSavingPin, setIsSavingPin] = useState(false);
 
 
   const {
@@ -159,6 +162,74 @@ export default function SettingsPage() {
     }
   };
 
+  // Util to hash PIN client-side using SubtleCrypto
+  const hashStringSHA256 = async (value: string) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(value);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+  };
+
+  const handleSetPin = async (pinA: string, pinB: string) => {
+    if (!venue || !venueOwner) return;
+    setPinError(null);
+    setPinSuccess(null);
+    if (!/^\d{4}$/.test(pinA) || !/^\d{4}$/.test(pinB)) {
+      setPinError('Ο PIN πρέπει να είναι 4ψήφιος (μόνο αριθμοί).');
+      return;
+    }
+    if (pinA !== pinB) {
+      setPinError('Οι δύο νέοι PIN δεν ταιριάζουν.');
+      return;
+    }
+    setIsSavingPin(true);
+    try {
+      const hash = await hashStringSHA256(pinA);
+      await venueService.update(venue.id, { managementPinHash: hash } as any);
+      setPinSuccess('Ο PIN ορίστηκε επιτυχώς.');
+      await loadVenueData();
+    } catch (e) {
+      console.error(e);
+      setPinError('Αποτυχία αποθήκευσης PIN.');
+    } finally {
+      setIsSavingPin(false);
+    }
+  };
+
+  const handleChangePin = async (oldPin: string, newPinA: string, newPinB: string) => {
+    if (!venue || !venueOwner) return;
+    setPinError(null);
+    setPinSuccess(null);
+    if (!/^\d{4}$/.test(oldPin) || !/^\d{4}$/.test(newPinA) || !/^\d{4}$/.test(newPinB)) {
+      setPinError('Κάθε PIN πρέπει να είναι 4ψήφιος (μόνο αριθμοί).');
+      return;
+    }
+    if (newPinA !== newPinB) {
+      setPinError('Οι δύο νέοι PIN δεν ταιριάζουν.');
+      return;
+    }
+    setIsSavingPin(true);
+    try {
+      const oldHash = await hashStringSHA256(oldPin);
+      if (venue.managementPinHash && oldHash !== venue.managementPinHash) {
+        setPinError('Ο τρέχων PIN δεν είναι σωστός.');
+        setIsSavingPin(false);
+        return;
+      }
+      const newHash = await hashStringSHA256(newPinA);
+      await venueService.update(venue.id, { managementPinHash: newHash } as any);
+      setPinSuccess('Ο PIN ενημερώθηκε επιτυχώς.');
+      await loadVenueData();
+    } catch (e) {
+      console.error(e);
+      setPinError('Αποτυχία ενημέρωσης PIN.');
+    } finally {
+      setIsSavingPin(false);
+    }
+  };
+
   if (authLoading || !venueOwner) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -220,6 +291,17 @@ export default function SettingsPage() {
       {error && (
         <div className="rounded-md bg-red-50 p-4">
           <div className="text-sm text-red-700">{error}</div>
+        </div>
+      )}
+
+      {pinSuccess && (
+        <div className="rounded-md bg-green-50 p-4">
+          <div className="text-sm text-green-700">{pinSuccess}</div>
+        </div>
+      )}
+      {pinError && (
+        <div className="rounded-md bg-red-50 p-4">
+          <div className="text-sm text-red-700">{pinError}</div>
         </div>
       )}
 
@@ -349,6 +431,23 @@ export default function SettingsPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+          {/* Management PIN Section - moved here under venue info */}
+          <div className="bg-white shadow rounded-lg">
+            <div className="px-4 py-5 sm:p-6">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">🔐 PIN Διαχείρισης</h4>
+              {!venue?.managementPinHash ? (
+                <div className="space-y-4">
+                  <div className="text-sm text-gray-700">Δεν έχει οριστεί PIN. Πατήστε για να ορίσετε 4ψήφιο PIN.</div>
+                  <SetPinForm onSubmit={handleSetPin} isSaving={isSavingPin} />
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="text-sm text-gray-700">Ο PIN έχει οριστεί. Για αλλαγή, εισάγετε τον τρέχον και δύο φορές τον νέο.</div>
+                  <ChangePinForm onSubmit={handleChangePin} isSaving={isSavingPin} />
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -606,6 +705,93 @@ export default function SettingsPage() {
 
         </div>
       </div>
+    </div>
+  );
+}
+
+function SetPinForm({ onSubmit, isSaving }: { onSubmit: (pinA: string, pinB: string) => void; isSaving: boolean }) {
+  const [pinA, setPinA] = useState('');
+  const [pinB, setPinB] = useState('');
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <input
+          type="password"
+          inputMode="numeric"
+          pattern="\\d{4}"
+          maxLength={4}
+          placeholder="Νέος PIN (4 ψηφία)"
+          className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
+          value={pinA}
+          onChange={(e) => setPinA(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+        />
+        <input
+          type="password"
+          inputMode="numeric"
+          pattern="\\d{4}"
+          maxLength={4}
+          placeholder="Επιβεβαίωση PIN"
+          className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
+          value={pinB}
+          onChange={(e) => setPinB(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+        />
+      </div>
+      <button
+        disabled={isSaving}
+        onClick={() => onSubmit(pinA, pinB)}
+        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+      >
+        {isSaving ? 'Αποθήκευση...' : 'Ορισμός PIN'}
+      </button>
+    </div>
+  );
+}
+
+function ChangePinForm({ onSubmit, isSaving }: { onSubmit: (oldPin: string, newA: string, newB: string) => void; isSaving: boolean }) {
+  const [oldPin, setOldPin] = useState('');
+  const [newA, setNewA] = useState('');
+  const [newB, setNewB] = useState('');
+  return (
+    <div className="space-y-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <input
+          type="password"
+          inputMode="numeric"
+          pattern="\\d{4}"
+          maxLength={4}
+          placeholder="Τρέχων PIN"
+          className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
+          value={oldPin}
+          onChange={(e) => setOldPin(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+        />
+        <input
+          type="password"
+          inputMode="numeric"
+          pattern="\\d{4}"
+          maxLength={4}
+          placeholder="Νέος PIN"
+          className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
+          value={newA}
+          onChange={(e) => setNewA(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+        />
+        <input
+          type="password"
+          inputMode="numeric"
+          pattern="\\d{4}"
+          maxLength={4}
+          placeholder="Επιβεβαίωση"
+          className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
+          value={newB}
+          onChange={(e) => setNewB(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+        />
+      </div>
+      <button
+        disabled={isSaving}
+        onClick={() => onSubmit(oldPin, newA, newB)}
+        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+      >
+        {isSaving ? 'Αποθήκευση...' : 'Αλλαγή PIN'}
+      </button>
     </div>
   );
 }

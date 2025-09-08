@@ -39,7 +39,7 @@ export default function CustomersPage() {
     if (!venueOwner) return;
     
     try {
-      const customersData = await userService.getByVenue();
+      const customersData = await userService.getByVenue(venueOwner.venueId);
       setCustomers(customersData || []);
     } catch (error) {
       console.error('Error loading customers:', error);

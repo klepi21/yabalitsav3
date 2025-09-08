@@ -38,6 +38,7 @@ interface FirebaseVenueData {
   plan?: 'subscription' | 'pay-per-booking' | 'trial';
   planType?: 'Basic' | 'Pro' | 'Enterprise';
   active?: boolean;
+  managementPinHash?: string;
   createdAt?: any;
   updatedAt?: any;
 }
@@ -87,6 +88,7 @@ export const venueService = {
         daysRemaining: data.daysRemaining,
         plan: data.plan || 'trial',
         planType: data.planType,
+        managementPinHash: (data as any).managementPinHash,
         active: (data as any).active ?? true,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date()
@@ -114,6 +116,7 @@ export const venueService = {
         daysRemaining: data.daysRemaining,
         plan: data.plan || 'trial',
         planType: data.planType,
+        managementPinHash: (data as any).managementPinHash,
         active: (data as any).active ?? true,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date()

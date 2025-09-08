@@ -12,7 +12,7 @@ import {
   DocumentArrowDownIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import { bookingService, pitchService, paymentService } from '@/lib/firebase-services';
+import { bookingService, pitchService, paymentService, venueService } from '@/lib/firebase-services';
 import { Booking, Pitch, Payment } from '@/types';
 import {
   Chart as ChartJS,
@@ -48,6 +48,9 @@ export default function ReportsPage() {
   const [pitches, setPitches] = useState<Pitch[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPinVerified, setIsPinVerified] = useState(false);
+  const [pinError, setPinError] = useState<string | null>(null);
+  const [pinInput, setPinInput] = useState('');
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
   const [selectedPitch, setSelectedPitch] = useState<string>('all');
   const [downloadingInvoice, setDownloadingInvoice] = useState<string | null>(null);
@@ -60,9 +63,58 @@ export default function ReportsPage() {
       router.push('/venue-login');
       return;
     }
-    
-    loadData();
+    // If there's no PIN set, allow directly; else require PIN
+    if (!venueOwner.venueId) return;
+    (async () => {
+      // Fetch venue data to check managementPinHash
+      try {
+        // lightweight: payments/pitches/bookings already fetched by venueId below
+        // Defer data load until PIN is verified
+        setIsPinVerified(false);
+      } catch (e) {
+        console.error(e);
+      }
+    })();
   }, [user, venueOwner, authLoading, router]);
+
+  // Utility to hash string SHA-256
+  const hashStringSHA256 = async (value: string) => {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(value);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    return hashHex;
+  };
+
+  const handleVerifyPin = async () => {
+    if (!venueOwner?.venueId) return;
+    setPinError(null);
+    if (!/^\d{4}$/.test(pinInput)) {
+      setPinError('Ο PIN πρέπει να είναι 4ψήφιος.');
+      return;
+    }
+    try {
+      // Read venue to access stored hash
+      const venue = await venueService.getById(venueOwner.venueId);
+      const expectedHash = venue?.managementPinHash;
+      if (!expectedHash) {
+        setIsPinVerified(true);
+        loadData();
+        return;
+      }
+      const enteredHash = await hashStringSHA256(pinInput);
+      if (enteredHash === expectedHash) {
+        setIsPinVerified(true);
+        loadData();
+      } else {
+        setPinError('Λάθος PIN. Προσπαθήστε ξανά.');
+      }
+    } catch (e) {
+      console.error(e);
+      setPinError('Σφάλμα επαλήθευσης PIN.');
+    }
+  };
 
   const loadData = async () => {
     if (!venueOwner?.venueId) return;
@@ -285,10 +337,40 @@ export default function ReportsPage() {
     ],
   };
 
-  if (authLoading || isLoading) {
+  if (authLoading || (!isPinVerified && !!venueOwner) || (isPinVerified && isLoading)) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-football-green"></div>
+      <div className="relative min-h-[16rem]">
+        {!isPinVerified ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+              <div className="text-center mb-4">
+                <div className="text-2xl font-semibold text-black">Εισαγωγή PIN</div>
+                <div className="text-sm text-black mt-1">Παρακαλώ εισάγετε τον 4ψήφιο PIN διαχείρισης</div>
+              </div>
+              <div className="flex justify-center mb-4">
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  pattern="\\d{4}"
+                  maxLength={4}
+                  className="text-center tracking-widest text-2xl w-40 border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-football-green"
+                  value={pinInput}
+                  onChange={(e) => setPinInput(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+                  autoFocus
+                />
+              </div>
+              {pinError && <div className="text-center text-sm text-red-600 mb-3">{pinError}</div>}
+              <div className="flex gap-3">
+                <button onClick={handleVerifyPin} className="flex-1 inline-flex items-center justify-center px-4 py-2 rounded-md text-white bg-blue-600 hover:bg-blue-700">Συνέχεια</button>
+                <Link href="/management/dashboard" className="flex-1 inline-flex items-center justify-center px-4 py-2 rounded-md border border-gray-300 text-gray-700 bg-white hover:bg-gray-50">Άκυρο</Link>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-football-green"></div>
+          </div>
+        )}
       </div>
     );
   }

@@ -98,7 +98,7 @@ export default function NewPitchPage() {
         defaultOpeningHours: data.defaultOpeningHours
       });
       
-      router.push('/dashboard');
+      router.push('/management/pitches');
     } catch (error) {
       console.error('Error creating pitch:', error);
       throw error;
@@ -125,7 +125,7 @@ export default function NewPitchPage() {
       {/* Header */}
       <div className="flex items-center space-x-4">
         <Link
-          href="/dashboard"
+          href="/management/pitches"
           className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
         >
           <ArrowLeftIcon className="h-4 w-4 mr-1" />
@@ -300,7 +300,7 @@ export default function NewPitchPage() {
           {/* Submit Button */}
           <div className="flex justify-end space-x-3">
             <Link
-              href="/dashboard"
+              href="/management/pitches"
               className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
             >
               Ακύρωση

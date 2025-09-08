@@ -12,6 +12,7 @@ export interface Venue {
   planType?: 'Basic' | 'Pro' | 'Enterprise';
   subscriptionEndDate?: string; // ISO string for subscription end date
   active?: boolean;
+  managementPinHash?: string; // SHA-256 hash of 4-digit PIN
   createdAt: Date;
   updatedAt: Date;
 }
