@@ -88,6 +88,7 @@ export const venueService = {
         daysRemaining: data.daysRemaining,
         plan: data.plan || 'trial',
         planType: data.planType,
+        subscriptionEndDate: (data as any).subscriptionEndDate, // Add this field
         managementPinHash: (data as any).managementPinHash,
         active: (data as any).active ?? true,
         createdAt: data.createdAt?.toDate() || new Date(),
@@ -116,6 +117,7 @@ export const venueService = {
         daysRemaining: data.daysRemaining,
         plan: data.plan || 'trial',
         planType: data.planType,
+        subscriptionEndDate: (data as any).subscriptionEndDate, // Add this field
         managementPinHash: (data as any).managementPinHash,
         active: (data as any).active ?? true,
         createdAt: data.createdAt?.toDate() || new Date(),

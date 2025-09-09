@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -13,9 +13,8 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { venueService, paymentService } from '@/lib/firebase-services';
 import { Venue } from '@/types';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import SupportEmail from '@/components/SupportEmail';
+import { calculateDaysRemaining, getSubscriptionEndDate, formatDateSafely } from '@/lib/subscription-utils';
 
 // Form validation schema
 const venueSettingsSchema = z.object({
@@ -34,29 +33,20 @@ export default function SettingsPage() {
   const router = useRouter();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
 
-  // Utility function to safely format dates
-  const formatDateSafely = (dateString: string | null | undefined) => {
-    if (!dateString) return null;
-    
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return null;
-    
-    return date;
-  };
-
-  // Utility function to calculate days difference safely
-  const calculateDaysDifference = (dateString: string | null | undefined) => {
-    const date = formatDateSafely(dateString);
-    if (!date) return null;
-    
-    const now = new Date();
-    const diffTime = date.getTime() - now.getTime();
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  };
 
   
   const [venue, setVenue] = useState<Venue | null>(null);
-  const [lastPayment, setLastPayment] = useState<any>(null);
+  const [lastPayment, setLastPayment] = useState<{
+    id: string;
+    venueId: string;
+    stripePaymentIntentId: string;
+    amount: number;
+    status: string;
+    paymentDate?: string;
+    planName?: string;
+    durationMonths?: number;
+    paymentType: string;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,19 +65,7 @@ export default function SettingsPage() {
     resolver: zodResolver(venueSettingsSchema),
   });
 
-  // Load venue data and check authentication
-  useEffect(() => {
-    if (authLoading) return;
-    
-    if (!user || !venueOwner) {
-      router.push('/venue-login');
-      return;
-    }
-    
-    loadVenueData();
-  }, [user, venueOwner, authLoading, router]);
-
-  const loadVenueData = async () => {
+  const loadVenueData = useCallback(async () => {
     if (!venueOwner) return;
     
     setIsLoading(true);
@@ -108,6 +86,7 @@ export default function SettingsPage() {
         
         // Subscription data is now stored directly in venue document
         // No need to load from separate collection
+        
         
         // Load last payment data
         try {
@@ -132,7 +111,19 @@ export default function SettingsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [venueOwner, reset]);
+
+  // Load venue data and check authentication
+  useEffect(() => {
+    if (authLoading) return;
+    
+    if (!user || !venueOwner) {
+      router.push('/venue-login');
+      return;
+    }
+    
+    loadVenueData();
+  }, [user, venueOwner, authLoading, router, loadVenueData]);
 
   const handleFormSubmit = async (data: VenueSettingsFormData) => {
     if (!venue || !venueOwner) return;
@@ -187,7 +178,7 @@ export default function SettingsPage() {
     setIsSavingPin(true);
     try {
       const hash = await hashStringSHA256(pinA);
-      await venueService.update(venue.id, { managementPinHash: hash } as any);
+      await venueService.update(venue.id, { managementPinHash: hash });
       setPinSuccess('Ο PIN ορίστηκε επιτυχώς.');
       await loadVenueData();
     } catch (e) {
@@ -219,7 +210,7 @@ export default function SettingsPage() {
         return;
       }
       const newHash = await hashStringSHA256(newPinA);
-      await venueService.update(venue.id, { managementPinHash: newHash } as any);
+      await venueService.update(venue.id, { managementPinHash: newHash });
       setPinSuccess('Ο PIN ενημερώθηκε επιτυχώς.');
       await loadVenueData();
     } catch (e) {
@@ -265,20 +256,58 @@ export default function SettingsPage() {
           <p className="mt-2 text-gray-600">Διαμόρφωση προτιμήσεων και ρυθμίσεων του γηπέδου σας</p>
         </div>
         
-        {/* Subscription Status Badge */}
-        {venue && (
-          <div className={`px-4 py-2 rounded-lg font-semibold text-sm ${
-            venue.plan === 'subscription' 
-              ? 'bg-green-100 text-green-800 border border-green-300' 
-              : 'bg-yellow-100 text-yellow-800 border border-yellow-300'
-          }`}>
-            {venue.plan === 'subscription' ? (
-              <span>✨ {venue.planType || 'Pro'} Plan</span>
-            ) : (
-              <span>⚠️ Trial Account</span>
-            )}
-          </div>
-        )}
+        
+        {/* Subscription Status Badge - matches SidebarWrapper logic */}
+        {venue && (() => {
+          const daysRemaining = calculateDaysRemaining(venue, lastPayment);
+          
+          if (venue.plan === 'subscription') {
+            if (daysRemaining !== null && daysRemaining > 7) {
+              // All OK - Green indicator
+              return (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-100 border border-green-300">
+                  <div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
+                  <span className="text-sm font-semibold text-green-800">
+                    {venue.planType || 'Basic'} Plan
+                  </span>
+                  <span className="text-xs text-green-600">
+                    ({daysRemaining} ημέρες)
+                  </span>
+                </div>
+              );
+            } else if (daysRemaining !== null && daysRemaining > 0) {
+              // Warning - Expires soon
+              return (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-100 border border-amber-300">
+                  <div className="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse"></div>
+                  <span className="text-sm font-semibold text-amber-800">
+                    {venue.planType || 'Basic'} - {daysRemaining} ημέρες
+                  </span>
+                </div>
+              );
+            } else {
+              // Expired
+              return (
+                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-100 border border-red-300">
+                  <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
+                  <span className="text-sm font-semibold text-red-800">
+                    Πλάνο έληξε
+                  </span>
+                </div>
+              );
+            }
+          } else {
+            // Trial or No Plan
+            return (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 border border-gray-300">
+                <div className="w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
+                <span className="text-sm font-semibold text-gray-600">
+                  {venue.plan === 'trial' ? 'Δωρεάν Trial' : 'Χωρίς Πλάνο'}
+                </span>
+              </div>
+            );
+          }
+        })()}
       </div>
 
       {/* Success/Error Messages */}
@@ -465,7 +494,10 @@ export default function SettingsPage() {
                       <span className="font-medium">Υπόλοιπο ημερών:</span>
                     </div>
                     <div className="text-2xl font-bold text-green-700">
-                      {venue.daysRemaining ?? 0} ημέρες
+                      {(() => {
+                        const daysRemaining = calculateDaysRemaining(venue, lastPayment);
+                        return daysRemaining !== null ? `${daysRemaining} ημέρες` : '0 ημέρες';
+                      })()}
                     </div>
                   </div>
                   
@@ -481,132 +513,116 @@ export default function SettingsPage() {
                         {venue.planType || 'Basic'} Plan
                       </div>
                     )}
+                    {/* Renewal/Upgrade Button - positioned under the plan info */}
+                    <div className="mt-3">
+                      {(() => {
+                        const daysRemaining = calculateDaysRemaining(venue, lastPayment);
+                        
+                        if (venue.plan === 'subscription') {
+                          if (daysRemaining !== null && daysRemaining <= 7) {
+                            // Show renewal button if less than 7 days remaining
+                            return (
+                              <Link
+                                href="/management/settings/renewal"
+                                className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-full transition-colors shadow-sm"
+                              >
+                                ⚡ Ανανέωση
+                              </Link>
+                            );
+                          } else {
+                            // Show upgrade button if more than 7 days remaining
+                            return (
+                              <Link
+                                href="/management/settings/renewal"
+                                className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors"
+                              >
+                                🚀 Αναβάθμιση
+                              </Link>
+                            );
+                          }
+                        } else {
+                          // Show activation button for trial/no plan
+                          return (
+                            <Link
+                              href="/management/settings/renewal"
+                              className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-full transition-colors shadow-sm"
+                            >
+                              ✨ Ενεργοποίηση
+                            </Link>
+                          );
+                        }
+                      })()}
+                    </div>
                   </div>
-                  
-                  {/* Subscription End Date */}
-                                        {venue.plan === 'subscription' && (
-                        <div className="text-center mt-4">
-                          <div className="text-sm text-gray-700 mb-2">
-                            <span className="font-medium">Λήγει στις:</span>
-                          </div>
-{(() => {
-                            // Try to get end date from venue.subscriptionEndDate or calculate from last payment
-                            let endDateString = venue.subscriptionEndDate;
-                            
-                            // If no subscriptionEndDate but we have a recent payment, calculate it
-                            if (!endDateString && lastPayment && lastPayment.paymentDate && lastPayment.durationMonths) {
-                              const paymentDate = new Date(lastPayment.paymentDate);
-                              const calculatedEndDate = new Date(paymentDate);
-                              calculatedEndDate.setMonth(calculatedEndDate.getMonth() + lastPayment.durationMonths);
-                              endDateString = calculatedEndDate.toISOString();
-                            }
-                            
-                            if (endDateString) {
-                              const endDate = formatDateSafely(endDateString);
-                              if (!endDate) {
-                                return (
-                                  <div className="text-lg font-semibold text-orange-600">
-                                    ⚠️ Ημερομηνία δεν είναι έγκυρη
-                                  </div>
-                                );
-                              }
-                              
-                              const diffDays = calculateDaysDifference(endDateString);
-                              if (diffDays === null) {
-                                return (
-                                  <div className="text-lg font-semibold text-orange-600">
-                                    ⚠️ Δεν είναι δυνατός ο υπολογισμός ημερών
-                                  </div>
-                                );
-                              }
-                              
-                              return (
-                                <>
-                                  <div className="text-lg font-semibold text-blue-700">
-                                    {endDate.toLocaleDateString('el-GR', {
-                                      year: 'numeric',
-                                      month: 'long',
-                                      day: 'numeric'
-                                    })}
-                                  </div>
-                                  <div className="text-xs text-gray-500 mt-1">
-                                    {diffDays > 0 ? `${diffDays} ημέρες ακόμα` : 
-                                     diffDays === 0 ? 'Λήγει σήμερα!' : 
-                                     `Έληξε πριν ${Math.abs(diffDays)} ημέρες`}
-                                  </div>
-                                  {!venue.subscriptionEndDate && lastPayment && (
-                                    <div className="text-xs text-amber-600 mt-1">
-                                      📅 Υπολογισμός από την τελευταία πληρωμή
-                                    </div>
-                                  )}
-                                </>
-                              );
-                            } else {
-                              return (
-                                <div className="text-center">
-                                  <div className="text-lg font-semibold text-gray-500 mb-2">
-                                    📅 Δεν βρέθηκε ημερομηνία λήξης
-                                  </div>
-                                  <div className="text-sm text-gray-600 mb-3">
-                                    {venue.plan === 'subscription' ? 
-                                      'Το πλάνο σας είναι ενεργό αλλά δεν έχει καταγραφεί ημερομηνία λήξης' :
-                                      'Δεν έχετε ενεργό πλάνο συνδρομής'
-                                    }
-                                  </div>
-                                  <div className="flex flex-col gap-2">
-                                    <Link 
-                                      href="/management/settings/renewal"
-                                      className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
-                                    >
-                                      🚀 Ενεργοποίηση Πλάνου
-                                    </Link>
-                                  </div>
-                                </div>
-                              );
-                            }
-                          })()}
-                          
-                          {/* Ανανέωση Συνδρομής Button - Εμφανίζεται μόνο αν απομένουν λιγότερες από 5 ημέρες */}
-                          {(() => {
-                            // Calculate days remaining from subscription end date
-                            let daysRemaining = null;
-                            
-                            if (venue.subscriptionEndDate) {
-                              daysRemaining = calculateDaysDifference(venue.subscriptionEndDate);
-                            } else if (lastPayment && lastPayment.paymentDate && lastPayment.durationMonths) {
-                              // Calculate from last payment if no subscriptionEndDate
-                              const paymentDate = new Date(lastPayment.paymentDate);
-                              const calculatedEndDate = new Date(paymentDate);
-                              calculatedEndDate.setMonth(calculatedEndDate.getMonth() + lastPayment.durationMonths);
-                              daysRemaining = calculateDaysDifference(calculatedEndDate.toISOString());
-                            }
-                            
-                            // Show renewal button only if less than 5 days remaining
-                            if (daysRemaining !== null && daysRemaining < 5) {
-                              return (
-                                <div className="mt-3">
-                                  <Link 
-                                    href="/management/settings/renewal" 
-                                    className="inline-flex items-center justify-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-lg transition-colors"
-                                  >
-                                    ⚠️ Ανανέωση Συνδρομής ({daysRemaining} ημέρες ακόμα)
-                                  </Link>
-                                </div>
-                              );
-                            }
-                            
-                            // Don't show button if more than 5 days remaining
-                            return null;
-                          })()}
-                        </div>
-                      )}
                 </div>
                 
-                <div className="mt-4 text-center">
-
-                  
-
-                </div>
+                {/* Subscription End Date - Full width below the grid, aligned like the other sections */}
+                {venue.plan === 'subscription' && (
+                  <div className="mt-4">
+                    <div className="text-center">
+                      <div className="text-sm text-gray-700 mb-2">
+                        <span className="font-medium">Λήγει στις:</span>
+                      </div>
+                      {(() => {
+                        const daysRemaining = calculateDaysRemaining(venue, lastPayment);
+                        const endDateInfo = getSubscriptionEndDate(venue, lastPayment);
+                        
+                        if (endDateInfo) {
+                          const endDate = formatDateSafely(endDateInfo.date);
+                          if (!endDate) {
+                            return (
+                              <div className="text-lg font-semibold text-orange-600">
+                                ⚠️ Ημερομηνία δεν είναι έγκυρη
+                              </div>
+                            );
+                          }
+                          
+                          return (
+                            <>
+                              <div className="text-lg font-semibold text-blue-700">
+                                {endDate.toLocaleDateString('el-GR', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                {daysRemaining !== null ? (
+                                  daysRemaining > 0 ? `${daysRemaining} ημέρες ακόμα` : 
+                                  daysRemaining === 0 ? 'Λήγει σήμερα!' : 
+                                  `Έληξε πριν ${Math.abs(daysRemaining)} ημέρες`
+                                ) : 'Δεν είναι δυνατός ο υπολογισμός ημερών'}
+                              </div>
+                            </>
+                          );
+                        } else {
+                          // No end date available at all
+                          return (
+                            <div className="text-center">
+                              <div className="text-lg font-semibold text-gray-500 mb-2">
+                                📅 Δεν βρέθηκε ημερομηνία λήξης
+                              </div>
+                              <div className="text-sm text-gray-600 mb-3">
+                                {venue.plan === 'subscription' ? 
+                                  'Το πλάνο σας είναι ενεργό αλλά δεν έχει καταγραφεί ημερομηνία λήξης' :
+                                  'Δεν έχετε ενεργό πλάνο συνδρομής'
+                                }
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <Link 
+                                  href="/management/settings/renewal"
+                                  className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
+                                >
+                                  🚀 Ενεργοποίηση Πλάνου
+                                </Link>
+                              </div>
+                            </div>
+                          );
+                        }
+                      })()}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -656,7 +672,12 @@ export default function SettingsPage() {
                     </div>
                     <div className="text-sm text-blue-600 mt-2">
                       {lastPayment.paymentDate ? (
-                        `Πριν ${Math.ceil((new Date().getTime() - new Date(lastPayment.paymentDate).getTime()) / (1000 * 60 * 60 * 24))} ημέρες`
+                        (() => {
+                          const daysDiff = Math.floor((new Date().getTime() - new Date(lastPayment.paymentDate).getTime()) / (1000 * 60 * 60 * 24));
+                          if (daysDiff === 0) return 'Σήμερα';
+                          if (daysDiff === 1) return 'Πριν 1 ημέρα';
+                          return `Πριν ${daysDiff} ημέρες`;
+                        })()
                       ) : (
                         'Ημερομηνία μη διαθέσιμη'
                       )}
