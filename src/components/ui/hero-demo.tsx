@@ -37,7 +37,7 @@ const sections = [
               style={{ 
                 color: 'white', 
                 textDecoration: 'underline', 
-                fontSize: '0.6em',
+                fontSize: '12px',
                 opacity: 0.7
               }}
             >
