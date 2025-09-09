@@ -32,9 +32,10 @@ export default function Sidebar() {
           <div className="flex h-20 items-center justify-between px-6">
             <div className="flex items-center justify-center flex-1">
               <img
-                src="/yabalitsalogo.png"
+                src="/yabalo.png"
                 alt="Yabalitsa"
                 className="h-12 w-auto"
+                style={{ filter: 'brightness(0)' }}
               />
             </div>
             <button
@@ -109,9 +110,10 @@ export default function Sidebar() {
         <div className="flex flex-col flex-grow bg-white border-r border-gray-200">
           <div className="flex h-20 items-center justify-center px-6">
             <img
-              src="/yabalitsalogo.png"
+              src="/yabalo.png"
               alt="Yabalitsa"
               className="h-12 w-auto"
+              style={{ filter: 'brightness(0)' }}
             />
           </div>
           <div className="border-b border-gray-200 mx-4 mb-4"></div>
