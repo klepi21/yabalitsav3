@@ -513,112 +513,116 @@ export default function SettingsPage() {
                         {venue.planType || 'Basic'} Plan
                       </div>
                     )}
+                    {/* Renewal/Upgrade Button - positioned under the plan info */}
+                    <div className="mt-3">
+                      {(() => {
+                        const daysRemaining = calculateDaysRemaining(venue, lastPayment);
+                        
+                        if (venue.plan === 'subscription') {
+                          if (daysRemaining !== null && daysRemaining <= 7) {
+                            // Show renewal button if less than 7 days remaining
+                            return (
+                              <Link
+                                href="/management/settings/renewal"
+                                className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-full transition-colors shadow-sm"
+                              >
+                                ⚡ Ανανέωση
+                              </Link>
+                            );
+                          } else {
+                            // Show upgrade button if more than 7 days remaining
+                            return (
+                              <Link
+                                href="/management/settings/renewal"
+                                className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors"
+                              >
+                                🚀 Αναβάθμιση
+                              </Link>
+                            );
+                          }
+                        } else {
+                          // Show activation button for trial/no plan
+                          return (
+                            <Link
+                              href="/management/settings/renewal"
+                              className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-full transition-colors shadow-sm"
+                            >
+                              ✨ Ενεργοποίηση
+                            </Link>
+                          );
+                        }
+                      })()}
+                    </div>
                   </div>
-                  
-                  {/* Subscription End Date */}
-                                        {venue.plan === 'subscription' && (
-                        <div className="text-center mt-4">
-                          <div className="text-sm text-gray-700 mb-2">
-                            <span className="font-medium">Λήγει στις:</span>
-                          </div>
-{(() => {
-                            const daysRemaining = calculateDaysRemaining(venue, lastPayment);
-                            const endDateInfo = getSubscriptionEndDate(venue, lastPayment);
-                            
-                            if (endDateInfo) {
-                              const endDate = formatDateSafely(endDateInfo.date);
-                              if (!endDate) {
-                                return (
-                                  <div className="text-lg font-semibold text-orange-600">
-                                    ⚠️ Ημερομηνία δεν είναι έγκυρη
-                                  </div>
-                                );
-                              }
-                              
-                              return (
-                                <>
-                                  <div className="text-lg font-semibold text-blue-700">
-                                    {endDate.toLocaleDateString('el-GR', {
-                                      year: 'numeric',
-                                      month: 'long',
-                                      day: 'numeric'
-                                    })}
-                                  </div>
-                                  <div className="text-xs text-gray-500 mt-1">
-                                    {daysRemaining !== null ? (
-                                      daysRemaining > 0 ? `${daysRemaining} ημέρες ακόμα` : 
-                                      daysRemaining === 0 ? 'Λήγει σήμερα!' : 
-                                      `Έληξε πριν ${Math.abs(daysRemaining)} ημέρες`
-                                    ) : 'Δεν είναι δυνατός ο υπολογισμός ημερών'}
-                                  </div>
-                                  {endDateInfo.source === 'payment' && (
-                                    <div className="text-xs text-amber-600 mt-1">
-                                      📅 Υπολογισμός από την τελευταία πληρωμή
-                                    </div>
-                                  )}
-                                  {endDateInfo.source === 'daysRemaining' && (
-                                    <div className="text-xs text-blue-600 mt-1">
-                                      📅 Υπολογισμός από αποθηκευμένες ημέρες
-                                    </div>
-                                  )}
-                                </>
-                              );
-                            } else {
-                              // No end date available at all
-                              return (
-                                <div className="text-center">
-                                  <div className="text-lg font-semibold text-gray-500 mb-2">
-                                    📅 Δεν βρέθηκε ημερομηνία λήξης
-                                  </div>
-                                  <div className="text-sm text-gray-600 mb-3">
-                                    {venue.plan === 'subscription' ? 
-                                      'Το πλάνο σας είναι ενεργό αλλά δεν έχει καταγραφεί ημερομηνία λήξης' :
-                                      'Δεν έχετε ενεργό πλάνο συνδρομής'
-                                    }
-                                  </div>
-                                  <div className="flex flex-col gap-2">
-                                    <Link 
-                                      href="/management/settings/renewal"
-                                      className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
-                                    >
-                                      🚀 Ενεργοποίηση Πλάνου
-                                    </Link>
-                                  </div>
-                                </div>
-                              );
-                            }
-                          })()}
-                          
-                          {/* Ανανέωση Συνδρομής Button - Εμφανίζεται μόνο αν απομένουν λιγότερες από 5 ημέρες */}
-                          {(() => {
-                            const daysRemaining = calculateDaysRemaining(venue, lastPayment);
-                            
-                            // Show renewal button only if less than 5 days remaining
-                            if (daysRemaining !== null && daysRemaining < 5) {
-                              return (
-                                <div className="mt-3">
-                                  <Link 
-                                    href="/management/settings/renewal" 
-                                    className="inline-flex items-center justify-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded-lg transition-colors"
-                                  >
-                                    ⚠️ Ανανέωση Συνδρομής ({daysRemaining} ημέρες ακόμα)
-                                  </Link>
-                                </div>
-                              );
-                            }
-                            
-                            // Don't show button if more than 5 days remaining
-                            return null;
-                          })()}
-                        </div>
-                      )}
                 </div>
                 
-                <div className="mt-4 text-center">
-
-                  
-
-                </div>
+                {/* Subscription End Date - Full width below the grid, aligned like the other sections */}
+                {venue.plan === 'subscription' && (
+                  <div className="mt-4">
+                    <div className="text-center">
+                      <div className="text-sm text-gray-700 mb-2">
+                        <span className="font-medium">Λήγει στις:</span>
+                      </div>
+                      {(() => {
+                        const daysRemaining = calculateDaysRemaining(venue, lastPayment);
+                        const endDateInfo = getSubscriptionEndDate(venue, lastPayment);
+                        
+                        if (endDateInfo) {
+                          const endDate = formatDateSafely(endDateInfo.date);
+                          if (!endDate) {
+                            return (
+                              <div className="text-lg font-semibold text-orange-600">
+                                ⚠️ Ημερομηνία δεν είναι έγκυρη
+                              </div>
+                            );
+                          }
+                          
+                          return (
+                            <>
+                              <div className="text-lg font-semibold text-blue-700">
+                                {endDate.toLocaleDateString('el-GR', {
+                                  year: 'numeric',
+                                  month: 'long',
+                                  day: 'numeric'
+                                })}
+                              </div>
+                              <div className="text-xs text-gray-500 mt-1">
+                                {daysRemaining !== null ? (
+                                  daysRemaining > 0 ? `${daysRemaining} ημέρες ακόμα` : 
+                                  daysRemaining === 0 ? 'Λήγει σήμερα!' : 
+                                  `Έληξε πριν ${Math.abs(daysRemaining)} ημέρες`
+                                ) : 'Δεν είναι δυνατός ο υπολογισμός ημερών'}
+                              </div>
+                            </>
+                          );
+                        } else {
+                          // No end date available at all
+                          return (
+                            <div className="text-center">
+                              <div className="text-lg font-semibold text-gray-500 mb-2">
+                                📅 Δεν βρέθηκε ημερομηνία λήξης
+                              </div>
+                              <div className="text-sm text-gray-600 mb-3">
+                                {venue.plan === 'subscription' ? 
+                                  'Το πλάνο σας είναι ενεργό αλλά δεν έχει καταγραφεί ημερομηνία λήξης' :
+                                  'Δεν έχετε ενεργό πλάνο συνδρομής'
+                                }
+                              </div>
+                              <div className="flex flex-col gap-2">
+                                <Link 
+                                  href="/management/settings/renewal"
+                                  className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
+                                >
+                                  🚀 Ενεργοποίηση Πλάνου
+                                </Link>
+                              </div>
+                            </div>
+                          );
+                        }
+                      })()}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
