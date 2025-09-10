@@ -5,6 +5,7 @@ import './globals.css';
 import { AuthProvider } from '@/contexts/AuthContext';
 import SidebarWrapper from '@/components/SidebarWrapper';
 import ConditionalWrapper from '@/components/ConditionalWrapper';
+import CookieConsent from '@/components/CookieConsent';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -128,6 +129,7 @@ export default function RootLayout({
         <ConditionalWrapper>
           {children}
         </ConditionalWrapper>
+        <CookieConsent />
       </body>
     </html>
   );
