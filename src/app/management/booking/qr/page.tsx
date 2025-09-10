@@ -1,9 +1,11 @@
 'use client';
 
-import { useSearchParams } from 'next/navigation';
-import { useMemo } from 'react';
+export const dynamic = 'force-dynamic';
 
-export default function BookingQRPage() {
+import { useSearchParams } from 'next/navigation';
+import { useMemo, Suspense } from 'react';
+
+function QRInner() {
   const params = useSearchParams();
   const url = params.get('url') || '';
 
@@ -65,6 +67,14 @@ export default function BookingQRPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function BookingQRPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Φόρτωση...</div>}>
+      <QRInner />
+    </Suspense>
   );
 }
 
