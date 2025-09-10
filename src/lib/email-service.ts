@@ -129,6 +129,9 @@ export const emailTemplates = {
     phone: string;
     pitchName: string;
     venueName: string;
+    venuePhone?: string;
+    venueEmail?: string;
+    venueAddress?: string;
     date: string;
     time: string;
     price: number;
@@ -191,11 +194,21 @@ export const emailTemplates = {
             </p>
           </div>
 
+          <!-- Venue Contact Info -->
+          <div style="background: #e0f2fe; border: 1px solid #b3e5fc; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
+            <h3 style="color: #0277bd; font-size: 16px; font-weight: 600; margin: 0 0 12px 0;">📞 Στοιχεία Γηπέδου</h3>
+            <p style="color: #01579b; font-size: 14px; margin: 0;">
+              <strong>Γήπεδο:</strong> ${bookingData.venueName}<br>
+              ${bookingData.venueAddress ? `<strong>Διεύθυνση:</strong> ${bookingData.venueAddress}<br>` : ''}
+              ${bookingData.venuePhone ? `<strong>Τηλέφωνο:</strong> ${bookingData.venuePhone}<br>` : ''}
+              ${bookingData.venueEmail ? `<strong>Email:</strong> ${bookingData.venueEmail}` : ''}
+            </p>
+          </div>
+
           <div style="background: #fef3c7; border: 1px solid #fde68a; border-radius: 8px; padding: 20px; margin-bottom: 24px;">
             <h3 style="color: #92400e; font-size: 16px; font-weight: 600; margin: 0 0 12px 0;">⚠️ Σημαντικές Οδηγίες</h3>
             <ul style="color: #92400e; font-size: 14px; margin: 0; padding-left: 20px;">
               <li>Παρακαλώ φτάστε 10 λεπτά πριν την ώρα της κράτησης</li>
-              <li>Φέρτε μαζί σας ταυτότητα για επιβεβαίωση</li>
               <li>Σε περίπτωση ακύρωσης, επικοινωνήστε μαζί μας τουλάχιστον 2 ώρες νωρίτερα</li>
               <li>Η πληρωμή γίνεται κατά την άφιξή σας στον χώρο</li>
             </ul>

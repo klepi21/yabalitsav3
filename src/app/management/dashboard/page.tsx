@@ -16,6 +16,7 @@ export default function DashboardPage() {
   const [venue, setVenue] = useState<Venue | null>(null);
   const [isVenueInfoExpanded, setIsVenueInfoExpanded] = useState(false);
   const [showQuickBooking, setShowQuickBooking] = useState(false);
+  const [showBookingMenu, setShowBookingMenu] = useState(false);
   const [isCreatingBooking, setIsCreatingBooking] = useState(false);
   const [showStatusConfirm, setShowStatusConfirm] = useState(false);
   const [statusChangeData, setStatusChangeData] = useState<{
@@ -118,6 +119,14 @@ export default function DashboardPage() {
   // Prevent infinite loading by adding a loading state
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Helper: create slug for /book/[venueName]
+  function getVenueSlug(name?: string) {
+    if (!name) return '';
+    return name.toLowerCase().replace(/\s+/g, '');
+  }
+
+  const bookingPath = venue ? `/book/${getVenueSlug(venue.name)}` : '';
 
   // Show loading while checking authentication
   if (authLoading) {
@@ -538,6 +547,41 @@ export default function DashboardPage() {
               <PlusIcon className="h-4 w-4 mr-2" />
               Γρήγορη Κράτηση
             </button>
+
+            {/* Booking Page Dropdown */}
+            <div className="relative">
+              <button
+                onClick={() => setShowBookingMenu((v) => !v)}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-semibold rounded-lg bg-white hover:bg-gray-50 text-gray-900 shadow transition"
+              >
+                Σελίδα Booking
+                <span className="ml-2">▾</span>
+              </button>
+              {showBookingMenu && (
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                  <button
+                    className="w-full text-left px-4 py-2 text-sm text-gray-900 font-medium hover:bg-gray-50 disabled:opacity-50"
+                    onClick={() => {
+                      setShowBookingMenu(false);
+                      if (bookingPath) router.push(bookingPath);
+                    }}
+                    disabled={!bookingPath}
+                  >
+                    Άνοιγμα
+                  </button>
+                  <button
+                    className="w-full text-left px-4 py-2 text-sm text-gray-900 font-medium hover:bg-gray-50 disabled:opacity-50"
+                    onClick={() => {
+                      setShowBookingMenu(false);
+                      if (bookingPath) window.open(`/management/booking/qr?url=${encodeURIComponent(bookingPath)}`, '_blank');
+                    }}
+                    disabled={!bookingPath}
+                  >
+                    Δημιουργία QR
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

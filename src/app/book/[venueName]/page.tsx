@@ -4,8 +4,6 @@ import { useState, useEffect } from "react";
 import { use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, MapPin, Phone, Mail, Calendar, Clock, Users, Star, ArrowLeft, X, RotateCcw } from "lucide-react";
-import { RecaptchaVerifier, signInWithPhoneNumber, PhoneAuthProvider, signInWithCredential } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
 
 interface Booking {
   id: string;
@@ -78,45 +76,20 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
     firstName: '',
     lastName: '',
     phone: '',
+    email: '',
     termsAccepted: false
   });
 
-  // SMS Validation states
-  const [showSmsValidation, setShowSmsValidation] = useState(false);
-  const [verificationId, setVerificationId] = useState<string>('');
-  const [smsCode, setSmsCode] = useState('');
-  const [isSendingSms, setIsSendingSms] = useState(false);
-  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
+  // Email verification states
+  const [showEmailVerification, setShowEmailVerification] = useState(false);
+  const [emailCode, setEmailCode] = useState('');
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [canResend, setCanResend] = useState(false);
-  const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
-  const [smsError, setSmsError] = useState<string | null>(null);
-  const [isRateLimited, setIsRateLimited] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [emailSent, setEmailSent] = useState(false);
 
-  // Helper: (re)create invisible reCAPTCHA
-  const recreateRecaptcha = async () => {
-    try {
-      // Ensure persistent container exists
-      let container = document.getElementById('recaptcha-container');
-      if (!container) {
-        container = document.createElement('div');
-        container.id = 'recaptcha-container';
-        container.style.position = 'absolute';
-        container.style.left = '-9999px';
-        document.body.appendChild(container);
-      }
-      if (!auth) return;
-      const verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        size: 'invisible',
-        callback: () => {},
-        'expired-callback': () => {}
-      });
-      await verifier.render();
-      setRecaptchaVerifier(verifier);
-    } catch (e) {
-      console.error('Failed to recreate reCAPTCHA:', e);
-    }
-  };
   
   // Success popup state
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
@@ -296,87 +269,6 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
     loadVenueData();
   }, [venueName]);
 
-  // Initialize a single invisible reCAPTCHA on mount (persistent container)
-  useEffect(() => {
-    let verifier: RecaptchaVerifier | null = null;
-    if (recaptchaVerifier) return;
-    
-    const initRecaptcha = async () => {
-      try {
-        // Ensure persistent container exists
-        let container = document.getElementById('recaptcha-container');
-        if (!container) {
-          container = document.createElement('div');
-          container.id = 'recaptcha-container';
-          // Hide container
-          container.style.position = 'absolute';
-          container.style.left = '-9999px';
-          document.body.appendChild(container);
-        }
-        if (!container) {
-          console.log('reCAPTCHA container not found');
-          return;
-        }
-        
-        // Check if auth is properly initialized
-        if (!auth) {
-          console.log('Auth not initialized');
-          return;
-        }
-        
-        console.log('Initializing invisible reCAPTCHA');
-        
-        // Create invisible reCAPTCHA with (auth, containerId, params)
-        verifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-          size: 'invisible',
-          callback: () => {
-            // Automatically proceeds when reCAPTCHA resolves
-          },
-          'expired-callback': () => {
-            // Token expired; nothing to do, user can retry
-          }
-        });
-        
-        console.log('RecaptchaVerifier created successfully');
-        
-        // Pre-render the reCAPTCHA as suggested in docs
-        await verifier.render();
-        console.log('reCAPTCHA rendered successfully');
-        setRecaptchaVerifier(verifier);
-        
-      } catch (error: any) {
-        console.error('reCAPTCHA initialization error:', error);
-        console.error('Error details:', {
-          name: error?.name,
-          message: error?.message,
-          code: error?.code,
-          stack: error?.stack
-        });
-        setRecaptchaVerifier(null);
-      }
-    };
-    
-    // Initialize reCAPTCHA
-    initRecaptcha();
-    
-    // Cleanup function
-    return () => {
-      if (verifier) {
-        try {
-          verifier.clear();
-        } catch (error) {
-          // Silent cleanup error
-        }
-      }
-    };
-  }, [auth]);
-
-  // Reset reCAPTCHA function (only for true errors)
-  const resetRecaptcha = () => {
-    console.log('Manual reset requested - keeping reCAPTCHA for reuse');
-    // Don't clear the reCAPTCHA - it can be reused
-    // Only reset if there's a real error
-  };
 
   const generateWeekSchedule = (): DaySchedule[] => {
     if (!selectedPitch) return [];
@@ -510,7 +402,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
   };
 
   const handleConfirmBooking = () => {
-    if (!formData.firstName || !formData.lastName || !formData.phone || !formData.termsAccepted) {
+    if (!formData.firstName || !formData.lastName || !formData.phone || !formData.email || !formData.termsAccepted) {
       alert('Παρακαλώ συμπληρώστε όλα τα υποχρεωτικά πεδία και αποδεχτείτε τους όρους χρήσης.');
       return;
     }
@@ -521,8 +413,14 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       return;
     }
 
-    // Show SMS validation popup
-    setShowSmsValidation(true);
+    // Validate email
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      alert('Παρακαλώ εισάγετε ένα έγκυρο email.');
+      return;
+    }
+
+    // Show email verification popup
+    setShowEmailVerification(true);
   };
 
   const goToStep = (step: 'pitch' | 'date' | 'slots' | 'confirmation') => { 
@@ -531,152 +429,90 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
 
 
-  // Countdown timer for resend
+  // Email resend countdown
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: NodeJS.Timeout | undefined;
     if (countdown > 0) {
       interval = setInterval(() => {
-        setCountdown(prev => {
-          if (prev <= 1) {
+        setCountdown((p) => {
+          if (p <= 1) {
             setCanResend(true);
-            setIsRateLimited(false);
-            setSmsError(null);
+            setEmailError(null);
             return 0;
           }
-          return prev - 1;
+          return p - 1;
         });
       }, 1000);
     }
-    return () => clearInterval(interval);
+    return () => interval && clearInterval(interval);
   }, [countdown]);
 
-  // Send SMS verification
-  const sendSmsVerification = async () => {
-    if (!recaptchaVerifier) {
-      alert('Παρακαλώ περιμένετε να φορτώσει το reCAPTCHA ή δοκιμάστε ξανά.');
+  // Send Email verification code
+  const sendEmailVerification = async () => {
+    if (!formData.email) {
+      alert('Παρακαλώ εισάγετε το email σας.');
       return;
     }
-
-    if (!formData.phone) {
-      alert('Παρακαλώ εισάγετε το τηλέφωνο σας.');
-      return;
-    }
-
     try {
-      setIsSendingSms(true);
-      setSmsError(null);
-      setIsRateLimited(false);
-      
-      // Format phone number for international format - always add +30 for Greek numbers
-      const formattedPhone = formData.phone.startsWith('+') ? formData.phone : `+30${formData.phone}`;
-      
-      // Ensure the invisible reCAPTCHA executes to get a fresh token before sending
-      await recaptchaVerifier.verify();
-      
-      // Use the reCAPTCHA verifier (token already generated by verify())
-      const confirmationResult = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifier);
-      
-      setVerificationId(confirmationResult.verificationId);
-      
-      // Start countdown (1 minute)
+      setIsSendingEmail(true);
+      setEmailError(null);
+      const res = await fetch('/api/verification/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, firstName: formData.firstName })
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || 'send_failed');
+      }
       setCountdown(60);
       setCanResend(false);
-    } catch (error: any) {
-      console.error('SMS verification error:', error);
-      
-      // Handle specific Firebase errors
-      if (error.code === 'auth/invalid-phone-number') {
-        alert('Λάθος αριθμός τηλεφώνου. Παρακαλώ ελέγξτε τον αριθμό σας.');
-      } else if (error.code === 'auth/too-many-requests') {
-        setSmsError('Πάρα πολλές προσπάθειες SMS. Το σύστημα έχει περιορίσει την αποστολή για αυτόν τον αριθμό. Παρακαλώ δοκιμάστε αργότερα ή χρησιμοποιήστε άλλον αριθμό.');
-        setIsRateLimited(true);
-        // Start a much longer cooldown (10 minutes) for rate limiting
-        setCountdown(600);
-        setCanResend(false);
-      } else if (error.code === 'auth/quota-exceeded') {
-        alert('Υπέρβαση ορίου SMS. Παρακαλώ δοκιμάστε αργότερα.');
-      } else if (error.code === 'auth/invalid-recaptcha-token' || error.code === 'auth/missing-recaptcha-token') {
-        setSmsError('Το reCAPTCHA δεν ήταν έγκυρο. Παρακαλώ δοκιμάστε ξανά.');
-        try {
-          // Recreate a fresh verifier
-          if (recaptchaVerifier) {
-            try { recaptchaVerifier.clear(); } catch (_) {}
-            setRecaptchaVerifier(null);
-          }
-          await recreateRecaptcha();
-        } catch (_) {}
-      } else if (error.code === 'auth/invalid-app-credential') {
-        alert('Το reCAPTCHA δεν είναι έγκυρο. Παρακαλώ δοκιμάστε ξανά.');
-        // Reset reCAPTCHA and try to reinitialize
-        if (recaptchaVerifier) {
-          try {
-            recaptchaVerifier.clear();
-          } catch (clearError) {
-            console.error('Error clearing reCAPTCHA:', clearError);
-          }
-        }
-        // Don't reset reCAPTCHA - it might be reusable
-        console.log('reCAPTCHA error, but keeping for potential reuse');
-      } else if (error.code === 'auth/recaptcha-token-expired') {
-        alert('Το reCAPTCHA έληξε. Παρακαλώ δοκιμάστε ξανά.');
-        // Don't reset - let user try again with same reCAPTCHA
-      } else if (error.code === 'auth/recaptcha-not-rendered') {
-        alert('Το reCAPTCHA δεν φορτώθηκε σωστά. Παρακαλώ δοκιμάστε ξανά.');
-        // Don't reset - let user try again
-      } else {
-        alert(`Σφάλμα στην αποστολή SMS: ${error.code || error.message}. Παρακαλώ δοκιμάστε ξανά.`);
-      }
+      setEmailSent(true);
+      // Initialize email code input after successful send
+      setEmailCode('');
+    } catch (err: any) {
+      console.error('email send error', err);
+      setEmailError('Αποτυχία αποστολής email. Δοκιμάστε ξανά.');
     } finally {
-      setIsSendingSms(false);
+      setIsSendingEmail(false);
     }
   };
 
-  // Verify SMS code
-  const verifySmsCode = async () => {
-    if (!smsCode || !verificationId) return;
-
+  // Verify Email code
+  const verifyEmailCode = async () => {
+    if (!emailCode || !formData.email) return;
     try {
-      setIsVerifyingCode(true);
-      
-      const credential = PhoneAuthProvider.credential(verificationId, smsCode);
-      await signInWithCredential(auth, credential);
-      
-      // SMS verified successfully - create booking
+      setIsVerifyingEmail(true);
+      const res = await fetch('/api/verification/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, code: emailCode })
+      });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.error || 'invalid_code');
+      }
       await createBooking();
-      
-      // Close SMS validation popup
-      setShowSmsValidation(false);
-      setSmsCode('');
-      setVerificationId('');
-      
-      // Don't reset reCAPTCHA - keep it for potential reuse
-      // Only clear it when the popup is actually closed
-      
-      // Set success data for popup
+      setShowEmailVerification(false);
+      setEmailCode('');
+      setEmailSent(false);
+
       if (selectedPitch && selectedDate && selectedTimeSlot) {
         setSuccessBookingData({
           userName: `${formData.firstName} ${formData.lastName}`,
           userPhone: `+30 ${formData.phone}`,
           pitchName: selectedPitch.name,
-          date: selectedDate.toLocaleDateString('el-GR', { 
-            weekday: 'long', 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          }),
+          date: selectedDate.toLocaleDateString('el-GR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
           time: selectedTimeSlot.time,
           price: selectedPitch.pricePerSlot
         });
-        
-        // Show success popup
         setShowSuccessPopup(true);
       }
-      
-    } catch (error) {
-      console.error('Error verifying SMS:', error);
-      alert('Λάθος κωδικός SMS. Παρακαλώ δοκιμάστε ξανά.');
+    } catch (err) {
+      console.error('verify email error', err);
+      alert('Λάθος κωδικός email. Παρακαλώ δοκιμάστε ξανά.');
     } finally {
-      setIsVerifyingCode(false);
+      setIsVerifyingEmail(false);
     }
   };
 
@@ -738,7 +574,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         // New customer - create customer record
         const newCustomerData = {
           name: `${formData.firstName} ${formData.lastName}`,
-          email: '', // No email provided in booking form
+          email: formData.email,
           phone: formData.phone,
           venueIds: [venue?.id || ''], // This is their first venue
           createdAt: new Date(),
@@ -755,7 +591,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         venueId: venue?.id || '',
         userId: customerId, // Use the customer ID we just created/found
         userName: `${formData.firstName} ${formData.lastName}`,
-        userEmail: '',
+        userEmail: formData.email,
         userPhone: formData.phone,
         startTime: startDateTime,
         endTime: endDateTime,
@@ -766,8 +602,38 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
       await bookingService.create(newBooking);
       
+      // Send confirmation email
+      try {
+        await fetch('/api/booking/finalize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            phone: formData.phone,
+            pitchName: selectedPitch.name,
+            venueName: venue?.name || '',
+            venuePhone: venue?.phone || '',
+            venueEmail: venue?.email || '',
+            venueAddress: venue?.address || '',
+            date: selectedDate.toLocaleDateString('el-GR', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            }),
+            time: selectedTimeSlot.time,
+            price: selectedPitch.pricePerSlot
+          })
+        });
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
+        // Don't fail the booking if email fails
+      }
+      
       // Reset form and go back to start
-      setFormData({ firstName: '', lastName: '', phone: '', termsAccepted: false });
+      setFormData({ firstName: '', lastName: '', phone: '', email: '', termsAccepted: false });
       setSelectedDate(null);
       setSelectedTimeSlot(null);
       setCurrentStep('pitch');
@@ -1250,6 +1116,19 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                               Εισάγετε τον αριθμό χωρίς το +30 (π.χ. 6973625633)
                             </p>
                           </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                              Email *
+                            </label>
+                            <input
+                              type="email"
+                              placeholder="Εισάγετε το email σας"
+                              value={formData.email}
+                              onChange={(e) => handleFormChange('email', e.target.value)}
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                              required
+                            />
+                          </div>
                           <div className="flex items-start space-x-3">
                             <input
                               type="checkbox"
@@ -1295,8 +1174,8 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         </div>
       </div>
 
-      {/* SMS Validation Popup */}
-      {showSmsValidation && (
+      {/* Email Verification Popup */}
+      {showEmailVerification && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
@@ -1305,11 +1184,12 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Επιβεβαίωση Τηλεφώνου</h3>
+              <h3 className="text-xl font-bold text-gray-900">Επιβεβαίωση Email</h3>
               <button
                 onClick={() => {
-                  setShowSmsValidation(false);
-                  // Don't reset reCAPTCHA - keep it for reuse
+                  setShowEmailVerification(false);
+                  setEmailCode('');
+                  setEmailSent(false);
                 }}
                 className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
               >
@@ -1317,32 +1197,29 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
               </button>
             </div>
 
-            {/* Phone Number Display */}
+            {/* Email Display */}
             <div className="text-center mb-6">
-              <p className="text-gray-600 mb-2">Θα σας στείλουμε SMS στο:</p>
-              <p className="text-lg font-semibold text-gray-900">+30 {formData.phone}</p>
+              <p className="text-gray-600 mb-2">Θα σας στείλουμε κωδικό στο:</p>
+              <p className="text-lg font-semibold text-gray-900">{formData.email}</p>
             </div>
 
-            {/* reCAPTCHA Container */}
-            <div id="recaptcha-container" className="mb-6"></div>
-            
-            {/* Send SMS Button */}
-            {!verificationId && (
+            {/* Send Email Button */}
+            {!emailSent && (
               <button
-                onClick={sendSmsVerification}
-                disabled={isSendingSms || !recaptchaVerifier || isRateLimited}
+                onClick={sendEmailVerification}
+                disabled={isSendingEmail}
                 className="w-full bg-emerald-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4"
               >
-                {isSendingSms ? 'Αποστολή...' : !recaptchaVerifier ? 'Φόρτωση...' : isRateLimited ? 'Περιμένετε...' : 'Αποστολή SMS'}
+                {isSendingEmail ? 'Αποστολή...' : 'Αποστολή Κωδικού'}
               </button>
             )}
 
-            {/* SMS Code Input */}
-            {verificationId && (
+            {/* Email Code Input */}
+            {emailSent && (
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Κωδικός SMS
+                    Κωδικός Email
                   </label>
                   
                   {/* 6-Digit Code Input */}
@@ -1353,14 +1230,14 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                         type="text"
                         maxLength={1}
                         data-index={index}
-                        value={smsCode[index] || ''}
+                        value={emailCode[index] || ''}
                         onChange={(e) => {
                           const value = e.target.value;
                           if (value && /^\d$/.test(value)) { // Only allow digits
-                            const newCode = smsCode.split('');
+                            const newCode = emailCode.split('');
                             newCode[index] = value;
                             const finalCode = newCode.join('');
-                            setSmsCode(finalCode);
+                            setEmailCode(finalCode);
                             
                             // Auto-focus next input
                             if (index < 5) {
@@ -1374,17 +1251,17 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                         onKeyDown={(e) => {
                           // Handle backspace
                           if (e.key === 'Backspace') {
-                            if (!smsCode[index] && index > 0) {
+                            if (!emailCode[index] && index > 0) {
                               // If current input is empty, go to previous
                               setTimeout(() => {
                                 const prevInput = document.querySelector(`input[data-index="${index - 1}"]`) as HTMLInputElement;
                                 if (prevInput) prevInput.focus();
                               }, 10);
-                            } else if (smsCode[index]) {
+                            } else if (emailCode[index]) {
                               // If current input has value, clear it first
-                              const newCode = smsCode.split('');
+                              const newCode = emailCode.split('');
                               newCode[index] = '';
-                              setSmsCode(newCode.join(''));
+                              setEmailCode(newCode.join(''));
                             }
                           }
                         }}
@@ -1394,7 +1271,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                           const digits = pastedData.replace(/\D/g, '').slice(0, 6);
                           
                           if (digits.length === 6) {
-                            setSmsCode(digits);
+                            setEmailCode(digits);
                             // Focus last input
                             setTimeout(() => {
                               const lastInput = document.querySelector(`input[data-index="5"]`) as HTMLInputElement;
@@ -1404,11 +1281,11 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                         }}
                         className={`
                           w-12 h-12 text-center text-xl font-bold border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all
-                          ${smsCode[index] 
+                          ${emailCode[index] 
                             ? 'border-emerald-500 bg-emerald-50 text-emerald-700' 
                             : 'border-gray-300 bg-white text-gray-900'
                           }
-                          ${index === smsCode.length ? 'ring-2 ring-emerald-500' : ''}
+                          ${index === emailCode.length ? 'ring-2 ring-emerald-500' : ''}
                         `}
                         placeholder=""
                       />
@@ -1416,20 +1293,20 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                   </div>
                   
                   <p className="text-sm text-gray-500 text-center mb-4">
-                    Εισάγετε τον 6ψήφιο κωδικό που λάβατε στο SMS
+                    Εισάγετε τον 6ψήφιο κωδικό που λάβατε στο email
                   </p>
                 </div>
 
                 {/* Verify Button */}
                 <button
-                  onClick={verifySmsCode}
-                  disabled={!smsCode || smsCode.length !== 6 || isVerifyingCode}
+                  onClick={verifyEmailCode}
+                  disabled={!emailCode || emailCode.length !== 6 || isVerifyingEmail}
                   className="w-full bg-emerald-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4"
                 >
-                  {isVerifyingCode ? 'Επιβεβαίωση...' : 'Επιβεβαίωση Κωδικού'}
+                  {isVerifyingEmail ? 'Επιβεβαίωση...' : 'Επιβεβαίωση Κωδικού'}
                 </button>
 
-                {/* Resend SMS */}
+                {/* Resend Email */}
                 <div className="text-center">
                   {countdown > 0 ? (
                     <p className="text-sm text-gray-500">
@@ -1437,22 +1314,17 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                     </p>
                   ) : (
                     <button
-                      onClick={sendSmsVerification}
+                      onClick={sendEmailVerification}
                       disabled={!canResend}
                       className="flex items-center justify-center space-x-2 text-sm text-emerald-600 hover:text-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed mx-auto"
                     >
                       <RotateCcw className="w-4 h-4" />
-                      <span>Επαναποστολή SMS</span>
+                      <span>Επαναποστολή Email</span>
                     </button>
                   )}
-                  {smsError && (
+                  {emailError && (
                     <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                      <p className="text-sm text-red-800 font-medium">{smsError}</p>
-                      {isRateLimited && (
-                        <p className="text-xs text-red-600 mt-1">
-                          💡 Συμβουλή: Δοκιμάστε να χρησιμοποιήσετε διαφορετικό αριθμό τηλεφώνου ή περιμένετε λίγο περισσότερο.
-                        </p>
-                      )}
+                      <p className="text-sm text-red-800 font-medium">{emailError}</p>
                     </div>
                   )}
                 </div>
@@ -1461,7 +1333,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
             {/* Info */}
             <div className="text-xs text-gray-500 text-center mt-4">
-              Η κράτηση θα ολοκληρωθεί μόνο μετά την επιβεβαίωση του τηλεφώνου σας.
+              Η κράτηση θα ολοκληρωθεί μόνο μετά την επιβεβαίωση του email σας.
             </div>
           </motion.div>
         </div>

@@ -11,6 +11,9 @@ export async function POST(request: Request) {
       phone, 
       pitchName, 
       venueName, 
+      venuePhone,
+      venueEmail,
+      venueAddress,
       date, 
       time, 
       price 
@@ -21,6 +24,9 @@ export async function POST(request: Request) {
       phone: string;
       pitchName: string;
       venueName: string;
+      venuePhone?: string;
+      venueEmail?: string;
+      venueAddress?: string;
       date: string;
       time: string;
       price: number;
@@ -38,6 +44,9 @@ export async function POST(request: Request) {
       phone,
       pitchName,
       venueName,
+      venuePhone,
+      venueEmail,
+      venueAddress,
       date,
       time,
       price
