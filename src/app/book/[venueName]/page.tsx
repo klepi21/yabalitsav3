@@ -646,7 +646,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
   if (!venue || !selectedPitch) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-emerald-900 to-emerald-700 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
           <p className="text-emerald-600">Φόρτωση...</p>
@@ -656,34 +656,26 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-emerald-100">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-900 to-emerald-700">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-emerald-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <img src="/yabalitsalogo.png" alt="Yabalitsa" className="h-8 w-auto" />
-              <h1 className="text-lg font-semibold text-gray-900">{venue.name}</h1>
-            </div>
-            <div className="flex items-center space-x-4 text-sm text-gray-600">
-              <div className="flex items-center space-x-1">
-                <MapPin className="w-4 h-4" />
-                <span className="hidden sm:inline">{venue.address}</span>
-              </div>
-              <div className="flex items-center space-x-1">
-                <Phone className="w-4 h-4" />
-                <span>{venue.phone}</span>
-              </div>
-            </div>
+          <div className="flex items-center justify-center h-16">
+            <img src="/yabalitsalogo.png" alt="Yabalitsa" className="h-8 w-auto" />
           </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Venue name above component */}
+        <div className="text-center mb-4">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-white">{venue.name}</h1>
+        </div>
+
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          {/* Progress Steps */}
-          <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-4">
+          {/* Progress Steps - hidden */}
+          <div className="hidden bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-4">
             <div className="flex items-center justify-center space-x-8">
               {[
                 { step: 'pitch', label: 'Γήπεδο' },
@@ -739,7 +731,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
                         onClick={() => handlePitchSelect(pitch)}
-                        className="bg-gray-50 rounded-xl p-6 border-2 border-transparent hover:border-emerald-300 cursor-pointer transition-all"
+                        className="bg-white rounded-xl p-6 border border-emerald-100 hover:border-emerald-300 cursor-pointer transition-all shadow-lg shadow-emerald-900/20 hover:shadow-emerald-900/30"
                       >
                         <div className="text-center space-y-3">
                           <div className="flex items-center justify-center mx-auto">
@@ -750,7 +742,21 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                           <div className="text-2xl font-bold text-emerald-600">
                             €{pitch.pricePerSlot}
                           </div>
-                          <p className="text-xs text-gray-500">ανά ώρα</p>
+                          {(() => {
+                            const match = (pitch.type || '').match(/(\d+)\s*x\s*(\d+)/i);
+                            if (match) {
+                              const left = parseInt(match[1], 10);
+                              const right = parseInt(match[2], 10);
+                              const total = (isNaN(left) ? 0 : left) + (isNaN(right) ? 0 : right);
+                              if (total > 0) {
+                                const per = pitch.pricePerSlot / total;
+                                return (
+                                  <p className="text-xs text-gray-600">{total} άτομα • €{per.toFixed(2)}/άτομο</p>
+                                );
+                              }
+                            }
+                            return <p className="text-xs text-gray-500">ανά ώρα</p>;
+                          })()}
                         </div>
                       </motion.div>
                     ))}
@@ -1170,6 +1176,22 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                 </motion.div>
               )}
             </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Venue contact info under component */}
+        <div className="mt-6 flex justify-center">
+          <div className="w-full max-w-xl rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md shadow-2xl px-5 py-4 md:px-6 md:py-5">
+            <div className="flex flex-col items-center gap-2 text-white text-base md:text-lg">
+              <div className="flex items-center gap-2">
+                <span>📍</span>
+                <span className="text-center">{venue.address}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span>📞</span>
+                <span className="text-center">{venue.phone}</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
