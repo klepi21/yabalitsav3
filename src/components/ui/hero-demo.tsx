@@ -16,12 +16,14 @@ const sections = [
         <div className="transform scale-[0.8] md:scale-100">
           <div className="relative flex items-center justify-center gap-0 md:gap-6">
             {/* App Store button - left of device */}
-            <img 
-              src="/appstore.svg" 
-              alt="App Store" 
-              className="w-[80px] md:w-[100px] h-auto -mr-16 md:mr-0" 
-              style={{ opacity: 0.8 }} 
-            />
+            <Link href="https://apps.apple.com/gr/app/yabalitsa/id6751777747" target="_blank" rel="noopener noreferrer">
+              <img 
+                src="/appstore.svg" 
+                alt="App Store" 
+                className="w-[80px] md:w-[100px] h-auto -mr-16 md:mr-0" 
+                style={{ opacity: 0.8 }} 
+              />
+            </Link>
             
             {/* iPhone mockup in center */}
             <IPhoneMockup
