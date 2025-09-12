@@ -20,25 +20,27 @@ const sections = [
               <img 
                 src="/appstore.svg" 
                 alt="App Store" 
-                className="w-[80px] md:w-[100px] h-auto -mr-16 md:mr-0" 
-                style={{ opacity: 0.8 }} 
+                className="w-[80px] md:w-[100px] h-auto mr-2 md:mr-0" 
+                style={{ opacity: 1 }} 
               />
             </Link>
             
-            {/* iPhone mockup in center */}
-            <IPhoneMockup
-              model="15-pro"
-              color="natural-titanium"
-              scale={0.6}
-              wallpaper="/main.png"
-            />
+            {/* iPhone mockup in center - clickable */}
+            <Link href="https://apps.apple.com/gr/app/yabalitsa/id6751777747" target="_blank" rel="noopener noreferrer">
+              <IPhoneMockup
+                model="15-pro"
+                color="natural-titanium"
+                scale={0.6}
+                wallpaper="/main.png"
+              />
+            </Link>
             
-            {/* Google Play button - right of device */}
+            {/* Google Play button - right of device (hidden on mobile) */}
             <img 
               src="/google-play-badge-coming-soon.webp" 
               alt="Google Play" 
-              className="w-[90px] md:w-[110px] h-auto -ml-16 md:ml-0" 
-              style={{ opacity: 0.8 }} 
+              className="hidden md:block w-[110px] h-auto ml-0" 
+              style={{ opacity: 1 }} 
             />
           </div>
         </div>
