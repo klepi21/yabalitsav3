@@ -178,7 +178,7 @@ export default function VenueLoginPage() {
             <div className="text-center">
               <p className="text-sm text-gray-600">
                 Δεν έχετε λογαριασμό;{' '}
-                <a href="#" className="font-medium text-football-green hover:text-football-green-light">
+                <a href="/for-venues" className="font-medium text-football-green hover:text-football-green-light">
                   Εγγραφή
                 </a>
               </p>

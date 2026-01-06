@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, ReactNode } from 'react
 import { User as FirebaseUser } from 'firebase/auth';
 import { authService, venueOwnerService } from '@/lib/firebase-services';
 import { VenueOwner } from '@/types';
+import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -18,6 +19,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [venueOwner, setVenueOwner] = useState<VenueOwner | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = authService.onAuthStateChanged(async (firebaseUser) => {
@@ -37,19 +39,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } else {
         setVenueOwner(null);
+        // User logged out, redirect to venue-login
+        router.push('/venue-login');
       }
       
       setIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   const signOut = async () => {
     try {
       await authService.signOut();
       setUser(null);
       setVenueOwner(null);
+      router.push('/venue-login');
     } catch (error) {
       console.error('Sign out error:', error);
     }
