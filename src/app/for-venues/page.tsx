@@ -1,9 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { db, auth } from '@/lib/firebase';
+import { auth } from '@/lib/firebase';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -71,35 +70,38 @@ export default function ForVenuesPage() {
 
       // 2) Create auth user
       const cred = await createUserWithEmailAndPassword(auth, form.ownerEmail, form.password);
-      const uid = cred.user.uid;
 
-      // 3) Create venue
-      const venueDoc = await addDoc(collection(db, 'yabalitsa_venues'), {
-        name: form.venueName,
-        address: form.venueAddress,
-        city: form.venueCity,
-        contactDetails: { email: '', phone: '' },
-        ownerId: uid,
-        plan: form.plan,
-        active: true,
-        tax: { afm: form.venueAfm, doy: form.venueDoy },
-        daysRemaining: 15,
-        lastDecrementAt: serverTimestamp(),
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
+      // 3) Get the ID token
+      const idToken = await cred.user.getIdToken();
+
+      // 4) Create venue via server-side API
+      const venueResponse = await fetch('/api/venues/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          venueName: form.venueName,
+          venueAddress: form.venueAddress,
+          venueCity: form.venueCity,
+          venueEmail: form.venueEmail,
+          venuePhone: form.venuePhone,
+          venueAfm: form.venueAfm,
+          venueDoy: form.venueDoy,
+          ownerName: form.ownerName,
+          ownerEmail: form.ownerEmail,
+          ownerPhone: form.ownerPhone,
+          plan: form.plan
+        })
       });
 
-      // 4) Create venue owner profile
-      await addDoc(collection(db, 'yabalitsa_venueOwners'), {
-        venueId: venueDoc.id,
-        email: form.ownerEmail,
-        name: form.ownerName,
-        phone: form.ownerPhone,
-        role: 'owner',
-        permissions: ['manage:all'],
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp()
-      });
+      if (!venueResponse.ok) {
+        const errorData = await venueResponse.json();
+        throw new Error(errorData.error || 'Failed to create venue');
+      }
+
+      const venueData = await venueResponse.json();
 
       setSuccess('ok');
       setShowCongrats(true);
