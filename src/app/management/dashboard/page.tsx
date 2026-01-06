@@ -585,15 +585,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Loading State */}
-        {isLoading && (
-          <div className="bg-white shadow-lg rounded-2xl border border-gray-100 p-8 text-center">
-            <div className="text-2xl mb-4">🔄</div>
-            <div className="text-lg font-semibold text-gray-700">Φόρτωση δεδομένων...</div>
-            <div className="text-gray-500">Παρακαλώ περιμένετε</div>
-          </div>
-        )}
-
         {/* Error State */}
         {loadError && (
           <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
