@@ -142,8 +142,8 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                         </span>
                       </div>
                       <Link
-                        //href="#"
-                        href="/management/settings/renewal"
+                        href="#"
+                        //href="/management/settings/renewal"
                         className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-full transition-colors shadow-sm"
                       >
                         ✨ Ενεργοποίηση
