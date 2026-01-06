@@ -66,11 +66,43 @@ export default function SettingsPage() {
   });
 
   const loadVenueData = useCallback(async () => {
-    if (!venueOwner) return;
+    if (!venueOwner || !user) return;
     
     setIsLoading(true);
+    setError(null);
     try {
-      const venueData = await venueService.getById(venueOwner.venueId);
+      // Get auth token
+      const token = await user.getIdToken();
+      if (!token) {
+        throw new Error('No auth token available');
+      }
+
+      // Use server-side API to fetch data with proper auth
+      const response = await fetch('/api/settings/get-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          venueId: venueOwner.venueId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch settings data');
+      }
+
+      const data = await response.json();
+
+      // Convert venue data
+      const venueData = data.venue ? {
+        ...data.venue,
+        createdAt: new Date(data.venue.createdAt),
+        updatedAt: new Date(data.venue.updatedAt),
+      } : null;
+
       setVenue(venueData);
       
       if (venueData) {
@@ -84,34 +116,31 @@ export default function SettingsPage() {
           },
         });
         
-        // Subscription data is now stored directly in venue document
-        // No need to load from separate collection
-        
-        
         // Load last payment data
-        try {
-          const payments = await paymentService.getByVenueId(venueOwner.venueId);
-          if (payments.length > 0) {
-            // Sort by payment date and get the most recent
-            const sortedPayments = payments.sort((a, b) => {
-              const dateA = a.paymentDate ? new Date(a.paymentDate).getTime() : 0;
-              const dateB = b.paymentDate ? new Date(b.paymentDate).getTime() : 0;
-              return dateB - dateA;
-            });
-            setLastPayment(sortedPayments[0]);
-          }
-        } catch (paymentError) {
-          console.error('Error loading payment data:', paymentError);
-          // Don't show error for payments, just log it
+        if (data.payments && data.payments.length > 0) {
+          const payments = data.payments.map((p: any) => ({
+            ...p,
+            createdAt: typeof p.createdAt === 'string' ? p.createdAt : new Date(p.createdAt).toISOString(),
+            updatedAt: typeof p.updatedAt === 'string' ? p.updatedAt : new Date(p.updatedAt).toISOString(),
+          }));
+          
+          // Sort by payment date and get the most recent
+          const sortedPayments = payments.sort((a: any, b: any) => {
+            const dateA = a.paymentDate ? new Date(a.paymentDate).getTime() : 0;
+            const dateB = b.paymentDate ? new Date(b.paymentDate).getTime() : 0;
+            return dateB - dateA;
+          });
+          setLastPayment(sortedPayments[0]);
         }
       }
     } catch (error) {
       console.error('Error loading venue data:', error);
-      setError('Αποτυχία φόρτωσης δεδομένων γηπέδου');
+      const errorMessage = error instanceof Error ? error.message : 'Αποτυχία φόρτωσης δεδομένων γηπέδου';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
-  }, [venueOwner, reset]);
+  }, [venueOwner, user, reset]);
 
   // Load venue data and check authentication
   useEffect(() => {
@@ -239,6 +268,34 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Error Alert */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-red-800">
+                Σφάλμα κατά τη φόρτωση ρυθμίσεων
+              </h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>{error}</p>
+                <p className="mt-2 text-xs">
+                  Αν το πρόβλημα συνεχίζεται, δοκιμάστε να ανανεώσετε τη σελίδα ή να συνδεθείτε ξανά.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setError(null);
+                loadVenueData();
+              }}
+              className="ml-4 inline-flex text-red-400 hover:text-red-500"
+            >
+              <span className="text-sm font-medium">Δοκιμάστε ξανά</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center space-x-4">
         <Link
@@ -523,8 +580,8 @@ export default function SettingsPage() {
                             // Show renewal button if less than 7 days remaining
                             return (
                               <Link
-                              href="#"
-                              //href="/management/settings/renewal"
+                              //href="#"
+                              href="/management/settings/renewal"
                                 className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-full transition-colors shadow-sm"
                               >
                                 ⚡ Ανανέωση
@@ -534,8 +591,8 @@ export default function SettingsPage() {
                             // Show upgrade button if more than 7 days remaining
                             return (
                               <Link
-                              href="#"
-                              //href="/management/settings/renewal"
+                              //href="#"
+                              href="/management/settings/renewal"
                                 className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors"
                               >
                                 🚀 Αναβάθμιση
@@ -546,8 +603,8 @@ export default function SettingsPage() {
                           // Show activation button for trial/no plan
                           return (
                               <Link
-                              href="#"
-                              //href="/management/settings/renewal"
+                              //href="#"
+                              href="/management/settings/renewal"
                                 className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-full transition-colors shadow-sm"
                               >
                               ✨ Ενεργοποίηση
@@ -613,8 +670,8 @@ export default function SettingsPage() {
                               </div>
                               <div className="flex flex-col gap-2">
                                 <Link 
-                                  href="#"
-                                  //href="/management/settings/renewal"
+                                  //href="#"
+                                  href="/management/settings/renewal"
                                   className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
                                 >
                                   🚀 Ενεργοποίηση Πλάνου

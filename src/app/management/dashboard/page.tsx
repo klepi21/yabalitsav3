@@ -143,7 +143,7 @@ export default function DashboardPage() {
   }
 
     const loadDashboardData = async () => {
-    if (!venueOwner?.venueId) {
+    if (!venueOwner?.venueId || !user) {
       // No venue ID found in venue owner
       return;
     }
@@ -157,28 +157,65 @@ export default function DashboardPage() {
     setLoadError(null);
 
     try {
-      // Loading data for venue
-      
-      const [bookingsData, pitchesData, venueData] = await Promise.all([
-        bookingService.getByVenue(venueOwner.venueId),
-        pitchService.getByVenue(venueOwner.venueId),
-        venueService.getById(venueOwner.venueId)
-      ]);
+      // Get auth token
+      const token = await user.getIdToken();
+      if (!token) {
+        throw new Error('No auth token available');
+      }
 
-              // Data loaded successfully
+      // Use server-side API to fetch data with proper auth
+      const response = await fetch('/api/dashboard/get-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          venueId: venueOwner.venueId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch dashboard data');
+      }
+
+      const data = await response.json();
       
-      setBookings(bookingsData);
-      setPitches(pitchesData);
-      setVenue(venueData);
+      // Convert ISO strings back to Date objects
+      const convertedBookings = (data.bookings || []).map((booking: any) => ({
+        ...booking,
+        startTime: new Date(booking.startTime),
+        endTime: new Date(booking.endTime),
+        createdAt: new Date(booking.createdAt),
+        updatedAt: new Date(booking.updatedAt),
+      }));
+
+      const convertedPitches = (data.pitches || []).map((pitch: any) => ({
+        ...pitch,
+        createdAt: new Date(pitch.createdAt),
+        updatedAt: new Date(pitch.updatedAt),
+      }));
+
+      const convertedVenue = data.venue ? {
+        ...data.venue,
+        createdAt: new Date(data.venue.createdAt),
+        updatedAt: new Date(data.venue.updatedAt),
+      } : null;
+
+      setBookings(convertedBookings);
+      setPitches(convertedPitches);
+      setVenue(convertedVenue);
       
       // If venue data is null but we have a venueId, log an error
-      if (!venueData && venueOwner.venueId) {
+      if (!convertedVenue && venueOwner.venueId) {
         // Venue data is null but venueId exists - venue document may not exist
         setLoadError('Venue data not found. Please contact support.');
       }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
-      setLoadError('Failed to load dashboard data. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load dashboard data';
+      setLoadError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -449,6 +486,34 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50 p-4">
       <div className="w-full space-y-4">
+        {/* Error Alert */}
+        {loadError && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex">
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-red-800">
+                  Σφάλμα κατά τη φόρτωση δεδομένων πίνακα
+                </h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <p>{loadError}</p>
+                  <p className="mt-2 text-xs">
+                    Αν το πρόβλημα συνεχίζεται, δοκιμάστε να ανανεώσετε τη σελίδα ή να συνδεθείτε ξανά.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setLoadError(null);
+                  loadDashboardData();
+                }}
+                className="ml-4 inline-flex text-red-400 hover:text-red-500"
+              >
+                <span className="text-sm font-medium">Δοκιμάστε ξανά</span>
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>

@@ -24,6 +24,7 @@ export default function BookingsPage() {
   const [pitches, setPitches] = useState<Pitch[]>([]);
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('calendar');
   const [deletingBookingId, setDeletingBookingId] = useState<string | null>(null);
@@ -42,19 +43,68 @@ export default function BookingsPage() {
   }, [user, venueOwner, authLoading, router]);
 
   const loadBookings = async () => {
-    if (!venueOwner) return;
+    if (!venueOwner || !user) return;
     
     try {
-      const [bookingsData, pitchesData, blockedDatesData] = await Promise.all([
-        bookingService.getByVenue(venueOwner.venueId),
-        pitchService.getByVenue(venueOwner.venueId),
-        blockedDateService.getByVenue(venueOwner.venueId)
-      ]);
-      setBookings(bookingsData || []);
-      setPitches(pitchesData || []);
-      setBlockedDates(blockedDatesData || []);
+      setError(null);
+      // Get auth token
+      const token = await user.getIdToken();
+      if (!token) {
+        throw new Error('No auth token available');
+      }
+
+      // Use server-side API to fetch data with proper auth
+      const response = await fetch('/api/bookings/get-by-venue', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          venueId: venueOwner.venueId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch bookings');
+      }
+
+      const data = await response.json();
+      
+      // Convert ISO strings back to Date objects
+      const convertedBookings = (data.bookings || []).map((booking: any) => ({
+        ...booking,
+        startTime: new Date(booking.startTime),
+        endTime: new Date(booking.endTime),
+        createdAt: new Date(booking.createdAt),
+        updatedAt: new Date(booking.updatedAt),
+      }));
+
+      const convertedPitches = (data.pitches || []).map((pitch: any) => ({
+        ...pitch,
+        createdAt: new Date(pitch.createdAt),
+        updatedAt: new Date(pitch.updatedAt),
+      }));
+
+      const convertedBlockedDates = (data.blockedDates || []).map((blocked: any) => ({
+        ...blocked,
+        date: new Date(blocked.date),
+        createdAt: new Date(blocked.createdAt),
+        updatedAt: new Date(blocked.updatedAt),
+      }));
+
+      setBookings(convertedBookings);
+      setPitches(convertedPitches);
+      setBlockedDates(convertedBlockedDates);
     } catch (error) {
       console.error('Error loading data:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load bookings';
+      setError(errorMessage);
+      // Set empty state on error instead of hiding the error
+      setBookings([]);
+      setPitches([]);
+      setBlockedDates([]);
     } finally {
       setIsLoading(false);
     }
@@ -137,6 +187,34 @@ export default function BookingsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Error Alert */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-red-800">
+                Σφάλμα κατά τη φόρτωση κρατήσεων
+              </h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>{error}</p>
+                <p className="mt-2 text-xs">
+                  Αν το πρόβλημα συνεχίζεται, δοκιμάστε να ανανεώσετε τη σελίδα ή να συνδεθείτε ξανά.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setError(null);
+                loadBookings();
+              }}
+              className="ml-4 inline-flex text-red-400 hover:text-red-500"
+            >
+              <span className="text-sm font-medium">Δοκιμάστε ξανά</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center space-x-4">
         <Link
