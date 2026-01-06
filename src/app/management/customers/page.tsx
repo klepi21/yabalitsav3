@@ -21,6 +21,7 @@ export default function CustomersPage() {
   
   const [customers, setCustomers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   // Check authentication
@@ -36,13 +37,47 @@ export default function CustomersPage() {
   }, [user, venueOwner, authLoading, router]);
 
   const loadCustomers = async () => {
-    if (!venueOwner) return;
+    if (!venueOwner || !user) return;
     
     try {
-      const customersData = await userService.getByVenue(venueOwner.venueId);
-      setCustomers(customersData || []);
+      setError(null);
+      // Get auth token
+      const token = await user.getIdToken();
+      if (!token) {
+        throw new Error('No auth token available');
+      }
+
+      // Use server-side API to fetch data with proper auth
+      const response = await fetch('/api/customers/get-by-venue', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          venueId: venueOwner.venueId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch customers');
+      }
+
+      const data = await response.json();
+      
+      // Convert ISO strings back to Date objects
+      const convertedCustomers = (data.customers || []).map((customer: any) => ({
+        ...customer,
+        createdAt: new Date(customer.createdAt),
+        updatedAt: new Date(customer.updatedAt),
+      }));
+
+      setCustomers(convertedCustomers);
     } catch (error) {
       console.error('Error loading customers:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Αποτυχία φόρτωσης πελατών';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -65,6 +100,34 @@ export default function CustomersPage() {
 
   return (
     <div className="space-y-6">
+      {/* Error Alert */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex">
+            <div className="flex-1">
+              <h3 className="text-sm font-medium text-red-800">
+                Σφάλμα κατά τη φόρτωση πελατών
+              </h3>
+              <div className="mt-2 text-sm text-red-700">
+                <p>{error}</p>
+                <p className="mt-2 text-xs">
+                  Αν το πρόβλημα συνεχίζεται, δοκιμάστε να ανανεώσετε τη σελίδα ή να συνδεθείτε ξανά.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setError(null);
+                loadCustomers();
+              }}
+              className="ml-4 inline-flex text-red-400 hover:text-red-500"
+            >
+              <span className="text-sm font-medium">Δοκιμάστε ξανά</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center space-x-4">
         <Link
