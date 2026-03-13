@@ -1,13 +1,16 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 import { academyUserService, userGroupService, squadService } from '@/lib/academy-services';
 import { AcademyUser, UserGroup, Squad, GROUP_COLORS } from '@/types/academy';
 
 export default function AcademyUsersPage() {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, venueOwner, isLoading: authLoading } = useAuth();
   const [users, setUsers] = useState<AcademyUser[]>([]);
   const [groups, setGroups] = useState<UserGroup[]>([]);
   const [squads, setSquads] = useState<Squad[]>([]);
@@ -21,11 +24,13 @@ export default function AcademyUsersPage() {
   const [groupFilter, setGroupFilter] = useState<string | 'all'>(urlGroupId || 'all');
   const [squadFilter, setSquadFilter] = useState<string | null>(urlSquad);
 
-  const venueId = 'demo-venue-id';
+  const venueId = venueOwner?.venueId || '';
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user || !venueOwner) { router.push('/venue-login'); return; }
     loadData();
-  }, []);
+  }, [user, venueOwner, authLoading]);
 
   useEffect(() => {
     if (urlGroupId) setGroupFilter(urlGroupId);

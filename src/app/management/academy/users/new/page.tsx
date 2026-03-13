@@ -3,12 +3,14 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 import AcademyUserForm from '@/components/AcademyUserForm';
 import { academyUserService, userGroupService, squadService } from '@/lib/academy-services';
 import { AcademyUser, UserGroup, Squad } from '@/types/academy';
 
 export default function NewAcademyUserPage() {
   const router = useRouter();
+  const { user, venueOwner, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [groups, setGroups] = useState<UserGroup[]>([]);
@@ -16,11 +18,13 @@ export default function NewAcademyUserPage() {
   const [squads, setSquads] = useState<Squad[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const venueId = 'demo-venue-id';
+  const venueId = venueOwner?.venueId || '';
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user || !venueOwner) { router.push('/venue-login'); return; }
     loadData();
-  }, []);
+  }, [user, venueOwner, authLoading]);
 
   // Find the parent group to load parent candidates
   const parentGroup = useMemo(

@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 import { userGroupService } from '@/lib/academy-services';
 import {
   UserGroupField,
@@ -24,8 +25,14 @@ const FIELD_TYPE_LABELS: Record<UserGroupFieldType, string> = {
 
 export default function NewUserGroupPage() {
   const router = useRouter();
+  const { user, venueOwner, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user || !venueOwner) { router.push('/venue-login'); return; }
+  }, [user, venueOwner, authLoading]);
 
   const [name, setName] = useState('');
   const [namePlural, setNamePlural] = useState('');
@@ -44,7 +51,7 @@ export default function NewUserGroupPage() {
   });
   const [newOption, setNewOption] = useState('');
 
-  const venueId = 'demo-venue-id';
+  const venueId = venueOwner?.venueId || '';
 
   const addField = () => {
     if (!newField.label.trim()) return;

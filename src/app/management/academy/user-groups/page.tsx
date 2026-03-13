@@ -1,21 +1,27 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 import { userGroupService } from '@/lib/academy-services';
 import { UserGroup, GROUP_COLORS } from '@/types/academy';
 
 export default function UserGroupsPage() {
+  const router = useRouter();
+  const { user, venueOwner, isLoading: authLoading } = useAuth();
   const [groups, setGroups] = useState<UserGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  const venueId = 'demo-venue-id';
+  const venueId = venueOwner?.venueId || '';
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user || !venueOwner) { router.push('/venue-login'); return; }
     loadGroups();
-  }, []);
+  }, [user, venueOwner, authLoading]);
 
   const loadGroups = async () => {
     try {

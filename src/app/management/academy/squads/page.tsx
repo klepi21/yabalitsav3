@@ -1,11 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 import { squadService, academyUserService, userGroupService } from '@/lib/academy-services';
 import { Squad, AcademyUser, UserGroup } from '@/types/academy';
 
 export default function SquadsPage() {
+  const router = useRouter();
+  const { user, venueOwner, isLoading: authLoading } = useAuth();
   const [squads, setSquads] = useState<Squad[]>([]);
   const [users, setUsers] = useState<AcademyUser[]>([]);
   const [groups, setGroups] = useState<UserGroup[]>([]);
@@ -13,11 +17,13 @@ export default function SquadsPage() {
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
-  const venueId = 'demo-venue-id';
+  const venueId = venueOwner?.venueId || '';
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user || !venueOwner) { router.push('/venue-login'); return; }
     loadData();
-  }, []);
+  }, [user, venueOwner, authLoading]);
 
   const loadData = async () => {
     try {

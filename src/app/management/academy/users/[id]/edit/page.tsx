@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 import AcademyUserForm from '@/components/AcademyUserForm';
 import { academyUserService, userGroupService, squadService } from '@/lib/academy-services';
 import { AcademyUser, UserGroup, Squad } from '@/types/academy';
@@ -14,6 +15,7 @@ interface PageProps {
 export default function EditAcademyUserPage({ params }: PageProps) {
   const { id } = use(params);
   const router = useRouter();
+  const { user: authUser, venueOwner, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(true);
   const [user, setUser] = useState<AcademyUser | null>(null);
@@ -22,11 +24,13 @@ export default function EditAcademyUserPage({ params }: PageProps) {
   const [squads, setSquads] = useState<Squad[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  const venueId = 'demo-venue-id';
+  const venueId = venueOwner?.venueId || '';
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!authUser || !venueOwner) { router.push('/venue-login'); return; }
     loadData();
-  }, [id]);
+  }, [id, authUser, venueOwner, authLoading]);
 
   const loadData = async () => {
     try {

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 import { squadService, academyUserService, userGroupService } from '@/lib/academy-services';
 import { AcademyUser, UserGroup } from '@/types/academy';
 
@@ -10,6 +11,7 @@ const AGE_GROUPS = ['U6', 'U7', 'U8', 'U9', 'U10', 'U11', 'U12', 'U13', 'U14', '
 
 export default function NewSquadPage() {
   const router = useRouter();
+  const { user, venueOwner, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [coaches, setCoaches] = useState<AcademyUser[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -20,11 +22,13 @@ export default function NewSquadPage() {
     coachIds: [] as string[],
   });
 
-  const venueId = 'demo-venue-id';
+  const venueId = venueOwner?.venueId || '';
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user || !venueOwner) { router.push('/venue-login'); return; }
     loadCoaches();
-  }, []);
+  }, [user, venueOwner, authLoading]);
 
   const loadCoaches = async () => {
     try {
