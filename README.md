@@ -112,3 +112,4 @@ The system is designed to be extensible for additional modules:
 ## 📄 License
 
 This project is proprietary software for Yabalitsa management operations.
+
