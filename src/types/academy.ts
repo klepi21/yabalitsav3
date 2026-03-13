@@ -64,7 +64,7 @@ export interface AcademyUser {
   groupId: string;       // references UserGroup.id
   displayName: string;
   venueId: string;
-  fields: Record<string, any>;  // dynamic field values
+  fields: Record<string, string | number | null>;  // dynamic field values
   // Special relationship fields (used by capabilities)
   squad_id?: string;
   parent_uid?: string;

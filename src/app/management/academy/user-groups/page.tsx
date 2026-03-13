@@ -20,20 +20,19 @@ export default function UserGroupsPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user || !venueOwner) { router.push('/venue-login'); return; }
+    const loadGroups = async () => {
+      try {
+        setIsLoading(true);
+        const data = await userGroupService.getOrSeed(venueId);
+        setGroups(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης');
+      } finally {
+        setIsLoading(false);
+      }
+    };
     loadGroups();
-  }, [user, venueOwner, authLoading]);
-
-  const loadGroups = async () => {
-    try {
-      setIsLoading(true);
-      const data = await userGroupService.getOrSeed(venueId);
-      setGroups(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [user, venueOwner, authLoading, router, venueId]);
 
   const handleDelete = async (id: string) => {
     try {

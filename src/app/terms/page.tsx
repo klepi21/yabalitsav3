@@ -47,28 +47,28 @@ export default function TermsPage() {
                 <div className="flex items-start p-3 bg-white rounded-lg border border-blue-200 shadow-sm">
                   <span className="text-blue-600 text-lg font-bold mr-3">⚖️</span>
                   <div>
-                    <span className="font-bold text-blue-900 text-base">"Yabalitsa"</span>
+                    <span className="font-bold text-blue-900 text-base">&quot;Yabalitsa&quot;</span>
                     <span className="text-gray-700 ml-2">σημαίνει η εταιρεία Yabalitsa, με έδρα την Ελλάδα, που παρέχει υπηρεσίες διαχείρισης γηπέδων ποδοσφαίρου.</span>
                   </div>
                 </div>
                 <div className="flex items-start p-3 bg-white rounded-lg border border-blue-200 shadow-sm">
                   <span className="text-blue-600 text-lg font-bold mr-3">🏢</span>
                   <div>
-                    <span className="font-bold text-blue-900 text-base">"Επιχείρηση"</span>
+                    <span className="font-bold text-blue-900 text-base">&quot;Επιχείρηση&quot;</span>
                     <span className="text-gray-700 ml-2">σημαίνει οποιαδήποτε νομική οντότητα που εγγράφεται και χρησιμοποιεί την πλατφόρμα.</span>
                   </div>
                 </div>
                 <div className="flex items-start p-3 bg-white rounded-lg border border-blue-200 shadow-sm">
                   <span className="text-blue-600 text-lg font-bold mr-3">💻</span>
                   <div>
-                    <span className="font-bold text-blue-900 text-base">"Πλατφόρμα"</span>
+                    <span className="font-bold text-blue-900 text-base">&quot;Πλατφόρμα&quot;</span>
                     <span className="text-gray-700 ml-2">σημαίνει το διαδικτυακό σύστημα διαχείρισης γηπέδων που παρέχει η Yabalitsa.</span>
                   </div>
                 </div>
                 <div className="flex items-start p-3 bg-white rounded-lg border border-blue-200 shadow-sm">
                   <span className="text-blue-600 text-lg font-bold mr-3">🔧</span>
                   <div>
-                    <span className="font-bold text-blue-900 text-base">"Υπηρεσίες"</span>
+                    <span className="font-bold text-blue-900 text-base">&quot;Υπηρεσίες&quot;</span>
                     <span className="text-gray-700 ml-2">σημαίνει όλες τις λειτουργίες που παρέχονται μέσω της πλατφόρμας.</span>
                   </div>
                 </div>
@@ -333,7 +333,7 @@ export default function TermsPage() {
                 <li>• <strong>Yabalitsa:</strong> Κατέχει όλα τα δικαιώματα πνευματικής ιδιοκτησίας της πλατφόρμας</li>
                 <li>• <strong>Επιχειρήσεις:</strong> Διατηρούν τα δικαιώματα στα περιεχόμενά τους (γήπεδα, φωτογραφίες)</li>
                 <li>• <strong>Απαγόρευση:</strong> Απαγορεύεται η αντιγραφή, διανομή ή τροποποίηση της πλατφόρμας</li>
-                <li>• <strong>Branding:</strong> Δεν επιτρέπεται η χρήση του brand "Yabalitsa" χωρίς άδεια</li>
+                <li>• <strong>Branding:</strong> Δεν επιτρέπεται η χρήση του brand &quot;Yabalitsa&quot; χωρίς άδεια</li>
               </ul>
             </div>
           </div>

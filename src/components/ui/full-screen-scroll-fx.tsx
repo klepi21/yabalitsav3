@@ -12,6 +12,7 @@ import React, {
   useState,
 } from "react";
 import { gsap } from "gsap";
+import Image from "next/image";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 if (typeof window !== "undefined") {
@@ -104,8 +105,6 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
 
       durations = { change: 0.7, snap: 800 },
       reduceMotion,
-      smoothScroll = false, // enable if you install Lenis
-
       bgTransition = "fade",
       parallaxAmount = 4,
 
@@ -151,6 +150,10 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
     const isSnappingRef = useRef(false);
     const sectionTopRef = useRef<number[]>([]);
 
+    // Stable refs for functions used in effects to avoid dependency issues
+    const goToRef = useRef<(to: number, withScroll?: boolean) => void>(() => {});
+    const measureAndCenterListsRef = useRef<(toIndex?: number, animate?: boolean) => void>(() => {});
+
     // prefers-reduced-motion
     const prefersReduced = useMemo(() => {
       if (typeof window === "undefined") return false;
@@ -164,7 +167,7 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
       const words = text.split(/\s+/).filter(Boolean);
       return words.map((w, i) => (
         <span className="fx-word-mask" key={i}>
-          <span className="fx-word" ref={(el) => el && tempWordBucket.current.push(el)}>{w}</span>
+          <span className="fx-word" ref={(el) => { if (el) tempWordBucket.current.push(el); }}>{w}</span>
           {i < words.length - 1 ? " " : null}
         </span>
       ));
@@ -174,19 +177,8 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
       return null;
     };
 
-    // Compute scroll snap positions
-    const computePositions = () => {
-      const el = fixedSectionRef.current;
-      if (!el) return;
-      const top = el.offsetTop;
-      const h = el.offsetHeight;
-      const arr: number[] = [];
-      for (let i = 0; i < total; i++) arr.push(top + (h * i) / total);
-      sectionTopRef.current = arr;
-    };
-
     // Align lists: center active row
-    const measureAndCenterLists = (toIndex = index, animate = true) => {
+    const measureAndCenterLists: (toIndex?: number, animate?: boolean) => void = (toIndex = index, animate = true) => {
       const centerTrack = (
         container: HTMLDivElement | null,
         items: HTMLDivElement[],
@@ -229,12 +221,24 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
       requestAnimationFrame(() => requestAnimationFrame(fn));
     };
 
+    // Keep ref in sync so effects can call without being deps
+    measureAndCenterListsRef.current = measureAndCenterLists;
+
     // ScrollTrigger for pinning + index step detection
     useLayoutEffect(() => {
       if (typeof window === "undefined") return;
       const fixed = fixedRef.current;
       const fs = fixedSectionRef.current;
       if (!fixed || !fs || total === 0) return;
+
+      // Inline computePositions to avoid dependency issues
+      const computePos = () => {
+        const top = fs.offsetTop;
+        const h = fs.offsetHeight;
+        const arr: number[] = [];
+        for (let i = 0; i < total; i++) arr.push(top + (h * i) / total);
+        sectionTopRef.current = arr;
+      };
 
       // initial bg states
       gsap.set(bgRefs.current, { opacity: 0, scale: 1.04, yPercent: 0 });
@@ -250,8 +254,8 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
         });
       });
 
-      computePositions();
-      measureAndCenterLists(index, false);
+      computePos();
+      measureAndCenterListsRef.current(index, false);
 
       const st = ScrollTrigger.create({
         trigger: fs,
@@ -266,7 +270,7 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
           if (target !== lastIndexRef.current && !isAnimatingRef.current) {
             const next = lastIndexRef.current + (target > lastIndexRef.current ? 1 : -1);
             // programmatic one-step snap without extra sound
-            goTo(next, false);
+            goToRef.current(next, false);
           }
           if (progressFillRef.current) {
             const p = (lastIndexRef.current / (total - 1 || 1)) * 100;
@@ -279,13 +283,13 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
 
       // initial jump if needed
       if (initialIndex && initialIndex > 0 && initialIndex < total) {
-        requestAnimationFrame(() => goTo(initialIndex, false));
+        requestAnimationFrame(() => goToRef.current(initialIndex, false));
       }
 
       // handle resize
       const ro = new ResizeObserver(() => {
-        computePositions();
-        measureAndCenterLists(lastIndexRef.current, false);
+        computePos();
+        measureAndCenterListsRef.current(lastIndexRef.current, false);
         ScrollTrigger.refresh();
       });
       ro.observe(fs);
@@ -295,8 +299,7 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
         st.kill();
         stRef.current = null;
       };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [total, initialIndex, motionOff, bgTransition, parallaxAmount]);
+    }, [total, initialIndex, motionOff, bgTransition, parallaxAmount, index]);
 
     // Section change visuals
     const changeSection = (to: number) => {
@@ -420,6 +423,9 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
       }
     };
 
+    // Keep ref in sync so effects can call without being deps
+    goToRef.current = goTo;
+
     const next = () => goTo(index + 1);
     const prev = () => goTo(index - 1);
 
@@ -433,47 +439,43 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
 
     // click/hover on list items
     const handleJump = (i: number) => goTo(i);
-    const handleLoadedStagger = () => {
+    // mount entrance
+    useEffect(() => {
       // soft entrance for lists at mount
+      const initialIdx = lastIndexRef.current;
       leftItemRefs.current.forEach((el, i) => {
         gsap.fromTo(
           el,
           { opacity: 0, y: 20 },
-          { opacity: i === index ? 1 : 0.35, y: 0, duration: 0.5, delay: i * 0.06, ease: "power3.out" }
+          { opacity: i === initialIdx ? 1 : 0.35, y: 0, duration: 0.5, delay: i * 0.06, ease: "power3.out" }
         );
       });
       rightItemRefs.current.forEach((el, i) => {
         gsap.fromTo(
           el,
           { opacity: 0, y: 20 },
-          { opacity: i === index ? 1 : 0.35, y: 0, duration: 0.5, delay: 0.2 + i * 0.06, ease: "power3.out" }
+          { opacity: i === initialIdx ? 1 : 0.35, y: 0, duration: 0.5, delay: 0.2 + i * 0.06, ease: "power3.out" }
         );
       });
-    };
-
-    // mount entrance
-    useEffect(() => {
-      handleLoadedStagger();
-      measureAndCenterLists(index, false);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      measureAndCenterListsRef.current(initialIdx, false);
     }, []);
 
     // CSS vars
-    const cssVars: CSSProperties = {
-      ["--fx-font" as any]: fontFamily,
-      ["--fx-text" as any]: colors.text ?? "rgba(245,245,245,0.92)",
-      ["--fx-overlay" as any]: colors.overlay ?? "rgba(0,0,0,0.35)",
-      ["--fx-page-bg" as any]: colors.pageBg ?? "#fff",
-      ["--fx-stage-bg" as any]: colors.stageBg ?? "#000",
-      ["--fx-gap" as any]: `${gap}rem`,
-      ["--fx-grid-px" as any]: `${gridPaddingX}rem`,
-      ["--fx-row-gap" as any]: "10px",
-    };
+    const cssVars = {
+      "--fx-font": fontFamily,
+      "--fx-text": colors.text ?? "rgba(245,245,245,0.92)",
+      "--fx-overlay": colors.overlay ?? "rgba(0,0,0,0.35)",
+      "--fx-page-bg": colors.pageBg ?? "#fff",
+      "--fx-stage-bg": colors.stageBg ?? "#000",
+      "--fx-gap": `${gap}rem`,
+      "--fx-grid-px": `${gridPaddingX}rem`,
+      "--fx-row-gap": "10px",
+    } as React.CSSProperties;
 
     return (
       <div
         ref={(node) => {
-          (rootRef as any).current = node;
+          rootRef.current = node;
           if (typeof ref === "function") ref(node);
           else if (ref) (ref as React.MutableRefObject<HTMLDivElement | null>).current = node;
         }}
@@ -494,10 +496,11 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
                       s.renderBackground(index === i, lastIndexRef.current === i)
                     ) : (
                       <>
-                        <img
-                          ref={(el) => el && (bgRefs.current[i] = el)}
+                        <Image
+                          ref={(el) => { if (el) bgRefs.current[i] = el; }}
                           src={s.background}
                           alt=""
+                          fill
                           className="fx-bg-img"
                         />
                         <div className="fx-bg-overlay" />
@@ -521,7 +524,7 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
                         <div
                           key={`L-${s.id ?? i}`}
                           className={`fx-item fx-left-item ${i === index ? "active" : ""}`}
-                          ref={(el) => el && (leftItemRefs.current[i] = el)}
+                          ref={(el) => { if (el) leftItemRefs.current[i] = el; }}
                           onClick={() => handleJump(i)}
                           role="button"
                           tabIndex={0}
@@ -563,7 +566,7 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
                         <div
                           key={`R-${s.id ?? i}`}
                           className={`fx-item fx-right-item ${i === index ? "active" : ""}`}
-                          ref={(el) => el && (rightItemRefs.current[i] = el)}
+                          ref={(el) => { if (el) rightItemRefs.current[i] = el; }}
                           onClick={() => handleJump(i)}
                           role="button"
                           tabIndex={0}

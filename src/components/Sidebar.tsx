@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   Bars3Icon,
@@ -63,9 +64,11 @@ export default function Sidebar() {
         <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white">
           <div className="flex h-20 items-center justify-between px-6">
             <div className="flex items-center justify-center flex-1">
-              <img
+              <Image
                 src="/yabalitsalogo.png"
                 alt="Yabalitsa"
+                width={150}
+                height={48}
                 className="h-12 w-auto"
               />
             </div>
@@ -191,9 +194,11 @@ export default function Sidebar() {
       <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
         <div className="flex flex-col flex-grow bg-white border-r border-gray-200">
           <div className="flex h-20 items-center justify-center px-6">
-            <img
+            <Image
               src="/yabalitsalogo.png"
               alt="Yabalitsa"
+              width={150}
+              height={48}
               className="h-12 w-auto"
             />
           </div>

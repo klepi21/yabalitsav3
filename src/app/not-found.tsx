@@ -37,17 +37,17 @@ export default function NotFound() {
         {/* Main message */}
         <div className="mb-10">
           <p className="text-xl md:text-2xl text-gray-700 mb-4 font-semibold">
-            The pitch you're looking for isn't here
+            The pitch you&apos;re looking for isn&apos;t here
           </p>
           <p className="text-lg text-gray-600 mb-6 max-w-lg mx-auto leading-relaxed">
-            This page seems to have gone off-field. Don't worry, we'll help you get back to the game and find what you're looking for!
+            This page seems to have gone off-field. Don&apos;t worry, we&apos;ll help you get back to the game and find what you&apos;re looking for!
           </p>
         </div>
 
         {/* Help section */}
         <div className="text-sm text-gray-600">
           <p className="mb-3">
-            Still can't find what you need?{' '}
+            Still can&apos;t find what you need?{' '}
             <Link href="/" className="text-football-green font-bold hover:underline">
               Contact support
             </Link>

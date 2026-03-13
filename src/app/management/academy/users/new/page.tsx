@@ -23,37 +23,36 @@ export default function NewAcademyUserPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user || !venueOwner) { router.push('/venue-login'); return; }
+    const loadData = async () => {
+      try {
+        setIsDataLoading(true);
+        const [groupsData, squadsData, allUsers] = await Promise.all([
+          userGroupService.getOrSeed(venueId),
+          squadService.getByVenue(venueId),
+          academyUserService.getByVenue(venueId),
+        ]);
+        setGroups(groupsData);
+        setSquads(squadsData);
+
+        // Find parent group and filter parent candidates
+        const pGroup = groupsData.find((g) => g.isDefault && g.name === 'Γονέας');
+        if (pGroup) {
+          setParentCandidates(allUsers.filter((u) => u.groupId === pGroup.id));
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης δεδομένων');
+      } finally {
+        setIsDataLoading(false);
+      }
+    };
     loadData();
-  }, [user, venueOwner, authLoading]);
+  }, [user, venueOwner, authLoading, router, venueId]);
 
   // Find the parent group to load parent candidates
   const parentGroup = useMemo(
     () => groups.find((g) => g.isDefault && g.name === 'Γονέας'),
     [groups]
   );
-
-  const loadData = async () => {
-    try {
-      setIsDataLoading(true);
-      const [groupsData, squadsData, allUsers] = await Promise.all([
-        userGroupService.getOrSeed(venueId),
-        squadService.getByVenue(venueId),
-        academyUserService.getByVenue(venueId),
-      ]);
-      setGroups(groupsData);
-      setSquads(squadsData);
-
-      // Find parent group and filter parent candidates
-      const pGroup = groupsData.find((g) => g.isDefault && g.name === 'Γονέας');
-      if (pGroup) {
-        setParentCandidates(allUsers.filter((u) => u.groupId === pGroup.id));
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης δεδομένων');
-    } finally {
-      setIsDataLoading(false);
-    }
-  };
 
   const handleSubmit = async (data: Omit<AcademyUser, 'id' | 'createdAt' | 'updatedAt'>) => {
     try {

@@ -29,31 +29,30 @@ export default function AcademyUsersPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user || !venueOwner) { router.push('/venue-login'); return; }
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        const [usersData, groupsData, squadsData] = await Promise.all([
+          academyUserService.getByVenue(venueId),
+          userGroupService.getOrSeed(venueId),
+          squadService.getByVenue(venueId),
+        ]);
+        setUsers(usersData);
+        setGroups(groupsData);
+        setSquads(squadsData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης');
+      } finally {
+        setIsLoading(false);
+      }
+    };
     loadData();
-  }, [user, venueOwner, authLoading]);
+  }, [user, venueOwner, authLoading, router, venueId]);
 
   useEffect(() => {
     if (urlGroupId) setGroupFilter(urlGroupId);
     if (urlSquad) setSquadFilter(urlSquad);
   }, [urlGroupId, urlSquad]);
-
-  const loadData = async () => {
-    try {
-      setIsLoading(true);
-      const [usersData, groupsData, squadsData] = await Promise.all([
-        academyUserService.getByVenue(venueId),
-        userGroupService.getOrSeed(venueId),
-        squadService.getByVenue(venueId),
-      ]);
-      setUsers(usersData);
-      setGroups(groupsData);
-      setSquads(squadsData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const getGroup = (groupId: string) => groups.find((g) => g.id === groupId);
 
@@ -62,8 +61,8 @@ export default function AcademyUsersPage() {
       const matchesSearch =
         searchQuery === '' ||
         user.displayName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (user.fields.email && user.fields.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (user.fields.phone && user.fields.phone.includes(searchQuery));
+        (typeof user.fields.email === 'string' && user.fields.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (typeof user.fields.phone === 'string' && user.fields.phone.includes(searchQuery));
 
       const matchesGroup = groupFilter === 'all' || user.groupId === groupFilter;
       const matchesSquad = !squadFilter || user.squad_id === squadFilter;
@@ -270,7 +269,7 @@ export default function AcademyUsersPage() {
                               {user.fields.license && ` \u2022 ${user.fields.license}`}
                             </p>
                           )}
-                          {user.fields.birth_year && (
+                          {typeof user.fields.birth_year === 'number' && (
                             <p>
                               <span className="inline-block w-4">📅</span> Γεννήθηκε {user.fields.birth_year} (Ηλικία{' '}
                               {new Date().getFullYear() - user.fields.birth_year})

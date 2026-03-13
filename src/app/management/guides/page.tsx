@@ -300,7 +300,7 @@ export default function GuidesPage() {
                       <li>Κλικ στο κουμπί «+ Προσθήκη Γηπέδου»</li>
                       <li>Συμπληρώστε τα βασικά στοιχεία:
                         <ul className="list-disc ml-6 mt-1">
-                          <li>Όνομα γηπέδου (π.χ. "Γήπεδο 1")</li>
+                          <li>Όνομα γηπέδου (π.χ. &quot;Γήπεδο 1&quot;)</li>
                           <li>Τύπος (5x5, 6x6, 7x7, 8x8, 11x11)</li>
                           <li>Τιμή ανά slot</li>
                           <li>Διάρκεια slot (60, 90, 120 λεπτά)</li>

@@ -56,14 +56,13 @@ export default function EditBookingPage() {
     formState: { errors },
     reset,
     setValue,
-    watch,
     control,
   } = useForm<BookingEditFormData>({
     resolver: zodResolver(bookingEditSchema),
   });
 
   // Pure helper to build slot list given explicit inputs (prevents effect re-runs)
-  const buildAvailableSlots = (
+  const buildAvailableSlots = useCallback((
     inputPitch: Pitch | null,
     pitchId: string,
     date: string,
@@ -79,7 +78,7 @@ export default function EditBookingPage() {
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const dayName = dayNames[dayOfWeek];
 
-    const daySchedule: any = (inputPitch || pitch).defaultOpeningHours[dayName];
+    const daySchedule = (inputPitch || pitch).defaultOpeningHours[dayName] as { isOpen: boolean; slots: Array<{ start: string; end: string }> } | undefined;
     if (!daySchedule || !daySchedule.isOpen) return [];
 
     // Check if the date is fully blocked for this pitch
@@ -102,7 +101,7 @@ export default function EditBookingPage() {
       daySchedule.slots.forEach((openingSlot: { start: string; end: string }) => {
         const startTime = new Date(`2000-01-01T${openingSlot.start}`);
         const endTime = new Date(`2000-01-01T${openingSlot.end}`);
-        let currentTime = new Date(startTime);
+        const currentTime = new Date(startTime);
         while (currentTime < endTime) {
           const slotStart = currentTime.toTimeString().slice(0, 5);
           const slotEnd = new Date(currentTime.getTime() + (inputPitch || pitch).slotDuration * 60000);
@@ -117,7 +116,7 @@ export default function EditBookingPage() {
       // Backward compatibility: simple open/close window
       const startTime = new Date(`2000-01-01T${daySchedule.open}`);
       const endTime = new Date(`2000-01-01T${daySchedule.close}`);
-      let currentTime = new Date(startTime);
+      const currentTime = new Date(startTime);
       while (currentTime < endTime) {
         const slotStart = currentTime.toTimeString().slice(0, 5);
         const slotEnd = new Date(currentTime.getTime() + (inputPitch || pitch).slotDuration * 60000);
@@ -144,11 +143,11 @@ export default function EditBookingPage() {
       });
 
     return slots.filter(slot => !bookedSlots.includes(slot.time));
-  };
+  }, [pitch, existingBookings, blockedDates, booking]);
 
   const generateAvailableSlots = useCallback((pitchId: string, date: string) => {
     return buildAvailableSlots(pitch, pitchId, date, existingBookings, blockedDates, booking?.id);
-  }, [pitch, existingBookings, blockedDates, booking?.id]);
+  }, [buildAvailableSlots, pitch, existingBookings, blockedDates, booking?.id]);
 
   const loadBookingData = useCallback(async (bookingId: string) => {
     try {
@@ -205,7 +204,7 @@ export default function EditBookingPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [venueOwner?.venueId, reset]);
+  }, [venueOwner?.venueId, reset, buildAvailableSlots]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -218,7 +217,7 @@ export default function EditBookingPage() {
     if (params.id) {
       loadBookingData(params.id as string);
     }
-  }, [user, venueOwner, authLoading, router, params.id]);
+  }, [user, venueOwner, authLoading, router, params.id, loadBookingData]);
 
   const handleDateChange = (date: string) => {
     if (pitch) {

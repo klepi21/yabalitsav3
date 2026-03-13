@@ -9,6 +9,7 @@ import { pricingUtils } from '@/lib/pricing';
 export default function SubscriptionRenewalPage() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<1 | 6 | 12>(1);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [venueData, setVenueData] = useState<any>(null);
   const [currentDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);

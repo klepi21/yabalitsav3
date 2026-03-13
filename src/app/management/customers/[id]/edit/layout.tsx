@@ -1,13 +1,6 @@
 import { Metadata } from 'next';
 
-interface CustomerEditLayoutProps {
-  children: React.ReactNode;
-  params: Promise<{ id: string }>;
-}
-
-export async function generateMetadata({ params }: CustomerEditLayoutProps): Promise<Metadata> {
-  const { id } = await params;
-  
+export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `Επεξεργασία Πελάτη - Διαχείριση Γηπέδου`,
     description: `Επεξεργασία πληροφοριών πελάτη. Ενημέρωση στοιχείων επικοινωνίας, ονόματος και άλλων λεπτομερειών.`,

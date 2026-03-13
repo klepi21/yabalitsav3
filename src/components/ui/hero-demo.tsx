@@ -1,11 +1,12 @@
 'use client';
 
 import React from "react";
-import { FullScreenScrollFX, FullScreenFXAPI } from "@/components/ui/full-screen-scroll-fx";
+import { FullScreenScrollFX } from "@/components/ui/full-screen-scroll-fx";
 import { GetStartedButton } from "@/components/ui/get-started-button";
 // Removed WaitlistComponent per request
 import IPhoneMockup from "@/components/ui/iphone-mockup";
 import Link from "next/link";
+import Image from "next/image";
 import { Instagram } from "lucide-react";
 
 const sections = [
@@ -17,11 +18,13 @@ const sections = [
           <div className="relative flex items-center justify-center gap-0 md:gap-6">
             {/* App Store button - left of device */}
             <Link href="https://apps.apple.com/gr/app/yabalitsa/id6751777747" target="_blank" rel="noopener noreferrer">
-              <img 
-                src="/appstore.svg" 
-                alt="App Store" 
-                className="w-[80px] md:w-[100px] h-auto mr-2 md:mr-0" 
-                style={{ opacity: 1 }} 
+              <Image
+                src="/appstore.svg"
+                alt="App Store"
+                width={100}
+                height={34}
+                className="w-[80px] md:w-[100px] h-auto mr-2 md:mr-0"
+                style={{ opacity: 1 }}
               />
             </Link>
             
@@ -36,11 +39,13 @@ const sections = [
             </Link>
             
             {/* Google Play button - right of device (hidden on mobile) */}
-            <img 
-              src="/google-play-badge-coming-soon.webp" 
-              alt="Google Play" 
-              className="hidden md:block w-[110px] h-auto ml-0" 
-              style={{ opacity: 1 }} 
+            <Image
+              src="/google-play-badge-coming-soon.webp"
+              alt="Google Play"
+              width={110}
+              height={38}
+              className="hidden md:block w-[110px] h-auto ml-0"
+              style={{ opacity: 1 }}
             />
           </div>
         </div>
@@ -89,22 +94,22 @@ const sections = [
 ];
 
 export default function HeroDemo() {
-  const apiRef = React.useRef<FullScreenFXAPI>(null);
-
   return (
     <>
       <FullScreenScrollFX
         sections={sections}
         header={
           <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem' }}>                                                                           
-            <img 
-              src="/yabalo.png" 
-              alt="Yabalitsa" 
-              style={{ 
-                width: '300px', 
+            <Image
+              src="/yabalo.png"
+              alt="Yabalitsa"
+              width={300}
+              height={60}
+              style={{
+                width: '300px',
                 height: 'auto',
                 filter: 'brightness(0) invert(1)'
-              }} 
+              }}
             />
             {/* Desktop/Tablet CTA - top right */}
             <Link

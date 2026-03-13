@@ -68,7 +68,7 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
           }),
         });
 
-        const result = await response.json();
+        const result = await response.json() as { success: boolean; error?: string };
 
         if (result.success) {
           // Redirect to success page
@@ -165,14 +165,15 @@ function CheckoutPageContent() {
     // Extract client secret from the parameter
     // The parameter should be in format: pi_xxxxx_secret_xxxxx
     if (paymentIntentParam.includes('_secret_')) {
-      setClientSecret(paymentIntentParam);
+      queueMicrotask(() => {
+        setClientSecret(paymentIntentParam);
+        setLoading(false);
+      });
     } else {
       console.error('Invalid payment intent format');
       router.push('/management/settings/renewal');
       return;
     }
-
-    setLoading(false);
   }, [searchParams, router]);
 
   if (loading) {

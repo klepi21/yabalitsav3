@@ -32,7 +32,7 @@ export default function NewUserGroupPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user || !venueOwner) { router.push('/venue-login'); return; }
-  }, [user, venueOwner, authLoading]);
+  }, [user, venueOwner, authLoading, router]);
 
   const [name, setName] = useState('');
   const [namePlural, setNamePlural] = useState('');

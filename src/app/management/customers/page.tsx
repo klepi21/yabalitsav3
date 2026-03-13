@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -12,7 +12,6 @@ import {
   PhoneIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import { userService } from '@/lib/firebase-services';
 import { User } from '@/types';
 
 export default function CustomersPage() {
@@ -24,19 +23,7 @@ export default function CustomersPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Check authentication
-  useEffect(() => {
-    if (authLoading) return;
-    
-    if (!user || !venueOwner) {
-      router.push('/venue-login');
-      return;
-    }
-    
-    loadCustomers();
-  }, [user, venueOwner, authLoading, router]);
-
-  const loadCustomers = async () => {
+  const loadCustomers = useCallback(async () => {
     if (!venueOwner || !user) return;
     
     try {
@@ -67,7 +54,7 @@ export default function CustomersPage() {
       const data = await response.json();
       
       // Convert ISO strings back to Date objects
-      const convertedCustomers = (data.customers || []).map((customer: any) => ({
+      const convertedCustomers = (data.customers || []).map((customer: Omit<User, 'createdAt' | 'updatedAt'> & { createdAt: string; updatedAt: string }) => ({
         ...customer,
         createdAt: new Date(customer.createdAt),
         updatedAt: new Date(customer.updatedAt),
@@ -81,7 +68,19 @@ export default function CustomersPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [venueOwner, user]);
+
+  // Check authentication
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (!user || !venueOwner) {
+      router.push('/venue-login');
+      return;
+    }
+
+    loadCustomers();
+  }, [user, venueOwner, authLoading, router, loadCustomers]);
 
   // Filter customers based on search term
   const filteredCustomers = customers.filter(customer => 

@@ -30,10 +30,9 @@ export async function POST(request: NextRequest) {
     const token = authHeader.substring(7); // Remove 'Bearer '
 
     // Verify the token
-    let decodedToken;
     try {
-      decodedToken = await auth.verifyIdToken(token);
-    } catch (err) {
+      await auth.verifyIdToken(token);
+    } catch {
       return NextResponse.json(
         { error: 'Invalid or expired token' },
         { status: 401 }
@@ -73,10 +72,10 @@ export async function POST(request: NextRequest) {
       },
       { status: 200 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error fetching pitches:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to fetch pitches' },
+      { error: (error as Error).message || 'Failed to fetch pitches' },
       { status: 500 }
     );
   }

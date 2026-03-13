@@ -24,8 +24,8 @@ export const db = getFirestore(app);
 export const auth = getAuth(app);
 
 // Initialize analytics only in browser environment
-export const analytics = typeof window !== 'undefined' && isSupported() 
-  ? getAnalytics(app) 
+export const analytics = typeof window !== 'undefined'
+  ? isSupported().then((supported) => (supported ? getAnalytics(app) : null))
   : null;
 
 export default app;

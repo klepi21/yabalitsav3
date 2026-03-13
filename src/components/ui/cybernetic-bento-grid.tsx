@@ -3,7 +3,7 @@
 import React, { useEffect, useRef } from 'react';
 
 // Reusable BentoItem component
-const BentoItem = ({ className, children }: { className: string; children: React.ReactNode }) => {
+const BentoItem = ({ className = '', children }: { className?: string; children: React.ReactNode }) => {
     const itemRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {

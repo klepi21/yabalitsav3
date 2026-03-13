@@ -5,8 +5,8 @@ import {
   AcademyUser,
   UserGroup,
   UserGroupField,
+  GroupCapability,
   Squad,
-  GROUP_COLORS,
 } from '../types/academy';
 
 interface AcademyUserFormProps {
@@ -34,7 +34,7 @@ export default function AcademyUserForm({
 
   const [selectedGroupId, setSelectedGroupId] = useState(defaultGroupId);
   const [displayName, setDisplayName] = useState(initialData?.displayName || '');
-  const [fieldValues, setFieldValues] = useState<Record<string, any>>(initialData?.fields || {});
+  const [fieldValues, setFieldValues] = useState<Record<string, string | number | null>>(initialData?.fields || {});
   const [squadId, setSquadId] = useState(initialData?.squad_id || '');
   const [parentUid, setParentUid] = useState(initialData?.parent_uid || '');
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +44,7 @@ export default function AcademyUserForm({
   const [parentSearch, setParentSearch] = useState('');
   const [isCreatingParent, setIsCreatingParent] = useState(false);
   const [quickParentName, setQuickParentName] = useState('');
-  const [quickParentFields, setQuickParentFields] = useState<Record<string, any>>({});
+  const [quickParentFields, setQuickParentFields] = useState<Record<string, string | number | null>>({});
 
   const selectedGroup = useMemo(
     () => groups.find((g) => g.id === selectedGroupId),
@@ -57,7 +57,7 @@ export default function AcademyUserForm({
     [groups]
   );
 
-  const hasCapability = (cap: string) => selectedGroup?.capabilities.includes(cap as any) || false;
+  const hasCapability = (cap: string) => selectedGroup?.capabilities.includes(cap as GroupCapability) || false;
 
   const filteredParents = useMemo(() => {
     if (!parentSearch) return parentCandidates;
@@ -65,12 +65,12 @@ export default function AcademyUserForm({
     return parentCandidates.filter(
       (p) =>
         p.displayName.toLowerCase().includes(lower) ||
-        (p.fields.email && p.fields.email.toLowerCase().includes(lower)) ||
-        (p.fields.phone && p.fields.phone.includes(parentSearch))
+        (typeof p.fields.email === 'string' && p.fields.email.toLowerCase().includes(lower)) ||
+        (typeof p.fields.phone === 'string' && p.fields.phone.includes(parentSearch))
     );
   }, [parentCandidates, parentSearch]);
 
-  const setFieldValue = (key: string, value: any) => {
+  const setFieldValue = (key: string, value: string | number | null) => {
     setFieldValues((prev) => ({ ...prev, [key]: value }));
   };
 
@@ -143,8 +143,8 @@ export default function AcademyUserForm({
     'mt-1 block w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base appearance-none';
 
   // Render a single dynamic field
-  const renderField = (field: UserGroupField, values: Record<string, any>, setValue: (key: string, val: any) => void) => {
-    const value = values[field.key] || '';
+  const renderField = (field: UserGroupField, values: Record<string, string | number | null>, setValue: (key: string, val: string | number | null) => void) => {
+    const value = values[field.key] ?? '';
 
     switch (field.type) {
       case 'text':
@@ -373,8 +373,8 @@ export default function AcademyUserForm({
                       <div className="ml-3">
                         <p className="text-sm font-medium text-gray-900">{parent.displayName}</p>
                         <p className="text-xs text-gray-500">
-                          {parent.fields.phone && `${parent.fields.phone} \u2022 `}
-                          {parent.fields.email || ''}
+                          {parent.fields.phone ? `${parent.fields.phone} \u2022 ` : ''}
+                          {parent.fields.email ?? ''}
                         </p>
                       </div>
                     </label>
@@ -396,7 +396,7 @@ export default function AcademyUserForm({
                 {parentGroup.fields.map((field) => (
                   <div key={field.key}>
                     <label className="block text-xs text-gray-500 mb-1">{field.label} {field.required && '*'}</label>
-                    {renderField(field, quickParentFields, (key, val) =>
+                    {renderField(field, quickParentFields, (key: string, val: string | number | null) =>
                       setQuickParentFields((prev) => ({ ...prev, [key]: val }))
                     )}
                   </div>

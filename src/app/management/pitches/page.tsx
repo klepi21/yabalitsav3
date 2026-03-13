@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -8,7 +8,6 @@ import {
   MagnifyingGlassIcon, 
   ArrowLeftIcon
 } from '@heroicons/react/24/outline';
-import { pitchService } from '@/lib/firebase-services';
 import { Pitch } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -21,19 +20,7 @@ export default function PitchesPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Check authentication
-  useEffect(() => {
-    if (authLoading) return;
-    
-    if (!user || !venueOwner) {
-      router.push('/venue-login');
-      return;
-    }
-    
-    loadPitches();
-  }, [user, venueOwner, authLoading, router]);
-
-  const loadPitches = async () => {
+  const loadPitches = useCallback(async () => {
     if (!venueOwner || !user) return;
     
     try {
@@ -64,6 +51,7 @@ export default function PitchesPage() {
       const data = await response.json();
       
       // Convert ISO strings back to Date objects
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const convertedPitches = (data.pitches || []).map((pitch: any) => ({
         ...pitch,
         createdAt: new Date(pitch.createdAt),
@@ -78,7 +66,19 @@ export default function PitchesPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [venueOwner, user]);
+
+  // Check authentication
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (!user || !venueOwner) {
+      router.push('/venue-login');
+      return;
+    }
+
+    loadPitches();
+  }, [user, venueOwner, authLoading, router, loadPitches]);
 
   const filteredPitches = pitches.filter(pitch =>
     pitch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

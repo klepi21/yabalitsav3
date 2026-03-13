@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -8,12 +8,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { 
   ArrowLeftIcon,
-  MapPinIcon,
   ClockIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { pitchService, blockedDateService } from '@/lib/firebase-services';
-import { Pitch, BlockedDate } from '@/types';
+import { Pitch, BlockedDate, getOpeningSlots } from '@/types';
 
 // Form validation schema
 // Time slot validation schema
@@ -145,20 +144,7 @@ export default function EditPitchPage() {
     }
   });
 
-  useEffect(() => {
-    if (authLoading) return;
-    
-    if (!user || !venueOwner) {
-      router.push('/venue-login');
-      return;
-    }
-    
-    if (params.id) {
-      loadPitchData(params.id as string);
-    }
-  }, [user, venueOwner, authLoading, router, params.id]);
-
-  const loadPitchData = async (pitchId: string) => {
+  const loadPitchData = useCallback(async (pitchId: string) => {
     try {
       const pitchData = await pitchService.getById(pitchId);
       if (pitchData) {
@@ -171,7 +157,7 @@ export default function EditPitchPage() {
             ...acc,
             [day]: {
               isOpen: hours.isOpen,
-              slots: hours.slots || []
+              slots: getOpeningSlots(hours)
             }
           }), {})
         };
@@ -188,7 +174,20 @@ export default function EditPitchPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [reset]);
+
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (!user || !venueOwner) {
+      router.push('/venue-login');
+      return;
+    }
+
+    if (params.id) {
+      loadPitchData(params.id as string);
+    }
+  }, [user, venueOwner, authLoading, router, params.id, loadPitchData]);
 
   const handleFormSubmit = async (data: PitchEditFormData) => {
     if (!pitch) return;
@@ -274,7 +273,7 @@ export default function EditPitchPage() {
     return (
       <div className="text-center py-12">
         <h3 className="text-lg font-medium text-gray-900">Pitch not found</h3>
-        <p className="mt-1 text-sm text-gray-500">The pitch you're looking for doesn't exist.</p>
+        <p className="mt-1 text-sm text-gray-500">The pitch you&apos;re looking for doesn&apos;t exist.</p>
         <Link
           href="/management/pitches"
           className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
@@ -429,7 +428,7 @@ export default function EditPitchPage() {
                     {watch(`defaultOpeningHours.${day}.isOpen`) && (
                       <div className="space-y-3">
                         {/* Existing time slots */}
-                        {watch(`defaultOpeningHours.${day}.slots`)?.map((slot: any, index: number) => (
+                        {watch(`defaultOpeningHours.${day}.slots`)?.map((_slot: { start: string; end: string }, index: number) => (
                           <div key={index} className="flex items-end gap-2">
                             <div>
                               <label className="block text-xs text-gray-500">Άνοιγμα</label>

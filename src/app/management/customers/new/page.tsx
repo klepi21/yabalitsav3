@@ -43,9 +43,7 @@ export default function NewCustomerPage() {
         email: data.email || '',
         phone: data.phone,
         venueIds: venueOwner?.venueId ? [venueOwner.venueId] : [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      } as any);
+      });
       setSuccess('Ο πελάτης δημιουργήθηκε επιτυχώς!');
       reset({ name: '', email: '', phone: '' });
       // Redirect back to customers list after brief delay

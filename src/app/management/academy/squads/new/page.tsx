@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { squadService, academyUserService, userGroupService } from '@/lib/academy-services';
-import { AcademyUser, UserGroup } from '@/types/academy';
+import { AcademyUser } from '@/types/academy';
 
 const AGE_GROUPS = ['U6', 'U7', 'U8', 'U9', 'U10', 'U11', 'U12', 'U13', 'U14', 'U15', 'U16', 'U17', 'U18', 'U19', 'U21', 'Ανδρών'];
 
@@ -27,21 +27,20 @@ export default function NewSquadPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user || !venueOwner) { router.push('/venue-login'); return; }
-    loadCoaches();
-  }, [user, venueOwner, authLoading]);
-
-  const loadCoaches = async () => {
-    try {
-      const groups = await userGroupService.getOrSeed(venueId);
-      const coachGroup = groups.find((g) => g.isDefault && g.name === 'Προπονητής');
-      if (coachGroup) {
-        const coachUsers = await academyUserService.getByGroup(venueId, coachGroup.id);
-        setCoaches(coachUsers);
+    const loadCoaches = async () => {
+      try {
+        const groups = await userGroupService.getOrSeed(venueId);
+        const coachGroup = groups.find((g) => g.isDefault && g.name === 'Προπονητής');
+        if (coachGroup) {
+          const coachUsers = await academyUserService.getByGroup(venueId, coachGroup.id);
+          setCoaches(coachUsers);
+        }
+      } catch (err) {
+        console.error('Failed to load coaches:', err);
       }
-    } catch (err) {
-      console.error('Failed to load coaches:', err);
-    }
-  };
+    };
+    loadCoaches();
+  }, [user, venueOwner, authLoading, router, venueId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

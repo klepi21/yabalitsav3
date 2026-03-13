@@ -4,15 +4,14 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { squadService, academyUserService, userGroupService } from '@/lib/academy-services';
-import { Squad, AcademyUser, UserGroup } from '@/types/academy';
+import { squadService, academyUserService } from '@/lib/academy-services';
+import { Squad, AcademyUser } from '@/types/academy';
 
 export default function SquadsPage() {
   const router = useRouter();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
   const [squads, setSquads] = useState<Squad[]>([]);
   const [users, setUsers] = useState<AcademyUser[]>([]);
-  const [groups, setGroups] = useState<UserGroup[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -22,26 +21,23 @@ export default function SquadsPage() {
   useEffect(() => {
     if (authLoading) return;
     if (!user || !venueOwner) { router.push('/venue-login'); return; }
+    const loadData = async () => {
+      try {
+        setIsLoading(true);
+        const [squadsData, usersData] = await Promise.all([
+          squadService.getByVenue(venueId),
+          academyUserService.getByVenue(venueId),
+        ]);
+        setSquads(squadsData);
+        setUsers(usersData);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης τμημάτων');
+      } finally {
+        setIsLoading(false);
+      }
+    };
     loadData();
-  }, [user, venueOwner, authLoading]);
-
-  const loadData = async () => {
-    try {
-      setIsLoading(true);
-      const [squadsData, usersData, groupsData] = await Promise.all([
-        squadService.getByVenue(venueId),
-        academyUserService.getByVenue(venueId),
-        userGroupService.getOrSeed(venueId),
-      ]);
-      setSquads(squadsData);
-      setUsers(usersData);
-      setGroups(groupsData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης τμημάτων');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  }, [user, venueOwner, authLoading, router, venueId]);
 
   const handleDelete = async (squadId: string) => {
     try {
@@ -52,8 +48,6 @@ export default function SquadsPage() {
       setError(err instanceof Error ? err.message : 'Αποτυχία διαγραφής τμήματος');
     }
   };
-
-  const coachGroup = groups.find((g) => g.isDefault && g.name === 'Προπονητής');
 
   const getCoachNames = (coachIds: string[]) => {
     return coachIds

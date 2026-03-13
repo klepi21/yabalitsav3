@@ -7,6 +7,15 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar from './Sidebar';
 
+interface VenueData {
+  id: string;
+  ownerId: string;
+  plan?: string;
+  planType?: string;
+  daysRemaining?: number;
+  [key: string]: unknown;
+}
+
 interface SidebarWrapperProps {
   children: React.ReactNode;
 }
@@ -14,7 +23,7 @@ interface SidebarWrapperProps {
 export default function SidebarWrapper({ children }: SidebarWrapperProps) {
   const pathname = usePathname();
   const { user } = useAuth();
-  const [venueData, setVenueData] = useState<any>(null);
+  const [venueData, setVenueData] = useState<VenueData | null>(null);
   
   // Don't show sidebar on public pages
   const isRootPage = pathname === '/';
@@ -39,7 +48,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
           
           if (!querySnapshot.empty) {
             const venueDoc = querySnapshot.docs[0];
-            setVenueData({ id: venueDoc.id, ...venueDoc.data() });
+            setVenueData({ id: venueDoc.id, ...venueDoc.data() } as VenueData);
           }
         } catch (error) {
           console.error('Error fetching venue data:', error);
@@ -84,7 +93,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                   {venueData.plan === 'subscription' ? (
                     // Active Plan
                     <>
-                      {venueData.daysRemaining > 7 ? (
+                      {(venueData.daysRemaining ?? 0) > 7 ? (
                         // All OK - Green indicator
                         <div className="flex items-center gap-2">
                           <div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
@@ -95,7 +104,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                             ({venueData.daysRemaining} ημέρες)
                           </span>
                         </div>
-                      ) : venueData.daysRemaining > 0 ? (
+                      ) : (venueData.daysRemaining ?? 0) > 0 ? (
                         // Warning - Expires soon
                         <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 border border-amber-200">
                           <div className="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse"></div>

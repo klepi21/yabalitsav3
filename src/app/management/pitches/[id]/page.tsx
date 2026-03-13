@@ -11,7 +11,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 import { pitchService, bookingService, blockedDateService } from '@/lib/firebase-services';
-import { Pitch, Booking, BlockedDate } from '@/types';
+import { Pitch, Booking, BlockedDate, OpeningSlot, getOpeningSlots } from '@/types';
 
 export default function PitchDetailsPage() {
   const router = useRouter();
@@ -172,9 +172,9 @@ export default function PitchDetailsPage() {
                     {dayNames[day as keyof typeof dayNames] || day}
                   </span>
                       <span className="text-sm text-gray-900">
-                        {hours.isOpen 
-                          ? hours.slots?.length > 0 
-                            ? hours.slots.map((slot, idx) => (
+                        {hours.isOpen
+                          ? getOpeningSlots(hours).length > 0
+                            ? getOpeningSlots(hours).map((slot: OpeningSlot, idx: number) => (
                                 <span key={idx}>
                                   {idx > 0 && ', '}
                                   {slot.start} - {slot.end}

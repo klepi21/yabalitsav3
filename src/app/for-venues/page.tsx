@@ -14,7 +14,7 @@ export default function ForVenuesPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [, setSuccess] = useState<string | null>(null);
   const [showCongrats, setShowCongrats] = useState(false);
 
   const [form, setForm] = useState({
@@ -104,7 +104,7 @@ export default function ForVenuesPage() {
         throw new Error(errorData.error || 'Failed to create venue');
       }
 
-      const venueData = await venueResponse.json();
+      await venueResponse.json();
 
       setSuccess('ok');
       setShowCongrats(true);
@@ -114,9 +114,9 @@ export default function ForVenuesPage() {
         venueName: '', venueAddress: '', venueCity: 'Αθήνα', venueEmail: '', venuePhone: '', venueAfm: '', venueDoy: '',
         plan: 'trial', acceptTerms: false
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Registration error:', err);
-      const code = err?.code || '';
+      const code = (err as { code?: string })?.code || '';
       const firebaseErrors: Record<string, string> = {
         'auth/email-already-in-use': 'Αυτό το email χρησιμοποιείται ήδη. Δοκιμάστε να συνδεθείτε ή χρησιμοποιήστε άλλο email.',
         'auth/invalid-email': 'Μη έγκυρη διεύθυνση email.',
@@ -125,7 +125,7 @@ export default function ForVenuesPage() {
         'auth/too-many-requests': 'Πολλές προσπάθειες. Δοκιμάστε ξανά σε λίγο.',
         'auth/network-request-failed': 'Πρόβλημα σύνδεσης. Ελέγξτε το internet σας.',
       };
-      setError(firebaseErrors[code] || err?.message || 'Κάτι πήγε στραβά.');
+      setError(firebaseErrors[code] || (err as Error)?.message || 'Κάτι πήγε στραβά.');
     } finally {
       setIsSubmitting(false);
     }

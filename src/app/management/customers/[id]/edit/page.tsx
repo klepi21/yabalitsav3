@@ -6,9 +6,8 @@ import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { 
+import {
   ArrowLeftIcon,
-  PencilIcon,
   CheckIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
@@ -37,48 +36,47 @@ export default function EditCustomerPage() {
 
   const customerId = params?.id as string;
 
-  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<CustomerFormData>({
+  const { register, handleSubmit, formState: { errors }, setValue } = useForm<CustomerFormData>({
     resolver: zodResolver(customerSchema),
   });
 
   // Check authentication
   useEffect(() => {
     if (authLoading) return;
-    
+
     if (!user || !venueOwner) {
       router.push('/venue-login');
       return;
     }
-    
-    loadCustomerData();
-  }, [user, venueOwner, authLoading, router, customerId]);
 
-  const loadCustomerData = async () => {
-    if (!customerId) return;
-    
-    try {
-      setIsLoading(true);
-      
-      // Load customer data
-      const customerData = await userService.getById(customerId);
-      if (!customerData) {
-        setError('Ο πελάτης δεν βρέθηκε');
-        return;
+    const loadCustomerData = async () => {
+      if (!customerId) return;
+
+      try {
+        setIsLoading(true);
+
+        // Load customer data
+        const customerData = await userService.getById(customerId);
+        if (!customerData) {
+          setError('Ο πελάτης δεν βρέθηκε');
+          return;
+        }
+        setCustomer(customerData);
+
+        // Set form values
+        setValue('name', customerData.name);
+        setValue('email', customerData.email || '');
+        setValue('phone', customerData.phone);
+
+      } catch (error) {
+        console.error('Error loading customer data:', error);
+        setError('Σφάλμα στη φόρτωση των δεδομένων του πελάτη');
+      } finally {
+        setIsLoading(false);
       }
-      setCustomer(customerData);
-      
-      // Set form values
-      setValue('name', customerData.name);
-      setValue('email', customerData.email || '');
-      setValue('phone', customerData.phone);
-      
-    } catch (error) {
-      console.error('Error loading customer data:', error);
-      setError('Σφάλμα στη φόρτωση των δεδομένων του πελάτη');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+    loadCustomerData();
+  }, [user, venueOwner, authLoading, router, customerId, setValue]);
 
   const onSubmit = async (data: CustomerFormData) => {
     if (!customer) return;

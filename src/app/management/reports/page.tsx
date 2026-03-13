@@ -12,7 +12,7 @@ import {
   DocumentArrowDownIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import { bookingService, pitchService, paymentService, venueService } from '@/lib/firebase-services';
+import { venueService } from '@/lib/firebase-services';
 import { Booking, Pitch, Payment } from '@/types';
 import {
   Chart as ChartJS,
@@ -149,21 +149,21 @@ export default function ReportsPage() {
       const data = await response.json();
       
       // Convert ISO strings back to Date objects
-      const convertedBookings = (data.bookings || []).map((booking: any) => ({
+      const convertedBookings = (data.bookings || []).map((booking: Record<string, unknown>) => ({
         ...booking,
-        startTime: new Date(booking.startTime),
-        endTime: new Date(booking.endTime),
-        createdAt: new Date(booking.createdAt),
-        updatedAt: new Date(booking.updatedAt),
+        startTime: new Date(booking.startTime as string),
+        endTime: new Date(booking.endTime as string),
+        createdAt: new Date(booking.createdAt as string),
+        updatedAt: new Date(booking.updatedAt as string),
       }));
 
-      const convertedPitches = (data.pitches || []).map((pitch: any) => ({
+      const convertedPitches = (data.pitches || []).map((pitch: Record<string, unknown>) => ({
         ...pitch,
-        createdAt: new Date(pitch.createdAt),
-        updatedAt: new Date(pitch.updatedAt),
+        createdAt: new Date(pitch.createdAt as string),
+        updatedAt: new Date(pitch.updatedAt as string),
       }));
 
-      const convertedPayments = (data.payments || []).map((payment: any) => ({
+      const convertedPayments = (data.payments || []).map((payment: Record<string, unknown>) => ({
         ...payment,
         createdAt: payment.createdAt,
         updatedAt: payment.updatedAt,
@@ -265,7 +265,6 @@ export default function ReportsPage() {
 
   // Prepare chart data
   const getChartData = () => {
-    const now = new Date();
     const labels = [];
     const revenueData = [];
     const bookingsData = [];

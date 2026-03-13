@@ -113,7 +113,7 @@ export const userGroupService = {
   // Update a group
   async update(id: string, data: Partial<UserGroup>): Promise<void> {
     const docRef = doc(db, GROUPS_COLLECTION, id);
-    const updateData: any = { ...data, updatedAt: serverTimestamp() };
+    const updateData: Record<string, unknown> = { ...data, updatedAt: serverTimestamp() };
     delete updateData.id;
     delete updateData.createdAt;
     await updateDoc(docRef, updateData);
@@ -129,19 +129,19 @@ export const userGroupService = {
 // Academy User Service
 // ============================================
 
-function convertToUser(id: string, data: any): AcademyUser {
+function convertToUser(id: string, data: Record<string, unknown>): AcademyUser {
   return {
     id,
-    groupId: data.groupId || data.role || '', // backward compat with old 'role' field
-    displayName: data.displayName || '',
-    venueId: data.venueId || '',
-    fields: data.fields || {},
-    squad_id: data.squad_id,
-    parent_uid: data.parent_uid,
-    linked_athletes: data.linked_athletes,
-    assigned_squads: data.assigned_squads,
-    createdAt: data.createdAt?.toDate?.() || new Date(),
-    updatedAt: data.updatedAt?.toDate?.() || new Date(),
+    groupId: (data.groupId as string) || (data.role as string) || '', // backward compat with old 'role' field
+    displayName: (data.displayName as string) || '',
+    venueId: (data.venueId as string) || '',
+    fields: (data.fields as Record<string, string | number | null>) || {},
+    squad_id: data.squad_id as string | undefined,
+    parent_uid: data.parent_uid as string | undefined,
+    linked_athletes: data.linked_athletes as string[] | undefined,
+    assigned_squads: data.assigned_squads as string[] | undefined,
+    createdAt: (data.createdAt as { toDate?(): Date })?.toDate?.() || new Date(),
+    updatedAt: (data.updatedAt as { toDate?(): Date })?.toDate?.() || new Date(),
   };
 }
 
@@ -183,7 +183,7 @@ export const academyUserService = {
 
   // Update user
   async update(id: string, userData: Partial<AcademyUser>): Promise<void> {
-    const updateData: any = { ...userData, updatedAt: serverTimestamp() };
+    const updateData: Record<string, unknown> = { ...userData, updatedAt: serverTimestamp() };
     delete updateData.id;
     delete updateData.createdAt;
     await updateDoc(doc(db, USERS_COLLECTION, id), updateData);

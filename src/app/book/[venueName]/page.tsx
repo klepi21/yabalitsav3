@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, MapPin, Phone, Mail, Calendar, Clock, Users, Star, ArrowLeft, X, RotateCcw } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, ArrowLeft, X, RotateCcw } from "lucide-react";
+import Image from "next/image";
 
 interface Booking {
   id: string;
@@ -336,7 +337,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
   const handleDateSelect = (dateStr: string) => {
     // Convert the Greek date string to a proper Date object
-    const [day, month] = dateStr.split(' ');
+    const [, month] = dateStr.split(' ');
     const monthMap: { [key: string]: number } = {
       'Ιαν': 0, 'Φεβ': 1, 'Μαρ': 2, 'Απρ': 3, 'Μαϊ': 4, 'Ιουν': 5,
       'Ιουλ': 6, 'Αυγ': 7, 'Σεπ': 8, 'Οκτ': 9, 'Νοε': 10, 'Δεκ': 11
@@ -436,7 +437,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       setEmailSent(true);
       // Initialize email code input after successful send
       setEmailCode('');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('email send error', err);
       setEmailError('Αποτυχία αποστολής email. Δοκιμάστε ξανά.');
     } finally {
@@ -547,7 +548,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
           updatedAt: new Date()
         };
         
-        customerId = await userService.create(newCustomerData as any);
+        customerId = await userService.create(newCustomerData as Omit<import('@/types').User, 'id' | 'createdAt' | 'updatedAt'>);
         console.log('✅ New customer created:', customerId);
       }
 
@@ -650,7 +651,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       <div className="bg-white shadow-sm border-b border-emerald-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center h-16">
-            <img src="/yabalitsalogo.png" alt="Yabalitsa" className="h-8 w-auto" />
+            <Image src="/yabalitsalogo.png" alt="Yabalitsa" width={120} height={32} className="h-8 w-auto" />
           </div>
         </div>
       </div>
@@ -1033,10 +1034,13 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                       {/* Ιαστεράκι - Venue Info (χωρίς αξιολογήσεις) */}
                       <div className="bg-gray-50 rounded-xl p-6">
                         <div className="flex items-center space-x-4">
-                          <img
+                          <Image
                             src={venue.imageUrl}
                             alt={venue.name}
+                            width={64}
+                            height={64}
                             className="w-16 h-16 rounded-lg object-cover"
+                            unoptimized
                           />
                           <div>
                             <h4 className="text-lg font-semibold text-gray-900">{venue.name}</h4>

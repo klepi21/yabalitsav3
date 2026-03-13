@@ -1,4 +1,5 @@
 import { Cpu, Lock, Sparkles, Zap } from 'lucide-react'
+import Image from 'next/image'
 
 export function Features() {
     return (
@@ -10,7 +11,7 @@ export function Features() {
                 </div>
                 <div className="relative rounded-3xl p-3 md:-mx-8 lg:col-span-3">
                     <div className="aspect-[88/36] relative">
-                        <img src="/screnn.png" className="absolute inset-0 z-10 rounded-2xl" alt="Yabalitsa management dashboard" width={2797} height={1137} />
+                        <Image src="/screnn.png" className="absolute inset-0 z-10 rounded-2xl" alt="Yabalitsa management dashboard" width={2797} height={1137} />
                     </div>
                 </div>
                 <div className="relative mx-auto grid grid-cols-2 gap-x-3 gap-y-6 sm:gap-8 lg:grid-cols-4 mt-32">

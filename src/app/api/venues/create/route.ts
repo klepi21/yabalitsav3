@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     let decodedToken;
     try {
       decodedToken = await auth.verifyIdToken(token);
-    } catch (err) {
+    } catch {
       return NextResponse.json(
         { error: 'Invalid or expired token' },
         { status: 401 }
@@ -106,10 +106,10 @@ export async function POST(request: NextRequest) {
       },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error creating venue:', error);
     return NextResponse.json(
-      { error: error.message || 'Failed to create venue' },
+      { error: (error as Error).message || 'Failed to create venue' },
       { status: 500 }
     );
   }

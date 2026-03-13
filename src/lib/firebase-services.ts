@@ -2,7 +2,7 @@ import {
   collection, 
   doc, 
   addDoc, 
-  setDoc,
+
   updateDoc, 
   deleteDoc, 
   getDocs, 
@@ -39,8 +39,9 @@ interface FirebaseVenueData {
   planType?: 'Basic' | 'Pro' | 'Enterprise';
   active?: boolean;
   managementPinHash?: string;
-  createdAt?: any;
-  updatedAt?: any;
+  subscriptionEndDate?: string;
+  createdAt?: { toDate(): Date };
+  updatedAt?: { toDate(): Date };
 }
 
 // Venue Services
@@ -48,8 +49,8 @@ export const venueService = {
   // Create a new venue
   async create(venueData: Omit<Venue, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     // Convert phone/email to contactDetails structure for Firebase
-    const firebaseData: any = { ...venueData };
-    
+    const firebaseData: Record<string, unknown> = { ...venueData };
+
     if (venueData.phone !== undefined || venueData.email !== undefined) {
       firebaseData.contactDetails = {
         phone: venueData.phone || '',
@@ -59,11 +60,11 @@ export const venueService = {
       delete firebaseData.phone;
       delete firebaseData.email;
     }
-    
+
     const docRef = await addDoc(collection(db, 'yabalitsa_venues'), {
       ...firebaseData,
-      active: firebaseData.active ?? true,
-      daysRemaining: firebaseData.daysRemaining ?? 15,
+      active: (firebaseData.active as boolean) ?? true,
+      daysRemaining: (firebaseData.daysRemaining as number) ?? 15,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
@@ -88,9 +89,9 @@ export const venueService = {
         daysRemaining: data.daysRemaining,
         plan: data.plan || 'trial',
         planType: data.planType,
-        subscriptionEndDate: (data as any).subscriptionEndDate, // Add this field
-        managementPinHash: (data as any).managementPinHash,
-        active: (data as any).active ?? true,
+        subscriptionEndDate: data.subscriptionEndDate,
+        managementPinHash: data.managementPinHash,
+        active: data.active ?? true,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date()
       } as Venue;
@@ -117,9 +118,9 @@ export const venueService = {
         daysRemaining: data.daysRemaining,
         plan: data.plan || 'trial',
         planType: data.planType,
-        subscriptionEndDate: (data as any).subscriptionEndDate, // Add this field
-        managementPinHash: (data as any).managementPinHash,
-        active: (data as any).active ?? true,
+        subscriptionEndDate: data.subscriptionEndDate,
+        managementPinHash: data.managementPinHash,
+        active: data.active ?? true,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date()
       } as Venue;
@@ -132,8 +133,8 @@ export const venueService = {
     const docRef = doc(db, 'yabalitsa_venues', id);
     
     // Convert phone/email to contactDetails structure for Firebase
-    const firebaseData: any = { ...venueData };
-    
+    const firebaseData: Record<string, unknown> = { ...venueData };
+
     if (venueData.phone !== undefined || venueData.email !== undefined) {
       firebaseData.contactDetails = {
         phone: venueData.phone || '',
@@ -143,7 +144,7 @@ export const venueService = {
       delete firebaseData.phone;
       delete firebaseData.email;
     }
-    
+
     await updateDoc(docRef, {
       ...firebaseData,
       updatedAt: serverTimestamp()
@@ -463,9 +464,9 @@ export const venueOwnerService = {
   // Create a new venue owner account
   async create(ownerData: Omit<VenueOwner, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     // First create Firebase Auth user
-    const userCredential = await createUserWithEmailAndPassword(
-      auth, 
-      ownerData.email, 
+    await createUserWithEmailAndPassword(
+      auth,
+      ownerData.email,
       ownerData.password
     );
     
@@ -638,14 +639,14 @@ export const paymentService = {
   // Get all payments
   async getAll(): Promise<Payment[]> {
     const snapshot = await getDocs(collection(db, 'yabalitsa_payments'));
-    return snapshot.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as Payment[];
+    return snapshot.docs.map(d => ({ id: d.id, ...(d.data() as Record<string, unknown>) })) as Payment[];
   },
 
   // Get payments by venue ID
   async getByVenueId(venueId: string): Promise<Payment[]> {
     const q = query(collection(db, 'yabalitsa_payments'), where('venueId', '==', venueId));
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as Payment[];
+    return snapshot.docs.map(d => ({ id: d.id, ...(d.data() as Record<string, unknown>) })) as Payment[];
   },
 
   // Get payment by Stripe PaymentIntent ID
@@ -654,7 +655,7 @@ export const paymentService = {
     const snapshot = await getDocs(q);
     if (snapshot.empty) return null;
     const d = snapshot.docs[0];
-    return { id: d.id, ...(d.data() as any) } as Payment;
+    return { id: d.id, ...(d.data() as Record<string, unknown>) } as Payment;
   },
 
   // Get payment by ID
@@ -662,7 +663,7 @@ export const paymentService = {
     const ref = doc(db, 'yabalitsa_payments', id);
     const snap = await getDoc(ref);
     if (!snap.exists()) return null;
-    return { id: snap.id, ...(snap.data() as any) } as Payment;
+    return { id: snap.id, ...(snap.data() as Record<string, unknown>) } as Payment;
   },
 
   // Update payment

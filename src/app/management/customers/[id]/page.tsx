@@ -32,43 +32,42 @@ export default function CustomerDetailsPage() {
   // Check authentication
   useEffect(() => {
     if (authLoading) return;
-    
+
     if (!user || !venueOwner) {
       router.push('/venue-login');
       return;
     }
-    
+
+    const loadCustomerData = async () => {
+      if (!customerId) return;
+
+      try {
+        setIsLoading(true);
+
+        // Load customer data
+        const customerData = await userService.getById(customerId);
+        if (!customerData) {
+          setError('Ο πελάτης δεν βρέθηκε');
+          return;
+        }
+        setCustomer(customerData);
+
+        // Load customer's bookings for this venue
+        const allBookings = await bookingService.getByVenue(venueOwner.venueId);
+        const customerVenueBookings = allBookings.filter(booking =>
+          booking.userId === customerId
+        );
+        setCustomerBookings(customerVenueBookings);
+
+      } catch (error) {
+        console.error('Error loading customer data:', error);
+        setError('Σφάλμα στη φόρτωση των δεδομένων του πελάτη');
+      } finally {
+        setIsLoading(false);
+      }
+    };
     loadCustomerData();
   }, [user, venueOwner, authLoading, router, customerId]);
-
-  const loadCustomerData = async () => {
-    if (!customerId) return;
-    
-    try {
-      setIsLoading(true);
-      
-      // Load customer data
-      const customerData = await userService.getById(customerId);
-      if (!customerData) {
-        setError('Ο πελάτης δεν βρέθηκε');
-        return;
-      }
-      setCustomer(customerData);
-      
-      // Load customer's bookings for this venue
-      const allBookings = await bookingService.getByVenue(venueOwner.venueId);
-      const customerVenueBookings = allBookings.filter(booking => 
-        booking.userId === customerId
-      );
-      setCustomerBookings(customerVenueBookings);
-      
-    } catch (error) {
-      console.error('Error loading customer data:', error);
-      setError('Σφάλμα στη φόρτωση των δεδομένων του πελάτη');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   if (authLoading || isLoading) {
     return (

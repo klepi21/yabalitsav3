@@ -6,13 +6,11 @@ export interface VenueData {
   planType?: string;
   daysRemaining?: number;
   subscriptionEndDate?: string;
-  [key: string]: any;
 }
 
 export interface PaymentData {
   paymentDate?: string;
   durationMonths?: number;
-  [key: string]: any;
 }
 
 // Utility function to safely format dates
@@ -36,7 +34,7 @@ export const calculateDaysDifference = (dateString: string | null | undefined) =
 };
 
 // Calculate days remaining - use stored daysRemaining for display
-export const calculateDaysRemaining = (venue: VenueData | null, lastPayment?: PaymentData | null) => {
+export const calculateDaysRemaining = (venue: VenueData | null) => {
   if (!venue) return null;
   
   // Always use stored daysRemaining for display

@@ -4,6 +4,7 @@ export const dynamic = 'force-dynamic';
 
 import { useSearchParams } from 'next/navigation';
 import { useMemo, Suspense } from 'react';
+import Image from 'next/image';
 
 function QRInner() {
   const params = useSearchParams();
@@ -40,10 +41,13 @@ function QRInner() {
 
         {fullUrl ? (
           <>
-            <img
+            <Image
               src={`https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&data=${encodeURIComponent(fullUrl)}`}
               alt="QR για Σελίδα Κράτησης"
+              width={1200}
+              height={1200}
               className="print-qr mx-auto w-full max-w-md h-auto"
+              unoptimized
             />
             <div className="no-print mt-6 flex items-center justify-center gap-3">
               <button

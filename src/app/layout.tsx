@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import { GoogleAnalytics } from '@next/third-parties/google';
 import './globals.css';
 
-import { AuthProvider } from '@/contexts/AuthContext';
-import SidebarWrapper from '@/components/SidebarWrapper';
 import ConditionalWrapper from '@/components/ConditionalWrapper';
 import CookieConsent from '@/components/CookieConsent';
 
@@ -106,30 +105,13 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/fav.png" />
         <link rel="apple-touch-icon" href="/fav.png" />
         
-        {/* Google Analytics 4 */}
-        <script
-          async
-          src="https://www.googletagmanager.com/gtag/js?id=G-GWX4K2ZM6J"
-        />
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', 'G-GWX4K2ZM6J', {
-                page_title: document.title,
-                page_location: window.location.href,
-              });
-            `,
-          }}
-        />
       </head>
       <body className={inter.className} suppressHydrationWarning={true}>
         <ConditionalWrapper>
           {children}
         </ConditionalWrapper>
         <CookieConsent />
+        <GoogleAnalytics gaId="G-GWX4K2ZM6J" />
       </body>
     </html>
   );

@@ -39,11 +39,11 @@ export async function getVerificationCode(email: string) {
     try {
       const doc = await db.collection('email_verifications').doc(email).get();
       if (doc.exists) {
-        const data = doc.data() as any;
+        const data = doc.data() as Record<string, unknown>;
         return {
-          code: data.code,
-          expiresAt: data.expiresAt,
-          attempts: data.attempts || 0
+          code: data.code as string,
+          expiresAt: data.expiresAt as number,
+          attempts: (data.attempts as number) || 0
         };
       }
       return null;

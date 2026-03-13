@@ -5,7 +5,7 @@ import { useEffect, Suspense } from 'react';
 
 declare global {
   interface Window {
-    gtag: (...args: any[]) => void;
+    gtag: (command: string, targetId: string, config?: Record<string, unknown>) => void;
   }
 }
 

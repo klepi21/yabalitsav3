@@ -29,11 +29,31 @@ export interface LegacyOpeningHours {
   close: string; // HH:mm format
 }
 
-// Union type for opening hours
-export type DayOpeningHours = {
+// Modern opening hours with multiple time slots
+export interface ModernOpeningHours {
   isOpen: boolean;
   slots: OpeningSlot[];
-} | LegacyOpeningHours;
+}
+
+// Union type for opening hours
+export type DayOpeningHours = ModernOpeningHours | LegacyOpeningHours;
+
+// Type guard to check if opening hours use the modern slots format
+export function hasSlots(hours: DayOpeningHours): hours is ModernOpeningHours {
+  return 'slots' in hours;
+}
+
+// Helper to safely get slots from either format
+export function getOpeningSlots(hours: DayOpeningHours): OpeningSlot[] {
+  if (hasSlots(hours)) {
+    return hours.slots;
+  }
+  // Convert legacy format to a single slot
+  if (hours.isOpen && hours.open && hours.close) {
+    return [{ start: hours.open, end: hours.close }];
+  }
+  return [];
+}
 
 export interface Pitch {
   id: string;

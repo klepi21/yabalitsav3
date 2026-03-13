@@ -1,12 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MagnifyingGlassIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import { venueService, pitchService, bookingService } from '@/lib/firebase-services';
-import { Venue, Pitch, Booking } from '@/types';
+import { Venue, Pitch } from '@/types';
 
 interface SearchResult {
   venue: Venue;
@@ -32,12 +31,9 @@ export default function FSEPage() {
   });
 
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [venues, setVenues] = useState<Venue[]>([]);
-  const [pitches, setPitches] = useState<Pitch[]>([]);
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [suggestions, setSuggestions] = useState<SmartSuggestion[]>([]);
+  const [isSearching] = useState(false);
+  const [hasSearched] = useState(false);
+  const [suggestions] = useState<SmartSuggestion[]>([]);
 
   // Format date to Greek format (e.g., "Τετάρτη 15 Σεπτεμβρίου")
   const formatGreekDate = (dateStr: string): string => {
@@ -55,223 +51,6 @@ export default function FSEPage() {
     return `${dayName} ${day} ${month}`;
   };
 
-  // Load all data on component mount
-  useEffect(() => {
-    loadAllData();
-  }, []);
-
-  const loadAllData = async () => {
-    try {
-      const [venuesData, pitchesData, bookingsData] = await Promise.all([
-        venueService.getAll(),
-        pitchService.getAll(),
-        bookingService.getAll()
-      ]);
-      
-      setVenues(venuesData || []);
-      setPitches(pitchesData || []);
-      setBookings(bookingsData || []);
-    } catch (error) {
-      console.error('Error loading data:', error);
-    }
-  };
-
-  const handleSearch = async () => {
-    if (!searchQuery.date || !searchQuery.pitchType || !searchQuery.time) {
-      return;
-    }
-    
-    // City is optional - if not selected, show all cities
-
-    setHasSearched(true);
-    setIsSearching(true);
-    
-    try {
-      // Search started with query and available data
-      
-      const results: SearchResult[] = [];
-      const selectedDate = new Date(searchQuery.date);
-      const selectedTime = searchQuery.time;
-      
-      // Filter pitches by type
-      const matchingPitches = pitches.filter(pitch => pitch.type === searchQuery.pitchType);
-              // Found matching pitches for pitch type
-      
-      for (const pitch of matchingPitches) {
-                  // Checking pitch availability
-        const venue = venues.find(v => v.id === pitch.venueId);
-        if (!venue) {
-                      // No venue found for pitch
-          continue;
-        }
-
-        // Filter by city if selected
-        if (searchQuery.city && venue?.city !== searchQuery.city) {
-          // Venue city does not match search query
-          continue;
-        }
-                  // Venue city matches or no city filter applied
-
-        // Check if pitch is available for the selected date and time
-        const isAvailable = await checkPitchAvailability(pitch, selectedDate, selectedTime);
-                  // Pitch availability checked
-        
-        if (isAvailable) {
-          results.push({
-            venue,
-            pitch,
-            price: pitch.pricePerSlot
-          });
-        }
-      }
-
-              // Search completed with results
-      // Sort by price (lowest first)
-      results.sort((a, b) => a.price - b.price);
-      setSearchResults(results);
-
-      // If no exact results, generate smart suggestions
-      if (results.length === 0) {
-        const alt = await generateSmartSuggestions(
-          searchQuery.pitchType,
-          searchQuery.city,
-          new Date(searchQuery.date),
-          searchQuery.time
-        );
-        setSuggestions(alt);
-      } else {
-        setSuggestions([]);
-      }
-    } catch (error) {
-      console.error('Search error:', error);
-    } finally {
-      setIsSearching(false);
-    }
-  };
-
-  // Suggest next available days and nearby times for same pitch type in the selected city
-  const generateSmartSuggestions = async (
-    pitchType: string,
-    city: string,
-    selectedDate: Date,
-    selectedTime: string
-  ): Promise<SmartSuggestion[]> => {
-    const results: SmartSuggestion[] = [];
-
-    // Filter pitches of the requested type and city
-    const candidatePitches = pitches.filter(p => {
-      const v = venues.find(vn => vn.id === p.venueId);
-      if (!v) return false;
-      if (city && v.city !== city) return false;
-      return p.type === pitchType;
-    });
-
-    // Build time candidates: same time, ±2h (within 08:00-23:00)
-    const [h, m] = selectedTime.split(':').map(Number);
-    const timeCandidates: string[] = [];
-    const pushTime = (hour: number) => {
-      if (hour >= 8 && hour <= 23) timeCandidates.push(`${hour.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`);
-    };
-    pushTime(h);
-    pushTime(h - 2);
-    pushTime(h - 1);
-    pushTime(h + 1);
-    pushTime(h + 2);
-
-    // Search next 7 days
-    for (let d = 0; d < 7; d++) {
-      const date = new Date(selectedDate);
-      date.setDate(selectedDate.getDate() + d);
-      const dateStr = date.toISOString().split('T')[0];
-
-      for (const pitch of candidatePitches) {
-        const venue = venues.find(v => v.id === pitch.venueId);
-        if (!venue) continue;
-
-        // Check each time candidate and only add if available
-        for (const time of timeCandidates) {
-          const ok = await checkPitchAvailability(pitch, date, time);
-          if (ok) {
-            results.push({ date: dateStr, time, venue, pitch, price: pitch.pricePerSlot });
-          }
-        }
-        
-        // Stop after we find some suggestions per day to avoid flooding
-        if (results.length >= 15) return results;
-      }
-    }
-
-    return results;
-  };
-
-  const checkPitchAvailability = async (pitch: Pitch, date: Date, time: string): Promise<boolean> => {
-          // Checking pitch availability for specific date and time
-    
-    // Check if the date is blocked
-    const dayOfWeek = date.getDay();
-    const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-    const dayName = dayNames[dayOfWeek];
-    
-    const daySchedule = pitch.defaultOpeningHours[dayName];
-          // Opening hours for the day
-    
-    if (!daySchedule || !daySchedule.isOpen) {
-              // Pitch is closed on this day
-      return false;
-    }
-
-    // Handle both old and new opening hours structure
-    let isWithinOpeningHours = false;
-    
-    // Create selectedTime object for both cases
-    const [hours, minutes] = time.split(':').map(Number);
-    const selectedTime = new Date(date);
-    selectedTime.setHours(hours, minutes, 0, 0);
-    const selectedTimeString = selectedTime.toTimeString().slice(0, 5);
-    
-    if ('slots' in daySchedule && daySchedule.slots && daySchedule.slots.length > 0) {
-      // New structure with slots array
-      isWithinOpeningHours = daySchedule.slots.some(slot => {
-        // Time check for slots format
-        return selectedTimeString >= slot.start && selectedTimeString < slot.end;
-      });
-    } else if ('open' in daySchedule && 'close' in daySchedule && daySchedule.open && daySchedule.close) {
-      // Old structure with open/close times
-              // Time check for open/close format
-      isWithinOpeningHours = selectedTimeString >= daySchedule.open && selectedTimeString < daySchedule.close;
-    }
-
-    if (!isWithinOpeningHours) {
-              // Time is outside opening hours
-        return false;
-      }
-      
-      // Time is within opening hours
-
-    // Check if there are conflicting bookings
-    const conflictingBookings = bookings.filter(booking => 
-      booking.pitchId === pitch.id &&
-      booking.status !== 'cancelled' &&
-      new Date(booking.startTime).toDateString() === date.toDateString()
-    );
-
-          // Found conflicting bookings
-
-    // Check if the selected time conflicts with any existing booking
-    for (const booking of conflictingBookings) {
-      const bookingStart = new Date(booking.startTime);
-      const bookingEnd = new Date(booking.endTime);
-      
-      if (selectedTime >= bookingStart && selectedTime < bookingEnd) {
-                  // Time conflicts with existing booking
-        return false;
-      }
-    }
-
-          // Pitch is available for booking
-      return true;
-  };
-
   const handleBookNow = (venueId: string, pitchId: string, time: string) => {
     // Redirect to a booking page with pre-filled data
     const params = new URLSearchParams({
@@ -281,11 +60,6 @@ export default function FSEPage() {
       time
     });
     router.push(`/book?${params.toString()}`);
-  };
-
-  const getCurrentDate = () => {
-    const today = new Date();
-    return today.toISOString().split('T')[0];
   };
 
   return (
@@ -422,7 +196,7 @@ export default function FSEPage() {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-1 gap-4">
-                {searchResults.map((result, index) => (
+                {searchResults.map((result) => (
                   <div key={`${result.venue.id}-${result.pitch.id}`} className={`bg-white/90 backdrop-blur-sm rounded-xl shadow-lg ${result.venue.name?.toLowerCase().includes('tziolas') ? 'border-2 border-green-700' : 'border border-gray-100'} hover:shadow-xl hover:bg-white transition-all duration-300 overflow-hidden mb-3 sm:mb-4 w-full`}>
                     <div className="p-3 sm:p-4">
                       {/* Horizontal Layout */}

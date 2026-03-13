@@ -39,7 +39,7 @@ export async function sendEmail(options: EmailOptions): Promise<{ success: boole
       });
 
       if (response.ok) {
-        const result = await response.json();
+        await response.json();
         await logEmail({ to, subject, status: 'sent', timestamp: Date.now(), provider: 'resend' });
         return { success: true, provider: 'resend' };
       } else {

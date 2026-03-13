@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -12,8 +12,8 @@ import {
   UserIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import { bookingService, pitchService, blockedDateService } from '@/lib/firebase-services';
-import { Pitch, Booking, BlockedDate } from '@/types';
+import { bookingService } from '@/lib/firebase-services';
+import { Pitch, Booking, BlockedDate, OpeningSlot, getOpeningSlots } from '@/types';
 
 // Form validation schema
 const bookingCreateSchema = z.object({
@@ -79,19 +79,7 @@ export default function NewBookingPage() {
     }
   }, [setValue]);
 
-  // Check authentication and load pitches
-  useEffect(() => {
-    if (authLoading) return;
-    
-    if (!user || !venueOwner) {
-      router.push('/venue-login');
-      return;
-    }
-    
-    loadPitches();
-  }, [user, venueOwner, authLoading, router]);
-
-  const loadPitches = async () => {
+  const loadPitches = useCallback(async () => {
     if (!venueOwner || !user) return;
     
     try {
@@ -122,25 +110,25 @@ export default function NewBookingPage() {
       const data = await response.json();
       
       // Convert ISO strings back to Date objects
-      const convertedPitches = (data.pitches || []).map((pitch: any) => ({
+      const convertedPitches = (data.pitches || []).map((pitch: Record<string, unknown>) => ({
         ...pitch,
-        createdAt: new Date(pitch.createdAt),
-        updatedAt: new Date(pitch.updatedAt),
+        createdAt: new Date(pitch.createdAt as string),
+        updatedAt: new Date(pitch.updatedAt as string),
       }));
 
-      const convertedBookings = (data.bookings || []).map((booking: any) => ({
+      const convertedBookings = (data.bookings || []).map((booking: Record<string, unknown>) => ({
         ...booking,
-        startTime: new Date(booking.startTime),
-        endTime: new Date(booking.endTime),
-        createdAt: new Date(booking.createdAt),
-        updatedAt: new Date(booking.updatedAt),
+        startTime: new Date(booking.startTime as string),
+        endTime: new Date(booking.endTime as string),
+        createdAt: new Date(booking.createdAt as string),
+        updatedAt: new Date(booking.updatedAt as string),
       }));
 
-      const convertedBlockedDates = (data.blockedDates || []).map((blocked: any) => ({
+      const convertedBlockedDates = (data.blockedDates || []).map((blocked: Record<string, unknown>) => ({
         ...blocked,
-        date: new Date(blocked.date),
-        createdAt: new Date(blocked.createdAt),
-        updatedAt: new Date(blocked.updatedAt),
+        date: new Date(blocked.date as string),
+        createdAt: new Date(blocked.createdAt as string),
+        updatedAt: new Date(blocked.updatedAt as string),
       }));
 
       setPitches(convertedPitches);
@@ -153,7 +141,19 @@ export default function NewBookingPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [venueOwner, user]);
+
+  // Check authentication and load pitches
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (!user || !venueOwner) {
+      router.push('/venue-login');
+      return;
+    }
+
+    loadPitches();
+  }, [user, venueOwner, authLoading, router, loadPitches]);
 
   const handleFormSubmit = async (data: BookingCreateFormData) => {
     if (!venueOwner) return;
@@ -274,14 +274,11 @@ export default function NewBookingPage() {
 
 
   // Generate available slots when pitch or date changes
+  const watchedPitchId = watch('pitchId');
   useEffect(() => {
-    generateAvailableSlots();
-  }, [watch('pitchId'), selectedDate, existingBookings, blockedDates]);
-
-  const generateAvailableSlots = () => {
-    const selectedPitchId = watch('pitchId');
+    const selectedPitchId = watchedPitchId;
     const date = selectedDate;
-    
+
     if (!selectedPitchId || !date) {
       setAvailableSlots([]);
       return;
@@ -298,67 +295,68 @@ export default function NewBookingPage() {
     const dayOfWeek = selectedDateObj.getDay();
     const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const dayName = dayNames[dayOfWeek];
-    
+
     const daySchedule = selectedPitch.defaultOpeningHours[dayName];
     console.log('Day schedule:', daySchedule);
-    
-    if (!daySchedule || !daySchedule.isOpen || !daySchedule.slots?.length) {
+
+    const daySlots = getOpeningSlots(daySchedule);
+    if (!daySchedule || !daySchedule.isOpen || !daySlots.length) {
       console.log('No slots available for this day');
       setAvailableSlots([]);
-      return [];
+      return;
     }
 
     // Check if the date is blocked
     const isDateBlocked = blockedDates.some(blockedDate => {
       if (blockedDate.pitchId !== selectedPitchId) return false;
-      
+
       const startDate = new Date(blockedDate.startDate);
       const endDate = new Date(blockedDate.endDate);
       const checkDate = new Date(selectedDateObj);
-      
+
       // Reset time to compare only dates
       startDate.setHours(0, 0, 0, 0);
       endDate.setHours(23, 59, 59, 999);
       checkDate.setHours(12, 0, 0, 0);
-      
+
       return checkDate >= startDate && checkDate <= endDate;
     });
-    
+
     if (isDateBlocked) {
       console.log('Date is blocked');
       setAvailableSlots([]);
-      return [];
+      return;
     }
 
     // Generate time slots based on opening slots and slot duration
     const slots: string[] = [];
-    
+
     // For each opening slot
-    daySchedule.slots.forEach(openingSlot => {
+    daySlots.forEach((openingSlot: OpeningSlot) => {
       console.log('Processing slot:', openingSlot);
       const startTime = new Date(`2000-01-01T${openingSlot.start}`);
       const endTime = new Date(`2000-01-01T${openingSlot.end}`);
-      
+
       const currentTime = new Date(startTime);
-      
+
       while (currentTime < endTime) {
         const slotStart = currentTime.toTimeString().slice(0, 5);
         const slotEnd = new Date(currentTime.getTime() + selectedPitch.slotDuration * 60000);
         const slotEndTime = slotEnd.toTimeString().slice(0, 5);
-        
+
         // Only add slot if it doesn't exceed closing time
         if (slotEnd <= endTime) {
           slots.push(`${slotStart} - ${slotEndTime}`);
         }
-        
+
         currentTime.setMinutes(currentTime.getMinutes() + selectedPitch.slotDuration);
       }
     });
 
     // Filter out already booked slots (including pending bookings)
     const bookedSlots = existingBookings
-      .filter(booking => 
-        booking.pitchId === selectedPitchId && 
+      .filter(booking =>
+        booking.pitchId === selectedPitchId &&
         booking.status !== 'cancelled' && // Don't count cancelled bookings
         new Date(booking.startTime).toDateString() === selectedDateObj.toDateString()
       )
@@ -372,16 +370,15 @@ export default function NewBookingPage() {
 
     console.log('All slots:', slots);
     console.log('Booked slots:', bookedSlots);
-    console.log('Existing bookings for this pitch and date:', existingBookings.filter(booking => 
-      booking.pitchId === selectedPitchId && 
+    console.log('Existing bookings for this pitch and date:', existingBookings.filter(booking =>
+      booking.pitchId === selectedPitchId &&
       new Date(booking.startTime).toDateString() === selectedDateObj.toDateString()
     ));
 
-    const availableSlots = slots.filter(slot => !bookedSlots.includes(slot));
-    console.log('Available slots:', availableSlots);
-    setAvailableSlots(availableSlots);
-    return availableSlots;
-  };
+    const computedAvailableSlots = slots.filter(slot => !bookedSlots.includes(slot));
+    console.log('Available slots:', computedAvailableSlots);
+    setAvailableSlots(computedAvailableSlots);
+  }, [watchedPitchId, selectedDate, existingBookings, blockedDates, pitches]);
 
   const generateRecurringDates = (startDate: string, frequency: string, interval: number, occurrences: number) => {
     const dates: string[] = [];
@@ -751,7 +748,7 @@ export default function NewBookingPage() {
                           recurringSettings.frequency, 
                           recurringSettings.interval, 
                           Math.min(recurringSettings.occurrences, 5)
-                        ).map((date, index) => (
+                        ).map((date) => (
                           <div key={date} className="flex items-center justify-between">
                             <span>{new Date(date).toLocaleDateString('el-GR', { 
                               weekday: 'long', 

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Cookie, Settings } from 'lucide-react';
+import { Cookie, Settings } from 'lucide-react';
 
 export default function CookieConsent() {
   const [showBanner, setShowBanner] = useState(false);
@@ -17,25 +17,25 @@ export default function CookieConsent() {
     // Check if user has already made a choice
     const consent = localStorage.getItem('cookie-consent');
     const consentTimestamp = localStorage.getItem('cookie-consent-timestamp');
-    
+
     if (!consent || !consentTimestamp) {
-      setShowBanner(true);
+      queueMicrotask(() => setShowBanner(true));
     } else {
       // Check if consent is older than 2 months (60 days)
       const twoMonthsAgo = new Date();
       twoMonthsAgo.setDate(twoMonthsAgo.getDate() - 60);
       const savedTimestamp = new Date(consentTimestamp);
-      
+
       if (savedTimestamp < twoMonthsAgo) {
         // Consent expired, show banner again
-        setShowBanner(true);
+        queueMicrotask(() => setShowBanner(true));
         // Clear old consent data
         localStorage.removeItem('cookie-consent');
         localStorage.removeItem('cookie-consent-timestamp');
       } else {
         // Consent is still valid
         const savedPreferences = JSON.parse(consent);
-        setPreferences(savedPreferences);
+        queueMicrotask(() => setPreferences(savedPreferences));
       }
     }
   }, []);

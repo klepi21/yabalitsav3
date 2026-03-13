@@ -29,38 +29,37 @@ export default function EditAcademyUserPage({ params }: PageProps) {
   useEffect(() => {
     if (authLoading) return;
     if (!authUser || !venueOwner) { router.push('/venue-login'); return; }
+    const loadData = async () => {
+      try {
+        setIsDataLoading(true);
+        const [userData, groupsData, squadsData, allUsers] = await Promise.all([
+          academyUserService.getById(id),
+          userGroupService.getOrSeed(venueId),
+          squadService.getByVenue(venueId),
+          academyUserService.getByVenue(venueId),
+        ]);
+
+        if (!userData) {
+          setError('Ο χρήστης δεν βρέθηκε');
+          return;
+        }
+
+        setUser(userData);
+        setGroups(groupsData);
+        setSquads(squadsData);
+
+        const pGroup = groupsData.find((g) => g.isDefault && g.name === 'Γονέας');
+        if (pGroup) {
+          setParentCandidates(allUsers.filter((u) => u.groupId === pGroup.id));
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης δεδομένων');
+      } finally {
+        setIsDataLoading(false);
+      }
+    };
     loadData();
-  }, [id, authUser, venueOwner, authLoading]);
-
-  const loadData = async () => {
-    try {
-      setIsDataLoading(true);
-      const [userData, groupsData, squadsData, allUsers] = await Promise.all([
-        academyUserService.getById(id),
-        userGroupService.getOrSeed(venueId),
-        squadService.getByVenue(venueId),
-        academyUserService.getByVenue(venueId),
-      ]);
-
-      if (!userData) {
-        setError('Ο χρήστης δεν βρέθηκε');
-        return;
-      }
-
-      setUser(userData);
-      setGroups(groupsData);
-      setSquads(squadsData);
-
-      const pGroup = groupsData.find((g) => g.isDefault && g.name === 'Γονέας');
-      if (pGroup) {
-        setParentCandidates(allUsers.filter((u) => u.groupId === pGroup.id));
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης δεδομένων');
-    } finally {
-      setIsDataLoading(false);
-    }
-  };
+  }, [id, authUser, venueOwner, authLoading, router, venueId]);
 
   const parentGroup = useMemo(
     () => groups.find((g) => g.isDefault && g.name === 'Γονέας'),

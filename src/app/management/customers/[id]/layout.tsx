@@ -1,13 +1,6 @@
 import { Metadata } from 'next';
 
-interface CustomerLayoutProps {
-  children: React.ReactNode;
-  params: Promise<{ id: string }>;
-}
-
-export async function generateMetadata({ params }: CustomerLayoutProps): Promise<Metadata> {
-  const { id } = await params;
-  
+export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `Πελάτης - Διαχείριση Γηπέδου`,
     description: `Προβολή λεπτομερειών πελάτη. Ιστορικό κρατήσεων, πληροφορίες επικοινωνίας και διαχείριση στοιχείων.`,

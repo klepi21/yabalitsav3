@@ -107,10 +107,6 @@ export default function NewPitchPage() {
     }
   };
 
-  const toggleDayOpen = (day: string) => {
-    const currentValue = watch(`defaultOpeningHours.${day}.isOpen` as any);
-    setValue(`defaultOpeningHours.${day}.isOpen` as any, !currentValue);
-  };
 
   if (authLoading || !venueOwner) {
     return (
@@ -220,7 +216,11 @@ export default function NewPitchPage() {
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Προεπιλεγμένες Ώρες Λειτουργίας</h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {(['monday','tuesday','wednesday','thursday','friday','saturday','sunday'] as const).map((day) => (
+              {(['monday','tuesday','wednesday','thursday','friday','saturday','sunday'] as const).map((day) => {
+                const openingHours = watch('defaultOpeningHours');
+                const dayData = openingHours[day];
+                const daySlots = dayData?.slots || [];
+                return (
                 <div key={day} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <label className="text-sm font-medium text-gray-700 capitalize">
@@ -231,23 +231,27 @@ export default function NewPitchPage() {
                        day === 'friday' ? 'Παρασκευή' :
                        day === 'saturday' ? 'Σάββατο' : 'Κυριακή'}
                     </label>
+                    { }
                     <input
                       type="checkbox"
-                      {...register(`defaultOpeningHours.${day}.isOpen` as any)}
+                      {...register(`defaultOpeningHours.${day}.isOpen`)}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
                   </div>
-                  {watch(`defaultOpeningHours.${day}.isOpen` as any) && (
+                  { }
+                  {dayData?.isOpen && (
                     <div className="space-y-3">
-                      {(watch(`defaultOpeningHours.${day}.slots` as any) || []).map((_: any, index: number) => (
+                      { }
+                      {daySlots.map((_: { start: string; end: string }, index: number) => (
                         <div key={index} className="flex items-end gap-2">
                           <div>
                             <label className="block text-xs text-gray-500">Άνοιγμα</label>
+                            { }
                             <input
                               type="text"
                               placeholder="HH:MM"
                               pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
-                              {...register(`defaultOpeningHours.${day}.slots.${index}.start` as any)}
+                              {...register(`defaultOpeningHours.${day}.slots.${index}.start`)}
                               className="block w-full text-sm border border-gray-300 rounded px-2 py-1"
                               onBlur={(e) => {
                                 const v = e.target.value; if (v && !v.includes(':')) e.target.value = v.padStart(4,'0').replace(/(\d{2})(\d{2})/,'$1:$2');
@@ -256,11 +260,12 @@ export default function NewPitchPage() {
                           </div>
                           <div>
                             <label className="block text-xs text-gray-500">Κλείσιμο</label>
+                            { }
                             <input
                               type="text"
                               placeholder="HH:MM"
                               pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
-                              {...register(`defaultOpeningHours.${day}.slots.${index}.end` as any)}
+                              {...register(`defaultOpeningHours.${day}.slots.${index}.end`)}
                               className="block w-full text-sm border border-gray-300 rounded px-2 py-1"
                               onBlur={(e) => {
                                 const v = e.target.value; if (v && !v.includes(':')) e.target.value = v.padStart(4,'0').replace(/(\d{2})(\d{2})/,'$1:$2');
@@ -270,9 +275,8 @@ export default function NewPitchPage() {
                           <button
                             type="button"
                             onClick={() => {
-                              const slots = watch(`defaultOpeningHours.${day}.slots` as any) || [];
-                              const next = [...slots]; next.splice(index,1);
-                              setValue(`defaultOpeningHours.${day}.slots` as any, next);
+                              const next = [...daySlots]; next.splice(index,1);
+                              setValue(`defaultOpeningHours.${day}.slots`, next);
                             }}
                             className="text-red-600 hover:text-red-800 px-2 py-1"
                           >
@@ -283,8 +287,7 @@ export default function NewPitchPage() {
                       <button
                         type="button"
                         onClick={() => {
-                          const slots = watch(`defaultOpeningHours.${day}.slots` as any) || [];
-                          setValue(`defaultOpeningHours.${day}.slots` as any, [...slots, { start: '', end: '' }]);
+                          setValue(`defaultOpeningHours.${day}.slots`, [...daySlots, { start: '', end: '' }]);
                         }}
                         className="text-sm text-green-600 hover:text-green-700 font-medium"
                       >
@@ -293,7 +296,8 @@ export default function NewPitchPage() {
                     </div>
                   )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
 

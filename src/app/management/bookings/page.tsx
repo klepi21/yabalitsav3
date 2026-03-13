@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { 
@@ -12,7 +12,7 @@ import {
   TrashIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import { bookingService, pitchService, blockedDateService } from '@/lib/firebase-services';
+import { bookingService } from '@/lib/firebase-services';
 import { Booking, Pitch, BlockedDate } from '@/types';
 import WeeklyCalendar from '@/components/WeeklyCalendar';
 
@@ -30,21 +30,9 @@ export default function BookingsPage() {
   const [deletingBookingId, setDeletingBookingId] = useState<string | null>(null);
   const [updatingBookingId, setUpdatingBookingId] = useState<string | null>(null);
 
-  // Check authentication
-  useEffect(() => {
-    if (authLoading) return;
-    
-    if (!user || !venueOwner) {
-      router.push('/venue-login');
-      return;
-    }
-    
-    loadBookings();
-  }, [user, venueOwner, authLoading, router]);
-
-  const loadBookings = async () => {
+  const loadBookings = useCallback(async () => {
     if (!venueOwner || !user) return;
-    
+
     try {
       setError(null);
       // Get auth token
@@ -71,27 +59,27 @@ export default function BookingsPage() {
       }
 
       const data = await response.json();
-      
+
       // Convert ISO strings back to Date objects
-      const convertedBookings = (data.bookings || []).map((booking: any) => ({
+      const convertedBookings = (data.bookings || []).map((booking: Record<string, unknown>) => ({
         ...booking,
-        startTime: new Date(booking.startTime),
-        endTime: new Date(booking.endTime),
-        createdAt: new Date(booking.createdAt),
-        updatedAt: new Date(booking.updatedAt),
+        startTime: new Date(booking.startTime as string),
+        endTime: new Date(booking.endTime as string),
+        createdAt: new Date(booking.createdAt as string),
+        updatedAt: new Date(booking.updatedAt as string),
       }));
 
-      const convertedPitches = (data.pitches || []).map((pitch: any) => ({
+      const convertedPitches = (data.pitches || []).map((pitch: Record<string, unknown>) => ({
         ...pitch,
-        createdAt: new Date(pitch.createdAt),
-        updatedAt: new Date(pitch.updatedAt),
+        createdAt: new Date(pitch.createdAt as string),
+        updatedAt: new Date(pitch.updatedAt as string),
       }));
 
-      const convertedBlockedDates = (data.blockedDates || []).map((blocked: any) => ({
+      const convertedBlockedDates = (data.blockedDates || []).map((blocked: Record<string, unknown>) => ({
         ...blocked,
-        date: new Date(blocked.date),
-        createdAt: new Date(blocked.createdAt),
-        updatedAt: new Date(blocked.updatedAt),
+        date: new Date(blocked.date as string),
+        createdAt: new Date(blocked.createdAt as string),
+        updatedAt: new Date(blocked.updatedAt as string),
       }));
 
       setBookings(convertedBookings);
@@ -108,7 +96,19 @@ export default function BookingsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [venueOwner, user]);
+
+  // Check authentication
+  useEffect(() => {
+    if (authLoading) return;
+
+    if (!user || !venueOwner) {
+      router.push('/venue-login');
+      return;
+    }
+
+    loadBookings();
+  }, [user, venueOwner, authLoading, router, loadBookings]);
 
   // Filter and sort bookings - pending first, then by date
   const filteredBookings = bookings

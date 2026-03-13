@@ -11,7 +11,7 @@ import {
   BuildingOfficeIcon
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
-import { venueService, paymentService } from '@/lib/firebase-services';
+import { venueService } from '@/lib/firebase-services';
 import { Venue } from '@/types';
 import SupportEmail from '@/components/SupportEmail';
 import { calculateDaysRemaining, getSubscriptionEndDate, formatDateSafely } from '@/lib/subscription-utils';
@@ -118,14 +118,14 @@ export default function SettingsPage() {
         
         // Load last payment data
         if (data.payments && data.payments.length > 0) {
-          const payments = data.payments.map((p: any) => ({
+          const payments = data.payments.map((p: Record<string, unknown>) => ({
             ...p,
-            createdAt: typeof p.createdAt === 'string' ? p.createdAt : new Date(p.createdAt).toISOString(),
-            updatedAt: typeof p.updatedAt === 'string' ? p.updatedAt : new Date(p.updatedAt).toISOString(),
+            createdAt: typeof p.createdAt === 'string' ? p.createdAt : new Date(p.createdAt as number).toISOString(),
+            updatedAt: typeof p.updatedAt === 'string' ? p.updatedAt : new Date(p.updatedAt as number).toISOString(),
           }));
-          
+
           // Sort by payment date and get the most recent
-          const sortedPayments = payments.sort((a: any, b: any) => {
+          const sortedPayments = payments.sort((a: { paymentDate?: string }, b: { paymentDate?: string }) => {
             const dateA = a.paymentDate ? new Date(a.paymentDate).getTime() : 0;
             const dateB = b.paymentDate ? new Date(b.paymentDate).getTime() : 0;
             return dateB - dateA;
@@ -316,7 +316,7 @@ export default function SettingsPage() {
         
         {/* Subscription Status Badge - matches SidebarWrapper logic */}
         {venue && (() => {
-          const daysRemaining = calculateDaysRemaining(venue, lastPayment);
+          const daysRemaining = calculateDaysRemaining(venue);
           
           if (venue.plan === 'subscription') {
             if (daysRemaining !== null && daysRemaining > 7) {
@@ -552,7 +552,7 @@ export default function SettingsPage() {
                     </div>
                     <div className="text-2xl font-bold text-green-700">
                       {(() => {
-                        const daysRemaining = calculateDaysRemaining(venue, lastPayment);
+                        const daysRemaining = calculateDaysRemaining(venue);
                         return daysRemaining !== null ? `${daysRemaining} ημέρες` : '0 ημέρες';
                       })()}
                     </div>
@@ -573,7 +573,7 @@ export default function SettingsPage() {
                     {/* Renewal/Upgrade Button - positioned under the plan info */}
                     <div className="mt-3">
                       {(() => {
-                        const daysRemaining = calculateDaysRemaining(venue, lastPayment);
+                        const daysRemaining = calculateDaysRemaining(venue);
                         
                         if (venue.plan === 'subscription') {
                           if (daysRemaining !== null && daysRemaining <= 7) {
@@ -624,7 +624,7 @@ export default function SettingsPage() {
                         <span className="font-medium">Λήγει στις:</span>
                       </div>
                       {(() => {
-                        const daysRemaining = calculateDaysRemaining(venue, lastPayment);
+                        const daysRemaining = calculateDaysRemaining(venue);
                         const endDateInfo = getSubscriptionEndDate(venue, lastPayment);
                         
                         if (endDateInfo) {

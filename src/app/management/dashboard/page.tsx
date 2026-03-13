@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { bookingService, pitchService, venueService } from '@/lib/firebase-services';
+import { bookingService } from '@/lib/firebase-services';
 import { Booking, Pitch, Venue } from '@/types';
 import { PlusIcon, ChevronUpIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
 
@@ -37,6 +37,74 @@ export default function DashboardPage() {
   // Notification state
   const [showNotifications, setShowNotifications] = useState(false);
 
+  // Loading state (moved up for proper hook ordering)
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const loadDashboardData = useCallback(async () => {
+    if (!venueOwner?.venueId || !user) {
+      return;
+    }
+
+    setLoadError(null);
+
+    try {
+      const token = await user.getIdToken();
+      if (!token) {
+        throw new Error('No auth token available');
+      }
+
+      const response = await fetch('/api/dashboard/get-data', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          venueId: venueOwner.venueId,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch dashboard data');
+      }
+
+      const data = await response.json();
+
+      const convertedBookings = (data.bookings || []).map((booking: Record<string, unknown>) => ({
+        ...booking,
+        startTime: new Date(booking.startTime as string),
+        endTime: new Date(booking.endTime as string),
+        createdAt: new Date(booking.createdAt as string),
+        updatedAt: new Date(booking.updatedAt as string),
+      }));
+
+      const convertedPitches = (data.pitches || []).map((pitch: Record<string, unknown>) => ({
+        ...pitch,
+        createdAt: new Date(pitch.createdAt as string),
+        updatedAt: new Date(pitch.updatedAt as string),
+      }));
+
+      const convertedVenue = data.venue ? {
+        ...data.venue,
+        createdAt: new Date(data.venue.createdAt),
+        updatedAt: new Date(data.venue.updatedAt),
+      } : null;
+
+      setBookings(convertedBookings);
+      setPitches(convertedPitches);
+      setVenue(convertedVenue);
+
+      if (!convertedVenue && venueOwner.venueId) {
+        setLoadError('Venue data not found. Please contact support.');
+      }
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to load dashboard data';
+      setLoadError(errorMessage);
+    }
+  }, [venueOwner?.venueId, user]);
+
   // Close notifications when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -64,7 +132,7 @@ export default function DashboardPage() {
     if (venueOwner?.venueId) {
       loadDashboardData();
     }
-  }, [venueOwner?.venueId]);
+  }, [venueOwner?.venueId, loadDashboardData]);
 
   // Smart refresh: 5 minutes when active, pause when inactive
   useEffect(() => {
@@ -114,11 +182,7 @@ export default function DashboardPage() {
       document.removeEventListener('keydown', handleUserActivity);
       document.removeEventListener('click', handleUserActivity);
     };
-  }, [venueOwner?.venueId]);
-
-  // Prevent infinite loading by adding a loading state
-  const [isLoading, setIsLoading] = useState(false);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  }, [venueOwner?.venueId, loadDashboardData]);
 
   // Helper: create slug for /book/[venueName]
   function getVenueSlug(name?: string) {
@@ -141,106 +205,6 @@ export default function DashboardPage() {
   if (!user || !venueOwner) {
     return null; // Will redirect to login
   }
-
-    const loadDashboardData = async () => {
-    if (!venueOwner?.venueId || !user) {
-      // No venue ID found in venue owner
-      return;
-    }
-
-    if (isLoading) {
-      // Already loading data, skipping
-      return;
-    }
-
-    setIsLoading(true);
-    setLoadError(null);
-
-    try {
-      // Get auth token
-      const token = await user.getIdToken();
-      if (!token) {
-        throw new Error('No auth token available');
-      }
-
-      // Use server-side API to fetch data with proper auth
-      const response = await fetch('/api/dashboard/get-data', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          venueId: venueOwner.venueId,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch dashboard data');
-      }
-
-      const data = await response.json();
-      
-      // Convert ISO strings back to Date objects
-      const convertedBookings = (data.bookings || []).map((booking: any) => ({
-        ...booking,
-        startTime: new Date(booking.startTime),
-        endTime: new Date(booking.endTime),
-        createdAt: new Date(booking.createdAt),
-        updatedAt: new Date(booking.updatedAt),
-      }));
-
-      const convertedPitches = (data.pitches || []).map((pitch: any) => ({
-        ...pitch,
-        createdAt: new Date(pitch.createdAt),
-        updatedAt: new Date(pitch.updatedAt),
-      }));
-
-      const convertedVenue = data.venue ? {
-        ...data.venue,
-        createdAt: new Date(data.venue.createdAt),
-        updatedAt: new Date(data.venue.updatedAt),
-      } : null;
-
-      setBookings(convertedBookings);
-      setPitches(convertedPitches);
-      setVenue(convertedVenue);
-      
-      // If venue data is null but we have a venueId, log an error
-      if (!convertedVenue && venueOwner.venueId) {
-        // Venue data is null but venueId exists - venue document may not exist
-        setLoadError('Venue data not found. Please contact support.');
-      }
-    } catch (error) {
-      console.error('Error loading dashboard data:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load dashboard data';
-      setLoadError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const getMonthlyRevenue = () => {
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    
-            // Calculating monthly revenue
-    
-    const monthlyBookings = bookings.filter(booking => {
-      const bookingDate = new Date(booking.startTime);
-      const isThisMonth = bookingDate.getMonth() === currentMonth;
-      const isThisYear = bookingDate.getFullYear() === currentYear;
-      const isCompleted = booking.status === 'completed';
-      
-      // Processing booking for revenue calculation
-      
-      return isThisMonth && isThisYear && isCompleted;
-    });
-    
-    const total = monthlyBookings.reduce((total, booking) => total + booking.price, 0);
-    return total || 0; // Return 0 if no bookings or NaN
-  };
 
   const getLiveBookings = () => {
     const now = new Date();
@@ -314,7 +278,7 @@ export default function DashboardPage() {
         const startTime = new Date(`2000-01-01T${openingSlot.start}`);
         const endTime = new Date(`2000-01-01T${openingSlot.end}`);
         
-        let currentTime = new Date(startTime);
+        const currentTime = new Date(startTime);
         
         while (currentTime < endTime) {
           const slotStart = currentTime.toTimeString().slice(0, 5);
@@ -337,7 +301,7 @@ export default function DashboardPage() {
       const startTime = new Date(`2000-01-01T${daySchedule.open}`);
       const endTime = new Date(`2000-01-01T${daySchedule.close}`);
       
-      let currentTime = new Date(startTime);
+      const currentTime = new Date(startTime);
       
       while (currentTime < endTime) {
         const slotStart = currentTime.toTimeString().slice(0, 5);
