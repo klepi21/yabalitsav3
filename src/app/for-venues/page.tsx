@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
 import Image from 'next/image';
@@ -50,6 +51,7 @@ export default function ForVenuesPage() {
     setSuccess(null);
 
     try {
+      console.log('Starting registration process...');
       // 1) Validate password, AFM, and terms
       // Password validation
       const strong = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_+\-={}\[\]:;"'`~<>,.?/\\]).{6,}$/;
@@ -69,6 +71,7 @@ export default function ForVenuesPage() {
       }
 
       // 2) Create auth user
+      console.log('Creating auth user...');
       const cred = await createUserWithEmailAndPassword(auth, form.ownerEmail, form.password);
 
       // 3) Get the ID token
@@ -105,12 +108,14 @@ export default function ForVenuesPage() {
 
       setSuccess('ok');
       setShowCongrats(true);
+      console.log('Registration successful, showing modal.');
       setForm({
         ownerName: '', ownerEmail: '', ownerPhone: '', password: '', confirmPassword: '',
         venueName: '', venueAddress: '', venueCity: 'Αθήνα', venueEmail: '', venuePhone: '', venueAfm: '', venueDoy: '',
         plan: 'trial', acceptTerms: false
       });
     } catch (err: any) {
+      console.error('Registration error:', err);
       setError(err?.message || 'Κάτι πήγε στραβά.');
     } finally {
       setIsSubmitting(false);
@@ -155,23 +160,23 @@ export default function ForVenuesPage() {
 
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Ονοματεπώνυμο Ιδιοκτήτη</label>
-              <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.ownerName} onChange={e=>setForm({...form, ownerName:e.target.value})} required />
+              <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.ownerName} onChange={e => setForm({ ...form, ownerName: e.target.value })} required />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Email Ιδιοκτήτη</label>
-              <input type="email" className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.ownerEmail} onChange={e=>setForm({...form, ownerEmail:e.target.value})} required />
+              <input type="email" className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.ownerEmail} onChange={e => setForm({ ...form, ownerEmail: e.target.value })} required />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Τηλέφωνο</label>
-              <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.ownerPhone} onChange={e=>setForm({...form, ownerPhone:e.target.value})} required />
+              <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.ownerPhone} onChange={e => setForm({ ...form, ownerPhone: e.target.value })} required />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Κωδικός</label>
-              <input type="password" className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.password} onChange={e=>setForm({...form, password:e.target.value})} required />
+              <input type="password" className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} required />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Επιβεβαίωση Κωδικού</label>
-              <input type="password" className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.confirmPassword} onChange={e=>setForm({...form, confirmPassword:e.target.value})} required />
+              <input type="password" className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.confirmPassword} onChange={e => setForm({ ...form, confirmPassword: e.target.value })} required />
             </div>
             {/* Password rules checklist */}
             <div className="md:col-span-2 text-xs text-gray-600">
@@ -199,18 +204,18 @@ export default function ForVenuesPage() {
 
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Επωνυμία Εταιρείας</label>
-              <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.venueName} onChange={e=>setForm({...form, venueName:e.target.value})} required />
+              <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.venueName} onChange={e => setForm({ ...form, venueName: e.target.value })} required />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Διεύθυνση Γηπέδου</label>
-              <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.venueAddress} onChange={e=>setForm({...form, venueAddress:e.target.value})} required />
+              <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.venueAddress} onChange={e => setForm({ ...form, venueAddress: e.target.value })} required />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Πόλη</label>
-              <select 
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white" 
-                value={form.venueCity} 
-                onChange={e=>setForm({...form, venueCity:e.target.value})} 
+              <select
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white"
+                value={form.venueCity}
+                onChange={e => setForm({ ...form, venueCity: e.target.value })}
                 required
               >
                 <option value="Αθήνα">Αθήνα</option>
@@ -220,11 +225,11 @@ export default function ForVenuesPage() {
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">ΑΦΜ Επιχείρησης</label>
-              <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.venueAfm} onChange={e=>setForm({...form, venueAfm:e.target.value})} placeholder="9 ψηφία" required />
+              <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.venueAfm} onChange={e => setForm({ ...form, venueAfm: e.target.value })} placeholder="9 ψηφία" required />
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-700 mb-1">Δ.Ο.Υ.</label>
-              <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.venueDoy} onChange={e=>setForm({...form, venueDoy:e.target.value})} required />
+              <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={form.venueDoy} onChange={e => setForm({ ...form, venueDoy: e.target.value })} required />
             </div>
 
             {error && <div className="md:col-span-2 text-sm text-red-600">{error}</div>}
@@ -235,7 +240,7 @@ export default function ForVenuesPage() {
                 type="checkbox"
                 className="mt-0.5"
                 checked={form.acceptTerms}
-                onChange={(e)=>setForm({...form, acceptTerms: e.target.checked})}
+                onChange={(e) => setForm({ ...form, acceptTerms: e.target.checked })}
               />
               <label htmlFor="acceptTerms" className="select-none">
                 Αποδέχομαι τους <Link href="/terms" className="underline text-blue-600 hover:text-blue-800">Όρους Χρήσης</Link> και την <Link href="/privacy" className="underline text-blue-600 hover:text-blue-800">Πολιτική Απορρήτου</Link>.
@@ -257,8 +262,8 @@ export default function ForVenuesPage() {
               <h3 className="text-2xl font-bold text-gray-900 mb-2">Συγχαρητήρια!</h3>
               <p className="text-gray-600 mb-6">Η εγγραφή σας ολοκληρώθηκε. Μπορείτε να ξεκινήσετε να χρησιμοποιείτε το διαχειριστικό.</p>
               <div className="flex gap-3 justify-center">
-                <button onClick={()=>router.push('/management')} className="bg-green-700 hover:bg-green-800 text-white px-5 py-2 rounded-lg font-medium">Μετάβαση στο Διαχειριστικό</button>
-                <button onClick={()=>setShowCongrats(false)} className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-5 py-2 rounded-lg font-medium">Κλείσιμο</button>
+                <button onClick={() => router.push('/management')} className="bg-green-700 hover:bg-green-800 text-white px-5 py-2 rounded-lg font-medium">Μετάβαση στο Διαχειριστικό</button>
+                <button onClick={() => setShowCongrats(false)} className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-5 py-2 rounded-lg font-medium">Κλείσιμο</button>
               </div>
             </div>
           </div>
