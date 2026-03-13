@@ -116,7 +116,16 @@ export default function ForVenuesPage() {
       });
     } catch (err: any) {
       console.error('Registration error:', err);
-      setError(err?.message || 'Κάτι πήγε στραβά.');
+      const code = err?.code || '';
+      const firebaseErrors: Record<string, string> = {
+        'auth/email-already-in-use': 'Αυτό το email χρησιμοποιείται ήδη. Δοκιμάστε να συνδεθείτε ή χρησιμοποιήστε άλλο email.',
+        'auth/invalid-email': 'Μη έγκυρη διεύθυνση email.',
+        'auth/weak-password': 'Ο κωδικός πρέπει να είναι τουλάχιστον 6 χαρακτήρες.',
+        'auth/operation-not-allowed': 'Η εγγραφή δεν είναι διαθέσιμη αυτή τη στιγμή.',
+        'auth/too-many-requests': 'Πολλές προσπάθειες. Δοκιμάστε ξανά σε λίγο.',
+        'auth/network-request-failed': 'Πρόβλημα σύνδεσης. Ελέγξτε το internet σας.',
+      };
+      setError(firebaseErrors[code] || err?.message || 'Κάτι πήγε στραβά.');
     } finally {
       setIsSubmitting(false);
     }
