@@ -42,6 +42,21 @@ service cloud.firestore {
       allow read, write: if request.auth != null;
     }
 
+    // Academy Users collection (athletes, coaches, parents, admins)
+    match /yabalitsa_academy_users/{userId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Squads collection (teams/age groups)
+    match /yabalitsa_squads/{squadId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // User Groups collection (dynamic user categories per venue)
+    match /yabalitsa_user_groups/{groupId} {
+      allow read, write: if request.auth != null;
+    }
+
     // Subscriptions collection (one document per venue; doc ID == venueId)
     match /yabalitsa_subscriptions/{venueId} {
       // Allow reads for authenticated users who own the venue

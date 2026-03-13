@@ -5,23 +5,55 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  ChevronDownIcon,
+  ChevronRightIcon,
 } from '@heroicons/react/24/outline';
 import { useAuth } from '@/contexts/AuthContext';
 
-const navigation = [
+interface NavItem {
+  name: string;
+  href?: string;
+  emoji: string;
+  children?: { name: string; href: string; emoji: string }[];
+}
+
+const navigation: NavItem[] = [
   { name: 'Πίνακας Ελέγχου', href: '/management/dashboard', emoji: '📊' },
   { name: 'Γήπεδα', href: '/management/pitches', emoji: '🏟️' },
   { name: 'Κρατήσεις', href: '/management/bookings', emoji: '📅' },
   { name: 'Πελάτες', href: '/management/customers', emoji: '👥' },
+  {
+    name: 'Ακαδημία',
+    emoji: '🎓',
+    children: [
+      { name: 'Όλοι οι Χρήστες', href: '/management/academy/users', emoji: '👥' },
+      { name: 'Τμήματα', href: '/management/academy/squads', emoji: '⚽' },
+      { name: 'Κατηγορίες Χρηστών', href: '/management/academy/user-groups', emoji: '📋' },
+    ]
+  },
   { name: 'Αναφορές', href: '/management/reports', emoji: '📈' },
   { name: 'Ρυθμίσεις', href: '/management/settings', emoji: '⚙️' },
 ];
 
 export default function Sidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>(['Ακαδημία']);
   const pathname = usePathname();
   const { signOut } = useAuth();
+
+  const toggleMenu = (menuName: string) => {
+    setExpandedMenus(prev =>
+      prev.includes(menuName)
+        ? prev.filter(m => m !== menuName)
+        : [...prev, menuName]
+    );
+  };
+
+  const isChildActive = (item: NavItem) => {
+    if (!item.children) return false;
+    return item.children.some(child => pathname.startsWith(child.href));
+  };
 
   return (
     <>
@@ -46,13 +78,64 @@ export default function Sidebar() {
             </button>
           </div>
           <div className="border-b border-gray-200 mx-4 mb-4"></div>
-          <nav className="flex-1 space-y-2 px-4 py-3">
+          <nav className="flex-1 space-y-2 px-4 py-3 overflow-y-auto">
             {navigation.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = item.href ? pathname === item.href : false;
+              const hasChildren = !!item.children;
+              const isExpanded = expandedMenus.includes(item.name);
+              const isParentActive = isChildActive(item);
+
+              if (hasChildren) {
+                return (
+                  <div key={item.name}>
+                    <button
+                      onClick={() => toggleMenu(item.name)}
+                      className={`group flex items-center justify-between w-full p-3 text-sm font-medium rounded-xl transition-all duration-200 border-2 ${
+                        isParentActive
+                          ? 'bg-football-green/10 text-football-green border-football-green'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-lg border-gray-200 hover:border-football-green'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{item.emoji}</span>
+                        <span>{item.name}</span>
+                      </div>
+                      {isExpanded ? (
+                        <ChevronDownIcon className="h-4 w-4" />
+                      ) : (
+                        <ChevronRightIcon className="h-4 w-4" />
+                      )}
+                    </button>
+                    {isExpanded && (
+                      <div className="mt-1 ml-4 space-y-1">
+                        {item.children?.map((child) => {
+                          const isChildItemActive = pathname.startsWith(child.href);
+                          return (
+                            <Link
+                              key={child.name}
+                              href={child.href}
+                              onClick={() => setSidebarOpen(false)}
+                              className={`group flex items-center gap-2 p-2 pl-4 text-sm font-medium rounded-lg transition-all duration-200 ${
+                                isChildItemActive
+                                  ? 'bg-football-green text-white'
+                                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                              }`}
+                            >
+                              <span className="text-lg">{child.emoji}</span>
+                              <span>{child.name}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={item.name}
-                  href={item.href}
+                  href={item.href!}
                   className={`group flex flex-col items-center justify-center p-3 text-sm font-medium rounded-xl transition-all duration-200 border-2 ${
                     isActive
                       ? 'bg-football-green text-white shadow-xl transform scale-105 border-football-green'
@@ -115,13 +198,63 @@ export default function Sidebar() {
             />
           </div>
           <div className="border-b border-gray-200 mx-4 mb-4"></div>
-          <nav className="flex-1 space-y-2 px-4 py-3">
+          <nav className="flex-1 space-y-2 px-4 py-3 overflow-y-auto">
             {navigation.map((item) => {
-              const isActive = pathname === item.href;
+              const isActive = item.href ? pathname === item.href : false;
+              const hasChildren = !!item.children;
+              const isExpanded = expandedMenus.includes(item.name);
+              const isParentActive = isChildActive(item);
+
+              if (hasChildren) {
+                return (
+                  <div key={item.name}>
+                    <button
+                      onClick={() => toggleMenu(item.name)}
+                      className={`group flex items-center justify-between w-full p-3 text-sm font-medium rounded-xl transition-all duration-200 border-2 ${
+                        isParentActive
+                          ? 'bg-football-green/10 text-football-green border-football-green'
+                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-lg border-gray-200 hover:border-football-green'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{item.emoji}</span>
+                        <span>{item.name}</span>
+                      </div>
+                      {isExpanded ? (
+                        <ChevronDownIcon className="h-4 w-4" />
+                      ) : (
+                        <ChevronRightIcon className="h-4 w-4" />
+                      )}
+                    </button>
+                    {isExpanded && (
+                      <div className="mt-1 ml-4 space-y-1">
+                        {item.children?.map((child) => {
+                          const isChildItemActive = pathname.startsWith(child.href);
+                          return (
+                            <Link
+                              key={child.name}
+                              href={child.href}
+                              className={`group flex items-center gap-2 p-2 pl-4 text-sm font-medium rounded-lg transition-all duration-200 ${
+                                isChildItemActive
+                                  ? 'bg-football-green text-white'
+                                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                              }`}
+                            >
+                              <span className="text-lg">{child.emoji}</span>
+                              <span>{child.name}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
               return (
                 <Link
                   key={item.name}
-                  href={item.href}
+                  href={item.href!}
                   className={`group flex flex-col items-center justify-center p-3 text-sm font-medium rounded-xl transition-all duration-200 border-2 ${
                     isActive
                       ? 'bg-football-green text-white shadow-xl transform scale-105 border-football-green'
