@@ -38,7 +38,7 @@ const navigation: NavItem[] = [
 
 export default function Sidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [expandedMenus, setExpandedMenus] = useState<string[]>(['Ακαδημία']);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const pathname = usePathname();
   const { signOut } = useAuth();
 

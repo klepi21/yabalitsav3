@@ -39,15 +39,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } else {
         setVenueOwner(null);
-        // User logged out, redirect to venue-login
-        router.push('/venue-login');
       }
       
       setIsLoading(false);
     });
 
     return () => unsubscribe();
-  }, [router]);
+  }, []);
 
   const signOut = async () => {
     try {

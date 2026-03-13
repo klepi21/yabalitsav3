@@ -68,6 +68,8 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
   const [venue, setVenue] = useState<Venue | null>(null);
   const [pitches, setPitches] = useState<Pitch[]>([]);
   const [selectedPitch, setSelectedPitch] = useState<Pitch | null>(null);
+  const [dataLoaded, setDataLoaded] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [currentStep, setCurrentStep] = useState<'pitch' | 'date' | 'slots' | 'confirmation'>('pitch');
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<{ date: string; time: string } | null>(null);
@@ -116,6 +118,9 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
           v.name && v.name.toLowerCase().replace(/\s+/g, '') === venueName.toLowerCase().replace(/\s+/g, '')
         );
 
+        console.log('All venues found:', allVenues.map(v => v.name));
+        console.log('Looking for:', venueName);
+
         if (foundVenue) {
           // Set venue data
           const venueData: Venue = {
@@ -132,12 +137,13 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
           // Get pitches for this venue
           const pitchesData = await pitchService.getByVenue(foundVenue.id);
+          console.log('Pitches found:', pitchesData?.length || 0);
           if (pitchesData && pitchesData.length > 0) {
             // Get existing bookings for all pitches in this venue
             try {
               const { bookingService } = await import('@/lib/firebase-services');
               const allBookings: Booking[] = [];
-              
+
               for (const pitch of pitchesData) {
                 const pitchBookings = await bookingService.getByPitch(pitch.id);
                 if (pitchBookings) {
@@ -145,7 +151,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                   allBookings.push(...pitchBookings);
                 }
               }
-              
+
               setExistingBookings(allBookings);
             } catch (error) {
               console.error('Error loading existing bookings:', error);
@@ -154,7 +160,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
             const convertedPitches: Pitch[] = pitchesData.map(pitch => {
               // Convert the database opening hours to our format
               const convertedOpeningHours: { [key: string]: { isOpen: boolean; slots: Array<{ start: string; end: string }> } } = {};
-              
+
               // Map database opening hours to our interface
               if (pitch.defaultOpeningHours) {
                 Object.entries(pitch.defaultOpeningHours).forEach(([day, hours]) => {
@@ -166,15 +172,15 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                         isOpen: hours.isOpen,
                         slots: hours.slots || []
                       };
-                                         } else if ('start' in hours && 'end' in hours) {
-                       // Old format - single time slot
-                       convertedOpeningHours[day] = {
-                         isOpen: true,
-                         slots: [{ 
-                           start: String(hours.start), 
-                           end: String(hours.end) 
-                         }]
-                       };
+                    } else if ('start' in hours && 'end' in hours) {
+                      // Old format - single time slot
+                      convertedOpeningHours[day] = {
+                        isOpen: true,
+                        slots: [{
+                          start: String(hours.start),
+                          end: String(hours.end)
+                        }]
+                      };
                     } else {
                       // Fallback - closed
                       convertedOpeningHours[day] = {
@@ -185,7 +191,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                   }
                 });
               }
-              
+
               // Set default opening hours if none exist
               if (Object.keys(convertedOpeningHours).length === 0) {
                 convertedOpeningHours.monday = { isOpen: false, slots: [] };
@@ -196,7 +202,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                 convertedOpeningHours.saturday = { isOpen: false, slots: [] };
                 convertedOpeningHours.sunday = { isOpen: false, slots: [] };
               }
-              
+
               return {
                 id: pitch.id,
                 name: pitch.name,
@@ -206,64 +212,23 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                 defaultOpeningHours: convertedOpeningHours
               };
             });
-            
+
             setPitches(convertedPitches);
             setSelectedPitch(convertedPitches[0]);
+          } else {
+            console.error('No pitches found for venue:', foundVenue.name);
+            setLoadError('Δεν βρέθηκαν γήπεδα για αυτό το venue.');
           }
+        } else {
+          console.error('Venue not found for slug:', venueName);
+          setLoadError('Το venue δεν βρέθηκε.');
         }
       } catch (error) {
         console.error('Error loading venue data:', error);
         console.error('venueName:', venueName);
-        // Fallback to mock data if there's an error
-        const fallbackVenue: Venue = {
-          id: '1',
-          name: venueName ? decodeURIComponent(venueName) : 'Άγνωστο Venue',
-          address: 'Entanti Papagewrgiou 123, Thessaloniki',
-          phone: '2310565657',
-          email: 'info@leontes.gr',
-          imageUrl: '/yaba.png',
-          rating: 4.8,
-          reviewCount: 127
-        };
-
-        const fallbackPitches: Pitch[] = [
-          {
-            id: '1',
-            name: 'Megalo (8×8)',
-            type: 'football',
-            pricePerSlot: 72,
-            slotDuration: 60,
-            defaultOpeningHours: {
-              monday: { isOpen: true, slots: [{ start: '08:00', end: '23:00' }] },
-              tuesday: { isOpen: true, slots: [{ start: '08:00', end: '23:00' }] },
-              wednesday: { isOpen: true, slots: [{ start: '08:00', end: '23:00' }] },
-              thursday: { isOpen: true, slots: [{ start: '08:00', end: '23:00' }] },
-              friday: { isOpen: true, slots: [{ start: '08:00', end: '23:00' }] },
-              saturday: { isOpen: true, slots: [{ start: '08:00', end: '23:00' }] },
-              sunday: { isOpen: true, slots: [{ start: '08:00', end: '23:00' }] }
-            }
-          },
-          {
-            id: '2',
-            name: 'Mikro (5×5)',
-            type: 'football',
-            pricePerSlot: 70,
-            slotDuration: 60,
-            defaultOpeningHours: {
-              monday: { isOpen: true, slots: [{ start: '08:00', end: '23:00' }] },
-              tuesday: { isOpen: true, slots: [{ start: '08:00', end: '23:00' }] },
-              wednesday: { isOpen: true, slots: [{ start: '08:00', end: '23:00' }] },
-              thursday: { isOpen: true, slots: [{ start: '08:00', end: '23:00' }] },
-              friday: { isOpen: true, slots: [{ start: '08:00', end: '23:00' }] },
-              saturday: { isOpen: true, slots: [{ start: '08:00', end: '23:00' }] },
-              sunday: { isOpen: true, slots: [{ start: '08:00', end: '23:00' }] }
-            }
-          }
-        ];
-
-        setVenue(fallbackVenue);
-        setPitches(fallbackPitches);
-        setSelectedPitch(fallbackPitches[0]);
+        setLoadError('Σφάλμα φόρτωσης: ' + (error instanceof Error ? error.message : 'Άγνωστο σφάλμα'));
+      } finally {
+        setDataLoaded(true);
       }
     };
 
@@ -646,11 +611,34 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
   };
 
   if (!venue || !selectedPitch) {
+    // Still loading
+    if (!dataLoaded) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-emerald-900 to-emerald-700 flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+            <p className="text-emerald-300">Φόρτωση...</p>
+          </div>
+        </div>
+      );
+    }
+    // Data loaded but venue/pitches not found
     return (
       <div className="min-h-screen bg-gradient-to-br from-emerald-900 to-emerald-700 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-          <p className="text-emerald-600">Φόρτωση...</p>
+        <div className="text-center max-w-md px-6">
+          <div className="text-6xl mb-4">⚽</div>
+          <h1 className="text-2xl font-bold text-white mb-2">
+            {loadError || 'Το venue δεν βρέθηκε'}
+          </h1>
+          <p className="text-emerald-200 mb-6">
+            Δεν μπορέσαμε να βρούμε το venue &quot;{decodeURIComponent(venueName)}&quot;. Ελέγξτε τη διεύθυνση και δοκιμάστε ξανά.
+          </p>
+          <a
+            href="/management/dashboard"
+            className="inline-flex items-center px-6 py-3 bg-white text-emerald-700 rounded-xl font-medium hover:bg-emerald-50 transition-colors"
+          >
+            Αρχική Σελίδα
+          </a>
         </div>
       </div>
     );

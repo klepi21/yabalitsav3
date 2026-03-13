@@ -18,14 +18,15 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
   // Pages that should not have AuthProvider or SidebarWrapper
-  const isPublicPage = pathname === '/' || 
-                      pathname === '/fse' || 
+  const isPublicPage = pathname === '/' ||
+                      pathname === '/fse' ||
                       pathname === '/venues' ||
-                      pathname === '/for-venues' || 
-                      pathname.startsWith('/book/') || 
-                      pathname === '/terms' || 
+                      pathname === '/for-venues' ||
+                      pathname.startsWith('/book/') ||
+                      pathname === '/terms' ||
                       pathname === '/privacy' ||
-                      pathname === '/payment/checkout';
+                      pathname === '/payment/checkout' ||
+                      pathname === '/management/booking/qr';
 
   // Pages that need AuthProvider but are not in the sidebar
   const isAuthPage = pathname === '/venue-login';

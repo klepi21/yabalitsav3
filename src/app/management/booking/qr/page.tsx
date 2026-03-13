@@ -56,7 +56,7 @@ function QRInner() {
                 href={fullUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium hover:bg-gray-50"
+                className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-900 bg-white hover:bg-gray-50"
               >
                 Άνοιγμα Σελίδας Κράτησης
               </a>

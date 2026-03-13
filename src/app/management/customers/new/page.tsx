@@ -42,6 +42,7 @@ export default function NewCustomerPage() {
         name: data.name,
         email: data.email || '',
         phone: data.phone,
+        venueIds: venueOwner?.venueId ? [venueOwner.venueId] : [],
         createdAt: new Date(),
         updatedAt: new Date(),
       } as any);

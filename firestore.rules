@@ -2,19 +2,21 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     // Yabalitsa Management Collections - These are separate from your existing app
-    // Venues collection
+    // Venues collection - public read for booking pages
     match /yabalitsa_venues/{venueId} {
-      allow read, write: if request.auth != null;
+      allow read: if true;
+      allow write: if request.auth != null;
     }
-    
-    // Pitches collection
+
+    // Pitches collection - public read for booking pages
     match /yabalitsa_pitches/{pitchId} {
-      allow read, write: if request.auth != null;
+      allow read: if true;
+      allow write: if request.auth != null;
     }
-    
-    // Bookings collection
+
+    // Bookings collection - public read/write for booking pages
     match /yabalitsa_bookings/{bookingId} {
-      allow read, write: if request.auth != null;
+      allow read, write: if true;
     }
     
     // Customers collection (renamed from users to avoid conflict)
@@ -29,6 +31,11 @@ service cloud.firestore {
     
     // BlockedSlots collection
     match /yabalitsa_blockedSlots/{blockedSlotId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // BlockedDates collection
+    match /yabalitsa_blockedDates/{blockedDateId} {
       allow read, write: if request.auth != null;
     }
     
