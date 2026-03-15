@@ -1,25 +1,45 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  PlusIcon, 
-  MagnifyingGlassIcon, 
-  CalendarIcon,
-  ArrowLeftIcon,
-  UserIcon,
-  TrashIcon
-} from '@heroicons/react/24/outline';
+import {
+  Loader2,
+  Plus,
+  Search,
+  CalendarDays,
+  Users,
+  Trash2,
+  CheckCircle,
+  Flag,
+  RefreshCw,
+  Phone,
+  Building2,
+  Eye,
+  Pencil
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { bookingService } from '@/lib/firebase-services';
 import { Booking, Pitch, BlockedDate } from '@/types';
 import WeeklyCalendar from '@/components/WeeklyCalendar';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 
 export default function BookingsPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
-  
+
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [pitches, setPitches] = useState<Pitch[]>([]);
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
@@ -103,16 +123,16 @@ export default function BookingsPage() {
     if (authLoading) return;
 
     if (!user || !venueOwner) {
-      router.push('/venue-login');
+      router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
 
     loadBookings();
-  }, [user, venueOwner, authLoading, router, loadBookings]);
+  }, [user, venueOwner, authLoading, router, loadBookings, pathname]);
 
   // Filter and sort bookings - pending first, then by date
   const filteredBookings = bookings
-    .filter(booking => 
+    .filter(booking =>
       booking.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.userPhone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       booking.status?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -121,11 +141,11 @@ export default function BookingsPage() {
       // First priority: pending status
       if (a.status === 'pending' && b.status !== 'pending') return -1;
       if (a.status !== 'pending' && b.status === 'pending') return 1;
-      
+
       // Second priority: confirmed status
       if (a.status === 'confirmed' && b.status !== 'confirmed' && b.status !== 'pending') return -1;
       if (a.status !== 'confirmed' && a.status !== 'pending' && b.status === 'confirmed') return 1;
-      
+
       // Third priority: by start time (newest first)
       const dateA = new Date(a.startTime);
       const dateB = new Date(b.startTime);
@@ -164,8 +184,8 @@ export default function BookingsPage() {
     setUpdatingBookingId(bookingId);
     try {
       await bookingService.update(bookingId, { status: newStatus });
-      setBookings(bookings.map(booking => 
-        booking.id === bookingId 
+      setBookings(bookings.map(booking =>
+        booking.id === bookingId
           ? { ...booking, status: newStatus }
           : booking
       ));
@@ -177,10 +197,21 @@ export default function BookingsPage() {
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    const config: Record<string, { label: string; className: string }> = {
+      confirmed: { label: 'Επιβεβαιωμένη', className: 'border-emerald-300 text-emerald-700 bg-emerald-50' },
+      pending: { label: 'Εκκρεμεί', className: 'border-amber-300 text-amber-700 bg-amber-50' },
+      completed: { label: 'Ολοκληρωμένη', className: 'border-slate-300 text-slate-700 bg-slate-50' },
+      cancelled: { label: 'Ακυρωμένη', className: 'border-red-300 text-red-700 bg-red-50' },
+    };
+    const { label, className } = config[status] || config.confirmed;
+    return <Badge variant="outline" className={className}>{label}</Badge>;
+  };
+
   if (authLoading || isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
       </div>
     );
   }
@@ -189,13 +220,13 @@ export default function BookingsPage() {
     <div className="space-y-6">
       {/* Error Alert */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
           <div className="flex">
             <div className="flex-1">
-              <h3 className="text-sm font-medium text-red-800">
+              <h3 className="text-sm font-medium text-destructive">
                 Σφάλμα κατά τη φόρτωση κρατήσεων
               </h3>
-              <div className="mt-2 text-sm text-red-700">
+              <div className="mt-2 text-sm text-destructive/80">
                 <p>{error}</p>
                 <p className="mt-2 text-xs">
                   Αν το πρόβλημα συνεχίζεται, δοκιμάστε να ανανεώσετε τη σελίδα ή να συνδεθείτε ξανά.
@@ -207,7 +238,7 @@ export default function BookingsPage() {
                 setError(null);
                 loadBookings();
               }}
-              className="ml-4 inline-flex text-red-400 hover:text-red-500"
+              className="ml-4 inline-flex text-destructive/60 hover:text-destructive"
             >
               <span className="text-sm font-medium">Δοκιμάστε ξανά</span>
             </button>
@@ -215,59 +246,55 @@ export default function BookingsPage() {
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex items-center space-x-4">
-        <Link
-          href="/dashboard"
-          className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-        >
-          <ArrowLeftIcon className="h-4 w-4 mr-1" />
-          Επιστροφή στον Πίνακα Ελέγχου
-        </Link>
-      </div>
+      {/* Breadcrumb */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard">Πίνακας Ελέγχου</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Κρατήσεις</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Κρατήσεις</h1>
-          <p className="mt-1 sm:mt-2 text-gray-600">Διαχείριση κρατήσεων για το γήπεδό σας</p>
+          <h2 className="text-2xl font-semibold text-foreground">Κρατήσεις</h2>
+          <p className="mt-1 text-muted-foreground">Διαχείριση κρατήσεων για το γήπεδό σας</p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:space-x-4">
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
           <div className="grid grid-cols-2 sm:flex sm:items-center gap-2">
-            <button
+            <Button
+              variant={viewMode === 'calendar' ? 'default' : 'outline'}
+              size="sm"
               onClick={() => setViewMode('calendar')}
-              className={`w-full sm:w-auto px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                viewMode === 'calendar' 
-                  ? 'bg-football-green text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
             >
-              <CalendarIcon className="h-4 w-4 inline mr-2" />
+              <CalendarDays className="h-4 w-4" />
               Ημερολόγιο
-            </button>
-            <button
+            </Button>
+            <Button
+              variant={viewMode === 'list' ? 'default' : 'outline'}
+              size="sm"
               onClick={() => setViewMode('list')}
-              className={`w-full sm:w-auto px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                viewMode === 'list' 
-                  ? 'bg-football-green text-white' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
             >
-              <UserIcon className="h-4 w-4 inline mr-2" />
+              <Users className="h-4 w-4" />
               Λίστα
-            </button>
+            </Button>
           </div>
-          <Link
-            href="/management/bookings/new"
-            className="inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
-          >
-            <PlusIcon className="h-4 w-4 mr-2" />
-            Νέα Κράτηση
-          </Link>
+          <Button asChild>
+            <Link href="/management/bookings/new">
+              <Plus className="h-4 w-4" />
+              Νέα Κράτηση
+            </Link>
+          </Button>
         </div>
       </div>
 
       {viewMode === 'calendar' ? (
-        <WeeklyCalendar 
+        <WeeklyCalendar
           bookings={bookings}
           pitches={pitches}
           blockedDates={blockedDates}
@@ -287,166 +314,156 @@ export default function BookingsPage() {
           <div className="max-w-lg">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                <Search className="h-4 w-4 text-muted-foreground" />
               </div>
-              <input
+              <Input
                 type="text"
                 placeholder="Αναζήτηση κρατήσεων..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-football-green focus:border-football-green sm:text-sm"
+                className="pl-10"
               />
             </div>
           </div>
 
           {/* Bookings List */}
-          <div className="bg-white shadow-lg rounded-2xl border border-gray-100">
-        {filteredBookings.length === 0 ? (
-          <div className="text-center py-12">
-            <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
-              {searchTerm ? 'Δεν βρέθηκαν κρατήσεις.' : 'Δεν υπάρχουν κρατήσεις ακόμα'}
-            </h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {searchTerm ? 'Δοκιμάστε να αλλάξετε τους όρους αναζήτησης.' : 'Ξεκινήστε δημιουργώντας την πρώτη σας κράτηση.'}
-            </p>
-            {!searchTerm && (
-              <div className="mt-6">
-                <div className="flex space-x-3">
-                                  <Link
-                  href="/management/bookings/new"
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
-                >
-                  <PlusIcon className="h-4 w-4 mr-2" />
-                  Δημιουργία Κράτησης
-                </Link>
-                  <Link
-                    href="/management/bookings/new?recurring=true"
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
-                  >
-                    <span className="mr-2">🔄</span>
-                    Επαναλαμβανόμενη Κράτηση
-                  </Link>
+          <Card>
+            <CardContent className="p-0">
+              {filteredBookings.length === 0 ? (
+                <div className="text-center py-12">
+                  <CalendarDays className="mx-auto h-12 w-12 text-muted-foreground" />
+                  <h3 className="mt-4 text-sm font-medium text-foreground">
+                    {searchTerm ? 'Δεν βρέθηκαν κρατήσεις.' : 'Δεν υπάρχουν κρατήσεις ακόμα'}
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {searchTerm ? 'Δοκιμάστε να αλλάξετε τους όρους αναζήτησης.' : 'Ξεκινήστε δημιουργώντας την πρώτη σας κράτηση.'}
+                  </p>
+                  {!searchTerm && (
+                    <div className="mt-6 flex justify-center gap-3">
+                      <Button asChild>
+                        <Link href="/management/bookings/new">
+                          <Plus className="h-4 w-4" />
+                          Δημιουργία Κράτησης
+                        </Link>
+                      </Button>
+                      <Button variant="outline" asChild>
+                        <Link href="/management/bookings/new?recurring=true">
+                          <RefreshCw className="h-4 w-4" />
+                          Επαναλαμβανόμενη Κράτηση
+                        </Link>
+                      </Button>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <ul className="divide-y divide-gray-200">
-            {filteredBookings.map((booking) => {
-              const pitch = pitches.find(p => p.id === booking.pitchId);
-              return (
-                <li key={booking.id} className="px-4 py-4 sm:px-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                          <UserIcon className="h-6 w-6 text-blue-600" />
-                        </div>
-                      </div>
-                      <div className="ml-4">
-                        <div className="flex items-center">
-                          <p className="text-sm font-medium text-gray-900">
-                            {booking.userName || 'Άγνωστος Πελάτης'}
-                          </p>
-                          <span className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                            booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                            booking.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                            booking.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                            'bg-gray-100 text-gray-800'
-                          }`}>
-                            {booking.status === 'confirmed' ? 'Επιβεβαιωμένη' :
-                             booking.status === 'pending' ? 'Εκκρεμεί' :
-                             booking.status === 'completed' ? 'Ολοκληρωμένη' :
-                             booking.status === 'cancelled' ? 'Ακυρωμένη' :
-                             'Επιβεβαιωμένη'}
-                          </span>
-                        </div>
-                        <div className="mt-1 flex items-center text-sm text-gray-500">
-                          📱
-                          {booking.userPhone || 'Δεν υπάρχει τηλέφωνο'}
-                        </div>
-                        <div className="mt-2 flex items-center space-x-4">
-                          <div className="flex items-center">
-                            <span className="text-sm text-gray-500 mr-1">⚽</span>
-                            <span className="text-sm font-medium text-gray-900">
-                              {pitch?.name || 'Άγνωστο Γήπεδο'}
-                            </span>
-                            {pitch && (
-                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-football-green/10 text-football-green border border-football-green/20">
-                                {pitch.type}
-                              </span>
-                            )}
+              ) : (
+                <ul className="divide-y divide-border">
+                  {filteredBookings.map((booking) => {
+                    const pitch = pitches.find(p => p.id === booking.pitchId);
+                    return (
+                      <li key={booking.id} className="px-4 py-4 sm:px-6">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                          <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                              <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                <Users className="h-5 w-5 text-primary" />
+                              </div>
+                            </div>
+                            <div className="ml-4">
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-medium text-foreground">
+                                  {booking.userName || 'Άγνωστος Πελάτης'}
+                                </p>
+                                {getStatusBadge(booking.status)}
+                              </div>
+                              <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
+                                <Phone className="h-3.5 w-3.5" />
+                                {booking.userPhone || 'Δεν υπάρχει τηλέφωνο'}
+                              </div>
+                              <div className="mt-2 flex items-center gap-2">
+                                <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                                <span className="text-sm font-medium text-foreground">
+                                  {pitch?.name || 'Άγνωστο Γήπεδο'}
+                                </span>
+                                {pitch && (
+                                  <Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">
+                                    {pitch.type}
+                                  </Badge>
+                                )}
+                              </div>
+                              <div className="mt-2">
+                                <p className="text-lg font-bold text-foreground">
+                                  {'\u20AC'}{booking.price?.toFixed(2) || '0.00'}
+                                </p>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                  {booking.notes ? `${booking.notes.substring(0, 50)}...` : 'Δεν υπάρχουν σημειώσεις'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="text-left sm:text-right">
+                            <div className="text-xl sm:text-2xl font-bold text-foreground">
+                              {new Date(booking.startTime).toLocaleDateString()}
+                            </div>
+                            <div className="text-base sm:text-lg font-semibold text-primary">
+                              {new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit'})}
+                            </div>
                           </div>
                         </div>
-                        <div className="mt-2">
-                          <p className="text-lg font-bold text-gray-900">
-                            €{booking.price?.toFixed(2) || '0.00'}
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            {booking.notes ? `${booking.notes.substring(0, 50)}...` : 'Δεν υπάρχουν σημειώσεις'}
-                          </p>
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/management/bookings/${booking.id}`}>
+                              <Eye className="h-4 w-4" />
+                              Προβολή
+                            </Link>
+                          </Button>
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/management/bookings/${booking.id}/edit`}>
+                              <Pencil className="h-4 w-4" />
+                              Επεξεργασία
+                            </Link>
+                          </Button>
+                          {booking.status === 'pending' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleUpdateBookingStatus(booking.id, 'confirmed')}
+                              disabled={updatingBookingId === booking.id}
+                              className="text-blue-600 hover:text-blue-700"
+                            >
+                              <CheckCircle className="h-4 w-4" />
+                              {updatingBookingId === booking.id ? 'Ενημέρωση...' : 'Επιβεβαίωση'}
+                            </Button>
+                          )}
+                          {booking.status !== 'completed' && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleUpdateBookingStatus(booking.id, 'completed')}
+                              disabled={updatingBookingId === booking.id}
+                              className="text-emerald-600 hover:text-emerald-700"
+                            >
+                              <Flag className="h-4 w-4" />
+                              {updatingBookingId === booking.id ? 'Ενημέρωση...' : 'Ολοκλήρωση'}
+                            </Button>
+                          )}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteBooking(booking.id)}
+                            disabled={deletingBookingId === booking.id}
+                            className="text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            {deletingBookingId === booking.id ? 'Διαγραφή...' : 'Διαγραφή'}
+                          </Button>
                         </div>
-                      </div>
-                    </div>
-                    <div className="text-left sm:text-right">
-                      <div className="text-xl sm:text-2xl font-bold text-gray-900">
-                        {new Date(booking.startTime).toLocaleDateString()}
-                      </div>
-                      <div className="text-base sm:text-lg font-semibold text-blue-600">
-                        {new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit'})}
-                      </div>
-                    </div>
-                  </div>
-                <div className="mt-4 flex flex-wrap gap-3">
-                  <Link
-                    href={`/management/bookings/${booking.id}`}
-                    className="min-h-[44px] inline-flex items-center text-sm text-football-green hover:text-football-green-light"
-                  >
-                    Προβολή Λεπτομερειών
-                  </Link>
-                  <Link
-                    href={`/management/bookings/${booking.id}/edit`}
-                    className="min-h-[44px] inline-flex items-center text-sm text-football-green hover:text-football-green-light"
-                  >
-                    Επεξεργασία
-                  </Link>
-                  {booking.status === 'pending' && (
-                    <button
-                      onClick={() => handleUpdateBookingStatus(booking.id, 'confirmed')}
-                      disabled={updatingBookingId === booking.id}
-                      className="min-h-[44px] text-sm text-blue-600 hover:text-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                    >
-                      <span className="mr-1">✅</span>
-                      {updatingBookingId === booking.id ? 'Ενημέρωση...' : 'Επιβεβαίωση'}
-                    </button>
-                  )}
-                  {booking.status !== 'completed' && (
-                    <button
-                      onClick={() => handleUpdateBookingStatus(booking.id, 'completed')}
-                      disabled={updatingBookingId === booking.id}
-                      className="min-h-[44px] text-sm text-green-600 hover:text-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                    >
-                      <span className="mr-1">🏁</span>
-                      {updatingBookingId === booking.id ? 'Ενημέρωση...' : 'Ολοκλήρωση'}
-                    </button>
-                  )}
-                  <button
-                    onClick={() => handleDeleteBooking(booking.id)}
-                    disabled={deletingBookingId === booking.id}
-                    className="min-h-[44px] text-sm text-red-600 hover:text-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                  >
-                    <TrashIcon className="h-4 w-4 mr-1" />
-                    {deletingBookingId === booking.id ? 'Διαγραφή...' : 'Διαγραφή'}
-                  </button>
-                </div>
-              </li>
-            );
-          })}
-          </ul>
-        )}
-      </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
         </>
       )}
     </div>

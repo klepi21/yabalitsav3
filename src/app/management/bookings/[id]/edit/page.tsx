@@ -1,17 +1,31 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { 
-  ArrowLeftIcon
-} from '@heroicons/react/24/outline';
+import {
+  Loader2,
+  CalendarX
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { bookingService, pitchService, blockedDateService } from '@/lib/firebase-services';
 import { Booking, Pitch, BlockedDate } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 
 // Form validation schema
 const bookingEditSchema = z.object({
@@ -27,9 +41,10 @@ type BookingEditFormData = z.infer<typeof bookingEditSchema>;
 
 export default function EditBookingPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const params = useParams();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
-  
+
   const [booking, setBooking] = useState<Booking | null>(null);
   const [pitch, setPitch] = useState<Pitch | null>(null);
   const [existingBookings, setExistingBookings] = useState<Booking[]>([]);
@@ -155,11 +170,11 @@ export default function EditBookingPage() {
         bookingService.getById(bookingId),
         bookingService.getByVenue(venueOwner?.venueId || '')
       ]);
-      
+
       if (bookingData) {
         setBooking(bookingData);
         setExistingBookings(bookingsData || []);
-        
+
         // Load pitch data if available
         if (bookingData.pitchId) {
           const pitchData = await pitchService.getById(bookingData.pitchId);
@@ -185,10 +200,10 @@ export default function EditBookingPage() {
         // Format dates for form inputs
         const startDate = new Date(bookingData.startTime);
         const endDate = new Date(bookingData.endTime);
-        
+
         // Find the matching slot format for the current booking time
         const currentSlotTime = `${startDate.toTimeString().slice(0, 5)} - ${endDate.toTimeString().slice(0, 5)}`;
-        
+
         reset({
           customerName: bookingData.userName || '',
           customerPhone: bookingData.userPhone || '',
@@ -208,16 +223,16 @@ export default function EditBookingPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    
+
     if (!user || !venueOwner) {
-      router.push('/venue-login');
+      router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
-    
+
     if (params.id) {
       loadBookingData(params.id as string);
     }
-  }, [user, venueOwner, authLoading, router, params.id, loadBookingData]);
+  }, [user, venueOwner, authLoading, router, params.id, loadBookingData, pathname]);
 
   const handleDateChange = (date: string) => {
     if (pitch) {
@@ -230,17 +245,17 @@ export default function EditBookingPage() {
 
   const handleFormSubmit = async (data: BookingEditFormData) => {
     if (!booking || !pitch) return;
-    
+
     setIsSaving(true);
     setError(null);
-    
+
     try {
       // Parse the selected slot to get start time
       const [slotTime] = data.selectedSlot.split(' - ');
       const [hours, minutes] = slotTime.split(':').map(Number);
       const startTime = new Date(data.selectedDate);
       startTime.setHours(hours, minutes, 0, 0);
-      
+
       // Calculate end time based on slot duration
       const endTime = new Date(startTime);
       endTime.setMinutes(endTime.getMinutes() + pitch.slotDuration);
@@ -254,7 +269,7 @@ export default function EditBookingPage() {
         status: data.status,
         notes: data.notes,
       });
-      
+
       router.push(`/management/bookings/${booking.id}`);
     } catch (error) {
       console.error('Error updating booking:', error);
@@ -266,8 +281,8 @@ export default function EditBookingPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
       </div>
     );
   }
@@ -275,211 +290,211 @@ export default function EditBookingPage() {
   if (!booking) {
     return (
       <div className="text-center py-12">
-        <h3 className="text-lg font-medium text-gray-900">Η κράτηση δεν βρέθηκε</h3>
-        <p className="mt-1 text-sm text-gray-500">Η κράτηση που αναζητάτε δεν υπάρχει.</p>
-        <Link
-          href="/management/bookings"
-          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-        >
-          Επιστροφή στις Κρατήσεις
-        </Link>
+        <CalendarX className="mx-auto h-12 w-12 text-muted-foreground" />
+        <h3 className="mt-4 text-lg font-medium text-foreground">Η κράτηση δεν βρέθηκε</h3>
+        <p className="mt-1 text-sm text-muted-foreground">Η κράτηση που αναζητάτε δεν υπάρχει.</p>
+        <Button className="mt-4" asChild>
+          <Link href="/management/bookings">
+            Επιστροφή στις Κρατήσεις
+          </Link>
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <div className="space-y-6">
+      {/* Breadcrumb */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/dashboard">Πίνακας Ελέγχου</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/management/bookings">Κρατήσεις</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href={`/management/bookings/${booking.id}`}>Λεπτομέρειες</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Επεξεργασία</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-4">
-          <Link
-            href={`/management/bookings/${booking.id}`}
-            className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-          >
-            <ArrowLeftIcon className="h-4 w-4 mr-1" />
-            Επιστροφή στην Κράτηση
-          </Link>
-        </div>
-        <h1 className="text-2xl font-bold text-gray-900">Επεξεργασία Κράτησης</h1>
+      <div>
+        <h2 className="text-2xl font-semibold text-foreground">Επεξεργασία Κράτησης</h2>
+        <p className="mt-1 text-muted-foreground">Ενημέρωση στοιχείων κράτησης</p>
       </div>
 
       {error && (
-        <div className="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 text-sm text-destructive">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
         {/* Customer Information */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Πληροφορίες Πελάτη</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Όνομα Πελάτη *
-              </label>
-              <input
-                type="text"
-                {...register('customerName')}
-                className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-              {errors.customerName && (
-                <p className="mt-1 text-sm text-red-600">{errors.customerName.message}</p>
-              )}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Πληροφορίες Πελάτη</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Όνομα Πελάτη *</Label>
+                <Input
+                  type="text"
+                  {...register('customerName')}
+                />
+                {errors.customerName && (
+                  <p className="text-sm text-destructive">{errors.customerName.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Τηλέφωνο *</Label>
+                <Input
+                  type="tel"
+                  {...register('customerPhone')}
+                />
+                {errors.customerPhone && (
+                  <p className="text-sm text-destructive">{errors.customerPhone.message}</p>
+                )}
+              </div>
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Τηλέφωνο *
-              </label>
-              <input
-                type="tel"
-                {...register('customerPhone')}
-                className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              />
-              {errors.customerPhone && (
-                <p className="mt-1 text-sm text-red-600">{errors.customerPhone.message}</p>
-              )}
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Booking Details */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Λεπτομέρειες Κράτησης</h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ημερομηνία *
-              </label>
-              <Controller
-                name="selectedDate"
-                control={control}
-                render={({ field }) => (
-                  <input
-                    type="date"
-                    value={field.value || ''}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      handleDateChange(e.target.value);
-                    }}
-                    className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Λεπτομέρειες Κράτησης</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Ημερομηνία *</Label>
+                <Controller
+                  name="selectedDate"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      type="date"
+                      value={field.value || ''}
+                      onChange={(e) => {
+                        field.onChange(e);
+                        handleDateChange(e.target.value);
+                      }}
+                    />
+                  )}
+                />
+                {errors.selectedDate && (
+                  <p className="text-sm text-destructive">{errors.selectedDate.message}</p>
                 )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Ώρα *</Label>
+                <select
+                  {...register('selectedSlot')}
+                  className="flex h-9 w-full rounded-lg border border-zinc-200/70 bg-transparent px-3 py-1 text-sm shadow-none transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                >
+                  <option value="">Επιλέξτε ώρα</option>
+                  {availableSlots.map((slot, index) => (
+                    <option key={index} value={slot.time}>
+                      {slot.display}
+                    </option>
+                  ))}
+                </select>
+                {errors.selectedSlot && (
+                  <p className="text-sm text-destructive">{errors.selectedSlot.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Κατάσταση</Label>
+                <select
+                  {...register('status')}
+                  className="flex h-9 w-full rounded-lg border border-zinc-200/70 bg-transparent px-3 py-1 text-sm shadow-none transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                >
+                  <option value="pending">Εκκρεμεί</option>
+                  <option value="confirmed">Επιβεβαιωμένη</option>
+                  <option value="completed">Ολοκληρωμένη</option>
+                  <option value="cancelled">Ακυρωμένη</option>
+                </select>
+                {errors.status && (
+                  <p className="text-sm text-destructive">{errors.status.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label>Τιμή ανά Κράτηση</Label>
+                <Input
+                  type="text"
+                  value={pitch ? `\u20AC${pitch.pricePerSlot?.toFixed(2) || '0.00'}` : '\u20AC0.00'}
+                  disabled
+                  className="bg-muted text-muted-foreground"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Σημειώσεις</Label>
+              <Textarea
+                {...register('notes')}
+                rows={3}
+                placeholder="Προαιρετικές σημειώσεις..."
               />
-              {errors.selectedDate && (
-                <p className="mt-1 text-sm text-red-600">{errors.selectedDate.message}</p>
+              {errors.notes && (
+                <p className="text-sm text-destructive">{errors.notes.message}</p>
               )}
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ώρα *
-              </label>
-              <select
-                {...register('selectedSlot')}
-                className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="">Επιλέξτε ώρα</option>
-                {availableSlots.map((slot, index) => (
-                  <option key={index} value={slot.time}>
-                    {slot.display}
-                  </option>
-                ))}
-              </select>
-              {errors.selectedSlot && (
-                <p className="mt-1 text-sm text-red-600">{errors.selectedSlot.message}</p>
-              )}
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Κατάσταση
-              </label>
-              <select
-                {...register('status')}
-                className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="pending">Εκκρεμεί</option>
-                <option value="confirmed">Επιβεβαιωμένη</option>
-                <option value="completed">Ολοκληρωμένη</option>
-                <option value="cancelled">Ακυρωμένη</option>
-              </select>
-              {errors.status && (
-                <p className="mt-1 text-sm text-red-600">{errors.status.message}</p>
-              )}
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Τιμή ανά Κράτηση
-              </label>
-              <input
-                type="text"
-                value={pitch ? `€${pitch.pricePerSlot?.toFixed(2) || '0.00'}` : '€0.00'}
-                disabled
-                className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm bg-gray-50 text-gray-500"
-              />
-            </div>
-          </div>
-          
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Σημειώσεις
-            </label>
-            <textarea
-              {...register('notes')}
-              rows={3}
-              className="block w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Προαιρετικές σημειώσεις..."
-            />
-            {errors.notes && (
-              <p className="mt-1 text-sm text-red-600">{errors.notes.message}</p>
-            )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Pitch Information */}
         {pitch && (
-          <div className="bg-white shadow rounded-lg p-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Πληροφορίες Γηπέδου</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Όνομα Γηπέδου</dt>
-                <dd className="mt-1 text-sm text-gray-900">{pitch.name}</dd>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Πληροφορίες Γηπέδου</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <dt className="text-sm font-medium text-muted-foreground">Όνομα Γηπέδου</dt>
+                  <dd className="mt-1 text-sm text-foreground">{pitch.name}</dd>
+                </div>
+
+                <div>
+                  <dt className="text-sm font-medium text-muted-foreground">Τύπος</dt>
+                  <dd className="mt-1 text-sm text-foreground">{pitch.type}</dd>
+                </div>
+
+                <div>
+                  <dt className="text-sm font-medium text-muted-foreground">Παίκτες ανά Ομάδα</dt>
+                  <dd className="mt-1 text-sm text-foreground">{getPlayersPerPitch(pitch.type)} παίκτες</dd>
+                </div>
               </div>
-              
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Τύπος</dt>
-                <dd className="mt-1 text-sm text-gray-900">{pitch.type}</dd>
-              </div>
-              
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Παίκτες ανά Ομάδα</dt>
-                <dd className="mt-1 text-sm text-gray-900">{getPlayersPerPitch(pitch.type)} παίκτες</dd>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Form Actions */}
-        <div className="flex justify-end space-x-3">
-          <Link
-            href={`/management/bookings/${booking.id}`}
-            className="px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-          >
-            Ακύρωση
-          </Link>
-          <button
-            type="submit"
-            disabled={isSaving}
-            className="px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
-          >
+        <div className="flex justify-end gap-3">
+          <Button variant="outline" asChild>
+            <Link href={`/management/bookings/${booking.id}`}>
+              Ακύρωση
+            </Link>
+          </Button>
+          <Button type="submit" disabled={isSaving}>
+            {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
             {isSaving ? 'Αποθήκευση...' : 'Αποθήκευση Αλλαγών'}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

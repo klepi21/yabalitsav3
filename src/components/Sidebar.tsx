@@ -5,43 +5,53 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
-  Bars3Icon,
-  XMarkIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-} from '@heroicons/react/24/outline';
+  LayoutDashboard,
+  Building2,
+  CalendarDays,
+  Users,
+  GraduationCap,
+  BarChart3,
+  Settings,
+  Trophy,
+  ClipboardList,
+  LogOut,
+  ChevronDown,
+  ChevronRight,
+  Menu,
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
 
 interface NavItem {
   name: string;
   href?: string;
-  emoji: string;
-  children?: { name: string; href: string; emoji: string }[];
+  icon: React.ElementType;
+  children?: { name: string; href: string; icon: React.ElementType }[];
 }
 
 const navigation: NavItem[] = [
-  { name: 'Πίνακας Ελέγχου', href: '/management/dashboard', emoji: '📊' },
-  { name: 'Γήπεδα', href: '/management/pitches', emoji: '🏟️' },
-  { name: 'Κρατήσεις', href: '/management/bookings', emoji: '📅' },
-  { name: 'Πελάτες', href: '/management/customers', emoji: '👥' },
+  { name: 'Πίνακας Ελέγχου', href: '/management/dashboard', icon: LayoutDashboard },
+  { name: 'Γήπεδα', href: '/management/pitches', icon: Building2 },
+  { name: 'Κρατήσεις', href: '/management/bookings', icon: CalendarDays },
+  { name: 'Πελάτες', href: '/management/customers', icon: Users },
   {
     name: 'Ακαδημία',
-    emoji: '🎓',
+    icon: GraduationCap,
     children: [
-      { name: 'Όλοι οι Χρήστες', href: '/management/academy/users', emoji: '👥' },
-      { name: 'Τμήματα', href: '/management/academy/squads', emoji: '⚽' },
-      { name: 'Κατηγορίες Χρηστών', href: '/management/academy/user-groups', emoji: '📋' },
+      { name: 'Όλοι οι Χρήστες', href: '/management/academy/users', icon: Users },
+      { name: 'Τμήματα', href: '/management/academy/squads', icon: Trophy },
+      { name: 'Κατηγορίες Χρηστών', href: '/management/academy/user-groups', icon: ClipboardList },
     ]
   },
-  { name: 'Αναφορές', href: '/management/reports', emoji: '📈' },
-  { name: 'Ρυθμίσεις', href: '/management/settings', emoji: '⚙️' },
+  { name: 'Αναφορές', href: '/management/reports', icon: BarChart3 },
+  { name: 'Ρυθμίσεις', href: '/management/settings', icon: Settings },
 ];
 
-export default function Sidebar() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const pathname = usePathname();
-  const { signOut } = useAuth();
+  const { signOut, venueOwner } = useAuth();
 
   const toggleMenu = (menuName: string) => {
     setExpandedMenus(prev =>
@@ -57,264 +67,147 @@ export default function Sidebar() {
   };
 
   return (
-    <>
-      {/* Mobile sidebar */}
-      <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
-        <div className="fixed inset-0 bg-gray-900/80" onClick={() => setSidebarOpen(false)} />
-        <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white">
-          <div className="flex h-20 items-center justify-between px-6">
-            <div className="flex items-center justify-center flex-1">
-              <Image
-                src="/yabalitsalogo.png"
-                alt="Yabalitsa"
-                width={150}
-                height={48}
-                className="h-12 w-auto"
-              />
-            </div>
-            <button
-              type="button"
-              className="text-gray-400 hover:text-gray-600"
-              onClick={() => setSidebarOpen(false)}
-            >
-              <XMarkIcon className="h-6 w-6" />
-            </button>
-          </div>
-          <div className="border-b border-gray-200 mx-4 mb-4"></div>
-          <nav className="flex-1 space-y-2 px-4 py-3 overflow-y-auto">
-            {navigation.map((item) => {
-              const isActive = item.href ? pathname === item.href : false;
-              const hasChildren = !!item.children;
-              const isExpanded = expandedMenus.includes(item.name);
-              const isParentActive = isChildActive(item);
-
-              if (hasChildren) {
-                return (
-                  <div key={item.name}>
-                    <button
-                      onClick={() => toggleMenu(item.name)}
-                      className={`group flex items-center justify-between w-full p-3 text-sm font-medium rounded-xl transition-all duration-200 border-2 ${
-                        isParentActive
-                          ? 'bg-football-green/10 text-football-green border-football-green'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-lg border-gray-200 hover:border-football-green'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{item.emoji}</span>
-                        <span>{item.name}</span>
-                      </div>
-                      {isExpanded ? (
-                        <ChevronDownIcon className="h-4 w-4" />
-                      ) : (
-                        <ChevronRightIcon className="h-4 w-4" />
-                      )}
-                    </button>
-                    {isExpanded && (
-                      <div className="mt-1 ml-4 space-y-1">
-                        {item.children?.map((child) => {
-                          const isChildItemActive = pathname.startsWith(child.href);
-                          return (
-                            <Link
-                              key={child.name}
-                              href={child.href}
-                              onClick={() => setSidebarOpen(false)}
-                              className={`group flex items-center gap-2 p-2 pl-4 text-sm font-medium rounded-lg transition-all duration-200 ${
-                                isChildItemActive
-                                  ? 'bg-football-green text-white'
-                                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                              }`}
-                            >
-                              <span className="text-lg">{child.emoji}</span>
-                              <span>{child.name}</span>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              }
-
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href!}
-                  className={`group flex flex-col items-center justify-center p-3 text-sm font-medium rounded-xl transition-all duration-200 border-2 ${
-                    isActive
-                      ? 'bg-football-green text-white shadow-xl transform scale-105 border-football-green'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-lg border-gray-200 hover:border-football-green'
-                  }`}
-                  onClick={() => setSidebarOpen(false)}
-                >
-                  <span
-                    className={`text-2xl mb-1 ${
-                      isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-500'
-                    }`}
-                  >
-                    {item.emoji}
-                  </span>
-                  <span className="text-center text-xs">{item.name}</span>
-                </Link>
-              );
-            })}
-          </nav>
-          
-          {/* Support Email - Mobile */}
-          <div className="px-4 py-3 border-t border-gray-200">
-            <div className="text-center">
-              <div className="text-xs text-gray-500 mb-1">Υποστήριξη</div>
-              <a 
-                href="mailto:support@yabalitsa.com"
-                className="text-sm text-football-green hover:text-football-green-light font-medium"
-              >
-                support@yabalitsa.com
-              </a>
-            </div>
-          </div>
-          
-          {/* Logout button - Mobile */}
-          <div className="px-4 py-4 border-t border-gray-200">
-            <button
-              onClick={() => {
-                signOut();
-                setSidebarOpen(false);
-              }}
-              className="group flex flex-col items-center justify-center p-4 text-sm font-medium rounded-xl transition-all duration-200 border-2 text-red-600 hover:bg-red-50 hover:text-red-700 hover:shadow-lg border-red-200 hover:border-red-300 w-full"
-            >
-              <span className="text-3xl mb-2 text-red-400 group-hover:text-red-500">
-                🚪
-              </span>
-              <span className="text-center text-xs">Αποσύνδεση</span>
-            </button>
-          </div>
-        </div>
+    <div className="flex h-full flex-col bg-[#0f172a]">
+      {/* Logo */}
+      <div className="flex h-[60px] items-center px-5 border-b border-white/[0.06]">
+        <Image
+          src="/yabalitsalogo.png"
+          alt="Yabalitsa"
+          width={130}
+          height={36}
+          className="h-8 w-auto brightness-0 invert opacity-90"
+        />
       </div>
 
-      {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <div className="flex flex-col flex-grow bg-white border-r border-gray-200">
-          <div className="flex h-20 items-center justify-center px-6">
-            <Image
-              src="/yabalitsalogo.png"
-              alt="Yabalitsa"
-              width={150}
-              height={48}
-              className="h-12 w-auto"
-            />
-          </div>
-          <div className="border-b border-gray-200 mx-4 mb-4"></div>
-          <nav className="flex-1 space-y-2 px-4 py-3 overflow-y-auto">
-            {navigation.map((item) => {
-              const isActive = item.href ? pathname === item.href : false;
-              const hasChildren = !!item.children;
-              const isExpanded = expandedMenus.includes(item.name);
-              const isParentActive = isChildActive(item);
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-0.5">
+        {navigation.map((item) => {
+          const isActive = item.href ? pathname === item.href || pathname.startsWith(item.href + '/') : false;
+          const hasChildren = !!item.children;
+          const isExpanded = expandedMenus.includes(item.name) || isChildActive(item);
+          const isParentActive = isChildActive(item);
+          const Icon = item.icon;
 
-              if (hasChildren) {
-                return (
-                  <div key={item.name}>
-                    <button
-                      onClick={() => toggleMenu(item.name)}
-                      className={`group flex items-center justify-between w-full p-3 text-sm font-medium rounded-xl transition-all duration-200 border-2 ${
-                        isParentActive
-                          ? 'bg-football-green/10 text-football-green border-football-green'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-lg border-gray-200 hover:border-football-green'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{item.emoji}</span>
-                        <span>{item.name}</span>
-                      </div>
-                      {isExpanded ? (
-                        <ChevronDownIcon className="h-4 w-4" />
-                      ) : (
-                        <ChevronRightIcon className="h-4 w-4" />
-                      )}
-                    </button>
-                    {isExpanded && (
-                      <div className="mt-1 ml-4 space-y-1">
-                        {item.children?.map((child) => {
-                          const isChildItemActive = pathname.startsWith(child.href);
-                          return (
-                            <Link
-                              key={child.name}
-                              href={child.href}
-                              className={`group flex items-center gap-2 p-2 pl-4 text-sm font-medium rounded-lg transition-all duration-200 ${
-                                isChildItemActive
-                                  ? 'bg-football-green text-white'
-                                  : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
-                              }`}
-                            >
-                              <span className="text-lg">{child.emoji}</span>
-                              <span>{child.name}</span>
-                            </Link>
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              }
-
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href!}
-                  className={`group flex flex-col items-center justify-center p-3 text-sm font-medium rounded-xl transition-all duration-200 border-2 ${
-                    isActive
-                      ? 'bg-football-green text-white shadow-xl transform scale-105 border-football-green'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-lg border-gray-200 hover:border-football-green'
-                  }`}
+          if (hasChildren) {
+            return (
+              <div key={item.name}>
+                <button
+                  onClick={() => toggleMenu(item.name)}
+                  className={cn(
+                    'flex w-full items-center justify-between rounded-lg px-3 py-2 text-[13px] font-medium transition-colors',
+                    isParentActive
+                      ? 'bg-white/[0.08] text-white'
+                      : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
+                  )}
                 >
-                  <span
-                    className={`text-2xl mb-1 ${
-                      isActive ? 'text-white' : 'text-gray-400 group-hover:text-gray-500'
-                    }`}
-                  >
-                    {item.emoji}
-                  </span>
-                  <span className="text-center text-xs">{item.name}</span>
-                </Link>
-              );
-            })}
-          </nav>
-          
-          {/* Support Email - Desktop */}
-          <div className="px-4 py-3 border-t border-gray-200">
-            <div className="text-center">
-              <div className="text-xs text-gray-500 mb-1">Υποστήριξη</div>
-              <a 
-                href="mailto:support@yabalitsa.com"
-                className="text-sm text-football-green hover:text-football-green-light font-medium"
-              >
-                support@yabalitsa.com
-              </a>
-            </div>
-          </div>
-          
-          {/* Logout button - Desktop */}
-          <div className="px-4 py-4 border-t border-gray-200">
-            <button
-              onClick={signOut}
-              className="group flex flex-col items-center justify-center p-4 text-sm font-medium rounded-xl transition-all duration-200 border-2 text-red-600 hover:bg-red-50 hover:text-red-700 hover:shadow-lg border-red-200 hover:border-red-300 w-full"
+                  <div className="flex items-center gap-3">
+                    <Icon className="h-[18px] w-[18px] opacity-70" />
+                    <span>{item.name}</span>
+                  </div>
+                  {isExpanded ? (
+                    <ChevronDown className="h-3.5 w-3.5 opacity-50" />
+                  ) : (
+                    <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+                  )}
+                </button>
+                {isExpanded && (
+                  <div className="mt-0.5 ml-[22px] space-y-0.5 border-l border-white/[0.06] pl-3">
+                    {item.children?.map((child) => {
+                      const isChildItemActive = pathname.startsWith(child.href);
+                      const ChildIcon = child.icon;
+                      return (
+                        <Link
+                          key={child.name}
+                          href={child.href}
+                          onClick={onNavigate}
+                          className={cn(
+                            'flex items-center gap-3 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors',
+                            isChildItemActive
+                              ? 'text-emerald-400'
+                              : 'text-slate-400 hover:text-slate-200'
+                          )}
+                        >
+                          <ChildIcon className="h-[16px] w-[16px] opacity-60" />
+                          <span>{child.name}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          }
+
+          return (
+            <Link
+              key={item.name}
+              href={item.href!}
+              onClick={onNavigate}
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors',
+                isActive
+                  ? 'bg-white/[0.08] text-white'
+                  : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
+              )}
             >
-              <span className="text-3xl mb-2 text-red-400 group-hover:text-red-500">
-                🚪
-              </span>
-              <span className="text-center text-xs">Αποσύνδεση</span>
-            </button>
+              <Icon className="h-[18px] w-[18px] opacity-70" />
+              <span>{item.name}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {/* Footer — venue name + logout */}
+      <div className="border-t border-white/[0.06] px-3 py-3 space-y-1">
+        {venueOwner?.name && (
+          <div className="px-3 py-1.5">
+            <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Λογαριασμός</p>
+            <p className="text-[13px] text-slate-300 font-medium truncate mt-0.5">{venueOwner.name}</p>
           </div>
+        )}
+        <button
+          onClick={() => {
+            signOut();
+            onNavigate?.();
+          }}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-slate-400 hover:bg-white/[0.04] hover:text-slate-200 transition-colors"
+        >
+          <LogOut className="h-[18px] w-[18px] opacity-70" />
+          <span>Αποσύνδεση</span>
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function Sidebar() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  return (
+    <>
+      {/* Mobile Sheet */}
+      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent side="left" className="w-[260px] p-0 border-0 bg-[#0f172a]">
+          <SheetTitle className="sr-only">Μενού πλοήγησης</SheetTitle>
+          <NavContent onNavigate={() => setSidebarOpen(false)} />
+        </SheetContent>
+      </Sheet>
+
+      {/* Desktop sidebar */}
+      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-[260px] lg:flex-col">
+        <div className="flex flex-col flex-grow">
+          <NavContent />
         </div>
       </div>
 
       {/* Mobile menu button */}
-      <div className="lg:hidden">
+      <div className="lg:hidden fixed top-4 left-4 z-40">
         <button
           type="button"
-          className="text-gray-500 hover:text-gray-600"
+          className="inline-flex items-center justify-center rounded-lg p-2 bg-white shadow-sm border border-zinc-200 text-zinc-600 hover:bg-zinc-50 transition-colors"
           onClick={() => setSidebarOpen(true)}
         >
-          <Bars3Icon className="h-6 w-6" />
+          <Menu className="h-5 w-5" />
         </button>
       </div>
     </>

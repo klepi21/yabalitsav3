@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon, CalendarIcon, ClockIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { ChevronLeft, ChevronRight, Calendar, Clock, Trash2 } from 'lucide-react';
 import { Booking, Pitch, BlockedDate } from '@/types';
 
 interface WeeklyCalendarProps {
@@ -131,7 +131,7 @@ export default function WeeklyCalendar({ bookings, pitches = [], blockedDates = 
             onClick={viewMode === 'weekly' ? prevWeek : prevDay}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors touch-manipulation"
           >
-            <ChevronLeftIcon className="h-5 w-5 text-gray-900" />
+            <ChevronLeft className="h-5 w-5 text-gray-900" />
           </button>
           
           <h2 className="leading-tight text-lg sm:text-xl font-semibold text-gray-900">
@@ -152,7 +152,7 @@ export default function WeeklyCalendar({ bookings, pitches = [], blockedDates = 
             onClick={viewMode === 'weekly' ? nextWeek : nextDay}
             className="p-2 rounded-lg hover:bg-gray-100 transition-colors touch-manipulation"
           >
-            <ChevronRightIcon className="h-5 w-5 text-gray-900" />
+            <ChevronRight className="h-5 w-5 text-gray-900" />
           </button>
         </div>
 
@@ -161,22 +161,22 @@ export default function WeeklyCalendar({ bookings, pitches = [], blockedDates = 
             onClick={() => setViewMode('weekly')}
             className={`px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-colors min-w-[96px] ${
               viewMode === 'weekly' 
-                ? 'bg-football-green text-white' 
+                ? 'bg-primary text-white' 
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            <CalendarIcon className="h-4 w-4 inline mr-2" />
+            <Calendar className="h-4 w-4 inline mr-2" />
             Εβδομάδα
           </button>
           <button
             onClick={() => setViewMode('daily')}
             className={`px-3 py-2 min-h-[44px] rounded-lg text-sm font-medium transition-colors min-w-[96px] ${
               viewMode === 'daily' 
-                ? 'bg-football-green text-white' 
+                ? 'bg-primary text-white' 
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
             }`}
           >
-            <ClockIcon className="h-4 w-4 inline mr-2" />
+            <Clock className="h-4 w-4 inline mr-2" />
             Ημέρα
           </button>
         </div>
@@ -272,7 +272,7 @@ export default function WeeklyCalendar({ bookings, pitches = [], blockedDates = 
                                    className="text-white hover:text-red-200 disabled:opacity-50"
                                    title="Διαγραφή"
                                  >
-                                   <TrashIcon className="h-3 w-3" />
+                                   <Trash2 className="h-3 w-3" />
                                  </button>
                                )}
                              </div>
@@ -358,7 +358,7 @@ export default function WeeklyCalendar({ bookings, pitches = [], blockedDates = 
                                   className="text-white hover:text-red-200 disabled:opacity-50"
                                   title="Διαγραφή"
                                 >
-                                  <TrashIcon className="h-4 w-4" />
+                                  <Trash2 className="h-4 w-4" />
                                 </button>
                               )}
                             </div>

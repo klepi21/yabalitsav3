@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MagnifyingGlassIcon, MapPinIcon } from '@heroicons/react/24/outline';
+import { Search, MapPin } from 'lucide-react';
 import Image from 'next/image';
 import { Venue, Pitch } from '@/types';
 
@@ -104,7 +104,7 @@ export default function FSEPage() {
                   <select
                     value={searchQuery.city}
                     disabled
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 text-sm cursor-not-allowed"
+                    className="flex h-9 w-full rounded-lg border border-zinc-200/70 bg-transparent px-3 py-1 text-sm shadow-none transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   >
                     <option value="">Όλες οι πόλεις</option>
                     <option value="Αθήνα">Αθήνα</option>
@@ -134,7 +134,7 @@ export default function FSEPage() {
                   <select
                     value={searchQuery.pitchType}
                     disabled
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 text-sm cursor-not-allowed"
+                    className="flex h-9 w-full rounded-lg border border-zinc-200/70 bg-transparent px-3 py-1 text-sm shadow-none transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   >
                     <option value="">Επιλέξτε τύπο</option>
                     <option value="5x5">5x5</option>
@@ -153,7 +153,7 @@ export default function FSEPage() {
                   <select
                     value={searchQuery.time}
                     disabled
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 text-sm cursor-not-allowed"
+                    className="flex h-9 w-full rounded-lg border border-zinc-200/70 bg-transparent px-3 py-1 text-sm shadow-none transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
                   >
                     <option value="">Επιλέξτε ώρα</option>
                     {(() => {
@@ -177,7 +177,7 @@ export default function FSEPage() {
                   disabled
                   className="w-full sm:w-auto bg-gray-400 text-white font-medium py-2 px-6 rounded-lg text-sm cursor-not-allowed flex items-center justify-center space-x-2"
                 >
-                  <MagnifyingGlassIcon className="h-5 w-5" />
+                  <Search className="h-5 w-5" />
                   <span>Αναζήτηση</span>
                 </button>
               </div>
@@ -217,7 +217,7 @@ export default function FSEPage() {
                             </span>
                           </div>
                           <div className="flex items-center text-gray-600 text-xs sm:text-sm mb-1">
-                            <MapPinIcon className="h-4 w-4 mr-1 hidden sm:inline" />
+                            <MapPin className="h-4 w-4 mr-1 hidden sm:inline" />
                             <span>{result.venue.address}</span>
                           </div>
                           <div className="text-xs sm:text-sm text-gray-600">

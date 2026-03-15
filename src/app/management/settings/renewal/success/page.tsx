@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircleIcon } from '@heroicons/react/24/outline';
+import { CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function PaymentSuccessPage() {
@@ -29,7 +29,7 @@ export default function PaymentSuccessPage() {
       <div className="max-w-md mx-auto px-4 py-8">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
           <div className="mb-6">
-            <CheckCircleIcon className="h-16 w-16 text-green-500 mx-auto mb-4" />
+            <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
             <div className="text-4xl mb-4">🎉</div>
           </div>
           

@@ -1,15 +1,27 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import AcademyUserForm from '@/components/AcademyUserForm';
 import { academyUserService, userGroupService, squadService } from '@/lib/academy-services';
 import { AcademyUser, UserGroup, Squad } from '@/types/academy';
+import { Loader2, ArrowLeft } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 
 export default function NewAcademyUserPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [isDataLoading, setIsDataLoading] = useState(true);
@@ -22,7 +34,7 @@ export default function NewAcademyUserPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user || !venueOwner) { router.push('/venue-login'); return; }
+    if (!user || !venueOwner) { router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`); return; }
     const loadData = async () => {
       try {
         setIsDataLoading(true);
@@ -46,7 +58,7 @@ export default function NewAcademyUserPage() {
       }
     };
     loadData();
-  }, [user, venueOwner, authLoading, router, venueId]);
+  }, [user, venueOwner, authLoading, router, venueId, pathname]);
 
   // Find the parent group to load parent candidates
   const parentGroup = useMemo(
@@ -84,28 +96,44 @@ export default function NewAcademyUserPage() {
 
   if (isDataLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div className="min-h-screen bg-muted">
+      <div className="bg-background border-b border-border sticky top-0 z-10">
         <div className="px-4 py-4 sm:px-6">
+          <Breadcrumb className="mb-2">
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/management">Διαχείριση</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink asChild>
+                  <Link href="/management/academy/users">Χρήστες</Link>
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Νέος Χρήστης</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
           <div className="flex items-center gap-4">
-            <Link
-              href="/management/academy/users"
-              className="p-2 -ml-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </Link>
+            <Button variant="ghost" size="icon" asChild className="-ml-2">
+              <Link href="/management/academy/users">
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+            </Button>
             <div>
-              <h1 className="text-xl font-bold text-gray-900">Νέος Χρήστης</h1>
-              <p className="text-sm text-gray-500">Δημιουργία νέου μέλους ακαδημίας</p>
+              <h1 className="text-xl font-bold text-foreground">Νέος Χρήστης</h1>
+              <p className="text-sm text-muted-foreground">Δημιουργία νέου μέλους ακαδημίας</p>
             </div>
           </div>
         </div>
@@ -113,23 +141,25 @@ export default function NewAcademyUserPage() {
 
       <div className="px-4 py-6 sm:px-6 max-w-2xl mx-auto">
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
             {error}
             <button onClick={() => setError(null)} className="ml-2 underline">Απόρριψη</button>
           </div>
         )}
 
-        <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
-          <AcademyUserForm
-            venueId={venueId}
-            groups={groups}
-            parentCandidates={parentCandidates}
-            squads={squads}
-            onSubmit={handleSubmit}
-            onParentQuickAdd={handleQuickAddParent}
-            isLoading={isLoading}
-          />
-        </div>
+        <Card>
+          <CardContent>
+            <AcademyUserForm
+              venueId={venueId}
+              groups={groups}
+              parentCandidates={parentCandidates}
+              squads={squads}
+              onSubmit={handleSubmit}
+              onParentQuickAdd={handleQuickAddParent}
+              isLoading={isLoading}
+            />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

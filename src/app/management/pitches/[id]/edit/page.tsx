@@ -1,18 +1,36 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { 
-  ArrowLeftIcon,
-  ClockIcon
-} from '@heroicons/react/24/outline';
+import {
+  Building2,
+  Clock,
+  Loader2,
+  Plus,
+  Trash2,
+  Ban,
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { pitchService, blockedDateService } from '@/lib/firebase-services';
 import { Pitch, BlockedDate, getOpeningSlots } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Badge } from '@/components/ui/badge';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 
 // Form validation schema
 // Time slot validation schema
@@ -75,7 +93,7 @@ const pitchEditSchema = z.object({
       const [bHour, bMin] = b.start.split(':').map(Number);
       return (aHour * 60 + aMin) - (bHour * 60 + bMin);
     });
-    
+
     for (let i = 0; i < sortedSlots.length - 1; i++) {
       const [endHour, endMin] = sortedSlots[i].end.split(':').map(Number);
       const [nextStartHour, nextStartMin] = sortedSlots[i + 1].start.split(':').map(Number);
@@ -86,7 +104,7 @@ const pitchEditSchema = z.object({
     return true;
   };
 
-  return Object.values(data.defaultOpeningHours).every(day => 
+  return Object.values(data.defaultOpeningHours).every(day =>
     !day.isOpen || validateDaySlots(day.slots)
   );
 }, {
@@ -106,9 +124,10 @@ const assertPitchType = (type: string): Pitch['type'] => {
 
 export default function EditPitchPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const params = useParams();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
-  
+
   const [pitch, setPitch] = useState<Pitch | null>(null);
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -149,7 +168,7 @@ export default function EditPitchPage() {
       const pitchData = await pitchService.getById(pitchId);
       if (pitchData) {
         setPitch(pitchData);
-        
+
         // Ensure each day has a slots array
         const formattedData = {
           ...pitchData,
@@ -161,9 +180,9 @@ export default function EditPitchPage() {
             }
           }), {})
         };
-        
+
         reset(formattedData);
-        
+
         // Load blocked dates for this pitch
         const blockedDatesData = await blockedDateService.getByPitch(pitchId);
         setBlockedDates(blockedDatesData);
@@ -180,21 +199,21 @@ export default function EditPitchPage() {
     if (authLoading) return;
 
     if (!user || !venueOwner) {
-      router.push('/venue-login');
+      router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
 
     if (params.id) {
       loadPitchData(params.id as string);
     }
-  }, [user, venueOwner, authLoading, router, params.id, loadPitchData]);
+  }, [user, venueOwner, authLoading, router, params.id, loadPitchData, pathname]);
 
   const handleFormSubmit = async (data: PitchEditFormData) => {
     if (!pitch) return;
-    
+
     setIsSaving(true);
     setError(null);
-    
+
     try {
       // Clean up the opening hours data
       const cleanedOpeningHours = Object.entries(data.defaultOpeningHours).reduce((acc, [day, hours]) => ({
@@ -216,7 +235,7 @@ export default function EditPitchPage() {
         defaultOpeningHours: cleanedOpeningHours,
         type: assertPitchType(data.type)
       });
-      
+
       router.push(`/management/pitches/${pitch.id}`);
     } catch (error) {
       console.error('Error updating pitch:', error);
@@ -228,7 +247,7 @@ export default function EditPitchPage() {
 
   const addBlockedDate = async () => {
     if (!pitch || !newBlockedDate.startDate || !newBlockedDate.endDate) return;
-    
+
     try {
       await blockedDateService.create({
         pitchId: pitch.id,
@@ -238,7 +257,7 @@ export default function EditPitchPage() {
         reason: newBlockedDate.reason || 'Δεν έχει οριστεί λόγος',
         isFullDay: newBlockedDate.isFullDay
       });
-      
+
       // Reset form and reload blocked dates
       setNewBlockedDate({ startDate: '', endDate: '', reason: '', isFullDay: true });
       setShowAddBlockedDate(false);
@@ -251,7 +270,7 @@ export default function EditPitchPage() {
 
   const removeBlockedDate = async (blockedDateId: string) => {
     if (!pitch) return;
-    
+
     try {
       await blockedDateService.delete(blockedDateId);
       await loadPitchData(pitch.id);
@@ -263,153 +282,154 @@ export default function EditPitchPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
       </div>
     );
   }
 
   if (!pitch) {
     return (
-      <div className="text-center py-12">
-        <h3 className="text-lg font-medium text-gray-900">Pitch not found</h3>
-        <p className="mt-1 text-sm text-gray-500">The pitch you&apos;re looking for doesn&apos;t exist.</p>
-        <Link
-          href="/management/pitches"
-          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-        >
-          Back to Pitches
-        </Link>
+      <div className="text-center py-16">
+        <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
+          <Building2 className="h-6 w-6 text-muted-foreground" />
+        </div>
+        <h3 className="text-lg font-medium text-foreground">Pitch not found</h3>
+        <p className="mt-1 text-sm text-muted-foreground">The pitch you&apos;re looking for doesn&apos;t exist.</p>
+        <Button asChild className="mt-4">
+          <Link href="/management/pitches">
+            Back to Pitches
+          </Link>
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center space-x-4">
-        <Link
-          href={`/management/pitches/${pitch.id}`}
-          className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-        >
-          <ArrowLeftIcon className="h-4 w-4 mr-1" />
-          Επιστροφή στις Λεπτομέρειες Γηπέδου
-        </Link>
-      </div>
+      {/* Breadcrumb */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/dashboard">Πίνακας Ελέγχου</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/management/pitches">Γήπεδα</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href={`/management/pitches/${pitch.id}`}>{pitch.name}</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Επεξεργασία</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Επεξεργασία Γηπέδου</h1>
-        <p className="mt-2 text-gray-600">Ενημέρωση πληροφοριών γηπέδου</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Επεξεργασία Γηπέδου</h1>
+        <p className="mt-1 text-muted-foreground">Ενημέρωση πληροφοριών γηπέδου</p>
       </div>
 
       {error && (
-        <div className="rounded-md bg-red-50 p-4">
-          <div className="text-sm text-red-700">{error}</div>
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+          <div className="text-sm text-destructive">{error}</div>
         </div>
       )}
 
       {/* Edit Form */}
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
+      <Card>
+        <CardContent className="p-6">
           <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
             {/* Basic Information */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                  Όνομα Γηπέδου
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="text"
-                    id="name"
-                    {...register('name')}
-                    className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
-                    placeholder="Εισάγετε όνομα γηπέδου"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="name">Όνομα Γηπέδου</Label>
+                <Input
+                  type="text"
+                  id="name"
+                  {...register('name')}
+                  placeholder="Εισάγετε όνομα γηπέδου"
+                />
                 {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                  <p className="text-sm text-destructive">{errors.name.message}</p>
                 )}
               </div>
 
-              <div>
-                <label htmlFor="type" className="block text-sm font-medium text-gray-700">
-                  Τύπος
-                </label>
-                <div className="mt-1">
-                  <select
-                    id="type"
-                    {...register('type')}
-                    className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
-                  >
-                    <option value="">Επιλέξτε τύπο</option>
-                    <option value="5x5">5x5</option>
-                    <option value="6x6">6x6</option>
-                    <option value="7x7">7x7</option>
-                    <option value="8x8">8x8</option>
-                    <option value="9x9">9x9</option>
-                  </select>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="type">Τύπος</Label>
+                <select
+                  id="type"
+                  {...register('type')}
+                  className="flex h-9 w-full rounded-lg border border-zinc-200/70 bg-transparent px-3 py-1 text-sm shadow-none transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                >
+                  <option value="">Επιλέξτε τύπο</option>
+                  <option value="5x5">5x5</option>
+                  <option value="6x6">6x6</option>
+                  <option value="7x7">7x7</option>
+                  <option value="8x8">8x8</option>
+                  <option value="9x9">9x9</option>
+                </select>
                 {errors.type && (
-                  <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
+                  <p className="text-sm text-destructive">{errors.type.message}</p>
                 )}
               </div>
-
-
             </div>
+
+            <Separator />
 
             {/* Pricing */}
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <div>
-                <label htmlFor="pricePerSlot" className="block text-sm font-medium text-gray-700">
-                  Τιμή ανά Κράτηση (€)
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="number"
-                    step="0.01"
-                    id="pricePerSlot"
-                    {...register('pricePerSlot', { valueAsNumber: true })}
-                    className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
-                    placeholder="0.00"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="pricePerSlot">Τιμή ανά Κράτηση (&euro;)</Label>
+                <Input
+                  type="number"
+                  step="0.01"
+                  id="pricePerSlot"
+                  {...register('pricePerSlot', { valueAsNumber: true })}
+                  placeholder="0.00"
+                />
                 {errors.pricePerSlot && (
-                  <p className="mt-1 text-sm text-red-600">{errors.pricePerSlot.message}</p>
+                  <p className="text-sm text-destructive">{errors.pricePerSlot.message}</p>
                 )}
               </div>
 
-              <div>
-                <label htmlFor="slotDuration" className="block text-sm font-medium text-gray-700">
-                  Διάρκεια Κράτησης (λεπτά)
-                </label>
-                <div className="mt-1">
-                  <input
-                    type="number"
-                    id="slotDuration"
-                    {...register('slotDuration', { valueAsNumber: true })}
-                    className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
-                    placeholder="60"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="slotDuration">Διάρκεια Κράτησης (λεπτά)</Label>
+                <Input
+                  type="number"
+                  id="slotDuration"
+                  {...register('slotDuration', { valueAsNumber: true })}
+                  placeholder="60"
+                />
                 {errors.slotDuration && (
-                  <p className="mt-1 text-sm text-red-600">{errors.slotDuration.message}</p>
+                  <p className="text-sm text-destructive">{errors.slotDuration.message}</p>
                 )}
               </div>
             </div>
 
+            <Separator />
+
             {/* Opening Hours */}
             <div>
-              <div className="flex items-center mb-4">
-                <ClockIcon className="h-5 w-5 text-gray-400 mr-2" />
-                <h3 className="text-lg font-medium text-gray-900">Ώρες Λειτουργίας</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <Clock className="h-5 w-5 text-primary" />
+                <h3 className="text-lg font-medium text-foreground">Ώρες Λειτουργίας</h3>
               </div>
-              
+
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {(['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'] as const).map((day) => (
-                  <div key={day} className="border border-gray-200 rounded-lg p-4">
+                  <div key={day} className="border border-border rounded-lg p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <label className="text-sm font-medium text-gray-700 capitalize">
+                      <Label className="capitalize">
                         {day === 'monday' ? 'Δευτέρα' :
                          day === 'tuesday' ? 'Τρίτη' :
                          day === 'wednesday' ? 'Τετάρτη' :
@@ -417,27 +437,27 @@ export default function EditPitchPage() {
                          day === 'friday' ? 'Παρασκευή' :
                          day === 'saturday' ? 'Σάββατο' :
                          day === 'sunday' ? 'Κυριακή' : day}
-                      </label>
+                      </Label>
                       <input
                         type="checkbox"
                         {...register(`defaultOpeningHours.${day}.isOpen`)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        className="h-4 w-4 rounded border-border text-primary focus:ring-ring"
                       />
                     </div>
-                    
+
                     {watch(`defaultOpeningHours.${day}.isOpen`) && (
                       <div className="space-y-3">
                         {/* Existing time slots */}
                         {watch(`defaultOpeningHours.${day}.slots`)?.map((_slot: { start: string; end: string }, index: number) => (
                           <div key={index} className="flex items-end gap-2">
-                            <div>
-                              <label className="block text-xs text-gray-500">Άνοιγμα</label>
-                              <input
+                            <div className="flex-1">
+                              <Label className="text-xs text-muted-foreground">Άνοιγμα</Label>
+                              <Input
                                 type="text"
                                 placeholder="HH:MM"
                                 pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
                                 {...register(`defaultOpeningHours.${day}.slots.${index}.start`)}
-                                className="block w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                className="h-8 text-sm"
                                 onBlur={(e) => {
                                   const value = e.target.value;
                                   if (value && !value.includes(':')) {
@@ -447,14 +467,14 @@ export default function EditPitchPage() {
                                 }}
                               />
                             </div>
-                            <div>
-                              <label className="block text-xs text-gray-500">Κλείσιμο</label>
-                              <input
+                            <div className="flex-1">
+                              <Label className="text-xs text-muted-foreground">Κλείσιμο</Label>
+                              <Input
                                 type="text"
                                 placeholder="HH:MM"
                                 pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
                                 {...register(`defaultOpeningHours.${day}.slots.${index}.end`)}
-                                className="block w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                className="h-8 text-sm"
                                 onBlur={(e) => {
                                   const value = e.target.value;
                                   if (value && !value.includes(':')) {
@@ -464,32 +484,37 @@ export default function EditPitchPage() {
                                 }}
                               />
                             </div>
-                            <button
+                            <Button
                               type="button"
+                              variant="ghost"
+                              size="icon-sm"
                               onClick={() => {
                                 const slots = watch(`defaultOpeningHours.${day}.slots`) || [];
                                 const newSlots = [...slots];
                                 newSlots.splice(index, 1);
                                 setValue(`defaultOpeningHours.${day}.slots`, newSlots);
                               }}
-                              className="text-red-600 hover:text-red-800 px-2 py-1"
+                              className="text-destructive hover:text-destructive"
                             >
-                              🗑️
-                            </button>
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
                           </div>
                         ))}
-                        
+
                         {/* Add new slot button */}
-                        <button
+                        <Button
                           type="button"
+                          variant="ghost"
+                          size="sm"
                           onClick={() => {
                             const slots = watch(`defaultOpeningHours.${day}.slots`) || [];
                             setValue(`defaultOpeningHours.${day}.slots`, [...slots, { start: '', end: '' }]);
                           }}
-                          className="text-sm text-green-600 hover:text-green-700 font-medium"
+                          className="text-primary"
                         >
-                          + Προσθήκη διαστήματος
-                        </button>
+                          <Plus className="h-3.5 w-3.5" />
+                          Προσθήκη διαστήματος
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -497,140 +522,139 @@ export default function EditPitchPage() {
               </div>
             </div>
 
+            <Separator />
+
             {/* Blocked Dates Management */}
-            <div className="bg-gray-50 rounded-lg p-6">
+            <div className="bg-muted rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900">🚫 Κλειστές Ημερομηνίες</h3>
-                <button
+                <h3 className="text-lg font-medium text-foreground flex items-center gap-2">
+                  <Ban className="h-5 w-5 text-destructive" />
+                  Κλειστές Ημερομηνίες
+                </h3>
+                <Button
                   type="button"
+                  variant="destructive"
+                  size="sm"
                   onClick={() => setShowAddBlockedDate(!showAddBlockedDate)}
-                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                 >
                   {showAddBlockedDate ? 'Ακύρωση' : 'Προσθήκη Κλειστής Ημερομηνίας'}
-                </button>
+                </Button>
               </div>
 
               {/* Add Blocked Date Form */}
               {showAddBlockedDate && (
-                <div className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Ημερομηνία Έναρξης *
-                      </label>
-                      <input
-                        type="date"
-                        value={newBlockedDate.startDate}
-                        onChange={(e) => setNewBlockedDate({...newBlockedDate, startDate: e.target.value})}
-                        className="block w-full text-sm border border-gray-300 rounded px-3 py-2"
-                        required
+                <Card className="mb-4">
+                  <CardContent className="p-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                      <div className="space-y-2">
+                        <Label>Ημερομηνία Έναρξης *</Label>
+                        <Input
+                          type="date"
+                          value={newBlockedDate.startDate}
+                          onChange={(e) => setNewBlockedDate({...newBlockedDate, startDate: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label>Ημερομηνία Λήξης *</Label>
+                        <Input
+                          type="date"
+                          value={newBlockedDate.endDate}
+                          onChange={(e) => setNewBlockedDate({...newBlockedDate, endDate: e.target.value})}
+                          required
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2 mb-4">
+                      <Label>Λόγος Κλεισίματος</Label>
+                      <Input
+                        type="text"
+                        value={newBlockedDate.reason}
+                        onChange={(e) => setNewBlockedDate({...newBlockedDate, reason: e.target.value})}
+                        placeholder="π.χ. Συντήρηση, Ειδική Εκδήλωση"
                       />
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Ημερομηνία Λήξης *
-                      </label>
+                    <div className="flex items-center mb-4">
                       <input
-                        type="date"
-                        value={newBlockedDate.endDate}
-                        onChange={(e) => setNewBlockedDate({...newBlockedDate, endDate: e.target.value})}
-                        className="block w-full text-sm border border-gray-300 rounded px-3 py-2"
-                        required
+                        type="checkbox"
+                        id="isFullDay"
+                        checked={newBlockedDate.isFullDay}
+                        onChange={(e) => setNewBlockedDate({...newBlockedDate, isFullDay: e.target.checked})}
+                        className="h-4 w-4 rounded border-border text-primary focus:ring-ring"
                       />
+                      <Label htmlFor="isFullDay" className="ml-2">
+                        Κλείσιμο όλης της ημέρας
+                      </Label>
                     </div>
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Λόγος Κλεισίματος
-                    </label>
-                    <input
-                      type="text"
-                      value={newBlockedDate.reason}
-                      onChange={(e) => setNewBlockedDate({...newBlockedDate, reason: e.target.value})}
-                      placeholder="π.χ. Συντήρηση, Ειδική Εκδήλωση"
-                      className="block w-full text-sm border border-gray-300 rounded px-3 py-2"
-                    />
-                  </div>
-                  <div className="flex items-center mb-4">
-                    <input
-                      type="checkbox"
-                      id="isFullDay"
-                      checked={newBlockedDate.isFullDay}
-                      onChange={(e) => setNewBlockedDate({...newBlockedDate, isFullDay: e.target.checked})}
-                      className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
-                    />
-                    <label htmlFor="isFullDay" className="ml-2 text-sm text-gray-700">
-                      Κλείσιμο όλης της ημέρας
-                    </label>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={addBlockedDate}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                  >
-                    Προσθήκη Κλειστής Ημερομηνίας
-                  </button>
-                </div>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      onClick={addBlockedDate}
+                    >
+                      Προσθήκη Κλειστής Ημερομηνίας
+                    </Button>
+                  </CardContent>
+                </Card>
               )}
 
               {/* Existing Blocked Dates */}
               {blockedDates.length > 0 ? (
                 <div className="space-y-3">
                   {blockedDates.map((blockedDate) => (
-                    <div key={blockedDate.id} className="bg-white rounded-lg p-4 border border-red-200">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-4 text-sm">
-                            <span className="font-medium text-gray-900">
-                              {new Date(blockedDate.startDate).toLocaleDateString('el-GR')}
-                              {blockedDate.startDate !== blockedDate.endDate && 
-                                ` - ${new Date(blockedDate.endDate).toLocaleDateString('el-GR')}`
-                              }
-                            </span>
-                            <span className="text-red-600 font-medium">
-                              {blockedDate.isFullDay ? 'Όλη η ημέρα' : 'Συγκεκριμένες ώρες'}
-                            </span>
+                    <Card key={blockedDate.id} className="border-destructive/20">
+                      <CardContent className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-4 text-sm">
+                              <span className="font-medium text-foreground">
+                                {new Date(blockedDate.startDate).toLocaleDateString('el-GR')}
+                                {blockedDate.startDate !== blockedDate.endDate &&
+                                  ` - ${new Date(blockedDate.endDate).toLocaleDateString('el-GR')}`
+                                }
+                              </span>
+                              <Badge variant="destructive" className="text-xs">
+                                {blockedDate.isFullDay ? 'Όλη η ημέρα' : 'Συγκεκριμένες ώρες'}
+                              </Badge>
+                            </div>
+                            {blockedDate.reason && (
+                              <p className="text-muted-foreground text-sm mt-1">{blockedDate.reason}</p>
+                            )}
                           </div>
-                          {blockedDate.reason && (
-                            <p className="text-gray-600 text-sm mt-1">{blockedDate.reason}</p>
-                          )}
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            onClick={() => removeBlockedDate(blockedDate.id)}
+                            className="text-destructive hover:text-destructive"
+                            title="Διαγραφή"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => removeBlockedDate(blockedDate.id)}
-                          className="text-red-600 hover:text-red-800 p-1"
-                          title="Διαγραφή"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 text-sm">Δεν υπάρχουν κλειστές ημερομηνίες για αυτό το γήπεδο.</p>
+                <p className="text-muted-foreground text-sm">Δεν υπάρχουν κλειστές ημερομηνίες για αυτό το γήπεδο.</p>
               )}
             </div>
 
             {/* Submit Buttons */}
             <div className="flex justify-end space-x-3">
-              <Link
-                href={`/management/pitches/${pitch.id}`}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
-              >
-                Ακύρωση
-              </Link>
-              <button
-                type="submit"
-                disabled={isSaving}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green disabled:opacity-50 disabled:cursor-not-allowed"
-              >
+              <Button variant="outline" asChild>
+                <Link href={`/management/pitches/${pitch.id}`}>
+                  Ακύρωση
+                </Link>
+              </Button>
+              <Button type="submit" disabled={isSaving}>
+                {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
                 {isSaving ? 'Αποθήκευση...' : 'Αποθήκευση Αλλαγών'}
-              </button>
+              </Button>
             </div>
           </form>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

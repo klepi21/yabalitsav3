@@ -1,27 +1,54 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  ArrowLeftIcon,
-  EnvelopeIcon,
-  PhoneIcon,
-  MapPinIcon,
-  CalendarIcon,
-  ClockIcon,
-  CurrencyEuroIcon,
-  PencilIcon
-} from '@heroicons/react/24/outline';
+import {
+  Loader2,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Clock,
+  Euro,
+  Pencil,
+  Trash2,
+  AlertCircle,
+  CalendarDays,
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { userService, bookingService } from '@/lib/firebase-services';
 import { User, Booking } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function CustomerDetailsPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const params = useParams();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
-  
+
   const [customer, setCustomer] = useState<User | null>(null);
   const [customerBookings, setCustomerBookings] = useState<Booking[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,7 +61,7 @@ export default function CustomerDetailsPage() {
     if (authLoading) return;
 
     if (!user || !venueOwner) {
-      router.push('/venue-login');
+      router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
 
@@ -67,39 +94,32 @@ export default function CustomerDetailsPage() {
       }
     };
     loadCustomerData();
-  }, [user, venueOwner, authLoading, router, customerId]);
+  }, [user, venueOwner, authLoading, router, customerId, pathname]);
 
   if (authLoading || isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-football-green"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center">
-          <div className="text-red-600 text-2xl mb-4">❌</div>
-          <p className="text-red-600 text-lg mb-4">{error}</p>
-          <Link 
-            href="/management/customers"
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-          >
-            Επιστροφή στους Πελάτες
-          </Link>
-        </div>
+      <div className="flex flex-col items-center justify-center py-16">
+        <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+        <p className="text-destructive text-lg mb-4">{error}</p>
+        <Button variant="destructive" asChild>
+          <Link href="/management/customers">Επιστροφή στους Πελάτες</Link>
+        </Button>
       </div>
     );
   }
 
   if (!customer) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center">
-          <p className="text-gray-600 text-lg">Φόρτωση...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
       </div>
     );
   }
@@ -120,13 +140,13 @@ export default function CustomerDetailsPage() {
     });
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
-      case 'confirmed': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'completed': return 'bg-blue-100 text-blue-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'confirmed': return 'default';
+      case 'pending': return 'secondary';
+      case 'completed': return 'outline';
+      case 'cancelled': return 'destructive';
+      default: return 'secondary';
     }
   };
 
@@ -140,150 +160,187 @@ export default function CustomerDetailsPage() {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      await userService.delete(customer.id);
+      router.push('/management/customers');
+    } catch (e) {
+      console.error('Error deleting customer:', e);
+    }
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="space-y-6">
+      {/* Breadcrumb */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/management/dashboard">Πίνακας Ελέγχου</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/management/customers">Πελάτες</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{customer.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Link
-              href="/management/customers"
-              className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-            >
-              <ArrowLeftIcon className="h-4 w-4 mr-1" />
-              Επιστροφή στους Πελάτες
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-semibold text-foreground">Πληροφορίες Πελάτη</h2>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" asChild>
+            <Link href={`/management/customers/${customer.id}/edit`}>
+              <Pencil className="h-4 w-4 mr-2" />
+              Επεξεργασία
             </Link>
-            <h1 className="text-3xl font-bold text-gray-900">Πληροφορίες Πελάτη</h1>
-          </div>
-          <Link
-            href={`/management/customers/${customer.id}/edit`}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
-          >
-            <PencilIcon className="h-4 w-4 mr-2" />
-            Επεξεργασία
-          </Link>
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <Trash2 className="h-4 w-4 mr-2" />
+                Διαγραφή
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Διαγραφή Πελάτη</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Είστε σίγουροι ότι θέλετε να διαγράψετε τον πελάτη &quot;{customer.name}&quot;; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Ακύρωση</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Διαγραφή
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Customer Info Card */}
         <div className="lg:col-span-1">
-          <div className="bg-white shadow-lg rounded-2xl border border-gray-100 p-6">
-            <div className="text-center mb-6">
-              <div className="w-20 h-20 bg-football-green rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl text-white font-bold">
-                  {customer.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                </span>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex flex-col items-center mb-6">
+                <h3 className="text-xl font-semibold text-foreground">{customer.name}</h3>
               </div>
-              <h2 className="text-xl font-bold text-gray-900">{customer.name}</h2>
-            </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <PhoneIcon className="h-5 w-5 text-gray-400" />
-                <span className="text-gray-700">{customer.phone}</span>
-              </div>
-              
-              {customer.email && (
-                <div className="flex items-center space-x-3">
-                  <EnvelopeIcon className="h-5 w-5 text-gray-400" />
-                  <span className="text-gray-700">{customer.email}</span>
+              <Separator className="mb-4" />
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <Phone className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-foreground">{customer.phone}</span>
                 </div>
-              )}
 
-              <div className="flex items-center space-x-3">
-                <CalendarIcon className="h-5 w-5 text-gray-400" />
-                <span className="text-gray-700">
-                  Πελάτης από: {formatDate(customer.createdAt)}
-                </span>
-              </div>
+                {customer.email && (
+                  <div className="flex items-center gap-3">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-foreground">{customer.email}</span>
+                  </div>
+                )}
 
-              {customer.venueIds && customer.venueIds.length > 0 && (
-                <div className="flex items-center space-x-3">
-                  <MapPinIcon className="h-5 w-5 text-gray-400" />
-                  <span className="text-gray-700">
-                    {customer.venueIds.length} venue{customer.venueIds.length > 1 ? 's' : ''}
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm text-foreground">
+                    Πελάτης από: {formatDate(customer.createdAt)}
                   </span>
                 </div>
-              )}
-            </div>
-          </div>
+
+                {customer.venueIds && customer.venueIds.length > 0 && (
+                  <div className="flex items-center gap-3">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm text-foreground">
+                      {customer.venueIds.length} {customer.venueIds.length > 1 ? 'γήπεδα' : 'γήπεδο'}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Bookings List */}
         <div className="lg:col-span-2">
-          <div className="bg-white shadow-lg rounded-2xl border border-gray-100">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">
                 Κρατήσεις ({customerBookings.length})
-              </h3>
-            </div>
-
-            {customerBookings.length === 0 ? (
-              <div className="text-center py-12">
-                <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">
-                  Δεν υπάρχουν κρατήσεις ακόμα
-                </h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Αυτός ο πελάτης δεν έχει κάνει κρατήσεις στο γήπεδό σας.
-                </p>
-              </div>
-            ) : (
-              <div className="divide-y divide-gray-200">
-                {customerBookings.map((booking) => (
-                  <div key={booking.id} className="px-6 py-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
-                            {getStatusText(booking.status)}
-                          </span>
-                          <span className="text-sm text-gray-500">
-                            ID: {booking.id.slice(-8)}
-                          </span>
-                        </div>
-                        
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                          <div className="flex items-center space-x-2">
-                            <CalendarIcon className="h-4 w-4 text-gray-400" />
-                            <span className="text-gray-700">{formatDate(booking.startTime)}</span>
-                          </div>
-                          
-                          <div className="flex items-center space-x-2">
-                            <ClockIcon className="h-4 w-4 text-gray-400" />
-                            <span className="text-gray-700">
-                              {formatTime(booking.startTime)} - {formatTime(booking.endTime)}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {customerBookings.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <CalendarDays className="h-12 w-12 text-muted-foreground" />
+                  <h3 className="mt-4 text-sm font-medium text-foreground">
+                    Δεν υπάρχουν κρατήσεις ακόμα
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Αυτός ο πελάτης δεν έχει κάνει κρατήσεις στο γήπεδό σας.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {customerBookings.map((booking) => (
+                    <div key={booking.id} className="rounded-lg border border-border p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <Badge variant={getStatusVariant(booking.status)}>
+                              {getStatusText(booking.status)}
+                            </Badge>
+                            <span className="text-xs text-muted-foreground font-mono">
+                              ID: {booking.id.slice(-8)}
                             </span>
                           </div>
-                          
-                          <div className="flex items-center space-x-2">
-                            <CurrencyEuroIcon className="h-4 w-4 text-gray-400" />
-                            <span className="text-gray-700">€{booking.price}</span>
-                          </div>
-                          
-                          {booking.notes && (
-                            <div className="sm:col-span-2">
-                              <span className="text-gray-500">Σημείωση: {booking.notes}</span>
+
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span className="text-foreground">{formatDate(booking.startTime)}</span>
                             </div>
-                          )}
+
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span className="text-foreground">
+                                {formatTime(booking.startTime)} - {formatTime(booking.endTime)}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2">
+                              <Euro className="h-3.5 w-3.5 text-muted-foreground" />
+                              <span className="text-foreground">{booking.price}</span>
+                            </div>
+
+                            {booking.notes && (
+                              <div className="sm:col-span-2">
+                                <span className="text-muted-foreground">Σημείωση: {booking.notes}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="ml-4">
+                          <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/management/bookings/${booking.id}`}>
+                              Προβολή Κράτησης
+                            </Link>
+                          </Button>
                         </div>
                       </div>
-                      
-                      <div className="ml-4">
-                        <Link
-                          href={`/management/bookings/${booking.id}`}
-                          className="text-sm text-football-green hover:text-football-green-light"
-                        >
-                          Προβολή Κράτησης
-                        </Link>
-                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

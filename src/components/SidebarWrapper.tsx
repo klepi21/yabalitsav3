@@ -1,11 +1,12 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
-import { useEffect, useState } from 'react';
+import { HelpCircle, Zap, Sparkles, ArrowUpRight, Bell, CheckCircle2 } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar from './Sidebar';
+import { Badge } from '@/components/ui/badge';
 
 interface VenueData {
   id: string;
@@ -16,24 +17,37 @@ interface VenueData {
   [key: string]: unknown;
 }
 
+interface PendingBooking {
+  id: string;
+  userName: string;
+  userEmail?: string;
+  pitchId: string;
+  pitchName?: string;
+  startTime: string;
+  status: string;
+}
+
 interface SidebarWrapperProps {
   children: React.ReactNode;
 }
 
 export default function SidebarWrapper({ children }: SidebarWrapperProps) {
   const pathname = usePathname();
-  const { user } = useAuth();
+  const router = useRouter();
+  const { user, venueOwner } = useAuth();
   const [venueData, setVenueData] = useState<VenueData | null>(null);
-  
-  // Don't show sidebar on public pages
-  const isRootPage = pathname === '/';
-  const isLoginPage = pathname === '/venue-login';
-  const isForVenues = pathname === '/for-venues';
-  const isBookingPage = pathname.startsWith('/book/');
-  const isTermsPage = pathname === '/terms';
-  const isPrivacyPage = pathname === '/privacy';
-  const isFSEPage = pathname === '/fse';
-  
+  const [pendingBookings, setPendingBookings] = useState<PendingBooking[]>([]);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const isPublicPage =
+    pathname === '/' ||
+    pathname === '/venue-login' ||
+    pathname === '/for-venues' ||
+    pathname.startsWith('/book/') ||
+    pathname === '/terms' ||
+    pathname === '/privacy' ||
+    pathname === '/fse';
+
   // Fetch venue data for subscription info
   useEffect(() => {
     if (user?.uid) {
@@ -41,11 +55,11 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
         try {
           const { collection, query, where, getDocs } = await import('firebase/firestore');
           const { db } = await import('@/lib/firebase');
-          
+
           const venuesRef = collection(db, 'yabalitsa_venues');
           const q = query(venuesRef, where('ownerId', '==', user.uid));
           const querySnapshot = await getDocs(q);
-          
+
           if (!querySnapshot.empty) {
             const venueDoc = querySnapshot.docs[0];
             setVenueData({ id: venueDoc.id, ...venueDoc.data() } as VenueData);
@@ -54,115 +68,227 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
           console.error('Error fetching venue data:', error);
         }
       };
-      
+
       fetchVenueData();
     }
   }, [user?.uid]);
-  
-  if (isRootPage || isLoginPage || isForVenues || isBookingPage || isTermsPage || isPrivacyPage || isFSEPage) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        {children}
-      </div>
-    );
+
+  // Fetch pending bookings for notifications
+  const fetchPendingBookings = useCallback(async () => {
+    if (!venueOwner?.venueId || !user) return;
+
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch('/api/bookings/get-by-venue', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ venueId: venueOwner.venueId }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const pending = (data.bookings || [])
+          .filter((b: PendingBooking) => b.status === 'pending')
+          .slice(0, 5);
+        setPendingBookings(pending);
+      }
+    } catch (error) {
+      console.error('Error fetching pending bookings:', error);
+    }
+  }, [venueOwner?.venueId, user]);
+
+  useEffect(() => {
+    if (!isPublicPage) {
+      fetchPendingBookings();
+    }
+  }, [isPublicPage, fetchPendingBookings]);
+
+  // Close notifications when clicking outside
+  useEffect(() => {
+    if (!showNotifications) return;
+
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.notification-bell')) {
+        setShowNotifications(false);
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, [showNotifications]);
+
+  if (isPublicPage) {
+    return <>{children}</>;
   }
-  
-  // Show sidebar for management pages only
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <Sidebar />
-      <div className="lg:pl-64">
+      <div className="lg:pl-[260px]">
         <main className="min-h-screen">
-          {/* Top bar with Help/Guides button and Subscription Info */}
-          <div className="sticky top-0 z-20 bg-gray-50/80 backdrop-blur supports-[backdrop-filter]:bg-gray-50/60 border-b">
-            <div className="px-6 py-3 flex items-center justify-between">
-              {/* Help/Guides button */}
+          {/* Top bar */}
+          <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-sm border-b border-zinc-100">
+            <div className="px-6 py-2.5 flex items-center justify-between">
+              {/* Help/Guides */}
               <Link
                 href="/management/guides"
-                className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-green-700"
-                title="Οδηγίες Χρήσης"
+                className="inline-flex items-center gap-1.5 text-[13px] font-medium text-zinc-500 hover:text-zinc-700 transition-colors"
               >
-                <QuestionMarkCircleIcon className="h-5 w-5" />
+                <HelpCircle className="h-4 w-4" />
                 Οδηγίες
               </Link>
-              
-              {/* Plan Status - Right Side */}
-              {venueData && (
-                <div className="flex items-center gap-3">
-                  {/* Plan Status Indicator */}
-                  {venueData.plan === 'subscription' ? (
-                    // Active Plan
-                    <>
-                      {(venueData.daysRemaining ?? 0) > 7 ? (
-                        // All OK - Green indicator
-                        <div className="flex items-center gap-2">
-                          <div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
-                          <span className="text-sm font-medium text-gray-700">
-                            {venueData.planType || 'Basic'} Plan
-                          </span>
-                          <span className="text-xs text-gray-500">
-                            ({venueData.daysRemaining} ημέρες)
-                          </span>
-                        </div>
-                      ) : (venueData.daysRemaining ?? 0) > 0 ? (
-                        // Warning - Expires soon
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 border border-amber-200">
-                          <div className="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse"></div>
-                          <span className="text-sm font-medium text-amber-800">
-                            {venueData.planType || 'Basic'} - {venueData.daysRemaining} ημέρες
-                          </span>
-                        </div>
-                      ) : (
-                        // Expired
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-red-100 border border-red-200">
-                          <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
-                          <span className="text-sm font-medium text-red-800">
-                            Πλάνο έληξε
-                          </span>
-                        </div>
-                      )}
-                      
-                      {/* Renewal/Upgrade Link */}
-                      {(venueData.daysRemaining || 0) <= 7 ? (
-                        <Link
-                          href="#"
-                          //href="/management/settings/renewal"
-                          className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-full transition-colors shadow-sm"
-                        >
-                          ⚡ Ανανέωση
-                        </Link>
-                      ) : (
-                        <Link
-                          //href="/management/settings/renewal"
-                          href="#"
-                          className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors"
-                        >
-                          🚀 Αναβάθμιση
-                        </Link>
-                      )}
-                    </>
-                  ) : (
-                    // Trial or No Plan
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 border border-gray-200">
-                        <div className="w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
-                        <span className="text-sm font-medium text-gray-600">
-                          {venueData.plan === 'trial' ? 'Δωρεάν Trial' : 'Χωρίς Πλάνο'}
-                        </span>
+
+              {/* Right side: Notifications + Plan Status */}
+              <div className="flex items-center gap-4">
+                {/* Notification Bell */}
+                <div className="relative notification-bell">
+                  <button
+                    onClick={() => setShowNotifications(!showNotifications)}
+                    className="relative p-1.5 text-zinc-500 hover:text-zinc-700 transition-colors rounded-lg hover:bg-zinc-100"
+                  >
+                    <Bell className="h-[18px] w-[18px]" />
+                    {pendingBookings.length > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] rounded-full h-4 w-4 flex items-center justify-center font-semibold">
+                        {pendingBookings.length}
+                      </span>
+                    )}
+                  </button>
+
+                  {showNotifications && (
+                    <div className="absolute right-0 top-10 w-80 bg-white border border-zinc-100 rounded-xl shadow-lg z-50 overflow-hidden">
+                      <div className="px-4 py-3 border-b border-zinc-100">
+                        <h3 className="text-[13px] font-semibold text-zinc-900">Ειδοποιήσεις</h3>
+                        <p className="text-xs text-zinc-400 mt-0.5">Κρατήσεις που χρειάζονται προσοχή</p>
                       </div>
-                      <Link
-                        href="#"
-                        //href="/management/settings/renewal"
-                        className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-full transition-colors shadow-sm"
-                      >
-                        ✨ Ενεργοποίηση
-                      </Link>
+
+                      <div className="max-h-80 overflow-y-auto">
+                        {pendingBookings.length === 0 ? (
+                          <div className="p-6 text-center">
+                            <CheckCircle2 className="h-6 w-6 text-zinc-300 mx-auto" />
+                            <p className="mt-2 text-zinc-400 text-[13px]">Όλα εντάξει!</p>
+                          </div>
+                        ) : (
+                          pendingBookings.map((booking) => (
+                            <div
+                              key={booking.id}
+                              className="px-4 py-3 border-b border-zinc-50 hover:bg-zinc-50 cursor-pointer transition-colors"
+                              onClick={() => {
+                                setShowNotifications(false);
+                                router.push(`/management/bookings/${booking.id}`);
+                              }}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-[13px] font-medium text-zinc-900 truncate">
+                                    {booking.userName || booking.userEmail || 'Άγνωστος'}
+                                  </p>
+                                  <p className="text-xs text-zinc-400 mt-0.5">
+                                    {new Date(booking.startTime).toLocaleDateString('el-GR')} — {new Date(booking.startTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })}
+                                  </p>
+                                </div>
+                                <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700 text-[10px] ml-2 shrink-0">
+                                  Εκκρεμεί
+                                </Badge>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+
+                      {pendingBookings.length > 0 && (
+                        <div className="px-4 py-2.5 border-t border-zinc-100">
+                          <Link
+                            href="/management/bookings"
+                            onClick={() => setShowNotifications(false)}
+                            className="text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
+                          >
+                            Προβολή όλων
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
-              )}
+
+                {/* Separator */}
+                <div className="h-5 w-px bg-zinc-150" />
+
+                {/* Plan Status */}
+                {venueData && (
+                  <div className="flex items-center gap-2.5">
+                    {venueData.plan === 'subscription' ? (
+                      <>
+                        {(venueData.daysRemaining ?? 0) > 7 ? (
+                          <div className="flex items-center gap-2">
+                            <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                            <span className="text-[13px] font-medium text-zinc-600">
+                              {venueData.planType || 'Basic'} Plan
+                            </span>
+                            <span className="text-xs text-zinc-400">
+                              {venueData.daysRemaining} ημέρες
+                            </span>
+                          </div>
+                        ) : (venueData.daysRemaining ?? 0) > 0 ? (
+                          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-100">
+                            <div className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                            <span className="text-[13px] font-medium text-amber-700">
+                              {venueData.planType || 'Basic'} — {venueData.daysRemaining} ημέρες
+                            </span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-red-50 border border-red-100">
+                            <div className="h-2 w-2 rounded-full bg-red-500" />
+                            <span className="text-[13px] font-medium text-red-700">
+                              Πλάνο έληξε
+                            </span>
+                          </div>
+                        )}
+
+                        {(venueData.daysRemaining || 0) <= 7 ? (
+                          <Link
+                            href="#"
+                            className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-zinc-900 hover:bg-zinc-800 px-3 py-1.5 rounded-full transition-colors"
+                          >
+                            <Zap className="h-3 w-3" />
+                            Ανανέωση
+                          </Link>
+                        ) : (
+                          <Link
+                            href="#"
+                            className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-600 hover:text-zinc-800 bg-zinc-100 hover:bg-zinc-150 px-3 py-1.5 rounded-full transition-colors"
+                          >
+                            <ArrowUpRight className="h-3 w-3" />
+                            Αναβάθμιση
+                          </Link>
+                        )}
+                      </>
+                    ) : (
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-zinc-50 border border-zinc-100">
+                          <div className="h-2 w-2 rounded-full bg-zinc-400" />
+                          <span className="text-[13px] font-medium text-zinc-500">
+                            {venueData.plan === 'trial' ? 'Δωρεάν Trial' : 'Χωρίς Πλάνο'}
+                          </span>
+                        </div>
+                        <Link
+                          href="#"
+                          className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-full transition-colors"
+                        >
+                          <Sparkles className="h-3 w-3" />
+                          Ενεργοποίηση
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
+
           <div className="p-6">
             {children}
           </div>

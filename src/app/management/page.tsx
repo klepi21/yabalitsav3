@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { Loader2 } from 'lucide-react';
 
 export default function ManagementPage() {
   const router = useRouter();
@@ -20,18 +21,15 @@ export default function ManagementPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-football-green"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-center h-64">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-football-green mx-auto mb-4"></div>
-        <p className="text-gray-600">Ανακατεύθυνση...</p>
-      </div>
+    <div className="flex items-center justify-center min-h-[60vh]">
+      <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
     </div>
   );
 }

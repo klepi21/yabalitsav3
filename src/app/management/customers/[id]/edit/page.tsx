@@ -1,19 +1,29 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import {
-  ArrowLeftIcon,
-  CheckIcon,
-  XMarkIcon
-} from '@heroicons/react/24/outline';
+import { Loader2, Save, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { userService } from '@/lib/firebase-services';
 import { User } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const customerSchema = z.object({
   name: z.string().min(1, 'Το όνομα είναι υποχρεωτικό'),
@@ -25,9 +35,10 @@ type CustomerFormData = z.infer<typeof customerSchema>;
 
 export default function EditCustomerPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const params = useParams();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
-  
+
   const [customer, setCustomer] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -45,7 +56,7 @@ export default function EditCustomerPage() {
     if (authLoading) return;
 
     if (!user || !venueOwner) {
-      router.push('/venue-login');
+      router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
 
@@ -76,15 +87,15 @@ export default function EditCustomerPage() {
       }
     };
     loadCustomerData();
-  }, [user, venueOwner, authLoading, router, customerId, setValue]);
+  }, [user, venueOwner, authLoading, router, customerId, setValue, pathname]);
 
   const onSubmit = async (data: CustomerFormData) => {
     if (!customer) return;
-    
+
     setIsSaving(true);
     setError(null);
     setSuccess(null);
-    
+
     try {
       await userService.update(customer.id, {
         name: data.name,
@@ -92,9 +103,9 @@ export default function EditCustomerPage() {
         phone: data.phone,
         updatedAt: new Date(),
       });
-      
+
       setSuccess('Ο πελάτης ενημερώθηκε επιτυχώς!');
-      
+
       // Update local state
       setCustomer({
         ...customer,
@@ -103,10 +114,10 @@ export default function EditCustomerPage() {
         phone: data.phone,
         updatedAt: new Date(),
       });
-      
+
       // Redirect back to customer details after brief delay
       setTimeout(() => router.push(`/management/customers/${customer.id}`), 1000);
-      
+
     } catch (e) {
       console.error(e);
       setError('Αποτυχία ενημέρωσης πελάτη. Δοκιμάστε ξανά.');
@@ -117,197 +128,179 @@ export default function EditCustomerPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-football-green"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
       </div>
     );
   }
 
-  if (error) {
+  if (error && !customer) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center">
-          <div className="text-red-600 text-2xl mb-4">❌</div>
-          <p className="text-red-600 text-lg mb-4">{error}</p>
-          <Link 
-            href="/management/customers"
-            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-          >
-            Επιστροφή στους Πελάτες
-          </Link>
-        </div>
+      <div className="flex flex-col items-center justify-center py-16">
+        <AlertCircle className="h-12 w-12 text-destructive mb-4" />
+        <p className="text-destructive text-lg mb-4">{error}</p>
+        <Button variant="destructive" asChild>
+          <Link href="/management/customers">Επιστροφή στους Πελάτες</Link>
+        </Button>
       </div>
     );
   }
 
   if (!customer) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center">
-          <p className="text-gray-600 text-lg">Φόρτωση...</p>
-        </div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Link
-              href={`/management/customers/${customer.id}`}
-              className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-            >
-              <ArrowLeftIcon className="h-4 w-4 mr-1" />
-              Επιστροφή στον Πελάτη
-            </Link>
-            <h1 className="text-3xl font-bold text-gray-900">Επεξεργασία Πελάτη</h1>
-          </div>
-        </div>
-      </div>
+    <div className="space-y-6">
+      {/* Breadcrumb */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/management/dashboard">Πίνακας Ελέγχου</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/management/customers">Πελάτες</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink href={`/management/customers/${customer.id}`}>{customer.name}</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Επεξεργασία</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      <h2 className="text-2xl font-semibold text-foreground">Επεξεργασία Πελάτη</h2>
 
       {/* Success Message */}
       {success && (
-        <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4">
-          <div className="flex items-center">
-            <CheckIcon className="h-5 w-5 text-green-400 mr-2" />
-            <span className="text-green-800">{success}</span>
-          </div>
-        </div>
+        <Alert>
+          <AlertDescription className="text-green-700">{success}</AlertDescription>
+        </Alert>
       )}
 
       {/* Error Message */}
       {error && (
-        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex items-center">
-            <XMarkIcon className="h-5 w-5 text-red-400 mr-2" />
-            <span className="text-red-800">{error}</span>
-          </div>
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Edit Form */}
-      <div className="bg-white shadow-lg rounded-2xl border border-gray-100 p-6">
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* Customer Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Name */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Όνομα *
-              </label>
-              <input
-                type="text"
-                id="name"
-                {...register('name')}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-football-green ${
-                  errors.name ? 'border-red-300' : 'border-gray-300'
-                }`}
-                placeholder="Εισάγετε το όνομα"
-              />
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-              )}
+      <Card>
+        <CardHeader />
+        <CardContent>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            {/* Customer Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Name */}
+              <div>
+                <Label htmlFor="name">Όνομα *</Label>
+                <Input
+                  type="text"
+                  id="name"
+                  {...register('name')}
+                  className={`mt-1.5 ${errors.name ? 'border-destructive' : ''}`}
+                  placeholder="Εισάγετε το όνομα"
+                />
+                {errors.name && (
+                  <p className="mt-1 text-sm text-destructive">{errors.name.message}</p>
+                )}
+              </div>
+
+              {/* Phone */}
+              <div>
+                <Label htmlFor="phone">Τηλέφωνο *</Label>
+                <Input
+                  type="tel"
+                  id="phone"
+                  {...register('phone')}
+                  className={`mt-1.5 ${errors.phone ? 'border-destructive' : ''}`}
+                  placeholder="Εισάγετε το τηλέφωνο"
+                />
+                {errors.phone && (
+                  <p className="mt-1 text-sm text-destructive">{errors.phone.message}</p>
+                )}
+              </div>
+
+              {/* Email */}
+              <div className="md:col-span-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  type="email"
+                  id="email"
+                  {...register('email')}
+                  className={`mt-1.5 ${errors.email ? 'border-destructive' : ''}`}
+                  placeholder="Εισάγετε το email (προαιρετικό)"
+                />
+                {errors.email && (
+                  <p className="mt-1 text-sm text-destructive">{errors.email.message}</p>
+                )}
+              </div>
             </div>
 
-            {/* Phone */}
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
-                Τηλέφωνο *
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                {...register('phone')}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-football-green ${
-                  errors.phone ? 'border-red-300' : 'border-gray-300'
-                }`}
-                placeholder="Εισάγετε το τηλέφωνο"
-              />
-              {errors.phone && (
-                <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
-              )}
-            </div>
-
-            {/* Email */}
-            <div className="md:col-span-2">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                {...register('email')}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-football-green ${
-                  errors.email ? 'border-red-300' : 'border-gray-300'
-                }`}
-                placeholder="Εισάγετε το email (προαιρετικό)"
-              />
-              {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Read-only Info */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-gray-700 mb-3">Πληροφορίες Συστήματος</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-gray-500">ID Πελάτη:</span>
-                <span className="ml-2 font-mono text-gray-700">{customer.id}</span>
-              </div>
-              <div>
-                <span className="text-gray-500">Ημ/νία Δημιουργίας:</span>
-                <span className="ml-2 text-gray-700">
-                  {new Date(customer.createdAt).toLocaleDateString('el-GR')}
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-500">Τελευταία Ενημέρωση:</span>
-                <span className="ml-2 text-gray-700">
-                  {new Date(customer.updatedAt).toLocaleDateString('el-GR')}
-                </span>
-              </div>
-              {customer.venueIds && customer.venueIds.length > 0 && (
+            {/* Read-only Info */}
+            <div className="rounded-lg bg-muted p-4">
+              <h3 className="text-sm font-medium text-foreground mb-3">Πληροφορίες Συστήματος</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <span className="text-gray-500">Venues:</span>
-                  <span className="ml-2 text-gray-700">{customer.venueIds.length}</span>
+                  <span className="text-muted-foreground">ID Πελάτη:</span>
+                  <span className="ml-2 font-mono text-foreground">{customer.id}</span>
                 </div>
-              )}
+                <div>
+                  <span className="text-muted-foreground">Ημ/νία Δημιουργίας:</span>
+                  <span className="ml-2 text-foreground">
+                    {new Date(customer.createdAt).toLocaleDateString('el-GR')}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Τελευταία Ενημέρωση:</span>
+                  <span className="ml-2 text-foreground">
+                    {new Date(customer.updatedAt).toLocaleDateString('el-GR')}
+                  </span>
+                </div>
+                {customer.venueIds && customer.venueIds.length > 0 && (
+                  <div>
+                    <span className="text-muted-foreground">Γήπεδα:</span>
+                    <span className="ml-2 text-foreground">{customer.venueIds.length}</span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Action Buttons */}
-          <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-            <Link
-              href={`/management/customers/${customer.id}`}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
-            >
-              Ακύρωση
-            </Link>
-            <button
-              type="submit"
-              disabled={isSaving}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSaving ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                  Ενημέρωση...
-                </>
-              ) : (
-                <>
-                  <CheckIcon className="h-4 w-4 mr-2" />
-                  Αποθήκευση Αλλαγών
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
+            <Separator />
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-end gap-3">
+              <Button variant="outline" asChild>
+                <Link href={`/management/customers/${customer.id}`}>
+                  Ακύρωση
+                </Link>
+              </Button>
+              <Button type="submit" disabled={isSaving}>
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Ενημέρωση...
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4 mr-2" />
+                    Αποθήκευση Αλλαγών
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

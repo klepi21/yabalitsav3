@@ -1,14 +1,44 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { academyUserService, userGroupService, squadService } from '@/lib/academy-services';
 import { AcademyUser, UserGroup, Squad, GROUP_COLORS } from '@/types/academy';
+import { Loader2, Plus, Search, Users, Pencil, Trash2, Mail, Phone, GraduationCap, Calendar, Trophy, UserCheck, MoreHorizontal, AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function AcademyUsersPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
   const [users, setUsers] = useState<AcademyUser[]>([]);
@@ -28,7 +58,7 @@ export default function AcademyUsersPage() {
 
   useEffect(() => {
     if (authLoading) return;
-    if (!user || !venueOwner) { router.push('/venue-login'); return; }
+    if (!user || !venueOwner) { router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`); return; }
     const loadData = async () => {
       try {
         setIsLoading(true);
@@ -47,7 +77,7 @@ export default function AcademyUsersPage() {
       }
     };
     loadData();
-  }, [user, venueOwner, authLoading, router, venueId]);
+  }, [user, venueOwner, authLoading, router, venueId, pathname]);
 
   useEffect(() => {
     if (urlGroupId) setGroupFilter(urlGroupId);
@@ -101,242 +131,308 @@ export default function AcademyUsersPage() {
 
   const activeGroup = groupFilter !== 'all' ? getGroup(groupFilter) : null;
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="px-4 py-4 sm:px-6">
+    <div className="space-y-6">
+      {/* Error Alert */}
+      {error && (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-gray-900">
-                {activeGroup ? activeGroup.namePlural : 'Χρήστες Ακαδημίας'}
-              </h1>
-              <p className="text-sm text-gray-500 mt-1">
-                {activeGroup
-                  ? `Διαχείριση ${activeGroup.namePlural.toLowerCase()}`
-                  : 'Διαχείριση όλων των χρηστών'}
-              </p>
-            </div>
             <div className="flex items-center gap-2">
-              {(urlGroupId || urlSquad) && (
-                <Link
-                  href="/management/academy/users"
-                  className="inline-flex items-center px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-colors"
-                >
-                  Καθαρισμός
-                </Link>
-              )}
-              <Link
-                href="/management/academy/users/new"
-                className="inline-flex items-center px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 transition-colors shadow-sm"
-              >
-                <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Προσθήκη
-              </Link>
+              <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+              <p className="text-sm text-destructive">{error}</p>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setError(null)}
+              className="text-destructive/60 hover:text-destructive shrink-0"
+            >
+              Κλείσιμο
+            </Button>
           </div>
         </div>
+      )}
+
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+            {activeGroup ? activeGroup.namePlural : 'Χρήστες Ακαδημίας'}
+          </h1>
+          <p className="text-sm text-zinc-500 mt-1">
+            {activeGroup
+              ? `Διαχείριση ${activeGroup.namePlural.toLowerCase()}`
+              : 'Διαχείριση όλων των χρηστών της ακαδημίας'}
+          </p>
+        </div>
+        <Button asChild>
+          <Link href="/management/academy/users/new">
+            <Plus className="h-4 w-4" />
+            Προσθήκη
+          </Link>
+        </Button>
       </div>
 
-      <div className="px-4 py-6 sm:px-6 max-w-7xl mx-auto">
-        {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
-            {error}
+      {/* Stats pills */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <button
+          onClick={() => setGroupFilter('all')}
+          className={`flex items-center gap-2.5 rounded-xl border px-4 py-2.5 transition-all duration-150 ${
+            groupFilter === 'all'
+              ? 'border-zinc-300 bg-white shadow-sm'
+              : 'border-zinc-100/60 bg-white/60 hover:border-zinc-200/80'
+          }`}
+        >
+          <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center">
+            <Users className="h-4 w-4 text-zinc-600" />
           </div>
-        )}
-
-        {/* Stats Cards - Dynamic from groups */}
-        <div className="flex flex-wrap gap-3 mb-6">
-          <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm min-w-[120px]">
-            <p className="text-2xl font-bold text-gray-900">{userStats.total}</p>
-            <p className="text-xs text-gray-500">Σύνολο</p>
+          <div className="text-left">
+            <p className="text-lg font-semibold tracking-tight text-zinc-900">{userStats.total}</p>
+            <p className="text-[11px] text-zinc-400 leading-none">Σύνολο</p>
           </div>
-          {groups.map((group) => (
-            <div
+        </button>
+        {groups.map((group) => {
+          const isActive = groupFilter === group.id;
+          return (
+            <button
               key={group.id}
-              className={`rounded-xl p-4 border shadow-sm cursor-pointer transition-all min-w-[120px] ${
-                groupFilter === group.id ? 'ring-2 ring-green-500' : ''
-              } ${GROUP_COLORS[group.color] || 'bg-gray-100 text-gray-800'}`}
-              onClick={() => setGroupFilter(groupFilter === group.id ? 'all' : group.id)}
+              onClick={() => setGroupFilter(isActive ? 'all' : group.id)}
+              className={`flex items-center gap-2.5 rounded-xl border px-4 py-2.5 transition-all duration-150 ${
+                isActive
+                  ? 'border-zinc-300 bg-white shadow-sm'
+                  : 'border-zinc-100/60 bg-white/60 hover:border-zinc-200/80'
+              }`}
             >
-              <p className="text-2xl font-bold">{userStats[group.id] || 0}</p>
-              <p className="text-xs">
-                {group.icon} {group.namePlural}
-              </p>
-            </div>
+              <Badge variant="secondary" className={`h-8 w-8 rounded-lg p-0 flex items-center justify-center text-xs ${GROUP_COLORS[group.color] || ''}`}>
+                {group.icon || '👤'}
+              </Badge>
+              <div className="text-left">
+                <p className="text-lg font-semibold tracking-tight text-zinc-900">{userStats[group.id] || 0}</p>
+                <p className="text-[11px] text-zinc-400 leading-none">{group.namePlural}</p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Search + Filter row */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+        <div className="relative flex-1 sm:max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+          <Input
+            type="text"
+            placeholder="Αναζήτηση με όνομα, email ή τηλέφωνο..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <select
+          value={groupFilter}
+          onChange={(e) => setGroupFilter(e.target.value)}
+          className="flex h-9 rounded-lg border border-zinc-200/70 bg-white px-3 py-1 text-sm shadow-none transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:w-[200px]"
+        >
+          <option value="all">Όλες οι Κατηγορίες</option>
+          {groups.map((g) => (
+            <option key={g.id} value={g.id}>{g.namePlural}</option>
           ))}
-        </div>
+        </select>
+        {(urlGroupId || urlSquad || groupFilter !== 'all' || searchQuery) && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => { setGroupFilter('all'); setSquadFilter(null); setSearchQuery(''); }}
+            className="text-zinc-400 hover:text-zinc-600 shrink-0"
+          >
+            Καθαρισμός
+          </Button>
+        )}
+      </div>
 
-        {/* Search & Filter */}
-        <div className="bg-white rounded-xl border border-gray-200 p-4 mb-6 shadow-sm">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1 relative">
-              <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Αναζήτηση με όνομα, email ή τηλέφωνο..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-green-500 focus:border-transparent"
-              />
+      {/* Users Table */}
+      {filteredUsers.length === 0 ? (
+        <div className="rounded-xl border border-zinc-100/60 bg-white py-16">
+          <div className="text-center">
+            <div className="mx-auto h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center mb-4">
+              <Users className="h-6 w-6 text-zinc-400" />
             </div>
-            <select
-              value={groupFilter}
-              onChange={(e) => setGroupFilter(e.target.value)}
-              className="px-4 py-3 border border-gray-300 rounded-xl bg-white focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            >
-              <option value="all">Όλες οι Κατηγορίες</option>
-              {groups.map((g) => (
-                <option key={g.id} value={g.id}>{g.namePlural}</option>
-              ))}
-            </select>
+            <h3 className="text-sm font-medium text-zinc-900 mb-1">Δεν βρέθηκαν χρήστες</h3>
+            <p className="text-[13px] text-zinc-400 mb-5">
+              {searchQuery || groupFilter !== 'all'
+                ? 'Δοκιμάστε να αλλάξετε την αναζήτηση ή το φίλτρο.'
+                : 'Ξεκινήστε προσθέτοντας τον πρώτο χρήστη.'}
+            </p>
+            {!searchQuery && groupFilter === 'all' && (
+              <Button size="sm" asChild>
+                <Link href="/management/academy/users/new">
+                  <Plus className="h-4 w-4" />
+                  Προσθήκη Χρήστη
+                </Link>
+              </Button>
+            )}
           </div>
         </div>
-
-        {/* Users List */}
-        {filteredUsers.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-            <div className="text-4xl mb-4">👥</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Δεν βρέθηκαν χρήστες</h3>
-            <p className="text-gray-500 mb-6">
-              {searchQuery || groupFilter !== 'all'
-                ? 'Δοκιμάστε να αλλάξετε την αναζήτηση ή το φίλτρο'
-                : 'Ξεκινήστε προσθέτοντας τον πρώτο χρήστη'}
-            </p>
-            <Link
-              href="/management/academy/users/new"
-              className="inline-flex items-center px-6 py-3 bg-green-600 text-white font-medium rounded-xl hover:bg-green-700 transition-colors"
-            >
-              Προσθήκη Χρήστη
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {filteredUsers.map((user) => {
-              const group = getGroup(user.groupId);
-              return (
-                <div
-                  key={user.id}
-                  className="bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4 flex-1 min-w-0">
-                      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center text-2xl">
-                        {group?.icon || '👤'}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="font-semibold text-gray-900 truncate">{user.displayName}</h3>
+      ) : (
+        <div className="rounded-xl border border-zinc-100/60 bg-white overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-zinc-100/60 hover:bg-transparent">
+                <TableHead className="text-[13px] text-zinc-400 font-medium pl-5">Χρήστης</TableHead>
+                <TableHead className="text-[13px] text-zinc-400 font-medium hidden md:table-cell">Κατηγορία</TableHead>
+                <TableHead className="text-[13px] text-zinc-400 font-medium hidden lg:table-cell">Επικοινωνία</TableHead>
+                <TableHead className="text-[13px] text-zinc-400 font-medium hidden xl:table-cell">Πληροφορίες</TableHead>
+                <TableHead className="text-[13px] text-zinc-400 font-medium text-right pr-5 w-[80px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredUsers.map((u) => {
+                const group = getGroup(u.groupId);
+                return (
+                  <TableRow key={u.id} className="border-b border-zinc-100/40 hover:bg-zinc-50/50">
+                    <TableCell className="pl-5 py-3.5">
+                      <div>
+                        <div className="text-sm font-medium text-zinc-900">{u.displayName}</div>
+                        {/* Mobile-only: show group badge + contact inline */}
+                        <div className="flex items-center gap-2 mt-1 md:hidden">
                           {group && (
-                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${GROUP_COLORS[group.color] || 'bg-gray-100 text-gray-800'}`}>
+                            <Badge variant="secondary" className={`text-[10px] px-1.5 py-0 ${GROUP_COLORS[group.color] || ''}`}>
                               {group.name}
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 text-xs text-zinc-400 mt-0.5 lg:hidden">
+                          {u.fields.phone && (
+                            <span className="flex items-center gap-1">
+                              <Phone className="h-3 w-3" />
+                              {u.fields.phone}
+                            </span>
+                          )}
+                          {u.fields.email && (
+                            <span className="flex items-center gap-1 truncate">
+                              <Mail className="h-3 w-3" />
+                              {u.fields.email}
                             </span>
                           )}
                         </div>
-
-                        <div className="mt-1 text-sm text-gray-500 space-y-0.5">
-                          {user.fields.email && (
-                            <p className="truncate">
-                              <span className="inline-block w-4">📧</span> {user.fields.email}
-                            </p>
-                          )}
-                          {user.fields.phone && (
-                            <p>
-                              <span className="inline-block w-4">📱</span> {user.fields.phone}
-                            </p>
-                          )}
-                          {user.fields.specialization && (
-                            <p>
-                              <span className="inline-block w-4">🎓</span> {user.fields.specialization}
-                              {user.fields.license && ` \u2022 ${user.fields.license}`}
-                            </p>
-                          )}
-                          {typeof user.fields.birth_year === 'number' && (
-                            <p>
-                              <span className="inline-block w-4">📅</span> Γεννήθηκε {user.fields.birth_year} (Ηλικία{' '}
-                              {new Date().getFullYear() - user.fields.birth_year})
-                            </p>
-                          )}
-                          {user.squad_id && (
-                            <p>
-                              <span className="inline-block w-4">🏃</span> {getSquadName(user.squad_id)}
-                            </p>
-                          )}
-                          {user.parent_uid && (
-                            <p>
-                              <span className="inline-block w-4">👨‍👩‍👧</span> Γονέας: {getParentName(user.parent_uid)}
-                            </p>
-                          )}
-                          {user.linked_athletes && user.linked_athletes.length > 0 && (
-                            <p>
-                              <span className="inline-block w-4">⚽</span>{' '}
-                              {user.linked_athletes.length} {user.linked_athletes.length > 1 ? 'αθλητές' : 'αθλητής'}
-                            </p>
-                          )}
-                        </div>
                       </div>
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Link
-                        href={`/management/academy/users/${user.id}/edit`}
-                        className="p-2 text-gray-500 hover:text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </Link>
-                      {deleteConfirm === user.id ? (
-                        <div className="flex items-center gap-1">
-                          <button
-                            onClick={() => handleDelete(user.id)}
-                            className="px-2 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
-                          >
-                            Διαγραφή
-                          </button>
-                          <button
-                            onClick={() => setDeleteConfirm(null)}
-                            className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
-                          >
-                            Ακύρωση
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={() => setDeleteConfirm(user.id)}
-                          className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell py-3.5">
+                      {group && (
+                        <Badge variant="secondary" className={`text-[11px] ${GROUP_COLORS[group.color] || ''}`}>
+                          {group.name}
+                        </Badge>
                       )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell py-3.5">
+                      <div className="space-y-0.5">
+                        {u.fields.email && (
+                          <p className="text-[13px] text-zinc-500 flex items-center gap-1.5 truncate max-w-[220px]">
+                            <Mail className="h-3 w-3 shrink-0 text-zinc-400" />
+                            {u.fields.email}
+                          </p>
+                        )}
+                        {u.fields.phone && (
+                          <p className="text-[13px] text-zinc-500 flex items-center gap-1.5">
+                            <Phone className="h-3 w-3 shrink-0 text-zinc-400" />
+                            {u.fields.phone}
+                          </p>
+                        )}
+                        {!u.fields.email && !u.fields.phone && (
+                          <span className="text-[13px] text-zinc-300">—</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden xl:table-cell py-3.5">
+                      <div className="flex flex-wrap gap-1.5">
+                        {u.fields.specialization && (
+                          <span className="text-[11px] text-zinc-500 flex items-center gap-1 bg-zinc-50 rounded-md px-2 py-0.5">
+                            <GraduationCap className="h-3 w-3" />
+                            {u.fields.specialization}
+                          </span>
+                        )}
+                        {typeof u.fields.birth_year === 'number' && (
+                          <span className="text-[11px] text-zinc-500 flex items-center gap-1 bg-zinc-50 rounded-md px-2 py-0.5">
+                            <Calendar className="h-3 w-3" />
+                            {u.fields.birth_year}
+                          </span>
+                        )}
+                        {u.squad_id && (
+                          <span className="text-[11px] text-zinc-500 flex items-center gap-1 bg-zinc-50 rounded-md px-2 py-0.5">
+                            <Trophy className="h-3 w-3" />
+                            {getSquadName(u.squad_id)}
+                          </span>
+                        )}
+                        {u.parent_uid && (
+                          <span className="text-[11px] text-zinc-500 flex items-center gap-1 bg-zinc-50 rounded-md px-2 py-0.5">
+                            <UserCheck className="h-3 w-3" />
+                            {getParentName(u.parent_uid)}
+                          </span>
+                        )}
+                        {u.linked_athletes && u.linked_athletes.length > 0 && (
+                          <span className="text-[11px] text-zinc-500 flex items-center gap-1 bg-zinc-50 rounded-md px-2 py-0.5">
+                            <Trophy className="h-3 w-3" />
+                            {u.linked_athletes.length} {u.linked_athletes.length > 1 ? 'αθλητές' : 'αθλητής'}
+                          </span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right pr-5 py-3.5">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-zinc-400 hover:text-zinc-600">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40">
+                          <DropdownMenuItem asChild>
+                            <Link href={`/management/academy/users/${u.id}/edit`}>
+                              <Pencil className="h-3.5 w-3.5 mr-2" />
+                              Επεξεργασία
+                            </Link>
+                          </DropdownMenuItem>
+                          <AlertDialog open={deleteConfirm === u.id} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem
+                                onSelect={(e) => { e.preventDefault(); setDeleteConfirm(u.id); }}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="h-3.5 w-3.5 mr-2" />
+                                Διαγραφή
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Διαγραφή χρήστη</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Είστε σίγουροι ότι θέλετε να διαγράψετε τον χρήστη &quot;{u.displayName}&quot;; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Ακύρωση</AlertDialogCancel>
+                                <AlertDialogAction variant="destructive" onClick={() => handleDelete(u.id)}>
+                                  Διαγραφή
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 }

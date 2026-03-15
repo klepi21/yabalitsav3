@@ -1,14 +1,27 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { pitchService } from '@/lib/firebase-services';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { Loader2, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
 
 // Multi-slot schema (aligned with edit page)
 const timeSlotSchema = z.object({
@@ -57,19 +70,20 @@ const defaultOpeningHours = {
 
 export default function NewPitchPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
-  
+
   const [isLoading, setIsLoading] = useState(false);
 
   // Check authentication
   useEffect(() => {
     if (authLoading) return;
-    
+
     if (!user || !venueOwner) {
-      router.push('/venue-login');
+      router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
-  }, [user, venueOwner, authLoading, router]);
+  }, [user, venueOwner, authLoading, router, pathname]);
 
   const {
     register,
@@ -86,7 +100,7 @@ export default function NewPitchPage() {
 
   const handleFormSubmit = async (data: PitchFormData) => {
     if (!venueOwner) return;
-    
+
     setIsLoading(true);
     try {
       await pitchService.create({
@@ -97,7 +111,7 @@ export default function NewPitchPage() {
         pricePerSlot: data.pricePerSlot,
         defaultOpeningHours: data.defaultOpeningHours
       });
-      
+
       router.push('/management/pitches');
     } catch (error) {
       console.error('Error creating pitch:', error);
@@ -107,218 +121,215 @@ export default function NewPitchPage() {
     }
   };
 
-
   if (authLoading || !venueOwner) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center space-x-4">
-        <Link
-          href="/management/pitches"
-          className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-        >
-          <ArrowLeftIcon className="h-4 w-4 mr-1" />
-          Επιστροφή στον Πίνακα Ελέγχου
-        </Link>
-      </div>
+      {/* Breadcrumb */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/dashboard">Πίνακας Ελέγχου</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/management/pitches">Γήπεδα</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>Νέο Γήπεδο</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Προσθήκη Νέου Γηπέδου</h1>
-        <p className="mt-2 text-gray-600">Δημιουργία νέου γηπέδου για το χώρο σας</p>
+        <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Προσθήκη Νέου Γηπέδου</h1>
+        <p className="mt-1 text-muted-foreground">Δημιουργία νέου γηπέδου για το χώρο σας</p>
       </div>
 
-      <div className="bg-white shadow rounded-lg p-6">
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Όνομα Γηπέδου *
-              </label>
-              <input
-                type="text"
-                id="name"
-                {...register('name')}
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-football-green focus:border-football-green sm:text-sm"
-                placeholder="π.χ., Κύριο Γήπεδο, Κλειστό 1"
-              />
-              {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-              )}
+      <Card>
+        <CardContent className="p-6">
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+            {/* Basic Information */}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="name">Όνομα Γηπέδου *</Label>
+                <Input
+                  type="text"
+                  id="name"
+                  {...register('name')}
+                  placeholder="π.χ., Κύριο Γήπεδο, Κλειστό 1"
+                />
+                {errors.name && (
+                  <p className="text-sm text-destructive">{errors.name.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="type">Τύπος Γηπέδου *</Label>
+                <select
+                  id="type"
+                  {...register('type')}
+                  className="flex h-9 w-full rounded-lg border border-zinc-200/70 bg-transparent px-3 py-1 text-sm shadow-none transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                >
+                  <option value="5x5">5x5</option>
+                  <option value="6x6">6x6</option>
+                  <option value="7x7">7x7</option>
+                  <option value="8x8">8x8</option>
+                  <option value="9x9">9x9</option>
+                </select>
+                {errors.type && (
+                  <p className="text-sm text-destructive">{errors.type.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="slotDuration">Διάρκεια Κράτησης (λεπτά) *</Label>
+                <Input
+                  type="number"
+                  id="slotDuration"
+                  {...register('slotDuration', { valueAsNumber: true })}
+                  placeholder="60"
+                  min="30"
+                  step="30"
+                />
+                {errors.slotDuration && (
+                  <p className="text-sm text-destructive">{errors.slotDuration.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pricePerSlot">Τιμή ανά Κράτηση (&euro;) *</Label>
+                <Input
+                  type="number"
+                  id="pricePerSlot"
+                  {...register('pricePerSlot', { valueAsNumber: true })}
+                  placeholder="25.00"
+                  min="0"
+                  step="0.01"
+                />
+                {errors.pricePerSlot && (
+                  <p className="text-sm text-destructive">{errors.pricePerSlot.message}</p>
+                )}
+              </div>
             </div>
 
+            <Separator />
+
+            {/* Opening Hours (multi-slot) */}
             <div>
-              <label htmlFor="type" className="block text-sm font-medium text-gray-700">
-                Τύπος Γηπέδου *
-              </label>
-              <select
-                id="type"
-                {...register('type')}
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 focus:outline-none focus:ring-football-green focus:border-football-green sm:text-sm"
-              >
-                <option value="5x5">5x5</option>
-                <option value="6x6">6x6</option>
-                <option value="7x7">7x7</option>
-                <option value="8x8">8x8</option>
-                <option value="9x9">9x9</option>
-              </select>
-              {errors.type && (
-                <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>
-              )}
-            </div>
-
-
-
-            <div>
-              <label htmlFor="slotDuration" className="block text-sm font-medium text-gray-700">
-                Διάρκεια Κράτησης (λεπτά) *
-              </label>
-              <input
-                type="number"
-                id="slotDuration"
-                {...register('slotDuration', { valueAsNumber: true })}
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-football-green focus:border-football-green sm:text-sm"
-                placeholder="60"
-                min="30"
-                step="30"
-              />
-              {errors.slotDuration && (
-                <p className="mt-1 text-sm text-red-600">{errors.slotDuration.message}</p>
-              )}
-            </div>
-
-            <div>
-              <label htmlFor="pricePerSlot" className="block text-sm font-medium text-gray-700">
-                Τιμή ανά Κράτηση (€) *
-              </label>
-              <input
-                type="number"
-                id="pricePerSlot"
-                {...register('pricePerSlot', { valueAsNumber: true })}
-                className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-football-green focus:border-football-green sm:text-sm"
-                placeholder="25.00"
-                min="0"
-                step="0.01"
-              />
-              {errors.pricePerSlot && (
-                <p className="mt-1 text-sm text-red-600">{errors.pricePerSlot.message}</p>
-              )}
-            </div>
-          </div>
-
-          {/* Opening Hours (multi-slot) */}
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">Προεπιλεγμένες Ώρες Λειτουργίας</h3>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {(['monday','tuesday','wednesday','thursday','friday','saturday','sunday'] as const).map((day) => {
-                const openingHours = watch('defaultOpeningHours');
-                const dayData = openingHours[day];
-                const daySlots = dayData?.slots || [];
-                return (
-                <div key={day} className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-medium text-gray-700 capitalize">
-                      {day === 'monday' ? 'Δευτέρα' :
-                       day === 'tuesday' ? 'Τρίτη' :
-                       day === 'wednesday' ? 'Τετάρτη' :
-                       day === 'thursday' ? 'Πέμπτη' :
-                       day === 'friday' ? 'Παρασκευή' :
-                       day === 'saturday' ? 'Σάββατο' : 'Κυριακή'}
-                    </label>
-                    { }
-                    <input
-                      type="checkbox"
-                      {...register(`defaultOpeningHours.${day}.isOpen`)}
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                    />
-                  </div>
-                  { }
-                  {dayData?.isOpen && (
-                    <div className="space-y-3">
-                      { }
-                      {daySlots.map((_: { start: string; end: string }, index: number) => (
-                        <div key={index} className="flex items-end gap-2">
-                          <div>
-                            <label className="block text-xs text-gray-500">Άνοιγμα</label>
-                            { }
-                            <input
-                              type="text"
-                              placeholder="HH:MM"
-                              pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
-                              {...register(`defaultOpeningHours.${day}.slots.${index}.start`)}
-                              className="block w-full text-sm border border-gray-300 rounded px-2 py-1"
-                              onBlur={(e) => {
-                                const v = e.target.value; if (v && !v.includes(':')) e.target.value = v.padStart(4,'0').replace(/(\d{2})(\d{2})/,'$1:$2');
-                              }}
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs text-gray-500">Κλείσιμο</label>
-                            { }
-                            <input
-                              type="text"
-                              placeholder="HH:MM"
-                              pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
-                              {...register(`defaultOpeningHours.${day}.slots.${index}.end`)}
-                              className="block w-full text-sm border border-gray-300 rounded px-2 py-1"
-                              onBlur={(e) => {
-                                const v = e.target.value; if (v && !v.includes(':')) e.target.value = v.padStart(4,'0').replace(/(\d{2})(\d{2})/,'$1:$2');
-                              }}
-                            />
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const next = [...daySlots]; next.splice(index,1);
-                              setValue(`defaultOpeningHours.${day}.slots`, next);
-                            }}
-                            className="text-red-600 hover:text-red-800 px-2 py-1"
-                          >
-                            🗑️
-                          </button>
-                        </div>
-                      ))}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setValue(`defaultOpeningHours.${day}.slots`, [...daySlots, { start: '', end: '' }]);
-                        }}
-                        className="text-sm text-green-600 hover:text-green-700 font-medium"
-                      >
-                        + Προσθήκη διαστήματος
-                      </button>
+              <h3 className="text-lg font-medium text-foreground mb-4">Προεπιλεγμένες Ώρες Λειτουργίας</h3>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {(['monday','tuesday','wednesday','thursday','friday','saturday','sunday'] as const).map((day) => {
+                  const openingHours = watch('defaultOpeningHours');
+                  const dayData = openingHours[day];
+                  const daySlots = dayData?.slots || [];
+                  return (
+                  <div key={day} className="border border-border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <Label className="capitalize">
+                        {day === 'monday' ? 'Δευτέρα' :
+                         day === 'tuesday' ? 'Τρίτη' :
+                         day === 'wednesday' ? 'Τετάρτη' :
+                         day === 'thursday' ? 'Πέμπτη' :
+                         day === 'friday' ? 'Παρασκευή' :
+                         day === 'saturday' ? 'Σάββατο' : 'Κυριακή'}
+                      </Label>
+                      <input
+                        type="checkbox"
+                        {...register(`defaultOpeningHours.${day}.isOpen`)}
+                        className="h-4 w-4 rounded border-border text-primary focus:ring-ring"
+                      />
                     </div>
-                  )}
-                </div>
-                );
-              })}
+                    {dayData?.isOpen && (
+                      <div className="space-y-3">
+                        {daySlots.map((_: { start: string; end: string }, index: number) => (
+                          <div key={index} className="flex items-end gap-2">
+                            <div className="flex-1">
+                              <Label className="text-xs text-muted-foreground">Άνοιγμα</Label>
+                              <Input
+                                type="text"
+                                placeholder="HH:MM"
+                                pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+                                {...register(`defaultOpeningHours.${day}.slots.${index}.start`)}
+                                className="h-8 text-sm"
+                                onBlur={(e) => {
+                                  const v = e.target.value; if (v && !v.includes(':')) e.target.value = v.padStart(4,'0').replace(/(\d{2})(\d{2})/,'$1:$2');
+                                }}
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <Label className="text-xs text-muted-foreground">Κλείσιμο</Label>
+                              <Input
+                                type="text"
+                                placeholder="HH:MM"
+                                pattern="^([01]?[0-9]|2[0-3]):[0-5][0-9]$"
+                                {...register(`defaultOpeningHours.${day}.slots.${index}.end`)}
+                                className="h-8 text-sm"
+                                onBlur={(e) => {
+                                  const v = e.target.value; if (v && !v.includes(':')) e.target.value = v.padStart(4,'0').replace(/(\d{2})(\d{2})/,'$1:$2');
+                                }}
+                              />
+                            </div>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon-sm"
+                              onClick={() => {
+                                const next = [...daySlots]; next.splice(index,1);
+                                setValue(`defaultOpeningHours.${day}.slots`, next);
+                              }}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        ))}
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setValue(`defaultOpeningHours.${day}.slots`, [...daySlots, { start: '', end: '' }]);
+                          }}
+                          className="text-primary"
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                          Προσθήκη διαστήματος
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  );
+                })}
+              </div>
             </div>
-          </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-end space-x-3">
-            <Link
-              href="/management/pitches"
-              className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
-            >
-              Ακύρωση
-            </Link>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Δημιουργία...' : 'Δημιουργία Γηπέδου'}
-            </button>
-          </div>
-        </form>
-      </div>
+            {/* Submit Button */}
+            <div className="flex justify-end space-x-3">
+              <Button variant="outline" asChild>
+                <Link href="/management/pitches">
+                  Ακύρωση
+                </Link>
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {isLoading ? 'Δημιουργία...' : 'Δημιουργία Γηπέδου'}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

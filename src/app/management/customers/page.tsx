@@ -1,23 +1,33 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  PlusIcon, 
-  MagnifyingGlassIcon, 
-  UsersIcon,
-  ArrowLeftIcon,
-  EnvelopeIcon,
-  PhoneIcon
-} from '@heroicons/react/24/outline';
+import { Loader2, Plus, Search, Users, Phone, Eye, Pencil, AlertCircle, MoreHorizontal } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { User } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 export default function CustomersPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
-  
+
   const [customers, setCustomers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +35,7 @@ export default function CustomersPage() {
 
   const loadCustomers = useCallback(async () => {
     if (!venueOwner || !user) return;
-    
+
     try {
       setError(null);
       // Get auth token
@@ -52,7 +62,7 @@ export default function CustomersPage() {
       }
 
       const data = await response.json();
-      
+
       // Convert ISO strings back to Date objects
       const convertedCustomers = (data.customers || []).map((customer: Omit<User, 'createdAt' | 'updatedAt'> & { createdAt: string; updatedAt: string }) => ({
         ...customer,
@@ -75,15 +85,15 @@ export default function CustomersPage() {
     if (authLoading) return;
 
     if (!user || !venueOwner) {
-      router.push('/venue-login');
+      router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
 
     loadCustomers();
-  }, [user, venueOwner, authLoading, router, loadCustomers]);
+  }, [user, venueOwner, authLoading, router, loadCustomers, pathname]);
 
   // Filter customers based on search term
-  const filteredCustomers = customers.filter(customer => 
+  const filteredCustomers = customers.filter(customer =>
     customer.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.phone?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -91,8 +101,8 @@ export default function CustomersPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
       </div>
     );
   }
@@ -101,139 +111,143 @@ export default function CustomersPage() {
     <div className="space-y-6">
       {/* Error Alert */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex">
-            <div className="flex-1">
-              <h3 className="text-sm font-medium text-red-800">
-                Σφάλμα κατά τη φόρτωση πελατών
-              </h3>
-              <div className="mt-2 text-sm text-red-700">
-                <p>{error}</p>
-                <p className="mt-2 text-xs">
-                  Αν το πρόβλημα συνεχίζεται, δοκιμάστε να ανανεώσετε τη σελίδα ή να συνδεθείτε ξανά.
-                </p>
-              </div>
+        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+              <p className="text-sm text-destructive">{error}</p>
             </div>
-            <button
-              onClick={() => {
-                setError(null);
-                loadCustomers();
-              }}
-              className="ml-4 inline-flex text-red-400 hover:text-red-500"
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => { setError(null); loadCustomers(); }}
+              className="text-destructive/60 hover:text-destructive shrink-0"
             >
-              <span className="text-sm font-medium">Δοκιμάστε ξανά</span>
-            </button>
+              Δοκιμάστε ξανά
+            </Button>
           </div>
         </div>
       )}
 
       {/* Header */}
-      <div className="flex items-center space-x-4">
-        <Link
-          href="/management/dashboard"
-          className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-        >
-          <ArrowLeftIcon className="h-4 w-4 mr-1" />
-          Επιστροφή στον Πίνακα Ελέγχου
-        </Link>
-      </div>
-
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Πελάτες</h1>
-          <p className="mt-2 text-gray-600">Διαχείριση πληροφοριών πελατών για το γήπεδό σας</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Πελάτες</h1>
+          <p className="text-sm text-zinc-500 mt-1">Διαχείριση πληροφοριών πελατών για το γήπεδό σας</p>
         </div>
-        <Link
-          href="/management/customers/new"
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
-        >
-          <PlusIcon className="h-4 w-4 mr-2" />
-          Προσθήκη Πελάτη
-        </Link>
+        <Button asChild>
+          <Link href="/management/customers/new">
+            <Plus className="h-4 w-4" />
+            Νέος Πελάτης
+          </Link>
+        </Button>
       </div>
 
-      {/* Search */}
-      <div className="max-w-lg">
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+      {/* Stats + Search row */}
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex items-center gap-3 rounded-xl border border-zinc-100/60 bg-white px-5 py-3.5">
+          <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center">
+            <Users className="h-5 w-5 text-blue-600" />
           </div>
-          <input
+          <div>
+            <p className="text-2xl font-semibold tracking-tight text-zinc-900">{customers.length}</p>
+            <p className="text-[13px] text-zinc-400">Σύνολο Πελατών</p>
+          </div>
+        </div>
+
+        <div className="relative flex-1 sm:max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+          <Input
             type="text"
             placeholder="Αναζήτηση πελατών..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-football-green focus:border-football-green sm:text-sm"
+            className="pl-10"
           />
         </div>
       </div>
 
-      {/* Customers List */}
-      <div className="bg-white shadow-lg rounded-2xl border border-gray-100">
-        {filteredCustomers.length === 0 ? (
-          <div className="text-center py-12">
-            <UsersIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
-              {searchTerm ? 'Δεν βρέθηκαν πελάτες.' : 'Δεν υπάρχουν πελάτες ακόμα'}
+      {/* Customers Table */}
+      {filteredCustomers.length === 0 ? (
+        <div className="rounded-xl border border-zinc-100/60 bg-white py-16">
+          <div className="text-center">
+            <div className="mx-auto h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center mb-4">
+              <Users className="h-6 w-6 text-zinc-400" />
+            </div>
+            <h3 className="text-sm font-medium text-zinc-900 mb-1">
+              {searchTerm ? 'Δεν βρέθηκαν πελάτες' : 'Δεν υπάρχουν πελάτες ακόμα'}
             </h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="text-[13px] text-zinc-400 mb-5">
               {searchTerm ? 'Δοκιμάστε να αλλάξετε τους όρους αναζήτησης.' : 'Ξεκινήστε προσθέτοντας τον πρώτο σας πελάτη.'}
             </p>
             {!searchTerm && (
-              <div className="mt-6">
-                <Link
-                  href="/management/customers/new"
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green"
-                >
-                  <PlusIcon className="h-4 w-4 mr-2" />
+              <Button size="sm" asChild>
+                <Link href="/management/customers/new">
+                  <Plus className="h-4 w-4" />
                   Προσθήκη Πελάτη
                 </Link>
-              </div>
+              </Button>
             )}
           </div>
-        ) : (
-          <ul className="divide-y divide-gray-200">
-            {filteredCustomers.map((customer) => (
-              <li key={customer.id} className="px-6 py-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className="h-10 w-10 rounded-full bg-football-green flex items-center justify-center">
-                        <UsersIcon className="h-6 w-6 text-white" />
-                      </div>
-                    </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900">{customer.name}</div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <EnvelopeIcon className="mr-1 h-4 w-4" />
-                        {customer.email}
-                      </div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <PhoneIcon className="mr-1 h-4 w-4" />
+        </div>
+      ) : (
+        <div className="rounded-xl border border-zinc-100/60 bg-white overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="border-b border-zinc-100/60 hover:bg-transparent">
+                <TableHead className="text-[13px] text-zinc-400 font-medium pl-5">Πελάτης</TableHead>
+                <TableHead className="text-[13px] text-zinc-400 font-medium hidden sm:table-cell">Email</TableHead>
+                <TableHead className="text-[13px] text-zinc-400 font-medium hidden sm:table-cell">Τηλέφωνο</TableHead>
+                <TableHead className="text-[13px] text-zinc-400 font-medium text-right pr-5 w-[80px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredCustomers.map((customer) => (
+                <TableRow key={customer.id} className="border-b border-zinc-100/40 hover:bg-zinc-50/50">
+                  <TableCell className="pl-5 py-3">
+                    <div>
+                      <div className="text-sm font-medium text-zinc-900">{customer.name}</div>
+                      <div className="flex items-center gap-1 text-xs text-zinc-400 sm:hidden">
+                        <Phone className="h-3 w-3" />
                         {customer.phone}
                       </div>
                     </div>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Link
-                      href={`/management/customers/${customer.id}`}
-                      className="text-sm text-football-green hover:text-football-green-light"
-                    >
-                      Προβολή
-                    </Link>
-                    <Link
-                      href={`/management/customers/${customer.id}/edit`}
-                      className="text-sm text-football-green hover:text-football-green-light"
-                    >
-                      Επεξεργασία
-                    </Link>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell py-3">
+                    <span className="text-[13px] text-zinc-500">{customer.email || '—'}</span>
+                  </TableCell>
+                  <TableCell className="hidden sm:table-cell py-3">
+                    <span className="text-[13px] text-zinc-500">{customer.phone || '—'}</span>
+                  </TableCell>
+                  <TableCell className="text-right pr-5 py-3">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-zinc-400 hover:text-zinc-600">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40">
+                        <DropdownMenuItem asChild>
+                          <Link href={`/management/customers/${customer.id}`}>
+                            <Eye className="h-3.5 w-3.5 mr-2" />
+                            Προβολή
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/management/customers/${customer.id}/edit`}>
+                            <Pencil className="h-3.5 w-3.5 mr-2" />
+                            Επεξεργασία
+                          </Link>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { loadStripe } from '@stripe/stripe-js';
 import { pricingUtils } from '@/lib/pricing';
@@ -160,7 +160,7 @@ export default function SubscriptionRenewalPage() {
             href="/management/settings"
             className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
           >
-            <ArrowLeftIcon className="h-4 w-4 mr-1" />
+            <ArrowLeft className="h-4 w-4 mr-1" />
             Επιστροφή στις Ρυθμίσεις
           </Link>
           <h1 className="text-2xl font-bold text-gray-900">Ανανέωση Συνδρομής</h1>

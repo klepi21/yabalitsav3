@@ -1,47 +1,75 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  ArrowLeftIcon,
-  MapPinIcon,
-  ClockIcon,
-  CalendarIcon
-} from '@heroicons/react/24/outline';
+import {
+  Loader2,
+  Building2,
+  Clock,
+  Calendar,
+  Pencil,
+  Trash2,
+  Ban,
+  ArrowRight,
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { pitchService, bookingService, blockedDateService } from '@/lib/firebase-services';
 import { Pitch, Booking, BlockedDate, OpeningSlot, getOpeningSlots } from '@/types';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from '@/components/ui/breadcrumb';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export default function PitchDetailsPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const params = useParams();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
-  
+
   const [pitch, setPitch] = useState<Pitch | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
-    
+
     if (!user || !venueOwner) {
-      router.push('/venue-login');
+      router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
-    
+
     if (params.id) {
       loadPitchData(params.id as string);
     }
-  }, [user, venueOwner, authLoading, router, params.id]);
+  }, [user, venueOwner, authLoading, router, params.id, pathname]);
 
   const loadPitchData = async (pitchId: string) => {
     try {
       const pitchData = await pitchService.getById(pitchId);
       if (pitchData) {
         setPitch(pitchData);
-        
+
         // Load bookings and blocked dates for this pitch
         const [bookingsData, blockedDatesData] = await Promise.all([
           bookingService.getByPitch(pitchId),
@@ -57,98 +85,154 @@ export default function PitchDetailsPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!pitch) return;
+    setIsDeleting(true);
+    try {
+      await pitchService.delete(pitch.id);
+      router.push('/management/pitches');
+    } catch (error) {
+      console.error('Error deleting pitch:', error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   if (authLoading || isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
       </div>
     );
   }
 
   if (!pitch) {
     return (
-      <div className="text-center py-12">
-        <h3 className="text-lg font-medium text-gray-900">Το γήπεδο δεν βρέθηκε</h3>
-        <p className="mt-1 text-sm text-gray-500">Το γήπεδο που αναζητάτε δεν υπάρχει.</p>
-        <Link
-          href="/management/pitches"
-          className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-        >
-          Επιστροφή στα Γήπεδα
-        </Link>
+      <div className="text-center py-16">
+        <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
+          <Building2 className="h-6 w-6 text-muted-foreground" />
+        </div>
+        <h3 className="text-lg font-medium text-foreground">Το γήπεδο δεν βρέθηκε</h3>
+        <p className="mt-1 text-sm text-muted-foreground">Το γήπεδο που αναζητάτε δεν υπάρχει.</p>
+        <Button asChild className="mt-4">
+          <Link href="/management/pitches">
+            Επιστροφή στα Γήπεδα
+          </Link>
+        </Button>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-                  <Link
-          href="/management/pitches"
-          className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
-        >
-          <ArrowLeftIcon className="h-4 w-4 mr-1" />
-          Επιστροφή στα Γήπεδα
-        </Link>
-        </div>
-        <Link
-          href={`/management/pitches/${pitch.id}/edit`}
-          className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-        >
-          Επεξεργασία Γηπέδου
-        </Link>
-      </div>
+      {/* Breadcrumb */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/dashboard">Πίνακας Ελέγχου</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbLink asChild>
+              <Link href="/management/pitches">Γήπεδα</Link>
+            </BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{pitch.name}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">{pitch.name}</h1>
-        <p className="mt-2 text-gray-600">Λεπτομέρειες και πληροφορίες γηπέδου</p>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{pitch.name}</h1>
+          <p className="mt-1 text-muted-foreground">Λεπτομέρειες και πληροφορίες γηπέδου</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" asChild>
+            <Link href={`/management/pitches/${pitch.id}/edit`}>
+              <Pencil className="h-4 w-4" />
+              Επεξεργασία
+            </Link>
+          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <Trash2 className="h-4 w-4" />
+                Διαγραφή
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Διαγραφή Γηπέδου</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Είστε σίγουροι ότι θέλετε να διαγράψετε το γήπεδο &quot;{pitch.name}&quot;; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Ακύρωση</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Διαγραφή...' : 'Διαγραφή'}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Pitch Information */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="flex items-center mb-4">
-              <MapPinIcon className="h-6 w-6 text-blue-600 mr-3" />
-              <h3 className="text-lg font-medium text-gray-900">Πληροφορίες Γηπέδου</h3>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Building2 className="h-5 w-5 text-primary" />
+              Πληροφορίες Γηπέδου
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <dt className="text-sm font-medium text-muted-foreground">Όνομα</dt>
+              <dd className="mt-1 text-lg font-semibold text-foreground">{pitch.name}</dd>
             </div>
-            
-            <div className="space-y-4">
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Όνομα</dt>
-                <dd className="mt-1 text-lg font-semibold text-gray-900">{pitch.name}</dd>
-              </div>
-              
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Τύπος</dt>
-                <dd className="mt-1 text-sm text-gray-900">{pitch.type}</dd>
-              </div>
-              
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Τιμή ανά Κράτηση</dt>
-                <dd className="mt-1 text-2xl font-bold text-gray-900">
-                  €{pitch.pricePerSlot?.toFixed(2) || '0.00'}
-                </dd>
-              </div>
-              
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Διάρκεια Κράτησης</dt>
-                <dd className="mt-1 text-sm text-gray-900">{pitch.slotDuration} λεπτά</dd>
-              </div>
+
+            <div>
+              <dt className="text-sm font-medium text-muted-foreground">Τύπος</dt>
+              <dd className="mt-1">
+                <Badge variant="secondary">{pitch.type}</Badge>
+              </dd>
             </div>
-          </div>
-        </div>
+
+            <div>
+              <dt className="text-sm font-medium text-muted-foreground">Τιμή ανά Κράτηση</dt>
+              <dd className="mt-1 text-2xl font-bold text-foreground">
+                &euro;{pitch.pricePerSlot?.toFixed(2) || '0.00'}
+              </dd>
+            </div>
+
+            <div>
+              <dt className="text-sm font-medium text-muted-foreground">Διάρκεια Κράτησης</dt>
+              <dd className="mt-1 text-sm text-foreground">{pitch.slotDuration} λεπτά</dd>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Opening Hours */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="flex items-center mb-4">
-              <ClockIcon className="h-6 w-6 text-green-600 mr-3" />
-              <h3 className="text-lg font-medium text-gray-900">Ώρες Λειτουργίας</h3>
-            </div>
-            
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-primary" />
+              Ώρες Λειτουργίας
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
             <div className="space-y-2">
               {pitch.defaultOpeningHours && (() => {
                 const dayOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -161,17 +245,17 @@ export default function PitchDetailsPage() {
                   'saturday': 'Σάββατο',
                   'sunday': 'Κυριακή'
                 };
-                
+
                 return dayOrder.map(day => {
                   const hours = pitch.defaultOpeningHours[day];
                   if (!hours) return null;
-                  
+
                   return (
-                    <div key={day} className="flex justify-between items-center">
-                                        <span className="text-sm font-medium text-gray-700">
-                    {dayNames[day as keyof typeof dayNames] || day}
-                  </span>
-                      <span className="text-sm text-gray-900">
+                    <div key={day} className="flex justify-between items-center py-1">
+                      <span className="text-sm font-medium text-foreground">
+                        {dayNames[day as keyof typeof dayNames] || day}
+                      </span>
+                      <span className="text-sm text-muted-foreground">
                         {hours.isOpen
                           ? getOpeningSlots(hours).length > 0
                             ? getOpeningSlots(hours).map((slot: OpeningSlot, idx: number) => (
@@ -189,98 +273,108 @@ export default function PitchDetailsPage() {
                 });
               })()}
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
         {/* Blocked Dates */}
         {blockedDates.length > 0 && (
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <div className="flex items-center mb-4">
-                <span className="text-2xl mr-3">🚫</span>
-                <h3 className="text-lg font-medium text-gray-900">Κλειστές Ημερομηνίες</h3>
-              </div>
-              
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Ban className="h-5 w-5 text-destructive" />
+                Κλειστές Ημερομηνίες
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="space-y-3">
                 {blockedDates.map((blockedDate) => (
-                  <div key={blockedDate.id} className="border border-red-200 rounded-lg p-3 bg-red-50">
+                  <div key={blockedDate.id} className="border border-destructive/20 rounded-lg p-3 bg-destructive/5">
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center space-x-3 text-sm">
-                          <span className="font-medium text-gray-900">
+                          <span className="font-medium text-foreground">
                             {new Date(blockedDate.startDate).toLocaleDateString('el-GR')}
-                            {blockedDate.startDate !== blockedDate.endDate && 
+                            {blockedDate.startDate !== blockedDate.endDate &&
                               ` - ${new Date(blockedDate.endDate).toLocaleDateString('el-GR')}`
                             }
                           </span>
-                          <span className="text-red-600 font-medium text-xs">
+                          <Badge variant="destructive" className="text-xs">
                             {blockedDate.isFullDay ? 'Όλη η ημέρα' : 'Συγκεκριμένες ώρες'}
-                          </span>
+                          </Badge>
                         </div>
                         {blockedDate.reason && (
-                          <p className="text-gray-600 text-xs mt-1">{blockedDate.reason}</p>
+                          <p className="text-muted-foreground text-xs mt-1">{blockedDate.reason}</p>
                         )}
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Recent Bookings */}
-        <div className="bg-white shadow rounded-lg lg:col-span-2">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center">
-                <CalendarIcon className="h-6 w-6 text-purple-600 mr-3" />
-                <h3 className="text-lg font-medium text-gray-900">Πρόσφατες Κρατήσεις</h3>
-              </div>
-              <Link
-                href="/bookings"
-                className="text-sm text-blue-600 hover:text-blue-500"
-              >
-                Προβολή όλων των κρατήσεων →
-              </Link>
+        <Card className={blockedDates.length > 0 ? '' : 'lg:col-span-2'}>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-primary" />
+                Πρόσφατες Κρατήσεις
+              </CardTitle>
+              <Button variant="link" size="sm" asChild>
+                <Link href="/bookings">
+                  Προβολή όλων
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+              </Button>
             </div>
-            
+          </CardHeader>
+          <CardContent>
             {bookings.length === 0 ? (
               <div className="text-center py-8">
-                <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">Δεν υπάρχουν κρατήσεις ακόμα</h3>
-                <p className="mt-1 text-sm text-gray-500">Οι κρατήσεις για αυτό το γήπεδο θα εμφανιστούν εδώ.</p>
+                <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-3">
+                  <Calendar className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="text-sm font-medium text-foreground">Δεν υπάρχουν κρατήσεις ακόμα</h3>
+                <p className="mt-1 text-sm text-muted-foreground">Οι κρατήσεις για αυτό το γήπεδο θα εμφανιστούν εδώ.</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {bookings.slice(0, 5).map((booking) => (
-                  <div key={booking.id} className="border border-gray-200 rounded-lg p-4">
+                  <div key={booking.id} className="border border-border rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="text-sm font-medium text-gray-900">
-                                                      {booking.userName || 'Άγνωστος Πελάτης'}
+                        <h4 className="text-sm font-medium text-foreground">
+                          {booking.userName || 'Άγνωστος Πελάτης'}
                         </h4>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-muted-foreground">
                           {new Date(booking.startTime).toLocaleDateString('el-GR')} στις {new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit'})}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-gray-900">€{booking.price?.toFixed(2) || '0.00'}</p>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm font-medium text-foreground">&euro;{booking.price?.toFixed(2) || '0.00'}</p>
+                        <Badge variant={
+                          booking.status === 'confirmed' ? 'default' :
+                          booking.status === 'pending' ? 'secondary' :
+                          booking.status === 'completed' ? 'default' :
+                          booking.status === 'cancelled' ? 'destructive' :
+                          'default'
+                        } className="text-xs">
                           {booking.status === 'confirmed' ? 'Επιβεβαιωμένη' :
                            booking.status === 'pending' ? 'Εκκρεμεί' :
                            booking.status === 'completed' ? 'Ολοκληρωμένη' :
                            booking.status === 'cancelled' ? 'Ακυρωμένη' :
                            'Επιβεβαιωμένη'}
-                        </p>
+                        </Badge>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

@@ -1,20 +1,37 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { 
-  ArrowLeftIcon,
-  BuildingOfficeIcon
-} from '@heroicons/react/24/outline';
+import {
+  ArrowLeft,
+  Building2,
+  Loader2,
+  Lock,
+  CreditCard,
+  CalendarDays,
+  LifeBuoy,
+  Zap,
+  ArrowUpCircle,
+  Sparkles,
+  AlertCircle,
+  BarChart3,
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { venueService } from '@/lib/firebase-services';
 import { Venue } from '@/types';
 import SupportEmail from '@/components/SupportEmail';
 import { calculateDaysRemaining, getSubscriptionEndDate, formatDateSafely } from '@/lib/subscription-utils';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 // Form validation schema
 const venueSettingsSchema = z.object({
@@ -31,10 +48,10 @@ type VenueSettingsFormData = z.infer<typeof venueSettingsSchema>;
 
 export default function SettingsPage() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
 
 
-  
   const [venue, setVenue] = useState<Venue | null>(null);
   const [lastPayment, setLastPayment] = useState<{
     id: string;
@@ -55,7 +72,6 @@ export default function SettingsPage() {
   const [pinError, setPinError] = useState<string | null>(null);
   const [isSavingPin, setIsSavingPin] = useState(false);
 
-
   const {
     register,
     handleSubmit,
@@ -67,7 +83,7 @@ export default function SettingsPage() {
 
   const loadVenueData = useCallback(async () => {
     if (!venueOwner || !user) return;
-    
+
     setIsLoading(true);
     setError(null);
     try {
@@ -104,7 +120,7 @@ export default function SettingsPage() {
       } : null;
 
       setVenue(venueData);
-      
+
       if (venueData) {
         reset({
           name: venueData.name,
@@ -115,7 +131,7 @@ export default function SettingsPage() {
             phone: venueData.phone || '',
           },
         });
-        
+
         // Load last payment data
         if (data.payments && data.payments.length > 0) {
           const payments = data.payments.map((p: Record<string, unknown>) => ({
@@ -145,22 +161,22 @@ export default function SettingsPage() {
   // Load venue data and check authentication
   useEffect(() => {
     if (authLoading) return;
-    
+
     if (!user || !venueOwner) {
-      router.push('/venue-login');
+      router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
-    
+
     loadVenueData();
-  }, [user, venueOwner, authLoading, router, loadVenueData]);
+  }, [user, venueOwner, authLoading, router, loadVenueData, pathname]);
 
   const handleFormSubmit = async (data: VenueSettingsFormData) => {
     if (!venue || !venueOwner) return;
-    
+
     setIsSaving(true);
     setError(null);
     setSuccess(null);
-    
+
     try {
       await venueService.update(venue.id, {
         name: data.name,
@@ -169,9 +185,9 @@ export default function SettingsPage() {
         email: data.contactDetails.email,
         phone: data.contactDetails.phone,
       });
-      
+
       setSuccess('Οι ρυθμίσεις του γηπέδου ενημερώθηκαν επιτυχώς!');
-      
+
       // Reload venue data to get the updated information
       await loadVenueData();
     } catch (error) {
@@ -252,16 +268,16 @@ export default function SettingsPage() {
 
   if (authLoading || !venueOwner) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
       </div>
     );
   }
@@ -270,98 +286,82 @@ export default function SettingsPage() {
     <div className="space-y-6">
       {/* Error Alert */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex">
-            <div className="flex-1">
-              <h3 className="text-sm font-medium text-red-800">
-                Σφάλμα κατά τη φόρτωση ρυθμίσεων
-              </h3>
-              <div className="mt-2 text-sm text-red-700">
-                <p>{error}</p>
-                <p className="mt-2 text-xs">
-                  Αν το πρόβλημα συνεχίζεται, δοκιμάστε να ανανεώσετε τη σελίδα ή να συνδεθείτε ξανά.
-                </p>
-              </div>
-            </div>
-            <button
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Σφάλμα κατά τη φόρτωση ρυθμίσεων</AlertTitle>
+          <AlertDescription>
+            <p>{error}</p>
+            <p className="mt-2 text-xs">
+              Αν το πρόβλημα συνεχίζεται, δοκιμάστε να ανανεώσετε τη σελίδα ή να συνδεθείτε ξανά.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-2"
               onClick={() => {
                 setError(null);
                 loadVenueData();
               }}
-              className="ml-4 inline-flex text-red-400 hover:text-red-500"
             >
-              <span className="text-sm font-medium">Δοκιμάστε ξανά</span>
-            </button>
-          </div>
-        </div>
+              Δοκιμάστε ξανά
+            </Button>
+          </AlertDescription>
+        </Alert>
       )}
 
       {/* Header */}
       <div className="flex items-center space-x-4">
         <Link
           href="/management/dashboard"
-          className="inline-flex items-center text-sm text-gray-500 hover:text-gray-700"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
         >
-          <ArrowLeftIcon className="h-4 w-4 mr-1" />
+          <ArrowLeft className="h-4 w-4 mr-1" />
           Επιστροφή στον Πίνακα Ελέγχου
         </Link>
       </div>
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Ρυθμίσεις Γηπέδου</h1>
-          <p className="mt-2 text-gray-600">Διαμόρφωση προτιμήσεων και ρυθμίσεων του γηπέδου σας</p>
+          <h1 className="text-3xl font-bold text-foreground">Ρυθμίσεις Γηπέδου</h1>
+          <p className="mt-2 text-muted-foreground">Διαμόρφωση προτιμήσεων και ρυθμίσεων του γηπέδου σας</p>
         </div>
-        
-        
+
         {/* Subscription Status Badge - matches SidebarWrapper logic */}
         {venue && (() => {
           const daysRemaining = calculateDaysRemaining(venue);
-          
+
           if (venue.plan === 'subscription') {
             if (daysRemaining !== null && daysRemaining > 7) {
-              // All OK - Green indicator
               return (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-green-100 border border-green-300">
-                  <div className="w-2.5 h-2.5 bg-green-500 rounded-full"></div>
-                  <span className="text-sm font-semibold text-green-800">
-                    {venue.planType || 'Basic'} Plan
-                  </span>
-                  <span className="text-xs text-green-600">
+                <Badge variant="default" className="gap-2 px-4 py-2 text-sm">
+                  <div className="w-2.5 h-2.5 bg-primary-foreground rounded-full"></div>
+                  {venue.planType || 'Basic'} Plan
+                  <span className="text-xs opacity-80">
                     ({daysRemaining} ημέρες)
                   </span>
-                </div>
+                </Badge>
               );
             } else if (daysRemaining !== null && daysRemaining > 0) {
-              // Warning - Expires soon
               return (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-amber-100 border border-amber-300">
+                <Badge variant="secondary" className="gap-2 px-4 py-2 text-sm border border-amber-300 bg-amber-100 text-amber-800">
                   <div className="w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-semibold text-amber-800">
-                    {venue.planType || 'Basic'} - {daysRemaining} ημέρες
-                  </span>
-                </div>
+                  {venue.planType || 'Basic'} - {daysRemaining} ημέρες
+                </Badge>
               );
             } else {
-              // Expired
               return (
-                <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-red-100 border border-red-300">
-                  <div className="w-2.5 h-2.5 bg-red-500 rounded-full"></div>
-                  <span className="text-sm font-semibold text-red-800">
-                    Πλάνο έληξε
-                  </span>
-                </div>
+                <Badge variant="destructive" className="gap-2 px-4 py-2 text-sm">
+                  <div className="w-2.5 h-2.5 bg-red-200 rounded-full"></div>
+                  Πλάνο έληξε
+                </Badge>
               );
             }
           } else {
-            // Trial or No Plan
             return (
-              <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 border border-gray-300">
-                <div className="w-2.5 h-2.5 bg-gray-400 rounded-full"></div>
-                <span className="text-sm font-semibold text-gray-600">
-                  {venue.plan === 'trial' ? 'Δωρεάν Trial' : 'Χωρίς Πλάνο'}
-                </span>
-              </div>
+              <Badge variant="outline" className="gap-2 px-4 py-2 text-sm">
+                <div className="w-2.5 h-2.5 bg-muted-foreground rounded-full"></div>
+                {venue.plan === 'trial' ? 'Δωρεάν Trial' : 'Χωρίς Πλάνο'}
+              </Badge>
             );
           }
         })()}
@@ -369,358 +369,335 @@ export default function SettingsPage() {
 
       {/* Success/Error Messages */}
       {success && (
-        <div className="rounded-md bg-green-50 p-4">
-          <div className="text-sm text-green-700">{success}</div>
-        </div>
-      )}
-      
-      {error && (
-        <div className="rounded-md bg-red-50 p-4">
-          <div className="text-sm text-red-700">{error}</div>
-        </div>
+        <Alert>
+          <AlertDescription className="text-primary">{success}</AlertDescription>
+        </Alert>
       )}
 
       {pinSuccess && (
-        <div className="rounded-md bg-green-50 p-4">
-          <div className="text-sm text-green-700">{pinSuccess}</div>
-        </div>
+        <Alert>
+          <AlertDescription className="text-primary">{pinSuccess}</AlertDescription>
+        </Alert>
       )}
       {pinError && (
-        <div className="rounded-md bg-red-50 p-4">
-          <div className="text-sm text-red-700">{pinError}</div>
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{pinError}</AlertDescription>
+        </Alert>
       )}
-
 
 
       {/* Two Column Layout */}
       <div className="grid lg:grid-cols-2 gap-8">
-        
+
         {/* Left Column: Venue Information */}
         <div className="space-y-6">
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <div className="flex items-center mb-6">
-                <BuildingOfficeIcon className="h-6 w-6 text-blue-600 mr-3" />
-                <h3 className="text-lg leading-6 font-medium text-gray-900">Πληροφορίες Γηπέδου</h3>
-              </div>
-              
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-primary" />
+                Πληροφορίες Γηπέδου
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
                 {/* Venue Name */}
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Όνομα Γηπέδου
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      id="name"
-                      {...register('name')}
-                      className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
-                      placeholder="Εισάγετε όνομα γηπέδου"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="name">Όνομα Γηπέδου</Label>
+                  <Input
+                    type="text"
+                    id="name"
+                    {...register('name')}
+                    placeholder="Εισάγετε όνομα γηπέδου"
+                  />
                   {errors.name && (
-                    <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                    <p className="text-sm text-destructive">{errors.name.message}</p>
                   )}
                 </div>
 
                 {/* Address */}
-                <div>
-                  <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                    Διεύθυνση
-                  </label>
-                  <div className="mt-1">
-                    <input
-                      type="text"
-                      id="address"
-                      {...register('address')}
-                      className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
-                      placeholder="Εισάγετε διεύθυνση γηπέδου"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="address">Διεύθυνση</Label>
+                  <Input
+                    type="text"
+                    id="address"
+                    {...register('address')}
+                    placeholder="Εισάγετε διεύθυνση γηπέδου"
+                  />
                   {errors.address && (
-                    <p className="mt-1 text-sm text-red-600">{errors.address.message}</p>
+                    <p className="text-sm text-destructive">{errors.address.message}</p>
                   )}
                 </div>
 
                 {/* City */}
-                <div>
-                  <label htmlFor="city" className="block text-sm font-medium text-gray-700">
-                    Πόλη
-                  </label>
-                  <div className="mt-1">
-                    <select
-                      id="city"
-                      {...register('city')}
-                      className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 bg-white placeholder-gray-400 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
-                    >
-                      <option value="Αθήνα">Αθήνα</option>
-                      <option value="Θεσσαλονίκη">Θεσσαλονίκη</option>
-                      <option value="Πάτρα">Πάτρα</option>
-                    </select>
-                  </div>
+                <div className="space-y-2">
+                  <Label htmlFor="city">Πόλη</Label>
+                  <select
+                    id="city"
+                    {...register('city')}
+                    className="flex h-9 w-full rounded-lg border border-zinc-200/70 bg-transparent px-3 py-1 text-sm shadow-none transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                  >
+                    <option value="Αθήνα">Αθήνα</option>
+                    <option value="Θεσσαλονίκη">Θεσσαλονίκη</option>
+                    <option value="Πάτρα">Πάτρα</option>
+                  </select>
                   {errors.city && (
-                    <p className="mt-1 text-sm text-red-600">{errors.city.message}</p>
+                    <p className="text-sm text-destructive">{errors.city.message}</p>
                   )}
                 </div>
 
+                <Separator />
+
                 {/* Contact Information */}
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                      Διεύθυνση Email
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="email"
-                        id="email"
-                        {...register('contactDetails.email')}
-                        className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
-                        placeholder="Εισάγετε διεύθυνση email"
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Διεύθυνση Email</Label>
+                    <Input
+                      type="email"
+                      id="email"
+                      {...register('contactDetails.email')}
+                      placeholder="Εισάγετε διεύθυνση email"
+                    />
                     {errors.contactDetails?.email && (
-                      <p className="mt-1 text-sm text-red-600">{errors.contactDetails.email.message}</p>
+                      <p className="text-sm text-destructive">{errors.contactDetails.email.message}</p>
                     )}
                   </div>
 
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                      Αριθμός Τηλεφώνου
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        type="tel"
-                        id="phone"
-                        {...register('contactDetails.phone')}
-                        className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 placeholder-gray-400 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
-                        placeholder="Εισάγετε αριθμό τηλεφώνου"
-                      />
-                    </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Αριθμός Τηλεφώνου</Label>
+                    <Input
+                      type="tel"
+                      id="phone"
+                      {...register('contactDetails.phone')}
+                      placeholder="Εισάγετε αριθμό τηλεφώνου"
+                    />
                     {errors.contactDetails?.phone && (
-                      <p className="mt-1 text-sm text-red-600">{errors.contactDetails.phone.message}</p>
+                      <p className="text-sm text-destructive">{errors.contactDetails.phone.message}</p>
                     )}
                   </div>
                 </div>
-
-
 
                 {/* Submit Button */}
                 <div className="flex justify-end">
-                  <button
+                  <Button
                     type="submit"
                     disabled={isSaving}
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-football-green hover:bg-football-green-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-football-green disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isSaving ? 'Αποθήκευση...' : 'Αποθήκευση Αλλαγών'}
-                  </button>
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Αποθήκευση...
+                      </>
+                    ) : (
+                      'Αποθήκευση Αλλαγών'
+                    )}
+                  </Button>
                 </div>
               </form>
-            </div>
-          </div>
-          {/* Management PIN Section - moved here under venue info */}
-          <div className="bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">🔐 PIN Διαχείρισης</h4>
+            </CardContent>
+          </Card>
+
+          {/* Management PIN Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Lock className="h-5 w-5 text-primary" />
+                PIN Διαχείρισης
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               {!venue?.managementPinHash ? (
                 <div className="space-y-4">
-                  <div className="text-sm text-gray-700">Δεν έχει οριστεί PIN. Πατήστε για να ορίσετε 4ψήφιο PIN.</div>
+                  <p className="text-sm text-muted-foreground">Δεν έχει οριστεί PIN. Πατήστε για να ορίσετε 4ψήφιο PIN.</p>
                   <SetPinForm onSubmit={handleSetPin} isSaving={isSavingPin} />
                 </div>
               ) : (
                 <div className="space-y-4">
-                  <div className="text-sm text-gray-700">Ο PIN έχει οριστεί. Για αλλαγή, εισάγετε τον τρέχον και δύο φορές τον νέο.</div>
+                  <p className="text-sm text-muted-foreground">Ο PIN έχει οριστεί. Για αλλαγή, εισάγετε τον τρέχον και δύο φορές τον νέο.</p>
                   <ChangePinForm onSubmit={handleChangePin} isSaving={isSavingPin} />
                 </div>
               )}
-            </div>
-          </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Right Column: Current Plan & Pricing Packages */}
         <div className="space-y-6">
           {/* Current Plan Info */}
           {venue && (
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <h4 className="text-lg font-semibold text-gray-900 mb-4">Τρέχον Πλάνο</h4>
+            <Card>
+              <CardHeader>
+                <CardTitle>Τρέχον Πλάνο</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center">
-                    <div className="text-sm text-gray-700 mb-2">
+                    <div className="text-sm text-muted-foreground mb-2">
                       <span className="font-medium">Υπόλοιπο ημερών:</span>
                     </div>
-                    <div className="text-2xl font-bold text-green-700">
+                    <div className="text-2xl font-bold text-primary">
                       {(() => {
                         const daysRemaining = calculateDaysRemaining(venue);
                         return daysRemaining !== null ? `${daysRemaining} ημέρες` : '0 ημέρες';
                       })()}
                     </div>
                   </div>
-                  
+
                   <div className="text-center">
-                    <div className="text-sm text-gray-700 mb-2">
+                    <div className="text-sm text-muted-foreground mb-2">
                       <span className="font-medium">Τρέχον πλάνο:</span>
                     </div>
-                    <div className="text-lg font-semibold text-gray-900">
+                    <div className="text-lg font-semibold text-foreground">
                       {venue.plan === 'subscription' ? 'Συνδρομή' : 'Δωρεάν Trial'}
                     </div>
                     {venue.plan === 'subscription' && (
-                      <div className="text-xs text-gray-500 mt-1">
+                      <div className="text-xs text-muted-foreground mt-1">
                         {venue.planType || 'Basic'} Plan
                       </div>
                     )}
-                    {/* Renewal/Upgrade Button - positioned under the plan info */}
+                    {/* Renewal/Upgrade Button */}
                     <div className="mt-3">
                       {(() => {
                         const daysRemaining = calculateDaysRemaining(venue);
-                        
+
                         if (venue.plan === 'subscription') {
                           if (daysRemaining !== null && daysRemaining <= 7) {
-                            // Show renewal button if less than 7 days remaining
                             return (
-                              <Link
-                              href="#"
-                              //href="/management/settings/renewal"
-                                className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-full transition-colors shadow-sm"
-                              >
-                                ⚡ Ανανέωση
-                              </Link>
+                              <Button variant="default" size="sm" asChild>
+                                <Link href="#">
+                                  <Zap className="h-3 w-3 mr-1" />
+                                  Ανανέωση
+                                </Link>
+                              </Button>
                             );
                           } else {
-                            // Show upgrade button if more than 7 days remaining
                             return (
-                              <Link
-                              href="#"
-                              //href="/management/settings/renewal"
-                                className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-full transition-colors"
-                              >
-                                🚀 Αναβάθμιση
-                              </Link>
+                              <Button variant="outline" size="sm" asChild>
+                                <Link href="#">
+                                  <ArrowUpCircle className="h-3 w-3 mr-1" />
+                                  Αναβάθμιση
+                                </Link>
+                              </Button>
                             );
                           }
                         } else {
-                          // Show activation button for trial/no plan
                           return (
-                              <Link
-                              href="#"
-                              //href="/management/settings/renewal"
-                                className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-green-600 hover:bg-green-700 px-3 py-1.5 rounded-full transition-colors shadow-sm"
-                              >
-                              ✨ Ενεργοποίηση
-                            </Link>
+                            <Button variant="default" size="sm" asChild>
+                              <Link href="#">
+                                <Sparkles className="h-3 w-3 mr-1" />
+                                Ενεργοποίηση
+                              </Link>
+                            </Button>
                           );
                         }
                       })()}
                     </div>
                   </div>
                 </div>
-                
-                {/* Subscription End Date - Full width below the grid, aligned like the other sections */}
+
+                {/* Subscription End Date */}
                 {venue.plan === 'subscription' && (
-                  <div className="mt-4">
+                  <>
+                    <Separator className="my-4" />
                     <div className="text-center">
-                      <div className="text-sm text-gray-700 mb-2">
+                      <div className="text-sm text-muted-foreground mb-2">
                         <span className="font-medium">Λήγει στις:</span>
                       </div>
                       {(() => {
                         const daysRemaining = calculateDaysRemaining(venue);
                         const endDateInfo = getSubscriptionEndDate(venue, lastPayment);
-                        
+
                         if (endDateInfo) {
                           const endDate = formatDateSafely(endDateInfo.date);
                           if (!endDate) {
                             return (
-                              <div className="text-lg font-semibold text-orange-600">
-                                ⚠️ Ημερομηνία δεν είναι έγκυρη
+                              <div className="text-lg font-semibold text-amber-600 flex items-center justify-center gap-1">
+                                <AlertCircle className="h-4 w-4" />
+                                Ημερομηνία δεν είναι έγκυρη
                               </div>
                             );
                           }
-                          
+
                           return (
                             <>
-                              <div className="text-lg font-semibold text-blue-700">
+                              <div className="text-lg font-semibold text-primary">
                                 {endDate.toLocaleDateString('el-GR', {
                                   year: 'numeric',
                                   month: 'long',
                                   day: 'numeric'
                                 })}
                               </div>
-                              <div className="text-xs text-gray-500 mt-1">
+                              <div className="text-xs text-muted-foreground mt-1">
                                 {daysRemaining !== null ? (
-                                  daysRemaining > 0 ? `${daysRemaining} ημέρες ακόμα` : 
-                                  daysRemaining === 0 ? 'Λήγει σήμερα!' : 
+                                  daysRemaining > 0 ? `${daysRemaining} ημέρες ακόμα` :
+                                  daysRemaining === 0 ? 'Λήγει σήμερα!' :
                                   `Έληξε πριν ${Math.abs(daysRemaining)} ημέρες`
                                 ) : 'Δεν είναι δυνατός ο υπολογισμός ημερών'}
                               </div>
                             </>
                           );
                         } else {
-                          // No end date available at all
                           return (
                             <div className="text-center">
-                              <div className="text-lg font-semibold text-gray-500 mb-2">
-                                📅 Δεν βρέθηκε ημερομηνία λήξης
+                              <div className="text-lg font-semibold text-muted-foreground mb-2 flex items-center justify-center gap-1">
+                                <CalendarDays className="h-5 w-5" />
+                                Δεν βρέθηκε ημερομηνία λήξης
                               </div>
-                              <div className="text-sm text-gray-600 mb-3">
-                                {venue.plan === 'subscription' ? 
+                              <div className="text-sm text-muted-foreground mb-3">
+                                {venue.plan === 'subscription' ?
                                   'Το πλάνο σας είναι ενεργό αλλά δεν έχει καταγραφεί ημερομηνία λήξης' :
                                   'Δεν έχετε ενεργό πλάνο συνδρομής'
                                 }
                               </div>
-                              <div className="flex flex-col gap-2">
-                                <Link 
-                                  href="#"
-                                  //href="/management/settings/renewal"
-                                  className="inline-flex items-center gap-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition-colors"
-                                >
-                                  🚀 Ενεργοποίηση Πλάνου
+                              <Button asChild>
+                                <Link href="#">
+                                  <ArrowUpCircle className="h-4 w-4 mr-1" />
+                                  Ενεργοποίηση Πλάνου
                                 </Link>
-                              </div>
+                              </Button>
                             </div>
                           );
                         }
                       })()}
                     </div>
-                  </div>
+                  </>
                 )}
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Last Payment Info */}
           {venue && venue.plan === 'subscription' && lastPayment && (
-            <div className="bg-white shadow rounded-lg">
-              <div className="px-4 py-5 sm:p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h4 className="text-lg font-semibold text-gray-900">💳 Τελευταία Πληρωμή</h4>
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                    lastPayment.status === 'succeeded' 
-                      ? 'bg-green-100 text-green-700 border border-green-200' 
-                      : 'bg-amber-100 text-amber-700 border border-amber-200'
-                  }`}>
-                    {lastPayment.status === 'succeeded' ? '✅ Επιτυχής' : '⏳ Εκκρεμεί'}
-                  </span>
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="h-5 w-5 text-primary" />
+                    Τελευταία Πληρωμή
+                  </CardTitle>
+                  <Badge variant={lastPayment.status === 'succeeded' ? 'default' : 'secondary'}>
+                    {lastPayment.status === 'succeeded' ? 'Επιτυχής' : 'Εκκρεμεί'}
+                  </Badge>
                 </div>
-                
+              </CardHeader>
+              <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <div className="text-sm font-medium text-green-800 mb-2">
+                  <div className="bg-primary/5 border border-primary/20 rounded-lg p-4">
+                    <div className="text-sm font-medium text-primary mb-2">
                       Ποσό Πληρωμής
                     </div>
-                    <div className="text-3xl font-bold text-green-700">
-                      €{typeof lastPayment.amount === 'number' ? lastPayment.amount.toFixed(2) : parseFloat(lastPayment.amount || '0').toFixed(2)}
+                    <div className="text-3xl font-bold text-primary">
+                      {'\u20AC'}{typeof lastPayment.amount === 'number' ? lastPayment.amount.toFixed(2) : parseFloat(lastPayment.amount || '0').toFixed(2)}
                     </div>
-                    <div className="text-sm text-green-600 mt-2">
-                      {lastPayment.planName || 'Basic'} Plan · {lastPayment.durationMonths || 1} μήνες
+                    <div className="text-sm text-primary/70 mt-2">
+                      {lastPayment.planName || 'Basic'} Plan {'\u00B7'} {lastPayment.durationMonths || 1} μήνες
                     </div>
                   </div>
-                  
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                    <div className="text-sm font-medium text-blue-800 mb-2">
+
+                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <div className="text-sm font-medium text-blue-800 dark:text-blue-300 mb-2">
                       Ημερομηνία Πληρωμής
                     </div>
-                    <div className="text-lg font-semibold text-blue-700">
+                    <div className="text-lg font-semibold text-blue-700 dark:text-blue-400">
                       {lastPayment.paymentDate ? (
                         new Date(lastPayment.paymentDate).toLocaleDateString('el-GR', {
                           year: 'numeric',
@@ -731,7 +708,7 @@ export default function SettingsPage() {
                         'Δεν καταγράφηκε'
                       )}
                     </div>
-                    <div className="text-sm text-blue-600 mt-2">
+                    <div className="text-sm text-blue-600 dark:text-blue-400/70 mt-2">
                       {lastPayment.paymentDate ? (
                         (() => {
                           const daysDiff = Math.floor((new Date().getTime() - new Date(lastPayment.paymentDate).getTime()) / (1000 * 60 * 60 * 24));
@@ -745,45 +722,52 @@ export default function SettingsPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Payment Summary */}
-                <div className="mt-6 p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                <Separator className="my-4" />
+                <div className="p-4 bg-muted rounded-lg">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <div className="text-sm font-medium text-gray-800 mb-1">
-                        📊 Σύνοψη Πληρωμής
+                      <div className="text-sm font-medium text-foreground mb-1 flex items-center gap-1">
+                        <BarChart3 className="h-4 w-4" />
+                        Σύνοψη Πληρωμής
                       </div>
-                      <div className="text-sm text-gray-600">
-                        Ενεργοποιήθηκε το {lastPayment.planName || 'Basic'} πλάνο 
-                        για {lastPayment.durationMonths || 1} μήνες με συνολικό κόστος €{typeof lastPayment.amount === 'number' ? lastPayment.amount.toFixed(2) : parseFloat(lastPayment.amount || '0').toFixed(2)}
+                      <div className="text-sm text-muted-foreground">
+                        Ενεργοποιήθηκε το {lastPayment.planName || 'Basic'} πλάνο
+                        για {lastPayment.durationMonths || 1} μήνες με συνολικό κόστος {'\u20AC'}{typeof lastPayment.amount === 'number' ? lastPayment.amount.toFixed(2) : parseFloat(lastPayment.amount || '0').toFixed(2)}
                       </div>
                     </div>
                     {lastPayment.paymentType === 'one_time_plan_purchase' && (
-                      <div className="ml-4 text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full">
+                      <Badge variant="secondary" className="ml-4">
                         Εφάπαξ Αγορά
-                      </div>
+                      </Badge>
                     )}
                   </div>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           )}
 
           {/* Support Section */}
-          <div className="mt-8 bg-white shadow rounded-lg">
-            <div className="px-4 py-5 sm:p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">🆘 Χρειάζεστε βοήθεια;</h4>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <LifeBuoy className="h-5 w-5 text-primary" />
+                Χρειάζεστε βοήθεια;
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
               <div className="text-center">
-                <p className="text-gray-600 mb-4">
+                <p className="text-muted-foreground mb-4">
                   Η ομάδα υποστήριξης μας είναι εδώ για να σας βοηθήσει με οποιαδήποτε ερώτηση ή πρόβλημα
                 </p>
                 <SupportEmail variant="highlighted" />
-                <p className="text-sm text-gray-500 mt-3">
+                <p className="text-sm text-muted-foreground mt-3">
                   Απάντηση εντός 24 ωρών
                 </p>
               </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
 
         </div>
       </div>
@@ -797,34 +781,38 @@ function SetPinForm({ onSubmit, isSaving }: { onSubmit: (pinA: string, pinB: str
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <input
+        <Input
           type="password"
           inputMode="numeric"
           pattern="\\d{4}"
           maxLength={4}
           placeholder="Νέος PIN (4 ψηφία)"
-          className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
           value={pinA}
           onChange={(e) => setPinA(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
         />
-        <input
+        <Input
           type="password"
           inputMode="numeric"
           pattern="\\d{4}"
           maxLength={4}
           placeholder="Επιβεβαίωση PIN"
-          className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
           value={pinB}
           onChange={(e) => setPinB(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
         />
       </div>
-      <button
+      <Button
         disabled={isSaving}
         onClick={() => onSubmit(pinA, pinB)}
-        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
       >
-        {isSaving ? 'Αποθήκευση...' : 'Ορισμός PIN'}
-      </button>
+        {isSaving ? (
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Αποθήκευση...
+          </>
+        ) : (
+          'Ορισμός PIN'
+        )}
+      </Button>
     </div>
   );
 }
@@ -836,44 +824,47 @@ function ChangePinForm({ onSubmit, isSaving }: { onSubmit: (oldPin: string, newA
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <input
+        <Input
           type="password"
           inputMode="numeric"
           pattern="\\d{4}"
           maxLength={4}
           placeholder="Τρέχων PIN"
-          className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
           value={oldPin}
           onChange={(e) => setOldPin(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
         />
-        <input
+        <Input
           type="password"
           inputMode="numeric"
           pattern="\\d{4}"
           maxLength={4}
           placeholder="Νέος PIN"
-          className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
           value={newA}
           onChange={(e) => setNewA(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
         />
-        <input
+        <Input
           type="password"
           inputMode="numeric"
           pattern="\\d{4}"
           maxLength={4}
           placeholder="Επιβεβαίωση"
-          className="block w-full appearance-none rounded-md border border-gray-300 px-3 py-2 shadow-sm focus:border-football-green focus:outline-none focus:ring-football-green sm:text-sm"
           value={newB}
           onChange={(e) => setNewB(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
         />
       </div>
-      <button
+      <Button
         disabled={isSaving}
         onClick={() => onSubmit(oldPin, newA, newB)}
-        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
       >
-        {isSaving ? 'Αποθήκευση...' : 'Αλλαγή PIN'}
-      </button>
+        {isSaving ? (
+          <>
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            Αποθήκευση...
+          </>
+        ) : (
+          'Αλλαγή PIN'
+        )}
+      </Button>
     </div>
   );
 }
