@@ -127,8 +127,8 @@ export default function SettingsPage() {
           address: venueData.address,
           city: venueData.city || 'Αθήνα', // Default to Athens if not set
           contactDetails: {
-            email: venueData.email || '',
-            phone: venueData.phone || '',
+            email: venueData.contactDetails?.email || '',
+            phone: venueData.contactDetails?.phone || '',
           },
         });
 
@@ -182,8 +182,10 @@ export default function SettingsPage() {
         name: data.name,
         address: data.address,
         city: data.city,
-        email: data.contactDetails.email,
-        phone: data.contactDetails.phone,
+        contactDetails: {
+          email: data.contactDetails.email,
+          phone: data.contactDetails.phone,
+        },
       });
 
       setSuccess('Οι ρυθμίσεις του γηπέδου ενημερώθηκαν επιτυχώς!');

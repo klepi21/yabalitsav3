@@ -421,7 +421,7 @@ export default function ForVenuesPage() {
                     />
                   </div>
                 </div>
-                <div className="space-y-2 sm:col-span-2 sm:max-w-[calc(50%-0.5rem)]">
+                <div className="space-y-2">
                   <Label className="text-zinc-700">Δ.Ο.Υ.</Label>
                   <Input
                     className="h-11 bg-white"
@@ -430,6 +430,33 @@ export default function ForVenuesPage() {
                     placeholder="π.χ. Αμαρουσίου"
                     required
                   />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-zinc-700">Email Γηπέδου</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                    <Input
+                      type="email"
+                      className="pl-10 h-11 bg-white"
+                      value={form.venueEmail}
+                      onChange={e => setForm({ ...form, venueEmail: e.target.value })}
+                      placeholder="info@venue.gr"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-zinc-700">Τηλέφωνο Γηπέδου</Label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                    <Input
+                      className="pl-10 h-11 bg-white"
+                      value={form.venuePhone}
+                      onChange={e => setForm({ ...form, venuePhone: e.target.value })}
+                      placeholder="21xxxxxxxx"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
             </div>
