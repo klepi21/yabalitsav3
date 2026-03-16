@@ -7,20 +7,24 @@ import {
   Loader2,
   Trophy,
   ArrowLeft,
-  Plus,
   Shield,
-  Users,
-  Phone,
-  Mail,
-  ChevronRight,
-  Trash2,
+  Plus,
   X,
   Pencil,
+  Trash2,
   Save,
+  Mail,
+  Phone,
+  ChevronRight,
+  Users,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { tournamentService, tournamentTeamService, tournamentPlayerService } from '@/lib/tournament-services';
-import { Tournament, TournamentTeam, TournamentPlayer, emptyTeamStats } from '@/types/tournament';
+import {
+  tournamentService,
+  tournamentTeamService,
+  tournamentPlayerService,
+} from '@/lib/tournament-services';
+import { Tournament, TournamentTeam, TournamentPlayer } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -35,6 +39,18 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { cn, toGreekUpperCase } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+
+const emptyTeamStats = {
+  played: 0,
+  won: 0,
+  drawn: 0,
+  lost: 0,
+  goalsFor: 0,
+  goalsAgainst: 0,
+  points: 0,
+};
 
 export default function TeamsPage() {
   const router = useRouter();
@@ -165,19 +181,19 @@ export default function TeamsPage() {
   if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+        <Loader2 className="h-10 w-10 animate-spin text-emerald-600" />
       </div>
     );
   }
 
   if (!tournament) {
     return (
-      <div className="text-center py-16">
-        <div className="mx-auto h-12 w-12 bg-zinc-100 rounded-xl flex items-center justify-center mb-4">
-          <Trophy className="h-6 w-6 text-zinc-400" />
+      <div className="flex flex-col items-center justify-center py-32 text-center">
+        <div className="h-20 w-20 bg-zinc-50 rounded-[2rem] flex items-center justify-center mb-6">
+          <Trophy className="h-10 w-10 text-zinc-300" />
         </div>
-        <h3 className="text-lg font-semibold tracking-tight text-zinc-900">Το τουρνουά δεν βρέθηκε</h3>
-        <Button asChild className="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white">
+        <h3 className="text-2xl font-black text-zinc-900 mb-2 uppercase tracking-tight">Το τουρνουά δεν βρέθηκε</h3>
+        <Button asChild className="mt-6 h-12 px-8 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-black uppercase tracking-widest text-[10px]">
           <Link href="/management/tournaments">Επιστροφή</Link>
         </Button>
       </div>
@@ -187,168 +203,220 @@ export default function TeamsPage() {
   const canAddTeams = teams.length < tournament.maxTeams;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Back */}
+    <div className="max-w-6xl mx-auto space-y-12 pb-20 px-4 sm:px-0">
+      {/* Back Button */}
       <Link
         href={`/management/tournaments/${tournament.id}`}
-        className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
+        className="group inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-emerald-600 transition-colors"
       >
-        <ArrowLeft className="h-4 w-4" />
-        {tournament.name}
+        <div className="h-8 w-8 rounded-lg bg-zinc-50 flex items-center justify-center group-hover:bg-emerald-50 transition-colors">
+          <ArrowLeft className="h-4 w-4" />
+        </div>
+        Πίσω στο {tournament.name}
       </Link>
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-100 text-blue-600">
-            <Shield className="h-5 w-5" />
+      {/* Header Section */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-8 border-b border-zinc-100">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-violet-50 flex items-center justify-center">
+              <Shield className="h-6 w-6 text-violet-600" />
+            </div>
+            <h1 className="text-4xl font-black text-zinc-900 tracking-tight uppercase">{toGreekUpperCase('Ομάδες Τουρνουά')}</h1>
           </div>
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Ομάδες</h1>
-            <p className="text-sm text-zinc-500">{teams.length}/{tournament.maxTeams} ομάδες εγγεγραμμένες</p>
-          </div>
+          <p className="text-lg font-bold text-zinc-400">
+            <span className="text-violet-600">{teams.length}</span> από <span className="text-zinc-900">{tournament.maxTeams}</span> διαθέσιμες θέσεις
+          </p>
         </div>
+
         {canAddTeams && !showAddForm && (
-          <Button onClick={() => setShowAddForm(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg">
-            <Plus className="h-4 w-4" />
+          <Button 
+            onClick={() => setShowAddForm(true)} 
+            className="h-14 px-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-lg shadow-emerald-100"
+          >
+            <Plus className="h-5 w-5 mr-2" />
             Προσθήκη Ομάδας
           </Button>
         )}
       </div>
 
-      {/* Add Form */}
+      {/* Add Form Card */}
       {showAddForm && (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50/30 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-base font-semibold tracking-tight text-zinc-900">Νέα Ομάδα</h2>
-            <button onClick={() => setShowAddForm(false)} className="text-zinc-400 hover:text-zinc-600">
-              <X className="h-4 w-4" />
+        <div className="bg-white rounded-[2.5rem] border border-emerald-100 shadow-xl shadow-emerald-50/50 p-10 space-y-10 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                <Plus className="h-5 w-5 text-emerald-600" />
+              </div>
+              <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Νέα Ομάδα')}</h2>
+            </div>
+            <button 
+              onClick={() => setShowAddForm(false)} 
+              className="h-10 w-10 rounded-xl hover:bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-zinc-600 transition-colors"
+            >
+              <X className="h-5 w-5" />
             </button>
           </div>
-          <form onSubmit={handleAddTeam} className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-zinc-700">Όνομα Ομάδας *</Label>
+
+          <form onSubmit={handleAddTeam} className="space-y-10">
+            <div className="space-y-4 text-left">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Όνομα Ομάδας *</Label>
               <Input
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
-                placeholder="π.χ. FC Olympus"
-                className="bg-white rounded-lg border-zinc-200"
+                placeholder="π.χ. Α.Ο. FC Champions"
+                className="h-14 bg-zinc-50 border-none rounded-2xl px-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label className="text-zinc-700">Αρχηγός *</Label>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+              <div className="space-y-4">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Υπεύθυνος / Αρχηγός *</Label>
                 <Input
                   value={captainName}
                   onChange={(e) => setCaptainName(e.target.value)}
                   placeholder="Ονοματεπώνυμο"
-                  className="bg-white rounded-lg border-zinc-200"
+                  className="h-14 bg-zinc-50 border-none rounded-2xl px-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
-              <div className="space-y-2">
-                <Label className="text-zinc-700">Τηλέφωνο *</Label>
+              <div className="space-y-4">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Τηλέφωνο Επικοινωνίας *</Label>
                 <Input
                   value={captainPhone}
                   onChange={(e) => setCaptainPhone(e.target.value)}
                   placeholder="69x xxx xxxx"
-                  className="bg-white rounded-lg border-zinc-200"
+                  className="h-14 bg-zinc-50 border-none rounded-2xl px-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
-              <div className="space-y-2">
-                <Label className="text-zinc-700">Email</Label>
+              <div className="space-y-4">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">E-mail (Προαιρετικά)</Label>
                 <Input
                   type="email"
                   value={captainEmail}
                   onChange={(e) => setCaptainEmail(e.target.value)}
                   placeholder="email@example.com"
-                  className="bg-white rounded-lg border-zinc-200"
+                  className="h-14 bg-zinc-50 border-none rounded-2xl px-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
             </div>
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <Button type="button" variant="outline" onClick={() => setShowAddForm(false)} className="rounded-lg">
+
+            <div className="flex items-center justify-end gap-4 pt-4">
+              <Button 
+                type="button" 
+                variant="ghost" 
+                onClick={() => setShowAddForm(false)} 
+                className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] text-zinc-400 hover:text-zinc-600"
+              >
                 Ακύρωση
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg">
-                {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
-                Προσθήκη
+              <Button 
+                type="submit" 
+                disabled={isSubmitting} 
+                className="h-14 px-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-lg shadow-emerald-100"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <><Plus className="h-5 w-5 mr-2" /> Αποθήκευση Ομάδας</>
+                )}
               </Button>
             </div>
           </form>
         </div>
       )}
 
-      {/* Team List */}
+      {/* Team List Grid */}
       {teams.length === 0 ? (
-        <div className="rounded-xl border border-zinc-100/60 bg-white p-12 text-center">
-          <div className="mx-auto h-12 w-12 bg-zinc-50 rounded-xl flex items-center justify-center mb-3">
-            <Shield className="h-6 w-6 text-zinc-300" />
+        <div className="bg-zinc-50 rounded-[3rem] border-2 border-dashed border-zinc-100 p-20 text-center">
+          <div className="h-20 w-20 bg-white shadow-sm rounded-[2rem] mx-auto flex items-center justify-center mb-8 text-zinc-200">
+            <Shield className="h-10 w-10" />
           </div>
-          <h3 className="text-sm font-medium text-zinc-700">Δεν υπάρχουν ομάδες</h3>
-          <p className="mt-1 text-sm text-zinc-400">Προσθέστε ομάδες στο τουρνουά.</p>
+          <h3 className="text-2xl font-black text-zinc-900 mb-3 uppercase tracking-tight">Δεν υπάρχουν ομάδες</h3>
+          <p className="text-lg font-medium text-zinc-400 max-w-md mx-auto mb-10">
+            Ξεκινήστε προσθέτοντας τις συμμετέχουσες ομάδες στο τουρνουά σας.
+          </p>
+          <Button 
+            onClick={() => setShowAddForm(true)} 
+            className="h-14 px-10 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-lg shadow-emerald-100"
+          >
+            <Plus className="h-5 w-5 mr-2" /> Προσθήκη Πρώτης Ομάδας
+          </Button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-6">
           {teams.map((team) => {
             const teamPlayers = players.filter(p => p.teamId === team.id);
             const isEditing = editingTeamId === team.id;
 
             if (isEditing) {
               return (
-                <div key={team.id} className="rounded-xl border border-amber-200 bg-amber-50/30 p-5 space-y-4">
+                <div key={team.id} className="bg-white rounded-[2.5rem] border-2 border-amber-400 shadow-xl shadow-amber-50 p-10 space-y-10 animate-in fade-in zoom-in-95 duration-300">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-semibold text-zinc-900">Επεξεργασία Ομάδας</h3>
-                    <button onClick={() => setEditingTeamId(null)} className="text-zinc-400 hover:text-zinc-600">
-                      <X className="h-4 w-4" />
+                    <div className="flex items-center gap-4">
+                      <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                        <Pencil className="h-5 w-5 text-amber-600" />
+                      </div>
+                      <h3 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase(`Επεξεργασία ${team.name}`)}</h3>
+                    </div>
+                    <button 
+                      onClick={() => setEditingTeamId(null)} 
+                      className="h-10 w-10 rounded-xl hover:bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-zinc-600 transition-colors"
+                    >
+                      <X className="h-5 w-5" />
                     </button>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="text-zinc-700">Όνομα Ομάδας *</Label>
-                    <Input
-                      value={editName}
-                      onChange={(e) => setEditName(e.target.value)}
-                      className="bg-white rounded-lg border-zinc-200"
-                    />
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="space-y-2">
-                      <Label className="text-zinc-700">Αρχηγός *</Label>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-left">
+                    <div className="space-y-4 lg:col-span-1">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Όνομα Ομάδας</Label>
+                      <Input
+                        value={editName}
+                        onChange={(e) => setEditName(e.target.value)}
+                        className="h-14 bg-zinc-50 border-none rounded-2xl px-6 font-bold text-zinc-900 focus:ring-2 focus:ring-amber-500/20"
+                      />
+                    </div>
+                    <div className="space-y-4">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Υπεύθυνος</Label>
                       <Input
                         value={editCaptainName}
                         onChange={(e) => setEditCaptainName(e.target.value)}
-                        className="bg-white rounded-lg border-zinc-200"
+                        className="h-14 bg-zinc-50 border-none rounded-2xl px-6 font-bold text-zinc-900 focus:ring-2 focus:ring-amber-500/20"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-zinc-700">Τηλέφωνο *</Label>
+                    <div className="space-y-4">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Τηλέφωνο</Label>
                       <Input
                         value={editCaptainPhone}
                         onChange={(e) => setEditCaptainPhone(e.target.value)}
-                        className="bg-white rounded-lg border-zinc-200"
+                        className="h-14 bg-zinc-50 border-none rounded-2xl px-6 font-bold text-zinc-900 focus:ring-2 focus:ring-amber-500/20"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="text-zinc-700">Email</Label>
+                    <div className="space-y-4">
+                      <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Email</Label>
                       <Input
                         type="email"
                         value={editCaptainEmail}
                         onChange={(e) => setEditCaptainEmail(e.target.value)}
-                        className="bg-white rounded-lg border-zinc-200"
+                        className="h-14 bg-zinc-50 border-none rounded-2xl px-6 font-bold text-zinc-900 focus:ring-2 focus:ring-amber-500/20"
                       />
                     </div>
                   </div>
-                  <div className="flex items-center justify-end gap-2">
-                    <Button type="button" variant="outline" onClick={() => setEditingTeamId(null)} className="rounded-lg text-xs" size="sm">
+
+                  <div className="flex items-center justify-end gap-4 pt-4">
+                    <Button 
+                      onClick={() => setEditingTeamId(null)} 
+                      variant="ghost" 
+                      className="h-12 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-600"
+                    >
                       Ακύρωση
                     </Button>
                     <Button
-                      size="sm"
                       onClick={handleSaveEdit}
                       disabled={isSavingEdit || !editName.trim() || !editCaptainName.trim() || !editCaptainPhone.trim()}
-                      className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs"
+                      className="h-12 px-10 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-amber-100"
                     >
-                      {isSavingEdit ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
-                      Αποθήκευση
+                      {isSavingEdit ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                      Ενημέρωση
                     </Button>
                   </div>
                 </div>
@@ -356,72 +424,95 @@ export default function TeamsPage() {
             }
 
             return (
-              <div key={team.id} className="rounded-xl border border-zinc-100/60 bg-white p-5 hover:shadow-sm transition-all duration-150">
-                <div className="flex items-center justify-between">
+              <div 
+                key={team.id} 
+                className="group bg-white rounded-[2.5rem] border border-zinc-100 p-8 hover:shadow-xl hover:border-violet-100 transition-all duration-300"
+              >
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
                   <Link
                     href={`/management/tournaments/${tournament.id}/teams/${team.id}`}
-                    className="flex items-center gap-3.5 flex-1 min-w-0"
+                    className="flex-1 flex flex-col md:flex-row md:items-center gap-8 min-w-0"
                   >
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-100 text-zinc-600">
-                      <Shield className="h-5 w-5" />
+                    <div className="h-20 w-20 rounded-[1.75rem] bg-zinc-50 flex items-center justify-center text-zinc-300 group-hover:bg-violet-50 group-hover:text-violet-600 transition-all duration-300">
+                      <Shield className="h-10 w-10" />
                     </div>
-                    <div className="min-w-0">
-                      <h3 className="font-semibold tracking-tight text-zinc-900">{team.name}</h3>
-                      <div className="flex items-center gap-3 mt-0.5 text-xs text-zinc-400">
-                        <span className="flex items-center gap-1">
-                          <Users className="h-3 w-3" />
+                    
+                    <div className="space-y-2">
+                      <h3 className="text-2xl font-black text-zinc-900 group-hover:text-violet-700 transition-colors uppercase tracking-tight">
+                        {team.name}
+                      </h3>
+                      <div className="flex flex-wrap items-center gap-4">
+                        <Badge variant="outline" className="h-7 px-4 rounded-lg bg-zinc-50 border-none text-[10px] font-black uppercase tracking-widest text-zinc-400 group-hover:bg-violet-100 group-hover:text-violet-700">
+                          <Users className="h-3 w-3 mr-2" />
                           {teamPlayers.length} παίκτες
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Phone className="h-3 w-3" />
+                        </Badge>
+                        <Badge variant="outline" className="h-7 px-4 rounded-lg bg-zinc-50 border-none text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                          <Phone className="h-3 w-3 mr-2" />
                           {team.captainName}
-                        </span>
+                        </Badge>
                         {team.captainEmail && (
-                          <span className="flex items-center gap-1 hidden sm:flex">
-                            <Mail className="h-3 w-3" />
+                          <Badge variant="outline" className="h-7 px-4 rounded-lg bg-zinc-50 border-none text-[10px] font-black uppercase tracking-widest text-zinc-400 hidden xl:flex">
+                            <Mail className="h-3 w-3 mr-2" />
                             {team.captainEmail}
-                          </span>
+                          </Badge>
                         )}
                       </div>
                     </div>
                   </Link>
-                  <div className="flex items-center gap-2 ml-3">
+
+                  <div className="flex items-center gap-4 pl-4 md:border-l md:border-zinc-50">
                     {(tournament.type === 'league' || tournament.type === 'group+knockout') && (
-                      <div className="text-right mr-2 hidden sm:block">
-                        <p className="text-xs text-zinc-400">Βαθμοί</p>
-                        <p className="text-sm font-bold text-zinc-900">{team.stats.points}</p>
+                      <div className="text-center px-6 py-3 bg-zinc-50 rounded-2xl group-hover:bg-violet-50 transition-colors mr-2">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-violet-400">Βαθμοί</p>
+                        <p className="text-2xl font-black text-zinc-900 group-hover:text-violet-700">{team.stats.points}</p>
                       </div>
                     )}
-                    <button
-                      onClick={() => startEditTeam(team)}
-                      className="p-1.5 rounded-lg text-zinc-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <button className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors">
-                          <Trash2 className="h-4 w-4" />
+                    
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => startEditTeam(team)}
+                          className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 hover:bg-amber-50 hover:text-amber-600 transition-all"
+                          title="Επεξεργασία"
+                        >
+                          <Pencil className="h-4 w-4" />
                         </button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent className="rounded-xl">
-                        <AlertDialogHeader>
-                          <AlertDialogTitle className="text-zinc-900">Διαγραφή Ομάδας</AlertDialogTitle>
-                          <AlertDialogDescription className="text-zinc-500">
-                            Θα διαγραφούν και οι {teamPlayers.length} παίκτες της ομάδας &quot;{team.name}&quot;.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel className="rounded-lg">Ακύρωση</AlertDialogCancel>
-                          <AlertDialogAction variant="destructive" onClick={() => handleDeleteTeam(team.id)} className="rounded-lg">
-                            Διαγραφή
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                    <Link href={`/management/tournaments/${tournament.id}/teams/${team.id}`}>
-                      <ChevronRight className="h-4 w-4 text-zinc-300" />
-                    </Link>
+                        
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 hover:bg-red-50 hover:text-red-600 transition-all" title="Διαγραφή">
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="rounded-[2.5rem] p-10 border-none">
+                            <AlertDialogHeader className="space-y-4">
+                              <AlertDialogTitle className="text-2xl font-black text-zinc-900 uppercase tracking-tight">Διαγραφή Ομάδας</AlertDialogTitle>
+                              <AlertDialogDescription className="text-lg font-medium text-zinc-500">
+                                Είστε σίγουροι; Θα διαγραφούν οριστικά η ομάδα <span className="text-zinc-900 font-bold">&quot;{team.name}&quot;</span> και οι <span className="text-zinc-900 font-bold">{teamPlayers.length}</span> παίκτες που ανήκουν σε αυτήν. Αυτή η ενέργεια δεν αναιρείται.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="pt-8 gap-4">
+                              <AlertDialogCancel className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[11px] border-none bg-zinc-50 hover:bg-zinc-100 text-zinc-400 hover:text-zinc-900 transition-all shadow-none">Ακύρωση</AlertDialogCancel>
+                              <AlertDialogAction 
+                                variant="destructive" 
+                                onClick={() => handleDeleteTeam(team.id)} 
+                                className="h-14 px-10 rounded-2xl font-black uppercase tracking-widest text-[11px] bg-red-600 hover:bg-red-700 text-white transition-all shadow-lg shadow-red-100"
+                              >
+                                Διαγραφή Ομάδας
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                      
+                      <Link 
+                        href={`/management/tournaments/${tournament.id}/teams/${team.id}`}
+                        className="h-10 px-4 rounded-xl bg-zinc-900 text-white flex items-center justify-between text-[9px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all"
+                      >
+                        Ρόστερ
+                        <ChevronRight className="h-3 w-3 ml-2" />
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>

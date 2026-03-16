@@ -6,7 +6,7 @@ import './globals.css';
 import ConditionalWrapper from '@/components/ConditionalWrapper';
 import CookieConsent from '@/components/CookieConsent';
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ['latin', 'greek'] });
 
 export const metadata: Metadata = {
   title: {
@@ -97,7 +97,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="el">
       <head>
         {/* Favicon */}
         <link rel="icon" type="image/png" sizes="32x32" href="/fav.png" />

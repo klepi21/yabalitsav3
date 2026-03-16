@@ -13,7 +13,7 @@ import {
   AlertCircle, Trophy, TrendingUp, TrendingDown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+import { cn, toGreekUpperCase } from '@/lib/utils';
 
 interface AthleteStats {
   id: string;
@@ -213,7 +213,7 @@ export default function TrainingStatsPage() {
             <BarChart3 className="h-7 w-7" />
           </div>
           <div>
-            <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-1">Στατιστικά Προπονήσεων</h1>
+            <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-1 uppercase">{toGreekUpperCase('Στατιστικά Προπονήσεων')}</h1>
             <p className="text-lg font-medium text-zinc-500">Ανάλυση παρουσιών και απόδοσης αθλητών.</p>
           </div>
         </div>

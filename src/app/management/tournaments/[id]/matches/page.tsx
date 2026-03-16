@@ -37,12 +37,15 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+
 const matchStatusConfig: Record<string, { label: string; className: string }> = {
-  scheduled: { label: 'Προγραμματισμένος', className: 'bg-blue-50 text-blue-700 border-blue-200' },
-  live: { label: 'Live', className: 'bg-red-50 text-red-700 border-red-200 animate-pulse' },
-  completed: { label: 'Ολοκληρωμένος', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  postponed: { label: 'Αναβλήθηκε', className: 'bg-amber-50 text-amber-700 border-amber-200' },
-  cancelled: { label: 'Ακυρώθηκε', className: 'bg-red-50 text-red-600 border-red-200' },
+  scheduled: { label: 'Προγραμματισμένος', className: 'bg-blue-50 text-blue-700 border-none' },
+  live: { label: 'Live', className: 'bg-red-50 text-red-700 border-none animate-pulse' },
+  completed: { label: 'Ολοκληρωμένος', className: 'bg-emerald-50 text-emerald-700 border-none' },
+  postponed: { label: 'Αναβλήθηκε', className: 'bg-amber-50 text-amber-700 border-none' },
+  cancelled: { label: 'Ακυρώθηκε', className: 'bg-red-50 text-red-600 border-none' },
 };
 
 export default function MatchesPage() {
@@ -280,19 +283,19 @@ export default function MatchesPage() {
   if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+        <Loader2 className="h-10 w-10 animate-spin text-emerald-600" />
       </div>
     );
   }
 
   if (!tournament) {
     return (
-      <div className="text-center py-16">
-        <div className="mx-auto h-12 w-12 bg-zinc-100 rounded-xl flex items-center justify-center mb-4">
-          <Swords className="h-6 w-6 text-zinc-400" />
+      <div className="flex flex-col items-center justify-center py-32 text-center">
+        <div className="h-20 w-20 bg-zinc-50 rounded-[2rem] flex items-center justify-center mb-6">
+          <Swords className="h-10 w-10 text-zinc-300" />
         </div>
-        <h3 className="text-lg font-semibold tracking-tight text-zinc-900">Το τουρνουά δεν βρέθηκε</h3>
-        <Button asChild className="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white">
+        <h3 className="text-2xl font-black text-zinc-900 mb-2 uppercase tracking-tight">Το τουρνουά δεν βρέθηκε</h3>
+        <Button asChild className="mt-6 h-12 px-8 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-black uppercase tracking-widest text-[10px]">
           <Link href="/management/tournaments">Επιστροφή</Link>
         </Button>
       </div>
@@ -312,80 +315,83 @@ export default function MatchesPage() {
   const scheduledCount = matches.filter(m => m.status === 'scheduled' || m.status === 'live').length;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      {/* Back */}
+    <div className="max-w-7xl mx-auto space-y-12 pb-20">
+      {/* Back Button */}
       <Link
         href={`/management/tournaments/${tournament.id}`}
-        className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
+        className="group inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-emerald-600 transition-colors"
       >
-        <ArrowLeft className="h-4 w-4" />
-        {tournament.name}
+        <div className="h-8 w-8 rounded-lg bg-zinc-50 flex items-center justify-center group-hover:bg-emerald-50 transition-colors">
+          <ArrowLeft className="h-4 w-4" />
+        </div>
+        Πίσω στο {tournament.name}
       </Link>
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-100 text-blue-600">
-            <Swords className="h-5 w-5" />
+      {/* Header Section */}
+      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-8 border-b border-zinc-100">
+        <div className="space-y-4">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center">
+              <Swords className="h-6 w-6 text-blue-600" />
+            </div>
+            <h1 className="text-4xl font-black text-zinc-900 tracking-tight uppercase">Διαχείριση Αγώνων</h1>
           </div>
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Αγώνες</h1>
-            <p className="text-sm text-zinc-500">{matches.length} αγώνες &middot; {completedCount} ολοκληρωμένοι</p>
-          </div>
+          <p className="text-lg font-bold text-zinc-400">
+            {matches.length} Συνολικοί Αγώνες &middot; <span className="text-emerald-600">{completedCount} Ολοκληρωμένοι</span>
+          </p>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex flex-wrap items-center gap-4">
           {matches.length === 0 && teams.length >= 2 && (
             <Button
               onClick={handleGenerateFixtures}
               disabled={isGenerating}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg"
+              className="h-14 px-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-lg shadow-emerald-100"
             >
               {isGenerating ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Δημιουργία...
-                </>
+                <><Loader2 className="h-5 w-5 animate-spin mr-2" /> Δημιουργία...</>
               ) : (
-                <>
-                  <Zap className="h-4 w-4" />
-                  Αυτόματη Κλήρωση
-                </>
+                <><Zap className="h-5 w-5 mr-2" /> Αυτόματη Κλήρωση</>
               )}
             </Button>
           )}
           {teams.length >= 2 && (
             <Button
               onClick={() => setShowNewMatch(!showNewMatch)}
-              variant={showNewMatch ? 'outline' : 'default'}
-              className={showNewMatch ? 'rounded-lg border-zinc-200' : 'bg-blue-600 hover:bg-blue-700 text-white rounded-lg'}
+              className={cn(
+                "h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-lg transition-all",
+                showNewMatch 
+                  ? "bg-white border-2 border-zinc-100 text-zinc-400 hover:bg-zinc-50 shadow-none" 
+                  : "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-100"
+              )}
             >
               {showNewMatch ? (
-                <>
-                  <X className="h-4 w-4" />
-                  Ακύρωση
-                </>
+                <><X className="h-5 w-5 mr-2" /> Ακύρωση</>
               ) : (
-                <>
-                  <Plus className="h-4 w-4" />
-                  Νέος Αγώνας
-                </>
+                <><Plus className="h-5 w-5 mr-2" /> Νέος Αγώνας</>
               )}
             </Button>
           )}
         </div>
       </div>
 
-      {/* New Match Form */}
+      {/* New Match Form Card */}
       {showNewMatch && (
-        <div className="rounded-xl border border-blue-100 bg-blue-50/30 p-6 space-y-4">
-          <h3 className="text-sm font-semibold text-zinc-900">Νέος Αγώνας</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-zinc-600">Γηπεδούχος</label>
+        <div className="bg-white rounded-[2.5rem] border border-blue-100 shadow-xl shadow-blue-50/50 p-10 space-y-10">
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
+              <Plus className="h-5 w-5 text-blue-600" />
+            </div>
+            <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">Προσθήκη Αγώνα</h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
+            <div className="space-y-4">
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Γηπεδούχος Ομάδα</label>
               <select
                 value={newHomeTeam}
                 onChange={(e) => setNewHomeTeam(e.target.value)}
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                className="w-full h-14 bg-zinc-50 border-none rounded-2xl px-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer"
               >
                 <option value="">Επιλέξτε ομάδα...</option>
                 {teams.map((t) => (
@@ -393,12 +399,12 @@ export default function MatchesPage() {
                 ))}
               </select>
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-zinc-600">Φιλοξενούμενος</label>
+            <div className="space-y-4">
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Φιλοξενούμενη Ομάδα</label>
               <select
                 value={newAwayTeam}
                 onChange={(e) => setNewAwayTeam(e.target.value)}
-                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                className="w-full h-14 bg-zinc-50 border-none rounded-2xl px-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-blue-500/20 appearance-none cursor-pointer"
               >
                 <option value="">Επιλέξτε ομάδα...</option>
                 {teams.map((t) => (
@@ -407,137 +413,119 @@ export default function MatchesPage() {
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-zinc-600">Αγωνιστική</label>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-left">
+            <div className="space-y-4">
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Αγωνιστική</label>
               <Input
                 type="number"
                 min={1}
                 value={newRound}
                 onChange={(e) => setNewRound(parseInt(e.target.value) || 1)}
-                className="bg-white rounded-lg border-zinc-200"
+                className="h-14 bg-zinc-50 border-none rounded-2xl px-6 font-bold focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-zinc-600">Ημερομηνία</label>
+            <div className="space-y-4">
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Ημερομηνία</label>
               <Input
                 type="date"
                 value={newDate}
                 onChange={(e) => setNewDate(e.target.value)}
-                className="bg-white rounded-lg border-zinc-200"
+                className="h-14 bg-zinc-50 border-none rounded-2xl px-6 font-bold focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-zinc-600">Ώρα</label>
+            <div className="space-y-4">
+              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Ώρα</label>
               <Input
                 type="time"
                 value={newTime}
                 onChange={(e) => setNewTime(e.target.value)}
-                className="bg-white rounded-lg border-zinc-200"
+                className="h-14 bg-zinc-50 border-none rounded-2xl px-6 font-bold focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
           </div>
-          <div className="flex justify-end">
+
+          <div className="flex justify-end pt-4">
             <Button
               onClick={handleCreateMatch}
               disabled={isCreating || !newHomeTeam || !newAwayTeam || !newDate || newHomeTeam === newAwayTeam}
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+              className="h-14 px-12 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-lg shadow-blue-100"
             >
               {isCreating ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Δημιουργία...
-                </>
+                <><Loader2 className="h-5 w-5 animate-spin mr-2" /> Δημιουργία...</>
               ) : (
-                <>
-                  <Plus className="h-4 w-4" />
-                  Δημιουργία Αγώνα
-                </>
+                <><Plus className="h-5 w-5 mr-2" /> Αποθήκευση Αγώνα</>
               )}
             </Button>
           </div>
         </div>
       )}
 
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
-        <div className="rounded-xl border border-zinc-100/60 bg-white p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-blue-100 text-blue-600">
-              <Calendar className="h-4 w-4" />
+      {/* Stats Quick Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+        {[
+          { label: 'Προγραμματισμένοι', value: scheduledCount, icon: Calendar, color: 'blue' },
+          { label: 'Ολοκληρωμένοι', value: completedCount, icon: CheckCircle2, color: 'emerald' },
+          { label: 'Συνολικά Γκολ', value: matches.filter(m => m.status === 'completed').reduce((s, m) => s + (m.homeScore ?? 0) + (m.awayScore ?? 0), 0), icon: Target, color: 'amber' }
+        ].map((stat, i) => (
+          <div key={i} className="bg-white rounded-[2rem] border border-zinc-100 shadow-sm p-8 flex items-center gap-6">
+            <div className={cn("h-16 w-16 rounded-[1.25rem] flex items-center justify-center", 
+              stat.color === 'blue' ? 'bg-blue-50 text-blue-600' :
+              stat.color === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
+              'bg-amber-50 text-amber-600'
+            )}>
+              <stat.icon className="h-8 w-8" />
             </div>
             <div>
-              <p className="text-xs text-zinc-500">Προγραμματισμένοι</p>
-              <p className="text-lg font-semibold tracking-tight text-zinc-900">{scheduledCount}</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">{stat.label}</p>
+              <p className="text-3xl font-black text-zinc-900 tracking-tight">{stat.value}</p>
             </div>
           </div>
-        </div>
-        <div className="rounded-xl border border-zinc-100/60 bg-white p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-100 text-emerald-600">
-              <CheckCircle2 className="h-4 w-4" />
-            </div>
-            <div>
-              <p className="text-xs text-zinc-500">Ολοκληρωμένοι</p>
-              <p className="text-lg font-semibold tracking-tight text-zinc-900">{completedCount}</p>
-            </div>
-          </div>
-        </div>
-        <div className="rounded-xl border border-zinc-100/60 bg-white p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-amber-100 text-amber-600">
-              <Target className="h-4 w-4" />
-            </div>
-            <div>
-              <p className="text-xs text-zinc-500">Γκολ</p>
-              <p className="text-lg font-semibold tracking-tight text-zinc-900">
-                {matches.filter(m => m.status === 'completed').reduce((s, m) => s + (m.homeScore ?? 0) + (m.awayScore ?? 0), 0)}
-              </p>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* Round Filter */}
+      {/* Round Filter Tabs */}
       {rounds.length > 0 && (
-        <div className="flex items-center gap-1 bg-zinc-100/80 rounded-lg p-1 overflow-x-auto">
+        <div className="flex flex-wrap items-center gap-3 p-2 bg-white rounded-3xl border border-zinc-100 shadow-sm overflow-x-auto">
           <button
             onClick={() => setFilterRound('all')}
-            className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
-              filterRound === 'all' ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700'
-            }`}
+            className={cn(
+              "px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
+              filterRound === 'all' ? "bg-zinc-900 text-white shadow-lg" : "text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50"
+            )}
           >
-            Όλοι
+            Όλοι οι Αγώνες
           </button>
           {rounds.map((r) => (
             <button
               key={r}
               onClick={() => setFilterRound(r)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all whitespace-nowrap ${
-                filterRound === r ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700'
-              }`}
+              className={cn(
+                "px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
+                filterRound === r ? "bg-zinc-900 text-white shadow-lg" : "text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50"
+              )}
             >
-              Αγ. {r}
+              Αγωνιστική {r}
             </button>
           ))}
         </div>
       )}
 
-      {/* Matches */}
+      {/* Matches Grid */}
       {matches.length === 0 ? (
-        <div className="rounded-xl border border-zinc-100/60 bg-white p-12 text-center">
-          <div className="mx-auto h-12 w-12 bg-zinc-50 rounded-xl flex items-center justify-center mb-3">
-            <Swords className="h-6 w-6 text-zinc-300" />
+        <div className="bg-zinc-50 rounded-[3rem] border-2 border-dashed border-zinc-100 p-20 text-center">
+          <div className="h-20 w-20 bg-white shadow-sm rounded-[2rem] mx-auto flex items-center justify-center mb-8">
+            <Swords className="h-10 w-10 text-zinc-200" />
           </div>
-          <h3 className="text-sm font-medium text-zinc-700">Δεν υπάρχουν αγώνες</h3>
-          <p className="mt-1 text-sm text-zinc-400">
+          <h3 className="text-2xl font-black text-zinc-900 mb-3 uppercase tracking-tight">Δεν υπάρχουν αγώνες</h3>
+          <p className="text-lg font-medium text-zinc-400 max-w-md mx-auto">
             {teams.length < 2
-              ? 'Χρειάζονται τουλάχιστον 2 ομάδες για δημιουργία αγώνων.'
-              : 'Πατήστε "Δημιουργία Αγώνων" για αυτόματη κλήρωση.'}
+              ? 'Χρειάζονται τουλάχιστον 2 ομάδες για να μπορέσετε να δημιουργήσετε αγώνες.'
+              : 'Πατήστε στο κουμπί "Αυτόματη Κλήρωση" ή "Νέος Αγώνας" για να ξεκινήσετε.'}
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-6">
           {sortedMatches.map((match) => {
             const home = teamMap.get(match.homeTeamId);
             const away = teamMap.get(match.awayTeamId);
@@ -549,130 +537,134 @@ export default function MatchesPage() {
             return (
               <div
                 key={match.id}
-                className={`rounded-xl border bg-white p-5 transition-all ${
-                  isEditing ? 'border-emerald-200 shadow-sm' : 'border-zinc-100/60'
-                }`}
+                className={cn(
+                  "group bg-white rounded-[2.5rem] border transition-all duration-300 overflow-hidden",
+                  isEditing ? "border-emerald-600 shadow-xl shadow-emerald-50 ring-2 ring-emerald-50" : "border-zinc-100 hover:shadow-xl hover:border-emerald-100"
+                )}
               >
-                {/* Round & date header */}
-                <div className="flex items-center justify-between text-xs text-zinc-400 mb-3">
-                  <span className="font-medium">{match.roundLabel || `Αγωνιστική ${match.round}`}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
+                {/* Match Card Header */}
+                <div className="px-10 py-6 border-b border-zinc-50 flex items-center justify-between bg-zinc-50/30">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                    {match.roundLabel || `Αγωνιστική ${match.round}`}
+                  </span>
+                  <div className="flex items-center gap-6">
+                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                      <Clock className="h-4 w-4 text-zinc-300" />
                       {new Date(match.scheduledDate).toLocaleDateString('el-GR')} &middot; {match.scheduledTime}
-                    </span>
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border ${ms.className}`}>
+                    </div>
+                    <Badge className={cn("px-4 py-1.5 rounded-xl font-black text-[9px] uppercase tracking-widest", ms.className)}>
                       {ms.label}
-                    </span>
+                    </Badge>
                   </div>
                 </div>
 
-                {/* Match body */}
-                <div className="flex items-center">
-                  {/* Home */}
-                  <div className="flex-1 flex items-center gap-2.5">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-zinc-100 text-zinc-500">
-                      <Shield className="h-4 w-4" />
-                    </div>
-                    <span className={`text-sm ${isCompleted && (match.homeScore ?? 0) > (match.awayScore ?? 0) ? 'font-bold text-zinc-900' : 'font-medium text-zinc-700'}`}>
+                {/* Match Card Body */}
+                <div className="p-10 flex flex-col md:flex-row items-center justify-between gap-12">
+                  {/* Home Team */}
+                  <div className="flex-1 flex items-center gap-6 md:justify-end">
+                    <span className={cn(
+                      "text-xl font-black uppercase tracking-tight text-right",
+                      isCompleted && (match.homeScore ?? 0) > (match.awayScore ?? 0) ? "text-emerald-700" : "text-zinc-900"
+                    )}>
                       {home?.name || '—'}
                     </span>
+                    <div className="h-16 w-16 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-violet-50 group-hover:text-violet-600 transition-all">
+                      <Shield className="h-8 w-8" />
+                    </div>
                   </div>
 
-                  {/* Score */}
-                  {isEditing ? (
-                    <div className="flex items-center gap-2 mx-4">
-                      <Input
-                        type="number"
-                        min={0}
-                        value={editHomeScore}
-                        onChange={(e) => setEditHomeScore(e.target.value)}
-                        className="w-14 h-10 text-center text-lg font-bold bg-white rounded-lg border-zinc-300"
-                      />
-                      <span className="text-zinc-300 font-bold">-</span>
-                      <Input
-                        type="number"
-                        min={0}
-                        value={editAwayScore}
-                        onChange={(e) => setEditAwayScore(e.target.value)}
-                        className="w-14 h-10 text-center text-lg font-bold bg-white rounded-lg border-zinc-300"
-                      />
-                    </div>
-                  ) : isCompleted ? (
-                    <div className="flex items-center gap-2 mx-4">
-                      <span className="text-xl font-bold text-zinc-900">{match.homeScore}</span>
-                      <span className="text-zinc-300">-</span>
-                      <span className="text-xl font-bold text-zinc-900">{match.awayScore}</span>
-                    </div>
-                  ) : (
-                    <span className="mx-4 text-xs text-zinc-400 font-medium">vs</span>
-                  )}
+                  {/* Score & VS Section */}
+                  <div className="flex items-center gap-6">
+                    {isEditing ? (
+                      <div className="flex items-center gap-4 bg-emerald-50 p-4 rounded-3xl">
+                        <Input
+                          type="number"
+                          min={0}
+                          value={editHomeScore}
+                          onChange={(e) => setEditHomeScore(e.target.value)}
+                          className="w-20 h-20 text-center text-4xl font-black bg-white rounded-2xl border-none shadow-sm focus:ring-4 focus:ring-emerald-200"
+                        />
+                        <span className="text-3xl font-black text-emerald-200">-</span>
+                        <Input
+                          type="number"
+                          min={0}
+                          value={editAwayScore}
+                          onChange={(e) => setEditAwayScore(e.target.value)}
+                          className="w-20 h-20 text-center text-4xl font-black bg-white rounded-2xl border-none shadow-sm focus:ring-4 focus:ring-emerald-200"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-6 bg-zinc-50 px-10 py-6 rounded-3xl min-w-[200px] justify-center group-hover:bg-emerald-50 transition-colors">
+                        {isCompleted ? (
+                          <>
+                            <span className="text-5xl font-black text-zinc-900">{match.homeScore}</span>
+                            <span className="text-3xl font-black text-zinc-200">-</span>
+                            <span className="text-5xl font-black text-zinc-900">{match.awayScore}</span>
+                          </>
+                        ) : (
+                          <span className="text-lg font-black text-zinc-300 uppercase tracking-[0.2em] py-2">VS</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
 
-                  {/* Away */}
-                  <div className="flex-1 flex items-center justify-end gap-2.5">
-                    <span className={`text-sm text-right ${isCompleted && (match.awayScore ?? 0) > (match.homeScore ?? 0) ? 'font-bold text-zinc-900' : 'font-medium text-zinc-700'}`}>
+                  {/* Away Team */}
+                  <div className="flex-1 flex items-center gap-6">
+                    <div className="h-16 w-16 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-violet-50 group-hover:text-violet-600 transition-all">
+                      <Shield className="h-8 w-8" />
+                    </div>
+                    <span className={cn(
+                      "text-xl font-black uppercase tracking-tight",
+                      isCompleted && (match.awayScore ?? 0) > (match.homeScore ?? 0) ? "text-emerald-700" : "text-zinc-900"
+                    )}>
                       {away?.name || '—'}
                     </span>
-                    <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-zinc-100 text-zinc-500">
-                      <Shield className="h-4 w-4" />
-                    </div>
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-zinc-100">
+                {/* Match Card Actions */}
+                <div className="px-10 py-6 bg-zinc-50/30 border-t border-zinc-50 flex items-center justify-end gap-4">
                   {isEditing ? (
                     <>
                       <Button
-                        size="sm"
-                        variant="outline"
                         onClick={() => setEditingMatch(null)}
-                        className="rounded-lg text-xs"
+                        variant="ghost"
+                        className="h-12 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900"
                       >
-                        <X className="h-3 w-3" />
-                        Ακύρωση
+                        <X className="h-4 w-4 mr-2" /> Ακύρωση
                       </Button>
                       <Button
-                        size="sm"
                         onClick={handleSaveScore}
                         disabled={isSaving}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs"
+                        className="h-12 px-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-emerald-100"
                       >
-                        {isSaving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
-                        Αποθήκευση
+                        {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                        Αποθήκευση Σκορ
                       </Button>
                     </>
                   ) : (
                     <>
-                      {isScheduled && (
+                      {(isScheduled || isCompleted) && (
                         <Button
-                          size="sm"
                           onClick={() => startEditing(match)}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs"
+                          className={cn(
+                            "h-12 px-6 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-sm transition-all",
+                            isCompleted 
+                              ? "bg-white border border-zinc-100 text-zinc-600 hover:bg-zinc-50" 
+                              : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-50"
+                          )}
                         >
-                          <Target className="h-3 w-3" />
-                          Καταχώρηση Σκορ
-                        </Button>
-                      )}
-                      {isCompleted && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => startEditing(match)}
-                          className="rounded-lg text-xs border-zinc-200"
-                        >
-                          Επεξεργασία Σκορ
+                          <Target className="h-4 w-4 mr-2" />
+                          {isCompleted ? 'Επεξεργασία Σκορ' : 'Καταχώρηση Σκορ'}
                         </Button>
                       )}
                       {isScheduled && (
                         <Button
-                          size="sm"
-                          variant="outline"
+                          variant="ghost"
                           onClick={() => handleCancelMatch(match.id)}
-                          className="rounded-lg text-xs border-red-200 text-red-600 hover:bg-red-50"
+                          className="h-12 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest text-red-400 hover:text-red-700 hover:bg-red-50"
                         >
-                          <XCircle className="h-3 w-3" />
-                          Ακύρωση
+                          <XCircle className="h-4 w-4 mr-2" /> Ακύρωση
                         </Button>
                       )}
                     </>

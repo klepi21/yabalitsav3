@@ -167,7 +167,7 @@ export default function CustomersPage() {
               placeholder="Αναζήτηση με όνομα, email ή τηλέφωνο..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-12 pl-12 border-0 bg-transparent focus:ring-0 text-zinc-900 font-bold placeholder:text-zinc-300 placeholder:font-normal"
+              className="h-12 pl-12 border-0 bg-transparent focus:ring-0 text-zinc-900 font-bold placeholder:text-zinc-400 placeholder:font-normal"
             />
           </div>
         </div>

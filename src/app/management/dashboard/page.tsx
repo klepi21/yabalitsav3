@@ -62,7 +62,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { cn } from '@/lib/utils';
+import { cn, toGreekUpperCase } from '@/lib/utils';
 
 export default function DashboardPage() {
   const { user, venueOwner, isLoading: authLoading } = useAuth();
@@ -532,8 +532,8 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
         <div className="space-y-1">
-          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl">
-            Πίνακας Ελέγχου
+          <h1 className="text-3xl font-black tracking-tight text-zinc-900 sm:text-4xl uppercase">
+            {toGreekUpperCase('Πίνακας Ελέγχου')}
           </h1>
           <p className="text-[16px] font-medium text-zinc-500">
             Καλώς ορίσατε στο σύστημα διαχείρισης του <span className="text-emerald-600 font-bold">{venue?.name || 'γηπέδου σας'}</span>
@@ -596,7 +596,7 @@ export default function DashboardPage() {
             <CardContent className="p-8">
               <div className="flex items-center justify-between">
                 <div className="space-y-2">
-                  <p className="text-[14px] text-zinc-500 font-bold uppercase tracking-wider">{stat.label}</p>
+                  <p className="text-[14px] text-zinc-500 font-bold tracking-wider">{toGreekUpperCase(stat.label)}</p>
                   <p className="text-4xl font-extrabold text-zinc-900 tracking-tight">{stat.value}</p>
                 </div>
                 <div className={cn(
@@ -825,7 +825,7 @@ export default function DashboardPage() {
               <CardHeader className="p-8 pb-4">
                 <CardTitle className="text-xl font-bold flex items-center gap-3">
                   <Building2 className="h-5 w-5 text-emerald-400" />
-                  Πληροφορίες Γηπέδου
+                  {toGreekUpperCase('Πληροφορίες Γηπέδου')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-8 pt-0 space-y-6">
@@ -1039,8 +1039,8 @@ export default function DashboardPage() {
             </div>
             
             <AlertDialogHeader className="text-center">
-              <AlertDialogTitle className="text-2xl font-extrabold text-zinc-900 leading-tight">
-                Αλλαγή Κατάστασης Κράτησης;
+              <AlertDialogTitle className="text-2xl font-black text-zinc-900 uppercase leading-tight">
+                {toGreekUpperCase('Αλλαγή Κατάστασης Κράτησης')}
               </AlertDialogTitle>
               <AlertDialogDescription className="text-[16px] font-medium text-zinc-500 mt-3 px-2">
                 Πρόκειται να αλλάξετε την κατάσταση της κράτησης του/της <span className="text-zinc-900 font-bold">{statusChangeData?.userName}</span> σε <span className="font-bold text-emerald-600">

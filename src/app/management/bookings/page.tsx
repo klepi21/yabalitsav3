@@ -62,7 +62,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
+import { cn, toGreekUpperCase } from '@/lib/utils';
 import { ChevronDown } from 'lucide-react';
 
 export default function BookingsPage() {
@@ -263,7 +263,7 @@ export default function BookingsPage() {
             <div className="p-2.5 rounded-xl bg-emerald-600 shadow-lg shadow-emerald-200">
               <CalendarDays className="h-6 w-6 text-white" />
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900">Κρατήσεις</h1>
+            <h1 className="text-4xl font-black text-zinc-900 tracking-tight uppercase">{toGreekUpperCase('Κρατήσεις')}</h1>
           </div>
           <p className="text-[16px] font-medium text-zinc-500">Διαχείριση και προγραμματισμός των κρατήσεων σας.</p>
         </div>
@@ -392,11 +392,11 @@ export default function BookingsPage() {
                         className={cn(
                           "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
                           filterStatus === opt.value
-                            ? "bg-zinc-900 text-white shadow-md"
-                            : "text-zinc-500 hover:text-zinc-700"
+                            ? 'bg-white text-zinc-900 shadow-sm'
+                            : 'text-zinc-400 hover:text-zinc-600'
                         )}
                       >
-                        {opt.label}
+                        {toGreekUpperCase(opt.label)}
                       </button>
                     ))}
                   </div>
@@ -454,7 +454,7 @@ export default function BookingsPage() {
                                 ? "bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-100 scale-110 z-10" 
                                 : "bg-white border-zinc-100 text-zinc-900"
                             )}>
-                              <p className={cn("text-[10px] font-black uppercase tracking-tighter", isToday ? "text-emerald-100" : "text-zinc-400")}>
+                              <p className={cn("text-[10px] font-black uppercase tracking-tighter", isToday ? "text-emerald-100" : "text-zinc-500")}>
                                 {startDate.toLocaleDateString('el-GR', { weekday: 'short' })}
                               </p>
                               <p className="text-2xl font-black leading-none my-1">

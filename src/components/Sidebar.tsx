@@ -23,7 +23,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
-import { cn } from '@/lib/utils';
+import { cn, toGreekUpperCase } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 interface NavItem {
   name: string;
@@ -33,7 +34,7 @@ interface NavItem {
 }
 
 const navigation: NavItem[] = [
-  { name: 'Πίνακας Ελέγχου', href: '/management/dashboard', icon: LayoutDashboard },
+  { name: toGreekUpperCase('Πίνακας Ελέγχου'), href: '/management/dashboard', icon: LayoutDashboard },
   { name: 'Γήπεδα', href: '/management/pitches', icon: Building2 },
   { name: 'Κρατήσεις', href: '/management/bookings', icon: CalendarDays },
   { name: 'Πελάτες', href: '/management/customers', icon: Users },
@@ -188,7 +189,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
           className="flex w-full items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-medium text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200"
         >
           <LogOut className="h-5 w-5 opacity-60" />
-          <span>Αποσύνδεση</span>
+          <span>{toGreekUpperCase('Αποσύνδεση')}</span>
         </button>
       </div>
     </div>

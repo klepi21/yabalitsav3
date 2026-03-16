@@ -7,6 +7,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar from './Sidebar';
 import { Badge } from '@/components/ui/badge';
+import { toGreekUpperCase } from '@/lib/utils';
 
 interface VenueData {
   id: string;
@@ -163,7 +164,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                   {showNotifications && (
                     <div className="absolute right-0 top-14 w-80 bg-white border border-zinc-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
                       <div className="px-5 py-4 border-b border-zinc-100 bg-zinc-50/50">
-                        <h3 className="text-[15px] font-bold text-zinc-900">Ειδοποιήσεις</h3>
+                        <h3 className="text-[15px] font-bold text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ειδοποιήσεις')}</h3>
                         <p className="text-xs text-zinc-500 mt-0.5">Εκκρεμείς κρατήσεις που χρειάζονται έγκριση</p>
                       </div>
 
@@ -245,7 +246,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                             <div className="h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse ring-4 ring-amber-500/10" />
                             <div className="flex flex-col">
                               <span className="text-[13px] font-bold text-amber-900 uppercase tracking-tight">
-                                Λήγει Σύντομα
+                                {toGreekUpperCase('Λήγει Σύντομα')}
                               </span>
                               <span className="text-[11px] font-medium text-amber-700">
                                 {venueData.daysRemaining} ημέρες
@@ -256,7 +257,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                           <div className="flex items-center gap-3 bg-red-50 border border-red-200 px-4 py-2 rounded-xl">
                             <div className="h-2.5 w-2.5 rounded-full bg-red-500 ring-4 ring-red-500/10" />
                             <span className="text-[13px] font-bold text-red-700 uppercase tracking-tight">
-                              Ληγμένο Πλάνο
+                              {toGreekUpperCase('Ληγμένο Πλάνο')}
                             </span>
                           </div>
                         )}
@@ -284,9 +285,9 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                         <div className="flex flex-col bg-zinc-50 border border-zinc-200 px-4 py-2 rounded-xl">
                           <div className="flex items-center gap-2">
                             <div className="h-2 w-2 rounded-full bg-zinc-400" />
-                            <span className="text-[13px] font-bold text-zinc-900">
-                              {venueData.plan === 'trial' ? 'Δωρεάν Δοκιμή' : 'Χωρίς Πλάνο'}
-                            </span>
+                              <span className="text-[13px] font-bold text-zinc-900 uppercase tracking-tight">
+                                {venueData.plan === 'trial' ? toGreekUpperCase('Δωρεάν Δοκιμή') : toGreekUpperCase('Χωρίς Πλάνο')}
+                              </span>
                           </div>
                         </div>
                         <Link
@@ -294,7 +295,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                           className="inline-flex items-center gap-2 text-[13px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-5 py-2.5 rounded-xl transition-all shadow-md shadow-emerald-600/20 active:scale-95"
                         >
                           <Sparkles className="h-4 w-4" />
-                          Ενεργοποίηση
+                          {toGreekUpperCase('Ενεργοποίηση')}
                         </Link>
                       </div>
                     )}
