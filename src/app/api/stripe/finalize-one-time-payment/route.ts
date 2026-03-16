@@ -1,7 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { paymentService, venueService } from '@/lib/firebase-services';
+import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+import { getApps, initializeApp, cert } from 'firebase-admin/app';
+import path from 'path';
 
+if (!getApps().length) {
+  initializeApp({
+    credential: cert(
+      path.join(process.cwd(), process.env.FIREBASE_ADMIN_KEY_PATH || 'yabalitsa-6f5e8-firebase-adminsdk-fbsvc-c8cc60c683.json')
+    ),
+  });
+}
+
+const db = getFirestore();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(request: NextRequest) {
@@ -31,68 +42,68 @@ export async function POST(request: NextRequest) {
     console.log('📋 Payment details:', { venueId, planName, duration, userUid });
 
     if (!venueId || !planName || !duration) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: 'Missing required metadata in PaymentIntent',
         metadata: paymentIntent.metadata
       }, { status: 400 });
     }
 
-    // Update payment record in Firebase
-    const payments = await paymentService.getAll();
-    const payment = payments.find(p => p.stripePaymentIntentId === paymentIntent.id);
-    
-    if (payment) {
-      await paymentService.update(payment.id, {
+    // Update payment record in Firebase (Admin SDK — bypasses rules)
+    const paymentsSnap = await db.collection('yabalitsa_payments')
+      .where('stripePaymentIntentId', '==', paymentIntent.id)
+      .limit(1)
+      .get();
+
+    if (!paymentsSnap.empty) {
+      const paymentDoc = paymentsSnap.docs[0];
+      await paymentDoc.ref.update({
         status: 'succeeded',
         paymentDate: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        updatedAt: FieldValue.serverTimestamp(),
       });
       console.log('✅ Updated payment record in Firebase');
     }
 
     // Get current venue data to get existing daysRemaining
-    const venue = await venueService.getById(venueId);
-    const currentDaysRemaining = venue?.daysRemaining || 0;
-    
+    const venueDoc = await db.collection('yabalitsa_venues').doc(venueId).get();
+    const venueData = venueDoc.data();
+    const currentDaysRemaining = venueData?.daysRemaining || 0;
+
     // Calculate new days to add based on duration (months to days)
-    const newDays = duration * 30; // Approximate: 1 month = 30 days
-    
-    // Add new days to existing days
+    const newDays = duration * 30;
     const daysRemaining = currentDaysRemaining + newDays;
-    
-    // Calculate new subscription end date from today + total days remaining
+
+    // Calculate new subscription end date
     const currentDate = new Date();
     const planEndDate = new Date(currentDate);
     planEndDate.setDate(planEndDate.getDate() + daysRemaining);
 
     // Convert planName to planType
-    const planTypeMap: { [key: string]: 'Basic' | 'Pro' | 'Enterprise' } = {
+    const planTypeMap: Record<string, string> = {
       'Basic': 'Basic',
-      'Pro': 'Pro', 
-      'Enterprise': 'Enterprise'
+      'Pro': 'Pro',
+      'Enterprise': 'Enterprise',
     };
     const planType = planTypeMap[planName] || 'Basic';
 
-    // Update venue with plan details
-    await venueService.update(venueId, {
-      plan: 'subscription', // Keep as 'subscription' for compatibility
-      planType: planType,
+    // Update venue with plan details (Admin SDK — bypasses rules)
+    await db.collection('yabalitsa_venues').doc(venueId).update({
+      plan: 'subscription',
+      planType,
       subscriptionEndDate: planEndDate.toISOString(),
       daysRemaining: Math.max(0, daysRemaining),
-      active: true
+      active: true,
+      updatedAt: FieldValue.serverTimestamp(),
     });
 
     console.log('✅ Updated venue with plan details:', {
       planType,
       subscriptionEndDate: planEndDate.toISOString(),
       daysRemaining,
-      active: true
+      active: true,
     });
 
-    // TODO: Generate official AADE invoice here if needed
-    console.log('⚠️ TODO: Generate official AADE invoice for tax compliance');
-
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: true,
       venueId,
       planName,
@@ -100,7 +111,7 @@ export async function POST(request: NextRequest) {
       durationMonths: duration,
       subscriptionEndDate: planEndDate.toISOString(),
       daysRemaining,
-      message: 'Plan activated successfully'
+      message: 'Plan activated successfully',
     });
 
   } catch (error) {

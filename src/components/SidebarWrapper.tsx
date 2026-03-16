@@ -258,7 +258,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                           </Link>
                         ) : (
                           <Link
-                            href="#"
+                            href="/management/settings/renewal"
                             className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-600 hover:text-zinc-800 bg-zinc-100 hover:bg-zinc-150 px-3 py-1.5 rounded-full transition-colors"
                           >
                             <ArrowUpRight className="h-3 w-3" />
@@ -275,7 +275,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                           </span>
                         </div>
                         <Link
-                          href="#"
+                          href="/management/settings/renewal"
                           className="inline-flex items-center gap-1.5 text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-700 px-3 py-1.5 rounded-full transition-colors"
                         >
                           <Sparkles className="h-3 w-3" />

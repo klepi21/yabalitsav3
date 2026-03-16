@@ -7,6 +7,7 @@ export interface PricingPlan {
   features: string[];
   popular?: boolean;
   maxPitches?: number;
+  durationMonths?: number;
   stripePriceIds: {
     monthly: string;
     semiAnnual: string;
@@ -41,14 +42,16 @@ export const pricingConfig: PricingConfig = {
     {
       id: 'basic',
       name: 'Basic',
-      description: '1 γήπεδο, απεριόριστες κρατήσεις',
-      basePrice: 25,
-      maxPitches: 1,
+      description: '1 μήνας συνδρομής',
+      basePrice: 21,
+      maxPitches: 999,
+      durationMonths: 1,
       features: [
-        '1 γήπεδο',
-        'Απεριόριστες κρατήσεις',
-        'Προηγμένο διαχειριστικό',
-        'Email υποστήριξη'
+        'Απεριόριστα γήπεδα & κρατήσεις',
+        'Online booking σελίδα',
+        'Πλήρες διαχειριστικό',
+        'Τουρνουά & Ακαδημία',
+        'Email υποστήριξη',
       ],
       stripePriceIds: {
         monthly: getEnvString('STRIPE_BASIC_MONTHLY_PRICE_ID', ''),
@@ -59,14 +62,14 @@ export const pricingConfig: PricingConfig = {
     {
       id: 'pro',
       name: 'Pro',
-      description: '2-3 γήπεδα, απεριόριστες κρατήσεις',
-      basePrice: 45,
-      maxPitches: 3,
+      description: '6 μήνες συνδρομής',
+      basePrice: 25,
+      maxPitches: 999,
+      durationMonths: 6,
       features: [
-        '2-3 γήπεδα',
-        'Απεριόριστες κρατήσεις',
-        'Προηγμένο διαχειριστικό',
-        'Προτεραιότητα υποστήριξης'
+        'Όλα τα χαρακτηριστικά Basic',
+        'Έκπτωση 7%',
+        'Προτεραιότητα υποστήριξης',
       ],
       popular: true,
       stripePriceIds: {
@@ -78,14 +81,14 @@ export const pricingConfig: PricingConfig = {
     {
       id: 'enterprise',
       name: 'Enterprise',
-      description: '3+ γήπεδα, unique booking link',
-      basePrice: 75,
-      maxPitches: 999, // Unlimited
+      description: '12 μήνες συνδρομής',
+      basePrice: 25,
+      maxPitches: 999,
+      durationMonths: 12,
       features: [
-        '3+ γήπεδα',
-        'Unique booking link',
-        'Πλήρες διαχειριστικό',
-        'Dedicated υποστήριξη'
+        'Όλα τα χαρακτηριστικά Pro',
+        'Έκπτωση 12%',
+        'Dedicated υποστήριξη',
       ],
       stripePriceIds: {
         monthly: getEnvString('STRIPE_ENTERPRISE_MONTHLY_PRICE_ID', ''),

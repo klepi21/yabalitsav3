@@ -86,10 +86,14 @@ export async function POST(request: NextRequest) {
       stripeCustomerId = stripeCustomer.id;
       console.log('✅ Created new Stripe customer:', stripeCustomerId);
       
-      // Update venue with Stripe customer ID
-      await venueService.update(venue.id, {
-        stripeCustomerId: stripeCustomerId
-      });
+      // Update venue with Stripe customer ID (non-blocking — may fail without auth context)
+      try {
+        await venueService.update(venue.id, {
+          stripeCustomerId: stripeCustomerId
+        });
+      } catch (e) {
+        console.warn('Could not save stripeCustomerId to venue (will retry on next payment):', e);
+      }
     }
 
     // Create PaymentIntent for one-time payment
@@ -113,7 +117,7 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ PaymentIntent created:', paymentIntent.id, paymentIntent.status);
 
-    // Store payment record in Firebase
+    // Store payment record in Firebase (payments collection has write: if true)
     const paymentId = await paymentService.create({
       venueId: venue.id,
       stripePaymentIntentId: paymentIntent.id,

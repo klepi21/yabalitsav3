@@ -7,7 +7,7 @@ import path from 'path';
 if (!getApps().length) {
   initializeApp({
     credential: cert(
-      path.join(process.cwd(), 'yabalitsa-6f5e8-firebase-adminsdk-fbsvc-c8cc60c683.json')
+      path.join(process.cwd(), process.env.FIREBASE_ADMIN_KEY_PATH || 'yabalitsa-6f5e8-firebase-adminsdk-fbsvc-c8cc60c683.json')
     ),
   });
 }
@@ -33,24 +33,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Telegram not configured' }, { status: 500 });
     }
 
-    const { message, category, venueId } = await request.json();
+    const { message, category, venueId, rateLimitHours = 1 } = await request.json();
 
     if (!message?.trim()) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    // Rate limit: 1 message per hour per venue
+    // Rate limit per venue based on plan (enterprise=1h, pro=2h, trial=1h)
+    const limitMs = Math.max(1, Number(rateLimitHours) || 1) * 60 * 60 * 1000;
     if (venueId) {
-      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+      const cutoff = new Date(Date.now() - limitMs);
       const recentMessages = await db.collection('yabalitsa_support_messages')
         .where('venueId', '==', venueId)
-        .where('createdAt', '>', oneHourAgo)
+        .where('createdAt', '>', cutoff)
         .limit(1)
         .get();
 
       if (!recentMessages.empty) {
+        const hours = Number(rateLimitHours) || 1;
         return NextResponse.json(
-          { error: 'Μπορείτε να στείλετε 1 μήνυμα ανά ώρα. Δοκιμάστε αργότερα.' },
+          { error: `Μπορείτε να στείλετε 1 μήνυμα ανά ${hours === 1 ? 'ώρα' : `${hours} ώρες`}. Δοκιμάστε αργότερα.` },
           { status: 429 }
         );
       }

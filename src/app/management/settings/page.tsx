@@ -577,7 +577,7 @@ export default function SettingsPage() {
                           } else {
                             return (
                               <Button variant="outline" size="sm" asChild>
-                                <Link href="#">
+                                <Link href="/management/settings/renewal">
                                   <ArrowUpCircle className="h-3 w-3 mr-1" />
                                   Αναβάθμιση
                                 </Link>
@@ -587,7 +587,7 @@ export default function SettingsPage() {
                         } else {
                           return (
                             <Button variant="default" size="sm" asChild>
-                              <Link href="#">
+                              <Link href="/management/settings/renewal">
                                 <Sparkles className="h-3 w-3 mr-1" />
                                 Ενεργοποίηση
                               </Link>
@@ -654,7 +654,7 @@ export default function SettingsPage() {
                                 }
                               </div>
                               <Button asChild>
-                                <Link href="#">
+                                <Link href="/management/settings/renewal">
                                   <ArrowUpCircle className="h-4 w-4 mr-1" />
                                   Ενεργοποίηση Πλάνου
                                 </Link>
@@ -753,18 +753,33 @@ export default function SettingsPage() {
             </Card>
           )}
 
-          {/* Instant Support via Telegram */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5 text-primary" />
-                Άμεση Επικοινωνία
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <TelegramSupportForm venueId={venueOwner?.venueId} />
-            </CardContent>
-          </Card>
+          {/* Instant Support via Telegram — shown for trial, pro, enterprise (not basic) */}
+          {venue && (() => {
+            const isTrial = venue.plan !== 'subscription';
+            const trialActive = isTrial && (calculateDaysRemaining(venue) ?? 0) > 0;
+            const planType = (venue.planType || '').toLowerCase();
+            const isPro = planType === 'pro';
+            const isEnterprise = planType === 'enterprise';
+            const showTelegram = trialActive || isPro || isEnterprise;
+
+            if (!showTelegram) return null;
+
+            const rateLimitHours = isEnterprise ? 1 : isPro ? 2 : 1; // trial = 1h
+
+            return (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageCircle className="h-5 w-5 text-primary" />
+                    Άμεση Επικοινωνία
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <TelegramSupportForm venueId={venueOwner?.venueId} rateLimitHours={rateLimitHours} />
+                </CardContent>
+              </Card>
+            );
+          })()}
 
           {/* Support Section */}
           <Card>
@@ -835,7 +850,7 @@ function SetPinForm({ onSubmit, isSaving }: { onSubmit: (pinA: string, pinB: str
   );
 }
 
-function TelegramSupportForm({ venueId }: { venueId?: string }) {
+function TelegramSupportForm({ venueId, rateLimitHours = 1 }: { venueId?: string; rateLimitHours?: number }) {
   const { user } = useAuth();
   const [message, setMessage] = useState('');
   const [category, setCategory] = useState('question');
@@ -865,7 +880,7 @@ function TelegramSupportForm({ venueId }: { venueId?: string }) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ message, category, venueId }),
+        body: JSON.stringify({ message, category, venueId, rateLimitHours }),
       });
 
       if (!res.ok) {
@@ -890,7 +905,7 @@ function TelegramSupportForm({ venueId }: { venueId?: string }) {
       </p>
       <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700">
         <Clock className="inline h-3 w-3 mr-1 -mt-0.5" />
-        Μπορείτε να στείλετε 1 μήνυμα ανά ώρα.
+        Μπορείτε να στείλετε 1 μήνυμα ανά {rateLimitHours === 1 ? 'ώρα' : `${rateLimitHours} ώρες`}.
       </div>
 
       {/* Category selector */}
