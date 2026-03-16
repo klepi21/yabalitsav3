@@ -20,6 +20,9 @@ import {
   AlertCircle,
   Clock,
   Euro,
+  XCircle,
+  Filter,
+  X,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { bookingService } from '@/lib/firebase-services';
@@ -52,6 +55,8 @@ export default function BookingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('calendar');
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterPitch, setFilterPitch] = useState<string>('all');
   const [deletingBookingId, setDeletingBookingId] = useState<string | null>(null);
   const [updatingBookingId, setUpdatingBookingId] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -133,11 +138,14 @@ export default function BookingsPage() {
   }, [user, venueOwner, authLoading, router, loadBookings, pathname]);
 
   const filteredBookings = bookings
-    .filter(booking =>
-      booking.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.userPhone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      booking.status?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    .filter(booking => {
+      const matchesSearch = !searchTerm ||
+        booking.userName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        booking.userPhone?.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = filterStatus === 'all' || booking.status === filterStatus;
+      const matchesPitch = filterPitch === 'all' || booking.pitchId === filterPitch;
+      return matchesSearch && matchesStatus && matchesPitch;
+    })
     .sort((a, b) => {
       if (a.status === 'pending' && b.status !== 'pending') return -1;
       if (a.status !== 'pending' && b.status === 'pending') return 1;
@@ -194,6 +202,7 @@ export default function BookingsPage() {
   // Stats
   const pendingCount = bookings.filter(b => b.status === 'pending').length;
   const confirmedCount = bookings.filter(b => b.status === 'confirmed').length;
+  const cancelledCount = bookings.filter(b => b.status === 'cancelled').length;
   const todayCount = bookings.filter(b => {
     const today = new Date();
     const start = new Date(b.startTime);
@@ -320,6 +329,15 @@ export default function BookingsPage() {
                   <p className="text-[11px] text-zinc-400">Σήμερα</p>
                 </div>
               </div>
+              <div className="hidden sm:flex items-center gap-3 rounded-xl border border-zinc-100/60 bg-white px-4 py-3">
+                <div className="h-9 w-9 rounded-lg bg-red-50 flex items-center justify-center">
+                  <XCircle className="h-4 w-4 text-red-600" />
+                </div>
+                <div>
+                  <p className="text-lg font-semibold tracking-tight text-zinc-900">{cancelledCount}</p>
+                  <p className="text-[11px] text-zinc-400">Ακυρωμένες</p>
+                </div>
+              </div>
             </div>
 
             <div className="relative flex-1 sm:max-w-sm">
@@ -332,6 +350,77 @@ export default function BookingsPage() {
                 className="pl-10"
               />
             </div>
+          </div>
+
+          {/* Filters */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-1.5 text-[13px] text-zinc-500">
+              <Filter className="h-3.5 w-3.5" />
+              Φίλτρα:
+            </div>
+
+            {/* Status filter */}
+            <div className="flex items-center rounded-lg border border-zinc-200 p-0.5">
+              {[
+                { value: 'all', label: 'Όλες' },
+                { value: 'pending', label: 'Εκκρεμείς' },
+                { value: 'confirmed', label: 'Επιβεβαιωμένες' },
+                { value: 'completed', label: 'Ολοκληρωμένες' },
+                { value: 'cancelled', label: 'Ακυρωμένες' },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => setFilterStatus(opt.value)}
+                  className={`px-2.5 py-1 rounded-md text-[12px] font-medium transition-all duration-150 ${
+                    filterStatus === opt.value
+                      ? 'bg-zinc-900 text-white shadow-sm'
+                      : 'text-zinc-500 hover:text-zinc-700'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Pitch filter */}
+            {pitches.length > 1 && (
+              <div className="flex items-center rounded-lg border border-zinc-200 p-0.5">
+                <button
+                  onClick={() => setFilterPitch('all')}
+                  className={`px-2.5 py-1 rounded-md text-[12px] font-medium transition-all duration-150 ${
+                    filterPitch === 'all'
+                      ? 'bg-zinc-900 text-white shadow-sm'
+                      : 'text-zinc-500 hover:text-zinc-700'
+                  }`}
+                >
+                  Όλα τα γήπεδα
+                </button>
+                {pitches.map((pitch) => (
+                  <button
+                    key={pitch.id}
+                    onClick={() => setFilterPitch(pitch.id)}
+                    className={`px-2.5 py-1 rounded-md text-[12px] font-medium transition-all duration-150 ${
+                      filterPitch === pitch.id
+                        ? 'bg-zinc-900 text-white shadow-sm'
+                        : 'text-zinc-500 hover:text-zinc-700'
+                    }`}
+                  >
+                    {pitch.name}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Clear filters */}
+            {(filterStatus !== 'all' || filterPitch !== 'all') && (
+              <button
+                onClick={() => { setFilterStatus('all'); setFilterPitch('all'); }}
+                className="flex items-center gap-1 text-[12px] text-zinc-400 hover:text-zinc-600 transition-colors"
+              >
+                <X className="h-3 w-3" />
+                Καθαρισμός
+              </button>
+            )}
           </div>
 
           {/* Bookings List */}
