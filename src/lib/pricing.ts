@@ -63,7 +63,7 @@ export const pricingConfig: PricingConfig = {
       id: 'pro',
       name: 'Pro',
       description: '6 μήνες συνδρομής',
-      basePrice: 25,
+      basePrice: 21,
       maxPitches: 999,
       durationMonths: 6,
       features: [
@@ -82,7 +82,7 @@ export const pricingConfig: PricingConfig = {
       id: 'enterprise',
       name: 'Enterprise',
       description: '12 μήνες συνδρομής',
-      basePrice: 25,
+      basePrice: 21,
       maxPitches: 999,
       durationMonths: 12,
       features: [

@@ -30,6 +30,10 @@ import {
   CheckCircle2,
   ArrowRight,
   BookOpen,
+  GraduationCap,
+  Trophy,
+  Dumbbell,
+  FileText,
 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -175,6 +179,18 @@ export default function GuidesPage() {
             <Settings className="h-4 w-4" />
             <span>Ρυθμίσεις</span>
           </TabsTrigger>
+          <TabsTrigger value="academy" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <GraduationCap className="h-4 w-4" />
+            <span>Ακαδημία</span>
+          </TabsTrigger>
+          <TabsTrigger value="tournaments" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <Trophy className="h-4 w-4" />
+            <span>Τουρνουά</span>
+          </TabsTrigger>
+          <TabsTrigger value="training" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
+            <Dumbbell className="h-4 w-4" />
+            <span>Προπονήσεις</span>
+          </TabsTrigger>
           <TabsTrigger value="fse" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
             <Search className="h-4 w-4" />
             <span>FSE</span>
@@ -201,8 +217,10 @@ export default function GuidesPage() {
                   <li><span className="font-medium text-zinc-700">Κρατήσεις</span> - Διαχείριση ημερολογίου και κρατήσεων</li>
                   <li><span className="font-medium text-zinc-700">Γήπεδα</span> - Ρύθμιση γηπέδων και διαθεσιμότητας</li>
                   <li><span className="font-medium text-zinc-700">Πελάτες</span> - Διαχείριση πελατολογίου</li>
+                  <li><span className="font-medium text-zinc-700">Ακαδημία</span> - Αθλητές, προπονητές, γονείς, τμήματα, προπονήσεις</li>
+                  <li><span className="font-medium text-zinc-700">Τουρνουά</span> - Πρωταθλήματα, ομάδες, βαθμολογίες, αγώνες</li>
                   <li><span className="font-medium text-zinc-700">Αναφορές</span> - Στατιστικά και αναλύσεις</li>
-                  <li><span className="font-medium text-zinc-700">Ρυθμίσεις</span> - Παραμετροποίηση συστήματος</li>
+                  <li><span className="font-medium text-zinc-700">Ρυθμίσεις</span> - Παραμετροποίηση, υποστήριξη Telegram</li>
                 </ul>
               </div>
 
@@ -214,6 +232,9 @@ export default function GuidesPage() {
                     <li>Προσθέστε τα γήπεδά σας με τιμές και ωράρια</li>
                     <li>Εξοικειωθείτε με το ημερολόγιο κρατήσεων</li>
                     <li>Δοκιμάστε να καταχωρήσετε μια κράτηση</li>
+                    <li>Δημιουργήστε τμήματα και αθλητές στην Ακαδημία</li>
+                    <li>Καταγράψτε προπονήσεις και απουσιολόγιο</li>
+                    <li>Διοργανώστε τουρνουά με αυτόματη βαθμολογία</li>
                   </ol>
                 </StepBox>
                 <div className="rounded-xl overflow-hidden border border-zinc-100/60">
@@ -698,7 +719,189 @@ export default function GuidesPage() {
           </SectionCard>
         </TabsContent>
 
-        {/* 7. FSE Panel */}
+        {/* 7. Academy Panel */}
+        <TabsContent value="academy">
+          <SectionCard>
+            <h2 className="text-xl font-semibold tracking-tight text-zinc-900 mb-1">Ακαδημία</h2>
+            <p className="text-sm text-zinc-500 mb-6">
+              Ολοκληρωμένη διαχείριση ακαδημίας — αθλητές, προπονητές, γονείς, τμήματα και έγγραφα.
+            </p>
+
+            <div className="space-y-8">
+              <div className="space-y-3">
+                <SectionHeading icon={Users} title="Κατηγορίες Χρηστών" color="blue" />
+                <InfoCard title="Δυναμικές Κατηγορίες">
+                  <BulletList items={[
+                    'Αθλητής — ανάθεση σε πολλαπλά τμήματα, σύνδεση με γονέα',
+                    'Γονέας — στοιχεία επικοινωνίας, σύνδεση με αθλητές',
+                    'Προπονητής — ειδικότητα, δίπλωμα, ανάθεση τμημάτων',
+                    'Διαχειριστής — πρόσβαση σε όλα τα δεδομένα',
+                    'Δημιουργήστε δικές σας κατηγορίες με custom πεδία',
+                  ]} />
+                </InfoCard>
+              </div>
+
+              <div className="space-y-3">
+                <SectionHeading icon={Trophy} title="Τμήματα (Squads)" color="emerald" />
+                <StepBox color="emerald" icon={Trophy} title="Διαχείριση Τμημάτων:">
+                  <ol className="list-decimal ml-4 space-y-2 text-sm">
+                    <li>Δημιουργήστε τμήματα με ηλικιακή κατηγορία (U6-U21, Ανδρών)</li>
+                    <li>Αναθέστε προπονητές σε κάθε τμήμα</li>
+                    <li>Προσθέστε αθλητές — κάθε αθλητής μπορεί να ανήκει σε πολλαπλά τμήματα</li>
+                    <li>Από τη σελίδα τμήματος βλέπετε αθλητές, προπονητές και προπονήσεις</li>
+                  </ol>
+                </StepBox>
+              </div>
+
+              <div className="space-y-3">
+                <SectionHeading icon={FileText} title="Έγγραφα PDF" color="amber" />
+                <InfoCard title="Ανέβασμα Αρχείων">
+                  <BulletList items={[
+                    'Ανεβάστε PDF αρχεία σε κάθε χρήστη (ιατρικά, συμβόλαια κ.λπ.)',
+                    'Μέγιστο μέγεθος: 10MB ανά αρχείο',
+                    'Απεριόριστος αριθμός αρχείων ανά χρήστη',
+                    'Κατεβάστε ή διαγράψτε αρχεία ανά πάσα στιγμή',
+                  ]} />
+                </InfoCard>
+              </div>
+
+              <div className="space-y-3">
+                <SectionHeading icon={Lightbulb} title="Συμβουλές" color="amber" />
+                <TipsList items={[
+                  'Συνδέστε πάντα τους αθλητές με τους γονείς τους',
+                  'Χρησιμοποιήστε τα τμήματα για οργανωμένη διαχείριση',
+                  'Ανεβάστε ιατρικά πιστοποιητικά ως PDF στο προφίλ κάθε αθλητή',
+                  'Δημιουργήστε custom κατηγορίες αν χρειάζεστε (π.χ. Φυσιοθεραπευτής)',
+                ]} />
+              </div>
+            </div>
+          </SectionCard>
+        </TabsContent>
+
+        {/* 8. Tournaments Panel */}
+        <TabsContent value="tournaments">
+          <SectionCard>
+            <h2 className="text-xl font-semibold tracking-tight text-zinc-900 mb-1">Τουρνουά & Πρωταθλήματα</h2>
+            <p className="text-sm text-zinc-500 mb-6">
+              Διοργανώστε τουρνουά με ομάδες, παίκτες, βαθμολογία και αυτόματη κλήρωση αγώνων.
+            </p>
+
+            <div className="space-y-8">
+              <div className="space-y-3">
+                <SectionHeading icon={Trophy} title="Δημιουργία Τουρνουά" color="blue" />
+                <StepBox color="blue" icon={Trophy} title="Βήματα:">
+                  <ol className="list-decimal ml-4 space-y-2 text-sm">
+                    <li>Μεταβείτε στα Τουρνουά → Νέο Τουρνουά</li>
+                    <li>Συμπληρώστε: Όνομα, Τύπος (League/Knockout/Group+Knockout)</li>
+                    <li>Επιλέξτε τύπο γηπέδου και γήπεδο</li>
+                    <li>Ορίστε αγωνιστικές ημερομηνίες</li>
+                    <li>Για League: επιλέξτε μονό (1×) ή διπλό (2×) γύρο</li>
+                  </ol>
+                </StepBox>
+              </div>
+
+              <div className="space-y-3">
+                <SectionHeading icon={Users} title="Ομάδες & Παίκτες" color="emerald" />
+                <InfoCard title="Διαχείριση Ομάδων">
+                  <BulletList items={[
+                    'Προσθέστε ομάδες με αρχηγό (όνομα, τηλέφωνο, email)',
+                    'Κάθε ομάδα έχει ρόστερ παικτών με θέση (GK/DEF/MID/FWD)',
+                    'Αριθμός φανέλας και σημαία αρχηγού',
+                    'Στατιστικά ανά παίκτη: γκολ, ασίστ, κίτρινες, κόκκινες',
+                  ]} />
+                </InfoCard>
+              </div>
+
+              <div className="space-y-3">
+                <SectionHeading icon={CalendarDays} title="Αγώνες & Βαθμολογία" color="amber" />
+                <StepBox color="amber" icon={CalendarDays} title="Διεξαγωγή Αγώνων:">
+                  <ol className="list-decimal ml-4 space-y-2 text-sm">
+                    <li>Αυτόματη κλήρωση αγώνων (round-robin ή knockout bracket)</li>
+                    <li>Προγραμματισμός αγώνων — αυτόματη δημιουργία Κλειστής Ημερομηνίας</li>
+                    <li>Καταχώρηση σκορ → αυτόματη ανανέωση βαθμολογίας</li>
+                    <li>Βαθμολογία: 3 βαθμοί νίκη, 1 ισοπαλία</li>
+                    <li>Στατιστικά: σκόρερ, ασίστ, top scorers</li>
+                  </ol>
+                </StepBox>
+              </div>
+
+              <div className="space-y-3">
+                <SectionHeading icon={Lightbulb} title="Συμβουλές" color="amber" />
+                <TipsList items={[
+                  'Ξεκινήστε από Draft → Registration → Active',
+                  'Προσθέστε πρώτα τις ομάδες, μετά κάντε κλήρωση αγώνων',
+                  'Μετά την καταχώρηση σκορ, τα στατιστικά ενημερώνονται αυτόματα',
+                  'Η ακύρωση αγώνα αφαιρεί αυτόματα την Κλειστή Ημερομηνία',
+                ]} />
+              </div>
+            </div>
+          </SectionCard>
+        </TabsContent>
+
+        {/* 9. Training Panel */}
+        <TabsContent value="training">
+          <SectionCard>
+            <h2 className="text-xl font-semibold tracking-tight text-zinc-900 mb-1">Προπονήσεις</h2>
+            <p className="text-sm text-zinc-500 mb-6">
+              Πρόγραμμα προπονήσεων, απουσιολόγιο και στατιστικά παρουσιών.
+            </p>
+
+            <div className="space-y-8">
+              <div className="space-y-3">
+                <SectionHeading icon={Dumbbell} title="Δημιουργία Προπόνησης" color="blue" />
+                <StepBox color="blue" icon={Dumbbell} title="Βήματα:">
+                  <ol className="list-decimal ml-4 space-y-2 text-sm">
+                    <li>Ακαδημία → Προπονήσεις → Νέα Προπόνηση</li>
+                    <li>Επιλέξτε τύπο: Προπόνηση, Φιλικό, Φυσική Κατάσταση, Τακτική, Αποκατάσταση</li>
+                    <li>Ορίστε τμήμα, προπονητή, βοηθούς προπονητές</li>
+                    <li>Καθορίστε ημερομηνία, ώρα έναρξης/λήξης</li>
+                    <li>Προσθέστε ασκήσεις με χρονική διάρκεια</li>
+                    <li>Γράψτε σημειώσεις προπονητή</li>
+                  </ol>
+                </StepBox>
+              </div>
+
+              <div className="space-y-3">
+                <SectionHeading icon={ClipboardList} title="Απουσιολόγιο" color="emerald" />
+                <InfoCard title="Καταγραφή Παρουσιών">
+                  <BulletList items={[
+                    'Ανοίξτε μια προπόνηση → Tab «Απουσιολόγιο»',
+                    'Φορτώνονται αυτόματα οι αθλητές του τμήματος',
+                    'Επιλέξτε κατάσταση: Παρών, Απών, Αργοπορία, Τραυματίας',
+                    'Προσθέστε σημείωση ανά αθλητή (προαιρετικό)',
+                    'Γρήγορα κουμπιά: «Όλοι Παρόντες» / «Όλοι Απόντες»',
+                  ]} />
+                </InfoCard>
+              </div>
+
+              <div className="space-y-3">
+                <SectionHeading icon={BarChart3} title="Στατιστικά Παρουσιών" color="amber" />
+                <InfoCard title="Αναλυτικά Στοιχεία">
+                  <BulletList items={[
+                    'Ποσοστό παρουσίας (%) ανά αθλητή',
+                    'Top 5 κορυφαίες / χαμηλότερες παρουσίες',
+                    'Φίλτρα: Τμήμα, Εβδομάδα, Μήνας, 3 μήνες, 6 μήνες',
+                    'Πίνακας αθλητών: Παρών, Απών, Αργοπορία, Τραυματίας, progress bar',
+                    'Μέσος όρος αθλητών ανά προπόνηση',
+                  ]} />
+                </InfoCard>
+              </div>
+
+              <div className="space-y-3">
+                <SectionHeading icon={Lightbulb} title="Συμβουλές" color="amber" />
+                <TipsList items={[
+                  'Συμπληρώνετε το απουσιολόγιο αμέσως μετά κάθε προπόνηση',
+                  'Χρησιμοποιήστε τα στατιστικά για να εντοπίσετε αθλητές με χαμηλή παρουσία',
+                  'Προσθέστε ασκήσεις στην προπόνηση για καλύτερο αρχείο',
+                  'Ελέγξτε τα μηνιαία στατιστικά για εικόνα του τμήματος',
+                  'Σημαδέψτε προπόνηση ως «Ολοκληρωμένη» αφού τελειώσει',
+                ]} />
+              </div>
+            </div>
+          </SectionCard>
+        </TabsContent>
+
+        {/* 10. FSE Panel */}
         <TabsContent value="fse">
           <SectionCard>
             <h2 className="text-xl font-semibold tracking-tight text-zinc-900 mb-1">Football Search Engine (FSE)</h2>

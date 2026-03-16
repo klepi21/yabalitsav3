@@ -1,11 +1,5 @@
-import HeroDemo from '@/components/ui/hero-demo';
-import { ContactFooter } from '@/components/ui/contact-footer';
+import { redirect } from 'next/navigation';
 
 export default function RootPage() {
-  return (
-    <>
-      <HeroDemo />
-      <ContactFooter />
-    </>
-  );
+  redirect('/venue-login');
 }
