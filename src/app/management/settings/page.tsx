@@ -14,6 +14,9 @@ import {
   CreditCard,
   CalendarDays,
   LifeBuoy,
+  MessageCircle,
+  Send,
+  Clock,
   Zap,
   ArrowUpCircle,
   Sparkles,
@@ -750,6 +753,19 @@ export default function SettingsPage() {
             </Card>
           )}
 
+          {/* Instant Support via Telegram */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MessageCircle className="h-5 w-5 text-primary" />
+                Άμεση Επικοινωνία
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <TelegramSupportForm venueId={venueOwner?.venueId} />
+            </CardContent>
+          </Card>
+
           {/* Support Section */}
           <Card>
             <CardHeader>
@@ -815,6 +831,122 @@ function SetPinForm({ onSubmit, isSaving }: { onSubmit: (pinA: string, pinB: str
           'Ορισμός PIN'
         )}
       </Button>
+    </div>
+  );
+}
+
+function TelegramSupportForm({ venueId }: { venueId?: string }) {
+  const { user } = useAuth();
+  const [message, setMessage] = useState('');
+  const [category, setCategory] = useState('question');
+  const [isSending, setIsSending] = useState(false);
+  const [sendSuccess, setSendSuccess] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+
+  const categories = [
+    { value: 'bug', label: 'Bug', icon: '🐛' },
+    { value: 'feature', label: 'Αίτημα', icon: '💡' },
+    { value: 'question', label: 'Ερώτηση', icon: '❓' },
+    { value: 'urgent', label: 'Επείγον', icon: '🚨' },
+    { value: 'other', label: 'Άλλο', icon: '💬' },
+  ];
+
+  const handleSend = async () => {
+    if (!message.trim() || !user) return;
+    setIsSending(true);
+    setSendError(null);
+    setSendSuccess(false);
+
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch('/api/telegram/send', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ message, category, venueId }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to send');
+      }
+
+      setSendSuccess(true);
+      setMessage('');
+      setTimeout(() => setSendSuccess(false), 5000);
+    } catch (err) {
+      setSendError(err instanceof Error ? err.message : 'Αποτυχία αποστολής');
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-sm text-muted-foreground">
+        Στείλτε μήνυμα απευθείας στην ομάδα ανάπτυξης. Θα λάβετε απάντηση άμεσα.
+      </p>
+      <div className="rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-xs text-amber-700">
+        <Clock className="inline h-3 w-3 mr-1 -mt-0.5" />
+        Μπορείτε να στείλετε 1 μήνυμα ανά ώρα.
+      </div>
+
+      {/* Category selector */}
+      <div className="flex flex-wrap gap-1.5">
+        {categories.map((cat) => (
+          <button
+            key={cat.value}
+            type="button"
+            onClick={() => setCategory(cat.value)}
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
+              category === cat.value
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-background text-muted-foreground border-border hover:border-primary/40'
+            }`}
+          >
+            {cat.icon} {cat.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Message input */}
+      <textarea
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Περιγράψτε το αίτημά σας..."
+        rows={4}
+        className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 focus:border-ring"
+      />
+
+      {/* Send button */}
+      <div className="flex items-center justify-between">
+        <div>
+          {sendSuccess && (
+            <p className="text-sm text-emerald-600 font-medium">Το μήνυμα στάλθηκε επιτυχώς!</p>
+          )}
+          {sendError && (
+            <p className="text-sm text-destructive">{sendError}</p>
+          )}
+        </div>
+        <Button
+          onClick={handleSend}
+          disabled={isSending || !message.trim()}
+        >
+          {isSending ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />
+              Αποστολή...
+            </>
+          ) : (
+            <>
+              <Send className="h-4 w-4 mr-1.5" />
+              Αποστολή
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 }
