@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-  ArrowLeft,
   Calendar,
   Euro,
   Users,
@@ -18,17 +17,15 @@ import {
   ClipboardList,
   CreditCard,
   AlertCircle,
+  CheckCircle,
+  XCircle,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { venueService } from '@/lib/firebase-services';
 import { Booking, Pitch, Payment } from '@/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -72,36 +69,22 @@ export default function ReportsPage() {
   const [selectedPitch, setSelectedPitch] = useState<string>('all');
   const [downloadingInvoice, setDownloadingInvoice] = useState<string | null>(null);
 
-  // Check authentication
   useEffect(() => {
     if (authLoading) return;
-
     if (!user || !venueOwner) {
       router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`);
       return;
     }
-    // If there's no PIN set, allow directly; else require PIN
     if (!venueOwner.venueId) return;
-    (async () => {
-      // Fetch venue data to check managementPinHash
-      try {
-        // lightweight: payments/pitches/bookings already fetched by venueId below
-        // Defer data load until PIN is verified
-        setIsPinVerified(false);
-      } catch (e) {
-        console.error(e);
-      }
-    })();
+    setIsPinVerified(false);
   }, [user, venueOwner, authLoading, router, pathname]);
 
-  // Utility to hash string SHA-256
   const hashStringSHA256 = async (value: string) => {
     const encoder = new TextEncoder();
     const data = encoder.encode(value);
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
-    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    return hashHex;
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   };
 
   const handleVerifyPin = async () => {
@@ -112,7 +95,6 @@ export default function ReportsPage() {
       return;
     }
     try {
-      // Read venue to access stored hash
       const venue = await venueService.getById(venueOwner.venueId);
       const expectedHash = venue?.managementPinHash;
       if (!expectedHash) {
@@ -127,34 +109,23 @@ export default function ReportsPage() {
       } else {
         setPinError('Λάθος PIN. Προσπαθήστε ξανά.');
       }
-    } catch (e) {
-      console.error(e);
+    } catch {
       setPinError('Σφάλμα επαλήθευσης PIN.');
     }
   };
 
   const loadData = async () => {
     if (!venueOwner?.venueId || !user) return;
-
     setIsLoading(true);
     setError(null);
     try {
-      // Get auth token
       const token = await user.getIdToken();
-      if (!token) {
-        throw new Error('No auth token available');
-      }
+      if (!token) throw new Error('No auth token available');
 
-      // Use server-side API to fetch data with proper auth
       const response = await fetch('/api/reports/get-by-venue', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          venueId: venueOwner.venueId,
-        }),
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ venueId: venueOwner.venueId }),
       });
 
       if (!response.ok) {
@@ -164,34 +135,26 @@ export default function ReportsPage() {
 
       const data = await response.json();
 
-      // Convert ISO strings back to Date objects
-      const convertedBookings = (data.bookings || []).map((booking: Record<string, unknown>) => ({
-        ...booking,
-        startTime: new Date(booking.startTime as string),
-        endTime: new Date(booking.endTime as string),
-        createdAt: new Date(booking.createdAt as string),
-        updatedAt: new Date(booking.updatedAt as string),
-      }));
-
-      const convertedPitches = (data.pitches || []).map((pitch: Record<string, unknown>) => ({
-        ...pitch,
-        createdAt: new Date(pitch.createdAt as string),
-        updatedAt: new Date(pitch.updatedAt as string),
-      }));
-
-      const convertedPayments = (data.payments || []).map((payment: Record<string, unknown>) => ({
-        ...payment,
-        createdAt: payment.createdAt,
-        updatedAt: payment.updatedAt,
-      }));
-
-      setBookings(convertedBookings);
-      setPitches(convertedPitches);
-      setPayments(convertedPayments);
-    } catch (error) {
-      console.error('Error loading data:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load reports';
-      setError(errorMessage);
+      setBookings((data.bookings || []).map((b: Record<string, unknown>) => ({
+        ...b,
+        startTime: new Date(b.startTime as string),
+        endTime: new Date(b.endTime as string),
+        createdAt: new Date(b.createdAt as string),
+        updatedAt: new Date(b.updatedAt as string),
+      })));
+      setPitches((data.pitches || []).map((p: Record<string, unknown>) => ({
+        ...p,
+        createdAt: new Date(p.createdAt as string),
+        updatedAt: new Date(p.updatedAt as string),
+      })));
+      setPayments((data.payments || []).map((p: Record<string, unknown>) => ({
+        ...p,
+        createdAt: p.createdAt,
+        updatedAt: p.updatedAt,
+      })));
+    } catch (err) {
+      console.error('Error loading data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to load reports');
       setBookings([]);
       setPitches([]);
       setPayments([]);
@@ -200,94 +163,68 @@ export default function ReportsPage() {
     }
   };
 
-  // Filter bookings based on selected period and pitch
-  const getFilteredBookings = () => {
-    let filtered = bookings.filter(booking =>
-      booking.status === 'completed'  // Μετράμε μόνο τις ολοκληρωμένες
-    );
-
-    if (selectedPitch !== 'all') {
-      filtered = filtered.filter(booking => booking.pitchId === selectedPitch);
-    }
-
+  const getDateFilter = () => {
     const now = new Date();
     const startDate = new Date();
-
     switch (selectedPeriod) {
-      case 'week':
-        startDate.setDate(now.getDate() - 7);
-        break;
-      case 'month':
-        startDate.setMonth(now.getMonth() - 1);
-        break;
-      case 'year':
-        startDate.setFullYear(now.getFullYear() - 1);
-        break;
+      case 'week': startDate.setDate(now.getDate() - 7); break;
+      case 'month': startDate.setMonth(now.getMonth() - 1); break;
+      case 'year': startDate.setFullYear(now.getFullYear() - 1); break;
     }
-
-    return filtered.filter(booking =>
-      new Date(booking.startTime) >= startDate
-    );
+    return startDate;
   };
 
+  const getAllFilteredBookings = () => {
+    let filtered = [...bookings];
+    if (selectedPitch !== 'all') filtered = filtered.filter(b => b.pitchId === selectedPitch);
+    const startDate = getDateFilter();
+    return filtered.filter(b => new Date(b.startTime) >= startDate);
+  };
+
+  const getFilteredBookings = () => {
+    return getAllFilteredBookings().filter(b => b.status === 'completed');
+  };
+
+  const allFiltered = getAllFilteredBookings();
   const filteredBookings = getFilteredBookings();
 
-  // Download invoice function
   const handleDownloadInvoice = async (payment: Payment) => {
-    if (!payment.stripePaymentIntentId) {
-      alert('Δεν υπάρχει διαθέσιμο receipt για αυτή την πληρωμή');
-      return;
-    }
-
+    if (!payment.stripePaymentIntentId) return;
     setDownloadingInvoice(payment.id);
-
     try {
-      // First try to get the receipt URL from our API
       const response = await fetch('/api/stripe/download-invoice', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          paymentIntentId: payment.stripePaymentIntentId
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ paymentIntentId: payment.stripePaymentIntentId }),
       });
-
       const result = await response.json();
-
       if (result.success && result.invoice.receiptUrl) {
-        // Open the Stripe receipt URL in a new tab
         window.open(result.invoice.receiptUrl, '_blank');
       } else {
-        // Fallback: redirect to Stripe dashboard
-        const stripeUrl = `https://dashboard.stripe.com/payments/${payment.stripePaymentIntentId}`;
-        window.open(stripeUrl, '_blank');
+        window.open(`https://dashboard.stripe.com/payments/${payment.stripePaymentIntentId}`, '_blank');
       }
-    } catch (error) {
-      console.error('Error downloading invoice:', error);
-      alert('Σφάλμα κατά τη λήψη του receipt. Παρακαλώ δοκιμάστε ξανά.');
+    } catch {
+      setError('Σφάλμα κατά τη λήψη του receipt.');
     } finally {
       setDownloadingInvoice(null);
     }
   };
 
-  // Calculate key metrics
-  const totalRevenue = filteredBookings.reduce((sum, booking) => sum + (booking.price || 0), 0);
-  const totalBookings = filteredBookings.length;
-  const averageBookingValue = totalBookings > 0 ? totalRevenue / totalBookings : 0;
-  const completedBookings = filteredBookings.filter(b => b.status === 'completed').length;
-  const pendingBookings = filteredBookings.filter(b => b.status === 'pending').length;
-  const confirmedBookings = filteredBookings.filter(b => b.status === 'confirmed').length;
+  // Metrics — revenue from completed only, counts from all statuses
+  const totalRevenue = filteredBookings.reduce((sum, b) => sum + (b.price || 0), 0);
+  const totalBookings = allFiltered.length;
+  const averageBookingValue = filteredBookings.length > 0 ? totalRevenue / filteredBookings.length : 0;
+  const completedBookings = allFiltered.filter(b => b.status === 'completed').length;
+  const pendingBookings = allFiltered.filter(b => b.status === 'pending').length;
+  const confirmedBookings = allFiltered.filter(b => b.status === 'confirmed').length;
 
-  // Prepare chart data
+  // Chart data
   const getChartData = () => {
-    const labels = [];
-    const revenueData = [];
-    const bookingsData = [];
+    const labels: string[] = [];
+    const revenueData: number[] = [];
+    const bookingsData: number[] = [];
 
-    let days = 7;
-    if (selectedPeriod === 'month') days = 30;
-    if (selectedPeriod === 'year') days = 12;
+    const days = selectedPeriod === 'year' ? 12 : selectedPeriod === 'month' ? 30 : 7;
 
     for (let i = days - 1; i >= 0; i--) {
       const date = new Date();
@@ -304,133 +241,115 @@ export default function ReportsPage() {
       const dayEnd = new Date(date);
       dayEnd.setHours(23, 59, 59, 999);
 
-      const dayBookings = filteredBookings.filter(booking => {
-        const bookingDate = new Date(booking.startTime);
-        return bookingDate >= dayStart && bookingDate <= dayEnd;
+      const dayBookings = filteredBookings.filter(b => {
+        const d = new Date(b.startTime);
+        return d >= dayStart && d <= dayEnd;
       });
 
-      const dayRevenue = dayBookings.reduce((sum, booking) => sum + (booking.price || 0), 0);
-      revenueData.push(dayRevenue);
+      revenueData.push(dayBookings.reduce((sum, b) => sum + (b.price || 0), 0));
       bookingsData.push(dayBookings.length);
     }
-
     return { labels, revenueData, bookingsData };
   };
 
   const { labels, revenueData, bookingsData } = getChartData();
 
-  // Revenue trend chart
+  const chartOptions = {
+    responsive: true,
+    plugins: { legend: { display: false }, title: { display: false } },
+    scales: {
+      x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#a1a1aa' } },
+      y: { beginAtZero: true, grid: { color: '#f4f4f5' }, ticks: { font: { size: 11 }, color: '#a1a1aa' } },
+    },
+  };
+
   const revenueChartData = {
     labels,
-    datasets: [
-      {
-        label: 'Έσοδα (€)',
-        data: revenueData,
-        borderColor: 'hsl(var(--primary))',
-        backgroundColor: 'hsl(var(--primary) / 0.1)',
-        tension: 0.4,
-        fill: true,
-      },
-    ],
+    datasets: [{
+      label: 'Έσοδα (€)',
+      data: revenueData,
+      borderColor: '#10b981',
+      backgroundColor: 'rgba(16, 185, 129, 0.08)',
+      tension: 0.4,
+      fill: true,
+      borderWidth: 2,
+      pointRadius: 0,
+      pointHoverRadius: 4,
+    }],
   };
 
-  // Bookings trend chart
   const bookingsChartData = {
     labels,
-    datasets: [
-      {
-        label: 'Κρατήσεις',
-        data: bookingsData,
-        borderColor: 'hsl(var(--chart-1, 220 70% 50%))',
-        backgroundColor: 'hsl(var(--chart-1, 220 70% 50%) / 0.1)',
-        tension: 0.4,
-        fill: true,
-      },
-    ],
+    datasets: [{
+      label: 'Κρατήσεις',
+      data: bookingsData,
+      borderColor: '#3b82f6',
+      backgroundColor: 'rgba(59, 130, 246, 0.08)',
+      tension: 0.4,
+      fill: true,
+      borderWidth: 2,
+      pointRadius: 0,
+      pointHoverRadius: 4,
+    }],
   };
 
-  // Pitch performance chart
   const pitchPerformanceData = {
-    labels: pitches.map(pitch => pitch.name),
-    datasets: [
-      {
-        label: 'Έσοδα ανά Γήπεδο (€)',
-        data: pitches.map(pitch => {
-          const pitchBookings = filteredBookings.filter(b => b.pitchId === pitch.id);
-          return pitchBookings.reduce((sum, booking) => sum + (booking.price || 0), 0);
-        }),
-        backgroundColor: [
-          'hsl(var(--primary) / 0.8)',
-          'hsl(var(--chart-1, 220 70% 50%) / 0.8)',
-          'hsl(var(--chart-2, 280 65% 60%) / 0.8)',
-          'hsl(var(--chart-3, 30 80% 55%) / 0.8)',
-          'hsl(var(--chart-4, 0 72% 51%) / 0.8)',
-        ],
-        borderWidth: 1,
-        borderColor: [
-          'hsl(var(--primary))',
-          'hsl(var(--chart-1, 220 70% 50%))',
-          'hsl(var(--chart-2, 280 65% 60%))',
-          'hsl(var(--chart-3, 30 80% 55%))',
-          'hsl(var(--chart-4, 0 72% 51%))',
-        ],
-      },
-    ],
+    labels: pitches.map(p => p.name),
+    datasets: [{
+      label: 'Έσοδα (€)',
+      data: pitches.map(p => filteredBookings.filter(b => b.pitchId === p.id).reduce((sum, b) => sum + (b.price || 0), 0)),
+      backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'],
+      borderRadius: 8,
+      borderSkipped: false,
+    }],
   };
 
-  // Status distribution chart
   const statusData = {
     labels: ['Ολοκληρωμένες', 'Επιβεβαιωμένες', 'Εκκρεμεί'],
-    datasets: [
-      {
-        data: [completedBookings, confirmedBookings, pendingBookings],
-        backgroundColor: [
-          'hsl(var(--primary) / 0.8)',
-          'hsl(var(--chart-1, 220 70% 50%) / 0.8)',
-          'hsl(var(--chart-3, 30 80% 55%) / 0.8)',
-        ],
-        borderWidth: 1,
-        borderColor: [
-          'hsl(var(--primary))',
-          'hsl(var(--chart-1, 220 70% 50%))',
-          'hsl(var(--chart-3, 30 80% 55%))',
-        ],
-      },
-    ],
+    datasets: [{
+      data: [completedBookings, confirmedBookings, pendingBookings],
+      backgroundColor: ['#10b981', '#3b82f6', '#f59e0b'],
+      borderWidth: 0,
+    }],
   };
 
+  // PIN gate
   if (authLoading || (!isPinVerified && !!venueOwner) || (isPinVerified && isLoading)) {
     return (
       <div className="relative min-h-[16rem]">
         {!isPinVerified ? (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <Card className="w-full max-w-sm">
-              <CardHeader className="text-center">
-                <CardTitle className="text-2xl">Εισαγωγή PIN</CardTitle>
-                <p className="text-sm text-muted-foreground mt-1">Παρακαλώ εισάγετε τον 4ψήφιο PIN διαχείρισης</p>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="w-full max-w-sm rounded-xl border border-zinc-200/80 bg-white p-8 shadow-xl">
+              <div className="text-center mb-6">
+                <div className="mx-auto h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center mb-4">
+                  <TrendingUp className="h-6 w-6 text-emerald-600" />
+                </div>
+                <h2 className="text-xl font-semibold tracking-tight text-zinc-900">Εισαγωγή PIN</h2>
+                <p className="text-sm text-zinc-500 mt-1">Εισάγετε τον 4ψήφιο PIN διαχείρισης</p>
+              </div>
+              <div className="space-y-4">
                 <div className="flex justify-center">
                   <Input
                     type="password"
                     inputMode="numeric"
                     pattern="\\d{4}"
                     maxLength={4}
-                    className="text-center tracking-widest text-2xl w-40"
+                    className="text-center tracking-[0.5em] text-2xl w-40 h-12 bg-white"
                     value={pinInput}
                     onChange={(e) => setPinInput(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+                    onKeyDown={(e) => e.key === 'Enter' && handleVerifyPin()}
                     autoFocus
                   />
                 </div>
-                {pinError && <p className="text-center text-sm text-destructive">{pinError}</p>}
+                {pinError && <p className="text-center text-sm text-red-500">{pinError}</p>}
                 <div className="flex gap-3">
-                  <Button onClick={handleVerifyPin} className="flex-1">Συνέχεια</Button>
-                  <Button variant="outline" asChild className="flex-1">
-                    <Link href="/management/dashboard">Άκυρο</Link>
+                  <Button onClick={handleVerifyPin} className="flex-1 h-11">Συνέχεια</Button>
+                  <Button variant="outline" asChild className="flex-1 h-11 border-zinc-200 text-zinc-700 hover:bg-zinc-50">
+                    <Link href="/management/dashboard">Ακύρωση</Link>
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
         ) : (
           <div className="flex items-center justify-center min-h-[60vh]">
@@ -441,539 +360,333 @@ export default function ReportsPage() {
     );
   }
 
-  if (!user || !venueOwner) {
-    return null; // Will redirect to login
-  }
+  if (!user || !venueOwner) return null;
 
   return (
     <div className="space-y-6">
-      {/* Error Alert */}
+      {/* Error */}
       {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Σφάλμα κατά τη φόρτωση αναφορών</AlertTitle>
-          <AlertDescription>
-            <p>{error}</p>
-            <p className="mt-2 text-xs">
-              Αν το πρόβλημα συνεχίζεται, δοκιμάστε να ανανεώσετε τη σελίδα ή να συνδεθείτε ξανά.
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              className="mt-2"
-              onClick={() => {
-                setError(null);
-                loadData();
-              }}
-            >
+        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+              <p className="text-sm text-destructive">{error}</p>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => { setError(null); loadData(); }} className="text-destructive/60 hover:text-destructive shrink-0">
               Δοκιμάστε ξανά
             </Button>
-          </AlertDescription>
-        </Alert>
+          </div>
+        </div>
       )}
 
       {/* Header */}
-      <div className="flex items-center space-x-4">
-        <Link
-          href="/management/dashboard"
-          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4 mr-1" />
-          Επιστροφή στον Πίνακα Ελέγχου
-        </Link>
-      </div>
-
-      <div>
-        <h1 className="text-3xl font-bold text-foreground flex items-center gap-2">
-          <TrendingUp className="h-8 w-8 text-primary" />
-          Αναφορές & Αναλυτικά
-        </h1>
-        <p className="mt-2 text-muted-foreground">Περιεκτικές αναφορές για τις κρατήσεις και τα έσοδα σας</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Αναφορές & Στατιστικά</h1>
+          <p className="text-sm text-zinc-500 mt-1">Ολοκληρωμένη εικόνα εσόδων και κρατήσεων</p>
+        </div>
       </div>
 
       {/* Filters */}
-      <Card>
-        <CardContent className="pt-6">
-          <div className="flex flex-wrap items-end gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="period">Περίοδος</Label>
-              <select
-                id="period"
-                value={selectedPeriod}
-                onChange={(e) => setSelectedPeriod(e.target.value as 'week' | 'month' | 'year')}
-                className="flex h-9 w-full rounded-lg border border-zinc-200/70 bg-transparent px-3 py-1 text-sm shadow-none transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              >
-                <option value="week">Τελευταία Εβδομάδα</option>
-                <option value="month">Τελευταίος Μήνας</option>
-                <option value="year">Τελευταίος Χρόνος</option>
-              </select>
-            </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center rounded-lg border border-zinc-200 p-0.5">
+          {[
+            { value: 'week', label: 'Εβδομάδα' },
+            { value: 'month', label: 'Μήνας' },
+            { value: 'year', label: 'Χρόνος' },
+          ].map((opt) => (
+            <button
+              key={opt.value}
+              onClick={() => setSelectedPeriod(opt.value as 'week' | 'month' | 'year')}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 ${
+                selectedPeriod === opt.value
+                  ? 'bg-zinc-900 text-white shadow-sm'
+                  : 'text-zinc-500 hover:text-zinc-700'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="pitch">Γήπεδο</Label>
-              <select
-                id="pitch"
-                value={selectedPitch}
-                onChange={(e) => setSelectedPitch(e.target.value)}
-                className="flex h-9 w-full rounded-lg border border-zinc-200/70 bg-transparent px-3 py-1 text-sm shadow-none transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+        {pitches.length > 1 && (
+          <div className="flex items-center rounded-lg border border-zinc-200 p-0.5">
+            <button
+              onClick={() => setSelectedPitch('all')}
+              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 ${
+                selectedPitch === 'all' ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700'
+              }`}
+            >
+              Όλα
+            </button>
+            {pitches.map((pitch) => (
+              <button
+                key={pitch.id}
+                onClick={() => setSelectedPitch(pitch.id)}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 ${
+                  selectedPitch === pitch.id ? 'bg-zinc-900 text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-700'
+                }`}
               >
-                <option value="all">Όλα τα Γήπεδα</option>
-                {pitches.map(pitch => (
-                  <option key={pitch.id} value={pitch.id}>{pitch.name}</option>
-                ))}
-              </select>
-            </div>
+                {pitch.name}
+              </button>
+            ))}
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-primary/10 rounded-lg">
-                <Euro className="h-6 w-6 text-primary" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Συνολικά Έσοδα</p>
-                <p className="text-2xl font-bold text-foreground">{'\u20AC'}{totalRevenue.toFixed(2)}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Συνολικές Κρατήσεις</p>
-                <p className="text-2xl font-bold text-foreground">{totalBookings}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Μέση Τιμή Κράτησης</p>
-                <p className="text-2xl font-bold text-foreground">{'\u20AC'}{averageBookingValue.toFixed(2)}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center">
-              <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-                <Clock className="h-6 w-6 text-orange-600 dark:text-orange-400" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Εκκρεμεί</p>
-                <p className="text-2xl font-bold text-foreground">{pendingBookings}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        )}
       </div>
 
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Key Metrics */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[
+          { label: 'Συνολικά Έσοδα', value: `€${totalRevenue.toFixed(2)}`, icon: Euro, color: 'emerald' },
+          { label: 'Κρατήσεις', value: totalBookings.toString(), icon: Calendar, color: 'blue' },
+          { label: 'Μέση Τιμή', value: `€${averageBookingValue.toFixed(2)}`, icon: Users, color: 'violet' },
+          { label: 'Εκκρεμείς', value: pendingBookings.toString(), icon: Clock, color: 'amber' },
+        ].map((metric) => {
+          const Icon = metric.icon;
+          const colorMap: Record<string, { bg: string; text: string }> = {
+            emerald: { bg: 'bg-emerald-50', text: 'text-emerald-600' },
+            blue: { bg: 'bg-blue-50', text: 'text-blue-600' },
+            violet: { bg: 'bg-violet-50', text: 'text-violet-600' },
+            amber: { bg: 'bg-amber-50', text: 'text-amber-600' },
+          };
+          const c = colorMap[metric.color];
+          return (
+            <div key={metric.label} className="flex items-center gap-3 rounded-xl border border-zinc-100/60 bg-white px-5 py-4">
+              <div className={`h-10 w-10 rounded-lg ${c.bg} flex items-center justify-center shrink-0`}>
+                <Icon className={`h-5 w-5 ${c.text}`} />
+              </div>
+              <div>
+                <p className="text-2xl font-semibold tracking-tight text-zinc-900">{metric.value}</p>
+                <p className="text-[11px] text-zinc-400">{metric.label}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Revenue Trend */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              Τάση Εσόδων
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Line
-              data={revenueChartData}
-              options={{
-                responsive: true,
-                plugins: {
-                  legend: {
-                    position: 'top' as const,
-                  },
-                  title: {
-                    display: false,
-                  },
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    ticks: {
-                      callback: function(value) {
-                        return '\u20AC' + value;
-                      }
-                    }
-                  }
-                }
-              }}
-            />
-          </CardContent>
-        </Card>
+        <div className="rounded-xl border border-zinc-100/60 bg-white p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+              <TrendingUp className="h-4 w-4 text-emerald-600" />
+            </div>
+            <h3 className="text-[15px] font-semibold text-zinc-900">Τάση Εσόδων</h3>
+          </div>
+          <Line data={revenueChartData} options={{
+            ...chartOptions,
+            scales: {
+              ...chartOptions.scales,
+              y: { ...chartOptions.scales.y, ticks: { ...chartOptions.scales.y.ticks, callback: (v) => `€${v}` } },
+            },
+          }} />
+        </div>
 
         {/* Bookings Trend */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CalendarDays className="h-5 w-5 text-blue-600" />
-              Τάση Κρατήσεων
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Line
-              data={bookingsChartData}
-              options={{
-                responsive: true,
-                plugins: {
-                  legend: {
-                    position: 'top' as const,
-                  },
-                  title: {
-                    display: false,
-                  },
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    ticks: {
-                      stepSize: 1
-                    }
-                  }
-                }
-              }}
-            />
-          </CardContent>
-        </Card>
+        <div className="rounded-xl border border-zinc-100/60 bg-white p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
+              <CalendarDays className="h-4 w-4 text-blue-600" />
+            </div>
+            <h3 className="text-[15px] font-semibold text-zinc-900">Τάση Κρατήσεων</h3>
+          </div>
+          <Line data={bookingsChartData} options={{
+            ...chartOptions,
+            scales: {
+              ...chartOptions.scales,
+              y: { ...chartOptions.scales.y, ticks: { ...chartOptions.scales.y.ticks, stepSize: 1 } },
+            },
+          }} />
+        </div>
       </div>
 
       {/* Bottom Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Pitch Performance */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Goal className="h-5 w-5 text-primary" />
-              Απόδοση ανά Γήπεδο
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Bar
-              data={pitchPerformanceData}
-              options={{
-                responsive: true,
-                plugins: {
-                  legend: {
-                    position: 'top' as const,
-                  },
-                  title: {
-                    display: false,
-                  },
-                },
-                scales: {
-                  y: {
-                    beginAtZero: true,
-                    ticks: {
-                      callback: function(value) {
-                        return '\u20AC' + value;
-                      }
-                    }
-                  }
-                }
-              }}
-            />
-          </CardContent>
-        </Card>
+        <div className="rounded-xl border border-zinc-100/60 bg-white p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-8 w-8 rounded-lg bg-violet-50 flex items-center justify-center">
+              <Goal className="h-4 w-4 text-violet-600" />
+            </div>
+            <h3 className="text-[15px] font-semibold text-zinc-900">Απόδοση ανά Γήπεδο</h3>
+          </div>
+          <Bar data={pitchPerformanceData} options={{
+            ...chartOptions,
+            scales: {
+              ...chartOptions.scales,
+              y: { ...chartOptions.scales.y, ticks: { ...chartOptions.scales.y.ticks, callback: (v) => `€${v}` } },
+            },
+          }} />
+        </div>
 
         {/* Status Distribution */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <PieChart className="h-5 w-5 text-primary" />
-              Κατανομή Καταστάσεων
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center justify-center h-64">
-              <Doughnut
-                data={statusData}
-                options={{
-                  responsive: true,
-                  maintainAspectRatio: false,
-                  plugins: {
-                    legend: {
-                      position: 'bottom' as const,
-                    },
-                    title: {
-                      display: false,
-                    },
-                  },
-                }}
-              />
+        <div className="rounded-xl border border-zinc-100/60 bg-white p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-8 w-8 rounded-lg bg-amber-50 flex items-center justify-center">
+              <PieChart className="h-4 w-4 text-amber-600" />
             </div>
-          </CardContent>
-        </Card>
+            <h3 className="text-[15px] font-semibold text-zinc-900">Κατανομή Καταστάσεων</h3>
+          </div>
+          <div className="flex items-center justify-center h-56">
+            <Doughnut data={statusData} options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { position: 'bottom', labels: { font: { size: 12 }, color: '#71717a', padding: 16, usePointStyle: true, pointStyleWidth: 8 } }, title: { display: false } },
+              cutout: '65%',
+            }} />
+          </div>
+        </div>
       </div>
 
       {/* Detailed Stats */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ClipboardList className="h-5 w-5 text-primary" />
-            Λεπτομερείς Στατιστικά
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-primary">{completedBookings}</div>
-              <div className="text-sm text-muted-foreground">Ολοκληρωμένες Κρατήσεις</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-blue-600">{confirmedBookings}</div>
-              <div className="text-sm text-muted-foreground">Επιβεβαιωμένες Κρατήσεις</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-orange-600">{pendingBookings}</div>
-              <div className="text-sm text-muted-foreground">Εκκρεμεί Κρατήσεις</div>
-            </div>
+      <div className="rounded-xl border border-zinc-100/60 bg-white p-5">
+        <div className="flex items-center gap-2 mb-5">
+          <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center">
+            <ClipboardList className="h-4 w-4 text-zinc-600" />
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Payment History Section */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <CreditCard className="h-5 w-5 text-primary" />
-            Ιστορικό Πληρωμών
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {payments.length === 0 ? (
-            <div className="text-center py-8">
-              <CreditCard className="h-12 w-12 mx-auto text-muted-foreground/40 mb-4" />
-              <p className="text-muted-foreground">Δεν υπάρχουν καταγεγραμμένες πληρωμές</p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {/* Payment Summary */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
-                    {payments.filter(p => p.status === 'succeeded').length}
-                  </div>
-                  <div className="text-sm text-blue-600 dark:text-blue-400">Επιτυχημένες Πληρωμές</div>
-                </div>
-                <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-orange-600 dark:text-orange-400">
-                    {payments.filter(p => p.status === 'pending').length}
-                  </div>
-                  <div className="text-sm text-orange-600 dark:text-orange-400">Εκκρεμεί</div>
-                </div>
-                <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4">
-                  <div className="text-2xl font-bold text-red-600 dark:text-red-400">
-                    {payments.filter(p => p.status === 'failed').length}
-                  </div>
-                  <div className="text-sm text-red-600 dark:text-red-400">Αποτυχημένες</div>
-                </div>
+          <h3 className="text-[15px] font-semibold text-zinc-900">Ανάλυση Κρατήσεων</h3>
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            { label: 'Ολοκληρωμένες', value: completedBookings, color: 'emerald' },
+            { label: 'Επιβεβαιωμένες', value: confirmedBookings, color: 'blue' },
+            { label: 'Εκκρεμείς', value: pendingBookings, color: 'amber' },
+          ].map((stat) => {
+            const colorMap: Record<string, string> = { emerald: 'text-emerald-600', blue: 'text-blue-600', amber: 'text-amber-600' };
+            return (
+              <div key={stat.label} className="text-center rounded-xl bg-zinc-50 p-4">
+                <p className={`text-3xl font-bold tracking-tight ${colorMap[stat.color]}`}>{stat.value}</p>
+                <p className="text-[13px] text-zinc-500 mt-1">{stat.label}</p>
               </div>
+            );
+          })}
+        </div>
+      </div>
 
-              {/* Payment History Table */}
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-border">
-                  <thead className="bg-muted">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Ημερομηνία
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Σχέδιο
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Διάρκεια
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Ποσό
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Κατάσταση
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Stripe ID
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                        Receipt
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border">
-                    {payments
-                      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                      .map((payment) => (
-                      <tr key={payment.id} className="hover:bg-muted/50">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                          <div>
-                            <div className="font-medium">
-                              {payment.paymentDate
-                                ? new Date(payment.paymentDate).toLocaleDateString('el-GR', {
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })
-                                : new Date(payment.createdAt).toLocaleDateString('el-GR', {
-                                    year: 'numeric',
-                                    month: 'short',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                  })
-                              }
-                            </div>
-                            <div className="text-muted-foreground text-xs">
-                              Δημιουργήθηκε: {new Date(payment.createdAt).toLocaleDateString('el-GR')}
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0">
-                              <div className={`w-3 h-3 rounded-full ${
-                                payment.planName === 'Basic' ? 'bg-blue-400' :
-                                payment.planName === 'Pro' ? 'bg-purple-400' :
-                                payment.planName === 'Enterprise' ? 'bg-primary' :
-                                'bg-muted-foreground'
-                              }`}></div>
-                            </div>
-                            <div className="ml-3">
-                              <div className="text-sm font-medium text-foreground">
-                                {payment.planName || 'Άγνωστο Σχέδιο'}
-                              </div>
-                              <div className="text-sm text-muted-foreground">
-                                {payment.paymentType === 'one_time_plan_purchase' ? 'Μιας Χρήσης' :
-                                 payment.paymentType === 'subscription_payment' ? 'Συνδρομή' :
-                                 payment.paymentType === 'booking_payment' ? 'Κράτηση' : 'Άγνωστο'}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                          {payment.durationMonths ? (
-                            <div>
-                              <div className="font-medium">{payment.durationMonths} μήνες</div>
-                              {payment.durationMonths === 1 && <div className="text-xs text-muted-foreground">Μηνιαία</div>}
-                              {payment.durationMonths === 6 && <div className="text-xs text-primary">7% έκπτωση</div>}
-                              {payment.durationMonths === 12 && <div className="text-xs text-primary">12% έκπτωση</div>}
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground">-</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-foreground">
-                          <div className="font-medium">{'\u20AC'}{payment.amount.toFixed(2)}</div>
-                          <div className="text-xs text-muted-foreground">{payment.currency?.toUpperCase()}</div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <Badge variant={
-                            payment.status === 'succeeded' ? 'default' :
-                            payment.status === 'pending' ? 'secondary' :
-                            payment.status === 'failed' ? 'destructive' :
-                            'outline'
-                          }>
-                            {payment.status === 'succeeded' ? 'Επιτυχής' :
-                             payment.status === 'pending' ? 'Εκκρεμεί' :
-                             payment.status === 'failed' ? 'Αποτυχημένη' :
-                             payment.status === 'canceled' ? 'Ακυρωμένη' :
-                             payment.status}
-                          </Badge>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground font-mono">
-                          <div className="truncate max-w-32" title={payment.stripePaymentIntentId}>
-                            {payment.stripePaymentIntentId}
-                          </div>
-                          {payment.stripeCustomerId && (
-                            <div className="text-xs text-muted-foreground/70 truncate max-w-32" title={payment.stripeCustomerId}>
-                              {payment.stripeCustomerId}
-                            </div>
-                          )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-muted-foreground">
-                          {payment.status === 'succeeded' ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDownloadInvoice(payment)}
-                              disabled={downloadingInvoice === payment.id}
-                            >
-                              {downloadingInvoice === payment.id ? (
-                                <>
-                                  <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                                  Φόρτωση...
-                                </>
-                              ) : (
-                                <>
-                                  <FileDown className="h-3 w-3 mr-1" />
-                                  Λήψη
-                                </>
-                              )}
-                            </Button>
-                          ) : (
-                            <span className="text-muted-foreground text-xs">Μη διαθέσιμο</span>
-                          )}
-                        </td>
-                      </tr>
+      {/* Payment History */}
+      <div className="rounded-xl border border-zinc-100/60 bg-white p-5">
+        <div className="flex items-center gap-2 mb-5">
+          <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
+            <CreditCard className="h-4 w-4 text-blue-600" />
+          </div>
+          <h3 className="text-[15px] font-semibold text-zinc-900">Ιστορικό Πληρωμών</h3>
+        </div>
+
+        {payments.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="mx-auto h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center mb-4">
+              <CreditCard className="h-6 w-6 text-zinc-400" />
+            </div>
+            <h4 className="text-sm font-medium text-zinc-900 mb-1">Δεν υπάρχουν πληρωμές</h4>
+            <p className="text-[13px] text-zinc-400">Δεν έχουν καταγραφεί πληρωμές ακόμα.</p>
+          </div>
+        ) : (
+          <>
+            {/* Payment Stats */}
+            <div className="grid grid-cols-3 gap-3 mb-5">
+              {[
+                { label: 'Επιτυχημένες', count: payments.filter(p => p.status === 'succeeded').length, icon: CheckCircle, color: 'emerald' },
+                { label: 'Εκκρεμείς', count: payments.filter(p => p.status === 'pending').length, icon: Clock, color: 'amber' },
+                { label: 'Αποτυχημένες', count: payments.filter(p => p.status === 'failed').length, icon: XCircle, color: 'red' },
+              ].map((stat) => {
+                const Icon = stat.icon;
+                const colorMap: Record<string, { bg: string; text: string }> = {
+                  emerald: { bg: 'bg-emerald-50', text: 'text-emerald-600' },
+                  amber: { bg: 'bg-amber-50', text: 'text-amber-600' },
+                  red: { bg: 'bg-red-50', text: 'text-red-600' },
+                };
+                const c = colorMap[stat.color];
+                return (
+                  <div key={stat.label} className={`rounded-xl ${c.bg} p-4`}>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Icon className={`h-4 w-4 ${c.text}`} />
+                      <span className={`text-2xl font-bold tracking-tight ${c.text}`}>{stat.count}</span>
+                    </div>
+                    <p className={`text-[12px] ${c.text} opacity-80`}>{stat.label}</p>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Payment Table */}
+            <div className="overflow-x-auto rounded-xl border border-zinc-100">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-zinc-50">
+                    {['Ημερομηνία', 'Σχέδιο', 'Διάρκεια', 'Ποσό', 'Κατάσταση', 'Receipt'].map((h) => (
+                      <th key={h} className="px-4 py-3 text-left text-[11px] font-medium text-zinc-400 uppercase tracking-wider">{h}</th>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Payment Details Summary */}
-              <Separator className="my-4" />
-              <div className="p-4 bg-muted rounded-lg">
-                <h4 className="text-sm font-medium text-foreground mb-3">Σύνοψη Πληρωμών</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">Συνολικές πληρωμές:</span>
-                    <span className="ml-2 font-medium text-muted-foreground">{payments.length}</span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Επιτυχημένες:</span>
-                    <span className="ml-2 font-medium text-primary">
-                      {payments.filter(p => p.status === 'succeeded').length}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Εκκρεμεί:</span>
-                    <span className="ml-2 font-medium text-yellow-600">
-                      {payments.filter(p => p.status === 'pending').length}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">Αποτυχημένες:</span>
-                    <span className="ml-2 font-medium text-destructive">
-                      {payments.filter(p => p.status === 'failed').length}
-                    </span>
-                  </div>
-                </div>
-              </div>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-100">
+                  {payments
+                    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                    .map((payment) => (
+                    <tr key={payment.id} className="hover:bg-zinc-50/50 transition-colors">
+                      <td className="px-4 py-3 text-sm text-zinc-900">
+                        {(payment.paymentDate ? new Date(payment.paymentDate) : new Date(payment.createdAt)).toLocaleDateString('el-GR', {
+                          day: 'numeric', month: 'short', year: 'numeric',
+                        })}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm font-medium text-zinc-900">{payment.planName || 'Άγνωστο'}</span>
+                        <span className="block text-[11px] text-zinc-400">
+                          {payment.paymentType === 'one_time_plan_purchase' ? 'Μιας Χρήσης' :
+                           payment.paymentType === 'subscription_payment' ? 'Συνδρομή' :
+                           payment.paymentType === 'booking_payment' ? 'Κράτηση' : '—'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-zinc-600">
+                        {payment.durationMonths ? `${payment.durationMonths} μήνες` : '—'}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className="text-sm font-semibold text-zinc-900">€{payment.amount.toFixed(2)}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className={`text-[11px] ${
+                          payment.status === 'succeeded' ? 'border-emerald-200/60 text-emerald-700 bg-emerald-50' :
+                          payment.status === 'pending' ? 'border-amber-200/60 text-amber-700 bg-amber-50' :
+                          payment.status === 'failed' ? 'border-red-200/60 text-red-700 bg-red-50' :
+                          'border-zinc-200/60 text-zinc-600 bg-zinc-50'
+                        }`}>
+                          {payment.status === 'succeeded' ? 'Επιτυχής' :
+                           payment.status === 'pending' ? 'Εκκρεμεί' :
+                           payment.status === 'failed' ? 'Αποτυχημένη' :
+                           payment.status === 'canceled' ? 'Ακυρωμένη' :
+                           payment.status}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        {payment.status === 'succeeded' ? (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-[11px] border-zinc-200 text-zinc-700 hover:bg-zinc-50"
+                            onClick={() => handleDownloadInvoice(payment)}
+                            disabled={downloadingInvoice === payment.id}
+                          >
+                            {downloadingInvoice === payment.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <>
+                                <FileDown className="h-3 w-3" />
+                                Λήψη
+                              </>
+                            )}
+                          </Button>
+                        ) : (
+                          <span className="text-[11px] text-zinc-300">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
-        </CardContent>
-      </Card>
+          </>
+        )}
+      </div>
     </div>
   );
 }
