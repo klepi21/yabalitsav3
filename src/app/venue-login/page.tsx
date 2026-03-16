@@ -26,7 +26,11 @@ function VenueLoginContent() {
   const searchParams = useSearchParams();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    searchParams.get('error') === 'inactive'
+      ? 'Η δοκιμαστική περίοδος του λογαριασμού σας έχει λήξει. Επικοινωνήστε μαζί μας για αναβάθμιση.'
+      : null
+  );
   const [showPassword, setShowPassword] = useState(false);
   const redirectTo = searchParams.get('redirect') || '/management/dashboard';
 
@@ -37,6 +41,12 @@ function VenueLoginContent() {
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
+
+  useEffect(() => {
+    if (searchParams.get('error') === 'inactive') {
+      setError('Η δοκιμαστική περίοδος του λογαριασμού σας έχει λήξει. Επικοινωνήστε μαζί μας για αναβάθμιση.');
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (authLoading) return;

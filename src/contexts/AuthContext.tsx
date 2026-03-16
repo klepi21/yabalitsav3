@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
-import { authService, venueOwnerService } from '@/lib/firebase-services';
+import { authService, venueOwnerService, venueService } from '@/lib/firebase-services';
 import { VenueOwner } from '@/types';
 import { useRouter } from 'next/navigation';
 
@@ -27,11 +27,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(firebaseUser);
       
       if (firebaseUser) {
-                  // Firebase user email retrieved
         try {
-          // Get venue owner data
           const owner = await venueOwnerService.getByEmail(firebaseUser.email || '');
-                      // Venue owner data loaded
+
+          // Check if venue is active
+          if (owner?.venueId) {
+            const venue = await venueService.getById(owner.venueId);
+            if (venue && venue.active === false) {
+              await authService.signOut();
+              setUser(null);
+              setVenueOwner(null);
+              setIsLoading(false);
+              router.push('/venue-login?error=inactive');
+              return;
+            }
+          }
+
           setVenueOwner(owner);
         } catch (error) {
           console.error('Error loading venue owner:', error);
@@ -45,7 +56,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [router]);
 
   const signOut = async () => {
     try {
