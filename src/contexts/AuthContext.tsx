@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, useRef, useCallback, ReactNode } from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { authService, venueOwnerService, venueService } from '@/lib/firebase-services';
 import { VenueOwner } from '@/types';
@@ -20,43 +20,90 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [venueOwner, setVenueOwner] = useState<VenueOwner | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  const forceLogout = useCallback(async (reason: string) => {
+    try {
+      await authService.signOut();
+    } catch { /* ignore */ }
+    setUser(null);
+    setVenueOwner(null);
+    router.push(`/venue-login?error=${reason}`);
+  }, [router]);
+
+  // Check if venue subscription is still valid
+  const checkSubscription = useCallback(async (venueId: string) => {
+    try {
+      const venue = await venueService.getById(venueId);
+      if (!venue) return;
+
+      // Check if explicitly deactivated
+      if (venue.active === false) {
+        await forceLogout('inactive');
+        return;
+      }
+
+      // Check if subscription expired (daysRemaining <= 0 and not trial)
+      if (venue.plan === 'subscription' && typeof venue.daysRemaining === 'number' && venue.daysRemaining <= 0) {
+        // Mark venue as inactive
+        await venueService.update(venueId, { active: false });
+        await forceLogout('expired');
+        return;
+      }
+
+      // Check if trial expired
+      if (venue.plan === 'trial' && typeof venue.daysRemaining === 'number' && venue.daysRemaining <= 0) {
+        await venueService.update(venueId, { active: false });
+        await forceLogout('trial_expired');
+        return;
+      }
+    } catch (error) {
+      console.error('Subscription check error:', error);
+    }
+  }, [forceLogout]);
 
   useEffect(() => {
     const unsubscribe = authService.onAuthStateChanged(async (firebaseUser) => {
-              // Auth state changed
       setUser(firebaseUser);
-      
+
       if (firebaseUser) {
         try {
           const owner = await venueOwnerService.getByEmail(firebaseUser.email || '');
 
           // Check if venue is active
           if (owner?.venueId) {
-            const venue = await venueService.getById(owner.venueId);
-            if (venue && venue.active === false) {
-              await authService.signOut();
-              setUser(null);
-              setVenueOwner(null);
-              setIsLoading(false);
-              router.push('/venue-login?error=inactive');
-              return;
-            }
+            await checkSubscription(owner.venueId);
           }
 
           setVenueOwner(owner);
+
+          // Start periodic check every 5 minutes
+          if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
+          if (owner?.venueId) {
+            checkIntervalRef.current = setInterval(() => {
+              checkSubscription(owner.venueId);
+            }, 5 * 60 * 1000);
+          }
         } catch (error) {
           console.error('Error loading venue owner:', error);
           setVenueOwner(null);
         }
       } else {
         setVenueOwner(null);
+        if (checkIntervalRef.current) {
+          clearInterval(checkIntervalRef.current);
+          checkIntervalRef.current = null;
+        }
       }
-      
+
       setIsLoading(false);
     });
 
-    return () => unsubscribe();
-  }, [router]);
+    return () => {
+      unsubscribe();
+      if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
+    };
+  }, [router, checkSubscription]);
 
   const signOut = async () => {
     try {

@@ -28,7 +28,11 @@ function VenueLoginContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(
     searchParams.get('error') === 'inactive'
-      ? 'Η δοκιμαστική περίοδος του λογαριασμού σας έχει λήξει. Επικοινωνήστε μαζί μας για αναβάθμιση.'
+      ? 'Ο λογαριασμός σας έχει απενεργοποιηθεί. Επικοινωνήστε μαζί μας.'
+      : searchParams.get('error') === 'expired'
+      ? 'Η συνδρομή σας έχει λήξει. Ανανεώστε για να συνεχίσετε.'
+      : searchParams.get('error') === 'trial_expired'
+      ? 'Η δοκιμαστική περίοδος έληξε. Επιλέξτε πλάνο για να συνεχίσετε.'
       : null
   );
   const [showPassword, setShowPassword] = useState(false);
