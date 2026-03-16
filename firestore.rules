@@ -64,6 +64,23 @@ service cloud.firestore {
       allow read, write: if request.auth != null;
     }
 
+    // Tournament collections
+    match /yabalitsa_tournaments/{tournamentId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /yabalitsa_tournament_teams/{teamId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /yabalitsa_tournament_players/{playerId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /yabalitsa_tournament_matches/{matchId} {
+      allow read, write: if request.auth != null;
+    }
+
     // Subscriptions collection (one document per venue; doc ID == venueId)
     match /yabalitsa_subscriptions/{venueId} {
       // Allow reads for authenticated users who own the venue

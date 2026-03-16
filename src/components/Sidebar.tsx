@@ -13,6 +13,7 @@ import {
   BarChart3,
   Settings,
   Trophy,
+  Swords,
   ClipboardList,
   LogOut,
   ChevronDown,
@@ -42,6 +43,14 @@ const navigation: NavItem[] = [
       { name: 'Όλοι οι Χρήστες', href: '/management/academy/users', icon: Users },
       { name: 'Τμήματα', href: '/management/academy/squads', icon: Trophy },
       { name: 'Κατηγορίες Χρηστών', href: '/management/academy/user-groups', icon: ClipboardList },
+    ]
+  },
+  {
+    name: 'Τουρνουά',
+    icon: Trophy,
+    children: [
+      { name: 'Όλα τα Τουρνουά', href: '/management/tournaments', icon: Swords },
+      { name: 'Νέο Τουρνουά', href: '/management/tournaments/new', icon: ClipboardList },
     ]
   },
   { name: 'Αναφορές', href: '/management/reports', icon: BarChart3 },
@@ -112,8 +121,13 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                 </button>
                 {isExpanded && (
                   <div className="mt-0.5 ml-[22px] space-y-0.5 border-l border-white/[0.06] pl-3">
-                    {item.children?.map((child) => {
-                      const isChildItemActive = pathname.startsWith(child.href);
+                    {item.children?.map((child, _idx, siblings) => {
+                      // Check exact match first, then startsWith but exclude paths that belong to other siblings
+                      const otherSiblingPaths = siblings.filter(s => s.href !== child.href).map(s => s.href);
+                      const isChildItemActive = pathname === child.href || (
+                        pathname.startsWith(child.href) &&
+                        !otherSiblingPaths.some(sp => pathname.startsWith(sp))
+                      );
                       const ChildIcon = child.icon;
                       return (
                         <Link
