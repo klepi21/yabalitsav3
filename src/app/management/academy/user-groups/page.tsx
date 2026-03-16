@@ -6,8 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { userGroupService } from '@/lib/academy-services';
 import { UserGroup, GROUP_COLORS } from '@/types/academy';
-import { Loader2, Plus, Pencil, Trash2, ClipboardList, Shield, Link2, Users } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Loader2, Plus, Pencil, Trash2, ClipboardList, Shield, Link2, Users, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -21,14 +20,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
 
 export default function UserGroupsPage() {
   const router = useRouter();
@@ -77,97 +68,132 @@ export default function UserGroupsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-muted">
-      <div className="bg-background border-b border-border sticky top-0 z-10">
-        <div className="px-4 py-4 sm:px-6">
-          <Breadcrumb className="mb-2">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/management">Διαχείριση</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Κατηγορίες Χρηστών</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+    <div className="space-y-6">
+      {/* Error */}
+      {error && (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-foreground">Κατηγορίες Χρηστών</h1>
-              <p className="text-sm text-muted-foreground mt-1">Διαχείριση κατηγοριών και πεδίων</p>
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+              <p className="text-sm text-destructive">{error}</p>
             </div>
-            <Button asChild>
+            <Button variant="ghost" size="sm" onClick={() => setError(null)} className="text-destructive/60 hover:text-destructive shrink-0">
+              Κλείσιμο
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Κατηγορίες Χρηστών</h1>
+          <p className="text-sm text-zinc-500 mt-1">Διαχείριση κατηγοριών και πεδίων</p>
+        </div>
+        <Button asChild>
+          <Link href="/management/academy/user-groups/new">
+            <Plus className="h-4 w-4" />
+            Νέα Κατηγορία
+          </Link>
+        </Button>
+      </div>
+
+      {/* Stats */}
+      <div className="flex items-center gap-3 rounded-xl border border-zinc-100/60 bg-white px-5 py-3.5 w-fit">
+        <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center">
+          <Users className="h-5 w-5 text-blue-600" />
+        </div>
+        <div>
+          <p className="text-2xl font-semibold tracking-tight text-zinc-900">{groups.length}</p>
+          <p className="text-[13px] text-zinc-400">Σύνολο Κατηγοριών</p>
+        </div>
+      </div>
+
+      {/* Groups List */}
+      {groups.length === 0 ? (
+        <div className="rounded-xl border border-zinc-100/60 bg-white py-16">
+          <div className="text-center">
+            <div className="mx-auto h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center mb-4">
+              <Users className="h-6 w-6 text-zinc-400" />
+            </div>
+            <h3 className="text-sm font-medium text-zinc-900 mb-1">Δεν υπάρχουν κατηγορίες</h3>
+            <p className="text-[13px] text-zinc-400 mb-5">Δημιουργήστε την πρώτη κατηγορία χρηστών.</p>
+            <Button size="sm" asChild>
               <Link href="/management/academy/user-groups/new">
-                <Plus className="h-4 w-4 mr-1" />
+                <Plus className="h-4 w-4" />
                 Νέα Κατηγορία
               </Link>
             </Button>
           </div>
         </div>
-      </div>
+      ) : (
+        <div className="space-y-3">
+          {groups.map((group, index) => {
+            const colors = [
+              { bg: 'bg-emerald-50', text: 'text-emerald-600' },
+              { bg: 'bg-blue-50', text: 'text-blue-600' },
+              { bg: 'bg-violet-50', text: 'text-violet-600' },
+              { bg: 'bg-amber-50', text: 'text-amber-600' },
+              { bg: 'bg-rose-50', text: 'text-rose-600' },
+            ];
+            const color = colors[index % colors.length];
 
-      <div className="px-4 py-6 sm:px-6 max-w-4xl mx-auto">
-        {error && (
-          <div className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-            {error}
-          </div>
-        )}
-
-        <div className="space-y-4">
-          {groups.map((group) => (
-            <Card key={group.id}>
-              <CardContent className="py-0">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted text-2xl">
-                      <Users className="h-6 w-6 text-muted-foreground" />
+            return (
+              <div
+                key={group.id}
+                className="group rounded-xl border border-zinc-100/60 bg-white p-5 hover:border-zinc-200/80 hover:shadow-sm transition-all duration-150"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex items-start gap-4 min-w-0">
+                    <div className={`h-11 w-11 rounded-lg ${color.bg} flex items-center justify-center shrink-0 text-xl`}>
+                      {group.icon}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-foreground text-lg">{group.name}</h3>
-                        <Badge variant="secondary" className={GROUP_COLORS[group.color] || ''}>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-[15px] font-semibold text-zinc-900">{group.name}</h3>
+                        <Badge variant="secondary" className={`text-[11px] ${GROUP_COLORS[group.color] || ''}`}>
                           {group.namePlural}
                         </Badge>
                         {group.isDefault && (
-                          <Badge variant="outline">
+                          <Badge variant="outline" className="text-[11px] border-zinc-200/60 text-zinc-400">
                             Προεπιλογή
                           </Badge>
                         )}
                       </div>
-                      <div className="mt-2 flex flex-wrap gap-2">
+
+                      {/* Fields */}
+                      <div className="mt-2.5 flex flex-wrap gap-1.5">
                         {group.fields.map((field) => (
-                          <Badge
+                          <span
                             key={field.key}
-                            variant="secondary"
-                            className="bg-muted text-muted-foreground"
+                            className="inline-flex items-center rounded-md bg-zinc-50 px-2 py-0.5 text-[11px] text-zinc-500 border border-zinc-100"
                           >
                             {field.label}
-                            {field.required && <span className="text-destructive ml-0.5">*</span>}
-                            <span className="ml-1 opacity-60">({field.type})</span>
-                          </Badge>
+                            {field.required && <span className="text-red-400 ml-0.5">*</span>}
+                          </span>
                         ))}
                         {group.fields.length === 0 && (
-                          <span className="text-xs text-muted-foreground">Χωρίς πρόσθετα πεδία</span>
+                          <span className="text-[11px] text-zinc-300">Χωρίς πρόσθετα πεδία</span>
                         )}
                       </div>
+
+                      {/* Capabilities */}
                       {group.capabilities.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1">
+                        <div className="mt-2 flex flex-wrap gap-1.5">
                           {group.capabilities.includes('squad_assignment') && (
-                            <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">
+                            <Badge variant="outline" className="text-[11px] text-blue-600 border-blue-200/60 bg-blue-50">
                               <Shield className="h-3 w-3 mr-1" />
                               Ανάθεση σε τμήμα
                             </Badge>
                           )}
                           {group.capabilities.includes('parent_linking') && (
-                            <Badge variant="outline" className="text-amber-600 border-amber-200 bg-amber-50">
+                            <Badge variant="outline" className="text-[11px] text-amber-600 border-amber-200/60 bg-amber-50">
                               <Link2 className="h-3 w-3 mr-1" />
                               Σύνδεση γονέα
                             </Badge>
                           )}
                           {group.capabilities.includes('coach_squads') && (
-                            <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5">
+                            <Badge variant="outline" className="text-[11px] text-emerald-600 border-emerald-200/60 bg-emerald-50">
                               <ClipboardList className="h-3 w-3 mr-1" />
                               Ανάθεση τμημάτων
                             </Badge>
@@ -177,17 +203,33 @@ export default function UserGroupsPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-1">
-                    <Button variant="ghost" size="icon-sm" asChild>
+                  {/* Actions */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button size="sm" className="h-8 text-xs" asChild>
                       <Link href={`/management/academy/user-groups/${group.id}/edit`}>
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="h-3.5 w-3.5" />
+                        Επεξεργασία
                       </Link>
                     </Button>
-                    {group.name !== 'Διαχειριστής' && (
+                    {group.isDefault ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 w-8 p-0 border-zinc-100 text-zinc-300 cursor-not-allowed"
+                        disabled
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    ) : (
                       <AlertDialog open={deleteConfirm === group.id} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
                         <AlertDialogTrigger asChild>
-                          <Button variant="ghost" size="icon-sm" onClick={() => setDeleteConfirm(group.id)}>
-                            <Trash2 className="h-4 w-4 text-muted-foreground" />
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 w-8 p-0 border-red-200 text-red-500 hover:text-red-700 hover:bg-red-50 hover:border-red-300"
+                            onClick={() => setDeleteConfirm(group.id)}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
@@ -207,12 +249,13 @@ export default function UserGroupsPage() {
                       </AlertDialog>
                     )}
                   </div>
+
                 </div>
-              </CardContent>
-            </Card>
-          ))}
+              </div>
+            );
+          })}
         </div>
-      </div>
+      )}
     </div>
   );
 }

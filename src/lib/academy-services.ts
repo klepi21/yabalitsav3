@@ -119,9 +119,14 @@ export const userGroupService = {
     await updateDoc(docRef, updateData);
   },
 
-  // Delete a group (only non-default)
+  // Delete a group (only non-default, backend enforced)
   async delete(id: string): Promise<void> {
-    await deleteDoc(doc(db, GROUPS_COLLECTION, id));
+    const docRef = doc(db, GROUPS_COLLECTION, id);
+    const snap = await getDoc(docRef);
+    if (snap.exists() && snap.data()?.isDefault === true) {
+      throw new Error('Δεν μπορείτε να διαγράψετε μια προεπιλεγμένη κατηγορία');
+    }
+    await deleteDoc(docRef);
   },
 };
 

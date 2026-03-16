@@ -7,17 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import AcademyUserForm from '@/components/AcademyUserForm';
 import { academyUserService, userGroupService, squadService } from '@/lib/academy-services';
 import { AcademyUser, UserGroup, Squad } from '@/types/academy';
-import { Loader2, ArrowLeft } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Loader2, ArrowLeft, UserPlus, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
 
 export default function NewAcademyUserPage() {
   const router = useRouter();
@@ -103,63 +94,56 @@ export default function NewAcademyUserPage() {
   }
 
   return (
-    <div className="min-h-screen bg-muted">
-      <div className="bg-background border-b border-border sticky top-0 z-10">
-        <div className="px-4 py-4 sm:px-6">
-          <Breadcrumb className="mb-2">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/management">Διαχείριση</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/management/academy/users">Χρήστες</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Νέος Χρήστης</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild className="-ml-2">
-              <Link href="/management/academy/users">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-            </Button>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">Νέος Χρήστης</h1>
-              <p className="text-sm text-muted-foreground">Δημιουργία νέου μέλους ακαδημίας</p>
-            </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <Button variant="outline" size="icon" className="h-9 w-9 border-zinc-200 shrink-0" asChild>
+          <Link href="/management/academy/users">
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+        </Button>
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+            <UserPlus className="h-5 w-5 text-emerald-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Νέος Χρήστης</h1>
+            <p className="text-sm text-zinc-500 mt-0.5">Δημιουργία νέου μέλους ακαδημίας</p>
           </div>
         </div>
       </div>
 
-      <div className="px-4 py-6 sm:px-6 max-w-2xl mx-auto">
-        {error && (
-          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-            {error}
-            <button onClick={() => setError(null)} className="ml-2 underline">Απόρριψη</button>
+      {/* Error */}
+      {error && (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+              <p className="text-sm text-destructive">{error}</p>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setError(null)}
+              className="text-destructive/60 hover:text-destructive shrink-0"
+            >
+              Κλείσιμο
+            </Button>
           </div>
-        )}
+        </div>
+      )}
 
-        <Card>
-          <CardContent>
-            <AcademyUserForm
-              venueId={venueId}
-              groups={groups}
-              parentCandidates={parentCandidates}
-              squads={squads}
-              onSubmit={handleSubmit}
-              onParentQuickAdd={handleQuickAddParent}
-              isLoading={isLoading}
-            />
-          </CardContent>
-        </Card>
+      {/* Form Card */}
+      <div className="rounded-xl border border-zinc-100/60 bg-white p-6 sm:p-8">
+        <AcademyUserForm
+          venueId={venueId}
+          groups={groups}
+          parentCandidates={parentCandidates}
+          squads={squads}
+          onSubmit={handleSubmit}
+          onParentQuickAdd={handleQuickAddParent}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );

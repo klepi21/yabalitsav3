@@ -221,13 +221,13 @@ export default function PitchesPage() {
                 </div>
 
                 <div className="flex gap-2 pt-4 border-t border-zinc-100/60">
-                  <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" asChild>
+                  <Button size="sm" className="flex-1 h-8 text-xs" asChild>
                     <Link href={`/management/pitches/${pitch.id}/edit`}>
                       <Pencil className="h-3.5 w-3.5" />
                       Επεξεργασία
                     </Link>
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" asChild>
+                  <Button variant="outline" size="sm" className="flex-1 h-8 text-xs border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900" asChild>
                     <Link href={`/management/pitches/${pitch.id}`}>
                       <Eye className="h-3.5 w-3.5" />
                       Προβολή

@@ -221,13 +221,13 @@ export default function SquadsPage() {
                 </div>
 
                 <div className="flex gap-2 pt-4 border-t border-zinc-100/60">
-                  <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" asChild>
+                  <Button size="sm" className="flex-1 h-8 text-xs" asChild>
                     <Link href={`/management/academy/squads/${squad.id}/edit`}>
                       <Pencil className="h-3.5 w-3.5" />
                       Επεξεργασία
                     </Link>
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1 h-8 text-xs" asChild>
+                  <Button variant="outline" size="sm" className="flex-1 h-8 text-xs border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900" asChild>
                     <Link href={`/management/academy/users?squad=${squad.id}`}>
                       <UsersIcon className="h-3.5 w-3.5" />
                       Ρόστερ
@@ -238,7 +238,7 @@ export default function SquadsPage() {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="h-8 w-8 p-0 text-xs text-zinc-400 hover:text-destructive hover:border-destructive/30"
+                        className="h-8 w-8 p-0 text-xs border-red-200 text-red-500 hover:text-red-700 hover:bg-red-50 hover:border-red-300"
                         onClick={() => setDeleteConfirm(squad.id)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />

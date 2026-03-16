@@ -12,13 +12,11 @@ import {
   AVAILABLE_ICONS,
   GROUP_COLORS,
 } from '@/types/academy';
-import { ArrowLeft, Loader2, X, Plus, Users } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowLeft, Loader2, X, Plus, Users, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 
 const FIELD_TYPE_LABELS: Record<UserGroupFieldType, string> = {
@@ -156,285 +154,220 @@ export default function EditUserGroupPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild className="-ml-2">
+        <Button variant="outline" size="icon" className="h-9 w-9 border-zinc-200 shrink-0" asChild>
           <Link href="/management/academy/user-groups">
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Επεξεργασία Κατηγορίας</h1>
-          <p className="text-sm text-zinc-500 mt-1">Ενημέρωση στοιχείων κατηγορίας χρηστών</p>
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+            <Users className="h-5 w-5 text-blue-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Επεξεργασία Κατηγορίας</h1>
+            <p className="text-sm text-zinc-500 mt-0.5">Ενημέρωση στοιχείων κατηγορίας χρηστών</p>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-2xl">
-        {error && (
-          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-            {error}
+      {/* Error */}
+      {error && (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+              <p className="text-sm text-destructive">{error}</p>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => setError(null)} className="text-destructive/60 hover:text-destructive shrink-0">
+              Κλείσιμο
+            </Button>
           </div>
-        )}
+        </div>
+      )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Info */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Βασικά Στοιχεία</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Όνομα (ενικός) *</Label>
-                  <Input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="π.χ. Φυσιοθεραπευτής"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Όνομα (πληθυντικός) *</Label>
-                  <Input
-                    type="text"
-                    value={namePlural}
-                    onChange={(e) => setNamePlural(e.target.value)}
-                    placeholder="π.χ. Φυσιοθεραπευτές"
-                  />
-                </div>
-              </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Basic Info */}
+        <div className="rounded-xl border border-zinc-100/60 bg-white p-6 sm:p-8 space-y-6">
+          <div>
+            <h2 className="text-[15px] font-semibold text-zinc-900 mb-1">Βασικά Στοιχεία</h2>
+            <p className="text-[13px] text-zinc-400">Όνομα, εικονίδιο και χρώμα κατηγορίας</p>
+          </div>
 
-              {/* Icon Selector */}
-              <div className="space-y-2">
-                <Label>Εικονίδιο</Label>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {AVAILABLE_ICONS.map((ic) => (
-                    <button
-                      key={ic}
-                      type="button"
-                      onClick={() => setIcon(ic)}
-                      className={`w-10 h-10 text-xl rounded-lg border-2 flex items-center justify-center transition-all ${
-                        icon === ic
-                          ? 'border-primary bg-primary/5 scale-110'
-                          : 'border-border hover:border-muted-foreground/30'
-                      }`}
-                    >
-                      {ic}
-                    </button>
-                  ))}
-                </div>
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div className="space-y-2">
+              <Label className="text-zinc-700">Όνομα (ενικός) <span className="text-red-400">*</span></Label>
+              <Input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="π.χ. Φυσιοθεραπευτής" className="h-11 bg-white" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-zinc-700">Όνομα (πληθυντικός) <span className="text-red-400">*</span></Label>
+              <Input type="text" value={namePlural} onChange={(e) => setNamePlural(e.target.value)} placeholder="π.χ. Φυσιοθεραπευτές" className="h-11 bg-white" />
+            </div>
+          </div>
 
-              {/* Color Selector */}
-              <div className="space-y-2">
-                <Label>Χρώμα</Label>
-                <div className="flex flex-wrap gap-2 mt-1">
-                  {AVAILABLE_COLORS.map((c) => (
-                    <button
-                      key={c}
-                      type="button"
-                      onClick={() => setColor(c)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                        GROUP_COLORS[c]
-                      } ${color === c ? 'ring-2 ring-primary scale-105' : ''}`}
-                    >
-                      {c}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Icon Selector */}
+          <div className="space-y-2">
+            <Label className="text-zinc-700">Εικονίδιο</Label>
+            <div className="flex flex-wrap gap-2">
+              {AVAILABLE_ICONS.map((ic) => (
+                <button
+                  key={ic}
+                  type="button"
+                  onClick={() => setIcon(ic)}
+                  className={`w-10 h-10 text-xl rounded-xl border flex items-center justify-center transition-all duration-150 ${
+                    icon === ic
+                      ? 'border-zinc-900 bg-zinc-900/5 scale-110 shadow-sm'
+                      : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
+                  }`}
+                >
+                  {ic}
+                </button>
+              ))}
+            </div>
+          </div>
 
-          {/* Fields */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Πεδία Φόρμας</CardTitle>
-              <p className="text-sm text-muted-foreground">Ορίστε τα πεδία που θα συμπληρώνονται για χρήστες αυτής της κατηγορίας</p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Existing fields */}
-              {fields.length > 0 && (
-                <div className="space-y-2">
-                  {fields.map((field, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 bg-muted rounded-lg border border-border"
-                    >
-                      <div>
-                        <span className="font-medium text-foreground text-sm">{field.label}</span>
-                        <span className="ml-2 text-xs text-muted-foreground">({FIELD_TYPE_LABELS[field.type]})</span>
-                        {field.required && <span className="ml-1 text-xs text-destructive">*</span>}
-                        {field.type === 'select' && field.options && field.options.length > 0 && (
-                          <span className="ml-2 text-xs text-muted-foreground">
-                            [{field.options.join(', ')}]
-                          </span>
-                        )}
-                      </div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeField(index)}
-                        className="h-7 w-7 text-destructive hover:text-destructive"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              )}
+          {/* Color Selector */}
+          <div className="space-y-2">
+            <Label className="text-zinc-700">Χρώμα</Label>
+            <div className="flex flex-wrap gap-2">
+              {AVAILABLE_COLORS.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setColor(c)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-150 ${
+                    GROUP_COLORS[c]
+                  } ${color === c ? 'ring-2 ring-zinc-900 ring-offset-1 scale-105' : ''}`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
 
-              {/* Add new field */}
-              <Separator />
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-foreground">Προσθήκη Πεδίου</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Ετικέτα *</Label>
-                    <Input
-                      type="text"
-                      value={newField.label}
-                      onChange={(e) => setNewField((prev) => ({ ...prev, label: e.target.value }))}
-                      placeholder="π.χ. ΑΜΚΑ"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Τύπος</Label>
-                    <select
-                      value={newField.type}
-                      onChange={(e) => setNewField((prev) => ({ ...prev, type: e.target.value as UserGroupFieldType, options: [] }))}
-                      className="flex h-9 w-full rounded-lg border border-zinc-200/70 bg-transparent px-3 py-1 text-sm shadow-none transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                    >
-                      {Object.entries(FIELD_TYPE_LABELS).map(([value, label]) => (
-                        <option key={value} value={value}>{label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="flex items-end gap-2">
-                    <label className="flex items-center gap-2 p-2 cursor-pointer">
-                      <Checkbox
-                        checked={newField.required}
-                        onCheckedChange={(checked) => setNewField((prev) => ({ ...prev, required: checked === true }))}
-                      />
-                      <span className="text-sm text-foreground">Υποχρεωτικό</span>
-                    </label>
-                  </div>
-                </div>
+        {/* Fields */}
+        <div className="rounded-xl border border-zinc-100/60 bg-white p-6 sm:p-8 space-y-6">
+          <div>
+            <h2 className="text-[15px] font-semibold text-zinc-900 mb-1">Πεδία Φόρμας</h2>
+            <p className="text-[13px] text-zinc-400">Ορίστε τα πεδία που θα συμπληρώνονται για χρήστες αυτής της κατηγορίας</p>
+          </div>
 
-                {newField.type !== 'select' && (
-                  <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">Placeholder</Label>
-                    <Input
-                      type="text"
-                      value={newField.placeholder || ''}
-                      onChange={(e) => setNewField((prev) => ({ ...prev, placeholder: e.target.value }))}
-                      placeholder="Κείμενο βοήθειας..."
-                    />
-                  </div>
-                )}
-
-                {/* Options for select type */}
-                {newField.type === 'select' && (
-                  <div className="space-y-2">
-                    <Label className="text-xs text-muted-foreground">Επιλογές</Label>
-                    <div className="flex gap-2">
-                      <Input
-                        type="text"
-                        value={newOption}
-                        onChange={(e) => setNewOption(e.target.value)}
-                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addOption(); } }}
-                        placeholder="Προσθήκη επιλογής..."
-                      />
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={addOption}
-                      >
-                        <Plus className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    {(newField.options || []).length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {(newField.options || []).map((opt, i) => (
-                          <Badge
-                            key={i}
-                            variant="secondary"
-                            className="gap-1"
-                          >
-                            {opt}
-                            <button
-                              type="button"
-                              onClick={() => removeOption(i)}
-                              className="hover:text-destructive"
-                            >
-                              <X className="h-3 w-3" />
-                            </button>
-                          </Badge>
-                        ))}
-                      </div>
+          {fields.length > 0 && (
+            <div className="space-y-2">
+              {fields.map((field, index) => (
+                <div key={index} className="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-100">
+                  <div>
+                    <span className="font-medium text-zinc-900 text-sm">{field.label}</span>
+                    <span className="ml-2 text-xs text-zinc-400">({FIELD_TYPE_LABELS[field.type]})</span>
+                    {field.required && <span className="ml-1 text-xs text-red-400">*</span>}
+                    {field.type === 'select' && field.options && field.options.length > 0 && (
+                      <span className="ml-2 text-xs text-zinc-400">[{field.options.join(', ')}]</span>
                     )}
                   </div>
-                )}
+                  <Button type="button" variant="ghost" size="sm" onClick={() => removeField(index)} className="h-7 w-7 p-0 text-red-400 hover:text-red-600 hover:bg-red-50">
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={addField}
-                  disabled={!newField.label.trim()}
-                  className="w-full border-dashed"
+          <div className="border-t border-zinc-100/60 pt-6 space-y-4">
+            <p className="text-sm font-medium text-zinc-700">Προσθήκη Πεδίου</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label className="text-xs text-zinc-400">Ετικέτα *</Label>
+                <Input type="text" value={newField.label} onChange={(e) => setNewField((prev) => ({ ...prev, label: e.target.value }))} placeholder="π.χ. ΑΜΚΑ" className="h-11 bg-white" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs text-zinc-400">Τύπος</Label>
+                <select
+                  value={newField.type}
+                  onChange={(e) => setNewField((prev) => ({ ...prev, type: e.target.value as UserGroupFieldType, options: [] }))}
+                  className="flex h-11 w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 appearance-none"
                 >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Προσθήκη Πεδίου
-                </Button>
+                  {Object.entries(FIELD_TYPE_LABELS).map(([value, label]) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
               </div>
-            </CardContent>
-          </Card>
+              <div className="flex items-end">
+                <label className="flex items-center gap-2 p-2.5 cursor-pointer">
+                  <Checkbox checked={newField.required} onCheckedChange={(checked) => setNewField((prev) => ({ ...prev, required: checked === true }))} />
+                  <span className="text-sm text-zinc-700">Υποχρεωτικό</span>
+                </label>
+              </div>
+            </div>
 
-          {/* Preview */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Προεπισκόπηση</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-background text-2xl">
-                  <Users className="h-6 w-6 text-muted-foreground" />
+            {newField.type !== 'select' && (
+              <div className="space-y-2">
+                <Label className="text-xs text-zinc-400">Placeholder</Label>
+                <Input type="text" value={newField.placeholder || ''} onChange={(e) => setNewField((prev) => ({ ...prev, placeholder: e.target.value }))} placeholder="Κείμενο βοήθειας..." className="h-11 bg-white" />
+              </div>
+            )}
+
+            {newField.type === 'select' && (
+              <div className="space-y-3">
+                <Label className="text-xs text-zinc-400">Επιλογές</Label>
+                <div className="flex gap-2">
+                  <Input type="text" value={newOption} onChange={(e) => setNewOption(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addOption(); } }} placeholder="Προσθήκη επιλογής..." className="h-11 bg-white" />
+                  <Button type="button" variant="outline" onClick={addOption} className="h-11 border-zinc-200">
+                    <Plus className="h-4 w-4" />
+                  </Button>
                 </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-foreground">{name || 'Όνομα κατηγορίας'}</span>
-                    <Badge variant="secondary" className={GROUP_COLORS[color] || ''}>
-                      {namePlural || 'Πληθυντικός'}
-                    </Badge>
+                {(newField.options || []).length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {(newField.options || []).map((opt, i) => (
+                      <Badge key={i} variant="secondary" className="gap-1 bg-zinc-100 text-zinc-700">
+                        {opt}
+                        <button type="button" onClick={() => removeOption(i)} className="hover:text-red-500">
+                          <X className="h-3 w-3" />
+                        </button>
+                      </Badge>
+                    ))}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {fields.length} πεδί{fields.length === 1 ? 'ο' : 'α'}
-                  </p>
-                </div>
+                )}
               </div>
-            </CardContent>
-          </Card>
+            )}
 
-          {/* Submit */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => router.back()}
-            >
-              Ακύρωση
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSaving}
-              className="flex-1"
-            >
-              {isSaving && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {isSaving ? 'Αποθήκευση...' : 'Αποθήκευση Αλλαγών'}
+            <Button type="button" variant="outline" onClick={addField} disabled={!newField.label.trim()} className="w-full h-11 border-dashed border-zinc-300 text-zinc-500 hover:text-zinc-700 hover:border-zinc-400">
+              <Plus className="h-4 w-4" />
+              Προσθήκη Πεδίου
             </Button>
           </div>
-        </form>
-      </div>
+        </div>
+
+        {/* Preview */}
+        <div className="rounded-xl border border-zinc-100/60 bg-white p-6 sm:p-8 space-y-4">
+          <h2 className="text-[15px] font-semibold text-zinc-900">Προεπισκόπηση</h2>
+          <div className="flex items-center gap-3 p-4 bg-zinc-50 rounded-xl">
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-2xl border border-zinc-100">
+              {icon}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-semibold text-zinc-900">{name || 'Όνομα κατηγορίας'}</span>
+                <Badge variant="secondary" className={GROUP_COLORS[color] || ''}>
+                  {namePlural || 'Πληθυντικός'}
+                </Badge>
+              </div>
+              <p className="text-xs text-zinc-400 mt-1">
+                {fields.length} πεδί{fields.length === 1 ? 'ο' : 'α'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Submit */}
+        <div className="flex flex-col sm:flex-row gap-3 pt-2">
+          <Button type="button" variant="outline" className="flex-1 h-11 border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900" onClick={() => router.back()}>
+            Ακύρωση
+          </Button>
+          <Button type="submit" disabled={isSaving} className="flex-1 h-11">
+            {isSaving ? (<><Loader2 className="h-4 w-4 animate-spin" /> Αποθήκευση...</>) : 'Αποθήκευση Αλλαγών'}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }

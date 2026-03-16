@@ -15,6 +15,7 @@ import {
   Trash2,
   AlertCircle,
   CalendarDays,
+  Eye,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { userService, bookingService } from '@/lib/firebase-services';
@@ -296,9 +297,6 @@ export default function CustomerDetailsPage() {
                             <Badge variant={getStatusVariant(booking.status)}>
                               {getStatusText(booking.status)}
                             </Badge>
-                            <span className="text-xs text-muted-foreground font-mono">
-                              ID: {booking.id.slice(-8)}
-                            </span>
                           </div>
 
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
@@ -328,8 +326,9 @@ export default function CustomerDetailsPage() {
                         </div>
 
                         <div className="ml-4">
-                          <Button variant="ghost" size="sm" asChild>
+                          <Button variant="outline" size="sm" className="border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900" asChild>
                             <Link href={`/management/bookings/${booking.id}`}>
+                              <Eye className="h-3.5 w-3.5" />
                               Προβολή Κράτησης
                             </Link>
                           </Button>

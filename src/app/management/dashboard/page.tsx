@@ -925,13 +925,13 @@ export default function DashboardPage() {
                     <dt className="text-[13px] text-zinc-400 mb-1.5 flex items-center gap-1.5">
                       <Mail className="h-3.5 w-3.5" /> Email
                     </dt>
-                    <dd className="text-sm text-zinc-900 font-medium">{venue.email || 'Δεν υπάρχει email'}</dd>
+                    <dd className="text-sm text-zinc-900 font-medium">{venue.contactDetails?.email || 'Δεν υπάρχει email'}</dd>
                   </div>
                   <div className="rounded-lg border border-zinc-100/60 p-4">
                     <dt className="text-[13px] text-zinc-400 mb-1.5 flex items-center gap-1.5">
                       <Phone className="h-3.5 w-3.5" /> Τηλέφωνο
                     </dt>
-                    <dd className="text-sm text-zinc-900 font-medium">{venue.phone || 'Δεν υπάρχει τηλέφωνο'}</dd>
+                    <dd className="text-sm text-zinc-900 font-medium">{venue.contactDetails?.phone || 'Δεν υπάρχει τηλέφωνο'}</dd>
                   </div>
                 </div>
               )}

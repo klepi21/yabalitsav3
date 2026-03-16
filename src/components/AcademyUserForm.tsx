@@ -8,6 +8,10 @@ import {
   GroupCapability,
   Squad,
 } from '../types/academy';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Loader2, Plus, Search, UserPlus } from 'lucide-react';
 
 interface AcademyUserFormProps {
   venueId: string;
@@ -136,12 +140,6 @@ export default function AcademyUserForm({
     }
   };
 
-  const inputClasses =
-    'mt-1 block w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base';
-  const labelClasses = 'block text-sm font-medium text-gray-700 mb-1';
-  const selectClasses =
-    'mt-1 block w-full border border-gray-300 rounded-xl px-4 py-3 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-base appearance-none';
-
   // Render a single dynamic field
   const renderField = (field: UserGroupField, values: Record<string, string | number | null>, setValue: (key: string, val: string | number | null) => void) => {
     const value = values[field.key] ?? '';
@@ -151,33 +149,33 @@ export default function AcademyUserForm({
       case 'phone':
       case 'email':
         return (
-          <input
+          <Input
             type={field.type === 'phone' ? 'tel' : field.type}
             value={value}
             onChange={(e) => setValue(field.key, e.target.value)}
-            className={inputClasses}
             placeholder={field.placeholder || ''}
+            className="h-11 bg-white"
           />
         );
 
       case 'number':
         return (
-          <input
+          <Input
             type="number"
             value={value}
             onChange={(e) => setValue(field.key, e.target.value ? Number(e.target.value) : '')}
-            className={inputClasses}
             placeholder={field.placeholder || ''}
+            className="h-11 bg-white"
           />
         );
 
       case 'date':
         return (
-          <input
+          <Input
             type="date"
             value={value ? (typeof value === 'string' ? value : new Date(value).toISOString().split('T')[0]) : ''}
             onChange={(e) => setValue(field.key, e.target.value || null)}
-            className={inputClasses}
+            className="h-11 bg-white"
           />
         );
 
@@ -187,7 +185,7 @@ export default function AcademyUserForm({
             value={value}
             onChange={(e) => setValue(field.key, e.target.value)}
             rows={2}
-            className={inputClasses}
+            className="flex w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             placeholder={field.placeholder || ''}
           />
         );
@@ -197,7 +195,7 @@ export default function AcademyUserForm({
           <select
             value={value}
             onChange={(e) => setValue(field.key, e.target.value)}
-            className={selectClasses}
+            className="flex h-11 w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 appearance-none"
           >
             <option value="">Επιλέξτε...</option>
             {(field.options || []).map((opt) => (
@@ -208,37 +206,37 @@ export default function AcademyUserForm({
 
       default:
         return (
-          <input
+          <Input
             type="text"
             value={value}
             onChange={(e) => setValue(field.key, e.target.value)}
-            className={inputClasses}
+            className="h-11 bg-white"
           />
         );
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-8">
       {error && (
-        <div className="rounded-xl bg-red-50 p-4 border border-red-200">
-          <div className="text-sm text-red-700">{error}</div>
+        <div className="rounded-xl bg-red-50 border border-red-200/60 p-4">
+          <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
 
       {/* Group Selector */}
-      <div>
-        <label className={labelClasses}>Κατηγορία *</label>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-2">
+      <div className="space-y-3">
+        <Label className="text-zinc-700 text-sm font-medium">Κατηγορία *</Label>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {groups.map((group) => (
             <button
               key={group.id}
               type="button"
               onClick={() => handleGroupChange(group.id)}
-              className={`px-4 py-3 rounded-xl text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+              className={`px-4 py-3 rounded-xl text-sm font-medium transition-all duration-150 flex items-center justify-center gap-2 border ${
                 selectedGroupId === group.id
-                  ? 'bg-green-600 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm'
+                  : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
               }`}
             >
               <span>{group.icon}</span>
@@ -249,28 +247,26 @@ export default function AcademyUserForm({
       </div>
 
       {/* Display Name */}
-      <div>
-        <label htmlFor="displayName" className={labelClasses}>
-          Ονοματεπώνυμο *
-        </label>
-        <input
+      <div className="space-y-2">
+        <Label htmlFor="displayName" className="text-zinc-700">Ονοματεπώνυμο *</Label>
+        <Input
           type="text"
           id="displayName"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
-          className={inputClasses}
+          className="h-11 bg-white"
           placeholder="Εισάγετε ονοματεπώνυμο"
         />
       </div>
 
       {/* Dynamic Fields from Group Definition */}
       {selectedGroup && selectedGroup.fields.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {selectedGroup.fields.map((field) => (
-            <div key={field.key} className={field.type === 'textarea' ? 'sm:col-span-2' : ''}>
-              <label className={labelClasses}>
-                {field.label} {field.required && '*'}
-              </label>
+            <div key={field.key} className={`space-y-2 ${field.type === 'textarea' ? 'sm:col-span-2' : ''}`}>
+              <Label className="text-zinc-700">
+                {field.label} {field.required && <span className="text-red-400">*</span>}
+              </Label>
               {renderField(field, fieldValues, setFieldValue)}
             </div>
           ))}
@@ -279,12 +275,12 @@ export default function AcademyUserForm({
 
       {/* Squad Assignment (capability) */}
       {hasCapability('squad_assignment') && squads.length > 0 && (
-        <div>
-          <label className={labelClasses}>Τμήμα</label>
+        <div className="space-y-2">
+          <Label className="text-zinc-700">Τμήμα</Label>
           <select
             value={squadId}
             onChange={(e) => setSquadId(e.target.value)}
-            className={selectClasses}
+            className="flex h-11 w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 appearance-none"
           >
             <option value="">Χωρίς τμήμα</option>
             {squads.map((squad) => (
@@ -298,16 +294,18 @@ export default function AcademyUserForm({
 
       {/* Coach Squad Assignment (capability) */}
       {hasCapability('coach_squads') && squads.length > 0 && (
-        <div>
-          <label className={labelClasses}>Ανάθεση Τμημάτων</label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+        <div className="space-y-3">
+          <Label className="text-zinc-700">Ανάθεση Τμημάτων</Label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {squads.map((squad) => {
               const isAssigned = (initialData?.assigned_squads || []).includes(squad.id);
               return (
                 <label
                   key={squad.id}
-                  className={`flex items-center p-3 rounded-xl border cursor-pointer transition-all ${
-                    isAssigned ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300'
+                  className={`flex items-center p-3 rounded-xl border cursor-pointer transition-all duration-150 ${
+                    isAssigned
+                      ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                      : 'border-zinc-200 hover:border-zinc-300 text-zinc-600'
                   }`}
                 >
                   <input
@@ -316,7 +314,7 @@ export default function AcademyUserForm({
                     checked={isAssigned}
                     readOnly
                   />
-                  <span className="text-sm">{squad.name} ({squad.ageGroup})</span>
+                  <span className="text-sm font-medium">{squad.name} ({squad.ageGroup})</span>
                 </label>
               );
             })}
@@ -328,38 +326,48 @@ export default function AcademyUserForm({
       {hasCapability('parent_linking') && (
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <label className={labelClasses}>Σύνδεση με Γονέα</label>
+            <Label className="text-zinc-700">Σύνδεση με Γονέα</Label>
             {onParentQuickAdd && parentGroup && (
               <button
                 type="button"
                 onClick={() => setShowQuickAddParent(!showQuickAddParent)}
-                className="text-sm text-green-600 hover:text-green-700 font-medium"
+                className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
               >
-                {showQuickAddParent ? 'Ακύρωση' : '+ Γρήγορη Προσθήκη Γονέα'}
+                {showQuickAddParent ? (
+                  'Ακύρωση'
+                ) : (
+                  <>
+                    <Plus className="h-3.5 w-3.5" />
+                    Γρήγορη Προσθήκη
+                  </>
+                )}
               </button>
             )}
           </div>
 
           {!showQuickAddParent ? (
-            <>
-              <input
-                type="text"
-                placeholder="Αναζήτηση γονέα με όνομα, email ή τηλέφωνο..."
-                value={parentSearch}
-                onChange={(e) => setParentSearch(e.target.value)}
-                className={inputClasses}
-              />
-              <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-xl divide-y">
+            <div className="space-y-3">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                <Input
+                  type="text"
+                  placeholder="Αναζήτηση γονέα με όνομα, email ή τηλέφωνο..."
+                  value={parentSearch}
+                  onChange={(e) => setParentSearch(e.target.value)}
+                  className="pl-10 h-11 bg-white"
+                />
+              </div>
+              <div className="max-h-48 overflow-y-auto rounded-xl border border-zinc-200 divide-y divide-zinc-100">
                 {filteredParents.length === 0 ? (
-                  <div className="p-4 text-center text-gray-500 text-sm">
+                  <div className="p-4 text-center text-zinc-400 text-sm">
                     {parentSearch ? 'Δεν βρέθηκαν γονείς' : 'Δεν υπάρχουν γονείς'}
                   </div>
                 ) : (
                   filteredParents.map((parent) => (
                     <label
                       key={parent.id}
-                      className={`flex items-center p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                        parentUid === parent.id ? 'bg-green-50' : ''
+                      className={`flex items-center p-4 cursor-pointer hover:bg-zinc-50 transition-colors ${
+                        parentUid === parent.id ? 'bg-emerald-50' : ''
                       }`}
                     >
                       <input
@@ -368,11 +376,11 @@ export default function AcademyUserForm({
                         value={parent.id}
                         checked={parentUid === parent.id}
                         onChange={() => setParentUid(parent.id)}
-                        className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300"
+                        className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-zinc-300"
                       />
                       <div className="ml-3">
-                        <p className="text-sm font-medium text-gray-900">{parent.displayName}</p>
-                        <p className="text-xs text-gray-500">
+                        <p className="text-sm font-medium text-zinc-900">{parent.displayName}</p>
+                        <p className="text-xs text-zinc-400">
                           {parent.fields.phone ? `${parent.fields.phone} \u2022 ` : ''}
                           {parent.fields.email ?? ''}
                         </p>
@@ -381,56 +389,77 @@ export default function AcademyUserForm({
                   ))
                 )}
               </div>
-            </>
+            </div>
           ) : parentGroup ? (
-            <div className="bg-gray-50 rounded-xl p-4 space-y-4 border border-gray-200">
-              <p className="text-sm font-medium text-gray-700">Δημιουργία Νέου Γονέα</p>
-              <input
-                type="text"
-                placeholder="Ονοματεπώνυμο γονέα *"
-                value={quickParentName}
-                onChange={(e) => setQuickParentName(e.target.value)}
-                className={inputClasses}
-              />
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50/50 p-5 space-y-4">
+              <div className="flex items-center gap-2">
+                <UserPlus className="h-4 w-4 text-zinc-500" />
+                <p className="text-sm font-medium text-zinc-700">Δημιουργία Νέου Γονέα</p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-zinc-600 text-xs">Ονοματεπώνυμο *</Label>
+                <Input
+                  type="text"
+                  placeholder="Ονοματεπώνυμο γονέα"
+                  value={quickParentName}
+                  onChange={(e) => setQuickParentName(e.target.value)}
+                  className="h-11 bg-white"
+                />
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {parentGroup.fields.map((field) => (
-                  <div key={field.key}>
-                    <label className="block text-xs text-gray-500 mb-1">{field.label} {field.required && '*'}</label>
+                  <div key={field.key} className="space-y-2">
+                    <Label className="text-zinc-600 text-xs">{field.label} {field.required && <span className="text-red-400">*</span>}</Label>
                     {renderField(field, quickParentFields, (key: string, val: string | number | null) =>
                       setQuickParentFields((prev) => ({ ...prev, [key]: val }))
                     )}
                   </div>
                 ))}
               </div>
-              <button
+              <Button
                 type="button"
                 onClick={handleQuickAddParent}
                 disabled={isCreatingParent || !quickParentName}
-                className="w-full px-4 py-3 bg-green-600 text-white rounded-xl font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-full"
               >
-                {isCreatingParent ? 'Δημιουργία...' : 'Δημιουργία & Σύνδεση Γονέα'}
-              </button>
+                {isCreatingParent ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Δημιουργία...
+                  </>
+                ) : (
+                  'Δημιουργία & Σύνδεση Γονέα'
+                )}
+              </Button>
             </div>
           ) : null}
         </div>
       )}
 
       {/* Submit Buttons */}
-      <div className="flex flex-col sm:flex-row gap-3 pt-4">
-        <button
+      <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-zinc-100/60">
+        <Button
           type="button"
+          variant="outline"
           onClick={() => window.history.back()}
-          className="flex-1 px-6 py-4 border border-gray-300 rounded-xl text-base font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+          className="flex-1 h-11 border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900"
         >
           Ακύρωση
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
           disabled={isLoading}
-          className="flex-1 px-6 py-4 bg-green-600 text-white rounded-xl text-base font-medium hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+          className="flex-1 h-11"
         >
-          {isLoading ? 'Αποθήκευση...' : initialData?.id ? 'Ενημέρωση' : 'Δημιουργία'}
-        </button>
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Αποθήκευση...
+            </>
+          ) : (
+            initialData?.id ? 'Ενημέρωση' : 'Δημιουργία'
+          )}
+        </Button>
       </div>
     </form>
   );

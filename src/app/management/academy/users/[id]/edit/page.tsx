@@ -7,17 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import AcademyUserForm from '@/components/AcademyUserForm';
 import { academyUserService, userGroupService, squadService } from '@/lib/academy-services';
 import { AcademyUser, UserGroup, Squad } from '@/types/academy';
-import { Loader2, ArrowLeft, Users } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
+import { Loader2, ArrowLeft, Pencil, Users, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -88,7 +79,6 @@ export default function EditAcademyUserPage({ params }: PageProps) {
       setIsLoading(true);
       setError(null);
 
-      // Handle parent linkage changes
       if (user) {
         const oldParentId = user.parent_uid;
         const newParentId = data.parent_uid;
@@ -130,15 +120,15 @@ export default function EditAcademyUserPage({ params }: PageProps) {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-muted flex items-center justify-center">
+      <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-          <h2 className="text-xl font-bold text-foreground mb-2">Ο χρήστης δεν βρέθηκε</h2>
-          <p className="text-muted-foreground mb-4">Ο χρήστης που αναζητάτε δεν υπάρχει.</p>
+          <div className="mx-auto h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center mb-4">
+            <Users className="h-6 w-6 text-zinc-400" />
+          </div>
+          <h2 className="text-lg font-semibold text-zinc-900 mb-1">Ο χρήστης δεν βρέθηκε</h2>
+          <p className="text-sm text-zinc-400 mb-5">Ο χρήστης που αναζητάτε δεν υπάρχει.</p>
           <Button asChild>
-            <Link href="/management/academy/users">
-              Πίσω στους Χρήστες
-            </Link>
+            <Link href="/management/academy/users">Πίσω στους Χρήστες</Link>
           </Button>
         </div>
       </div>
@@ -146,66 +136,54 @@ export default function EditAcademyUserPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-muted">
-      <div className="bg-background border-b border-border sticky top-0 z-10">
-        <div className="px-4 py-4 sm:px-6">
-          <Breadcrumb className="mb-2">
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/management">Διαχείριση</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink asChild>
-                  <Link href="/management/academy/users">Χρήστες</Link>
-                </BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Επεξεργασία</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" asChild className="-ml-2">
-              <Link href="/management/academy/users">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-            </Button>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">Επεξεργασία Χρήστη</h1>
-              <p className="text-sm text-muted-foreground">
-                {user.displayName} {userGroup ? `(${userGroup.name})` : ''}
-              </p>
-            </div>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-4">
+        <Button variant="outline" size="icon" className="h-9 w-9 border-zinc-200 shrink-0" asChild>
+          <Link href="/management/academy/users">
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+        </Button>
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
+            <Pencil className="h-5 w-5 text-amber-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Επεξεργασία Χρήστη</h1>
+            <p className="text-sm text-zinc-500 mt-0.5">
+              {user.displayName} {userGroup ? `(${userGroup.name})` : ''}
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="px-4 py-6 sm:px-6 max-w-2xl mx-auto">
-        {error && (
-          <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm">
-            {error}
-            <button onClick={() => setError(null)} className="ml-2 underline">Απόρριψη</button>
+      {/* Error */}
+      {error && (
+        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+              <p className="text-sm text-destructive">{error}</p>
+            </div>
+            <Button variant="ghost" size="sm" onClick={() => setError(null)} className="text-destructive/60 hover:text-destructive shrink-0">
+              Κλείσιμο
+            </Button>
           </div>
-        )}
+        </div>
+      )}
 
-        <Card>
-          <CardContent>
-            <AcademyUserForm
-              venueId={venueId}
-              groups={groups}
-              initialData={user}
-              parentCandidates={parentCandidates}
-              squads={squads}
-              onSubmit={handleSubmit}
-              onParentQuickAdd={handleQuickAddParent}
-              isLoading={isLoading}
-            />
-          </CardContent>
-        </Card>
+      {/* Form Card */}
+      <div className="rounded-xl border border-zinc-100/60 bg-white p-6 sm:p-8">
+        <AcademyUserForm
+          venueId={venueId}
+          groups={groups}
+          initialData={user}
+          parentCandidates={parentCandidates}
+          squads={squads}
+          onSubmit={handleSubmit}
+          onParentQuickAdd={handleQuickAddParent}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   );
