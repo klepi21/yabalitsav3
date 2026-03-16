@@ -14,7 +14,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { cn } from '@/lib/utils';
+import { cn, toGreekUpperCase } from '@/lib/utils';
 
 const TRAINING_TYPES: TrainingType[] = ['training', 'friendly', 'fitness', 'tactical', 'recovery'];
 
@@ -137,7 +137,7 @@ export default function NewTrainingPage() {
             <Dumbbell className="h-7 w-7" />
           </div>
           <div>
-            <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-1">Νέα Προπόνηση</h1>
+            <h1 className="text-4xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Νέα Προπόνηση')}</h1>
             <p className="text-lg font-medium text-zinc-500">Προγραμματίστε την επόμενη δραστηριότητα της ομάδας.</p>
           </div>
         </div>

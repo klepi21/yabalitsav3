@@ -821,42 +821,42 @@ export default function DashboardPage() {
 
           {/* Venue Info Info Card - more prominent */}
           {venue && (
-            <Card className="premium-card bg-emerald-950 text-white overflow-hidden border-0">
+            <Card className="premium-card bg-white border-zinc-100 shadow-sm overflow-hidden">
               <CardHeader className="p-8 pb-4">
                 <CardTitle className="text-xl font-bold flex items-center gap-3">
-                  <Building2 className="h-5 w-5 text-emerald-400" />
+                  <Building2 className="h-5 w-5 text-emerald-600" />
                   {toGreekUpperCase('Πληροφορίες Γηπέδου')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="p-8 pt-0 space-y-6">
                 <div className="space-y-4">
                   <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-lg bg-emerald-900/50">
-                      <MapPin className="h-5 w-5 text-emerald-400" />
+                    <div className="p-2 rounded-lg bg-emerald-50">
+                      <MapPin className="h-5 w-5 text-emerald-600" />
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Διεύθυνση</p>
-                      <p className="text-[15px] font-medium leading-relaxed mt-1 opacity-90">{venue.address}</p>
+                      <p className="text-xs font-bold text-emerald-600 tracking-widest">{toGreekUpperCase('Διεύθυνση')}</p>
+                      <p className="text-[15px] font-medium leading-relaxed mt-1 text-zinc-900">{venue.address}</p>
                     </div>
                   </div>
                   
                   <div className="flex flex-col sm:flex-row gap-6">
                     <div className="flex items-start gap-4 flex-1">
-                      <div className="p-2 rounded-lg bg-emerald-900/50">
-                        <Phone className="h-5 w-5 text-emerald-400" />
+                      <div className="p-2 rounded-lg bg-emerald-50">
+                        <Phone className="h-5 w-5 text-emerald-600" />
                       </div>
                       <div>
-                        <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Τηλέφωνο</p>
-                        <p className="text-[15px] font-medium mt-1 opacity-90">{venue.phone || venue.contactDetails?.phone}</p>
+                        <p className="text-xs font-bold text-emerald-600 tracking-widest">{toGreekUpperCase('Τηλέφωνο')}</p>
+                        <p className="text-[15px] font-medium mt-1 text-zinc-900">{venue.phone || venue.contactDetails?.phone}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-4 flex-1">
-                      <div className="p-2 rounded-lg bg-emerald-900/50">
-                        <Mail className="h-5 w-5 text-emerald-400" />
+                      <div className="p-2 rounded-lg bg-emerald-50">
+                        <Mail className="h-5 w-5 text-emerald-600" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Email</p>
-                        <p className="text-[15px] font-medium mt-1 opacity-90 truncate">{venue.email || venue.contactDetails?.email}</p>
+                        <p className="text-xs font-bold text-emerald-600 tracking-widest">{toGreekUpperCase('Email')}</p>
+                        <p className="text-[15px] font-medium mt-1 text-zinc-900 truncate">{venue.email || venue.contactDetails?.email}</p>
                       </div>
                     </div>
                   </div>
@@ -864,12 +864,12 @@ export default function DashboardPage() {
 
                 <Button 
                   variant="outline" 
-                  className="w-full h-12 rounded-xl font-bold bg-white/10 border-white/20 hover:bg-white hover:text-emerald-950 transition-all text-white"
+                  className="w-full h-12 rounded-xl font-bold bg-zinc-50 border-zinc-100 hover:bg-emerald-50 hover:text-emerald-700 transition-all text-zinc-900"
                   asChild
                 >
                   <Link href="/management/settings">
                     <Settings className="h-4 w-4 mr-2" />
-                    Επεξεργασία Στοιχείων
+                    {toGreekUpperCase('Επεξεργασία Στοιχείων')}
                   </Link>
                 </Button>
               </CardContent>

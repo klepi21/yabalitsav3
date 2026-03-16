@@ -26,7 +26,8 @@ import { Booking, Pitch, Payment } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { Label } from '@/components/ui/label';
+import { cn, toGreekUpperCase } from '@/lib/utils';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -326,7 +327,8 @@ export default function ReportsPage() {
                   <TrendingUp className="h-10 w-10 text-emerald-600" />
                 </div>
                 <h2 className="text-3xl font-black tracking-tight text-zinc-900 mb-2">Περιοχή Διαχειριστή</h2>
-                <p className="text-zinc-500 font-medium">Εισάγετε τον 4ψήφιο PIN για πρόσβαση στα οικονομικά στοιχεία.</p>
+                <h2 className="text-3xl font-black tracking-tight text-zinc-900 mb-2">{toGreekUpperCase('Περιοχή Διαχειριστή')}</h2>
+                <p className="text-zinc-500 font-medium">{toGreekUpperCase('Εισάγετε τον 4ψήφιο PIN για πρόσβαση στα οικονομικά στοιχεία.')}</p>
               </div>
               
               <div className="space-y-8">
@@ -358,14 +360,14 @@ export default function ReportsPage() {
                     onClick={handleVerifyPin} 
                     className="h-16 w-full rounded-2xl bg-zinc-900 hover:bg-emerald-600 font-black text-white text-lg shadow-xl transition-all hover:translate-y-[-2px] active:translate-y-[1px]"
                   >
-                    Είσοδος
+                    {toGreekUpperCase('Είσοδος')}
                   </Button>
                   <Button 
                     variant="ghost" 
                     asChild 
                     className="h-14 font-bold text-zinc-400 hover:text-zinc-600 rounded-2xl"
                   >
-                    <Link href="/management/dashboard">Επιστροφή</Link>
+                    <Link href="/management/dashboard">{toGreekUpperCase('Επιστροφή')}</Link>
                   </Button>
                 </div>
               </div>
@@ -400,7 +402,7 @@ export default function ReportsPage() {
               onClick={() => { setError(null); loadData(); }} 
               className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 font-bold"
             >
-              Δοκιμάστε ξανά
+              {toGreekUpperCase('Δοκιμάστε ξανά')}
             </Button>
           </div>
         </div>
@@ -409,11 +411,11 @@ export default function ReportsPage() {
       {/* Header & Filters */}
       <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-8">
         <div>
-          <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-2">
-            Αναφορές & Στατιστικά
+          <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-2 uppercase">
+            {toGreekUpperCase('Αναφορές & Στατιστικά')}
           </h1>
           <p className="text-lg font-medium text-zinc-500">
-            Παρακολουθήστε την απόδοση της επιχείρησής σας σε πραγματικό χρόνο.
+            {toGreekUpperCase('Παρακολουθήστε την απόδοση της επιχείρησής σας σε πραγματικό χρόνο.')}
           </p>
         </div>
 
@@ -434,7 +436,7 @@ export default function ReportsPage() {
                     : 'text-zinc-400 hover:text-zinc-600'
                 }`}
               >
-                {opt.label}
+                {toGreekUpperCase(opt.label)}
               </button>
             ))}
           </div>
@@ -449,7 +451,7 @@ export default function ReportsPage() {
                 selectedPitch === 'all' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-400 hover:text-zinc-600'
               }`}
             >
-              Όλα
+              {toGreekUpperCase('Όλα')}
             </button>
             {pitches.map((pitch) => (
               <button
@@ -459,7 +461,7 @@ export default function ReportsPage() {
                   selectedPitch === pitch.id ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-400 hover:text-zinc-600'
                 }`}
               >
-                {pitch.name}
+                {toGreekUpperCase(pitch.name)}
               </button>
             ))}
           </div>
@@ -487,7 +489,7 @@ export default function ReportsPage() {
                 <Icon className="h-6 w-6" />
               </div>
               <p className="text-3xl font-black text-zinc-900 mb-1">{metric.value}</p>
-              <p className="text-xs font-black uppercase tracking-widest text-zinc-400">{metric.label}</p>
+              <p className="text-xs font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase(metric.label)}</p>
             </div>
           );
         })}
@@ -501,7 +503,7 @@ export default function ReportsPage() {
             <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
               <TrendingUp className="h-5 w-5 text-emerald-600" />
             </div>
-            <h3 className="text-xl font-black text-zinc-900">Τάση Εσόδων</h3>
+            <h3 className="text-xl font-black text-zinc-900">{toGreekUpperCase('Τάση Εσόδων')}</h3>
           </div>
           <div className="h-[300px] w-full">
             <Line data={revenueChartData} options={{
@@ -522,7 +524,7 @@ export default function ReportsPage() {
             <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
               <CalendarDays className="h-5 w-5 text-blue-600" />
             </div>
-            <h3 className="text-xl font-black text-zinc-900">Τάση Κρατήσεων</h3>
+            <h3 className="text-xl font-black text-zinc-900">{toGreekUpperCase('Τάση Κρατήσεων')}</h3>
           </div>
           <div className="h-[300px] w-full">
             <Line data={bookingsChartData} options={{
@@ -543,7 +545,7 @@ export default function ReportsPage() {
             <div className="h-10 w-10 rounded-xl bg-violet-50 flex items-center justify-center">
               <Goal className="h-5 w-5 text-violet-600" />
             </div>
-            <h3 className="text-xl font-black text-zinc-900">Απόδοση ανά Γήπεδο</h3>
+            <h3 className="text-xl font-black text-zinc-900">{toGreekUpperCase('Απόδοση ανά Γήπεδο')}</h3>
           </div>
           <div className="h-[300px] w-full">
             <Bar data={pitchPerformanceData} options={{
@@ -564,7 +566,7 @@ export default function ReportsPage() {
             <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center">
               <PieChart className="h-5 w-5 text-amber-600" />
             </div>
-            <h3 className="text-xl font-black text-zinc-900">Κατανομή Καταστάσεων</h3>
+            <h3 className="text-xl font-black text-zinc-900">{toGreekUpperCase('Κατανομή Καταστάσεων')}</h3>
           </div>
           <div className="flex items-center justify-center h-[300px]">
             <Doughnut data={statusData} options={{
@@ -595,7 +597,7 @@ export default function ReportsPage() {
           <div className="h-10 w-10 rounded-xl bg-zinc-100 flex items-center justify-center">
             <ClipboardList className="h-5 w-5 text-zinc-600" />
           </div>
-          <h3 className="text-xl font-black text-zinc-900">Ανάλυση Κρατήσεων</h3>
+          <h3 className="text-xl font-black text-zinc-900">{toGreekUpperCase('Ανάλυση Κρατήσεων')}</h3>
         </div>
         <div className="p-8 grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
@@ -607,7 +609,7 @@ export default function ReportsPage() {
             return (
               <div key={stat.label} className={cn("rounded-3xl p-8 flex flex-col items-center justify-center text-center transition-transform hover:scale-[1.02]", colorMap[stat.color])}>
                 <p className="text-5xl font-black mb-2">{stat.value}</p>
-                <p className="text-xs font-black uppercase tracking-widest opacity-80">{stat.label}</p>
+                <p className="text-xs font-black uppercase tracking-widest opacity-80">{toGreekUpperCase(stat.label)}</p>
               </div>
             );
           })}
@@ -621,7 +623,7 @@ export default function ReportsPage() {
             <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
               <CreditCard className="h-5 w-5 text-blue-600" />
             </div>
-            <h3 className="text-xl font-black text-zinc-900">Ιστορικό Πληρωμών</h3>
+            <h3 className="text-xl font-black text-zinc-900">{toGreekUpperCase('Ιστορικό Πληρωμών')}</h3>
           </div>
         </div>
 
@@ -630,8 +632,8 @@ export default function ReportsPage() {
             <div className="mx-auto h-24 w-24 rounded-[2.5rem] bg-zinc-50 flex items-center justify-center mb-8 shadow-sm">
               <CreditCard className="h-12 w-12 text-zinc-200" />
             </div>
-            <h4 className="text-2xl font-black text-zinc-900 mb-2">Δεν βρέθηκαν πληρωμές</h4>
-            <p className="text-zinc-500 font-medium">Δεν έχουν καταγραφεί οικονομικές συναλλαγές για την περίοδο αυτή.</p>
+            <h4 className="text-2xl font-black text-zinc-900 mb-2">{toGreekUpperCase('Δεν βρέθηκαν πληρωμές')}</h4>
+            <p className="text-zinc-500 font-medium">{toGreekUpperCase('Δεν έχουν καταγραφεί οικονομικές συναλλαγές για την περίοδο αυτή.')}</p>
           </div>
         ) : (
           <div className="p-8 space-y-8">
@@ -652,7 +654,7 @@ export default function ReportsPage() {
                   <div key={stat.label} className={cn("p-6 rounded-2xl flex items-center justify-between", colorStyles[stat.color])}>
                     <div className="flex items-center gap-3">
                       <Icon className="h-5 w-5" />
-                      <span className="font-black text-sm uppercase tracking-widest">{stat.label}</span>
+                      <span className="font-black text-sm uppercase tracking-widest">{toGreekUpperCase(stat.label)}</span>
                     </div>
                     <span className="text-2xl font-black">{stat.count}</span>
                   </div>
@@ -665,11 +667,11 @@ export default function ReportsPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-zinc-50">
-                    <th className="py-5 px-6 text-xs font-black uppercase tracking-widest text-zinc-400">Ημερομηνία</th>
-                    <th className="py-5 px-6 text-xs font-black uppercase tracking-widest text-zinc-400">Περιγραφή</th>
-                    <th className="py-5 px-6 text-xs font-black uppercase tracking-widest text-zinc-400">Διάρκεια</th>
-                    <th className="py-5 px-6 text-xs font-black uppercase tracking-widest text-zinc-400">Ποσό</th>
-                    <th className="py-5 px-6 text-xs font-black uppercase tracking-widest text-zinc-400 text-center">Κατάσταση</th>
+                    <th className="py-5 px-6 text-xs font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Ημερομηνία')}</th>
+                    <th className="py-5 px-6 text-xs font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Περιγραφή')}</th>
+                    <th className="py-5 px-6 text-xs font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Διάρκεια')}</th>
+                    <th className="py-5 px-6 text-xs font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Ποσό')}</th>
+                    <th className="py-5 px-6 text-xs font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Κατάσταση')}</th>
                     <th className="py-5 px-6 text-right"></th>
                   </tr>
                 </thead>
@@ -687,11 +689,11 @@ export default function ReportsPage() {
                       </td>
                       <td className="py-5 px-6">
                         <div className="flex flex-col">
-                          <span className="text-sm font-black text-zinc-900">{payment.planName || 'Πακέτο'}</span>
+                          <span className="text-sm font-black text-zinc-900">{payment.planName || toGreekUpperCase('Πακέτο')}</span>
                           <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                            {payment.paymentType === 'one_time_plan_purchase' ? 'Μιας Χρήσης' :
-                             payment.paymentType === 'subscription_payment' ? 'Συνδρομή' :
-                             payment.paymentType === 'booking_payment' ? 'Κράτηση' : '—'}
+                            {payment.paymentType === 'one_time_plan_purchase' ? toGreekUpperCase('Μιας Χρήσης') :
+                             payment.paymentType === 'subscription_payment' ? toGreekUpperCase('Συνδρομή') :
+                             payment.paymentType === 'booking_payment' ? toGreekUpperCase('Κράτηση') : '—'}
                           </span>
                         </div>
                       </td>

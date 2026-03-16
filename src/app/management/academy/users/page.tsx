@@ -197,7 +197,7 @@ export default function AcademyUsersPage() {
             )}
           >
             <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center mb-4 transition-colors", 
-              groupFilter === 'all' ? "bg-white/10 text-white" : "bg-zinc-100 text-zinc-400 group-hover:bg-emerald-100 group-hover:text-emerald-600"
+              groupFilter === 'all' ? "bg-white/20 text-white" : "bg-zinc-100 text-zinc-400 group-hover:bg-emerald-100 group-hover:text-emerald-600"
             )}>
               <Users className="h-5 w-5" />
             </div>

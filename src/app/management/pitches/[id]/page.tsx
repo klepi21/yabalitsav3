@@ -35,7 +35,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { cn, toGreekUpperCase } from '@/lib/utils';
 
 export default function PitchDetailsPage() {
   const router = useRouter();
@@ -160,7 +160,7 @@ export default function PitchDetailsPage() {
             </div>
             <div>
               <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-3xl font-black tracking-tight text-zinc-900">{pitch.name}</h1>
+                <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">{toGreekUpperCase(pitch.name)}</h1>
                 <Badge className="bg-emerald-50 text-emerald-700 border-none font-black text-[10px] uppercase tracking-wider px-3">
                   {pitch.type}
                 </Badge>
