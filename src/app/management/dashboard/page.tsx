@@ -689,28 +689,32 @@ export default function DashboardPage() {
                           <h4 className="text-sm font-medium text-foreground">
                             {booking.userName || booking.userEmail || 'Άγνωστος Πελάτης'}
                           </h4>
-                          <div className="flex items-center space-x-2">
-                            {getStatusBadge(booking.status)}
-                            <Select
-                              value={booking.status}
-                              onValueChange={(value) => handleStatusChange(
-                                booking.id,
-                                value as 'confirmed' | 'pending' | 'completed' | 'cancelled',
-                                booking.status,
-                                booking.userName || 'Άγνωστος'
-                              )}
-                            >
-                              <SelectTrigger className="h-7 w-[130px] text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="pending">Εκκρεμεί</SelectItem>
-                                <SelectItem value="confirmed">Επιβεβαιωμένη</SelectItem>
-                                <SelectItem value="completed">Ολοκληρωμένη</SelectItem>
-                                <SelectItem value="cancelled">Ακυρωμένη</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <button className="inline-flex items-center gap-1 cursor-pointer">
+                                {getStatusBadge(booking.status)}
+                                <ChevronDown className="h-3 w-3 text-zinc-400" />
+                              </button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'pending', booking.status, booking.userName || 'Άγνωστος')}>
+                                <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0" />
+                                Εκκρεμεί
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'confirmed', booking.status, booking.userName || 'Άγνωστος')}>
+                                <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
+                                Επιβεβαιωμένη
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'completed', booking.status, booking.userName || 'Άγνωστος')}>
+                                <span className="h-2 w-2 rounded-full bg-zinc-400 shrink-0" />
+                                Ολοκληρωμένη
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'cancelled', booking.status, booking.userName || 'Άγνωστος')} className="text-red-600">
+                                <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
+                                Ακυρωμένη
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                         <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                           <span className="flex items-center gap-1">
