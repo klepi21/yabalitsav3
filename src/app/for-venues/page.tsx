@@ -20,6 +20,7 @@ import {
   Loader2,
   Sparkles,
   PartyPopper,
+  ChevronDown,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -27,12 +28,11 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -57,7 +57,7 @@ export default function ForVenuesPage() {
     confirmPassword: '',
     venueName: '',
     venueAddress: '',
-    venueCity: 'Αθήνα',
+    venueCity: '',
     venueEmail: '',
     venuePhone: '',
     venueAfm: '',
@@ -128,7 +128,7 @@ export default function ForVenuesPage() {
       setShowCongrats(true);
       setForm({
         ownerName: '', ownerEmail: '', ownerPhone: '', password: '', confirmPassword: '',
-        venueName: '', venueAddress: '', venueCity: 'Αθήνα', venueEmail: '', venuePhone: '', venueAfm: '', venueDoy: '',
+        venueName: '', venueAddress: '', venueCity: '', venueEmail: '', venuePhone: '', venueAfm: '', venueDoy: '',
         plan: 'trial', acceptTerms: false
       });
     } catch (err: unknown) {
@@ -394,19 +394,27 @@ export default function ForVenuesPage() {
                 </div>
                 <div className="space-y-2">
                   <Label className="text-zinc-700">Πόλη</Label>
-                  <Select
-                    value={form.venueCity}
-                    onValueChange={(value) => setForm({ ...form, venueCity: value })}
-                  >
-                    <SelectTrigger className="w-full h-11 bg-white">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Αθήνα">Αθήνα</SelectItem>
-                      <SelectItem value="Θεσσαλονίκη">Θεσσαλονίκη</SelectItem>
-                      <SelectItem value="Πάτρα">Πάτρα</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button type="button" className="flex h-11 w-full items-center justify-between rounded-lg border border-zinc-200/70 bg-white px-3 text-sm text-zinc-900 hover:bg-zinc-50 transition-colors">
+                        <span className={form.venueCity ? 'text-zinc-900' : 'text-zinc-400'}>
+                          {form.venueCity || 'Επιλέξτε πόλη'}
+                        </span>
+                        <ChevronDown className="h-4 w-4 text-zinc-400" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)] max-h-64 overflow-y-auto">
+                      {['Αθήνα', 'Θεσσαλονίκη', 'Πάτρα', 'Ηράκλειο', 'Λάρισα', 'Βόλος', 'Ιωάννινα', 'Χανιά', 'Καβάλα', 'Ρόδος', 'Σέρρες', 'Αλεξανδρούπολη', 'Κατερίνη', 'Τρίκαλα', 'Καλαμάτα', 'Κέρκυρα', 'Κομοτηνή', 'Ξάνθη', 'Δράμα', 'Κοζάνη', 'Άλλη'].map((city) => (
+                        <DropdownMenuItem
+                          key={city}
+                          onClick={() => setForm({ ...form, venueCity: city })}
+                          className={form.venueCity === city ? 'bg-zinc-100 font-medium' : ''}
+                        >
+                          {city}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
                 <div className="space-y-2">
                   <Label className="text-zinc-700">ΑΦΜ Επιχείρησης</Label>
