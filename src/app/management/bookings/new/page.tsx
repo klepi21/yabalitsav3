@@ -36,7 +36,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { cn } from '@/lib/utils';
+import { cn, toGreekUpperCase } from '@/lib/utils';
 
 // Form validation schema
 const bookingCreateSchema = z.object({
@@ -440,8 +440,8 @@ export default function NewBookingPage() {
                   <CalendarDays className="h-6 w-6 text-white" />
                 )}
               </div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900">
-                {isRecurring ? 'Επαναλαμβανόμενη Κράτηση' : 'Νέα Κράτηση'}
+              <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 uppercase">
+                {toGreekUpperCase(isRecurring ? 'Επαναλαμβανόμενη Κράτηση' : 'Νέα Κράτηση')}
               </h1>
             </div>
             <p className="text-[16px] font-medium text-zinc-500 max-w-lg">
@@ -487,7 +487,7 @@ export default function NewBookingPage() {
                     <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center border border-zinc-100">
                       <Users className="h-5 w-5 text-zinc-400" />
                     </div>
-                    <h3 className="text-xl font-black text-zinc-900">Στοιχεία Πελάτη</h3>
+                    <h3 className="text-xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Στοιχεία Πελάτη')}</h3>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -528,7 +528,7 @@ export default function NewBookingPage() {
                     <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center border border-zinc-100">
                       <CalendarDays className="h-5 w-5 text-zinc-400" />
                     </div>
-                    <h3 className="text-xl font-black text-zinc-900">Επιλογή Χώρου & Χρόνου</h3>
+                    <h3 className="text-xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Επιλογή Χώρου & Χρόνου')}</h3>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -621,7 +621,7 @@ export default function NewBookingPage() {
                       <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center border border-zinc-100">
                         <RefreshCw className="h-5 w-5 text-zinc-400" />
                       </div>
-                      <h3 className="text-xl font-black text-zinc-900">Επαναλαμβανόμενη</h3>
+                      <h3 className="text-xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Επαναλαμβανόμενη')}</h3>
                     </div>
                     <div
                       className={cn(
@@ -792,7 +792,7 @@ export default function NewBookingPage() {
           <Card className="premium-card bg-emerald-600 border-0 overflow-hidden shadow-2xl shadow-emerald-200">
             <CardContent className="p-8 text-white">
               <div className="flex items-center justify-between mb-8">
-                <p className="text-xs font-black uppercase tracking-[3px] opacity-70">Σύνοψη Πληρωμής</p>
+                <p className="text-xs font-black uppercase tracking-[3px] opacity-70">{toGreekUpperCase('Σύνοψη Πληρωμής')}</p>
                 <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">
                   <Euro className="h-5 w-5 text-emerald-100" />
                 </div>

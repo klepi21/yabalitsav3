@@ -268,7 +268,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                             className="inline-flex items-center gap-2 text-[13px] font-bold text-white bg-zinc-900 hover:bg-zinc-800 px-5 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95"
                           >
                             <Zap className="h-4 w-4" />
-                            Ανανέωση Τώρα
+                            {toGreekUpperCase('Ανανέωση Τώρα')}
                           </Link>
                         ) : (
                           <Link

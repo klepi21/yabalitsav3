@@ -35,7 +35,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { cn } from '@/lib/utils';
+import { cn, toGreekUpperCase } from '@/lib/utils';
 
 // Form validation schema
 const venueSettingsSchema = z.object({
@@ -325,8 +325,8 @@ export default function SettingsPage() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Επιστροφή στον Πίνακα Ελέγχου
           </Link>
-          <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-2">
-            Ρυθμίσεις Γηπέδου
+          <h1 className="text-4xl font-black tracking-tight text-zinc-900 uppercase">
+            {toGreekUpperCase('Ρυθμίσεις')}
           </h1>
           <p className="text-lg font-medium text-zinc-500">
             Διαμορφώστε τις προτιμήσεις και τις ρυθμίσεις του κέντρου σας.
@@ -553,34 +553,34 @@ export default function SettingsPage() {
         <div className="space-y-8">
           {/* Current Plan Info */}
           {venue && (
-            <Card className="premium-card border-none bg-zinc-900 text-white overflow-hidden group">
+            <Card className="premium-card border-none bg-zinc-900 text-white overflow-hidden group shadow-2xl shadow-zinc-200">
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
                 <Sparkles className="h-32 w-32" />
               </div>
               <CardHeader>
-                <CardTitle className="text-zinc-400 font-black text-xs uppercase tracking-widest">Τρέχον Πλάνο</CardTitle>
+                <CardTitle className="text-zinc-400 font-black text-xs uppercase tracking-widest">{toGreekUpperCase('Τρέχον Πλάνο')}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col gap-8 relative z-10">
                   <div className="flex items-end gap-3">
                     <span className="text-5xl font-black text-white">
-                      {venue.planType || 'Basic'}
+                      {toGreekUpperCase(venue.planType || 'Basic')}
                     </span>
                     <span className="text-zinc-400 font-bold mb-2">
-                      {venue.plan === 'subscription' ? 'Plan' : 'Free Trial'}
+                      {toGreekUpperCase(venue.plan === 'subscription' ? 'Plan' : 'Free Trial')}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                      <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1">Υπόλοιπο</p>
+                      <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1">{toGreekUpperCase('Υπόλοιπο')}</p>
                       <p className="text-2xl font-black text-white">
-                        {calculateDaysRemaining(venue) ?? 0} <span className="text-sm font-bold opacity-60">ημέρες</span>
+                        {calculateDaysRemaining(venue) ?? 0} <span className="text-sm font-bold opacity-60 uppercase">{toGreekUpperCase('ημέρες')}</span>
                       </p>
                     </div>
 
                     <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                      <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1">Λήξη</p>
+                      <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1">{toGreekUpperCase('Λήξη')}</p>
                       <p className="text-sm font-black text-white truncate">
                         {(() => {
                           const endDateInfo = getSubscriptionEndDate(venue, lastPayment);
@@ -596,7 +596,7 @@ export default function SettingsPage() {
                   >
                     <Link href="/management/settings/renewal">
                       <ArrowUpCircle className="h-5 w-5 mr-3" />
-                      Ανανέωση ή Αναβάθμιση
+                      {toGreekUpperCase('Ανανέωση ή Αναβάθμιση')}
                     </Link>
                   </Button>
                 </div>
@@ -613,7 +613,7 @@ export default function SettingsPage() {
                     <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center">
                       <CreditCard className="h-5 w-5 text-orange-600" />
                     </div>
-                    Τελευταία Πληρωμή
+                    {toGreekUpperCase('Τελευταία Πληρωμή')}
                   </div>
                   <Badge className={cn(
                     "rounded-xl px-4 py-1 font-black text-[10px] uppercase tracking-widest",
@@ -682,7 +682,7 @@ export default function SettingsPage() {
                 <div className="h-16 w-16 rounded-[1.5rem] bg-white text-blue-600 flex items-center justify-center mb-6 shadow-sm">
                   <LifeBuoy className="h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-black text-zinc-900 mb-2">Χρειάζεστε βοήθεια;</h3>
+                <h3 className="text-xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Χρειάζεστε βοήθεια;')}</h3>
                 <p className="text-zinc-500 font-medium mb-8">
                   Η ομάδα μας είναι διαθέσιμη για να σας υποστηρίξει σε ό,τι χρειαστείτε.
                 </p>
