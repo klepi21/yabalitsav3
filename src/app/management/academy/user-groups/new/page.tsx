@@ -111,7 +111,6 @@ export default function NewUserGroupPage() {
         color,
         fields,
         capabilities: [],
-        isDefault: false,
         order: 99,
         venueId,
       });

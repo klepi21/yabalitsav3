@@ -154,11 +154,6 @@ export default function UserGroupsPage() {
                         <Badge variant="secondary" className={`text-[11px] ${GROUP_COLORS[group.color] || ''}`}>
                           {group.namePlural}
                         </Badge>
-                        {group.isDefault && (
-                          <Badge variant="outline" className="text-[11px] border-zinc-200/60 text-zinc-400">
-                            Προεπιλογή
-                          </Badge>
-                        )}
                       </div>
 
                       {/* Fields */}
@@ -211,43 +206,32 @@ export default function UserGroupsPage() {
                         Επεξεργασία
                       </Link>
                     </Button>
-                    {group.isDefault ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 w-8 p-0 border-zinc-100 text-zinc-300 cursor-not-allowed"
-                        disabled
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
-                    ) : (
-                      <AlertDialog open={deleteConfirm === group.id} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0 border-red-200 text-red-500 hover:text-red-700 hover:bg-red-50 hover:border-red-300"
-                            onClick={() => setDeleteConfirm(group.id)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Διαγραφή κατηγορίας</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Είστε σίγουροι ότι θέλετε να διαγράψετε την κατηγορία &quot;{group.name}&quot;;
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Ακύρωση</AlertDialogCancel>
-                            <AlertDialogAction variant="destructive" onClick={() => handleDelete(group.id)}>
-                              Διαγραφή
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    )}
+                    <AlertDialog open={deleteConfirm === group.id} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-8 p-0 border-red-200 text-red-500 hover:text-red-700 hover:bg-red-50 hover:border-red-300"
+                          onClick={() => setDeleteConfirm(group.id)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Διαγραφή κατηγορίας</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Είστε σίγουροι ότι θέλετε να διαγράψετε την κατηγορία &quot;{group.name}&quot;;
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Ακύρωση</AlertDialogCancel>
+                          <AlertDialogAction variant="destructive" onClick={() => handleDelete(group.id)}>
+                            Διαγραφή
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
 
                 </div>

@@ -35,7 +35,7 @@ export default function NewSquadPage() {
     const loadCoaches = async () => {
       try {
         const groups = await userGroupService.getOrSeed(venueId);
-        const coachGroup = groups.find((g) => g.isDefault && g.name === 'Προπονητής');
+        const coachGroup = groups.find((g) => g.name === 'Προπονητής');
         if (coachGroup) {
           const coachUsers = await academyUserService.getByGroup(venueId, coachGroup.id);
           setCoaches(coachUsers);

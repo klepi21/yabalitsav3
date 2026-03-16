@@ -1,17 +1,19 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import {
   AcademyUser,
   UserGroup,
   UserGroupField,
+  UserDocument,
   GroupCapability,
   Squad,
 } from '../types/academy';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Plus, Search, UserPlus } from 'lucide-react';
+import { Loader2, Plus, Search, UserPlus, FileText, Upload, Trash2, Download } from 'lucide-react';
+import { storageService } from '@/lib/storage-service';
 
 interface AcademyUserFormProps {
   venueId: string;
@@ -34,14 +36,30 @@ export default function AcademyUserForm({
   onParentQuickAdd,
   isLoading = false,
 }: AcademyUserFormProps) {
-  const defaultGroupId = initialData?.groupId || groups[0]?.id || '';
+  // Resolve groupId — handle old role-based values like 'athlete' by matching group name
+  const resolveGroupId = (gid: string | undefined) => {
+    if (!gid) return groups[0]?.id || '';
+    if (groups.find((g) => g.id === gid)) return gid;
+    // Fallback: match by legacy role name
+    const roleMap: Record<string, string> = { athlete: 'Αθλητής', parent: 'Γονέας', coach: 'Προπονητής', admin: 'Διαχειριστής' };
+    const matchedGroup = groups.find((g) => g.name === roleMap[gid]);
+    return matchedGroup?.id || groups[0]?.id || '';
+  };
+
+  const defaultGroupId = resolveGroupId(initialData?.groupId);
 
   const [selectedGroupId, setSelectedGroupId] = useState(defaultGroupId);
   const [displayName, setDisplayName] = useState(initialData?.displayName || '');
   const [fieldValues, setFieldValues] = useState<Record<string, string | number | null>>(initialData?.fields || {});
-  const [squadId, setSquadId] = useState(initialData?.squad_id || '');
+  const [squadIds, setSquadIds] = useState<string[]>(initialData?.squad_ids || (initialData?.squad_id ? [initialData.squad_id] : []));
   const [parentUid, setParentUid] = useState(initialData?.parent_uid || '');
+  const [assignedSquads, setAssignedSquads] = useState<string[]>(initialData?.assigned_squads || []);
   const [error, setError] = useState<string | null>(null);
+
+  // Documents state
+  const [documents, setDocuments] = useState<UserDocument[]>(initialData?.documents || []);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Quick add parent state
   const [showQuickAddParent, setShowQuickAddParent] = useState(false);
@@ -57,7 +75,7 @@ export default function AcademyUserForm({
 
   // Find the "parent" group for quick-add
   const parentGroup = useMemo(
-    () => groups.find((g) => g.isDefault && g.name === 'Γονέας'),
+    () => groups.find((g) => g.name === 'Γονέας'),
     [groups]
   );
 
@@ -85,6 +103,46 @@ export default function AcademyUserForm({
     setParentUid('');
   };
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const userId = initialData?.id || 'new';
+
+    try {
+      setIsUploading(true);
+      setError(null);
+      const newDocs: UserDocument[] = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const doc = await storageService.uploadUserDocument(venueId, userId, files[i]);
+        newDocs.push(doc);
+      }
+
+      setDocuments((prev) => [...prev, ...newDocs]);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Αποτυχία ανεβάσματος αρχείου');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  const handleDeleteDocument = async (doc: UserDocument) => {
+    try {
+      await storageService.deleteUserDocument(doc.path);
+    } catch {
+      // File may already be deleted from storage — that's fine
+    }
+    setDocuments((prev) => prev.filter((d) => d.path !== doc.path));
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!displayName.trim()) {
@@ -109,9 +167,10 @@ export default function AcademyUserForm({
         displayName: displayName.trim(),
         venueId,
         fields: fieldValues,
-        ...(hasCapability('squad_assignment') && { squad_id: squadId }),
+        documents,
+        ...(hasCapability('squad_assignment') && { squad_ids: squadIds, squad_id: squadIds[0] || '' }),
         ...(hasCapability('parent_linking') && { parent_uid: parentUid }),
-        ...(hasCapability('coach_squads') && { assigned_squads: initialData?.assigned_squads || [] }),
+        ...(hasCapability('coach_squads') && { assigned_squads: assignedSquads }),
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Σφάλμα κατά την αποθήκευση');
@@ -224,27 +283,29 @@ export default function AcademyUserForm({
         </div>
       )}
 
-      {/* Group Selector */}
-      <div className="space-y-3">
-        <Label className="text-zinc-700 text-sm font-medium">Κατηγορία *</Label>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {groups.map((group) => (
-            <button
-              key={group.id}
-              type="button"
-              onClick={() => handleGroupChange(group.id)}
-              className={`px-4 py-3 rounded-xl text-sm font-medium transition-all duration-150 flex items-center justify-center gap-2 border ${
-                selectedGroupId === group.id
-                  ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm'
-                  : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
-              }`}
-            >
-              <span>{group.icon}</span>
-              {group.name}
-            </button>
-          ))}
+      {/* Group Selector — only show on create */}
+      {!initialData && (
+        <div className="space-y-3">
+          <Label className="text-zinc-700 text-sm font-medium">Κατηγορία *</Label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {groups.map((group) => (
+              <button
+                key={group.id}
+                type="button"
+                onClick={() => handleGroupChange(group.id)}
+                className={`px-4 py-3 rounded-xl text-sm font-medium transition-all duration-150 flex items-center justify-center gap-2 border ${
+                  selectedGroupId === group.id
+                    ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm'
+                    : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
+                }`}
+              >
+                <span>{group.icon}</span>
+                {group.name}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Display Name */}
       <div className="space-y-2">
@@ -275,20 +336,35 @@ export default function AcademyUserForm({
 
       {/* Squad Assignment (capability) */}
       {hasCapability('squad_assignment') && squads.length > 0 && (
-        <div className="space-y-2">
-          <Label className="text-zinc-700">Τμήμα</Label>
-          <select
-            value={squadId}
-            onChange={(e) => setSquadId(e.target.value)}
-            className="flex h-11 w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 appearance-none"
-          >
-            <option value="">Χωρίς τμήμα</option>
-            {squads.map((squad) => (
-              <option key={squad.id} value={squad.id}>
-                {squad.name} ({squad.ageGroup})
-              </option>
-            ))}
-          </select>
+        <div className="space-y-3">
+          <Label className="text-zinc-700">Τμήματα</Label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {squads.map((squad) => {
+              const isSelected = squadIds.includes(squad.id);
+              return (
+                <label
+                  key={squad.id}
+                  className={`flex items-center p-3 rounded-xl border cursor-pointer transition-all duration-150 ${
+                    isSelected
+                      ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
+                      : 'border-zinc-200 hover:border-zinc-300 text-zinc-600'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    className="sr-only"
+                    checked={isSelected}
+                    onChange={() => {
+                      setSquadIds((prev) =>
+                        isSelected ? prev.filter((id) => id !== squad.id) : [...prev, squad.id]
+                      );
+                    }}
+                  />
+                  <span className="text-sm font-medium">{squad.name} ({squad.ageGroup})</span>
+                </label>
+              );
+            })}
+          </div>
         </div>
       )}
 
@@ -298,7 +374,7 @@ export default function AcademyUserForm({
           <Label className="text-zinc-700">Ανάθεση Τμημάτων</Label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {squads.map((squad) => {
-              const isAssigned = (initialData?.assigned_squads || []).includes(squad.id);
+              const isAssigned = assignedSquads.includes(squad.id);
               return (
                 <label
                   key={squad.id}
@@ -312,7 +388,11 @@ export default function AcademyUserForm({
                     type="checkbox"
                     className="sr-only"
                     checked={isAssigned}
-                    readOnly
+                    onChange={() => {
+                      setAssignedSquads((prev) =>
+                        isAssigned ? prev.filter((id) => id !== squad.id) : [...prev, squad.id]
+                      );
+                    }}
                   />
                   <span className="text-sm font-medium">{squad.name} ({squad.ageGroup})</span>
                 </label>
@@ -435,6 +515,81 @@ export default function AcademyUserForm({
           ) : null}
         </div>
       )}
+
+      {/* Documents (PDF Upload) */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label className="text-zinc-700 text-sm font-medium">Αρχεία / Έγγραφα (PDF)</Label>
+          <span className="text-xs text-zinc-400">Μέγ. 10MB ανά αρχείο</span>
+        </div>
+
+        {/* Uploaded Documents List */}
+        {documents.length > 0 && (
+          <div className="space-y-2">
+            {documents.map((doc) => (
+              <div
+                key={doc.path}
+                className="flex items-center gap-3 p-3 rounded-xl border border-zinc-200 bg-zinc-50/50 group"
+              >
+                <div className="h-9 w-9 rounded-lg bg-red-50 flex items-center justify-center shrink-0">
+                  <FileText className="h-4 w-4 text-red-500" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-zinc-900 truncate">{doc.name}</p>
+                  <p className="text-xs text-zinc-400">
+                    {formatFileSize(doc.size)} • {new Date(doc.uploadedAt).toLocaleDateString('el-GR')}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <a
+                    href={doc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
+                  >
+                    <Download className="h-4 w-4" />
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteDocument(doc)}
+                    className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Upload Button */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf"
+          multiple
+          onChange={handleFileUpload}
+          className="hidden"
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={isUploading}
+          className="w-full flex items-center justify-center gap-2 p-4 rounded-xl border-2 border-dashed border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:text-zinc-700 hover:bg-zinc-50/50 transition-all duration-150"
+        >
+          {isUploading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-sm font-medium">Ανέβασμα...</span>
+            </>
+          ) : (
+            <>
+              <Upload className="h-4 w-4" />
+              <span className="text-sm font-medium">Ανέβασμα PDF αρχείων</span>
+            </>
+          )}
+        </button>
+      </div>
 
       {/* Submit Buttons */}
       <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-zinc-100/60">

@@ -28,7 +28,6 @@ export interface UserGroup {
   color: string;         // tailwind color key (e.g., 'green', 'blue')
   fields: UserGroupField[];
   capabilities: GroupCapability[];  // special built-in features
-  isDefault: boolean;    // true for system-created groups (can't be deleted)
   order: number;         // display order
   createdAt: Date;
   updatedAt: Date;
@@ -59,14 +58,24 @@ export const AVAILABLE_ICONS = [
 // Academy User (generic, works with any group)
 // ============================================
 
+export interface UserDocument {
+  name: string;        // original file name
+  url: string;         // Firebase Storage download URL
+  path: string;        // Storage path for deletion
+  size: number;        // file size in bytes
+  uploadedAt: string;  // ISO date string
+}
+
 export interface AcademyUser {
   id: string;
   groupId: string;       // references UserGroup.id
   displayName: string;
   venueId: string;
   fields: Record<string, string | number | null>;  // dynamic field values
+  documents?: UserDocument[];  // uploaded PDF files
   // Special relationship fields (used by capabilities)
-  squad_id?: string;
+  squad_id?: string;       // legacy single squad
+  squad_ids?: string[];    // multiple squad assignment
   parent_uid?: string;
   linked_athletes?: string[];
   assigned_squads?: string[];
@@ -98,7 +107,6 @@ export const DEFAULT_GROUPS: Omit<UserGroup, 'id' | 'venueId' | 'createdAt' | 'u
     namePlural: 'Αθλητές',
     icon: '⚽',
     color: 'green',
-    isDefault: true,
     order: 1,
     capabilities: ['squad_assignment', 'parent_linking'],
     fields: [
@@ -111,7 +119,6 @@ export const DEFAULT_GROUPS: Omit<UserGroup, 'id' | 'venueId' | 'createdAt' | 'u
     namePlural: 'Γονείς',
     icon: '👨‍👩‍👧',
     color: 'amber',
-    isDefault: true,
     order: 2,
     capabilities: [],
     fields: [
@@ -125,7 +132,6 @@ export const DEFAULT_GROUPS: Omit<UserGroup, 'id' | 'venueId' | 'createdAt' | 'u
     namePlural: 'Προπονητές',
     icon: '🏆',
     color: 'blue',
-    isDefault: true,
     order: 3,
     capabilities: ['coach_squads'],
     fields: [
@@ -146,7 +152,6 @@ export const DEFAULT_GROUPS: Omit<UserGroup, 'id' | 'venueId' | 'createdAt' | 'u
     namePlural: 'Διαχειριστές',
     icon: '👤',
     color: 'purple',
-    isDefault: true,
     order: 4,
     capabilities: [],
     fields: [

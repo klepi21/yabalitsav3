@@ -119,14 +119,8 @@ export const userGroupService = {
     await updateDoc(docRef, updateData);
   },
 
-  // Delete a group (only non-default, backend enforced)
   async delete(id: string): Promise<void> {
-    const docRef = doc(db, GROUPS_COLLECTION, id);
-    const snap = await getDoc(docRef);
-    if (snap.exists() && snap.data()?.isDefault === true) {
-      throw new Error('Δεν μπορείτε να διαγράψετε μια προεπιλεγμένη κατηγορία');
-    }
-    await deleteDoc(docRef);
+    await deleteDoc(doc(db, GROUPS_COLLECTION, id));
   },
 };
 
@@ -141,7 +135,9 @@ function convertToUser(id: string, data: Record<string, unknown>): AcademyUser {
     displayName: (data.displayName as string) || '',
     venueId: (data.venueId as string) || '',
     fields: (data.fields as Record<string, string | number | null>) || {},
+    documents: (data.documents as AcademyUser['documents']) || [],
     squad_id: data.squad_id as string | undefined,
+    squad_ids: (data.squad_ids as string[]) || (data.squad_id ? [data.squad_id as string] : []),
     parent_uid: data.parent_uid as string | undefined,
     linked_athletes: data.linked_athletes as string[] | undefined,
     assigned_squads: data.assigned_squads as string[] | undefined,

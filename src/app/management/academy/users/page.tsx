@@ -95,7 +95,7 @@ export default function AcademyUsersPage() {
         (typeof user.fields.phone === 'string' && user.fields.phone.includes(searchQuery));
 
       const matchesGroup = groupFilter === 'all' || user.groupId === groupFilter;
-      const matchesSquad = !squadFilter || user.squad_id === squadFilter;
+      const matchesSquad = !squadFilter || (user.squad_ids || []).includes(squadFilter) || user.squad_id === squadFilter;
 
       return matchesSearch && matchesGroup && matchesSquad;
     });
@@ -181,47 +181,49 @@ export default function AcademyUsersPage() {
         </Button>
       </div>
 
-      {/* Stats pills */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <button
-          onClick={() => setGroupFilter('all')}
-          className={`flex items-center gap-2.5 rounded-xl border px-4 py-2.5 transition-all duration-150 ${
-            groupFilter === 'all'
-              ? 'border-zinc-300 bg-white shadow-sm'
-              : 'border-zinc-100/60 bg-white/60 hover:border-zinc-200/80'
-          }`}
-        >
-          <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center">
-            <Users className="h-4 w-4 text-zinc-600" />
-          </div>
-          <div className="text-left">
-            <p className="text-lg font-semibold tracking-tight text-zinc-900">{userStats.total}</p>
-            <p className="text-[11px] text-zinc-400 leading-none">Σύνολο</p>
-          </div>
-        </button>
-        {groups.map((group) => {
-          const isActive = groupFilter === group.id;
-          return (
-            <button
-              key={group.id}
-              onClick={() => setGroupFilter(isActive ? 'all' : group.id)}
-              className={`flex items-center gap-2.5 rounded-xl border px-4 py-2.5 transition-all duration-150 ${
-                isActive
-                  ? 'border-zinc-300 bg-white shadow-sm'
-                  : 'border-zinc-100/60 bg-white/60 hover:border-zinc-200/80'
-              }`}
-            >
-              <Badge variant="secondary" className={`h-8 w-8 rounded-lg p-0 flex items-center justify-center text-xs ${GROUP_COLORS[group.color] || ''}`}>
-                {group.icon || '👤'}
-              </Badge>
-              <div className="text-left">
-                <p className="text-lg font-semibold tracking-tight text-zinc-900">{userStats[group.id] || 0}</p>
-                <p className="text-[11px] text-zinc-400 leading-none">{group.namePlural}</p>
-              </div>
-            </button>
-          );
-        })}
-      </div>
+      {/* Stats pills — hide when filtered by squad */}
+      {!urlSquad && (
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => setGroupFilter('all')}
+            className={`flex items-center gap-2.5 rounded-xl border px-4 py-2.5 transition-all duration-150 ${
+              groupFilter === 'all'
+                ? 'border-zinc-300 bg-white shadow-sm'
+                : 'border-zinc-100/60 bg-white/60 hover:border-zinc-200/80'
+            }`}
+          >
+            <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center">
+              <Users className="h-4 w-4 text-zinc-600" />
+            </div>
+            <div className="text-left">
+              <p className="text-lg font-semibold tracking-tight text-zinc-900">{userStats.total}</p>
+              <p className="text-[11px] text-zinc-400 leading-none">Σύνολο</p>
+            </div>
+          </button>
+          {groups.map((group) => {
+            const isActive = groupFilter === group.id;
+            return (
+              <button
+                key={group.id}
+                onClick={() => setGroupFilter(isActive ? 'all' : group.id)}
+                className={`flex items-center gap-2.5 rounded-xl border px-4 py-2.5 transition-all duration-150 ${
+                  isActive
+                    ? 'border-zinc-300 bg-white shadow-sm'
+                    : 'border-zinc-100/60 bg-white/60 hover:border-zinc-200/80'
+                }`}
+              >
+                <Badge variant="secondary" className={`h-8 w-8 rounded-lg p-0 flex items-center justify-center text-xs ${GROUP_COLORS[group.color] || ''}`}>
+                  {group.icon || '👤'}
+                </Badge>
+                <div className="text-left">
+                  <p className="text-lg font-semibold tracking-tight text-zinc-900">{userStats[group.id] || 0}</p>
+                  <p className="text-[11px] text-zinc-400 leading-none">{group.namePlural}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Search + Filter row */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3">
@@ -235,16 +237,18 @@ export default function AcademyUsersPage() {
             className="pl-10"
           />
         </div>
-        <select
-          value={groupFilter}
-          onChange={(e) => setGroupFilter(e.target.value)}
-          className="flex h-9 rounded-lg border border-zinc-200/70 bg-white px-3 py-1 text-sm shadow-none transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:w-[200px]"
-        >
-          <option value="all">Όλες οι Κατηγορίες</option>
-          {groups.map((g) => (
-            <option key={g.id} value={g.id}>{g.namePlural}</option>
-          ))}
-        </select>
+        {!urlSquad && (
+          <select
+            value={groupFilter}
+            onChange={(e) => setGroupFilter(e.target.value)}
+            className="flex h-9 rounded-lg border border-zinc-200/70 bg-white px-3 py-1 text-sm shadow-none transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:w-[200px]"
+          >
+            <option value="all">Όλες οι Κατηγορίες</option>
+            {groups.map((g) => (
+              <option key={g.id} value={g.id}>{g.namePlural}</option>
+            ))}
+          </select>
+        )}
         {(urlGroupId || urlSquad || groupFilter !== 'all' || searchQuery) && (
           <Button
             variant="ghost"
@@ -364,12 +368,12 @@ export default function AcademyUsersPage() {
                             {u.fields.birth_year}
                           </span>
                         )}
-                        {u.squad_id && (
-                          <span className="text-[11px] text-zinc-500 flex items-center gap-1 bg-zinc-50 rounded-md px-2 py-0.5">
+                        {(u.squad_ids || (u.squad_id ? [u.squad_id] : [])).map((sid) => (
+                          <span key={sid} className="text-[11px] text-zinc-500 flex items-center gap-1 bg-zinc-50 rounded-md px-2 py-0.5">
                             <Trophy className="h-3 w-3" />
-                            {getSquadName(u.squad_id)}
+                            {getSquadName(sid)}
                           </span>
-                        )}
+                        ))}
                         {u.parent_uid && (
                           <span className="text-[11px] text-zinc-500 flex items-center gap-1 bg-zinc-50 rounded-md px-2 py-0.5">
                             <UserCheck className="h-3 w-3" />

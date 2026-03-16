@@ -38,9 +38,9 @@ export default function NewAcademyUserPage() {
         setSquads(squadsData);
 
         // Find parent group and filter parent candidates
-        const pGroup = groupsData.find((g) => g.isDefault && g.name === 'Γονέας');
+        const pGroup = groupsData.find((g) => g.name === 'Γονέας');
         if (pGroup) {
-          setParentCandidates(allUsers.filter((u) => u.groupId === pGroup.id));
+          setParentCandidates(allUsers.filter((u) => u.groupId === pGroup.id || u.groupId === 'parent'));
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης δεδομένων');
@@ -53,7 +53,7 @@ export default function NewAcademyUserPage() {
 
   // Find the parent group to load parent candidates
   const parentGroup = useMemo(
-    () => groups.find((g) => g.isDefault && g.name === 'Γονέας'),
+    () => groups.find((g) => g.name === 'Γονέας'),
     [groups]
   );
 

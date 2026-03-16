@@ -51,9 +51,9 @@ export default function EditAcademyUserPage({ params }: PageProps) {
         setGroups(groupsData);
         setSquads(squadsData);
 
-        const pGroup = groupsData.find((g) => g.isDefault && g.name === 'Γονέας');
+        const pGroup = groupsData.find((g) => g.name === 'Γονέας');
         if (pGroup) {
-          setParentCandidates(allUsers.filter((u) => u.groupId === pGroup.id));
+          setParentCandidates(allUsers.filter((u) => u.groupId === pGroup.id || u.groupId === 'parent'));
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης δεδομένων');
@@ -65,7 +65,7 @@ export default function EditAcademyUserPage({ params }: PageProps) {
   }, [id, authUser, venueOwner, authLoading, router, venueId, pathname]);
 
   const parentGroup = useMemo(
-    () => groups.find((g) => g.isDefault && g.name === 'Γονέας'),
+    () => groups.find((g) => g.name === 'Γονέας'),
     [groups]
   );
 

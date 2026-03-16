@@ -74,7 +74,7 @@ export default function SquadsPage() {
   };
 
   const getAthleteCount = (squadId: string) => {
-    return users.filter((u) => u.squad_id === squadId).length;
+    return users.filter((u) => (u.squad_ids || []).includes(squadId) || u.squad_id === squadId).length;
   };
 
   const filteredSquads = squads.filter(squad =>
