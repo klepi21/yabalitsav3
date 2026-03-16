@@ -15,6 +15,8 @@ import {
   ChevronRight,
   Trash2,
   X,
+  Pencil,
+  Save,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { tournamentService, tournamentTeamService, tournamentPlayerService } from '@/lib/tournament-services';
@@ -47,11 +49,19 @@ export default function TeamsPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Form state
+  // Add form state
   const [teamName, setTeamName] = useState('');
   const [captainName, setCaptainName] = useState('');
   const [captainPhone, setCaptainPhone] = useState('');
   const [captainEmail, setCaptainEmail] = useState('');
+
+  // Edit state
+  const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
+  const [editCaptainName, setEditCaptainName] = useState('');
+  const [editCaptainPhone, setEditCaptainPhone] = useState('');
+  const [editCaptainEmail, setEditCaptainEmail] = useState('');
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
 
   const tournamentId = params.id as string;
 
@@ -114,7 +124,6 @@ export default function TeamsPage() {
 
   const handleDeleteTeam = async (teamId: string) => {
     try {
-      // Delete all players of this team first
       const teamPlayers = players.filter(p => p.teamId === teamId);
       for (const p of teamPlayers) {
         await tournamentPlayerService.delete(p.id);
@@ -123,6 +132,33 @@ export default function TeamsPage() {
       await loadData();
     } catch (error) {
       console.error('Error deleting team:', error);
+    }
+  };
+
+  const startEditTeam = (team: TournamentTeam) => {
+    setEditingTeamId(team.id);
+    setEditName(team.name);
+    setEditCaptainName(team.captainName);
+    setEditCaptainPhone(team.captainPhone);
+    setEditCaptainEmail(team.captainEmail || '');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingTeamId || !editName.trim() || !editCaptainName.trim() || !editCaptainPhone.trim()) return;
+    setIsSavingEdit(true);
+    try {
+      await tournamentTeamService.update(editingTeamId, {
+        name: editName.trim(),
+        captainName: editCaptainName.trim(),
+        captainPhone: editCaptainPhone.trim(),
+        captainEmail: editCaptainEmail.trim() || undefined,
+      });
+      setEditingTeamId(null);
+      await loadData();
+    } catch (error) {
+      console.error('Error updating team:', error);
+    } finally {
+      setIsSavingEdit(false);
     }
   };
 
@@ -255,6 +291,70 @@ export default function TeamsPage() {
         <div className="space-y-3">
           {teams.map((team) => {
             const teamPlayers = players.filter(p => p.teamId === team.id);
+            const isEditing = editingTeamId === team.id;
+
+            if (isEditing) {
+              return (
+                <div key={team.id} className="rounded-xl border border-amber-200 bg-amber-50/30 p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-zinc-900">Επεξεργασία Ομάδας</h3>
+                    <button onClick={() => setEditingTeamId(null)} className="text-zinc-400 hover:text-zinc-600">
+                      <X className="h-4 w-4" />
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-zinc-700">Όνομα Ομάδας *</Label>
+                    <Input
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="bg-white rounded-lg border-zinc-200"
+                    />
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-zinc-700">Αρχηγός *</Label>
+                      <Input
+                        value={editCaptainName}
+                        onChange={(e) => setEditCaptainName(e.target.value)}
+                        className="bg-white rounded-lg border-zinc-200"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-zinc-700">Τηλέφωνο *</Label>
+                      <Input
+                        value={editCaptainPhone}
+                        onChange={(e) => setEditCaptainPhone(e.target.value)}
+                        className="bg-white rounded-lg border-zinc-200"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-zinc-700">Email</Label>
+                      <Input
+                        type="email"
+                        value={editCaptainEmail}
+                        onChange={(e) => setEditCaptainEmail(e.target.value)}
+                        className="bg-white rounded-lg border-zinc-200"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-end gap-2">
+                    <Button type="button" variant="outline" onClick={() => setEditingTeamId(null)} className="rounded-lg text-xs" size="sm">
+                      Ακύρωση
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleSaveEdit}
+                      disabled={isSavingEdit || !editName.trim() || !editCaptainName.trim() || !editCaptainPhone.trim()}
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs"
+                    >
+                      {isSavingEdit ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                      Αποθήκευση
+                    </Button>
+                  </div>
+                </div>
+              );
+            }
+
             return (
               <div key={team.id} className="rounded-xl border border-zinc-100/60 bg-white p-5 hover:shadow-sm transition-all duration-150">
                 <div className="flex items-center justify-between">
@@ -286,12 +386,18 @@ export default function TeamsPage() {
                     </div>
                   </Link>
                   <div className="flex items-center gap-2 ml-3">
-                    {tournament.type === 'league' || tournament.type === 'group+knockout' ? (
+                    {(tournament.type === 'league' || tournament.type === 'group+knockout') && (
                       <div className="text-right mr-2 hidden sm:block">
                         <p className="text-xs text-zinc-400">Βαθμοί</p>
                         <p className="text-sm font-bold text-zinc-900">{team.stats.points}</p>
                       </div>
-                    ) : null}
+                    )}
+                    <button
+                      onClick={() => startEditTeam(team)}
+                      className="p-1.5 rounded-lg text-zinc-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <button className="p-1.5 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors">

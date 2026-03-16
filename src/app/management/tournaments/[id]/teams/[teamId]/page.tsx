@@ -17,6 +17,8 @@ import {
   Hash,
   Target,
   AlertTriangle,
+  Pencil,
+  Save,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -60,13 +62,30 @@ export default function TeamDetailPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Form
+  // Add player form
   const [playerName, setPlayerName] = useState('');
   const [playerPhone, setPlayerPhone] = useState('');
   const [playerEmail, setPlayerEmail] = useState('');
   const [shirtNumber, setShirtNumber] = useState('');
   const [position, setPosition] = useState<string>('');
   const [isCaptain, setIsCaptain] = useState(false);
+
+  // Edit team header
+  const [editingTeamInfo, setEditingTeamInfo] = useState(false);
+  const [editTeamName, setEditTeamName] = useState('');
+  const [editCaptainName, setEditCaptainName] = useState('');
+  const [editCaptainPhone, setEditCaptainPhone] = useState('');
+  const [editCaptainEmail, setEditCaptainEmail] = useState('');
+  const [isSavingTeam, setIsSavingTeam] = useState(false);
+
+  // Edit player inline
+  const [editingPlayerId, setEditingPlayerId] = useState<string | null>(null);
+  const [editPlayerName, setEditPlayerName] = useState('');
+  const [editPlayerPhone, setEditPlayerPhone] = useState('');
+  const [editShirtNumber, setEditShirtNumber] = useState('');
+  const [editPosition, setEditPosition] = useState<string>('');
+  const [editIsCaptain, setEditIsCaptain] = useState(false);
+  const [isSavingPlayer, setIsSavingPlayer] = useState(false);
 
   const tournamentId = params.id as string;
   const teamId = params.teamId as string;
@@ -145,6 +164,63 @@ export default function TeamDetailPage() {
     }
   };
 
+  const startEditTeamInfo = () => {
+    if (!team) return;
+    setEditingTeamInfo(true);
+    setEditTeamName(team.name);
+    setEditCaptainName(team.captainName);
+    setEditCaptainPhone(team.captainPhone);
+    setEditCaptainEmail(team.captainEmail || '');
+  };
+
+  const handleSaveTeamInfo = async () => {
+    if (!team || !editTeamName.trim() || !editCaptainName.trim() || !editCaptainPhone.trim()) return;
+    setIsSavingTeam(true);
+    try {
+      await tournamentTeamService.update(team.id, {
+        name: editTeamName.trim(),
+        captainName: editCaptainName.trim(),
+        captainPhone: editCaptainPhone.trim(),
+        captainEmail: editCaptainEmail.trim() || undefined,
+      });
+      setEditingTeamInfo(false);
+      await loadData();
+    } catch (error) {
+      console.error('Error updating team:', error);
+    } finally {
+      setIsSavingTeam(false);
+    }
+  };
+
+  const startEditPlayer = (player: TournamentPlayer) => {
+    setEditingPlayerId(player.id);
+    setEditPlayerName(player.name);
+    setEditPlayerPhone(player.phone || '');
+    setEditShirtNumber(player.shirtNumber?.toString() || '');
+    setEditPosition(player.position || '');
+    setEditIsCaptain(player.isCaptain);
+  };
+
+  const handleSavePlayer = async () => {
+    if (!editingPlayerId || !editPlayerName.trim()) return;
+    setIsSavingPlayer(true);
+    try {
+      await tournamentPlayerService.update(editingPlayerId, {
+        name: editPlayerName.trim(),
+        phone: editPlayerPhone.trim() || undefined,
+        shirtNumber: editShirtNumber ? parseInt(editShirtNumber) : undefined,
+        position: (editPosition as TournamentPlayer['position']) || undefined,
+        isCaptain: editIsCaptain,
+      });
+      setEditingPlayerId(null);
+      await loadData();
+    } catch (error) {
+      console.error('Error updating player:', error);
+    } finally {
+      setIsSavingPlayer(false);
+    }
+  };
+
   if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -185,27 +261,93 @@ export default function TeamDetailPage() {
       </Link>
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-100 text-zinc-600">
-            <Shield className="h-5 w-5" />
+      {editingTeamInfo ? (
+        <div className="rounded-xl border border-amber-200 bg-amber-50/30 p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-zinc-900">Επεξεργασία Ομάδας</h3>
+            <button onClick={() => setEditingTeamInfo(false)} className="text-zinc-400 hover:text-zinc-600">
+              <X className="h-4 w-4" />
+            </button>
           </div>
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{team.name}</h1>
-            <div className="flex items-center gap-3 mt-0.5 text-sm text-zinc-500">
-              <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" />{team.captainName}</span>
-              <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{team.captainPhone}</span>
-              {team.captainEmail && <span className="flex items-center gap-1 hidden sm:flex"><Mail className="h-3.5 w-3.5" />{team.captainEmail}</span>}
+          <div className="space-y-2">
+            <Label className="text-zinc-700">Όνομα Ομάδας *</Label>
+            <Input
+              value={editTeamName}
+              onChange={(e) => setEditTeamName(e.target.value)}
+              className="bg-white rounded-lg border-zinc-200"
+            />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label className="text-zinc-700">Αρχηγός *</Label>
+              <Input
+                value={editCaptainName}
+                onChange={(e) => setEditCaptainName(e.target.value)}
+                className="bg-white rounded-lg border-zinc-200"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-zinc-700">Τηλέφωνο *</Label>
+              <Input
+                value={editCaptainPhone}
+                onChange={(e) => setEditCaptainPhone(e.target.value)}
+                className="bg-white rounded-lg border-zinc-200"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-zinc-700">Email</Label>
+              <Input
+                type="email"
+                value={editCaptainEmail}
+                onChange={(e) => setEditCaptainEmail(e.target.value)}
+                className="bg-white rounded-lg border-zinc-200"
+              />
             </div>
           </div>
+          <div className="flex items-center justify-end gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => setEditingTeamInfo(false)} className="rounded-lg text-xs">
+              Ακύρωση
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleSaveTeamInfo}
+              disabled={isSavingTeam}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs"
+            >
+              {isSavingTeam ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+              Αποθήκευση
+            </Button>
+          </div>
         </div>
-        {!showAddForm && (
-          <Button onClick={() => setShowAddForm(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg">
-            <Plus className="h-4 w-4" />
-            Προσθήκη Παίκτη
-          </Button>
-        )}
-      </div>
+      ) : (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-zinc-100 text-zinc-600">
+              <Shield className="h-5 w-5" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{team.name}</h1>
+              <div className="flex items-center gap-3 mt-0.5 text-sm text-zinc-500">
+                <span className="flex items-center gap-1"><User className="h-3.5 w-3.5" />{team.captainName}</span>
+                <span className="flex items-center gap-1"><Phone className="h-3.5 w-3.5" />{team.captainPhone}</span>
+                {team.captainEmail && <span className="flex items-center gap-1 hidden sm:flex"><Mail className="h-3.5 w-3.5" />{team.captainEmail}</span>}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={startEditTeamInfo} className="rounded-lg border-zinc-200 text-xs">
+              <Pencil className="h-3.5 w-3.5" />
+              Επεξεργασία
+            </Button>
+            {!showAddForm && (
+              <Button onClick={() => setShowAddForm(true)} className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg" size="sm">
+                <Plus className="h-4 w-4" />
+                Προσθήκη Παίκτη
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -377,6 +519,85 @@ export default function TeamDetailPage() {
             <tbody className="divide-y divide-zinc-100">
               {sortedPlayers.map((player) => {
                 const pos = player.position ? positionLabels[player.position] : null;
+                const isEditingPlayer = editingPlayerId === player.id;
+
+                if (isEditingPlayer) {
+                  return (
+                    <tr key={player.id} className="bg-amber-50/50">
+                      <td className="py-3 px-4">
+                        <Input
+                          type="number"
+                          min={1}
+                          max={99}
+                          value={editShirtNumber}
+                          onChange={(e) => setEditShirtNumber(e.target.value)}
+                          className="w-14 h-8 text-center text-xs bg-white rounded-lg border-zinc-200"
+                          placeholder="#"
+                        />
+                      </td>
+                      <td className="py-3 px-4">
+                        <Input
+                          value={editPlayerName}
+                          onChange={(e) => setEditPlayerName(e.target.value)}
+                          className="h-8 text-sm bg-white rounded-lg border-zinc-200 mb-1"
+                        />
+                        <Input
+                          value={editPlayerPhone}
+                          onChange={(e) => setEditPlayerPhone(e.target.value)}
+                          placeholder="Τηλέφωνο"
+                          className="h-7 text-xs bg-white rounded-lg border-zinc-200"
+                        />
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex flex-wrap gap-1 justify-center">
+                          {(['GK', 'DEF', 'MID', 'FWD'] as const).map((p) => {
+                            const cfg = positionLabels[p];
+                            return (
+                              <button
+                                key={p}
+                                type="button"
+                                onClick={() => setEditPosition(editPosition === p ? '' : p)}
+                                className={`px-1.5 py-0.5 text-[10px] font-medium rounded transition-all ${
+                                  editPosition === p ? cfg.className : 'bg-zinc-100 text-zinc-400'
+                                }`}
+                              >
+                                {cfg.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </td>
+                      <td colSpan={4} className="py-3 px-3">
+                        <div className="flex items-center gap-2 justify-end">
+                          <button
+                            type="button"
+                            onClick={() => setEditIsCaptain(!editIsCaptain)}
+                            className={`px-2 py-0.5 text-[10px] font-medium rounded transition-all ${
+                              editIsCaptain ? 'bg-amber-100 text-amber-700' : 'bg-zinc-100 text-zinc-400'
+                            }`}
+                          >
+                            C
+                          </button>
+                          <button
+                            onClick={() => setEditingPlayerId(null)}
+                            className="p-1 rounded-lg text-zinc-400 hover:text-zinc-600"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                          <Button
+                            size="sm"
+                            onClick={handleSavePlayer}
+                            disabled={isSavingPlayer || !editPlayerName.trim()}
+                            className="h-7 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs px-2"
+                          >
+                            {isSavingPlayer ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                }
+
                 return (
                   <tr key={player.id} className="hover:bg-zinc-50/50 transition-colors">
                     <td className="py-3 px-4">
@@ -419,27 +640,35 @@ export default function TeamDetailPage() {
                       ) : <span className="text-xs text-zinc-300">—</span>}
                     </td>
                     <td className="py-3 px-2">
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <button className="p-1 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors">
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent className="rounded-xl">
-                          <AlertDialogHeader>
-                            <AlertDialogTitle className="text-zinc-900">Αφαίρεση Παίκτη</AlertDialogTitle>
-                            <AlertDialogDescription className="text-zinc-500">
-                              Θέλετε να αφαιρέσετε τον &quot;{player.name}&quot; από την ομάδα;
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel className="rounded-lg">Ακύρωση</AlertDialogCancel>
-                            <AlertDialogAction variant="destructive" onClick={() => handleDeletePlayer(player.id)} className="rounded-lg">
-                              Αφαίρεση
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <div className="flex items-center gap-0.5">
+                        <button
+                          onClick={() => startEditPlayer(player)}
+                          className="p-1 rounded-lg text-zinc-400 hover:text-amber-600 hover:bg-amber-50 transition-colors"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button className="p-1 rounded-lg text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="rounded-xl">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="text-zinc-900">Αφαίρεση Παίκτη</AlertDialogTitle>
+                              <AlertDialogDescription className="text-zinc-500">
+                                Θέλετε να αφαιρέσετε τον &quot;{player.name}&quot; από την ομάδα;
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="rounded-lg">Ακύρωση</AlertDialogCancel>
+                              <AlertDialogAction variant="destructive" onClick={() => handleDeletePlayer(player.id)} className="rounded-lg">
+                                Αφαίρεση
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     </td>
                   </tr>
                 );

@@ -17,6 +17,7 @@ import {
   Medal,
   Target,
   Shield,
+  Pencil,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -252,6 +253,12 @@ export default function TournamentDetailPage() {
               Εκκίνηση
             </Button>
           )}
+          <Button variant="outline" size="sm" asChild className="rounded-lg border-zinc-200">
+            <Link href={`/management/tournaments/${tournament.id}/edit`}>
+              <Pencil className="h-3.5 w-3.5" />
+              Επεξεργασία
+            </Link>
+          </Button>
           <Button variant="outline" size="sm" asChild className="rounded-lg border-zinc-200">
             <Link href={`/management/tournaments/${tournament.id}/teams`}>
               <Users className="h-3.5 w-3.5" />

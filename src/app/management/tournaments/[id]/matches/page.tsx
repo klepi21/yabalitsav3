@@ -16,6 +16,7 @@ import {
   Shield,
   Save,
   X,
+  Plus,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { blockedDateService } from '@/lib/firebase-services';
@@ -62,6 +63,15 @@ export default function MatchesPage() {
   const [editHomeScore, setEditHomeScore] = useState('');
   const [editAwayScore, setEditAwayScore] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+
+  // New match form
+  const [showNewMatch, setShowNewMatch] = useState(false);
+  const [newHomeTeam, setNewHomeTeam] = useState('');
+  const [newAwayTeam, setNewAwayTeam] = useState('');
+  const [newRound, setNewRound] = useState(1);
+  const [newDate, setNewDate] = useState('');
+  const [newTime, setNewTime] = useState('20:00');
+  const [isCreating, setIsCreating] = useState(false);
 
   const tournamentId = params.id as string;
 
@@ -196,6 +206,61 @@ export default function MatchesPage() {
     }
   };
 
+  const handleCreateMatch = async () => {
+    if (!tournament || !venueOwner || !newHomeTeam || !newAwayTeam || !newDate) return;
+    if (newHomeTeam === newAwayTeam) return;
+    setIsCreating(true);
+    try {
+      const matchData: Omit<TournamentMatch, 'id' | 'createdAt' | 'updatedAt'> = {
+        tournamentId: tournament.id,
+        venueId: venueOwner.venueId,
+        pitchId: tournament.pitchId,
+        round: newRound,
+        roundLabel: `Αγωνιστική ${newRound}`,
+        homeTeamId: newHomeTeam,
+        awayTeamId: newAwayTeam,
+        scheduledDate: new Date(newDate),
+        scheduledTime: newTime,
+        status: 'scheduled',
+        events: [],
+      };
+
+      const matchId = await tournamentMatchService.create(matchData);
+
+      // Auto-create BlockedDate for pitch
+      if (tournament.pitchId) {
+        const home = teams.find(t => t.id === newHomeTeam);
+        const away = teams.find(t => t.id === newAwayTeam);
+        const matchDate = new Date(newDate);
+        const endTime = new Date(matchDate);
+        endTime.setMinutes(endTime.getMinutes() + tournament.matchDuration);
+
+        const blockedDateId = await blockedDateService.create({
+          pitchId: tournament.pitchId,
+          venueId: venueOwner.venueId,
+          startDate: matchDate,
+          endDate: endTime,
+          reason: `Τουρνουά: ${tournament.name} — ${home?.name || '?'} vs ${away?.name || '?'}`,
+          isFullDay: false,
+        });
+
+        await tournamentMatchService.update(matchId, { blockedDateId });
+      }
+
+      // Reset form
+      setShowNewMatch(false);
+      setNewHomeTeam('');
+      setNewAwayTeam('');
+      setNewDate('');
+      setNewTime('20:00');
+      await loadData();
+    } catch (error) {
+      console.error('Error creating match:', error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   const handleCancelMatch = async (matchId: string) => {
     try {
       const match = matches.find(m => m.id === matchId);
@@ -268,26 +333,131 @@ export default function MatchesPage() {
             <p className="text-sm text-zinc-500">{matches.length} αγώνες &middot; {completedCount} ολοκληρωμένοι</p>
           </div>
         </div>
-        {matches.length === 0 && teams.length >= 2 && (
-          <Button
-            onClick={handleGenerateFixtures}
-            disabled={isGenerating}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg"
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Δημιουργία...
-              </>
-            ) : (
-              <>
-                <Zap className="h-4 w-4" />
-                Δημιουργία Αγώνων
-              </>
-            )}
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {matches.length === 0 && teams.length >= 2 && (
+            <Button
+              onClick={handleGenerateFixtures}
+              disabled={isGenerating}
+              className="bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Δημιουργία...
+                </>
+              ) : (
+                <>
+                  <Zap className="h-4 w-4" />
+                  Αυτόματη Κλήρωση
+                </>
+              )}
+            </Button>
+          )}
+          {teams.length >= 2 && (
+            <Button
+              onClick={() => setShowNewMatch(!showNewMatch)}
+              variant={showNewMatch ? 'outline' : 'default'}
+              className={showNewMatch ? 'rounded-lg border-zinc-200' : 'bg-blue-600 hover:bg-blue-700 text-white rounded-lg'}
+            >
+              {showNewMatch ? (
+                <>
+                  <X className="h-4 w-4" />
+                  Ακύρωση
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  Νέος Αγώνας
+                </>
+              )}
+            </Button>
+          )}
+        </div>
       </div>
+
+      {/* New Match Form */}
+      {showNewMatch && (
+        <div className="rounded-xl border border-blue-100 bg-blue-50/30 p-6 space-y-4">
+          <h3 className="text-sm font-semibold text-zinc-900">Νέος Αγώνας</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-zinc-600">Γηπεδούχος</label>
+              <select
+                value={newHomeTeam}
+                onChange={(e) => setNewHomeTeam(e.target.value)}
+                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              >
+                <option value="">Επιλέξτε ομάδα...</option>
+                {teams.map((t) => (
+                  <option key={t.id} value={t.id} disabled={t.id === newAwayTeam}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-zinc-600">Φιλοξενούμενος</label>
+              <select
+                value={newAwayTeam}
+                onChange={(e) => setNewAwayTeam(e.target.value)}
+                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+              >
+                <option value="">Επιλέξτε ομάδα...</option>
+                {teams.map((t) => (
+                  <option key={t.id} value={t.id} disabled={t.id === newHomeTeam}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-zinc-600">Αγωνιστική</label>
+              <Input
+                type="number"
+                min={1}
+                value={newRound}
+                onChange={(e) => setNewRound(parseInt(e.target.value) || 1)}
+                className="bg-white rounded-lg border-zinc-200"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-zinc-600">Ημερομηνία</label>
+              <Input
+                type="date"
+                value={newDate}
+                onChange={(e) => setNewDate(e.target.value)}
+                className="bg-white rounded-lg border-zinc-200"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-zinc-600">Ώρα</label>
+              <Input
+                type="time"
+                value={newTime}
+                onChange={(e) => setNewTime(e.target.value)}
+                className="bg-white rounded-lg border-zinc-200"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end">
+            <Button
+              onClick={handleCreateMatch}
+              disabled={isCreating || !newHomeTeam || !newAwayTeam || !newDate || newHomeTeam === newAwayTeam}
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg"
+            >
+              {isCreating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Δημιουργία...
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" />
+                  Δημιουργία Αγώνα
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4">
