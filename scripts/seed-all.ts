@@ -5,7 +5,7 @@
  *   npx tsx scripts/seed-all.ts <email> <password>
  *   npx tsx scripts/seed-all.ts <email> <password> --only pitches,customers
  *
- * Available modules: pitches, customers, bookings, blockedDates, academy
+ * Available modules: pitches, customers, bookings, blockedDates, academy, tournaments
  * ("academy" seeds user_groups, squads, and academy_users together)
  *
  * The venueId is automatically resolved from the venueOwner document matching the email.
@@ -551,6 +551,145 @@ async function seedAcademy() {
 }
 
 // ══════════════════════════════════════════════════════════
+// 7. TOURNAMENTS
+// ══════════════════════════════════════════════════════════
+async function seedTournamentsModule() {
+  console.log('\n🏆 Seeding Tournaments...');
+
+  const TCOL = {
+    tournaments: 'yabalitsa_tournaments',
+    teams: 'yabalitsa_tournament_teams',
+    players: 'yabalitsa_tournament_players',
+    matches: 'yabalitsa_tournament_matches',
+  };
+
+  for (const colName of [TCOL.matches, TCOL.players, TCOL.teams, TCOL.tournaments]) {
+    const q = query(collection(db, colName), where('venueId', '==', VENUE_ID));
+    const snap = await getDocs(q);
+    if (snap.size > 0) {
+      console.log(`  🗑️  Deleting ${snap.size} docs from ${colName}...`);
+      for (const d of snap.docs) await deleteDoc(doc(db, colName, d.id));
+    }
+  }
+
+  let pitchId: string | null = null;
+  const pitchQuery = query(collection(db, COL.pitches), where('venueId', '==', VENUE_ID));
+  const pitchSnap = await getDocs(pitchQuery);
+  if (!pitchSnap.empty) {
+    pitchId = pitchSnap.docs[0].id;
+    console.log(`  📍 Using pitch: ${pitchSnap.docs[0].data().name}`);
+  }
+
+  const TEAM_NAMES = ['Olympus FC', 'Αετοί Αθηνών', 'Spartans', 'Thunderbolts', 'Phoenix FC', 'Κεραυνός', 'Titans United', 'Ατρόμητοι'];
+  const PLAYER_NAMES = [
+    ['Γιάννης Παπαδόπουλος', 'Νίκος Αλεξίου', 'Κώστας Μαρίνος', 'Δημήτρης Κωνσταντίνου', 'Αλέξης Νικολάου', 'Μάριος Γεωργίου', 'Στέφανος Αντωνίου'],
+    ['Ανδρέας Βασιλείου', 'Παναγιώτης Χρήστου', 'Θοδωρής Δημητρίου', 'Λευτέρης Ιωάννου', 'Σπύρος Πέτρου', 'Μανώλης Σταματίου', 'Γρηγόρης Αθανασίου'],
+    ['Βαγγέλης Καραγιάννης', 'Χρήστος Μπακογιάννης', 'Αντώνης Λαμπρόπουλος', 'Πέτρος Σωτηρίου', 'Μιχάλης Αναγνώστου', 'Γιώργος Τριανταφύλλου', 'Τάσος Παπανικολάου'],
+    ['Κυριάκος Μητσοτάκης', 'Αχιλλέας Τσιμπίδης', 'Φίλιππος Μαντζούκας', 'Ευθύμης Κοντοπίδης', 'Πάνος Ρεμούνδος', 'Σάκης Αρβανίτης', 'Νεκτάριος Φωτίου'],
+    ['Ηλίας Σταυρόπουλος', 'Δημοσθένης Κούρτης', 'Αριστείδης Μαυρίδης', 'Κωνσταντίνος Μπέκος', 'Θανάσης Πολίτης', 'Βασίλης Κουτσούρας', 'Λάζαρος Χατζηγεωργίου'],
+    ['Ορέστης Δράκος', 'Αλέκος Ζαφειρίου', 'Στάθης Παπαθανασίου', 'Χάρης Μακρής', 'Γεράσιμος Καρατζάς', 'Δαμιανός Τζέλλας', 'Φώτης Αγγελόπουλος'],
+    ['Κλεάνθης Ράπτης', 'Αιμίλιος Κρητικός', 'Πρόδρομος Γαλάνης', 'Σωκράτης Λιάκος', 'Ανέστης Μπουρνάζος', 'Ξενοφών Μανωλάκος', 'Θεόφιλος Σιδέρης'],
+    ['Αγαμέμνων Τσακίρης', 'Αργύρης Ντόβας', 'Πολυχρόνης Φραγκούλης', 'Ευκλείδης Μπαλτάς', 'Χαρίλαος Ρούσσος', 'Τηλέμαχος Κανελλόπουλος', 'Μενέλαος Σκουλάς'],
+  ];
+  const POSITIONS: string[] = ['GK', 'DEF', 'DEF', 'MID', 'MID', 'FWD', 'FWD'];
+
+  const tournamentRef = await addDoc(collection(db, TCOL.tournaments), {
+    venueId: VENUE_ID, name: 'Ανοιξιάτικο Πρωτάθλημα 2026',
+    description: 'Το μεγάλο ανοιξιάτικο πρωτάθλημα 5x5 με 8 ομάδες.',
+    type: 'league', pitchType: '5x5', pitchId, status: 'active',
+    startDate: Timestamp.fromDate(new Date('2026-03-16')),
+    endDate: Timestamp.fromDate(new Date('2026-06-15')),
+    maxTeams: 8, matchDuration: 60, legs: 1,
+    rules: 'Κανονισμοί FIFA 5x5.',
+    prizeDescription: 'Κύπελλο + 500€ στον πρωταθλητή',
+    createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+  });
+  const tournamentId = tournamentRef.id;
+  console.log(`  ✅ Tournament → ${tournamentId}`);
+
+  const teamIds: string[] = [];
+  for (let i = 0; i < TEAM_NAMES.length; i++) {
+    const played = Math.floor(Math.random() * 5) + 2;
+    const won = Math.floor(Math.random() * (played + 1));
+    const remaining = played - won;
+    const drawn = Math.floor(Math.random() * (remaining + 1));
+    const lost = remaining - drawn;
+    const points = won * 3 + drawn;
+
+    const teamRef = await addDoc(collection(db, TCOL.teams), {
+      tournamentId, venueId: VENUE_ID, name: TEAM_NAMES[i],
+      captainName: PLAYER_NAMES[i][0], captainPhone: `69${Math.floor(10000000 + Math.random() * 90000000)}`,
+      captainEmail: `captain${i + 1}@example.com`, status: 'confirmed',
+      stats: { played, won, drawn, lost, goalsFor: won * 3 + drawn + Math.floor(Math.random() * 4), goalsAgainst: lost * 2 + drawn + Math.floor(Math.random() * 3), points },
+      createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+    });
+    teamIds.push(teamRef.id);
+    console.log(`    ⚽ ${TEAM_NAMES[i]} (${points}pts)`);
+  }
+
+  const playerIdsByTeam: string[][] = [];
+  let totalPlayers = 0;
+  for (let t = 0; t < 8; t++) {
+    const ids: string[] = [];
+    for (let p = 0; p < 7; p++) {
+      const ref = await addDoc(collection(db, TCOL.players), {
+        teamId: teamIds[t], tournamentId, venueId: VENUE_ID,
+        name: PLAYER_NAMES[t][p], phone: `69${Math.floor(10000000 + Math.random() * 90000000)}`,
+        shirtNumber: p === 0 ? 1 : (p + 1) * 2 + Math.floor(Math.random() * 3),
+        position: POSITIONS[p], isCaptain: p === 0,
+        stats: { goals: Math.floor(Math.random() * 6), assists: Math.floor(Math.random() * 4), yellowCards: Math.floor(Math.random() * 3), redCards: Math.random() > 0.85 ? 1 : 0 },
+        createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+      });
+      ids.push(ref.id);
+      totalPlayers++;
+    }
+    playerIdsByTeam.push(ids);
+  }
+  console.log(`  ✅ Created ${totalPlayers} players`);
+
+  const teamsCopy = [...Array(8).keys()];
+  let matchCount = 0;
+  let roundNum = 1;
+  for (let r = 0; r < 7; r++) {
+    for (let i = 0; i < 4; i++) {
+      const homeIdx = teamsCopy[i];
+      const awayIdx = teamsCopy[7 - i];
+      const matchDate = new Date('2026-03-16');
+      matchDate.setDate(matchDate.getDate() + r * 5 + i);
+      const hour = 18 + (i % 3) * 2;
+      const isCompleted = r < 3;
+      const homeScore = isCompleted ? Math.floor(Math.random() * 5) : null;
+      const awayScore = isCompleted ? Math.floor(Math.random() * 4) : null;
+
+      const events: { minute: number; type: string; playerId: string; teamId: string }[] = [];
+      if (isCompleted && homeScore !== null && awayScore !== null) {
+        for (let g = 0; g < homeScore; g++) {
+          events.push({ minute: Math.floor(Math.random() * 60) + 1, type: 'goal', playerId: playerIdsByTeam[homeIdx][Math.floor(Math.random() * 7)], teamId: teamIds[homeIdx] });
+        }
+        for (let g = 0; g < awayScore; g++) {
+          events.push({ minute: Math.floor(Math.random() * 60) + 1, type: 'goal', playerId: playerIdsByTeam[awayIdx][Math.floor(Math.random() * 7)], teamId: teamIds[awayIdx] });
+        }
+      }
+
+      await addDoc(collection(db, TCOL.matches), {
+        tournamentId, venueId: VENUE_ID, pitchId, round: roundNum,
+        roundLabel: `Αγωνιστική ${roundNum}`,
+        homeTeamId: teamIds[homeIdx], awayTeamId: teamIds[awayIdx],
+        scheduledDate: Timestamp.fromDate(matchDate), scheduledTime: `${hour}:00`,
+        status: isCompleted ? 'completed' : 'scheduled',
+        homeScore, awayScore, events,
+        createdAt: serverTimestamp(), updatedAt: serverTimestamp(),
+      });
+      matchCount++;
+    }
+    roundNum++;
+    const last = teamsCopy.pop()!;
+    teamsCopy.splice(1, 0, last);
+  }
+  console.log(`  ✅ Created ${matchCount} matches (12 completed, 16 scheduled)`);
+}
+
+// ══════════════════════════════════════════════════════════
 // MAIN
 // ══════════════════════════════════════════════════════════
 async function main() {
@@ -608,6 +747,10 @@ async function main() {
 
   if (shouldSeed('academy')) {
     await seedAcademy();
+  }
+
+  if (shouldSeed('tournaments')) {
+    await seedTournamentsModule();
   }
 
   console.log('\n' + '═'.repeat(50));
