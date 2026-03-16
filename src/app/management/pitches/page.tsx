@@ -3,12 +3,24 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, Plus, Search, Building2, Clock, Banknote, Eye, Pencil } from 'lucide-react';
+import { 
+  Loader2, 
+  Plus, 
+  Search, 
+  Building2, 
+  Clock, 
+  Banknote, 
+  Eye, 
+  Pencil, 
+  Ban 
+} from 'lucide-react';
 import { Pitch } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
 
 export default function PitchesPage() {
   const router = useRouter();
@@ -94,20 +106,45 @@ export default function PitchesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Error Alert */}
+    <div className="space-y-10 pb-20">
+      {/* Header & New Pitch Button */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-2">
+            Τα Γήπεδά σας
+          </h1>
+          <p className="text-lg font-medium text-zinc-500">
+            Διαχειριστείτε τις λεπτομέρειες και τη διαθεσιμότητα των γηπέδων σας.
+          </p>
+        </div>
+        <Button 
+          asChild 
+          className="h-14 px-8 rounded-2xl bg-zinc-900 border-0 hover:bg-emerald-600 font-black text-white shadow-xl shadow-zinc-200 transition-all hover:translate-y-[-2px] active:translate-y-[1px]"
+        >
+          <Link href="/management/pitches/new" className="flex items-center gap-3">
+            <Plus className="h-6 w-6" />
+            Προσθήκη Γηπέδου
+          </Link>
+        </Button>
+      </div>
+
       {error && (
-        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+        <div className="bg-red-50 border border-red-100 rounded-3xl p-6 animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-destructive">Σφάλμα κατά τη φόρτωση γηπέδων</h3>
-              <p className="text-sm text-destructive/80 mt-1">{error}</p>
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-red-100 flex items-center justify-center">
+                <Ban className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-red-900 uppercase tracking-wider">Σφάλμα</h3>
+                <p className="text-red-700 font-bold">{error}</p>
+              </div>
             </div>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => { setError(null); loadPitches(); }}
-              className="text-destructive/60 hover:text-destructive shrink-0"
+              className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 font-bold"
             >
               Δοκιμάστε ξανά
             </Button>
@@ -115,130 +152,128 @@ export default function PitchesPage() {
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Γήπεδα</h1>
-          <p className="text-sm text-zinc-500 mt-1">Διαχείριση των ποδοσφαιρικών γηπέδων του χώρου σας</p>
-        </div>
-        <Button asChild>
-          <Link href="/management/pitches/new">
-            <Plus className="h-4 w-4" />
-            Προσθήκη Γηπέδου
-          </Link>
-        </Button>
-      </div>
-
-      {/* Stats + Search row */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-        <div className="flex items-center gap-3 rounded-xl border border-zinc-100/60 bg-white px-5 py-3.5">
-          <div className="h-10 w-10 rounded-lg bg-emerald-50 flex items-center justify-center">
-            <Building2 className="h-5 w-5 text-emerald-600" />
-          </div>
-          <div>
-            <p className="text-2xl font-semibold tracking-tight text-zinc-900">{pitches.length}</p>
-            <p className="text-[13px] text-zinc-400">Σύνολο Γηπέδων</p>
-          </div>
-        </div>
-
-        <div className="relative flex-1 sm:max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-          <Input
-            type="text"
-            placeholder="Αναζήτηση γηπέδων..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
-
-      {/* Pitches List */}
-      {filteredPitches.length === 0 ? (
-        <div className="rounded-xl border border-zinc-100/60 bg-white py-16">
-          <div className="text-center">
-            <div className="mx-auto h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center mb-4">
-              <Building2 className="h-6 w-6 text-zinc-400" />
+      {/* Filter & Search Bar Row */}
+      <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+        <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-zinc-100 shadow-sm">
+          <div className="flex items-center gap-4 px-6 border-r border-zinc-100">
+            <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+              <Building2 className="h-5 w-5 text-emerald-600" />
             </div>
-            <h3 className="text-sm font-medium text-zinc-900 mb-1">
-              {searchTerm ? 'Δεν βρέθηκαν γήπεδα' : 'Δεν υπάρχουν γήπεδα ακόμα'}
-            </h3>
-            <p className="text-[13px] text-zinc-400 mb-5">
-              {searchTerm ? 'Δοκιμάστε να αλλάξετε τους όρους αναζήτησης.' : 'Ξεκινήστε προσθέτοντας το πρώτο σας γήπεδο.'}
-            </p>
-            {!searchTerm && (
-              <Button size="sm" asChild>
-                <Link href="/management/pitches/new">
-                  <Plus className="h-4 w-4" />
-                  Προσθήκη Γηπέδου
-                </Link>
-              </Button>
-            )}
+            <div>
+              <p className="text-xl font-black text-zinc-900">{pitches.length}</p>
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Σύνολο</p>
+            </div>
+          </div>
+          
+          <div className="relative flex-1 min-w-[280px]">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-300" />
+            <Input
+              type="text"
+              placeholder="Αναζήτηση με όνομα ή τύπο..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-12 pl-12 border-0 bg-transparent focus:ring-0 text-zinc-900 font-bold placeholder:text-zinc-300 placeholder:font-normal"
+            />
           </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredPitches.map((pitch, index) => {
-            const colors = [
-              { bg: 'bg-emerald-50', text: 'text-emerald-600', badge: 'border-emerald-200/60 bg-emerald-50 text-emerald-700' },
-              { bg: 'bg-blue-50', text: 'text-blue-600', badge: 'border-blue-200/60 bg-blue-50 text-blue-700' },
-              { bg: 'bg-violet-50', text: 'text-violet-600', badge: 'border-violet-200/60 bg-violet-50 text-violet-700' },
-            ];
-            const color = colors[index % colors.length];
+      </div>
 
-            return (
-              <div
-                key={pitch.id}
-                className="group rounded-xl border border-zinc-100/60 bg-white p-5 hover:border-zinc-200/80 hover:shadow-sm transition-all duration-150"
-              >
-                <div className="flex items-center justify-between mb-5">
-                  <div className="flex items-center gap-3">
-                    <div className={`h-10 w-10 rounded-lg ${color.bg} flex items-center justify-center shrink-0`}>
-                      <Building2 className={`h-5 w-5 ${color.text}`} />
-                    </div>
-                    <h4 className="text-[15px] font-semibold text-zinc-900">{pitch.name}</h4>
-                  </div>
-                  <Badge variant="outline" className={`text-[11px] ${color.badge}`}>
-                    {pitch.type}
-                  </Badge>
-                </div>
-
-                <div className="space-y-3 mb-5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[13px] text-zinc-400 flex items-center gap-1.5">
-                      <Banknote className="h-3.5 w-3.5" />
-                      Τιμή ανά Κράτηση
-                    </span>
-                    <span className="text-[15px] font-semibold text-zinc-900">&euro;{pitch.pricePerSlot}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[13px] text-zinc-400 flex items-center gap-1.5">
-                      <Clock className="h-3.5 w-3.5" />
-                      Διάρκεια Κράτησης
-                    </span>
-                    <span className="text-sm font-medium text-zinc-600">{pitch.slotDuration} λεπτά</span>
-                  </div>
-                </div>
-
-                <div className="flex gap-2 pt-4 border-t border-zinc-100/60">
-                  <Button size="sm" className="flex-1 h-8 text-xs" asChild>
-                    <Link href={`/management/pitches/${pitch.id}/edit`}>
-                      <Pencil className="h-3.5 w-3.5" />
-                      Επεξεργασία
-                    </Link>
-                  </Button>
-                  <Button variant="outline" size="sm" className="flex-1 h-8 text-xs border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900" asChild>
-                    <Link href={`/management/pitches/${pitch.id}`}>
-                      <Eye className="h-3.5 w-3.5" />
-                      Προβολή
-                    </Link>
-                  </Button>
-                </div>
+      {/* Pitch Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {filteredPitches.length === 0 ? (
+          <Card className="col-span-full premium-card border-none bg-zinc-50/50 py-20">
+            <CardContent className="flex flex-col items-center justify-center text-center">
+              <div className="h-24 w-24 rounded-[2.5rem] bg-white border border-zinc-100 flex items-center justify-center mb-8 shadow-sm">
+                <Building2 className="h-12 w-12 text-zinc-200" />
               </div>
-            );
-          })}
-        </div>
-      )}
+              <h3 className="text-2xl font-black text-zinc-900 mb-2">
+                {searchTerm ? 'Δεν βρέθηκαν αποτελέσματα' : 'Δεν υπάρχουν γήπεδα'}
+              </h3>
+              <p className="text-zinc-500 font-medium max-w-sm mb-10">
+                {searchTerm 
+                  ? 'Δοκιμάστε μια διαφορετική αναζήτηση ή καθαρίστε τα φίλτρα.' 
+                  : 'Ξεκινήστε την οργάνωση του χώρου σας προσθέτοντας το πρώτο σας γήπεδο.'}
+              </p>
+              {!searchTerm && (
+                <Button 
+                  asChild 
+                  className="h-14 px-10 rounded-2xl bg-emerald-600 hover:bg-emerald-700 font-black text-white"
+                >
+                  <Link href="/management/pitches/new">
+                    Προσθήκη Γηπέδου
+                  </Link>
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        ) : (
+          filteredPitches.map((pitch) => (
+            <Card 
+              key={pitch.id} 
+              className="premium-card group border-0 overflow-hidden hover:translate-y-[-4px] transition-all duration-300"
+            >
+              <CardContent className="p-0">
+                {/* Header Decoration */}
+                <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+                
+                <div className="p-8 space-y-8">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="space-y-1">
+                      <Badge className="bg-emerald-50 text-emerald-700 border-none font-black text-[10px] uppercase tracking-wider px-3 py-1 mb-2">
+                        {pitch.type}
+                      </Badge>
+                      <h3 className="text-2xl font-black text-zinc-900 tracking-tight leading-tight group-hover:text-emerald-700 transition-colors">
+                        {pitch.name}
+                      </h3>
+                    </div>
+                    <div className="h-14 w-14 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-all duration-500">
+                      <Building2 className="h-7 w-7 text-zinc-300 group-hover:text-emerald-600 transition-colors" />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-zinc-50 rounded-2xl p-4 border border-zinc-100 group-hover:bg-white group-hover:border-emerald-100 transition-all">
+                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Τιμή (Slot)</p>
+                      <div className="flex items-end gap-1">
+                        <span className="text-2xl font-black text-zinc-900 tracking-tight">&euro;{pitch.pricePerSlot}</span>
+                      </div>
+                    </div>
+                    <div className="bg-zinc-50 rounded-2xl p-4 border border-zinc-100 group-hover:bg-white group-hover:border-emerald-100 transition-all">
+                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Διάρκεια</p>
+                      <div className="flex items-end gap-1">
+                        <span className="text-2xl font-black text-zinc-900 tracking-tight">{pitch.slotDuration}</span>
+                        <span className="text-[10px] font-black text-zinc-400 pb-1">λεπτά</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex gap-3 pt-6 border-t border-zinc-100">
+                    <Button 
+                      asChild 
+                      className="flex-1 h-12 rounded-xl bg-zinc-900 hover:bg-emerald-600 text-white font-bold transition-all"
+                    >
+                      <Link href={`/management/pitches/${pitch.id}/edit`} className="flex items-center gap-2">
+                        <Pencil className="h-4 w-4" />
+                        Επεξεργασία
+                      </Link>
+                    </Button>
+                    <Button 
+                      asChild 
+                      variant="outline"
+                      className="h-12 w-12 rounded-xl border-zinc-200 text-zinc-400 hover:text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50 transition-all"
+                    >
+                      <Link href={`/management/pitches/${pitch.id}`}>
+                        <Eye className="h-5 w-5" />
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        )}
+      </div>
     </div>
   );
 }

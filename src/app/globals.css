@@ -3,40 +3,40 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: #fafafa;
-  --foreground: #0a0a0a;
+  --background: #f8fafc;
+  --foreground: #0f172a;
   --card: #ffffff;
-  --card-foreground: #0a0a0a;
+  --card-foreground: #0f172a;
   --popover: #ffffff;
-  --popover-foreground: #0a0a0a;
+  --popover-foreground: #0f172a;
   --primary: #059669;
   --primary-foreground: #ffffff;
-  --secondary: #f4f4f5;
-  --secondary-foreground: #18181b;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --accent: #f4f4f5;
-  --accent-foreground: #18181b;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #475569;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #ebebef;
-  --input: #ebebef;
+  --border: #e2e8f0;
+  --input: #e2e8f0;
   --ring: #059669;
-  --radius: 0.625rem;
+  --radius: 0.75rem;
   --chart-1: #059669;
   --chart-2: #10b981;
   --chart-3: #34d399;
   --chart-4: #6ee7b7;
   --chart-5: #a7f3d0;
-  --sidebar-bg: #0f172a;
+  --sidebar-bg: #1e293b;
   --sidebar-foreground: #94a3b8;
   --sidebar-primary: #059669;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(255, 255, 255, 0.06);
-  --sidebar-accent-foreground: #f1f5f9;
-  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-accent: rgba(255, 255, 255, 0.05);
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: rgba(255, 255, 255, 0.06);
   --sidebar-ring: #059669;
-  --sidebar: #0f172a;
+  --sidebar: #1e293b;
 }
 
 @theme inline {
@@ -82,7 +82,7 @@
 
 * {
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -moz-osx-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -91,17 +91,20 @@ body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   letter-spacing: -0.011em;
+  font-size: 16px;
+  line-height: 1.6;
 }
 
 /* Premium selection color */
 ::selection {
   background: rgba(5, 150, 105, 0.15);
+  color: var(--primary);
 }
 
 /* Refined scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
@@ -109,12 +112,19 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.12);
-  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  border: 2px solid var(--background);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.2);
+}
+
+/* Accessible utility for large clickable areas */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
 }
 
 /* Force 24-hour format for time inputs */
@@ -124,14 +134,22 @@ input[type="time"] {
   appearance: none;
 }
 
-input[type="time"]::-webkit-datetime-edit-hour-field,
-input[type="time"]::-webkit-datetime-edit-minute-field {
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
+/* Better card shadow for depth */
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
 }
 
-/* Remove AM/PM display */
-input[type="time"]::-webkit-datetime-edit-ampm-field {
-  display: none;
+.premium-card {
+  background: white;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  transition: all 0.2s ease;
 }
+
+.premium-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+}
+

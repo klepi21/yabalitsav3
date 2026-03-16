@@ -78,20 +78,20 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   return (
-    <div className="flex h-full flex-col bg-[#0f172a]">
+    <div className="flex h-full flex-col bg-[#1e293b]">
       {/* Logo */}
-      <div className="flex h-[60px] items-center px-5 border-b border-white/[0.06]">
+      <div className="flex h-[72px] items-center px-6 border-b border-white/[0.04]">
         <Image
           src="/yabalitsalogo.png"
           alt="Yabalitsa"
-          width={130}
-          height={36}
-          className="h-8 w-auto brightness-0 invert opacity-90"
+          width={140}
+          height={40}
+          className="h-9 w-auto brightness-0 invert opacity-100"
         />
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-0.5">
+      <nav className="flex-1 px-4 py-6 overflow-y-auto space-y-1">
         {navigation.map((item) => {
           const isActive = item.href ? pathname === item.href || pathname.startsWith(item.href + '/') : false;
           const hasChildren = !!item.children;
@@ -101,30 +101,29 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
           if (hasChildren) {
             return (
-              <div key={item.name}>
+              <div key={item.name} className="py-0.5">
                 <button
                   onClick={() => toggleMenu(item.name)}
                   className={cn(
-                    'flex w-full items-center justify-between rounded-lg px-3 py-2 text-[13px] font-medium transition-colors',
+                    'flex w-full items-center justify-between rounded-xl px-4 py-3 text-[15px] font-medium transition-all duration-200',
                     isParentActive
-                      ? 'bg-white/[0.08] text-white'
-                      : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
+                      ? 'bg-white/10 text-white shadow-sm'
+                      : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'
                   )}
                 >
-                  <div className="flex items-center gap-3">
-                    <Icon className="h-[18px] w-[18px] opacity-70" />
+                  <div className="flex items-center gap-4">
+                    <Icon className={cn("h-5 w-5 transition-opacity", isParentActive ? "opacity-100" : "opacity-60")} />
                     <span>{item.name}</span>
                   </div>
                   {isExpanded ? (
-                    <ChevronDown className="h-3.5 w-3.5 opacity-50" />
+                    <ChevronDown className="h-4 w-4 opacity-40" />
                   ) : (
-                    <ChevronRight className="h-3.5 w-3.5 opacity-50" />
+                    <ChevronRight className="h-4 w-4 opacity-40" />
                   )}
                 </button>
                 {isExpanded && (
-                  <div className="mt-0.5 ml-[22px] space-y-0.5 border-l border-white/[0.06] pl-3">
+                  <div className="mt-1 ml-6 space-y-1 border-l-2 border-white/5 pl-4">
                     {item.children?.map((child, _idx, siblings) => {
-                      // Check exact match first, then startsWith but exclude paths that belong to other siblings
                       const otherSiblingPaths = siblings.filter(s => s.href !== child.href).map(s => s.href);
                       const isChildItemActive = pathname === child.href || (
                         pathname.startsWith(child.href) &&
@@ -137,13 +136,13 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                           href={child.href}
                           onClick={onNavigate}
                           className={cn(
-                            'flex items-center gap-3 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors',
+                            'flex items-center gap-4 rounded-lg px-4 py-2.5 text-[15px] font-medium transition-colors',
                             isChildItemActive
-                              ? 'text-emerald-400'
-                              : 'text-slate-400 hover:text-slate-200'
+                              ? 'text-emerald-400 font-semibold'
+                              : 'text-slate-400 hover:text-slate-100'
                           )}
                         >
-                          <ChildIcon className="h-[16px] w-[16px] opacity-60" />
+                          <ChildIcon className={cn("h-[18px] w-[18px]", isChildItemActive ? "opacity-100" : "opacity-50")} />
                           <span>{child.name}</span>
                         </Link>
                       );
@@ -160,13 +159,13 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
               href={item.href!}
               onClick={onNavigate}
               className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-colors',
+                'flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-medium transition-all duration-200',
                 isActive
-                  ? 'bg-white/[0.08] text-white'
-                  : 'text-slate-400 hover:bg-white/[0.04] hover:text-slate-200'
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/20'
+                  : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'
               )}
             >
-              <Icon className="h-[18px] w-[18px] opacity-70" />
+              <Icon className={cn("h-5 w-5 transition-opacity", isActive ? "opacity-100" : "opacity-60")} />
               <span>{item.name}</span>
             </Link>
           );
@@ -174,11 +173,11 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
       </nav>
 
       {/* Footer — venue name + logout */}
-      <div className="border-t border-white/[0.06] px-3 py-3 space-y-1">
+      <div className="border-t border-white/[0.04] px-4 py-6 space-y-3">
         {venueOwner?.name && (
-          <div className="px-3 py-1.5">
-            <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Λογαριασμός</p>
-            <p className="text-[13px] text-slate-300 font-medium truncate mt-0.5">{venueOwner.name}</p>
+          <div className="px-4 pb-2">
+            <p className="text-[12px] font-bold text-slate-500 uppercase tracking-widest">Λογαριασμός</p>
+            <p className="text-[15px] text-white font-semibold truncate mt-1">{venueOwner.name}</p>
           </div>
         )}
         <button
@@ -186,9 +185,9 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
             signOut();
             onNavigate?.();
           }}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium text-slate-400 hover:bg-white/[0.04] hover:text-slate-200 transition-colors"
+          className="flex w-full items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-medium text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200"
         >
-          <LogOut className="h-[18px] w-[18px] opacity-70" />
+          <LogOut className="h-5 w-5 opacity-60" />
           <span>Αποσύνδεση</span>
         </button>
       </div>
@@ -201,31 +200,29 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Mobile Sheet */}
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="w-[260px] p-0 border-0 bg-[#0f172a]">
+        <SheetContent side="left" className="w-[300px] p-0 border-0 bg-[#1e293b]">
           <SheetTitle className="sr-only">Μενού πλοήγησης</SheetTitle>
           <NavContent onNavigate={() => setSidebarOpen(false)} />
         </SheetContent>
       </Sheet>
 
-      {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-[260px] lg:flex-col">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-[280px] lg:flex-col">
         <div className="flex flex-col flex-grow">
           <NavContent />
         </div>
       </div>
 
-      {/* Mobile menu button */}
-      <div className="lg:hidden fixed top-4 left-4 z-40">
+      <div className="lg:hidden fixed top-6 left-6 z-40">
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-lg p-2 bg-white shadow-sm border border-zinc-200 text-zinc-600 hover:bg-zinc-50 transition-colors"
+          className="inline-flex items-center justify-center rounded-xl p-3 bg-white shadow-lg border border-zinc-100 text-zinc-900 hover:bg-zinc-50 transition-all active:scale-95"
           onClick={() => setSidebarOpen(true)}
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-6 w-6" />
         </button>
       </div>
     </>
   );
 }
+

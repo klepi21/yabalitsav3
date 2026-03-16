@@ -10,6 +10,7 @@ import { Loader2, Plus, Pencil, Trash2, Trophy, Users as UsersIcon, AlertCircle,
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -91,20 +92,22 @@ export default function SquadsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10 pb-20">
       {/* Error Alert */}
       {error && (
-        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+        <div className="bg-red-50 border border-red-100 rounded-3xl p-6 animate-in fade-in slide-in-from-top-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
-              <p className="text-sm text-destructive">{error}</p>
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-red-100 flex items-center justify-center">
+                <AlertCircle className="h-6 w-6 text-red-600" />
+              </div>
+              <p className="text-red-700 font-bold">{error}</p>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setError(null)}
-              className="text-destructive/60 hover:text-destructive shrink-0"
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setError(null)} 
+              className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 font-bold"
             >
               Κλείσιμο
             </Button>
@@ -113,73 +116,67 @@ export default function SquadsPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Τμήματα</h1>
-          <p className="text-sm text-zinc-500 mt-1">Διαχείριση ομάδων και ηλικιακών κατηγοριών</p>
+          <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-2">Τμήματα</h1>
+          <p className="text-lg font-medium text-zinc-500">Οργανώστε τους αθλητές σας σε ηλικιακές και αγωνιστικές ομάδες.</p>
         </div>
-        <Button asChild>
-          <Link href="/management/academy/squads/new">
-            <Plus className="h-4 w-4" />
+        <Button asChild className="h-14 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black shadow-lg shadow-emerald-200 transition-all hover:translate-y-[-2px] active:translate-y-[1px]">
+          <Link href="/management/academy/squads/new" className="flex items-center gap-2">
+            <Plus className="h-5 w-5" />
             Νέο Τμήμα
           </Link>
         </Button>
       </div>
 
-      {/* Stats + Search row */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-        <div className="flex items-center gap-3 rounded-xl border border-zinc-100/60 bg-white px-5 py-3.5">
-          <div className="h-10 w-10 rounded-lg bg-violet-50 flex items-center justify-center">
-            <Trophy className="h-5 w-5 text-violet-600" />
+      {/* Stats row */}
+      <div className="flex flex-col md:flex-row items-center gap-4">
+        <div className="flex items-center gap-4 bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm min-w-[280px]">
+          <div className="h-14 w-14 rounded-2xl bg-violet-50 flex items-center justify-center text-violet-600 shrink-0">
+            <Trophy className="h-7 w-7" />
           </div>
           <div>
-            <p className="text-2xl font-semibold tracking-tight text-zinc-900">{squads.length}</p>
-            <p className="text-[13px] text-zinc-400">Σύνολο Τμημάτων</p>
+            <p className="text-3xl font-black text-zinc-900 leading-none mb-1">{squads.length}</p>
+            <p className="text-xs font-black uppercase tracking-widest text-zinc-400">Σύνολο Τμημάτων</p>
           </div>
         </div>
 
-        <div className="relative flex-1 sm:max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
           <Input
-            type="text"
-            placeholder="Αναζήτηση τμημάτων..."
+            placeholder="Αναζήτηση τμημάτων με όνομα ή ηλικία..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="h-14 pl-12 pr-4 bg-white rounded-2xl border-zinc-100 shadow-sm focus:ring-emerald-500 font-medium text-lg placeholder:text-zinc-400"
           />
         </div>
       </div>
 
       {/* Squads Grid */}
       {filteredSquads.length === 0 ? (
-        <div className="rounded-xl border border-zinc-100/60 bg-white py-16">
-          <div className="text-center">
-            <div className="mx-auto h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center mb-4">
-              <Trophy className="h-6 w-6 text-zinc-400" />
+        <div className="rounded-[2.5rem] border-2 border-dashed border-zinc-100 bg-white p-20 text-center">
+            <div className="mx-auto h-24 w-24 bg-zinc-50 rounded-[2rem] flex items-center justify-center mb-8 shadow-inner">
+                <Trophy className="h-12 w-12 text-zinc-200" />
             </div>
-            <h3 className="text-sm font-medium text-zinc-900 mb-1">
-              {searchTerm ? 'Δεν βρέθηκαν τμήματα' : 'Δεν υπάρχουν τμήματα ακόμα'}
-            </h3>
-            <p className="text-[13px] text-zinc-400 mb-5">
-              {searchTerm ? 'Δοκιμάστε να αλλάξετε τους όρους αναζήτησης.' : 'Δημιουργήστε το πρώτο τμήμα για να οργανώσετε τους αθλητές.'}
-            </p>
-            {!searchTerm && (
-              <Button size="sm" asChild>
-                <Link href="/management/academy/squads/new">
-                  <Plus className="h-4 w-4" />
-                  Δημιουργία Τμήματος
-                </Link>
-              </Button>
-            )}
-          </div>
+          <h3 className="text-2xl font-black text-zinc-900 mb-2">
+            {searchTerm ? 'Δεν βρέθηκαν τμήματα' : 'Δεν υπάρχουν τμήματα ακόμα'}
+          </h3>
+          <p className="text-zinc-500 font-medium text-lg max-w-sm mx-auto">
+            {searchTerm ? 'Δοκιμάστε να αλλάξετε τους όρους αναζήτησης.' : 'Δημιουργήστε το πρώτο τμήμα για να οργανώσετε τους αθλητές σας.'}
+          </p>
+          {!searchTerm && (
+            <Button asChild className="mt-10 h-14 px-10 rounded-2xl bg-emerald-600 text-white font-black">
+              <Link href="/management/academy/squads/new">Δημιουργία Τμήματος</Link>
+            </Button>
+          )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {filteredSquads.map((squad, index) => {
             const colors = [
-              { bg: 'bg-emerald-50', text: 'text-emerald-600', badge: 'border-emerald-200/60 bg-emerald-50 text-emerald-700' },
-              { bg: 'bg-blue-50', text: 'text-blue-600', badge: 'border-blue-200/60 bg-blue-50 text-blue-700' },
-              { bg: 'bg-violet-50', text: 'text-violet-600', badge: 'border-violet-200/60 bg-violet-50 text-violet-700' },
+              { bg: 'bg-emerald-50 text-emerald-600', badge: 'bg-emerald-100 text-emerald-700', hover: 'hover:border-emerald-200' },
+              { bg: 'bg-blue-50 text-blue-600', badge: 'bg-blue-100 text-blue-700', hover: 'hover:border-blue-200' },
+              { bg: 'bg-violet-50 text-violet-600', badge: 'bg-violet-100 text-violet-700', hover: 'hover:border-violet-200' },
             ];
             const color = colors[index % colors.length];
             const athleteCount = getAthleteCount(squad.id);
@@ -187,73 +184,74 @@ export default function SquadsPage() {
             return (
               <div
                 key={squad.id}
-                className="group rounded-xl border border-zinc-100/60 bg-white p-5 hover:border-zinc-200/80 hover:shadow-sm transition-all duration-150"
+                className={cn(
+                    "group relative flex flex-col rounded-[2rem] border border-zinc-100 bg-white p-8 transition-all duration-300 hover:shadow-xl",
+                    color.hover
+                )}
               >
-                <div className="flex items-center justify-between mb-5">
-                  <div className="flex items-center gap-3">
-                    <div className={`h-10 w-10 rounded-lg ${color.bg} flex items-center justify-center shrink-0`}>
-                      <Trophy className={`h-5 w-5 ${color.text}`} />
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center gap-4">
+                    <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm", color.bg)}>
+                      <Trophy className="h-7 w-7" />
                     </div>
-                    <h4 className="text-[15px] font-semibold text-zinc-900">{squad.name}</h4>
+                    <div>
+                      <h4 className="text-xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{squad.name}</h4>
+                      <p className="text-xs font-black uppercase tracking-widest text-zinc-400">{squad.ageGroup}</p>
+                    </div>
                   </div>
-                  <Badge variant="outline" className={`text-[11px] ${color.badge}`}>
-                    {squad.ageGroup}
-                  </Badge>
                 </div>
 
-                <div className="space-y-3 mb-5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[13px] text-zinc-400 flex items-center gap-1.5">
-                      <UsersIcon className="h-3.5 w-3.5" />
+                <div className="space-y-4 mb-8 flex-1">
+                  <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl group-hover:bg-zinc-100/50 transition-colors">
+                    <span className="text-xs font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2">
+                      <UsersIcon className="h-4 w-4" />
                       Αθλητές
                     </span>
-                    <span className="text-[15px] font-semibold text-zinc-900">{athleteCount}</span>
+                    <span className="text-xl font-black text-zinc-900">{athleteCount}</span>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-[13px] text-zinc-400 flex items-center gap-1.5">
-                      <Trophy className="h-3.5 w-3.5" />
-                      Προπονητής
-                    </span>
-                    <span className="text-sm font-medium text-zinc-600 truncate ml-4 text-right max-w-[140px]">
+                  <div className="space-y-1">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Προπονητής</p>
+                    <p className="text-sm font-bold text-zinc-700 truncate">
                       {getCoachNames(squad.coachIds)}
-                    </span>
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex gap-2 pt-4 border-t border-zinc-100/60">
-                  <Button size="sm" className="flex-1 h-8 text-xs" asChild>
+                <div className="flex gap-2 pt-6 border-t border-zinc-50">
+                  <Button variant="ghost" className="flex-1 h-12 rounded-xl font-bold bg-zinc-50 hover:bg-emerald-50 hover:text-emerald-700" asChild>
                     <Link href={`/management/academy/squads/${squad.id}/edit`}>
-                      <Pencil className="h-3.5 w-3.5" />
                       Επεξεργασία
                     </Link>
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1 h-8 text-xs border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900" asChild>
+                  <Button variant="outline" className="flex-1 h-12 rounded-xl font-bold border-zinc-100 hover:bg-zinc-50" asChild>
                     <Link href={`/management/academy/users?squad=${squad.id}`}>
-                      <UsersIcon className="h-3.5 w-3.5" />
                       Ρόστερ
                     </Link>
                   </Button>
-                  <AlertDialog open={deleteConfirm === squad.id} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
+                  
+                  <AlertDialog open={deleteConfirm === squad.id} onOpenChange={(open: boolean) => !open && setDeleteConfirm(null)}>
                     <AlertDialogTrigger asChild>
                       <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 w-8 p-0 text-xs border-red-200 text-red-500 hover:text-red-700 hover:bg-red-50 hover:border-red-300"
+                        variant="ghost"
+                        className="h-12 w-12 p-0 rounded-xl text-red-400 hover:text-red-600 hover:bg-red-50"
                         onClick={() => setDeleteConfirm(squad.id)}
                       >
-                        <Trash2 className="h-3.5 w-3.5" />
+                        <Trash2 className="h-5 w-5" />
                       </Button>
                     </AlertDialogTrigger>
-                    <AlertDialogContent>
+                    <AlertDialogContent className="rounded-[2.5rem] p-10">
                       <AlertDialogHeader>
-                        <AlertDialogTitle>Διαγραφή τμήματος</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          Είστε σίγουροι ότι θέλετε να διαγράψετε το τμήμα &quot;{squad.name}&quot;; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.
+                        <AlertDialogTitle className="text-2xl font-black text-zinc-900">Διαγραφή τμήματος</AlertDialogTitle>
+                        <AlertDialogDescription className="text-lg font-medium text-zinc-500 mt-2">
+                          Είστε σίγουροι ότι θέλετε να διαγράψετε το τμήμα <span className="text-zinc-900 font-bold">&quot;{squad.name}&quot;</span>; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>Ακύρωση</AlertDialogCancel>
-                        <AlertDialogAction variant="destructive" onClick={() => handleDelete(squad.id)}>
+                      <AlertDialogFooter className="mt-10 gap-3">
+                        <AlertDialogCancel className="h-14 px-8 rounded-2xl font-bold border-zinc-100">Ακύρωση</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={() => handleDelete(squad.id)}
+                          className="h-14 px-8 rounded-2xl bg-red-600 text-white font-black hover:bg-red-700 shadow-lg shadow-red-200"
+                        >
                           Διαγραφή
                         </AlertDialogAction>
                       </AlertDialogFooter>

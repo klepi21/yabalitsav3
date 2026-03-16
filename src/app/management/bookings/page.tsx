@@ -42,6 +42,28 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+import { ChevronDown } from 'lucide-react';
 
 export default function BookingsPage() {
   const router = useRouter();
@@ -235,39 +257,46 @@ export default function BookingsPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Κρατήσεις</h1>
-          <p className="text-sm text-zinc-500 mt-1">Διαχείριση κρατήσεων για το γήπεδό σας</p>
+          <div className="flex items-center gap-3 mb-2">
+            <div className="p-2.5 rounded-xl bg-emerald-600 shadow-lg shadow-emerald-200">
+              <CalendarDays className="h-6 w-6 text-white" />
+            </div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900">Κρατήσεις</h1>
+          </div>
+          <p className="text-[16px] font-medium text-zinc-500">Διαχείριση και προγραμματισμός των κρατήσεων σας.</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center rounded-lg border border-zinc-200 p-0.5">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center bg-zinc-100 p-1 rounded-xl border border-zinc-200">
             <button
               onClick={() => setViewMode('calendar')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 ${
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all",
                 viewMode === 'calendar'
-                  ? 'bg-zinc-900 text-white shadow-sm'
-                  : 'text-zinc-500 hover:text-zinc-700'
-              }`}
+                  ? "bg-white text-emerald-600 shadow-sm border border-zinc-200"
+                  : "text-zinc-500 hover:text-zinc-700"
+              )}
             >
-              <CalendarDays className="h-3.5 w-3.5" />
+              <CalendarDays className="h-4 w-4" />
               Ημερολόγιο
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all duration-150 ${
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all",
                 viewMode === 'list'
-                  ? 'bg-zinc-900 text-white shadow-sm'
-                  : 'text-zinc-500 hover:text-zinc-700'
-              }`}
+                  ? "bg-white text-emerald-600 shadow-sm border border-zinc-200"
+                  : "text-zinc-500 hover:text-zinc-700"
+              )}
             >
-              <Users className="h-3.5 w-3.5" />
+              <Users className="h-4 w-4" />
               Λίστα
             </button>
           </div>
-          <Button asChild>
+          <Button className="h-12 px-6 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-200" asChild>
             <Link href="/management/bookings/new">
-              <Plus className="h-4 w-4" />
+              <Plus className="h-5 w-5 mr-2" />
               Νέα Κράτηση
             </Link>
           </Button>
@@ -275,376 +304,333 @@ export default function BookingsPage() {
       </div>
 
       {viewMode === 'calendar' ? (
-        <WeeklyCalendar
-          bookings={bookings}
-          pitches={pitches}
-          blockedDates={blockedDates}
-          onBookingClick={(booking) => router.push(`/management/bookings/${booking.id}`)}
-          onSlotClick={(date, time) => {
-            router.push(`/management/bookings/new?date=${date}&time=${time}`);
-          }}
-          onDeleteBooking={handleDeleteBooking}
-          deletingBookingId={deletingBookingId}
-          onUpdateBookingStatus={handleUpdateBookingStatus}
-          updatingBookingId={updatingBookingId}
-        />
+        <div className="premium-card overflow-hidden">
+          <WeeklyCalendar
+            bookings={bookings}
+            pitches={pitches}
+            blockedDates={blockedDates}
+            onBookingClick={(booking) => router.push(`/management/bookings/${booking.id}`)}
+            onSlotClick={(date, time) => {
+              const formattedDate = date.toISOString().split('T')[0];
+              router.push(`/management/bookings/new?date=${formattedDate}&time=${time}`);
+            }}
+            onDeleteBooking={handleDeleteBooking}
+            deletingBookingId={deletingBookingId}
+            onUpdateBookingStatus={handleUpdateBookingStatus}
+            updatingBookingId={updatingBookingId}
+          />
+        </div>
       ) : (
-        <>
-          {/* Stats + Search */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-3 rounded-xl border border-zinc-100/60 bg-white px-4 py-3">
-                <div className="h-9 w-9 rounded-lg bg-emerald-50 flex items-center justify-center">
-                  <CalendarDays className="h-4 w-4 text-emerald-600" />
-                </div>
-                <div>
-                  <p className="text-lg font-semibold tracking-tight text-zinc-900">{bookings.length}</p>
-                  <p className="text-[11px] text-zinc-400">Σύνολο</p>
-                </div>
+        <div className="space-y-8">
+          {/* Stats Row */}
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="premium-card p-6 flex flex-col items-center justify-center text-center hover:scale-[1.02] transition-transform">
+              <div className="h-12 w-12 rounded-2xl bg-zinc-50 flex items-center justify-center mb-3">
+                <CalendarDays className="h-6 w-6 text-zinc-600" />
               </div>
-              <div className="flex items-center gap-3 rounded-xl border border-zinc-100/60 bg-white px-4 py-3">
-                <div className="h-9 w-9 rounded-lg bg-amber-50 flex items-center justify-center">
-                  <Clock className="h-4 w-4 text-amber-600" />
-                </div>
-                <div>
-                  <p className="text-lg font-semibold tracking-tight text-zinc-900">{pendingCount}</p>
-                  <p className="text-[11px] text-zinc-400">Εκκρεμείς</p>
-                </div>
+              <p className="text-2xl font-black text-zinc-900">{bookings.length}</p>
+              <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest mt-1">Σύνολο</p>
+            </div>
+            
+            <div className="premium-card p-6 flex flex-col items-center justify-center text-center hover:scale-[1.02] transition-transform">
+              <div className="h-12 w-12 rounded-2xl bg-amber-50 flex items-center justify-center mb-3">
+                <Clock className="h-6 w-6 text-amber-600" />
               </div>
-              <div className="hidden sm:flex items-center gap-3 rounded-xl border border-zinc-100/60 bg-white px-4 py-3">
-                <div className="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-lg font-semibold tracking-tight text-zinc-900">{confirmedCount}</p>
-                  <p className="text-[11px] text-zinc-400">Επιβεβαιωμένες</p>
-                </div>
-              </div>
-              <div className="hidden sm:flex items-center gap-3 rounded-xl border border-zinc-100/60 bg-white px-4 py-3">
-                <div className="h-9 w-9 rounded-lg bg-violet-50 flex items-center justify-center">
-                  <Flag className="h-4 w-4 text-violet-600" />
-                </div>
-                <div>
-                  <p className="text-lg font-semibold tracking-tight text-zinc-900">{todayCount}</p>
-                  <p className="text-[11px] text-zinc-400">Σήμερα</p>
-                </div>
-              </div>
-              <div className="hidden sm:flex items-center gap-3 rounded-xl border border-zinc-100/60 bg-white px-4 py-3">
-                <div className="h-9 w-9 rounded-lg bg-red-50 flex items-center justify-center">
-                  <XCircle className="h-4 w-4 text-red-600" />
-                </div>
-                <div>
-                  <p className="text-lg font-semibold tracking-tight text-zinc-900">{cancelledCount}</p>
-                  <p className="text-[11px] text-zinc-400">Ακυρωμένες</p>
-                </div>
-              </div>
+              <p className="text-2xl font-black text-zinc-900">{pendingCount}</p>
+              <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mt-1">Εκκρεμείς</p>
             </div>
 
-            <div className="relative flex-1 sm:max-w-sm">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-              <Input
-                type="text"
-                placeholder="Αναζήτηση κρατήσεων..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+            <div className="premium-card p-6 flex flex-col items-center justify-center text-center hover:scale-[1.02] transition-transform">
+              <div className="h-12 w-12 rounded-2xl bg-emerald-50 flex items-center justify-center mb-3">
+                <CheckCircle className="h-6 w-6 text-emerald-600" />
+              </div>
+              <p className="text-2xl font-black text-zinc-900">{confirmedCount}</p>
+              <p className="text-xs font-bold text-emerald-500 uppercase tracking-widest mt-1">Επιβεβαιωμένες</p>
+            </div>
+
+            <div className="premium-card p-6 flex flex-col items-center justify-center text-center hover:scale-[1.02] transition-transform">
+              <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center mb-3">
+                <Flag className="h-6 w-6 text-blue-600" />
+              </div>
+              <p className="text-2xl font-black text-zinc-900">{todayCount}</p>
+              <p className="text-xs font-bold text-blue-500 uppercase tracking-widest mt-1">Σήμερα</p>
+            </div>
+
+            <div className="premium-card p-6 flex flex-col items-center justify-center text-center hover:scale-[1.02] transition-transform">
+              <div className="h-12 w-12 rounded-2xl bg-red-50 flex items-center justify-center mb-3">
+                <XCircle className="h-6 w-6 text-red-600" />
+              </div>
+              <p className="text-2xl font-black text-zinc-900">{cancelledCount}</p>
+              <p className="text-xs font-bold text-red-500 uppercase tracking-widest mt-1">Ακυρωμένες</p>
             </div>
           </div>
 
-          {/* Filters */}
-          <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-1.5 text-[13px] text-zinc-500">
-              <Filter className="h-3.5 w-3.5" />
-              Φίλτρα:
-            </div>
-
-            {/* Status filter */}
-            <div className="flex items-center rounded-lg border border-zinc-200 p-0.5">
-              {[
-                { value: 'all', label: 'Όλες' },
-                { value: 'pending', label: 'Εκκρεμείς' },
-                { value: 'confirmed', label: 'Επιβεβαιωμένες' },
-                { value: 'completed', label: 'Ολοκληρωμένες' },
-                { value: 'cancelled', label: 'Ακυρωμένες' },
-              ].map((opt) => (
-                <button
-                  key={opt.value}
-                  onClick={() => setFilterStatus(opt.value)}
-                  className={`px-2.5 py-1 rounded-md text-[12px] font-medium transition-all duration-150 ${
-                    filterStatus === opt.value
-                      ? 'bg-zinc-900 text-white shadow-sm'
-                      : 'text-zinc-500 hover:text-zinc-700'
-                  }`}
-                >
-                  {opt.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Pitch filter */}
-            {pitches.length > 1 && (
-              <div className="flex items-center rounded-lg border border-zinc-200 p-0.5">
-                <button
-                  onClick={() => setFilterPitch('all')}
-                  className={`px-2.5 py-1 rounded-md text-[12px] font-medium transition-all duration-150 ${
-                    filterPitch === 'all'
-                      ? 'bg-zinc-900 text-white shadow-sm'
-                      : 'text-zinc-500 hover:text-zinc-700'
-                  }`}
-                >
-                  Όλα τα γήπεδα
-                </button>
-                {pitches.map((pitch) => (
-                  <button
-                    key={pitch.id}
-                    onClick={() => setFilterPitch(pitch.id)}
-                    className={`px-2.5 py-1 rounded-md text-[12px] font-medium transition-all duration-150 ${
-                      filterPitch === pitch.id
-                        ? 'bg-zinc-900 text-white shadow-sm'
-                        : 'text-zinc-500 hover:text-zinc-700'
-                    }`}
-                  >
-                    {pitch.name}
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Clear filters */}
-            {(filterStatus !== 'all' || filterPitch !== 'all') && (
-              <button
-                onClick={() => { setFilterStatus('all'); setFilterPitch('all'); }}
-                className="flex items-center gap-1 text-[12px] text-zinc-400 hover:text-zinc-600 transition-colors"
-              >
-                <X className="h-3 w-3" />
-                Καθαρισμός
-              </button>
-            )}
-          </div>
-
-          {/* Bookings List */}
-          {filteredBookings.length === 0 ? (
-            <div className="rounded-xl border border-zinc-100/60 bg-white py-16">
-              <div className="text-center">
-                <div className="mx-auto h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center mb-4">
-                  <CalendarDays className="h-6 w-6 text-zinc-400" />
+          <Card className="premium-card overflow-hidden border-0">
+            <CardHeader className="p-8 pb-4 bg-zinc-50/50 border-b border-zinc-100">
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                <div className="relative flex-1">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
+                  <Input
+                    type="text"
+                    placeholder="Αναζήτηση με όνομα ή τηλέφωνο..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="h-12 pl-12 pr-4 rounded-xl border-zinc-200 focus:ring-emerald-500"
+                  />
                 </div>
-                <h3 className="text-sm font-medium text-zinc-900 mb-1">
-                  {searchTerm ? 'Δεν βρέθηκαν κρατήσεις' : 'Δεν υπάρχουν κρατήσεις ακόμα'}
-                </h3>
-                <p className="text-[13px] text-zinc-400 mb-5">
-                  {searchTerm ? 'Δοκιμάστε να αλλάξετε τους όρους αναζήτησης.' : 'Ξεκινήστε δημιουργώντας την πρώτη σας κράτηση.'}
-                </p>
-                {!searchTerm && (
-                  <div className="flex justify-center gap-3">
-                    <Button size="sm" asChild>
-                      <Link href="/management/bookings/new">
-                        <Plus className="h-4 w-4" />
-                        Δημιουργία Κράτησης
-                      </Link>
-                    </Button>
-                    <Button variant="outline" size="sm" className="border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900" asChild>
-                      <Link href="/management/bookings/new?recurring=true">
-                        <RefreshCw className="h-4 w-4" />
-                        Επαναλαμβανόμενη
-                      </Link>
-                    </Button>
+                
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="bg-white p-1 rounded-xl border border-zinc-200 flex items-center">
+                    {[
+                      { value: 'all', label: 'Όλες' },
+                      { value: 'pending', label: 'Εκκρεμείς' },
+                      { value: 'confirmed', label: 'Επιβεβαιωμένες' },
+                    ].map((opt) => (
+                      <button
+                        key={opt.value}
+                        onClick={() => setFilterStatus(opt.value)}
+                        className={cn(
+                          "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+                          filterStatus === opt.value
+                            ? "bg-zinc-900 text-white shadow-md"
+                            : "text-zinc-500 hover:text-zinc-700"
+                        )}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
                   </div>
-                )}
+
+                  {pitches.length > 1 && (
+                    <Select value={filterPitch} onValueChange={setFilterPitch}>
+                      <SelectTrigger className="h-10 w-[180px] rounded-xl border-zinc-200 font-bold text-xs">
+                        <SelectValue placeholder="Όλα τα γήπεδα" />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl">
+                        <SelectItem value="all" className="font-bold text-xs">Όλα τα γήπεδα</SelectItem>
+                        {pitches.map((pitch) => (
+                          <SelectItem key={pitch.id} value={pitch.id} className="font-bold text-xs">
+                            {pitch.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {filteredBookings.map((booking) => {
-                const pitch = pitches.find(p => p.id === booking.pitchId);
-                const startDate = new Date(booking.startTime);
-                const endDate = new Date(booking.endTime);
-                const isToday = startDate.toDateString() === new Date().toDateString();
+            </CardHeader>
 
-                return (
-                  <div
-                    key={booking.id}
-                    className="group rounded-xl border border-zinc-100/60 bg-white p-5 hover:border-zinc-200/80 hover:shadow-sm transition-all duration-150"
+            <CardContent className="p-0">
+              {filteredBookings.length === 0 ? (
+                <div className="p-20 text-center">
+                  <div className="h-20 w-20 bg-zinc-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <CalendarDays className="h-10 w-10 text-zinc-300" />
+                  </div>
+                  <h3 className="text-xl font-bold text-zinc-900">Δεν βρέθηκαν κρατήσεις</h3>
+                  <p className="text-zinc-500 mt-2">Δοκιμάστε να αλλάξετε τα φίλτρα ή την αναζήτηση σας.</p>
+                  <Button 
+                    variant="outline" 
+                    className="mt-8 h-12 px-8 rounded-xl font-bold"
+                    onClick={() => { setSearchTerm(''); setFilterStatus('all'); setFilterPitch('all'); }}
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      {/* Left: Info */}
-                      <div className="flex items-start gap-4 min-w-0 flex-1">
-                        {/* Date block */}
-                        <div className={`shrink-0 w-14 text-center rounded-xl p-2 ${isToday ? 'bg-emerald-50 border border-emerald-200/60' : 'bg-zinc-50 border border-zinc-100'}`}>
-                          <p className={`text-[11px] font-medium uppercase ${isToday ? 'text-emerald-600' : 'text-zinc-400'}`}>
-                            {startDate.toLocaleDateString('el-GR', { weekday: 'short' })}
-                          </p>
-                          <p className={`text-xl font-bold ${isToday ? 'text-emerald-700' : 'text-zinc-900'}`}>
-                            {startDate.getDate()}
-                          </p>
-                          <p className={`text-[10px] ${isToday ? 'text-emerald-500' : 'text-zinc-400'}`}>
-                            {startDate.toLocaleDateString('el-GR', { month: 'short' })}
-                          </p>
-                        </div>
+                    Καθαρισμός Φίλτρων
+                  </Button>
+                </div>
+              ) : (
+                <div className="divide-y divide-zinc-100">
+                  {filteredBookings.map((booking) => {
+                    const pitch = pitches.find(p => p.id === booking.pitchId);
+                    const startDate = new Date(booking.startTime);
+                    const isToday = startDate.toDateString() === new Date().toDateString();
+                    
+                    return (
+                      <div key={booking.id} className="group p-8 hover:bg-zinc-50 transition-all duration-200">
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+                          <div className="flex items-center gap-6 flex-1">
+                            {/* Date Block */}
+                            <div className={cn(
+                              "shrink-0 w-16 h-20 flex flex-col items-center justify-center rounded-2xl border transition-all",
+                              isToday 
+                                ? "bg-emerald-600 border-emerald-500 text-white shadow-lg shadow-emerald-100 scale-110 z-10" 
+                                : "bg-white border-zinc-100 text-zinc-900"
+                            )}>
+                              <p className={cn("text-[10px] font-black uppercase tracking-tighter", isToday ? "text-emerald-100" : "text-zinc-400")}>
+                                {startDate.toLocaleDateString('el-GR', { weekday: 'short' })}
+                              </p>
+                              <p className="text-2xl font-black leading-none my-1">
+                                {startDate.getDate()}
+                              </p>
+                              <p className={cn("text-[10px] font-bold", isToday ? "text-emerald-100" : "text-zinc-500")}>
+                                {startDate.toLocaleDateString('el-GR', { month: 'short' })}
+                              </p>
+                            </div>
 
-                        {/* Details */}
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h4 className="text-[15px] font-semibold text-zinc-900">
-                              {booking.userName || 'Άγνωστος Πελάτης'}
-                            </h4>
-                            {getStatusBadge(booking.status)}
-                            {isToday && (
-                              <Badge variant="outline" className="text-[11px] border-emerald-200/60 text-emerald-600 bg-emerald-50">
-                                Σήμερα
-                              </Badge>
-                            )}
+                            <div className="space-y-2 flex-1 min-w-0">
+                              <div className="flex items-center gap-3 flex-wrap">
+                                <h4 className="text-[18px] font-bold text-zinc-900 truncate flex items-center gap-2">
+                                  {booking.userName || 'Άγνωστος Πελάτης'}
+                                  {booking.notes && (
+                                    <TooltipProvider>
+                                      <Tooltip>
+                                        <TooltipTrigger asChild>
+                                          <div className="p-1 rounded bg-amber-50 text-amber-600 border border-amber-100">
+                                            <AlertCircle className="h-3.5 w-3.5" />
+                                          </div>
+                                        </TooltipTrigger>
+                                        <TooltipContent className="rounded-xl border-zinc-200 shadow-xl p-4 max-w-xs">
+                                          <p className="text-xs font-bold text-zinc-900 mb-1">Σημειώσεις</p>
+                                          <p className="text-xs text-zinc-600 leading-relaxed font-medium">{booking.notes}</p>
+                                        </TooltipContent>
+                                      </Tooltip>
+                                    </TooltipProvider>
+                                  )}
+                                </h4>
+                                {getStatusBadge(booking.status)}
+                              </div>
+                              
+                              <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-[14px] text-zinc-500 font-medium">
+                                <span className="flex items-center gap-2 bg-zinc-100 px-2.5 py-1 rounded-lg text-zinc-700">
+                                  <Clock className="h-4 w-4" />
+                                  {startDate.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })} - {new Date(booking.endTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                                {booking.userPhone && (
+                                  <span className="flex items-center gap-2">
+                                    <Phone className="h-4 w-4 text-emerald-600" />
+                                    {booking.userPhone}
+                                  </span>
+                                )}
+                                {pitch && (
+                                  <span className="flex items-center gap-2">
+                                    <Building2 className="h-4 w-4 text-zinc-400" />
+                                    {pitch.name}
+                                    <Badge variant="outline" className="text-[10px] font-black h-5 border-zinc-200">
+                                      {pitch.type}
+                                    </Badge>
+                                  </span>
+                                )}
+                              </div>
+                            </div>
                           </div>
 
-                          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1">
-                            <span className="flex items-center gap-1.5 text-[13px] text-zinc-500">
-                              <Clock className="h-3.5 w-3.5" />
-                              {startDate.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })}
-                              {' - '}
-                              {endDate.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                            <span className="flex items-center gap-1.5 text-[13px] text-zinc-500">
-                              <Phone className="h-3.5 w-3.5" />
-                              {booking.userPhone || '—'}
-                            </span>
-                            {pitch && (
-                              <span className="flex items-center gap-1.5 text-[13px] text-zinc-500">
-                                <Building2 className="h-3.5 w-3.5" />
-                                {pitch.name}
-                                <Badge variant="outline" className="text-[10px] border-zinc-200/60 text-zinc-400 ml-0.5">
-                                  {pitch.type}
-                                </Badge>
-                              </span>
-                            )}
-                            <span className="flex items-center gap-1.5 text-[13px] font-semibold text-zinc-900">
-                              <Euro className="h-3.5 w-3.5 text-zinc-400" />
-                              {booking.price?.toFixed(2) || '0.00'}
-                            </span>
-                          </div>
+                          <div className="flex items-center justify-between lg:justify-end gap-10">
+                            <div className="text-right">
+                              <p className="text-2xl font-black text-zinc-900">&euro;{booking.price?.toFixed(2) || '0.00'}</p>
+                              {pitch && (
+                                <p className="text-xs font-bold text-zinc-400">
+                                  &euro;{(booking.price / parseInt(pitch.type.split('x')[0] || '10')).toFixed(0)} / άτομο
+                                </p>
+                              )}
+                            </div>
 
-                          {booking.notes && (
-                            <p className="mt-1.5 text-[12px] text-zinc-400 truncate max-w-md">
-                              {booking.notes}
-                            </p>
-                          )}
+                            <div className="flex items-center gap-2">
+                               <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-zinc-200 hover:bg-zinc-50 transition-all" asChild>
+                                <Link href={`/management/bookings/${booking.id}`}>
+                                  <Eye className="h-5 w-5" />
+                                </Link>
+                              </Button>
+                              
+                              <Button variant="outline" size="icon" className="h-12 w-12 rounded-xl border-zinc-200 hover:bg-zinc-50 transition-all" asChild>
+                                <Link href={`/management/bookings/${booking.id}/edit`}>
+                                  <Pencil className="h-5 w-5" />
+                                </Link>
+                              </Button>
+
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="outline" className="h-12 px-4 rounded-xl border-zinc-200 font-bold gap-2">
+                                    Κατάσταση
+                                    <ChevronDown className="h-4 w-4 text-zinc-400" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-2xl border-0">
+                                  <DropdownMenuItem onClick={() => setStatusConfirm({ id: booking.id, status: 'confirmed' })} className="rounded-xl px-4 py-3 font-bold cursor-pointer transition-colors hover:bg-emerald-50 text-zinc-700">
+                                    <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 mr-3" />
+                                    Επιβεβαίωση
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => setStatusConfirm({ id: booking.id, status: 'completed' })} className="rounded-xl px-4 py-3 font-bold cursor-pointer transition-colors hover:bg-zinc-100 text-zinc-700">
+                                    <div className="h-2.5 w-2.5 rounded-full bg-zinc-400 mr-3" />
+                                    Ολοκλήρωση
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => setStatusConfirm({ id: booking.id, status: 'cancelled' })} className="rounded-xl px-4 py-3 font-bold cursor-pointer transition-colors hover:bg-red-50 text-red-600">
+                                    <div className="h-2.5 w-2.5 rounded-full bg-red-500 mr-3" />
+                                    Ακύρωση
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+
+                              <AlertDialog open={deleteConfirm === booking.id} onOpenChange={(open: boolean) => !open && setDeleteConfirm(null)}>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-12 w-12 rounded-xl text-zinc-400 hover:bg-red-50 hover:text-red-500 transition-all"
+                                    onClick={() => setDeleteConfirm(booking.id)}
+                                    disabled={deletingBookingId === booking.id}
+                                  >
+                                    {deletingBookingId === booking.id ? (
+                                      <Loader2 className="h-5 w-5 animate-spin" />
+                                    ) : (
+                                      <Trash2 className="h-5 w-5" />
+                                    )}
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent className="rounded-3xl border-0 shadow-2xl p-0 overflow-hidden max-w-md">
+                                  <div className="p-8 pt-10">
+                                    <div className="h-16 w-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                      <Trash2 className="h-8 w-8 text-red-500" />
+                                    </div>
+                                    <AlertDialogHeader className="text-center">
+                                      <AlertDialogTitle className="text-2xl font-black text-zinc-900">Διαγραφή Κράτησης;</AlertDialogTitle>
+                                      <AlertDialogDescription className="text-[16px] font-medium text-zinc-500 mt-2">
+                                        Είστε σίγουροι ότι θέλετε να διαγράψετε την κράτηση του &quot;<span className="font-bold text-zinc-900">{booking.userName}</span>&quot;;
+                                        <br />Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter className="p-8 pt-4 flex flex-col sm:flex-row gap-3">
+                                      <Button variant="ghost" className="h-12 rounded-xl font-bold text-zinc-500 flex-1" onClick={() => setDeleteConfirm(null)}>Ακύρωση</Button>
+                                      <Button className="h-12 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white flex-1" onClick={() => handleDeleteBooking(booking.id)}>Διαγραφή</Button>
+                                    </AlertDialogFooter>
+                                  </div>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="mt-4 pt-3 border-t border-zinc-100/60 flex flex-wrap items-center gap-2">
-                      <Button size="sm" className="h-8 text-xs" asChild>
-                        <Link href={`/management/bookings/${booking.id}`}>
-                          <Eye className="h-3.5 w-3.5" />
-                          Προβολή
-                        </Link>
-                      </Button>
-                      <Button variant="outline" size="sm" className="h-8 text-xs border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900" asChild>
-                        <Link href={`/management/bookings/${booking.id}/edit`}>
-                          <Pencil className="h-3.5 w-3.5" />
-                          Επεξεργασία
-                        </Link>
-                      </Button>
-                      {booking.status === 'pending' && (
-                        <AlertDialog open={statusConfirm?.id === booking.id && statusConfirm?.status === 'confirmed'} onOpenChange={(open) => !open && setStatusConfirm(null)}>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 text-xs border-blue-200 text-blue-600 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300"
-                              onClick={() => setStatusConfirm({ id: booking.id, status: 'confirmed' })}
-                              disabled={updatingBookingId === booking.id}
-                            >
-                              <CheckCircle className="h-3.5 w-3.5" />
-                              {updatingBookingId === booking.id ? 'Ενημέρωση...' : 'Επιβεβαίωση'}
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Επιβεβαίωση κράτησης</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Είστε σίγουροι ότι θέλετε να αλλάξετε την κατάσταση σε &quot;επιβεβαιωμένη&quot;;
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Ακύρωση</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleUpdateBookingStatus(booking.id, 'confirmed')}>
-                                Επιβεβαίωση
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      )}
-                      {booking.status !== 'completed' && booking.status !== 'cancelled' && (
-                        <AlertDialog open={statusConfirm?.id === booking.id && statusConfirm?.status === 'completed'} onOpenChange={(open) => !open && setStatusConfirm(null)}>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="h-8 text-xs border-emerald-200 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300"
-                              onClick={() => setStatusConfirm({ id: booking.id, status: 'completed' })}
-                              disabled={updatingBookingId === booking.id}
-                            >
-                              <Flag className="h-3.5 w-3.5" />
-                              {updatingBookingId === booking.id ? 'Ενημέρωση...' : 'Ολοκλήρωση'}
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Ολοκλήρωση κράτησης</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Είστε σίγουροι ότι θέλετε να αλλάξετε την κατάσταση σε &quot;ολοκληρωμένη&quot;;
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Ακύρωση</AlertDialogCancel>
-                              <AlertDialogAction onClick={() => handleUpdateBookingStatus(booking.id, 'completed')}>
-                                Ολοκλήρωση
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      )}
-                      <AlertDialog open={deleteConfirm === booking.id} onOpenChange={(open) => !open && setDeleteConfirm(null)}>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-xs border-red-200 text-red-500 hover:text-red-700 hover:bg-red-50 hover:border-red-300 ml-auto"
-                            onClick={() => setDeleteConfirm(booking.id)}
-                            disabled={deletingBookingId === booking.id}
-                          >
-                            {deletingBookingId === booking.id ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-3.5 w-3.5" />
-                            )}
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Διαγραφή κράτησης</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Είστε σίγουροι ότι θέλετε να διαγράψετε την κράτηση του &quot;{booking.userName}&quot;; Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Ακύρωση</AlertDialogCancel>
-                            <AlertDialogAction variant="destructive" onClick={() => handleDeleteBooking(booking.id)}>
-                              Διαγραφή
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       )}
+
+      {/* Status Confirmation Dialog */}
+      <AlertDialog open={!!statusConfirm} onOpenChange={(open: boolean) => !open && setStatusConfirm(null)}>
+        <AlertDialogContent className="rounded-3xl border-0 shadow-2xl p-0 overflow-hidden max-w-md">
+          <div className="p-8 pt-10">
+            <div className="h-16 w-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <RefreshCw className="h-8 w-8 text-emerald-600" />
+            </div>
+            <AlertDialogHeader className="text-center">
+              <AlertDialogTitle className="text-2xl font-black text-zinc-900">Αλλαγή Κατάστασης;</AlertDialogTitle>
+              <AlertDialogDescription className="text-[16px] font-medium text-zinc-500 mt-2">
+                Είστε σίγουροι ότι θέλετε να αλλάξετε την κατάσταση της κράτησης σε <span className="font-black text-emerald-600">
+                  {statusConfirm?.status === 'confirmed' ? 'Επιβεβαιωμένη' : 
+                   statusConfirm?.status === 'completed' ? 'Ολοκληρωμένη' : 'Ακυρωμένη'}
+                </span>;
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="p-8 pt-4 flex flex-col sm:flex-row gap-3">
+              <Button variant="ghost" className="h-12 rounded-xl font-bold text-zinc-500 flex-1" onClick={() => setStatusConfirm(null)}>Ακύρωση</Button>
+              <Button className="h-12 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex-1 shadow-lg shadow-emerald-100" onClick={() => statusConfirm && handleUpdateBookingStatus(statusConfirm.id, statusConfirm.status)}>
+                Επιβεβαίωση
+              </Button>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

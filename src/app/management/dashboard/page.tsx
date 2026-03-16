@@ -62,6 +62,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 
 export default function DashboardPage() {
   const { user, venueOwner, isLoading: authLoading } = useAuth();
@@ -501,23 +502,21 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10 pb-12">
       {/* Error Alert */}
       {loadError && (
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
+        <Alert variant="destructive" className="rounded-2xl border-2 shadow-sm animate-in fade-in slide-in-from-top-4 duration-300">
+          <AlertTriangle className="h-5 w-5" />
           <AlertDescription>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-2">
               <div>
-                <p className="font-medium">Σφάλμα κατά τη φόρτωση δεδομένων πίνακα</p>
-                <p className="text-sm mt-1">{loadError}</p>
-                <p className="text-xs mt-1">
-                  Αν το πρόβλημα συνεχίζεται, δοκιμάστε να ανανεώσετε τη σελίδα ή να συνδεθείτε ξανά.
-                </p>
+                <p className="font-bold text-[16px]">Σφάλμα κατά τη φόρτωση δεδομένων</p>
+                <p className="text-sm mt-1 opacity-90">{loadError}</p>
               </div>
               <Button
-                variant="ghost"
-                size="sm"
+                variant="outline"
+                size="lg"
+                className="bg-white hover:bg-zinc-50 border-red-200 text-red-700 font-bold"
                 onClick={() => {
                   setLoadError(null);
                   loadDashboardData();
@@ -531,219 +530,221 @@ export default function DashboardPage() {
       )}
 
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Πίνακας Ελέγχου</h1>
-          <p className="text-sm text-zinc-500 mt-1">Επισκόπηση γηπέδου και κρατήσεων</p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
+        <div className="space-y-1">
+          <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 sm:text-4xl">
+            Πίνακας Ελέγχου
+          </h1>
+          <p className="text-[16px] font-medium text-zinc-500">
+            Καλώς ορίσατε στο σύστημα διαχείρισης του <span className="text-emerald-600 font-bold">{venue?.name || 'γηπέδου σας'}</span>
+          </p>
         </div>
-        <div className="flex items-center space-x-3">
-          <Button onClick={() => setShowQuickBooking(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+        <div className="flex items-center gap-3">
+          <Button 
+            size="lg" 
+            onClick={() => setShowQuickBooking(true)}
+            className="h-12 px-6 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-200"
+          >
+            <Plus className="h-5 w-5 mr-2" />
             Γρήγορη Κράτηση
           </Button>
 
-          {/* Booking Page Dropdown */}
           <DropdownMenu open={showBookingMenu} onOpenChange={setShowBookingMenu}>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="lg" className="h-12 px-5 rounded-xl font-bold border-zinc-200 hover:bg-zinc-50 text-zinc-700 transition-all active:scale-95">
                 Σελίδα Booking
-                <ChevronDown className="h-3.5 w-3.5 ml-1.5 opacity-50" />
+                <ChevronDown className="h-4 w-4 ml-2 opacity-50" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-2xl border-zinc-100">
               <DropdownMenuItem
+                className="rounded-xl px-4 py-3 font-semibold cursor-pointer"
                 onClick={() => {
                   setShowBookingMenu(false);
                   if (bookingPath) router.push(bookingPath);
                 }}
                 disabled={!bookingPath}
               >
-                Άνοιγμα
+                <Eye className="h-4 w-4 mr-3 text-zinc-400" />
+                Άνοιγμα Σελίδας
               </DropdownMenuItem>
               <DropdownMenuItem
+                className="rounded-xl px-4 py-3 font-semibold cursor-pointer"
                 onClick={() => {
                   setShowBookingMenu(false);
                   if (bookingPath) window.open(`/management/booking/qr?url=${encodeURIComponent(bookingPath)}`, '_blank');
                 }}
                 disabled={!bookingPath}
               >
-                Δημιουργία QR
+                <Activity className="h-4 w-4 mr-3 text-zinc-400" />
+                Δημιουργία QR Code
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       </div>
 
-      {/* Error State */}
-      {loadError && (
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            <h3 className="font-semibold">Σφάλμα φόρτωσης</h3>
-            <p className="mt-1">{loadError}</p>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={loadDashboardData}
-              className="mt-3"
-            >
-              Δοκιμάστε ξανά
-            </Button>
-          </AlertDescription>
-        </Alert>
-      )}
-
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="relative overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[13px] text-zinc-500 font-medium">Σύνολο Κρατήσεων</p>
-                <p className="text-2xl font-semibold text-zinc-900 mt-1 tracking-tight">{bookings.length}</p>
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          { label: 'Σύνολο Κρατήσεων', value: bookings.length, icon: CalendarDays, color: 'emerald' },
+          { label: 'Live Αγώνες', value: getLiveBookings(), icon: Activity, color: 'blue' },
+          { label: 'Σημερινές Κρατήσεις', value: getTodaysBookings().length, icon: Target, color: 'amber' },
+          { label: 'Σύνολο Πελατών', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, icon: Users, color: 'violet' }
+        ].map((stat, i) => (
+          <Card key={i} className="premium-card overflow-hidden group">
+            <CardContent className="p-8">
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-[14px] text-zinc-500 font-bold uppercase tracking-wider">{stat.label}</p>
+                  <p className="text-4xl font-extrabold text-zinc-900 tracking-tight">{stat.value}</p>
+                </div>
+                <div className={cn(
+                  "h-14 w-14 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110",
+                  stat.color === 'emerald' && "bg-emerald-50 text-emerald-600",
+                  stat.color === 'blue' && "bg-blue-50 text-blue-600",
+                  stat.color === 'amber' && "bg-amber-50 text-amber-600",
+                  stat.color === 'violet' && "bg-violet-50 text-violet-600"
+                )}>
+                  <stat.icon className="h-7 w-7" />
+                </div>
               </div>
-              <div className="h-10 w-10 rounded-lg bg-emerald-50 flex items-center justify-center">
-                <CalendarDays className="h-5 w-5 text-emerald-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="relative overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[13px] text-zinc-500 font-medium">Live Αγώνες</p>
-                <p className="text-2xl font-semibold text-zinc-900 mt-1 tracking-tight">{getLiveBookings()}</p>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                <Activity className="h-5 w-5 text-blue-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="relative overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[13px] text-zinc-500 font-medium">Σημερινές Κρατήσεις</p>
-                <p className="text-2xl font-semibold text-zinc-900 mt-1 tracking-tight">{getTodaysBookings().length}</p>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-amber-50 flex items-center justify-center">
-                <Target className="h-5 w-5 text-amber-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="relative overflow-hidden">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-[13px] text-zinc-500 font-medium">Σύνολο Πελατών</p>
-                <p className="text-2xl font-semibold text-zinc-900 mt-1 tracking-tight">{new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size}</p>
-              </div>
-              <div className="h-10 w-10 rounded-lg bg-violet-50 flex items-center justify-center">
-                <Users className="h-5 w-5 text-violet-600" />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+            <div className={cn(
+              "absolute bottom-0 left-0 right-0 h-1",
+              stat.color === 'emerald' && "bg-emerald-500",
+              stat.color === 'blue' && "bg-blue-500",
+              stat.color === 'amber' && "bg-amber-500",
+              stat.color === 'violet' && "bg-violet-500"
+            )} />
+          </Card>
+        ))}
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        {/* Recent Bookings - 2/3 width */}
-        <div className="lg:col-span-2 flex">
-          <Card className="flex-1 flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-2">
-                <CalendarDays className="h-5 w-5 text-muted-foreground" />
-                <CardTitle>Σημερινές Κρατήσεις</CardTitle>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        {/* Recent Bookings - 8/12 width */}
+        <div className="lg:col-span-8 space-y-6">
+          <Card className="premium-card">
+            <CardHeader className="p-8 pb-4 flex flex-row items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-zinc-100 text-zinc-600">
+                  <CalendarDays className="h-5 w-5" />
+                </div>
+                <CardTitle className="text-xl font-bold">Σημερινές Κρατήσεις</CardTitle>
               </div>
-              <Button size="sm" asChild>
+              <Button variant="ghost" className="font-bold text-emerald-600 h-10 px-4 hover:bg-emerald-50" asChild>
                 <Link href="/management/bookings">Προβολή Όλων</Link>
               </Button>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-8 pt-4">
               {!bookings || getTodaysBookings().length === 0 ? (
-                <div className="text-center py-8">
-                  <CalendarDays className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                  <h3 className="text-sm font-medium text-foreground">
-                    {!bookings ? 'Φόρτωση κρατήσεων...' : 'Δεν υπάρχουν σημερινές κρατήσεις'}
+                <div className="text-center py-16 bg-zinc-50/50 rounded-2xl border-2 border-dashed border-zinc-200">
+                  <div className="h-16 w-16 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CalendarDays className="h-8 w-8 text-zinc-400" />
+                  </div>
+                  <h3 className="text-[16px] font-bold text-zinc-900">
+                    {!bookings ? 'Φόρτωση κρατήσεων...' : 'Καμία κράτηση προγραμματισμένη'}
                   </h3>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {!bookings ? 'Παρακαλώ περιμένετε' : 'Δεν υπάρχουν κρατήσεις για σήμερα'}
+                  <p className="text-sm text-zinc-500 mt-2 max-w-[280px] mx-auto">
+                    {!bookings ? 'Παρακαλώ περιμένετε' : 'Δεν υπάρχουν κρατήσεις για σήμερα στο σύστημα.'}
                   </p>
+                  {bookings && (
+                    <Button 
+                      variant="outline" 
+                      className="mt-6 font-bold rounded-xl"
+                      onClick={() => setShowQuickBooking(true)}
+                    >
+                      Προσθήκη Κράτησης
+                    </Button>
+                  )}
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {getTodaysBookings()
-                    .slice(0, 5)
+                    .slice(0, 10) // Show more for desktop
                     .map((booking) => {
                     const pitch = pitches.find(p => p.id === booking.pitchId);
                     return (
-                      <div key={booking.id} className="border border-zinc-100/60 rounded-lg p-4 hover:bg-zinc-50/50 transition-colors">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-sm font-medium text-foreground">
-                            {booking.userName || booking.userEmail || 'Άγνωστος Πελάτης'}
-                          </h4>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <button className="inline-flex items-center gap-1 cursor-pointer">
-                                {getStatusBadge(booking.status)}
-                                <ChevronDown className="h-3 w-3 text-zinc-400" />
-                              </button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'pending', booking.status, booking.userName || 'Άγνωστος')}>
-                                <span className="h-2 w-2 rounded-full bg-amber-500 shrink-0" />
-                                Εκκρεμεί
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'confirmed', booking.status, booking.userName || 'Άγνωστος')}>
-                                <span className="h-2 w-2 rounded-full bg-emerald-500 shrink-0" />
-                                Επιβεβαιωμένη
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'completed', booking.status, booking.userName || 'Άγνωστος')}>
-                                <span className="h-2 w-2 rounded-full bg-zinc-400 shrink-0" />
-                                Ολοκληρωμένη
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'cancelled', booking.status, booking.userName || 'Άγνωστος')} className="text-red-600">
-                                <span className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
-                                Ακυρωμένη
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <CalendarDays className="h-3.5 w-3.5" />
-                            {new Date(booking.startTime).toLocaleDateString('el-GR')} στις {new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit', hour12: false})}
-                          </span>
-                          {pitch && (
-                            <span className="flex items-center gap-1">
-                              <Building2 className="h-3.5 w-3.5" />
-                              {pitch.name} ({pitch.type})
-                            </span>
-                          )}
-                        </div>
-                        <div className="mt-2 flex items-center justify-between">
-                          <div className="flex flex-col">
-                            <span className="text-sm font-medium text-foreground">
-                              &euro;{booking.price || pitch?.pricePerSlot || 0}
-                            </span>
-                            {pitch && (
-                              <span className="text-xs text-muted-foreground">
-                                (&euro;{((booking.price || pitch.pricePerSlot || 0) / getPlayersPerPitch(pitch.type)).toFixed(0)}/άτομο)
+                      <div key={booking.id} className="group border border-zinc-100 rounded-2xl p-6 hover:border-emerald-200 hover:bg-emerald-50/20 transition-all duration-200 shadow-sm hover:shadow-md">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                          <div className="space-y-1">
+                            <h4 className="text-[17px] font-bold text-zinc-900 flex items-center gap-2">
+                              {booking.userName || booking.userEmail || 'Άγνωστος Πελάτης'}
+                              {booking.notes && (
+                                <span className="inline-block p-1 rounded bg-amber-100 text-amber-700" title={booking.notes}>
+                                  <AlertTriangle className="h-3.5 w-3.5" />
+                                </span>
+                              )}
+                            </h4>
+                            <div className="flex flex-wrap items-center gap-4 text-[14px] text-zinc-500 font-medium">
+                              <span className="flex items-center gap-2 bg-zinc-100 px-2.5 py-1 rounded-lg">
+                                <CalendarDays className="h-4 w-4" />
+                                {new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit', hour12: false})}
                               </span>
-                            )}
+                              {pitch && (
+                                <span className="flex items-center gap-2">
+                                  <Building2 className="h-4 w-4" />
+                                  {pitch.name}
+                                  <Badge variant="outline" className="text-[10px] font-bold py-0 h-5 border-zinc-200 text-zinc-600 bg-white">
+                                    {pitch.type}
+                                  </Badge>
+                                </span>
+                              )}
+                              {booking.userPhone && (
+                                <span className="flex items-center gap-2">
+                                  <Phone className="h-3.5 w-3.5" />
+                                  {booking.userPhone}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <Button variant="link" size="sm" className="text-primary p-0 h-auto" asChild>
-                            <Link href={`/management/bookings/${booking.id}`}>
-                              Προβολή
-                            </Link>
-                          </Button>
+                          
+                          <div className="flex items-center justify-between sm:justify-end gap-6">
+                            <div className="text-right sm:text-right hidden sm:block">
+                              <p className="text-[17px] font-bold text-zinc-900">&euro;{booking.price || pitch?.pricePerSlot || 0}</p>
+                              {pitch && (
+                                <p className="text-xs text-zinc-500 font-medium tracking-tight">
+                                  &euro;{((booking.price || pitch.pricePerSlot || 0) / getPlayersPerPitch(pitch.type)).toFixed(0)}/άτομο
+                                </p>
+                              )}
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <button className="h-10 px-4 rounded-xl border border-zinc-200 bg-white flex items-center gap-3 font-bold text-[14px] transition-all hover:border-zinc-300 hover:shadow-sm">
+                                    {getStatusBadge(booking.status)}
+                                    <ChevronDown className="h-4 w-4 text-zinc-400" />
+                                  </button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-xl">
+                                  <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'pending', booking.status, booking.userName || 'Άγνωστος')} className="rounded-xl px-4 py-3 font-semibold cursor-pointer">
+                                    <div className="h-3 w-3 rounded-full bg-amber-500 mr-3" />
+                                    Εκκρεμεί
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'confirmed', booking.status, booking.userName || 'Άγνωστος')} className="rounded-xl px-4 py-3 font-semibold cursor-pointer">
+                                    <div className="h-3 w-3 rounded-full bg-emerald-500 mr-3" />
+                                    Επιβεβαιωμένη
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'completed', booking.status, booking.userName || 'Άγνωστος')} className="rounded-xl px-4 py-3 font-semibold cursor-pointer">
+                                    <div className="h-3 w-3 rounded-full bg-zinc-400 mr-3" />
+                                    Ολοκληρωμένη
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'cancelled', booking.status, booking.userName || 'Άγνωστος')} className="rounded-xl px-4 py-3 font-semibold cursor-pointer text-red-600">
+                                    <div className="h-3 w-3 rounded-full bg-red-500 mr-3" />
+                                    Ακυρωμένη
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                              
+                              <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl" asChild>
+                                <Link href={`/management/bookings/${booking.id}`}>
+                                  <Eye className="h-4 w-4" />
+                                </Link>
+                              </Button>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     );
@@ -754,319 +755,265 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Pitches Management - 1/3 width */}
-        <div className="lg:col-span-1 flex">
-          <Card className="flex-1 flex flex-col">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Building2 className="h-5 w-5 text-muted-foreground" />
-                <CardTitle>Γήπεδα</CardTitle>
+        {/* Sidebar Management - 4/12 width */}
+        <div className="lg:col-span-4 space-y-8">
+          {/* Pitches List */}
+          <Card className="premium-card">
+            <CardHeader className="p-8 pb-4 flex flex-row items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-zinc-100 text-zinc-600">
+                  <Building2 className="h-5 w-5" />
+                </div>
+                <CardTitle className="text-xl font-bold">Γήπεδα</CardTitle>
               </div>
-              <Button size="icon" variant="outline" className="h-8 w-8" asChild>
+              <Button size="icon" variant="outline" className="h-10 w-10 rounded-xl border-zinc-200 hover:bg-zinc-50" asChild>
                 <Link href="/management/pitches/new">
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-5 w-5" />
                 </Link>
               </Button>
             </CardHeader>
-            <CardContent className="flex-1">
+            <CardContent className="p-8 pt-4">
               {pitches.length === 0 ? (
-                <div className="text-center py-6">
-                  <Building2 className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
-                  <h3 className="text-sm font-medium text-foreground">Δεν υπάρχουν γήπεδα</h3>
-                  <p className="text-xs text-muted-foreground mt-1">Ξεκινήστε προσθέτοντας γήπεδο</p>
+                <div className="text-center py-12 bg-zinc-50/50 rounded-2xl border-2 border-dashed border-zinc-200">
+                  <Building2 className="h-10 w-10 text-zinc-300 mx-auto mb-3" />
+                  <h3 className="text-sm font-bold text-zinc-900">Δεν υπάρχουν γήπεδα</h3>
+                  <Button variant="link" size="sm" className="font-bold text-emerald-600 p-0 h-auto mt-2" asChild>
+                     <Link href="/management/pitches/new">Προσθήκη γηπέδου</Link>
+                  </Button>
                 </div>
               ) : (
-                <div className="divide-y divide-zinc-100/60">
-                  {pitches.slice(0, 3).map((pitch, index) => {
+                <div className="space-y-4">
+                  {pitches.slice(0, 5).map((pitch, index) => {
                     const colors = [
-                      { bg: 'bg-emerald-50', text: 'text-emerald-600', badge: 'border-emerald-200/60 bg-emerald-50 text-emerald-700' },
-                      { bg: 'bg-blue-50', text: 'text-blue-600', badge: 'border-blue-200/60 bg-blue-50 text-blue-700' },
-                      { bg: 'bg-violet-50', text: 'text-violet-600', badge: 'border-violet-200/60 bg-violet-50 text-violet-700' },
+                      { bg: 'bg-emerald-50', text: 'text-emerald-600', badge: 'border-emerald-200 bg-emerald-50 text-emerald-700' },
+                      { bg: 'bg-blue-50', text: 'text-blue-600', badge: 'border-blue-200 bg-blue-50 text-blue-700' },
+                      { bg: 'bg-violet-50', text: 'text-violet-600', badge: 'border-violet-200 bg-violet-50 text-violet-700' },
                     ];
                     const color = colors[index % colors.length];
                     return (
-                      <div key={pitch.id} className="group flex items-center gap-3 py-3 first:pt-0 last:pb-0 hover:bg-zinc-50/80 transition-colors rounded-lg px-1">
-                        <div className={`h-9 w-9 rounded-lg ${color.bg} flex items-center justify-center shrink-0`}>
-                          <Building2 className={`h-4 w-4 ${color.text}`} />
+                      <div key={pitch.id} className="group flex items-center gap-4 p-4 rounded-2xl border border-zinc-100 hover:border-emerald-200 hover:bg-zinc-50/50 transition-all duration-200">
+                        <div className={`h-12 w-12 rounded-xl ${color.bg} flex items-center justify-center shrink-0 shadow-sm`}>
+                          <Building2 className={`h-6 w-6 ${color.text}`} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <h4 className="text-sm font-medium text-zinc-900 truncate">{pitch.name}</h4>
-                            <Badge variant="outline" className={`text-[10px] px-1.5 py-0 ${color.badge}`}>
+                            <h4 className="text-[15px] font-bold text-zinc-900 truncate">{pitch.name}</h4>
+                            <Badge variant="outline" className={cn("text-[9px] font-extrabold uppercase px-1.5 py-0", color.badge)}>
                               {pitch.type}
                             </Badge>
                           </div>
-                          <p className="text-xs text-zinc-400 mt-0.5">
+                          <p className="text-[13px] text-zinc-500 font-medium mt-0.5">
                             &euro;{pitch.pricePerSlot} &middot; &euro;{getPricePerPerson(pitch.pricePerSlot, pitch.type)}/άτομο
                           </p>
                         </div>
-                        <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-zinc-400 hover:text-zinc-600" asChild>
-                            <Link href={`/management/pitches/${pitch.id}/edit`}>
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Link>
-                          </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-zinc-400 hover:text-zinc-600" asChild>
-                            <Link href={`/management/pitches/${pitch.id}`}>
-                              <Eye className="h-3.5 w-3.5" />
-                            </Link>
-                          </Button>
-                        </div>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" asChild>
+                          <Link href={`/management/pitches/${pitch.id}`}>
+                            <Pencil className="h-4 w-4" />
+                          </Link>
+                        </Button>
                       </div>
                     );
                   })}
-                  {pitches.length > 3 && (
-                    <div className="text-center pt-1">
-                      <Button variant="link" size="sm" className="text-primary text-xs" asChild>
-                        <Link href="/management/pitches">
-                          Προβολή όλων ({pitches.length} γήπεδα)
-                        </Link>
-                      </Button>
-                    </div>
-                  )}
                 </div>
               )}
             </CardContent>
           </Card>
-        </div>
-      </div>
 
-      {/* Quick Actions */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <Settings className="h-5 w-5 text-zinc-400" />
-          <h2 className="text-[15px] font-semibold text-zinc-900">Γρήγορες Ενέργειες</h2>
-        </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <Link
-            href="/management/bookings"
-            className="group flex items-center gap-4 rounded-xl border border-zinc-100/60 bg-white p-4 hover:border-zinc-200/80 hover:shadow-sm transition-all duration-150"
-          >
-            <div className="h-10 w-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0 group-hover:bg-emerald-100/80 transition-colors">
-              <CalendarDays className="h-5 w-5 text-emerald-600" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-zinc-900">Διαχείριση Κρατήσεων</p>
-              <p className="text-xs text-zinc-400 mt-0.5">Προβολή και διαχείριση όλων των κρατήσεων</p>
-            </div>
-          </Link>
-
-          <Link
-            href="/management/customers"
-            className="group flex items-center gap-4 rounded-xl border border-zinc-100/60 bg-white p-4 hover:border-zinc-200/80 hover:shadow-sm transition-all duration-150"
-          >
-            <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-blue-100/80 transition-colors">
-              <Users className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-zinc-900">Διαχείριση Πελατών</p>
-              <p className="text-xs text-zinc-400 mt-0.5">Διαχείριση πληροφοριών πελατών</p>
-            </div>
-          </Link>
-
-          <Link
-            href="/management/settings"
-            className="group flex items-center gap-4 rounded-xl border border-zinc-100/60 bg-white p-4 hover:border-zinc-200/80 hover:shadow-sm transition-all duration-150"
-          >
-            <div className="h-10 w-10 rounded-lg bg-violet-50 flex items-center justify-center shrink-0 group-hover:bg-violet-100/80 transition-colors">
-              <Building2 className="h-5 w-5 text-violet-600" />
-            </div>
-            <div>
-              <p className="text-sm font-medium text-zinc-900">Ρυθμίσεις Γηπέδου</p>
-              <p className="text-xs text-zinc-400 mt-0.5">Διαμόρφωση προτιμήσεων γηπέδου</p>
-            </div>
-          </Link>
-        </div>
-      </div>
-
-      {/* Expandable Venue Information */}
-      <div className="rounded-xl border border-zinc-100/60 bg-white">
-        <button
-          onClick={() => setIsVenueInfoExpanded(!isVenueInfoExpanded)}
-          className="flex items-center justify-between w-full text-left px-6 py-4"
-        >
-          <div className="flex items-center gap-2.5">
-            <div className="h-8 w-8 rounded-lg bg-zinc-50 flex items-center justify-center">
-              <Building2 className="h-4 w-4 text-zinc-500" />
-            </div>
-            <span className="text-[15px] font-semibold text-zinc-900">Πληροφορίες Γηπέδου</span>
-          </div>
-          <div className="h-7 w-7 rounded-md flex items-center justify-center hover:bg-zinc-50 transition-colors">
-            {isVenueInfoExpanded ? (
-              <ChevronUp className="h-4 w-4 text-zinc-400" />
-            ) : (
-              <ChevronDown className="h-4 w-4 text-zinc-400" />
-            )}
-          </div>
-        </button>
-
-        {isVenueInfoExpanded && (
-          <div className="px-6 pb-5">
-            <div className="border-t border-zinc-100/60 pt-4">
-              {!venue ? (
-                <div className="text-center py-8">
-                  <XCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                  <div className="text-zinc-500 text-sm">Δεν βρέθηκαν πληροφορίες γηπέδου</div>
-                  <div className="text-xs text-zinc-400 mt-1">Το γήπεδο δεν υπάρχει στη βάση δεδομένων</div>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={loadDashboardData}
-                    className="mt-3"
-                  >
-                    Δοκιμάστε ξανά
-                  </Button>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <div className="rounded-lg border border-zinc-100/60 p-4">
-                    <dt className="text-[13px] text-zinc-400 mb-1.5 flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5" /> Διεύθυνση
-                    </dt>
-                    <dd className="text-sm text-zinc-900 font-medium">{venue.address}</dd>
+          {/* Venue Info Info Card - more prominent */}
+          {venue && (
+            <Card className="premium-card bg-emerald-950 text-white overflow-hidden border-0">
+              <CardHeader className="p-8 pb-4">
+                <CardTitle className="text-xl font-bold flex items-center gap-3">
+                  <Building2 className="h-5 w-5 text-emerald-400" />
+                  Πληροφορίες Γηπέδου
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-8 pt-0 space-y-6">
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4">
+                    <div className="p-2 rounded-lg bg-emerald-900/50">
+                      <MapPin className="h-5 w-5 text-emerald-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Διεύθυνση</p>
+                      <p className="text-[15px] font-medium leading-relaxed mt-1 opacity-90">{venue.address}</p>
+                    </div>
                   </div>
-                  <div className="rounded-lg border border-zinc-100/60 p-4">
-                    <dt className="text-[13px] text-zinc-400 mb-1.5 flex items-center gap-1.5">
-                      <Mail className="h-3.5 w-3.5" /> Email
-                    </dt>
-                    <dd className="text-sm text-zinc-900 font-medium">{venue.contactDetails?.email || 'Δεν υπάρχει email'}</dd>
-                  </div>
-                  <div className="rounded-lg border border-zinc-100/60 p-4">
-                    <dt className="text-[13px] text-zinc-400 mb-1.5 flex items-center gap-1.5">
-                      <Phone className="h-3.5 w-3.5" /> Τηλέφωνο
-                    </dt>
-                    <dd className="text-sm text-zinc-900 font-medium">{venue.contactDetails?.phone || 'Δεν υπάρχει τηλέφωνο'}</dd>
+                  
+                  <div className="flex flex-col sm:flex-row gap-6">
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="p-2 rounded-lg bg-emerald-900/50">
+                        <Phone className="h-5 w-5 text-emerald-400" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Τηλέφωνο</p>
+                        <p className="text-[15px] font-medium mt-1 opacity-90">{venue.phone || venue.contactDetails?.phone}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="p-2 rounded-lg bg-emerald-900/50">
+                        <Mail className="h-5 w-5 text-emerald-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-bold text-emerald-400 uppercase tracking-widest">Email</p>
+                        <p className="text-[15px] font-medium mt-1 opacity-90 truncate">{venue.email || venue.contactDetails?.email}</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
-        )}
+
+                <Button 
+                  variant="outline" 
+                  className="w-full h-12 rounded-xl font-bold bg-white/10 border-white/20 hover:bg-white hover:text-emerald-950 transition-all text-white"
+                  asChild
+                >
+                  <Link href="/management/settings">
+                    <Settings className="h-4 w-4 mr-2" />
+                    Επεξεργασία Στοιχείων
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
+        </div>
       </div>
 
-      {/* Quick Booking Modal */}
+      {/* Quick Booking Dialog - Enhanced */}
       <Dialog open={showQuickBooking} onOpenChange={setShowQuickBooking}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Γρήγορη Κράτηση</DialogTitle>
-            <DialogDescription>
-              Δημιουργήστε μια νέα κράτηση γρήγορα
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleQuickBookingSubmit} className="space-y-4">
-            {/* Customer Name */}
-            <div className="space-y-2">
-              <Label htmlFor="customer-name">Όνομα Πελάτη *</Label>
-              <Input
-                id="customer-name"
-                type="text"
-                value={quickBookingData.userName}
-                onChange={(e) => setQuickBookingData({...quickBookingData, userName: e.target.value})}
-                placeholder="Εισάγετε όνομα"
-                required
-              />
-            </div>
-
-            {/* Customer Phone */}
-            <div className="space-y-2">
-              <Label htmlFor="customer-phone">Τηλέφωνο *</Label>
-              <Input
-                id="customer-phone"
-                type="tel"
-                value={quickBookingData.userPhone}
-                onChange={(e) => setQuickBookingData({...quickBookingData, userPhone: e.target.value})}
-                placeholder="Εισάγετε τηλέφωνο"
-                required
-              />
-            </div>
-
-            {/* Pitch Selection */}
-            <div className="space-y-2">
-              <Label>Γήπεδο *</Label>
-              <Select
-                value={quickBookingData.selectedPitchId}
-                onValueChange={(value) => setQuickBookingData({...quickBookingData, selectedPitchId: value, selectedSlot: ''})}
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Επιλέξτε γήπεδο" />
-                </SelectTrigger>
-                <SelectContent>
-                  {pitches.map((pitch) => (
-                    <SelectItem key={pitch.id} value={pitch.id}>
-                      {pitch.name} ({pitch.type})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Date Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="booking-date">Ημερομηνία *</Label>
-              <Input
-                id="booking-date"
-                type="date"
-                value={quickBookingData.selectedDate}
-                onChange={(e) => setQuickBookingData({...quickBookingData, selectedDate: e.target.value, selectedSlot: ''})}
-                required
-              />
-            </div>
-
-            {/* Time Slot Selection */}
-            {quickBookingData.selectedPitchId && quickBookingData.selectedDate && (
-              <div className="space-y-2">
-                <Label>Ώρα *</Label>
+        <DialogContent className="max-w-xl p-0 overflow-hidden rounded-3xl border-0 shadow-2xl">
+          <div className="bg-emerald-600 p-8 text-white">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-extrabold flex items-center gap-3">
+                <Plus className="h-7 w-7" />
+                Γρήγορη Κράτηση
+              </DialogTitle>
+              <DialogDescription className="text-emerald-100 font-medium text-[16px]">
+                Εισαγάγετε τα στοιχεία για άμεση δημιουργία κράτησης.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          
+          <form onSubmit={handleQuickBookingSubmit} className="p-8 space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <Label htmlFor="userName" className="text-[14px] font-bold text-zinc-700">Όνομα Πελάτη</Label>
+                <Input
+                  id="userName"
+                  placeholder="π.χ. Γιάννης Παπαδόπουλος"
+                  value={quickBookingData.userName}
+                  onChange={(e) => setQuickBookingData({ ...quickBookingData, userName: e.target.value })}
+                  required
+                  className="h-12 rounded-xl border-zinc-200 focus:ring-emerald-500 focus:border-emerald-500"
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="userPhone" className="text-[14px] font-bold text-zinc-700">Τηλέφωνο Επικοινωνίας</Label>
+                <Input
+                  id="userPhone"
+                  type="tel"
+                  placeholder="69xxxxxxxx"
+                  value={quickBookingData.userPhone}
+                  onChange={(e) => setQuickBookingData({ ...quickBookingData, userPhone: e.target.value })}
+                  required
+                  className="h-12 rounded-xl border-zinc-200 focus:ring-emerald-500 focus:border-emerald-500"
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="pitch" className="text-[14px] font-bold text-zinc-700">Επιλογή Γηπέδου</Label>
                 <Select
-                  value={quickBookingData.selectedSlot}
-                  onValueChange={(value) => setQuickBookingData({...quickBookingData, selectedSlot: value})}
+                  value={quickBookingData.selectedPitchId}
+                  onValueChange={(value: string) => setQuickBookingData({ ...quickBookingData, selectedPitchId: value, selectedSlot: '' })}
                   required
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Επιλέξτε ώρα" />
+                  <SelectTrigger id="pitch" className="h-12 rounded-xl border-zinc-200">
+                    <SelectValue placeholder="Επιλέξτε γήπεδο" />
                   </SelectTrigger>
-                  <SelectContent>
-                    {generateAvailableSlots(quickBookingData.selectedPitchId, quickBookingData.selectedDate).map((slot, index) => (
-                      <SelectItem key={index} value={slot.time}>
-                        {slot.display}
+                  <SelectContent className="rounded-xl shadow-xl">
+                    {pitches.map((pitch) => (
+                      <SelectItem key={pitch.id} value={pitch.id} className="cursor-pointer py-3 font-medium">
+                        {pitch.name} ({pitch.type})
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-            )}
-
-            {/* Notes */}
-            <div className="space-y-2">
-              <Label htmlFor="booking-notes">Σημειώσεις</Label>
-              <Textarea
-                id="booking-notes"
-                value={quickBookingData.notes}
-                onChange={(e) => setQuickBookingData({...quickBookingData, notes: e.target.value})}
-                placeholder="Προσθέστε σημειώσεις (προαιρετικό)"
-                rows={3}
-              />
+              <div className="space-y-3">
+                <Label htmlFor="date" className="text-[14px] font-bold text-zinc-700">Ημερομηνία</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  min={new Date().toISOString().split('T')[0]}
+                  value={quickBookingData.selectedDate}
+                  onChange={(e) => setQuickBookingData({ ...quickBookingData, selectedDate: e.target.value, selectedSlot: '' })}
+                  required
+                  className="h-12 rounded-xl border-zinc-200"
+                />
+              </div>
             </div>
 
-            {/* Submit Buttons */}
-            <div className="flex space-x-3 pt-4">
+            <div className="space-y-3">
+              <Label className="text-[14px] font-bold text-zinc-700">Διαθέσιμες Ώρες</Label>
+              {!quickBookingData.selectedPitchId || !quickBookingData.selectedDate ? (
+                <div className="p-8 text-center bg-zinc-50 rounded-2xl border-2 border-dashed border-zinc-200">
+                  <p className="text-sm font-medium text-zinc-500">
+                    Επιλέξτε γήπεδο και ημερομηνία για να δείτε διαθεσιμότητα
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
+                  {generateAvailableSlots(quickBookingData.selectedPitchId, quickBookingData.selectedDate).length === 0 ? (
+                    <div className="col-span-full p-4 text-center bg-red-50 rounded-xl border border-red-100 text-red-600 text-sm font-bold">
+                      Δεν υπάρχουν διαθέσιμες ώρες για αυτή την ημέρα
+                    </div>
+                  ) : (
+                    generateAvailableSlots(quickBookingData.selectedPitchId, quickBookingData.selectedDate).map((slot) => (
+                      <button
+                        key={slot.time}
+                        type="button"
+                        onClick={() => setQuickBookingData({ ...quickBookingData, selectedSlot: slot.time })}
+                        className={cn(
+                          "h-12 rounded-xl text-[14px] font-bold transition-all border-2 active:scale-95",
+                          quickBookingData.selectedSlot === slot.time
+                            ? "bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200 scale-105 z-10"
+                            : "bg-white border-zinc-100 text-zinc-700 hover:border-emerald-200 hover:bg-emerald-50/50"
+                        )}
+                      >
+                        {slot.display}
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3">
+                <Label htmlFor="notes" className="text-[14px] font-bold text-zinc-700">Σημειώσεις (Προαιρετικά)</Label>
+                <Textarea
+                  id="notes"
+                  placeholder="Ειδικές παρατηρήσεις για την κράτηση..."
+                  value={quickBookingData.notes}
+                  onChange={(e) => setQuickBookingData({ ...quickBookingData, notes: e.target.value })}
+                  className="min-h-[100px] rounded-xl border-zinc-200 focus:ring-emerald-500"
+                />
+              </div>
+
+            <div className="flex gap-4 pt-4">
               <Button
                 type="button"
-                variant="outline"
-                className="flex-1"
+                variant="ghost"
+                className="flex-1 h-12 rounded-xl font-bold text-zinc-500 hover:bg-zinc-100"
                 onClick={() => setShowQuickBooking(false)}
               >
                 Ακύρωση
               </Button>
               <Button
                 type="submit"
-                className="flex-1"
+                className="flex-1 h-12 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-200"
                 disabled={isCreatingBooking}
               >
                 {isCreatingBooking ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
                     Δημιουργία...
                   </>
                 ) : (
@@ -1078,42 +1025,51 @@ export default function DashboardPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Status Change Confirmation Modal */}
-      <AlertDialog open={showStatusConfirm && !!statusChangeData} onOpenChange={(open) => {
+      {/* Improved Confirmation Alert Dialog */}
+      <AlertDialog open={showStatusConfirm && !!statusChangeData} onOpenChange={(open: boolean) => {
         if (!open) {
           setShowStatusConfirm(false);
           setStatusChangeData(null);
         }
       }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <div className="flex justify-center mb-2">
-              <AlertTriangle className="h-10 w-10 text-amber-500" />
+        <AlertDialogContent className="rounded-3xl border-0 shadow-2xl p-0 overflow-hidden max-w-md">
+          <div className="p-8 pt-10">
+            <div className="h-16 w-16 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AlertTriangle className="h-8 w-8 text-amber-500" />
             </div>
-            <AlertDialogTitle className="text-center">Επιβεβαίωση Αλλαγής Κατάστασης</AlertDialogTitle>
-            <AlertDialogDescription className="text-center">
-              Είστε σίγουροι ότι θέλετε να αλλάξετε την κατάσταση της κράτησης για τον{' '}
-              <span className="font-semibold">{statusChangeData?.userName}</span>;
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          {statusChangeData && (
-            <div className="p-3 bg-muted rounded-lg space-y-2">
-              <p className="text-sm text-foreground">
-                <span className="font-medium">Από:</span>{' '}
-                {getStatusBadge(statusChangeData.oldStatus)}
-              </p>
-              <p className="text-sm text-foreground">
-                <span className="font-medium">Σε:</span>{' '}
-                {getStatusBadge(statusChangeData.newStatus)}
-              </p>
-            </div>
-          )}
-          <AlertDialogFooter>
-            <AlertDialogCancel>Ακύρωση</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmStatusChange}>
-              Επιβεβαίωση
-            </AlertDialogAction>
-          </AlertDialogFooter>
+            
+            <AlertDialogHeader className="text-center">
+              <AlertDialogTitle className="text-2xl font-extrabold text-zinc-900 leading-tight">
+                Αλλαγή Κατάστασης Κράτησης;
+              </AlertDialogTitle>
+              <AlertDialogDescription className="text-[16px] font-medium text-zinc-500 mt-3 px-2">
+                Πρόκειται να αλλάξετε την κατάσταση της κράτησης του/της <span className="text-zinc-900 font-bold">{statusChangeData?.userName}</span> σε <span className="font-bold text-emerald-600">
+                  {statusChangeData?.newStatus === 'confirmed' ? 'Επιβεβαιωμένη' : 
+                   statusChangeData?.newStatus === 'pending' ? 'Εκκρεμεί' :
+                   statusChangeData?.newStatus === 'completed' ? 'Ολοκληρωμένη' : 'Ακυρωμένη'}
+                </span>.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            
+            <AlertDialogFooter className="p-8 pt-2 flex flex-col sm:flex-row gap-3">
+              <Button 
+                variant="ghost" 
+                className="w-full h-12 rounded-xl font-bold text-zinc-500 flex-1 hover:bg-zinc-50"
+                onClick={() => {
+                  setShowStatusConfirm(false);
+                  setStatusChangeData(null);
+                }}
+              >
+                Πίσω
+              </Button>
+              <Button
+                className="w-full h-12 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex-1 shadow-md shadow-emerald-600/20"
+                onClick={confirmStatusChange}
+              >
+                Επιβεβαίωση
+              </Button>
+            </AlertDialogFooter>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </div>

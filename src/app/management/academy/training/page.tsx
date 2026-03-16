@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 export default function TrainingListPage() {
   const router = useRouter();
@@ -131,37 +132,49 @@ export default function TrainingListPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10 pb-20">
       {error && (
-        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
-            <p className="text-sm text-destructive">{error}</p>
+        <div className="bg-red-50 border border-red-100 rounded-3xl p-6 animate-in fade-in slide-in-from-top-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-red-100 flex items-center justify-center">
+                <AlertCircle className="h-6 w-6 text-red-600" />
+              </div>
+              <p className="text-red-700 font-bold">{error}</p>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setError(null)} 
+              className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 font-bold"
+            >
+              Κλείσιμο
+            </Button>
           </div>
         </div>
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-            <Dumbbell className="h-5 w-5 text-emerald-600" />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="h-14 w-14 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-200 shrink-0">
+            <Dumbbell className="h-7 w-7" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Προπονήσεις</h1>
-            <p className="text-sm text-zinc-500 mt-0.5">Πρόγραμμα και απουσιολόγιο</p>
+            <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-1">Προπονήσεις</h1>
+            <p className="text-lg font-medium text-zinc-500">Διαχειριστείτε το πρόγραμμα και το απουσιολόγιο της ακαδημίας.</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" asChild>
-            <Link href="/management/academy/training/stats">
-              <BarChart3 className="h-4 w-4" />
+        <div className="flex items-center gap-3">
+          <Button variant="outline" asChild className="h-14 px-6 rounded-2xl border-zinc-100 font-bold text-zinc-600 hover:bg-zinc-50">
+            <Link href="/management/academy/training/stats" className="flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" />
               Στατιστικά
             </Link>
           </Button>
-          <Button asChild>
-            <Link href="/management/academy/training/new">
-              <Plus className="h-4 w-4" />
+          <Button asChild className="h-14 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black shadow-lg shadow-emerald-200 transition-all hover:translate-y-[-2px] active:translate-y-[1px]">
+            <Link href="/management/academy/training/new" className="flex items-center gap-2">
+              <Plus className="h-5 w-5" />
               Νέα Προπόνηση
             </Link>
           </Button>
@@ -169,107 +182,144 @@ export default function TrainingListPage() {
       </div>
 
       {/* Month Navigator + Stats */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-        <div className="flex items-center gap-2">
-          <button onClick={() => navigateMonth(-1)} className="h-9 w-9 rounded-lg border border-zinc-200 flex items-center justify-center hover:bg-zinc-50 transition-colors">
-            <ChevronLeft className="h-4 w-4 text-zinc-600" />
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-zinc-100 shadow-sm">
+          <button 
+            onClick={() => navigateMonth(-1)} 
+            className="h-12 w-12 rounded-xl flex items-center justify-center hover:bg-zinc-50 text-zinc-400 hover:text-zinc-900 transition-all"
+          >
+            <ChevronLeft className="h-6 w-6" />
           </button>
-          <div className="px-4 py-2 rounded-lg bg-white border border-zinc-200 min-w-[180px] text-center">
-            <span className="text-sm font-semibold text-zinc-900 capitalize">{monthLabel}</span>
+          <div className="px-8 flex flex-col items-center min-w-[200px]">
+            <span className="text-sm font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">Μήνας</span>
+            <span className="text-xl font-black text-zinc-900 capitalize">{monthLabel}</span>
           </div>
-          <button onClick={() => navigateMonth(1)} className="h-9 w-9 rounded-lg border border-zinc-200 flex items-center justify-center hover:bg-zinc-50 transition-colors">
-            <ChevronRight className="h-4 w-4 text-zinc-600" />
+          <button 
+            onClick={() => navigateMonth(1)} 
+            className="h-12 w-12 rounded-xl flex items-center justify-center hover:bg-zinc-50 text-zinc-400 hover:text-zinc-900 transition-all"
+          >
+            <ChevronRight className="h-6 w-6" />
           </button>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 rounded-lg bg-white border border-zinc-100/60 px-3 py-1.5">
-            <Calendar className="h-3.5 w-3.5 text-zinc-400" />
-            <span className="text-sm font-semibold text-zinc-900">{stats.total}</span>
-            <span className="text-xs text-zinc-400">Σύνολο</span>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 flex-1">
+          <div className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-400">
+              <Calendar className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-2xl font-black text-zinc-900 leading-none mb-1">{stats.total}</p>
+              <p className="text-xs font-black uppercase tracking-widest text-zinc-400">Σύνολο</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-100 px-3 py-1.5">
-            <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-            <span className="text-sm font-semibold text-emerald-700">{stats.completed}</span>
-            <span className="text-xs text-emerald-600">Ολοκλ.</span>
+          <div className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-500">
+              <CheckCircle2 className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-2xl font-black text-zinc-900 leading-none mb-1">{stats.completed}</p>
+              <p className="text-xs font-black uppercase tracking-widest text-emerald-600">Ολοκληρ.</p>
+            </div>
           </div>
-          <div className="flex items-center gap-2 rounded-lg bg-blue-50 border border-blue-100 px-3 py-1.5">
-            <Clock className="h-3.5 w-3.5 text-blue-500" />
-            <span className="text-sm font-semibold text-blue-700">{stats.scheduled}</span>
-            <span className="text-xs text-blue-600">Προγρ.</span>
+          <div className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500">
+              <Clock className="h-6 w-6" />
+            </div>
+            <div>
+              <p className="text-2xl font-black text-zinc-900 leading-none mb-1">{stats.scheduled}</p>
+              <p className="text-xs font-black uppercase tracking-widest text-blue-600">Προγραμμ.</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-3">
-        <div className="relative flex-1 sm:max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+      {/* Filters Row */}
+      <div className="flex flex-col md:flex-row items-center gap-4">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
           <Input
-            type="text"
-            placeholder="Αναζήτηση..."
+            placeholder="Αναζήτηση με τίτλο ή προπονητή..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
+            className="h-14 pl-12 pr-4 bg-white rounded-2xl border-zinc-100 shadow-sm focus:ring-emerald-500 font-medium text-lg placeholder:text-zinc-400 w-full"
           />
         </div>
-        <select
-          value={squadFilter}
-          onChange={(e) => setSquadFilter(e.target.value)}
-          className="flex h-9 rounded-lg border border-zinc-200/70 bg-white px-3 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:w-[200px]"
-        >
-          <option value="all">Όλα τα Τμήματα</option>
-          {squads.map((s) => (
-            <option key={s.id} value={s.id}>{s.name} ({s.ageGroup})</option>
-          ))}
-        </select>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="flex h-9 rounded-lg border border-zinc-200/70 bg-white px-3 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:w-[180px]"
-        >
-          <option value="all">Όλες οι Καταστάσεις</option>
-          <option value="scheduled">Προγραμματισμένες</option>
-          <option value="completed">Ολοκληρωμένες</option>
-          <option value="cancelled">Ακυρωμένες</option>
-        </select>
+        
+        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+          <select
+            value={squadFilter}
+            onChange={(e) => setSquadFilter(e.target.value)}
+            className="h-14 px-6 rounded-2xl bg-white border border-zinc-100 shadow-sm text-zinc-900 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-w-[180px]"
+          >
+            <option value="all">Όλα τα Τμήματα</option>
+            {squads.map((s) => (
+              <option key={s.id} value={s.id}>{s.name} ({s.ageGroup})</option>
+            ))}
+          </select>
+          
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="h-14 px-6 rounded-2xl bg-white border border-zinc-100 shadow-sm text-zinc-900 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-w-[180px]"
+          >
+            <option value="all">Όλες οι Καταστάσεις</option>
+            <option value="scheduled">Προγραμματισμένες</option>
+            <option value="completed">Ολοκληρωμένες</option>
+            <option value="cancelled">Ακυρωμένες</option>
+          </select>
+
+          {(searchQuery || squadFilter !== 'all' || statusFilter !== 'all') && (
+            <Button
+              variant="ghost"
+              onClick={() => { setSearchQuery(''); setSquadFilter('all'); setStatusFilter('all'); }}
+              className="h-14 px-6 text-zinc-400 hover:text-zinc-900 font-bold rounded-2xl hover:bg-zinc-50"
+            >
+              Καθαρισμός
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Sessions by Date */}
       {filteredSessions.length === 0 ? (
-        <div className="rounded-xl border border-zinc-100/60 bg-white py-16">
-          <div className="text-center">
-            <div className="mx-auto h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center mb-4">
-              <Dumbbell className="h-6 w-6 text-zinc-400" />
+        <div className="rounded-[2.5rem] border-2 border-dashed border-zinc-100 bg-white p-20 text-center">
+            <div className="mx-auto h-24 w-24 bg-zinc-50 rounded-[2rem] flex items-center justify-center mb-8 shadow-inner">
+                <Dumbbell className="h-12 w-12 text-zinc-200" />
             </div>
-            <h3 className="text-sm font-medium text-zinc-900 mb-1">Δεν βρέθηκαν προπονήσεις</h3>
-            <p className="text-[13px] text-zinc-400 mb-5">Δεν υπάρχουν προπονήσεις για αυτόν τον μήνα.</p>
-            <Button size="sm" asChild>
-              <Link href="/management/academy/training/new">
-                <Plus className="h-4 w-4" />
-                Νέα Προπόνηση
-              </Link>
-            </Button>
-          </div>
+          <h3 className="text-2xl font-black text-zinc-900 mb-2">Δεν βρέθηκαν προπονήσεις</h3>
+          <p className="text-zinc-500 font-medium text-lg max-w-sm mx-auto">
+            Δεν υπάρχουν προπονήσεις που να ταιριάζουν στα φίλτρα σας για αυτόν τον μήνα.
+          </p>
+          <Button asChild className="mt-10 h-14 px-10 rounded-2xl bg-emerald-600 text-white font-black">
+            <Link href="/management/academy/training/new">Νέα Προπόνηση</Link>
+          </Button>
         </div>
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-12">
           {Array.from(groupedByDate.entries()).map(([date, daySessions]) => (
-            <div key={date}>
+            <div key={date} className="relative">
               {/* Date header */}
-              <div className="flex items-center gap-3 mb-3">
-                <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center">
-                  <Calendar className="h-4 w-4 text-zinc-500" />
+              <div className="sticky top-0 z-20 flex items-center gap-4 py-4 bg-zinc-50/95 backdrop-blur-sm mb-6">
+                <div className="h-12 w-12 rounded-2xl bg-zinc-900 flex flex-col items-center justify-center text-white shadow-xl shadow-zinc-200">
+                    <span className="text-[10px] font-black uppercase tracking-tighter leading-none mb-0.5">
+                        {new Date(date + 'T00:00:00').toLocaleDateString('el-GR', { weekday: 'short' })}
+                    </span>
+                    <span className="text-xl font-black leading-none">
+                        {new Date(date + 'T00:00:00').getDate()}
+                    </span>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-zinc-900">
-                    {new Date(date + 'T00:00:00').toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                  <p className="text-lg font-black text-zinc-900 capitalize">
+                    {new Date(date + 'T00:00:00').toLocaleDateString('el-GR', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
-                  <p className="text-xs text-zinc-400">{daySessions.length} {daySessions.length === 1 ? 'προπόνηση' : 'προπονήσεις'}</p>
+                  <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest leading-none mt-0.5">
+                    {daySessions.length} {daySessions.length === 1 ? 'προπόνηση' : 'προπονήσεις'}
+                  </p>
                 </div>
               </div>
 
               {/* Session cards */}
-              <div className="space-y-2 ml-[44px]">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {daySessions.map((session) => {
                   const typeColor = TRAINING_TYPE_COLORS[session.type];
                   const presentCount = session.attendance.filter((a) => a.status === 'present' || a.status === 'late').length;
@@ -279,39 +329,55 @@ export default function TrainingListPage() {
                     <Link
                       key={session.id}
                       href={`/management/academy/training/${session.id}`}
-                      className="block rounded-xl border border-zinc-100/60 bg-white p-4 hover:border-zinc-200/80 hover:shadow-sm transition-all duration-150"
+                      className="group flex flex-col rounded-[2rem] border border-zinc-100 bg-white p-6 transition-all duration-300 hover:shadow-xl hover:border-emerald-200"
                     >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex items-start gap-3 min-w-0">
-                          <div className={`h-10 w-10 rounded-lg ${typeColor.bg} flex items-center justify-center shrink-0`}>
-                            <Dumbbell className={`h-5 w-5 ${typeColor.text}`} />
+                      <div className="flex items-start justify-between gap-4 mb-6">
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 shadow-sm", typeColor.bg)}>
+                            <Dumbbell className={cn("h-7 w-7", typeColor.text)} />
                           </div>
                           <div className="min-w-0">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h3 className="text-sm font-semibold text-zinc-900">{session.title}</h3>
-                              <span className={`text-[11px] px-2 py-0.5 rounded-md border ${typeColor.bg} ${typeColor.text} ${typeColor.border}`}>
-                                {TRAINING_TYPE_LABELS[session.type]}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-4 mt-1.5 text-xs text-zinc-400">
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {session.startTime} - {session.endTime}
-                              </span>
-                              <span>{getSquadName(session.squadId)}</span>
-                              <span>{session.coachName}</span>
-                              {totalCount > 0 && (
-                                <span className="flex items-center gap-1">
-                                  <Users className="h-3 w-3" />
-                                  {presentCount}/{totalCount}
+                            <h3 className="text-lg font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{session.title}</h3>
+                            <div className="flex items-center gap-2 mt-1">
+                                <span className={cn("text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg border", typeColor.bg, typeColor.text, typeColor.border)}>
+                                    {TRAINING_TYPE_LABELS[session.type]}
                                 </span>
-                              )}
+                                <span className="text-[11px] font-bold text-zinc-400 flex items-center gap-1">
+                                    <Clock className="h-3 w-3" />
+                                    {session.startTime} - {session.endTime}
+                                </span>
                             </div>
                           </div>
                         </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          {statusIcon(session.status)}
-                          <span className="text-xs text-zinc-500">{statusLabel(session.status)}</span>
+                        <div className="flex flex-col items-end gap-1">
+                          <div className="flex items-center gap-1.5 p-1.5 rounded-xl bg-zinc-50 group-hover:bg-zinc-100/50 transition-colors">
+                            {statusIcon(session.status)}
+                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">{statusLabel(session.status)}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 mt-auto">
+                        <div className="space-y-1">
+                            <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Τμήμα & Προπονητής</p>
+                            <p className="text-xs font-bold text-zinc-600 truncate">{getSquadName(session.squadId)}</p>
+                            <p className="text-xs font-medium text-zinc-400 truncate">{session.coachName}</p>
+                        </div>
+                        <div className="flex flex-col items-end justify-end">
+                            {totalCount > 0 && (
+                                <div className="text-right">
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-0.5">Παρουσίες</p>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-16 h-1.5 rounded-full bg-zinc-100 overflow-hidden">
+                                            <div 
+                                                className="h-full bg-emerald-500 transition-all duration-500" 
+                                                style={{ width: `${(presentCount / totalCount) * 100}%` }}
+                                            />
+                                        </div>
+                                        <span className="text-xs font-black text-zinc-900">{presentCount}<span className="text-zinc-300 mx-0.5">/</span>{totalCount}</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                       </div>
                     </Link>

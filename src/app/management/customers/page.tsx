@@ -8,14 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { User } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -108,20 +101,45 @@ export default function CustomersPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Error Alert */}
+    <div className="space-y-10 pb-20">
+      {/* Header & New Customer Button */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+          <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-2">
+            Πελατολόγιο
+          </h1>
+          <p className="text-lg font-medium text-zinc-500">
+            Διαχειριστείτε τους πελάτες σας και δείτε το ιστορικό τους.
+          </p>
+        </div>
+        <Button 
+          asChild 
+          className="h-14 px-8 rounded-2xl bg-zinc-900 border-0 hover:bg-emerald-600 font-black text-white shadow-xl shadow-zinc-200 transition-all hover:translate-y-[-2px] active:translate-y-[1px]"
+        >
+          <Link href="/management/customers/new" className="flex items-center gap-3">
+            <Plus className="h-6 w-6" />
+            Νέος Πελάτης
+          </Link>
+        </Button>
+      </div>
+
       {error && (
-        <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4">
+        <div className="bg-red-50 border border-red-100 rounded-3xl p-6 animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
-              <p className="text-sm text-destructive">{error}</p>
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-red-100 flex items-center justify-center">
+                <AlertCircle className="h-6 w-6 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-sm font-black text-red-900 uppercase tracking-wider">Σφάλμα</h3>
+                <p className="text-red-700 font-bold">{error}</p>
+              </div>
             </div>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => { setError(null); loadCustomers(); }}
-              className="text-destructive/60 hover:text-destructive shrink-0"
+              className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 font-bold"
             >
               Δοκιμάστε ξανά
             </Button>
@@ -129,124 +147,131 @@ export default function CustomersPage() {
         </div>
       )}
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Πελάτες</h1>
-          <p className="text-sm text-zinc-500 mt-1">Διαχείριση πληροφοριών πελατών για το γήπεδό σας</p>
-        </div>
-        <Button asChild>
-          <Link href="/management/customers/new">
-            <Plus className="h-4 w-4" />
-            Νέος Πελάτης
-          </Link>
-        </Button>
-      </div>
-
-      {/* Stats + Search row */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-        <div className="flex items-center gap-3 rounded-xl border border-zinc-100/60 bg-white px-5 py-3.5">
-          <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center">
-            <Users className="h-5 w-5 text-blue-600" />
-          </div>
-          <div>
-            <p className="text-2xl font-semibold tracking-tight text-zinc-900">{customers.length}</p>
-            <p className="text-[13px] text-zinc-400">Σύνολο Πελατών</p>
-          </div>
-        </div>
-
-        <div className="relative flex-1 sm:max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-          <Input
-            type="text"
-            placeholder="Αναζήτηση πελατών..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
-
-      {/* Customers Table */}
-      {filteredCustomers.length === 0 ? (
-        <div className="rounded-xl border border-zinc-100/60 bg-white py-16">
-          <div className="text-center">
-            <div className="mx-auto h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center mb-4">
-              <Users className="h-6 w-6 text-zinc-400" />
+      {/* Stats row & Search row */}
+      <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+        <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-zinc-100 shadow-sm">
+          <div className="flex items-center gap-4 px-6 border-r border-zinc-100">
+            <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
+              <Users className="h-5 w-5 text-blue-600" />
             </div>
-            <h3 className="text-sm font-medium text-zinc-900 mb-1">
-              {searchTerm ? 'Δεν βρέθηκαν πελάτες' : 'Δεν υπάρχουν πελάτες ακόμα'}
+            <div>
+              <p className="text-xl font-black text-zinc-900">{customers.length}</p>
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Σύνολο</p>
+            </div>
+          </div>
+          
+          <div className="relative flex-1 min-w-[280px]">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-300" />
+            <Input
+              type="text"
+              placeholder="Αναζήτηση με όνομα, email ή τηλέφωνο..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-12 pl-12 border-0 bg-transparent focus:ring-0 text-zinc-900 font-bold placeholder:text-zinc-300 placeholder:font-normal"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Customers Table/Grid */}
+      {filteredCustomers.length === 0 ? (
+        <Card className="premium-card border-none bg-zinc-50/50 py-20">
+          <CardContent className="flex flex-col items-center justify-center text-center">
+            <div className="h-24 w-24 rounded-[2.5rem] bg-white border border-zinc-100 flex items-center justify-center mb-8 shadow-sm">
+              <Users className="h-12 w-12 text-zinc-200" />
+            </div>
+            <h3 className="text-2xl font-black text-zinc-900 mb-2">
+              {searchTerm ? 'Δεν βρέθηκαν αποτελέσματα' : 'Δεν υπάρχουν πελάτες'}
             </h3>
-            <p className="text-[13px] text-zinc-400 mb-5">
-              {searchTerm ? 'Δοκιμάστε να αλλάξετε τους όρους αναζήτησης.' : 'Ξεκινήστε προσθέτοντας τον πρώτο σας πελάτη.'}
+            <p className="text-zinc-500 font-medium max-w-sm mb-10">
+              {searchTerm 
+                ? 'Δοκιμάστε μια διαφορετική αναζήτηση ή καθαρίστε τα φίλτρα.' 
+                : 'Ξεκινήστε την οργάνωση των πελατών σας προσθέτοντας την πρώτη επαφή.'}
             </p>
             {!searchTerm && (
-              <Button size="sm" asChild>
+              <Button 
+                asChild 
+                className="h-14 px-10 rounded-2xl bg-emerald-600 hover:bg-emerald-700 font-black text-white"
+              >
                 <Link href="/management/customers/new">
-                  <Plus className="h-4 w-4" />
                   Προσθήκη Πελάτη
                 </Link>
               </Button>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="rounded-xl border border-zinc-100/60 bg-white overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-b border-zinc-100/60 hover:bg-transparent">
-                <TableHead className="text-[13px] text-zinc-400 font-medium pl-5">Πελάτης</TableHead>
-                <TableHead className="text-[13px] text-zinc-400 font-medium hidden sm:table-cell">Email</TableHead>
-                <TableHead className="text-[13px] text-zinc-400 font-medium hidden sm:table-cell">Τηλέφωνο</TableHead>
-                <TableHead className="text-[13px] text-zinc-400 font-medium text-right pr-5 w-[80px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCustomers.map((customer) => (
-                <TableRow key={customer.id} className="border-b border-zinc-100/40 hover:bg-zinc-50/50">
-                  <TableCell className="pl-5 py-3">
-                    <div>
-                      <div className="text-sm font-medium text-zinc-900">{customer.name}</div>
-                      <div className="flex items-center gap-1 text-xs text-zinc-400 sm:hidden">
-                        <Phone className="h-3 w-3" />
-                        {customer.phone}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell py-3">
-                    <span className="text-[13px] text-zinc-500">{customer.email || '—'}</span>
-                  </TableCell>
-                  <TableCell className="hidden sm:table-cell py-3">
-                    <span className="text-[13px] text-zinc-500">{customer.phone || '—'}</span>
-                  </TableCell>
-                  <TableCell className="text-right pr-5 py-3">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-7 w-7 text-zinc-400 hover:text-zinc-600">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-40">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/management/customers/${customer.id}`}>
-                            <Eye className="h-3.5 w-3.5 mr-2" />
-                            Προβολή
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/management/customers/${customer.id}/edit`}>
-                            <Pencil className="h-3.5 w-3.5 mr-2" />
-                            Επεξεργασία
-                          </Link>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+        <Card className="premium-card border-none overflow-hidden">
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-zinc-100">
+                    <th className="py-6 px-8 text-xs font-black uppercase tracking-widest text-zinc-400">Πελάτης</th>
+                    <th className="py-6 px-8 text-xs font-black uppercase tracking-widest text-zinc-400 hidden md:table-cell">Email</th>
+                    <th className="py-6 px-8 text-xs font-black uppercase tracking-widest text-zinc-400 hidden sm:table-cell">Τηλέφωνο</th>
+                    <th className="py-6 px-8 text-right w-[100px]"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-50">
+                  {filteredCustomers.map((customer) => (
+                    <tr key={customer.id} className="group hover:bg-zinc-50/50 transition-colors">
+                      <td className="py-6 px-8">
+                        <div className="flex items-center gap-4">
+                          <div className="h-12 w-12 rounded-2xl bg-zinc-100 flex items-center justify-center font-black text-zinc-400 group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors">
+                            {customer.name?.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="text-lg font-black text-zinc-900 group-hover:text-emerald-700 transition-colors">
+                              {customer.name}
+                            </p>
+                            <p className="text-xs font-bold text-zinc-400 md:hidden">{customer.email}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-6 px-8 hidden md:table-cell">
+                        <span className="text-sm font-bold text-zinc-500">{customer.email || '—'}</span>
+                      </td>
+                      <td className="py-6 px-8 hidden sm:table-cell">
+                        <div className="flex items-center gap-2 text-sm font-black text-zinc-900 tabular-nums">
+                          <Phone className="h-4 w-4 text-zinc-300" />
+                          {customer.phone || '—'}
+                        </div>
+                      </td>
+                      <td className="py-6 px-8 text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="h-10 w-10 rounded-xl hover:bg-white hover:shadow-md transition-all"
+                            >
+                              <MoreHorizontal className="h-5 w-5 text-zinc-400" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-56 rounded-2xl border-0 shadow-2xl p-2 animate-in fade-in zoom-in-95">
+                            <DropdownMenuItem asChild className="rounded-xl h-11 font-bold text-zinc-600 focus:text-emerald-600 focus:bg-emerald-50 cursor-pointer">
+                              <Link href={`/management/customers/${customer.id}`} className="flex items-center gap-3">
+                                <Eye className="h-4 w-4" />
+                                Προβολή Προφίλ
+                              </Link>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem asChild className="rounded-xl h-11 font-bold text-zinc-600 focus:text-emerald-600 focus:bg-emerald-50 cursor-pointer">
+                              <Link href={`/management/customers/${customer.id}/edit`} className="flex items-center gap-3">
+                                <Pencil className="h-4 w-4" />
+                                Επεξεργασία
+                              </Link>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

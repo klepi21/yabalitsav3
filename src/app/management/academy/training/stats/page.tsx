@@ -13,6 +13,7 @@ import {
   AlertCircle, Trophy, TrendingUp, TrendingDown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface AthleteStats {
   id: string;
@@ -178,158 +179,179 @@ export default function TrainingStatsPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10 pb-20">
       {error && (
-        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 text-destructive" />
-            <p className="text-sm text-destructive">{error}</p>
+        <div className="bg-red-50 border border-red-100 rounded-3xl p-6 animate-in fade-in slide-in-from-top-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-red-100 flex items-center justify-center">
+                <AlertCircle className="h-6 w-6 text-red-600" />
+              </div>
+              <p className="text-red-700 font-bold">{error}</p>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setError(null)} 
+              className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 font-bold"
+            >
+              Κλείσιμο
+            </Button>
           </div>
         </div>
       )}
 
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" className="h-9 w-9 border-zinc-200 shrink-0" asChild>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+        <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-zinc-100 hover:bg-zinc-50 shrink-0 shadow-sm" asChild>
           <Link href="/management/academy/training">
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-6 w-6 text-zinc-600" />
           </Link>
         </Button>
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
-            <BarChart3 className="h-5 w-5 text-violet-600" />
+        <div className="flex items-center gap-4">
+          <div className="h-14 w-14 rounded-2xl bg-violet-600 flex items-center justify-center text-white shadow-lg shadow-violet-200 shrink-0">
+            <BarChart3 className="h-7 w-7" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Στατιστικά Προπονήσεων</h1>
-            <p className="text-sm text-zinc-500 mt-0.5">Παρουσίες και απουσίες αθλητών</p>
+            <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-1">Στατιστικά Προπονήσεων</h1>
+            <p className="text-lg font-medium text-zinc-500">Ανάλυση παρουσιών και απόδοσης αθλητών.</p>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <select
-          value={squadFilter}
-          onChange={(e) => setSquadFilter(e.target.value)}
-          className="flex h-9 rounded-lg border border-zinc-200/70 bg-white px-3 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-        >
-          <option value="all">Όλα τα Τμήματα</option>
-          {squads.map((s) => (
-            <option key={s.id} value={s.id}>{s.name} ({s.ageGroup})</option>
-          ))}
-        </select>
-        <div className="flex gap-1 rounded-lg bg-zinc-100/80 p-0.5">
-          {[
-            { value: 'all', label: 'Όλα' },
-            { value: 'week', label: 'Εβδομάδα' },
-            { value: 'month', label: 'Μήνας' },
-            { value: '3months', label: '3 Μήνες' },
-            { value: '6months', label: '6 Μήνες' },
-          ].map((period) => (
-            <button
-              key={period.value}
-              onClick={() => setPeriodFilter(period.value)}
-              className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                periodFilter === period.value
-                  ? 'bg-white shadow-sm text-zinc-900'
-                  : 'text-zinc-500 hover:text-zinc-700'
-              }`}
+      <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+        <div className="flex flex-wrap items-center gap-4 bg-white p-2 rounded-2xl border border-zinc-100 shadow-sm">
+            <select
+            value={squadFilter}
+            onChange={(e) => setSquadFilter(e.target.value)}
+            className="h-12 px-6 rounded-xl bg-zinc-50 border-none text-zinc-900 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 min-w-[200px]"
             >
-              {period.label}
-            </button>
-          ))}
+            <option value="all">Όλα τα Τμήματα</option>
+            {squads.map((s) => (
+                <option key={s.id} value={s.id}>{s.name} ({s.ageGroup})</option>
+            ))}
+            </select>
+
+            <div className="h-8 w-px bg-zinc-100 hidden sm:block" />
+
+            <div className="flex gap-1 bg-zinc-50 p-1 rounded-xl">
+            {[
+                { value: 'all', label: 'Όλα' },
+                { value: 'week', label: '7 Ημέρες' },
+                { value: 'month', label: 'Μήνας' },
+                { value: '3months', label: '3 Μήνες' },
+                { value: '6months', label: '6 Μήνες' },
+            ].map((period) => (
+                <button
+                key={period.value}
+                onClick={() => setPeriodFilter(period.value)}
+                className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                    periodFilter === period.value
+                    ? 'bg-white text-zinc-900 shadow-sm'
+                    : 'text-zinc-400 hover:text-zinc-600'
+                }`}
+                >
+                {period.label}
+                </button>
+            ))}
+            </div>
         </div>
       </div>
 
-      {/* Global Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="rounded-xl border border-zinc-100/60 bg-white p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="h-8 w-8 rounded-lg bg-violet-50 flex items-center justify-center">
-              <BarChart3 className="h-4 w-4 text-violet-600" />
-            </div>
-          </div>
-          <p className="text-2xl font-semibold tracking-tight text-zinc-900">{globalStats.totalSessions}</p>
-          <p className="text-xs text-zinc-400 mt-0.5">Ολοκληρωμένες</p>
-        </div>
-        <div className="rounded-xl border border-zinc-100/60 bg-white p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-              <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-            </div>
-          </div>
-          <p className="text-2xl font-semibold tracking-tight text-zinc-900">{globalStats.avgAttendance}%</p>
-          <p className="text-xs text-zinc-400 mt-0.5">Μέση Παρουσία</p>
-        </div>
-        <div className="rounded-xl border border-zinc-100/60 bg-white p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
-              <Users className="h-4 w-4 text-blue-600" />
-            </div>
-          </div>
-          <p className="text-2xl font-semibold tracking-tight text-zinc-900">{globalStats.avgPerSession}</p>
-          <p className="text-xs text-zinc-400 mt-0.5">Μ.Ο. ανά Προπόνηση</p>
-        </div>
-        <div className="rounded-xl border border-zinc-100/60 bg-white p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="h-8 w-8 rounded-lg bg-amber-50 flex items-center justify-center">
-              <Trophy className="h-4 w-4 text-amber-600" />
-            </div>
-          </div>
-          <p className="text-2xl font-semibold tracking-tight text-zinc-900">{athleteStats.length}</p>
-          <p className="text-xs text-zinc-400 mt-0.5">Αθλητές</p>
-        </div>
+      {/* Global Stats Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        {[
+            { label: 'Ολοκληρωμένες', value: globalStats.totalSessions.toString(), icon: CheckCircle2, color: 'violet' },
+            { label: 'Μέση Παρουσία', value: `${globalStats.avgAttendance}%`, icon: TrendingUp, color: 'emerald' },
+            { label: 'Μ.Ο. ανά Προπόνηση', value: globalStats.avgPerSession.toString(), icon: Users, color: 'blue' },
+            { label: 'Σύνολο Αθλητών', value: athleteStats.length.toString(), icon: Trophy, color: 'amber' },
+        ].map((metric) => {
+            const Icon = metric.icon;
+            const colorStyles: Record<string, string> = {
+                violet: 'bg-violet-50 text-violet-600',
+                emerald: 'bg-emerald-50 text-emerald-600',
+                blue: 'bg-blue-50 text-blue-600',
+                amber: 'bg-amber-50 text-amber-600',
+            };
+            return (
+                <div key={metric.label} className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm transition-all hover:shadow-md">
+                    <div className={`h-12 w-12 rounded-2xl ${colorStyles[metric.color]} flex items-center justify-center mb-6`}>
+                        <Icon className="h-6 w-6" />
+                    </div>
+                    <p className="text-3xl font-black text-zinc-900 mb-1 leading-none">{metric.value}</p>
+                    <p className="text-xs font-black uppercase tracking-widest text-zinc-400">{metric.label}</p>
+                </div>
+            );
+        })}
       </div>
 
       {/* Top / Bottom performers */}
       {athleteStats.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Top Attendance */}
-          <div className="rounded-xl border border-zinc-100/60 bg-white p-5">
-            <h3 className="text-sm font-semibold text-zinc-900 mb-3 flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-emerald-500" />
-              Κορυφαίες Παρουσίες
-            </h3>
-            <div className="space-y-2">
+          <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm overflow-hidden">
+            <div className="p-8 border-b border-zinc-50 bg-zinc-50/30 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+                        <TrendingUp className="h-5 w-5 text-emerald-600" />
+                    </div>
+                    <h3 className="text-xl font-black text-zinc-900 tracking-tight">Κορυφαίες Παρουσίες</h3>
+                </div>
+                <div className="h-8 w-8 rounded-full bg-emerald-50 flex items-center justify-center">
+                    <Trophy className="h-4 w-4 text-emerald-500" />
+                </div>
+            </div>
+            <div className="p-8 space-y-4">
               {athleteStats.filter((a) => a.totalSessions > 0).slice(0, 5).map((athlete, i) => (
-                <div key={athlete.id} className="flex items-center gap-3">
-                  <div className={`h-6 w-6 rounded-md flex items-center justify-center text-[11px] font-bold ${
-                    i === 0 ? 'bg-amber-100 text-amber-700' :
-                    i === 1 ? 'bg-zinc-200 text-zinc-600' :
-                    i === 2 ? 'bg-orange-100 text-orange-700' :
-                    'bg-zinc-100 text-zinc-400'
-                  }`}>
+                <div key={athlete.id} className="flex items-center gap-4 group">
+                  <div className={cn(
+                    "h-10 w-10 rounded-xl flex items-center justify-center text-sm font-black transition-all",
+                    i === 0 ? "bg-amber-100 text-amber-700 scale-110 shadow-sm" :
+                    i === 1 ? "bg-zinc-100 text-zinc-500" :
+                    i === 2 ? "bg-orange-50 text-orange-600" :
+                    "bg-zinc-50 text-zinc-400"
+                  )}>
                     {i + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-zinc-900 truncate">{athlete.name}</p>
+                    <p className="text-base font-black text-zinc-900 truncate group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{athlete.name}</p>
+                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{athlete.totalSessions} Προπονήσεις</p>
                   </div>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${rateColor(athlete.attendanceRate)}`}>
+                  <div className={cn("px-4 py-2 rounded-xl text-sm font-black transition-all group-hover:scale-105 shadow-sm", rateColor(athlete.attendanceRate))}>
                     {athlete.attendanceRate}%
-                  </span>
+                  </div>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Lowest Attendance */}
-          <div className="rounded-xl border border-zinc-100/60 bg-white p-5">
-            <h3 className="text-sm font-semibold text-zinc-900 mb-3 flex items-center gap-2">
-              <TrendingDown className="h-4 w-4 text-red-400" />
-              Χαμηλότερες Παρουσίες
-            </h3>
-            <div className="space-y-2">
+          <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm overflow-hidden">
+            <div className="p-8 border-b border-zinc-50 bg-zinc-50/30 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-xl bg-red-100 flex items-center justify-center">
+                        <TrendingDown className="h-5 w-5 text-red-600" />
+                    </div>
+                    <h3 className="text-xl font-black text-zinc-900 tracking-tight">Χαμηλότερες Παρουσίες</h3>
+                </div>
+                <div className="h-8 w-8 rounded-full bg-red-50 flex items-center justify-center">
+                    <AlertCircle className="h-4 w-4 text-red-500" />
+                </div>
+            </div>
+            <div className="p-8 space-y-4">
               {[...athleteStats].filter((a) => a.totalSessions > 0).sort((a, b) => a.attendanceRate - b.attendanceRate).slice(0, 5).map((athlete, i) => (
-                <div key={athlete.id} className="flex items-center gap-3">
-                  <div className="h-6 w-6 rounded-md bg-red-50 flex items-center justify-center text-[11px] font-bold text-red-400">
+                <div key={athlete.id} className="flex items-center gap-4 group">
+                  <div className="h-10 w-10 rounded-xl bg-red-50 flex items-center justify-center text-sm font-black text-red-500 transition-all">
                     {i + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-zinc-900 truncate">{athlete.name}</p>
+                    <p className="text-base font-black text-zinc-900 truncate group-hover:text-red-700 transition-colors uppercase tracking-tight">{athlete.name}</p>
+                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{athlete.totalSessions} Προπονήσεις</p>
                   </div>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-md ${rateColor(athlete.attendanceRate)}`}>
+                  <div className={cn("px-4 py-2 rounded-xl text-sm font-black transition-all group-hover:scale-105 shadow-sm", rateColor(athlete.attendanceRate))}>
                     {athlete.attendanceRate}%
-                  </span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -338,74 +360,79 @@ export default function TrainingStatsPage() {
       )}
 
       {/* Full Athletes Table */}
-      <div className="rounded-xl border border-zinc-100/60 bg-white overflow-hidden">
-        <div className="px-5 py-4 border-b border-zinc-100/60">
-          <h3 className="text-sm font-semibold text-zinc-900">Αναλυτικά ανά Αθλητή</h3>
+      <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm overflow-hidden">
+        <div className="p-8 border-b border-zinc-50 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center">
+                    <Users className="h-5 w-5 text-zinc-400" />
+                </div>
+                <h3 className="text-xl font-black text-zinc-900 tracking-tight">Αναλυτικά ανά Αθλητή</h3>
+            </div>
+            <div className="px-4 py-1.5 rounded-xl bg-zinc-50 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                {athleteStats.length} Αθλητές
+            </div>
         </div>
+        
         {athleteStats.length === 0 ? (
-          <div className="py-12 text-center text-sm text-zinc-400">
-            Δεν υπάρχουν δεδομένα για τα επιλεγμένα φίλτρα
+          <div className="py-20 text-center">
+            <div className="mx-auto h-20 w-20 bg-zinc-50 rounded-[1.5rem] flex items-center justify-center mb-6">
+                <Users className="h-10 w-10 text-zinc-200" />
+            </div>
+            <p className="text-lg font-bold text-zinc-400">Δεν υπάρχουν δεδομένα για τα επιλεγμένα φίλτρα</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-zinc-100/60">
-                  <th className="text-left text-[13px] text-zinc-400 font-medium px-5 py-3">Αθλητής</th>
-                  <th className="text-center text-[13px] text-zinc-400 font-medium px-3 py-3">Τμήμα</th>
-                  <th className="text-center text-[13px] text-zinc-400 font-medium px-3 py-3">Προπ.</th>
-                  <th className="text-center text-[13px] text-zinc-400 font-medium px-3 py-3">
-                    <span className="text-emerald-500">✓</span>
-                  </th>
-                  <th className="text-center text-[13px] text-zinc-400 font-medium px-3 py-3">
-                    <span className="text-red-400">✕</span>
-                  </th>
-                  <th className="text-center text-[13px] text-zinc-400 font-medium px-3 py-3">
-                    <span className="text-amber-500">⏱</span>
-                  </th>
-                  <th className="text-center text-[13px] text-zinc-400 font-medium px-3 py-3">
-                    <span className="text-zinc-400">🏥</span>
-                  </th>
-                  <th className="text-left text-[13px] text-zinc-400 font-medium px-5 py-3 min-w-[160px]">Παρουσία</th>
+                <tr className="bg-zinc-50/50">
+                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-zinc-400">Αθλητής</th>
+                  <th className="py-5 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Τμήμα</th>
+                  <th className="py-5 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Προπ.</th>
+                  <th className="py-5 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Παρών</th>
+                  <th className="py-5 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Απών</th>
+                  <th className="py-5 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Καθ.</th>
+                  <th className="py-5 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Τραυμ.</th>
+                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-zinc-400 lg:min-w-[200px]">Ποσοστό Παρουσίας</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-zinc-50">
                 {athleteStats.map((athlete) => (
-                  <tr key={athlete.id} className="border-b border-zinc-100/40 hover:bg-zinc-50/50">
-                    <td className="px-5 py-3">
-                      <p className="text-sm font-medium text-zinc-900">{athlete.name}</p>
+                  <tr key={athlete.id} className="group hover:bg-zinc-50/50 transition-colors">
+                    <td className="py-5 px-8">
+                      <p className="text-sm font-black text-zinc-900 uppercase tracking-tight group-hover:text-violet-700 transition-colors">{athlete.name}</p>
                     </td>
-                    <td className="text-center px-3 py-3">
-                      <span className="text-xs text-zinc-500">
+                    <td className="py-5 px-6 text-center">
+                      <span className="text-xs font-bold text-zinc-500 whitespace-nowrap">
                         {athlete.squadIds.map((sid) => getSquadName(sid)).filter(Boolean).join(', ') || '—'}
                       </span>
                     </td>
-                    <td className="text-center px-3 py-3">
-                      <span className="text-sm font-semibold text-zinc-900">{athlete.totalSessions}</span>
+                    <td className="py-5 px-6 text-center">
+                      <span className="text-sm font-black text-zinc-900">{athlete.totalSessions}</span>
                     </td>
-                    <td className="text-center px-3 py-3">
-                      <span className="text-sm text-emerald-600 font-medium">{athlete.present}</span>
+                    <td className="py-5 px-6 text-center">
+                      <span className="text-sm font-bold text-emerald-600">{athlete.present}</span>
                     </td>
-                    <td className="text-center px-3 py-3">
-                      <span className="text-sm text-red-500 font-medium">{athlete.absent}</span>
+                    <td className="py-5 px-6 text-center">
+                      <span className="text-sm font-bold text-red-500">{athlete.absent}</span>
                     </td>
-                    <td className="text-center px-3 py-3">
-                      <span className="text-sm text-amber-600 font-medium">{athlete.late}</span>
+                    <td className="py-5 px-6 text-center">
+                      <span className="text-sm font-bold text-amber-600">{athlete.late}</span>
                     </td>
-                    <td className="text-center px-3 py-3">
-                      <span className="text-sm text-zinc-400 font-medium">{athlete.injured}</span>
+                    <td className="py-5 px-6 text-center">
+                      <span className="text-sm font-bold text-zinc-400">{athlete.injured}</span>
                     </td>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-2 rounded-full bg-zinc-100 overflow-hidden">
+                    <td className="py-5 px-8">
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1 h-3 rounded-full bg-zinc-100 overflow-hidden shadow-inner">
                           <div
-                            className={`h-full rounded-full ${rateBarColor(athlete.attendanceRate)} transition-all`}
+                            className={cn("h-full rounded-full transition-all duration-700", rateBarColor(athlete.attendanceRate))}
                             style={{ width: `${athlete.attendanceRate}%` }}
                           />
                         </div>
-                        <span className={`text-xs font-semibold min-w-[36px] text-right ${
-                          athlete.totalSessions === 0 ? 'text-zinc-300' : rateColor(athlete.attendanceRate).split(' ')[0]
-                        }`}>
+                        <span className={cn(
+                          "text-sm font-black min-w-[45px] text-right rounded-lg px-2 py-1",
+                          athlete.totalSessions === 0 ? "text-zinc-300" : rateColor(athlete.attendanceRate)
+                        )}>
                           {athlete.totalSessions === 0 ? '—' : `${athlete.attendanceRate}%`}
                         </span>
                       </div>
