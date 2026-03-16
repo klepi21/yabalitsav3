@@ -100,6 +100,11 @@ service cloud.firestore {
       allow write: if true;
     }
 
+    // Training sessions
+    match /yabalitsa_training_sessions/{sessionId} {
+      allow read, write: if request.auth != null;
+    }
+
     // Support messages (rate limiting for Telegram bot)
     match /yabalitsa_support_messages/{messageId} {
       allow read, write: if request.auth != null;
