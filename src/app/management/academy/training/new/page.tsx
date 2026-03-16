@@ -9,11 +9,12 @@ import { squadService, academyUserService, userGroupService } from '@/lib/academ
 import { Squad, AcademyUser } from '@/types/academy';
 import { TrainingType, TRAINING_TYPE_LABELS, TRAINING_TYPE_COLORS, TrainingDrill } from '@/types/training';
 import {
-  Loader2, ArrowLeft, Dumbbell, Plus, Trash2, Clock, AlertCircle,
+  Loader2, ArrowLeft, Dumbbell, Plus, Trash2, Clock, AlertCircle, CalendarDays, User, BookOpen, Target,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
 
 const TRAINING_TYPES: TrainingType[] = ['training', 'friendly', 'fitness', 'tactical', 'recovery'];
 
@@ -117,265 +118,357 @@ export default function NewTrainingPage() {
   if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+        <Loader2 className="h-10 w-10 animate-spin text-emerald-600" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10 pb-20">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" className="h-9 w-9 border-zinc-200 shrink-0" asChild>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-6">
+        <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-zinc-100 hover:bg-zinc-50 shrink-0 shadow-sm" asChild>
           <Link href="/management/academy/training">
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-6 w-6 text-zinc-600" />
           </Link>
         </Button>
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-            <Dumbbell className="h-5 w-5 text-emerald-600" />
+        <div className="flex items-center gap-4">
+          <div className="h-14 w-14 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-200 shrink-0">
+            <Dumbbell className="h-7 w-7" />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Νέα Προπόνηση</h1>
-            <p className="text-sm text-zinc-500 mt-0.5">Δημιουργία νέας προπόνησης</p>
+            <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-1">Νέα Προπόνηση</h1>
+            <p className="text-lg font-medium text-zinc-500">Προγραμματίστε την επόμενη δραστηριότητα της ομάδας.</p>
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4">
-          <div className="flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
-            <p className="text-sm text-destructive">{error}</p>
+        <div className="bg-red-50 border border-red-100 rounded-3xl p-6 animate-in fade-in slide-in-from-top-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-red-100 flex items-center justify-center">
+                <AlertCircle className="h-6 w-6 text-red-600" />
+              </div>
+              <p className="text-red-700 font-bold">{error}</p>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setError(null)} 
+              className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 font-bold"
+            >
+              Κλείσιμο
+            </Button>
           </div>
         </div>
       )}
 
-      <form onSubmit={handleSubmit}>
-        <div className="rounded-xl border border-zinc-100/60 bg-white p-6 sm:p-8 space-y-8">
-          {/* Title */}
-          <div className="space-y-2">
-            <Label className="text-zinc-700">Τίτλος *</Label>
-            <Input
-              value={form.title}
-              onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
-              placeholder="π.χ. Προπόνηση U12 - Τακτική"
-              className="h-11 bg-white"
-            />
-          </div>
-
-          {/* Type */}
-          <div className="space-y-3">
-            <Label className="text-zinc-700">Τύπος Προπόνησης *</Label>
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-              {TRAINING_TYPES.map((type) => {
-                const colors = TRAINING_TYPE_COLORS[type];
-                const isSelected = form.type === type;
-                return (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setForm((p) => ({ ...p, type }))}
-                    className={`px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 border ${
-                      isSelected
-                        ? `${colors.bg} ${colors.text} ${colors.border}`
-                        : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300'
-                    }`}
-                  >
-                    {TRAINING_TYPE_LABELS[type]}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Squad + Coach */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div className="space-y-2">
-              <Label className="text-zinc-700">Τμήμα *</Label>
-              <select
-                value={form.squadId}
-                onChange={(e) => setForm((p) => ({ ...p, squadId: e.target.value }))}
-                className="flex h-11 w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring appearance-none"
-              >
-                <option value="">Επιλέξτε τμήμα...</option>
-                {squads.map((s) => (
-                  <option key={s.id} value={s.id}>{s.name} ({s.ageGroup})</option>
-                ))}
-              </select>
-            </div>
-            <div className="space-y-2">
-              <Label className="text-zinc-700">Προπονητής *</Label>
-              <select
-                value={form.coachId}
-                onChange={(e) => setForm((p) => ({ ...p, coachId: e.target.value }))}
-                className="flex h-11 w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring appearance-none"
-              >
-                <option value="">Επιλέξτε προπονητή...</option>
-                {coaches.map((c) => (
-                  <option key={c.id} value={c.id}>{c.displayName}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Assistant Coaches */}
-          {coaches.length > 1 && (
-            <div className="space-y-3">
-              <Label className="text-zinc-700">Βοηθοί Προπονητές</Label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {coaches.filter((c) => c.id !== form.coachId).map((coach) => {
-                  const isSelected = form.assistantCoachIds.includes(coach.id);
-                  return (
-                    <label
-                      key={coach.id}
-                      className={`flex items-center p-3 rounded-xl border cursor-pointer transition-all duration-150 ${
-                        isSelected
-                          ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-                          : 'border-zinc-200 hover:border-zinc-300 text-zinc-600'
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        className="sr-only"
-                        checked={isSelected}
-                        onChange={() => {
-                          setForm((p) => ({
-                            ...p,
-                            assistantCoachIds: isSelected
-                              ? p.assistantCoachIds.filter((id) => id !== coach.id)
-                              : [...p.assistantCoachIds, coach.id],
-                          }));
-                        }}
-                      />
-                      <span className="text-sm font-medium">{coach.displayName}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Date + Time */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            <div className="space-y-2">
-              <Label className="text-zinc-700">Ημερομηνία *</Label>
-              <Input
-                type="date"
-                value={form.date}
-                onChange={(e) => setForm((p) => ({ ...p, date: e.target.value }))}
-                className="h-11 bg-white"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-zinc-700">Ώρα Έναρξης *</Label>
-              <Input
-                type="time"
-                value={form.startTime}
-                onChange={(e) => setForm((p) => ({ ...p, startTime: e.target.value }))}
-                className="h-11 bg-white"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="text-zinc-700">Ώρα Λήξης *</Label>
-              <Input
-                type="time"
-                value={form.endTime}
-                onChange={(e) => setForm((p) => ({ ...p, endTime: e.target.value }))}
-                className="h-11 bg-white"
-              />
-            </div>
-          </div>
-
-          {/* Drills */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="text-zinc-700">Ασκήσεις</Label>
-              {drills.length > 0 && (
-                <span className="text-xs text-zinc-400 flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {totalDrillMinutes} λεπτά
-                </span>
-              )}
-            </div>
-
-            {drills.length > 0 && (
-              <div className="space-y-1.5">
-                {drills.map((drill, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-zinc-200 bg-zinc-50/50">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-zinc-900">{drill.name}</p>
-                      <p className="text-xs text-zinc-400">
-                        {drill.duration} λεπτά
-                        {drill.description && ` — ${drill.description}`}
-                      </p>
+      <form onSubmit={handleSubmit} className="space-y-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+          
+          {/* Main Content */}
+          <div className="lg:col-span-2 space-y-10">
+            {/* General Info Card */}
+            <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-8 sm:p-10 space-y-8">
+                <div className="flex items-center gap-4 mb-2">
+                    <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center">
+                        <CalendarDays className="h-5 w-5 text-zinc-400" />
                     </div>
-                    <button type="button" onClick={() => removeDrill(i)} className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors">
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                ))}
-              </div>
+                    <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Γενικά Στοιχεία</h2>
+                </div>
+
+                <div className="space-y-4">
+                    <Label className="text-xs font-black uppercase tracking-widest text-zinc-400">Τίτλος Προπόνησης *</Label>
+                    <Input
+                    value={form.title}
+                    onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
+                    placeholder="π.χ. Προπόνηση U12 - Τακτική & Τελειώματα"
+                    className="h-16 bg-zinc-50 border-none rounded-2xl px-6 font-bold text-lg focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all"
+                    />
+                </div>
+
+                <div className="space-y-4">
+                    <Label className="text-xs font-black uppercase tracking-widest text-zinc-400">Τύπος Δραστηριότητας *</Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    {TRAINING_TYPES.map((type) => {
+                        const colors = TRAINING_TYPE_COLORS[type];
+                        const isSelected = form.type === type;
+                        return (
+                        <button
+                            key={type}
+                            type="button"
+                            onClick={() => setForm((p) => ({ ...p, type }))}
+                            className={cn(
+                                "h-14 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-sm border-2",
+                                isSelected
+                                ? `${colors.bg} ${colors.text} border-emerald-500 scale-[1.05] shadow-lg shadow-emerald-100`
+                                : "bg-white text-zinc-500 border-zinc-100 hover:border-zinc-200"
+                            )}
+                        >
+                            {TRAINING_TYPE_LABELS[type]}
+                        </button>
+                        );
+                    })}
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                    <div className="space-y-4">
+                        <Label className="text-xs font-black uppercase tracking-widest text-zinc-400">Τμήμα *</Label>
+                        <div className="relative">
+                            <select
+                                value={form.squadId}
+                                onChange={(e) => setForm((p) => ({ ...p, squadId: e.target.value }))}
+                                className="h-14 w-full rounded-2xl bg-zinc-50 border-none px-6 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/10 appearance-none transition-all"
+                            >
+                                <option value="">Επιλέξτε τμήμα...</option>
+                                {squads.map((s) => (
+                                <option key={s.id} value={s.id}>{s.name} ({s.ageGroup})</option>
+                                ))}
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
+                                <Plus className="h-4 w-4" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-4">
+                        <Label className="text-xs font-black uppercase tracking-widest text-zinc-400">Υπεύθυνος Προπονητής *</Label>
+                        <div className="relative">
+                            <select
+                                value={form.coachId}
+                                onChange={(e) => setForm((p) => ({ ...p, coachId: e.target.value }))}
+                                className="h-14 w-full rounded-2xl bg-zinc-50 border-none px-6 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/10 appearance-none transition-all"
+                            >
+                                <option value="">Επιλέξτε προπονητή...</option>
+                                {coaches.map((c) => (
+                                <option key={c.id} value={c.id}>{c.displayName}</option>
+                                ))}
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
+                                <User className="h-4 w-4" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Date & Time */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                    <div className="space-y-4">
+                        <Label className="text-xs font-black uppercase tracking-widest text-zinc-400">Ημερομηνία *</Label>
+                        <Input
+                            type="date"
+                            value={form.date}
+                            onChange={(e) => setForm((p) => ({ ...p, date: e.target.value }))}
+                            className="h-14 bg-zinc-50 border-none rounded-2xl px-6 font-bold focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all"
+                        />
+                    </div>
+                    <div className="space-y-4">
+                        <Label className="text-xs font-black uppercase tracking-widest text-zinc-400">Έναρξη *</Label>
+                        <Input
+                            type="time"
+                            value={form.startTime}
+                            onChange={(e) => setForm((p) => ({ ...p, startTime: e.target.value }))}
+                            className="h-14 bg-zinc-50 border-none rounded-2xl px-6 font-bold focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all"
+                        />
+                    </div>
+                    <div className="space-y-4">
+                        <Label className="text-xs font-black uppercase tracking-widest text-zinc-400">Λήξη *</Label>
+                        <Input
+                            type="time"
+                            value={form.endTime}
+                            onChange={(e) => setForm((p) => ({ ...p, endTime: e.target.value }))}
+                            className="h-14 bg-zinc-50 border-none rounded-2xl px-6 font-bold focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Drills Section Card */}
+            <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-8 sm:p-10 space-y-8">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-xl bg-violet-50 flex items-center justify-center">
+                            <Target className="h-5 w-5 text-violet-600" />
+                        </div>
+                        <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Ασκήσεις & Πρόγραμμα</h2>
+                    </div>
+                    {drills.length > 0 && (
+                        <div className="flex items-center gap-2 px-4 py-2 bg-violet-50 rounded-xl">
+                            <Clock className="h-4 w-4 text-violet-600" />
+                            <span className="text-sm font-black text-violet-700">{totalDrillMinutes} λ.</span>
+                        </div>
+                    )}
+                </div>
+
+                {drills.length > 0 && (
+                    <div className="space-y-3">
+                    {drills.map((drill, i) => (
+                        <div key={i} className="flex items-center gap-6 p-6 rounded-2xl border border-zinc-100 bg-zinc-50/50 group transition-all hover:border-violet-200 hover:bg-white hover:shadow-md">
+                            <div className="h-10 w-10 rounded-xl bg-white border border-zinc-100 flex items-center justify-center font-black text-zinc-400">
+                                {i + 1}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-3 mb-1">
+                                    <p className="text-lg font-black text-zinc-900 uppercase tracking-tight">{drill.name}</p>
+                                    <span className="px-3 py-1 bg-violet-100 text-violet-700 rounded-lg text-xs font-black">{drill.duration} λ.</span>
+                                </div>
+                                {drill.description && <p className="text-sm font-medium text-zinc-500">{drill.description}</p>}
+                            </div>
+                            <button type="button" onClick={() => removeDrill(i)} className="h-10 w-10 rounded-xl flex items-center justify-center text-zinc-300 hover:text-red-600 hover:bg-red-50 hover:border-red-100 border border-transparent transition-all">
+                                <Trash2 className="h-5 w-5" />
+                            </button>
+                        </div>
+                    ))}
+                    </div>
+                )}
+
+                {/* Add drill form */}
+                <div className="bg-zinc-50/50 border-2 border-dashed border-zinc-200 rounded-3xl p-6 sm:p-8 space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_120px] gap-6">
+                        <div className="space-y-4">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Όνομα Άσκησης</Label>
+                            <Input
+                            placeholder="π.χ. Προθέρμανση με μπάλα..."
+                            value={newDrill.name}
+                            onChange={(e) => setNewDrill((p) => ({ ...p, name: e.target.value }))}
+                            className="h-14 bg-white border-none rounded-2xl px-6 font-bold focus:ring-4 focus:ring-violet-500/10 transition-all"
+                            />
+                        </div>
+                        <div className="space-y-4">
+                            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Διάρκεια (λ.)</Label>
+                            <Input
+                            type="number"
+                            placeholder="Λεπτά"
+                            value={newDrill.duration}
+                            onChange={(e) => setNewDrill((p) => ({ ...p, duration: Number(e.target.value) || 0 }))}
+                            className="h-14 bg-white border-none rounded-2xl px-4 text-center font-black focus:ring-4 focus:ring-violet-500/10 transition-all"
+                            min={1}
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-4">
+                        <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Περιγραφή (Προαιρετικά)</Label>
+                        <Input
+                        placeholder="Περιγράψτε το στόχο ή τον τρόπο εκτέλεσης της άσκησης..."
+                        value={newDrill.description}
+                        onChange={(e) => setNewDrill((p) => ({ ...p, description: e.target.value }))}
+                        className="h-14 bg-white border-none rounded-2xl px-6 font-bold focus:ring-4 focus:ring-violet-500/10 transition-all"
+                        />
+                    </div>
+                    <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={addDrill} 
+                        disabled={!newDrill.name.trim()}
+                        className="h-14 w-full rounded-2xl border-none bg-white text-zinc-900 font-bold shadow-sm hover:shadow-md hover:bg-zinc-50 transition-all flex items-center justify-center gap-2"
+                    >
+                        <Plus className="h-5 w-5 text-violet-600" />
+                        Προσθήκη στο Πρόγραμμα
+                    </Button>
+                </div>
+            </div>
+          </div>
+
+          {/* Sidebar */}
+          <div className="space-y-10">
+            {/* Assistant Coaches Card */}
+            {coaches.length > 1 && (
+                <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-8 space-y-8">
+                    <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                            <User className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Βοηθοί</h2>
+                    </div>
+
+                    <div className="space-y-2">
+                        {coaches.filter((c) => c.id !== form.coachId).map((coach) => {
+                        const isSelected = form.assistantCoachIds.includes(coach.id);
+                        return (
+                            <label
+                            key={coach.id}
+                            className={cn(
+                                "flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300",
+                                isSelected
+                                ? "border-blue-500 bg-blue-50 text-blue-900 shadow-md"
+                                : "border-zinc-50 bg-zinc-50 text-zinc-500 hover:border-zinc-200 hover:bg-white"
+                            )}
+                            >
+                            <input
+                                type="checkbox"
+                                className="sr-only"
+                                checked={isSelected}
+                                onChange={() => {
+                                setForm((p) => ({
+                                    ...p,
+                                    assistantCoachIds: isSelected
+                                    ? p.assistantCoachIds.filter((id) => id !== coach.id)
+                                    : [...p.assistantCoachIds, coach.id],
+                                }));
+                                }}
+                            />
+                            <div className={cn(
+                                "h-5 w-5 rounded-md border-2 flex items-center justify-center transition-all",
+                                isSelected ? "bg-blue-600 border-blue-600" : "bg-white border-zinc-200"
+                            )}>
+                                {isSelected && <Plus className="h-3 w-3 text-white" />}
+                            </div>
+                            <span className="text-sm font-black uppercase tracking-tight">{coach.displayName}</span>
+                            </label>
+                        );
+                        })}
+                    </div>
+                </div>
             )}
 
-            {/* Add drill form */}
-            <div className="rounded-xl border border-zinc-200 bg-zinc-50/50 p-4 space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-[1fr_80px] gap-3">
-                <Input
-                  placeholder="Όνομα άσκησης..."
-                  value={newDrill.name}
-                  onChange={(e) => setNewDrill((p) => ({ ...p, name: e.target.value }))}
-                  className="h-10 bg-white"
-                />
-                <Input
-                  type="number"
-                  placeholder="Λεπτά"
-                  value={newDrill.duration}
-                  onChange={(e) => setNewDrill((p) => ({ ...p, duration: Number(e.target.value) || 0 }))}
-                  className="h-10 bg-white"
-                  min={1}
-                />
-              </div>
-              <Input
-                placeholder="Περιγραφή (προαιρετικό)..."
-                value={newDrill.description}
-                onChange={(e) => setNewDrill((p) => ({ ...p, description: e.target.value }))}
-                className="h-10 bg-white"
-              />
-              <Button type="button" variant="outline" size="sm" onClick={addDrill} disabled={!newDrill.name.trim()}>
-                <Plus className="h-4 w-4" />
-                Προσθήκη Άσκησης
-              </Button>
+            {/* Notes Card */}
+            <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-8 space-y-8">
+                <div className="flex items-center gap-4">
+                    <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                        <BookOpen className="h-5 w-5 text-amber-600" />
+                    </div>
+                    <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Σημειώσεις</h2>
+                </div>
+
+                <div className="space-y-4">
+                    <Label className="text-xs font-black uppercase tracking-widest text-zinc-400">Παρατηρήσεις Προπονητή</Label>
+                    <textarea
+                    value={form.notes}
+                    onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
+                    rows={6}
+                    className="w-full rounded-2xl bg-zinc-50 border-none p-6 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-amber-500/10 placeholder:text-zinc-300 resize-none transition-all"
+                    placeholder="Στόχοι προπόνησης, απαραίτητος εξοπλισμός, ειδικές οδηγίες..."
+                    />
+                </div>
             </div>
-          </div>
 
-          {/* Notes */}
-          <div className="space-y-2">
-            <Label className="text-zinc-700">Σημειώσεις Προπονητή</Label>
-            <textarea
-              value={form.notes}
-              onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
-              rows={3}
-              className="flex w-full rounded-md border border-input bg-white px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              placeholder="Στόχοι προπόνησης, σημειώσεις..."
-            />
-          </div>
-
-          {/* Submit */}
-          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-zinc-100/60">
-            <Button type="button" variant="outline" className="flex-1 h-11" onClick={() => router.back()}>
-              Ακύρωση
-            </Button>
-            <Button type="submit" disabled={isSaving} className="flex-1 h-11">
-              {isSaving ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Αποθήκευση...
-                </>
-              ) : (
-                'Δημιουργία Προπόνησης'
-              )}
-            </Button>
+            {/* Actions */}
+            <div className="flex flex-col gap-4">
+                <Button 
+                    type="submit" 
+                    disabled={isSaving} 
+                    className="h-20 w-full rounded-[2rem] bg-zinc-900 hover:bg-emerald-600 text-white font-black text-xl shadow-2xl transition-all hover:translate-y-[-4px] active:translate-y-[2px]"
+                >
+                    {isSaving ? (
+                        <div className="flex items-center gap-3">
+                            <Loader2 className="h-7 w-7 animate-spin" />
+                            <span>Αποθήκευση...</span>
+                        </div>
+                    ) : (
+                        'Δημιουργία Προπόνησης'
+                    )}
+                </Button>
+                <Button 
+                    type="button" 
+                    variant="ghost" 
+                    className="h-14 w-full rounded-2xl font-black text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100" 
+                    onClick={() => router.back()}
+                >
+                    Ακύρωση
+                </Button>
+            </div>
           </div>
         </div>
       </form>
