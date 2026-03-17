@@ -12,8 +12,14 @@ export default function SubscriptionRenewalPage() {
   const [venueData, setVenueData] = useState<any>(null);
   const [currentDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
-  const plans = pricingUtils.getAllPlans();
+  const DEV_EMAIL = 'nikoskoukis99@gmail.com';
+  const isDevUser = userEmail === DEV_EMAIL;
+
+  const plans = pricingUtils.getAllPlans().map(plan =>
+    isDevUser ? { ...plan, basePrice: 0.10 } : plan
+  );
 
   const planIcons: Record<string, React.ElementType> = {
     basic: Calendar,
@@ -30,6 +36,7 @@ export default function SubscriptionRenewalPage() {
 
         const auth = getAuth();
         if (auth.currentUser?.uid) {
+          setUserEmail(auth.currentUser.email || null);
           const venuesRef = collection(db, 'yabalitsa_venues');
           const q = query(venuesRef, where('ownerId', '==', auth.currentUser.uid));
           const querySnapshot = await getDocs(q);
