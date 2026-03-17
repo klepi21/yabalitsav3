@@ -116,21 +116,24 @@ export default function SquadsPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-1 border-b border-zinc-50">
-        <div className="flex items-center gap-3.5">
-           <div className="h-11 w-11 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shrink-0">
-             <Trophy className="h-5 w-5 text-emerald-400" />
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-2">
+        <div className="flex items-center gap-4">
+           <div className="h-12 w-12 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shadow-zinc-200 shrink-0">
+             <Trophy className="h-6 w-6 text-emerald-400" />
            </div>
            <div className="space-y-0.5">
-             <h1 className="text-xl font-black tracking-tight text-zinc-900 uppercase">
+             <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
                {toGreekUpperCase('Τμήματα')}
              </h1>
-             <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight">
-               {toGreekUpperCase('Οργάνωση αθλητών σε ομάδες')}
-             </p>
+             <div className="flex items-center gap-2">
+               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                 {toGreekUpperCase('Οργάνωση αθλητών σε ομάδες')}
+               </p>
+             </div>
            </div>
         </div>
-        <Button asChild className="h-10 px-5 rounded-lg bg-zinc-900 hover:bg-black text-white font-bold text-[12px] shadow-md transition-all active:scale-95 group">
+        <Button asChild className="h-10 px-6 rounded-xl bg-zinc-900 hover:bg-black text-white font-black shadow-md transition-all active:scale-95 text-[11px]">
           <Link href="/management/academy/squads/new" className="flex items-center gap-2">
             <Plus className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" />
             {toGreekUpperCase('Νέο Τμήμα')}
@@ -139,25 +142,39 @@ export default function SquadsPage() {
       </div>
 
       {/* Stats row */}
-      <div className="flex flex-col md:flex-row items-center gap-4">
-        <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-zinc-100 shadow-sm min-w-[200px] group hover:shadow-md transition-all duration-300">
-          <div className="h-9 w-9 rounded-lg bg-zinc-50 flex items-center justify-center text-zinc-300 group-hover:bg-emerald-50 group-hover:text-emerald-500 transition-all shadow-inner">
-            <Trophy className="h-4 w-4" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="flex items-center gap-4 bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm group hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-500">
+          <div className="h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-inner">
+            <Trophy className="h-6 w-6" />
           </div>
-          <div className="space-y-0.5">
-            <p className="text-lg font-black text-zinc-900 group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{squads.length}</p>
-            <p className="text-[8px] font-bold uppercase tracking-wider text-zinc-400">{toGreekUpperCase('Σύνολο Τμημάτων')}</p>
+          <div className="space-y-1">
+            <p className="text-3xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{squads.length}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Σύνολο Τμημάτων')}</p>
+          </div>
+        </div>
+        
+        <div className="flex items-center gap-4 bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm group hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-500">
+          <div className="h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-inner">
+            <UsersIcon className="h-6 w-6" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-3xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">
+              {users.filter(u => u.squad_id || (u.squad_ids && u.squad_ids.length > 0)).length}
+            </p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Σύνολο Αθλητών')}</p>
           </div>
         </div>
 
-        <div className="relative flex-1 w-full group">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-300 group-focus-within:text-emerald-500 transition-colors" />
-          <Input
-            placeholder={toGreekUpperCase('Αναζήτηση...')}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-10 pl-10 pr-4 bg-white border-zinc-100 rounded-lg shadow-sm focus:ring-4 focus:ring-emerald-500/10 font-bold text-xs placeholder:text-zinc-300 w-full transition-all uppercase"
-          />
+        <div className="sm:col-span-2 lg:col-span-2 flex items-center">
+          <div className="relative w-full group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-300 group-focus-within:text-emerald-500 transition-colors" />
+            <Input
+              placeholder={toGreekUpperCase('Αναζήτηση τμημάτων, ηλικιακών γκρουπ...')}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="h-14 pl-12 pr-4 bg-white border-zinc-100 rounded-2xl shadow-sm focus:ring-8 focus:ring-emerald-500/5 font-bold text-[13px] placeholder:text-zinc-300 w-full transition-all uppercase tracking-tight"
+            />
+          </div>
         </div>
       </div>
 

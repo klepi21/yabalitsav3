@@ -100,16 +100,24 @@ export default function TournamentsPage() {
   return (
     <div className="space-y-10 pb-20">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 pb-1 border-b border-zinc-50">
-        <div>
-          <h1 className="text-xl font-black tracking-tight text-zinc-900 uppercase">
-            {toGreekUpperCase('Τουρνουά')}
-          </h1>
-          <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight">
-            {toGreekUpperCase('Διαχειριστείτε τα πρωταθλήματα και τις διοργανώσεις σας.')}
-          </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-2">
+        <div className="flex items-center gap-4">
+           <div className="h-12 w-12 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shadow-zinc-200 shrink-0">
+             <Trophy className="h-6 w-6 text-emerald-400" />
+           </div>
+           <div className="space-y-0.5">
+             <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
+               {toGreekUpperCase('Τουρνουά')}
+             </h1>
+             <div className="flex items-center gap-2">
+               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                 {toGreekUpperCase('Διαχειριση πρωταθληματων και διοργανωσεων')}
+               </p>
+             </div>
+           </div>
         </div>
-        <Button asChild className="h-10 px-5 rounded-lg bg-zinc-900 border-0 hover:bg-black font-bold text-[12px] text-white shadow-md transition-all active:scale-95 group">
+        <Button asChild className="h-10 px-6 rounded-xl bg-zinc-900 hover:bg-black text-white font-black shadow-md transition-all active:scale-95 text-[11px]">
           <Link href="/management/tournaments/new" className="flex items-center gap-2">
             <Plus className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" />
             {toGreekUpperCase('Νέο Τουρνουά')}
@@ -117,31 +125,24 @@ export default function TournamentsPage() {
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {/* Stats row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'Σύνολο', value: tournaments.length, icon: Trophy, color: 'amber' },
+          { label: 'Σύνολο', value: tournaments.length, icon: Trophy, color: 'emerald' },
           { label: 'Ενεργά', value: tournaments.filter(t => t.status === 'active').length, icon: Swords, color: 'emerald' },
-          { label: 'Ομάδες', value: tournaments.reduce((sum, t) => sum + t.teamCount, 0), icon: Users, color: 'blue' },
-          { label: 'Ολοκληρωμένα', value: tournaments.filter(t => t.status === 'completed').length, icon: Calendar, color: 'violet' },
-        ].map((stat) => {
-          const Icon = stat.icon;
-          const colorStyles: Record<string, string> = {
-            amber: 'bg-amber-50 text-amber-600',
-            emerald: 'bg-emerald-50 text-emerald-600',
-            blue: 'bg-blue-50 text-blue-600',
-            violet: 'bg-violet-50 text-violet-600',
-          };
-          return (
-            <div key={stat.label} className="bg-white p-3 rounded-xl border border-zinc-100 shadow-sm transition-all hover:shadow-md">
-              <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center mb-3", colorStyles[stat.color])}>
-                <Icon className="h-4 w-4" />
-              </div>
-              <p className="text-lg font-black text-zinc-900 mb-0.5">{stat.value}</p>
-              <p className="text-[8px] font-bold uppercase tracking-wider text-zinc-400">{toGreekUpperCase(stat.label)}</p>
+          { label: 'Ομάδες', value: tournaments.reduce((sum, t) => sum + t.teamCount, 0), icon: Users, color: 'emerald' },
+          { label: 'Ολοκληρωμένα', value: tournaments.filter(t => t.status === 'completed').length, icon: Calendar, color: 'emerald' },
+        ].map((stat, i) => (
+          <div key={i} className="flex items-center gap-4 bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm group hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-500">
+            <div className="h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-inner">
+              <stat.icon className="h-6 w-6" />
             </div>
-          );
-        })}
+            <div className="space-y-1">
+              <p className="text-3xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{stat.value}</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase(stat.label)}</p>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Filters & Search */}

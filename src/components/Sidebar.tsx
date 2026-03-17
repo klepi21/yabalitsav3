@@ -20,6 +20,9 @@ import {
   ChevronDown,
   ChevronRight,
   Menu,
+  Smartphone,
+  Download,
+  Search as SearchIcon,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
@@ -79,116 +82,186 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   return (
-    <div className="flex h-full flex-col bg-[#1e293b]">
-      {/* Logo */}
-      <div className="flex h-14 items-center px-4 border-b border-white/[0.04] shrink-0">
-        <Image
-          src="/yabalitsalogo.png"
-          alt="Yabalitsa"
-          width={100}
-          height={28}
-          className="h-7 w-auto brightness-0 invert opacity-100"
-        />
+    <div className="flex h-full flex-col bg-white border-r border-zinc-100/80">
+      {/* Logo Area */}
+      <div className="flex h-16 items-center px-6 shrink-0 mb-1">
+        <div className="flex items-center gap-2.5">
+          <div className="h-8 w-8 bg-emerald-600 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-200">
+            <Image
+              src="/yabalitsalogo.png"
+              alt="Yabalitsa"
+              width={20}
+              height={20}
+              className="h-4 w-auto brightness-0 invert"
+            />
+          </div>
+          <span className="text-lg font-black text-zinc-900 tracking-tight">Yabalitsa</span>
+        </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-3 overflow-y-auto space-y-0.5">
-        {navigation.map((item) => {
-          const isActive = item.href ? pathname === item.href || pathname.startsWith(item.href + '/') : false;
-          const hasChildren = !!item.children;
-          const isExpanded = expandedMenus.includes(item.name) || isChildActive(item);
-          const isParentActive = isChildActive(item);
-          const Icon = item.icon;
-
-          if (hasChildren) {
-            return (
-              <div key={item.name} className="py-0.5">
-                <button
-                  onClick={() => toggleMenu(item.name)}
-                  className={cn(
-                    'flex w-full items-center justify-between rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all duration-200 min-h-[32px]',
-                    isParentActive
-                      ? 'bg-white/10 text-white shadow-sm'
-                      : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'
-                  )}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Icon className={cn("h-3.5 w-3.5 transition-opacity", isParentActive ? "opacity-100" : "opacity-60")} />
+      <nav className="flex-1 px-3 py-2 overflow-y-auto scrollbar-hide">
+        <div className="space-y-4">
+          {/* Main Menu Group */}
+          <div>
+            <p className="px-4 text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 font-mono">
+              {toGreekUpperCase('Μενού')}
+            </p>
+            <div className="space-y-0.5">
+              {navigation.slice(0, 4).map((item) => {
+                const isActive = item.href ? pathname === item.href || pathname.startsWith(item.href + '/') : false;
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href!}
+                    onClick={onNavigate}
+                    className={cn(
+                      'group relative flex items-center gap-3 rounded-lg px-4 py-2 text-[12px] font-bold transition-all duration-300',
+                      isActive
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                    )}
+                  >
+                    {isActive && (
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-emerald-600 rounded-r-full" />
+                    )}
+                    <Icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", isActive ? "text-emerald-600" : "text-zinc-400 group-hover:text-zinc-900")} />
                     <span>{toGreekUpperCase(item.name)}</span>
-                  </div>
-                  {isExpanded ? (
-                    <ChevronDown className="h-3.5 w-3.5 opacity-40" />
-                  ) : (
-                    <ChevronRight className="h-3.5 w-3.5 opacity-40" />
-                  )}
-                </button>
-                {isExpanded && (
-                  <div className="mt-0.5 ml-4 space-y-0.5 border-l border-white/5 pl-3">
-                    {item.children?.map((child, _idx, siblings) => {
-                      const otherSiblingPaths = siblings.filter(s => s.href !== child.href).map(s => s.href);
-                      const isChildItemActive = pathname === child.href || (
-                        pathname.startsWith(child.href) &&
-                        !otherSiblingPaths.some(sp => pathname.startsWith(sp))
-                      );
-                      const ChildIcon = child.icon;
-                      return (
-                        <Link
-                          key={child.name}
-                          href={child.href}
-                          onClick={onNavigate}
-                          className={cn(
-                            'flex items-center gap-2 rounded-lg px-2 py-1 text-[10px] font-bold tracking-tight transition-colors min-h-[28px]',
-                            isChildItemActive
-                              ? 'text-emerald-400'
-                              : 'text-slate-400 hover:text-slate-100'
-                          )}
-                        >
-                          <ChildIcon className={cn("h-3 w-3", isChildItemActive ? "opacity-100" : "opacity-50")} />
-                          <span>{toGreekUpperCase(child.name)}</span>
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          }
+                    {item.name === 'Κρατήσεις' && (
+                      <span className="ml-auto bg-emerald-600 text-white text-[9px] px-1.5 py-0.5 rounded-md font-black">
+                        NEW
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
 
-          return (
-            <Link
-              key={item.name}
-              href={item.href!}
-              onClick={onNavigate}
-              className={cn(
-                'flex items-center gap-2.5 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all duration-200 min-h-[32px]',
-                isActive
-                  ? 'bg-emerald-600 text-white shadow-md'
-                  : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'
-              )}
-            >
-              <Icon className={cn("h-3.5 w-3.5 transition-opacity", isActive ? "opacity-100" : "opacity-60")} />
-              <span>{toGreekUpperCase(item.name)}</span>
-            </Link>
-          );
-        })}
+          {/* Academy & More Group */}
+          <div>
+            <p className="px-4 text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 font-mono">
+              {toGreekUpperCase('Διαχείριση')}
+            </p>
+            <div className="space-y-1">
+              {navigation.slice(4).map((item) => {
+                const isActive = item.href ? pathname === item.href || pathname.startsWith(item.href + '/') : false;
+                const isParentActive = isChildActive(item);
+                const isExpanded = expandedMenus.includes(item.name) || isParentActive;
+                const Icon = item.icon;
+
+                if (item.children) {
+                  return (
+                    <div key={item.name} className="space-y-0.5">
+                      <button
+                        onClick={() => toggleMenu(item.name)}
+                        className={cn(
+                          'group relative flex w-full items-center justify-between rounded-lg px-4 py-2 text-[12px] font-bold transition-all duration-300',
+                          isParentActive
+                            ? 'bg-emerald-50 text-emerald-700'
+                            : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                        )}
+                      >
+                        {isParentActive && (
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-emerald-600 rounded-r-full" />
+                        )}
+                        <div className="flex items-center gap-3">
+                          <Icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", isParentActive ? "text-emerald-600" : "text-zinc-400 group-hover:text-zinc-900")} />
+                          <span>{toGreekUpperCase(item.name)}</span>
+                        </div>
+                        {isExpanded ? (
+                          <ChevronDown className="h-3 w-3 opacity-40" />
+                        ) : (
+                          <ChevronRight className="h-3 w-3 opacity-40" />
+                        )}
+                      </button>
+                      {isExpanded && (
+                        <div className="ml-7 space-y-0.5 pt-0.5 border-l border-zinc-100 pl-3">
+                          {item.children.map((child) => {
+                            const isChildItemActive = pathname === child.href;
+                            return (
+                              <Link
+                                key={child.name}
+                                href={child.href}
+                                onClick={onNavigate}
+                                className={cn(
+                                  'block py-1 text-[11px] font-bold transition-colors',
+                                  isChildItemActive
+                                    ? 'text-emerald-600'
+                                    : 'text-zinc-400 hover:text-zinc-900'
+                                )}
+                              >
+                                {toGreekUpperCase(child.name)}
+                              </Link>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={item.name}
+                    href={item.href!}
+                    onClick={onNavigate}
+                    className={cn(
+                      'group relative flex items-center gap-3 rounded-lg px-4 py-2 text-[12px] font-bold transition-all duration-300',
+                      isActive
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                    )}
+                  >
+                    {isActive && (
+                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-emerald-600 rounded-r-full" />
+                    )}
+                    <Icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", isActive ? "text-emerald-600" : "text-zinc-400 group-hover:text-zinc-900")} />
+                    <span>{toGreekUpperCase(item.name)}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </nav>
 
-      {/* Footer — venue name + logout */}
-      <div className="border-t border-white/[0.04] px-3 py-3 space-y-1.5 shrink-0">
-        {venueOwner?.name && (
-          <div className="px-2 pb-1">
-            <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{toGreekUpperCase('Λογαριασμός')}</p>
-            <p className="text-[11px] text-white font-bold truncate mt-0.5">{venueOwner.name}</p>
-          </div>
-        )}
+      {/* Promomotion Card & Logout Section */}
+      <div className="p-4 space-y-4">
+        {/* Mobile App Card */}
+        <div className="relative overflow-hidden rounded-2xl bg-zinc-900 p-5 group cursor-pointer hover:shadow-xl hover:shadow-emerald-900/10 transition-all duration-500">
+           {/* Abstract Background Shapes */}
+           <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/20 rounded-full blur-2xl group-hover:bg-emerald-500/30 transition-colors" />
+           <div className="absolute -left-4 -bottom-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl" />
+           
+           <div className="relative z-10 flex flex-col gap-3">
+              <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center backdrop-blur-md">
+                <Smartphone className="h-4 w-4 text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white tracking-tight">
+                  {toGreekUpperCase('Κατεβάστε την εφαρμογή')}
+                </p>
+                <p className="text-[10px] font-medium text-emerald-400/80 mt-0.5">
+                  ΔΙΑΧΕΙΡΙΣΗ ΑΠΟ ΠΑΝΤΟΥ
+                </p>
+              </div>
+              <button className="flex items-center justify-center gap-2 w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-black transition-all active:scale-95 shadow-lg shadow-emerald-900/20">
+                <Download className="h-3 w-3" />
+                DOWNLOAD
+              </button>
+           </div>
+        </div>
+
         <button
           onClick={() => {
             signOut();
             onNavigate?.();
           }}
-          className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1 text-[11px] font-bold text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 min-h-[32px]"
+          className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-[13px] font-bold text-red-500 hover:bg-red-50 transition-all duration-300"
         >
-          <LogOut className="h-3.5 w-3.5 opacity-60" />
+          <LogOut className="h-5 w-5" />
           <span>{toGreekUpperCase('Αποσύνδεση')}</span>
         </button>
       </div>
@@ -202,13 +275,13 @@ export default function Sidebar() {
   return (
     <>
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="w-[300px] p-0 border-0 bg-[#1e293b]">
+        <SheetContent side="left" className="w-[280px] p-0 border-0 bg-white">
           <SheetTitle className="sr-only">Μενού πλοήγησης</SheetTitle>
           <NavContent onNavigate={() => setSidebarOpen(false)} />
         </SheetContent>
       </Sheet>
 
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-[240px] lg:flex-col">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-[260px] lg:flex-col">
         <div className="flex flex-col flex-grow">
           <NavContent />
         </div>

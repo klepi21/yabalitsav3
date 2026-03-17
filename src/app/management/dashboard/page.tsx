@@ -542,9 +542,12 @@ export default function DashboardPage() {
              <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
                {toGreekUpperCase('Πίνακας Ελέγχου')}
              </h1>
-             <p className="text-sm font-bold text-zinc-400 uppercase tracking-tight">
-               {toGreekUpperCase('Διαχειριση γηπεδου')} <span className="text-emerald-500">{venue?.name ? toGreekUpperCase(venue.name) : ''}</span>
-             </p>
+             <div className="flex items-center gap-2">
+               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                 {toGreekUpperCase('Διαχειριση γηπεδου')} <span className="text-emerald-600 font-black">{venue?.name ? toGreekUpperCase(venue.name) : ''}</span>
+               </p>
+             </div>
            </div>
         </div>
         
@@ -596,24 +599,31 @@ export default function DashboardPage() {
       {/* Quick Stats */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {[
-          { label: 'Σύνολο Κρατήσεων', value: bookings.length, icon: CalendarDays, color: 'emerald' },
-          { label: 'Live Αγώνες', value: getLiveBookings(), icon: Activity, color: 'emerald' },
-          { label: 'Σημερινές Κρατήσεις', value: getTodaysBookings().length, icon: Target, color: 'emerald' },
-          { label: 'Σύνολο Πελατών', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, icon: Users, color: 'emerald' }
+          { label: 'Σύνολο Κρατήσεων', value: bookings.length, icon: CalendarDays, color: 'emerald', detail: 'ΤΕΛΕΥΤΑΙΕΣ 30 ΗΜΕΡΕΣ' },
+          { label: 'Live Αγώνες', value: getLiveBookings(), icon: Activity, color: 'emerald', detail: 'ΑΥΤΗ ΤΗ ΣΤΙΓΜΗ' },
+          { label: 'Κρατήσεις Σήμερα', value: getTodaysBookings().length, icon: Target, color: 'emerald', detail: 'ΠΡΟΓΡΑΜΜΑ ΗΜΕΡΑΣ' },
+          { label: 'Εγγεγραμμένοι', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, icon: Users, color: 'emerald', detail: 'ΣΥΝΟΛΟ ΠΕΛΑΤΩΝ' }
         ].map((stat, i) => (
-          <Card key={i} className="rounded-xl border border-zinc-100 bg-white shadow-sm overflow-hidden group hover:shadow-md transition-all duration-300">
-            <CardContent className="p-4 relative">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <p className="text-[9px] text-zinc-400 font-bold tracking-wider uppercase">{toGreekUpperCase(stat.label)}</p>
-                  <p className="text-2xl font-black text-zinc-900 tracking-tight group-hover:text-emerald-600 transition-colors uppercase">{stat.value}</p>
-                </div>
-                <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-300 group-hover:bg-emerald-50 group-hover:text-emerald-500 transition-all shadow-inner">
-                  <stat.icon className="h-5 w-5" />
+          <Card key={i} className="rounded-2xl border border-zinc-100 bg-white shadow-sm overflow-hidden group hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-500">
+            <CardContent className="p-6 relative">
+              <div className="flex items-start justify-between">
+                <div className="space-y-3">
+                  <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-inner">
+                    <stat.icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-zinc-400 font-bold tracking-[0.1em] uppercase mb-1">{toGreekUpperCase(stat.label)}</p>
+                    <div className="flex items-baseline gap-2">
+                       <p className="text-3xl font-black text-zinc-900 tracking-tighter uppercase">{stat.value}</p>
+                       <span className="text-[9px] font-black text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded uppercase">Live</span>
+                    </div>
+                    <p className="text-[9px] font-bold text-zinc-300 uppercase mt-2">{toGreekUpperCase(stat.detail)}</p>
+                  </div>
                 </div>
               </div>
-              <div className="absolute bottom-0 right-0 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity">
-                 <stat.icon className="h-24 w-24 translate-x-1/4 translate-y-1/4" />
+              {/* Subtle background decoration */}
+              <div className="absolute -right-6 -bottom-6 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-500">
+                 <stat.icon className="h-32 w-32 rotate-12" />
               </div>
             </CardContent>
           </Card>
@@ -625,18 +635,20 @@ export default function DashboardPage() {
         {/* Recent Bookings - 8/12 width */}
         <div className="lg:col-span-8 space-y-6">
           <Card className="rounded-xl border border-zinc-100 bg-white shadow-sm overflow-hidden">
-            <CardHeader className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-lg bg-zinc-900 flex items-center justify-center text-white shadow-md">
-                  <CalendarDays className="h-4 w-4 text-emerald-400" />
+            <CardHeader className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-zinc-50/50 border-b border-zinc-100">
+              <div className="flex items-center gap-4">
+                <div className="h-11 w-11 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shadow-zinc-200">
+                  <CalendarDays className="h-5 w-5 text-emerald-400" />
                 </div>
                 <div>
-                  <CardTitle className="text-lg font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Σημερινές Κρατήσεις')}</CardTitle>
-                  <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">{toGreekUpperCase('Προγραμμα ημερας')}</p>
+                  <CardTitle className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Πρόγραμμα Ημέρας')}</CardTitle>
+                  <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] mt-0.5">
+                    {new Date().toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase()}
+                  </p>
                 </div>
               </div>
-              <Button variant="outline" className="h-8 px-4 rounded-lg font-bold text-emerald-600 border-zinc-100 bg-zinc-50/50 hover:bg-emerald-600 hover:text-white transition-all text-[10px] uppercase tracking-wider" asChild>
-                <Link href="/management/bookings">{toGreekUpperCase('Προβολη Ολων')}</Link>
+              <Button variant="outline" className="h-10 px-6 rounded-xl font-black text-emerald-600 border-emerald-100 bg-white hover:bg-emerald-600 hover:text-white transition-all text-xs uppercase tracking-widest shadow-sm" asChild>
+                <Link href="/management/bookings">{toGreekUpperCase('Ημερολογιο')}</Link>
               </Button>
             </CardHeader>
             <CardContent className="p-4 pt-1">

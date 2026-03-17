@@ -257,7 +257,7 @@ export default function BookingsPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2 border-b border-zinc-50">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2">
         <div className="flex items-center gap-4">
            <div className="h-12 w-12 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shadow-zinc-200 shrink-0">
              <CalendarDays className="h-6 w-6 text-emerald-400" />
@@ -266,21 +266,24 @@ export default function BookingsPage() {
              <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
                {toGreekUpperCase('Κρατήσεις')}
              </h1>
-             <p className="text-sm font-bold text-zinc-400 uppercase tracking-tight">
-               {toGreekUpperCase('Διαχειριση και προγραμματισμος')}
-             </p>
+             <div className="flex items-center gap-2">
+               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                 {toGreekUpperCase('Διαχειριση και προγραμματισμος')}
+               </p>
+             </div>
            </div>
         </div>
         
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="bg-zinc-100 p-1 rounded-lg border border-zinc-200 flex items-center shadow-inner">
+          <div className="bg-zinc-100/80 p-1 rounded-xl border border-zinc-200/50 flex items-center shadow-inner backdrop-blur-sm">
             <button
               onClick={() => setViewMode('calendar')}
               className={cn(
-                "flex items-center gap-1.5 px-4 py-1.5 rounded-md text-[11px] font-black transition-all active:scale-95",
+                "flex items-center gap-2 px-5 py-2 rounded-lg text-[11px] font-black transition-all active:scale-95",
                 viewMode === 'calendar'
-                  ? "bg-white text-emerald-600 shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-600"
+                  ? "bg-white text-emerald-600 shadow-md shadow-emerald-900/5"
+                  : "text-zinc-400 hover:text-zinc-600 hover:bg-white/50"
               )}
             >
               <CalendarDays className="h-3.5 w-3.5" />
@@ -289,10 +292,10 @@ export default function BookingsPage() {
             <button
               onClick={() => setViewMode('list')}
               className={cn(
-                "flex items-center gap-1.5 px-4 py-1.5 rounded-md text-[11px] font-black transition-all active:scale-95",
+                "flex items-center gap-2 px-5 py-2 rounded-lg text-[11px] font-black transition-all active:scale-95",
                 viewMode === 'list'
-                  ? "bg-white text-emerald-600 shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-600"
+                  ? "bg-white text-emerald-600 shadow-md shadow-emerald-900/5"
+                  : "text-zinc-400 hover:text-zinc-600 hover:bg-white/50"
               )}
             >
               <Users className="h-3.5 w-3.5" />
@@ -329,20 +332,20 @@ export default function BookingsPage() {
       ) : (
         <div className="space-y-8">
           {/* Stats row */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
             {[
-              { label: 'Σύνολο', value: bookings.length, icon: CalendarDays, color: 'emerald' },
+              { label: 'Σύνολο', value: bookings.length, icon: CalendarDays, color: 'zinc' },
               { label: 'Εκκρεμείς', value: pendingCount, icon: Clock, color: 'amber' },
               { label: 'Επιβεβαιωμένες', value: confirmedCount, icon: CheckCircle, color: 'emerald' },
               { label: 'Σήμερα', value: todayCount, icon: Flag, color: 'blue' },
               { label: 'Ακυρωμένες', value: cancelledCount, icon: XCircle, color: 'red' }
             ].map((stat, i) => (
-              <div key={i} className="flex flex-col items-center justify-center text-center p-4 bg-white rounded-xl border border-zinc-100 shadow-sm group hover:shadow-md transition-all duration-300">
-                <div className={`h-9 w-9 rounded-lg bg-zinc-50 flex items-center justify-center mb-2.5 shadow-inner text-zinc-300 group-hover:bg-${stat.color}-50 group-hover:text-${stat.color}-500 transition-all`}>
-                  <stat.icon className="h-4 w-4" />
+              <div key={i} className="flex flex-col items-center justify-center text-center p-6 bg-white rounded-2xl border border-zinc-100 shadow-sm group hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-500">
+                <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center mb-4 transition-all group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-110 shadow-inner text-zinc-400">
+                  <stat.icon className="h-5 w-5" />
                 </div>
-                                <p className="text-xl font-black text-zinc-900 group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{stat.value}</p>
-                <p className="text-[8px] font-bold uppercase tracking-wider text-zinc-400 mt-0.5">{toGreekUpperCase(stat.label)}</p>
+                <p className="text-2xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{stat.value}</p>
+                <p className="text-[9px] font-black uppercase tracking-[0.1em] text-zinc-400 mt-1">{toGreekUpperCase(stat.label)}</p>
               </div>
             ))}
           </div>

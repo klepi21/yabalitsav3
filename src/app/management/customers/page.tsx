@@ -104,26 +104,29 @@ export default function CustomersPage() {
   return (
     <div className="space-y-6">
       {/* Header & New Customer Button */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1 border-b border-zinc-50">
-        <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-zinc-900 text-white shadow-sm">
-            <Users className="h-3.5 w-3.5" />
-          </div>
-          <div>
-            <h1 className="text-xl font-black tracking-tight text-zinc-900 uppercase">
-                {toGreekUpperCase('Πελατολόγιο')}
-            </h1>
-            <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight">
-                {toGreekUpperCase('Διαχειριστείτε τους πελάτες σας και δείτε το ιστορικό τους.')}
-            </p>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-2">
+        <div className="flex items-center gap-4">
+           <div className="h-12 w-12 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shadow-zinc-200 shrink-0">
+             <Users className="h-6 w-6 text-emerald-400" />
+           </div>
+           <div className="space-y-0.5">
+             <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
+               {toGreekUpperCase('Πελατολόγιο')}
+             </h1>
+             <div className="flex items-center gap-2">
+               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                 {toGreekUpperCase('Διαχειριση πελατων και ιστορικο')}
+               </p>
+             </div>
+           </div>
         </div>
         <Button 
           asChild 
-          className="h-9 px-4 rounded-lg bg-zinc-900 border-0 hover:bg-emerald-600 font-black text-[11px] text-white shadow-md transition-all active:scale-95 uppercase tracking-tight"
+          className="h-10 px-6 rounded-xl bg-zinc-900 hover:bg-black text-white font-black shadow-md transition-all active:scale-95 text-[11px]"
         >
           <Link href="/management/customers/new" className="flex items-center gap-2">
-            <Plus className="h-3.5 w-3.5 text-emerald-400" />
+            <Plus className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" />
             {toGreekUpperCase('Νέος Πελάτης')}
           </Link>
         </Button>
@@ -153,27 +156,26 @@ export default function CustomersPage() {
         </div>
       )}
 
-      {/* Stats row & Search row */}
-      <div className="flex flex-col lg:flex-row lg:items-center gap-6">
-        <div className="flex items-center gap-4 bg-white p-1.5 rounded-xl border border-zinc-100 shadow-sm">
-          <div className="flex items-center gap-3 px-4 border-r border-zinc-100">
-            <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
-              <Users className="h-4 w-4 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-lg font-black text-zinc-900 leading-none">{customers.length}</p>
-              <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">Σύνολο</p>
-            </div>
+      {/* Search and Stats - Modern Donezo Style */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="flex items-center gap-4 bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm group hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-500">
+          <div className="h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-inner">
+            <Users className="h-6 w-6" />
           </div>
-          
-          <div className="relative flex-1 min-w-[320px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-300" />
+          <div className="space-y-1">
+            <p className="text-3xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{customers.length}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Σύνολο Πελατών')}</p>
+          </div>
+        </div>
+
+        <div className="md:col-span-1 lg:col-span-3 flex items-center">
+          <div className="relative w-full group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-300 group-focus-within:text-emerald-500 transition-colors" />
             <Input
-              type="text"
               placeholder={toGreekUpperCase('Αναζήτηση με όνομα, email ή τηλέφωνο...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 pl-10 border-0 bg-transparent focus:ring-0 text-zinc-900 font-bold text-sm placeholder:text-zinc-300 placeholder:font-normal uppercase"
+              className="h-14 pl-12 pr-4 bg-white border-zinc-100 rounded-2xl shadow-sm focus:ring-8 focus:ring-emerald-500/5 font-bold text-[13px] placeholder:text-zinc-300 w-full transition-all uppercase tracking-tight outline-none"
             />
           </div>
         </div>

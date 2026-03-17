@@ -140,18 +140,24 @@ export default function GuidesPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 space-y-5">
-      <div className="flex items-center gap-2.5 pb-1 border-b border-zinc-50">
-        <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-zinc-900 text-white shadow-sm">
-          <BookOpen className="h-3.5 w-3.5" />
-        </div>
-        <div>
-          <h1 className="text-xl font-black tracking-tight text-zinc-900 uppercase">
-            {toGreekUpperCase('Οδηγίες Χρήσης')}
-          </h1>
-          <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight">
-            {toGreekUpperCase('Αναλυτικός οδηγός για όλες τις λειτουργίες')}
-          </p>
+    <div className="space-y-10 pb-20">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-2">
+        <div className="flex items-center gap-4">
+           <div className="h-12 w-12 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shadow-zinc-200 shrink-0">
+             <BookOpen className="h-6 w-6 text-emerald-400" />
+           </div>
+           <div className="space-y-0.5">
+             <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
+               {toGreekUpperCase('Οδηγίες Χρήσης')}
+             </h1>
+             <div className="flex items-center gap-2">
+               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                 {toGreekUpperCase('Οδηγοι και υποστηριξη χρησης')}
+               </p>
+             </div>
+           </div>
         </div>
       </div>
 

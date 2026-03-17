@@ -161,63 +161,70 @@ export default function TrainingListPage() {
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 pb-1 border-b border-zinc-50">
-        <div className="flex items-center gap-3.5">
-          <div className="h-10 w-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-md shrink-0">
-            <Dumbbell className="h-5 w-5" />
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 pb-2">
+        <div className="flex items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shadow-zinc-200 shrink-0">
+            <Dumbbell className="h-6 w-6 text-emerald-400" />
           </div>
-          <div>
-            <h1 className="text-xl font-black tracking-tight text-zinc-900 mb-0.5 uppercase">{toGreekUpperCase('Προπονήσεις')}</h1>
-            <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight">{toGreekUpperCase('Διαχειριστείτε το πρόγραμμα και το απουσιολόγιο')}</p>
+          <div className="space-y-0.5">
+            <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
+              {toGreekUpperCase('Προπονήσεις')}
+            </h1>
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                {toGreekUpperCase('Διαχειριση προγραμματος & απουσιολογιο')}
+              </p>
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-2.5">
-          <Button variant="outline" asChild className="h-9 px-4 rounded-lg border-zinc-100 font-bold text-zinc-600 hover:bg-zinc-50 text-[10px] shadow-sm">
+          <Button variant="outline" asChild className="h-10 px-5 rounded-xl border-zinc-200 font-bold text-zinc-600 hover:bg-zinc-50 text-[11px] shadow-sm transition-all active:scale-95">
             <Link href="/management/academy/training/stats" className="flex items-center gap-2">
-              <BarChart3 className="h-3.5 w-3.5" />
+              <BarChart3 className="h-4 w-4 text-emerald-500" />
               {toGreekUpperCase('Στατιστικά')}
             </Link>
           </Button>
-          <Button asChild className="h-9 px-6 rounded-lg bg-zinc-900 hover:bg-black text-white font-bold shadow-md transition-all active:scale-95 text-[10px]">
+          <Button asChild className="h-10 px-6 rounded-xl bg-zinc-900 hover:bg-black text-white font-black shadow-md transition-all active:scale-95 text-[11px]">
             <Link href="/management/academy/training/new" className="flex items-center gap-2">
-              <Plus className="h-3.5 w-3.5 text-emerald-400" />
+              <Plus className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" />
               {toGreekUpperCase('Νέα Προπόνηση')}
             </Link>
           </Button>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row lg:items-stretch justify-between gap-3">
-        <div className="flex items-center gap-2 bg-white p-1.5 rounded-xl border border-zinc-100 shadow-sm flex-1 lg:max-w-xs">
+      <div className="flex flex-col lg:flex-row lg:items-stretch justify-between gap-6">
+        <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-zinc-100 shadow-sm flex-1 lg:max-w-xs">
           <button 
             onClick={() => navigateMonth(-1)} 
-            className="h-9 w-9 rounded-lg flex items-center justify-center hover:bg-zinc-50 text-zinc-400 hover:text-zinc-900 transition-all border border-transparent shadow-sm active:scale-95 touch-target"
+            className="h-10 w-10 rounded-xl flex items-center justify-center hover:bg-zinc-50 text-zinc-400 hover:text-zinc-900 transition-all border border-zinc-100/50 shadow-sm active:scale-95 touch-target"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
           <div className="px-2 flex flex-col items-center flex-1">
-            <span className="text-[8px] font-bold text-zinc-400 uppercase tracking-tighter leading-none mb-0.5">ΜΗΝΑΣ</span>
-            <span className="text-base font-black text-zinc-900 capitalize">{monthLabel}</span>
+            <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] leading-none mb-1">ΜΗΝΑΣ</span>
+            <span className="text-lg font-black text-zinc-900 capitalize tracking-tight">{monthLabel}</span>
           </div>
           <button 
             onClick={() => navigateMonth(1)} 
-            className="h-9 w-9 rounded-lg flex items-center justify-center hover:bg-zinc-50 text-zinc-400 hover:text-zinc-900 transition-all border border-transparent shadow-sm active:scale-95 touch-target"
+            className="h-10 w-10 rounded-xl flex items-center justify-center hover:bg-zinc-50 text-zinc-400 hover:text-zinc-900 transition-all border border-zinc-100/50 shadow-sm active:scale-95 touch-target"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
         </div>
-        <div className="grid grid-cols-3 gap-3 lg:w-[380px]">
-          <div className="bg-white p-3 rounded-xl border border-zinc-100 shadow-sm flex flex-col items-center justify-center text-center gap-1">
-            <p className="text-lg font-black text-zinc-900 leading-none">{stats.total}</p>
-            <p className="text-[8px] font-bold uppercase tracking-wider text-zinc-400">{toGreekUpperCase('Σύνολο')}</p>
+        <div className="grid grid-cols-3 gap-6 lg:w-[450px]">
+          <div className="bg-white p-4 rounded-2xl border border-zinc-100 shadow-sm flex flex-col items-center justify-center text-center gap-1 group hover:shadow-md transition-all duration-300">
+            <p className="text-2xl font-black text-zinc-900 leading-none group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{stats.total}</p>
+            <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Σύνολο')}</p>
           </div>
-          <div className="bg-white p-3 rounded-xl border border-zinc-100 shadow-sm flex flex-col items-center justify-center text-center gap-1">
-            <p className="text-lg font-black text-zinc-900 leading-none">{stats.completed}</p>
-            <p className="text-[8px] font-bold uppercase tracking-wider text-emerald-600">{toGreekUpperCase('Ολοκληρ')}</p>
+          <div className="bg-white p-4 rounded-2xl border border-zinc-100 shadow-sm flex flex-col items-center justify-center text-center gap-1 group hover:shadow-md transition-all duration-300">
+            <p className="text-2xl font-black text-zinc-900 leading-none group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{stats.completed}</p>
+            <p className="text-[9px] font-black uppercase tracking-widest text-emerald-600">{toGreekUpperCase('Ολοκληρ')}</p>
           </div>
-          <div className="bg-white p-3 rounded-xl border border-zinc-100 shadow-sm flex flex-col items-center justify-center text-center gap-1">
-            <p className="text-lg font-black text-zinc-900 leading-none">{stats.scheduled}</p>
-            <p className="text-[8px] font-bold uppercase tracking-wider text-blue-600">{toGreekUpperCase('Προγραμμ')}</p>
+          <div className="bg-white p-4 rounded-2xl border border-zinc-100 shadow-sm flex flex-col items-center justify-center text-center gap-1 group hover:shadow-md transition-all duration-300">
+            <p className="text-2xl font-black text-zinc-900 leading-none group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{stats.scheduled}</p>
+            <p className="text-[9px] font-black uppercase tracking-widest text-blue-600">{toGreekUpperCase('Προγραμμ')}</p>
           </div>
         </div>
       </div>

@@ -317,19 +317,22 @@ export default function SettingsPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1 border-b border-zinc-50">
-        <div className="flex items-center gap-2.5">
-          <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-zinc-900 text-white shadow-sm">
-            <Settings className="h-4 w-4" />
-          </div>
-          <div>
-            <h1 className="text-xl font-black tracking-tight text-zinc-900 uppercase">
-                {toGreekUpperCase('Ρυθμίσεις')}
-            </h1>
-            <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight">
-                {toGreekUpperCase('Διαμορφώστε τις παραμέτρους του συστήματός σας.')}
-            </p>
-          </div>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-4 border-b border-zinc-50">
+        <div className="flex items-center gap-4">
+           <div className="h-12 w-12 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shadow-zinc-200 shrink-0">
+             <Settings className="h-6 w-6 text-emerald-400" />
+           </div>
+           <div className="space-y-0.5">
+             <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
+               {toGreekUpperCase('Ρυθμίσεις')}
+             </h1>
+             <div className="flex items-center gap-2">
+               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                 {toGreekUpperCase('Διαμορφωση παραμετρων συστηματος')}
+               </p>
+             </div>
+           </div>
         </div>
 
         {/* Subscription Status Badge */}
@@ -343,30 +346,30 @@ export default function SettingsPage() {
 
             return (
               <div className={cn(
-                "flex items-center gap-4 px-5 py-3 rounded-xl border shadow-sm font-bold transition-all",
-                isExpired ? "bg-red-50 border-red-100 text-red-600" :
-                isWarning ? "bg-amber-50 border-amber-100 text-amber-600" :
-                "bg-emerald-50 border-emerald-100 text-emerald-600"
+                "flex items-center gap-4 px-5 py-3 rounded-2xl border shadow-sm font-bold transition-all bg-white",
+                isExpired ? "border-red-100 text-red-600 shadow-red-900/5" :
+                isWarning ? "border-amber-100 text-amber-600 shadow-amber-900/5" :
+                "border-emerald-100 text-emerald-600 shadow-emerald-900/5"
               )}>
                 <div className={cn(
-                  "h-2.5 w-2.5 rounded-full",
+                  "h-2 w-2 rounded-full",
                   isExpired ? "bg-red-500" :
                   isWarning ? "bg-amber-500 animate-pulse" :
                   "bg-emerald-500"
                 )} />
                 <div className="flex flex-col">
-                  <span className="text-[9px] uppercase tracking-widest opacity-60">Τρέχον Πλάνο</span>
-                  <span className="text-xs">{planName} Plan • {daysRemaining} ημέρες</span>
+                  <span className="text-[9px] uppercase tracking-widest opacity-40 font-black">Πλάνο</span>
+                  <span className="text-xs font-black uppercase tracking-tight">{planName} • {daysRemaining} ημέρες</span>
                 </div>
               </div>
             );
           } else {
             return (
-              <div className="flex items-center gap-4 px-5 py-3 rounded-xl border border-zinc-100 bg-white text-zinc-400 shadow-sm font-bold">
-                <div className="h-2.5 w-2.5 rounded-full bg-zinc-200" />
+              <div className="flex items-center gap-4 px-5 py-3 rounded-2xl border border-zinc-100 bg-white text-zinc-400 shadow-sm font-bold">
+                <div className="h-2 w-2 rounded-full bg-zinc-200" />
                 <div className="flex flex-col">
-                  <span className="text-[9px] uppercase tracking-widest opacity-60">Πλάνο</span>
-                  <span className="text-xs">{venue.plan === 'trial' ? 'Δωρεάν Trial' : 'Χωρίς Πλάνο'}</span>
+                  <span className="text-[9px] uppercase tracking-widest opacity-40 font-black">Πλάνο</span>
+                  <span className="text-xs font-black uppercase tracking-tight">{venue.plan === 'trial' ? 'Δωρεάν Trial' : 'Χωρίς Πλάνο'}</span>
                 </div>
               </div>
             );

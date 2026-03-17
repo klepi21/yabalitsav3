@@ -2,12 +2,12 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { HelpCircle, Zap, Sparkles, ArrowUpRight, Bell, CheckCircle2, CalendarDays } from 'lucide-react';
+import { HelpCircle, Zap, Sparkles, ArrowUpRight, Bell, CheckCircle2, CalendarDays, Search, MessageSquare, User } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar from './Sidebar';
 import { Badge } from '@/components/ui/badge';
-import { toGreekUpperCase } from '@/lib/utils';
+import { toGreekUpperCase, cn } from '@/lib/utils';
 
 interface VenueData {
   id: string;
@@ -127,61 +127,67 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-zinc-50/50">
       <Sidebar />
-      <div className="lg:pl-[240px]">
+      <div className="lg:pl-[260px]">
         <main className="min-h-screen">
-          {/* Top bar */}
-          <div className="sticky top-0 z-20 bg-background/90 backdrop-blur-md border-b border-zinc-100/50">
-            <div className="px-5 py-2 flex items-center justify-between mx-auto">
-              {/* Help/Guides */}
-              <Link
-                href="/management/guides"
-                className="inline-flex items-center gap-2 text-xs font-black text-zinc-500 hover:text-emerald-600 transition-all group uppercase tracking-tight"
-              >
-                <div className="p-1.5 rounded-lg bg-zinc-50 group-hover:bg-emerald-50 transition-colors">
-                  <HelpCircle className="h-4 w-4" />
+          {/* Top bar - Modern Donezo Style */}
+          <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-zinc-100/80">
+            <div className="px-6 py-4 flex items-center justify-between gap-8 mx-auto">
+              
+              {/* Modern Search Bar */}
+              <div className="flex-1 max-w-md relative group">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-600 transition-colors">
+                  <Search className="h-4 w-4" />
                 </div>
-                {toGreekUpperCase('Οδηγίες Χρήσης')}
-              </Link>
+                <input 
+                  type="text" 
+                  placeholder={toGreekUpperCase('Αναζήτηση...')}
+                  className="w-full h-11 pl-11 pr-4 rounded-2xl bg-zinc-100/50 border-transparent focus:bg-white focus:border-emerald-100 focus:ring-4 focus:ring-emerald-500/5 transition-all text-[13px] font-bold placeholder:text-zinc-400 outline-none"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-1 rounded-lg bg-zinc-200/50 text-zinc-400 text-[10px] font-black border border-zinc-200">
+                  ⌘ F
+                </div>
+              </div>
 
-              {/* Right side: Notifications + Plan Status */}
-              <div className="flex items-center gap-6">
-                {/* Notification Bell */}
+              {/* Right Side Actions */}
+              <div className="flex items-center gap-2">
+                {/* Messages */}
+                <button className="p-2.5 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all border border-transparent hover:border-zinc-100 relative">
+                  <MessageSquare className="h-5 w-5" />
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white" />
+                </button>
+
+                {/* Notifications */}
                 <div className="relative notification-bell">
                   <button
                     onClick={() => setShowNotifications(!showNotifications)}
-                    className="relative p-2 text-zinc-400 hover:text-zinc-600 transition-all rounded-lg hover:bg-zinc-50 touch-target"
+                    className="p-2.5 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all border border-transparent hover:border-zinc-100 relative"
                   >
-                    <Bell className="h-4 w-4" />
+                    <Bell className="h-5 w-5" />
                     {pendingBookings.length > 0 && (
-                      <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-black ring-2 ring-white">
-                        {pendingBookings.length}
-                      </span>
+                      <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
                     )}
                   </button>
 
                   {showNotifications && (
-                    <div className="absolute right-0 top-14 w-80 bg-white border border-zinc-200 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
+                    <div className="absolute right-0 top-14 w-80 bg-white border border-zinc-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
                       <div className="px-5 py-4 border-b border-zinc-100 bg-zinc-50/50">
-                        <h3 className="text-[15px] font-bold text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ειδοποιήσεις')}</h3>
-                        <p className="text-xs text-zinc-500 mt-0.5">Εκκρεμείς κρατήσεις που χρειάζονται έγκριση</p>
+                        <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ειδοποιήσεις')}</h3>
+                        <p className="text-[10px] font-bold text-zinc-400 mt-0.5">ΕΚΚΡΕΜΕΙΣ ΚΡΑΤΗΣΕΙΣ</p>
                       </div>
 
                       <div className="max-h-96 overflow-y-auto">
                         {pendingBookings.length === 0 ? (
-                          <div className="p-8 text-center">
-                            <div className="h-12 w-12 bg-emerald-50 rounded-full flex items-center justify-center mx-auto">
-                              <CheckCircle2 className="h-6 w-6 text-emerald-500" />
-                            </div>
-                            <p className="mt-4 text-zinc-900 font-medium text-[15px]">Όλα εντάξει!</p>
-                            <p className="text-zinc-500 text-xs mt-1">Δεν υπάρχουν νέες ειδοποιήσεις.</p>
+                          <div className="p-8 text-center text-zinc-300">
+                            <Bell className="h-8 w-8 mx-auto mb-2 opacity-20" />
+                            <p className="text-xs font-bold uppercase tracking-tight">ΟΛΑ ΕΝΤΑΞΕΙ!</p>
                           </div>
                         ) : (
                           pendingBookings.map((booking) => (
                             <div
                               key={booking.id}
-                              className="px-5 py-4 border-b border-zinc-50 hover:bg-zinc-50 cursor-pointer transition-colors"
+                              className="px-5 py-3 border-b border-zinc-50 hover:bg-zinc-50 cursor-pointer transition-colors"
                               onClick={() => {
                                 setShowNotifications(false);
                                 router.push(`/management/bookings/${booking.id}`);
@@ -189,123 +195,69 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                             >
                               <div className="flex items-start justify-between gap-3">
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-[14px] font-semibold text-zinc-900 truncate">
-                                    {booking.userName || booking.userEmail || 'Άγνωστος'}
+                                  <p className="text-[13px] font-bold text-zinc-900 truncate">
+                                    {booking.userName || 'Άγνωστος'}
                                   </p>
-                                  <p className="text-xs text-zinc-500 mt-1 flex items-center gap-1.5">
-                                    <CalendarDays className="h-3 w-3" />
-                                    {new Date(booking.startTime).toLocaleDateString('el-GR')} — {new Date(booking.startTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })}
+                                  <p className="text-[10px] text-zinc-400 font-bold mt-1 uppercase tracking-tight">
+                                    {new Date(booking.startTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })}
                                   </p>
                                 </div>
-                                <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700 text-[10px] font-bold uppercase tracking-tight shrink-0">
-                                  Εκκρεμεί
+                                <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700 text-[9px] font-black uppercase">
+                                  NEW
                                 </Badge>
                               </div>
                             </div>
                           ))
                         )}
                       </div>
-
-                      {pendingBookings.length > 0 && (
-                        <div className="px-5 py-3 border-t border-zinc-100 text-center bg-zinc-50/30">
-                          <Link
-                            href="/management/bookings"
-                            onClick={() => setShowNotifications(false)}
-                            className="text-[13px] font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
-                          >
-                            Προβολή όλων των κρατήσεων
-                          </Link>
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
 
-                {/* Separator */}
-                <div className="h-5 w-px bg-zinc-100" />
-
-                {/* Plan Status */}
+                {/* Plan Indicator */}
                 {venueData && (
-                  <div className="flex items-center gap-4">
-                    {venueData.plan === 'subscription' ? (
-                      <>
-                        {(venueData.daysRemaining ?? 0) > 7 ? (
-                          <div className="flex items-center gap-3 bg-zinc-50 border border-zinc-200 px-4 py-2 rounded-xl">
-                            <div className="h-2.5 w-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/10" />
-                            <div className="flex flex-col">
-                              <span className="text-[13px] font-bold text-zinc-900">
-                                {venueData.planType || 'Basic'} Plan
-                              </span>
-                              <span className="text-[11px] font-medium text-zinc-500">
-                                {venueData.daysRemaining} ημέρες απομένουν
-                              </span>
-                            </div>
-                          </div>
-                        ) : (venueData.daysRemaining ?? 0) > 0 ? (
-                          <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 px-4 py-2 rounded-xl">
-                            <div className="h-2.5 w-2.5 rounded-full bg-amber-500 animate-pulse ring-4 ring-amber-500/10" />
-                            <div className="flex flex-col">
-                              <span className="text-[13px] font-bold text-amber-900 uppercase tracking-tight">
-                                {toGreekUpperCase('Λήγει Σύντομα')}
-                              </span>
-                              <span className="text-[11px] font-medium text-amber-700">
-                                {venueData.daysRemaining} ημέρες
-                              </span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-3 bg-red-50 border border-red-200 px-4 py-2 rounded-xl">
-                            <div className="h-2.5 w-2.5 rounded-full bg-red-500 ring-4 ring-red-500/10" />
-                            <span className="text-[13px] font-bold text-red-700 uppercase tracking-tight">
-                              {toGreekUpperCase('Ληγμένο Πλάνο')}
-                            </span>
-                          </div>
-                        )}
+                  <button 
+                    onClick={() => router.push('/management/settings')}
+                    className={cn(
+                      "hidden xl:flex items-center gap-2 px-3 py-2 rounded-xl border font-bold text-[11px] transition-all active:scale-95",
+                      (venueData.daysRemaining ?? 0) <= 7 
+                        ? "bg-amber-50 border-amber-100 text-amber-600 shadow-sm shadow-amber-100" 
+                        : "bg-emerald-50 border-emerald-100 text-emerald-600 shadow-sm shadow-emerald-100"
+                    )}
+                  >
+                    <Zap className={cn("h-3.5 w-3.5", (venueData.daysRemaining ?? 0) <= 7 ? "text-amber-500" : "text-emerald-500")} />
+                    <span className="uppercase tracking-tight">
+                      {(venueData.daysRemaining ?? 0) <= 7 ? toGreekUpperCase('Ανανέωση') : `${venueData.planType || 'BASIC'}`}
+                    </span>
+                  </button>
+                )}
 
-                        {(venueData.daysRemaining || 0) <= 7 ? (
-                          <Link
-                            href="/management/settings/renewal"
-                            className="inline-flex items-center gap-2 text-[13px] font-bold text-white bg-zinc-900 hover:bg-zinc-800 px-5 py-2.5 rounded-xl transition-all shadow-sm hover:shadow-md active:scale-95"
-                          >
-                            <Zap className="h-4 w-4" />
-                            {toGreekUpperCase('Ανανέωση Τώρα')}
-                          </Link>
-                        ) : (
-                          <Link
-                            href="/management/settings/renewal"
-                            className="inline-flex items-center gap-2 text-[13px] font-bold text-zinc-700 hover:text-zinc-900 bg-zinc-100 hover:bg-zinc-200 px-5 py-2.5 rounded-xl transition-all active:scale-95"
-                          >
-                            <ArrowUpRight className="h-4 w-4" />
-                            Διαχείριση
-                          </Link>
-                        )}
-                      </>
+                {/* Vertical Divider */}
+                <div className="w-px h-8 bg-zinc-100 mx-2" />
+
+                {/* User Profile Section */}
+                <div className="flex items-center gap-3 pl-2 group cursor-pointer hover:bg-zinc-50 p-1.5 rounded-2xl transition-all">
+                  <div className="flex flex-col text-right hidden sm:flex">
+                    <span className="text-[13px] font-black text-zinc-900 leading-none">
+                      {venueOwner?.name || 'User'}
+                    </span>
+                    <span className="text-[10px] font-bold text-zinc-400 mt-1 truncate max-w-[120px]">
+                      {user?.email}
+                    </span>
+                  </div>
+                  <div className="h-10 w-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
+                    {user?.photoURL ? (
+                      <img src={user.photoURL} alt="Avatar" className="h-full w-full object-cover" />
                     ) : (
-                      <div className="flex items-center gap-3">
-                        <div className="flex flex-col bg-zinc-50 border border-zinc-100 px-3 py-1.5 rounded-lg">
-                          <div className="flex items-center gap-2">
-                            <div className="h-2 w-2 rounded-full bg-zinc-400" />
-                              <span className="text-[11px] font-black text-zinc-900 uppercase tracking-tight">
-                                {venueData.plan === 'trial' ? toGreekUpperCase('Δωρεάν Δοκιμή') : toGreekUpperCase('Χωρίς Πλάνο')}
-                              </span>
-                          </div>
-                        </div>
-                        <Link
-                          href="/management/settings/renewal"
-                          className="inline-flex items-center gap-2 text-[11px] font-black text-white bg-zinc-900 hover:bg-black px-4 py-2 rounded-lg transition-all shadow-md active:scale-95 uppercase"
-                        >
-                          <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-                          {toGreekUpperCase('Ενεργοποίηση')}
-                        </Link>
-                      </div>
+                      <User className="h-5 w-5 text-emerald-600" />
                     )}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="max-w-[1600px] mx-auto p-4 sm:p-5">
+          <div className="max-w-[1600px] mx-auto p-4 sm:p-6">
             {children}
           </div>
         </main>
