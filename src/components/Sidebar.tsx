@@ -20,6 +20,9 @@ import {
   ChevronDown,
   ChevronRight,
   Menu,
+  Smartphone,
+  Sparkles,
+  ArrowUpRight,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
@@ -79,22 +82,52 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   return (
-    <div className="flex h-full flex-col bg-[#1e293b]">
+    <div className="flex h-full flex-col bg-white border-r border-zinc-100">
       {/* Logo */}
-      <div className="flex h-[72px] items-center px-6 border-b border-white/[0.04]">
+      <div className="flex h-[88px] items-center px-10">
         <Image
           src="/yabalitsalogo.png"
           alt="Yabalitsa"
-          width={140}
-          height={40}
-          className="h-9 w-auto brightness-0 invert opacity-100"
+          width={180}
+          height={60}
+          className="h-10 w-auto"
         />
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 overflow-y-auto space-y-1">
-        {navigation.map((item) => {
-          const isActive = item.href ? pathname === item.href || pathname.startsWith(item.href + '/') : false;
+      <div className="flex-1 px-6 py-4 overflow-y-auto space-y-8">
+        {/* Menu Section */}
+        <div className="space-y-2">
+            <p className="px-4 text-[11px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4">Menu</p>
+            <div className="space-y-1">
+                {navigation.slice(0, 4).map((item) => {
+                    const isActive = item.href ? pathname === item.href || pathname.startsWith(item.href + '/') : false;
+                    const Icon = item.icon;
+                    return (
+                        <Link
+                            key={item.name}
+                            href={item.href!}
+                            onClick={onNavigate}
+                            className={cn(
+                                'group relative flex items-center gap-4 rounded-2xl px-5 py-4 text-[15px] font-black transition-all duration-300',
+                                isActive
+                                    ? 'bg-emerald-50 text-emerald-600'
+                                    : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                            )}
+                        >
+                            {isActive && (
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-emerald-600 rounded-r-full" />
+                            )}
+                            <Icon className={cn("h-6 w-6", isActive ? "text-emerald-600" : "text-zinc-400 group-hover:text-zinc-900")} />
+                            <span>{item.name}</span>
+                        </Link>
+                    )
+                })}
+            </div>
+        </div>
+
+        {/* Categories / Sections */}
+        {navigation.slice(4).map((item) => {
           const hasChildren = !!item.children;
           const isExpanded = expandedMenus.includes(item.name) || isChildActive(item);
           const isParentActive = isChildActive(item);
@@ -102,95 +135,95 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
           if (hasChildren) {
             return (
-              <div key={item.name} className="py-0.5">
-                <button
-                  onClick={() => toggleMenu(item.name)}
-                  className={cn(
-                    'flex w-full items-center justify-between rounded-xl px-5 py-4 text-[16px] font-bold transition-all duration-200 min-h-[56px]',
-                    isParentActive
-                      ? 'bg-white/10 text-white shadow-sm'
-                      : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'
-                  )}
-                >
-                  <div className="flex items-center gap-4">
-                    <Icon className={cn("h-5 w-5 transition-opacity", isParentActive ? "opacity-100" : "opacity-60")} />
-                    <span>{item.name}</span>
-                  </div>
-                  {isExpanded ? (
-                    <ChevronDown className="h-4 w-4 opacity-40" />
-                  ) : (
-                    <ChevronRight className="h-4 w-4 opacity-40" />
-                  )}
-                </button>
-                {isExpanded && (
-                  <div className="mt-1 ml-6 space-y-1 border-l-2 border-white/5 pl-4">
-                    {item.children?.map((child, _idx, siblings) => {
-                      const otherSiblingPaths = siblings.filter(s => s.href !== child.href).map(s => s.href);
-                      const isChildItemActive = pathname === child.href || (
-                        pathname.startsWith(child.href) &&
-                        !otherSiblingPaths.some(sp => pathname.startsWith(sp))
-                      );
-                      const ChildIcon = child.icon;
-                      return (
-                        <Link
-                          key={child.name}
-                          href={child.href}
-                          onClick={onNavigate}
-                          className={cn(
-                            'flex items-center gap-4 rounded-lg px-5 py-3 text-[16px] font-medium transition-colors min-h-[48px]',
-                            isChildItemActive
-                              ? 'text-emerald-400 font-bold'
-                              : 'text-slate-400 hover:text-slate-100'
-                          )}
-                        >
-                          <ChildIcon className={cn("h-[18px] w-[18px]", isChildItemActive ? "opacity-100" : "opacity-50")} />
-                          <span>{child.name}</span>
-                        </Link>
-                      );
+              <div key={item.name} className="space-y-2">
+                <p className="px-4 text-[11px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4">{item.name}</p>
+                <div className="space-y-1">
+                    {item.children?.map((child) => {
+                        const isChildItemActive = pathname === child.href;
+                        const ChildIcon = child.icon;
+                        return (
+                            <Link
+                                key={child.name}
+                                href={child.href}
+                                onClick={onNavigate}
+                                className={cn(
+                                    'group relative flex items-center gap-4 rounded-2xl px-5 py-4 text-[15px] font-black transition-all duration-300',
+                                    isChildItemActive
+                                        ? 'bg-emerald-50 text-emerald-600'
+                                        : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                                )}
+                            >
+                                {isChildItemActive && (
+                                    <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-emerald-600 rounded-r-full" />
+                                )}
+                                <ChildIcon className={cn("h-6 w-6", isChildItemActive ? "text-emerald-600" : "text-zinc-400 group-hover:text-zinc-900")} />
+                                <span>{child.name}</span>
+                            </Link>
+                        );
                     })}
-                  </div>
-                )}
+                </div>
               </div>
             );
           }
 
           return (
-            <Link
-              key={item.name}
-              href={item.href!}
-              onClick={onNavigate}
-              className={cn(
-                'flex items-center gap-4 rounded-xl px-5 py-4 text-[16px] font-bold transition-all duration-200 min-h-[56px]',
-                isActive
-                  ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/40 scale-[1.02]'
-                  : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'
-              )}
-            >
-              <Icon className={cn("h-5 w-5 transition-opacity", isActive ? "opacity-100" : "opacity-60")} />
-              <span>{item.name}</span>
-            </Link>
+            <div key={item.name} className="space-y-2">
+                 <p className="px-4 text-[11px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-4">General</p>
+                 <Link
+                    href={item.href!}
+                    onClick={onNavigate}
+                    className={cn(
+                        'group relative flex items-center gap-4 rounded-2xl px-5 py-4 text-[15px] font-black transition-all duration-300',
+                        pathname === item.href
+                            ? 'bg-emerald-50 text-emerald-600'
+                            : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                    )}
+                >
+                    {pathname === item.href && (
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 h-8 w-1.5 bg-emerald-600 rounded-r-full" />
+                    )}
+                    <Icon className={cn("h-6 w-6", pathname === item.href ? "text-emerald-600" : "text-zinc-400 group-hover:text-zinc-900")} />
+                    <span>{item.name}</span>
+                </Link>
+            </div>
           );
         })}
-      </nav>
+      </div>
 
-      {/* Footer — venue name + logout */}
-      <div className="border-t border-white/[0.04] px-4 py-6 space-y-3">
-        {venueOwner?.name && (
-          <div className="px-4 pb-2">
-            <p className="text-[12px] font-bold text-slate-500 uppercase tracking-widest">Λογαριασμός</p>
-            <p className="text-[15px] text-white font-semibold truncate mt-1">{venueOwner.name}</p>
+      {/* Mobile App Promo Card */}
+      <div className="px-6 pb-6">
+          <div className="relative overflow-hidden rounded-[2.5rem] bg-zinc-900 p-8 text-white group cursor-pointer shadow-2xl">
+              <div className="relative z-10 space-y-4">
+                  <div className="h-10 w-10 bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-md">
+                      <Smartphone className="h-6 w-6 text-emerald-400" />
+                  </div>
+                  <h4 className="text-xl font-black leading-tight">
+                        {toGreekUpperCase('Κατεβάστε το Mobile App')}
+                  </h4>
+                  <button className="flex items-center gap-2 px-6 py-3 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-sm font-black transition-all active:scale-95 group-hover:shadow-lg group-hover:shadow-emerald-900/40">
+                      {toGreekUpperCase('Download')}
+                      <ArrowUpRight className="h-4 w-4" />
+                  </button>
+              </div>
+              
+              {/* Decorative elements */}
+              <div className="absolute -right-4 -bottom-4 h-32 w-32 bg-emerald-600/20 rounded-full blur-3xl transition-transform group-hover:scale-150" />
+              <div className="absolute -top-8 -left-8 h-24 w-24 bg-emerald-400/10 rounded-full blur-2xl" />
           </div>
-        )}
-        <button
-          onClick={() => {
-            signOut();
-            onNavigate?.();
-          }}
-          className="flex w-full items-center gap-4 rounded-xl px-5 py-4 text-[16px] font-bold text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 min-h-[56px]"
-        >
-          <LogOut className="h-5 w-5 opacity-60" />
-          <span>{toGreekUpperCase('Αποσύνδεση')}</span>
-        </button>
+      </div>
+
+      {/* Footer / Logout */}
+      <div className="px-6 py-6 border-t border-zinc-50">
+          <button
+            onClick={() => {
+                signOut();
+                onNavigate?.();
+            }}
+            className="flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-[15px] font-black text-zinc-400 hover:bg-red-50 hover:text-red-600 transition-all duration-300"
+          >
+            <LogOut className="h-6 w-6 opacity-60" />
+            <span>{toGreekUpperCase('Αποσύνδεση')}</span>
+          </button>
       </div>
     </div>
   );
@@ -202,13 +235,13 @@ export default function Sidebar() {
   return (
     <>
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="w-[300px] p-0 border-0 bg-[#1e293b]">
+        <SheetContent side="left" className="w-[320px] p-0 border-0 bg-white">
           <SheetTitle className="sr-only">Μενού πλοήγησης</SheetTitle>
           <NavContent onNavigate={() => setSidebarOpen(false)} />
         </SheetContent>
       </Sheet>
 
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-[280px] lg:flex-col">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-[320px] lg:flex-col">
         <div className="flex flex-col flex-grow">
           <NavContent />
         </div>
