@@ -620,12 +620,12 @@ export default function DashboardPage() {
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'ΣΥΝΟΛΟ ΚΡΑΤΗΣΕΩΝ', value: bookings.length, detail: 'ΤΕΛΕΥΤΑΙΕΣ 30 ΗΜΕΡΕΣ', sparkline: "M0 30 Q10 25 20 28 T40 20 T60 25 T80 15 T100 22" },
-          { label: 'LIVE ΑΓΩΝΕΣ', value: getLiveBookings(), detail: 'ΑΥΤΗ ΤΗ ΣΤΙΓΜΗ', sparkline: "M0 25 Q15 25 30 20 T60 28 T90 22 T120 25" },
-          { label: 'Κρατήσεις Σήμερα', value: getTodaysBookings().length, detail: 'ΠΡΟΓΡΑΜΜΑ ΗΜΕΡΑΣ', sparkline: "M0 28 Q20 28 40 22 T80 25 T120 18 T160 24" },
-          { label: 'ΣΥΝΟΛΟ ΠΕΛΑΤΩΝ', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, detail: 'ΣΥΝΟΛΟ ΠΕΛΑΤΩΝ', sparkline: "M0 22 Q25 22 50 28 T100 20 T150 25 T200 15" }
+          { label: 'ΣΥΝΟΛΟ ΚΡΑΤΗΣΕΩΝ', value: bookings.length, detail: 'ΤΕΛΕΥΤΑΙΕΣ 30 ΗΜΕΡΕΣ', sparkline: "M0 30 Q10 25 20 28 T40 20 T60 25 T80 15 T100 22", color: 'bg-emerald-50/50' },
+          { label: 'LIVE ΑΓΩΝΕΣ', value: getLiveBookings(), detail: 'ΑΥΤΗ ΤΗ ΣΤΙΓΜΗ', sparkline: "M0 25 Q15 25 30 20 T60 28 T90 22 T120 25", color: 'bg-blue-50/50' },
+          { label: 'Κρατήσεις Σήμερα', value: getTodaysBookings().length, detail: 'ΠΡΟΓΡΑΜΜΑ ΗΜΕΡΑΣ', sparkline: "M0 28 Q20 28 40 22 T80 25 T120 18 T160 24", color: 'bg-amber-50/50' },
+          { label: 'ΣΥΝΟΛΟ ΠΕΛΑΤΩΝ', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, detail: 'ΣΥΝΟΛΟ ΠΕΛΑΤΩΝ', sparkline: "M0 22 Q25 22 50 28 T100 20 T150 25 T200 15", color: 'bg-zinc-50/80' }
         ].map((stat, i) => (
-          <Card key={i} className="rounded-3xl border-none bg-white shadow-xl shadow-zinc-200/50 overflow-hidden group transition-all duration-500 hover:-translate-y-1">
+          <Card key={i} className={cn("rounded-3xl border-none shadow-xl shadow-zinc-200/50 overflow-hidden group transition-all duration-500 hover:-translate-y-1", stat.color)}>
             <CardContent className="p-6">
               <div className="flex flex-col gap-4">
                 <div className="flex justify-between items-start">
@@ -681,7 +681,7 @@ export default function DashboardPage() {
                   getTodaysBookings().slice(0, 4).map((booking: Booking) => {
                     const pitch = pitches.find(p => p.id === booking.pitchId);
                     return (
-                      <Card key={booking.id} className="rounded-[2.5rem] border-none bg-white shadow-xl shadow-zinc-200/30 overflow-hidden group hover:shadow-2xl hover:shadow-emerald-900/5 transition-all duration-500">
+                      <Card key={booking.id} className="rounded-[2.5rem] border border-zinc-100 bg-white shadow-xl shadow-zinc-200/20 overflow-hidden group hover:shadow-2xl hover:shadow-emerald-900/5 transition-all duration-500">
                         <CardContent className="p-8">
                             <div className="flex flex-col gap-6">
                               {/* User Info Row */}
@@ -770,7 +770,7 @@ export default function DashboardPage() {
                   getTodaysTrainings().slice(0, 4).map((training: TrainingSession) => {
                     const squad = squads.find(s => s.id === training.squadId);
                     return (
-                      <Card key={training.id} className="rounded-[2.5rem] border-none bg-white shadow-xl shadow-zinc-200/30 overflow-hidden group hover:shadow-2xl hover:shadow-emerald-900/5 transition-all duration-500">
+                      <Card key={training.id} className="rounded-[2.5rem] border-2 border-emerald-100/30 bg-white shadow-xl shadow-zinc-200/20 overflow-hidden group hover:shadow-2xl hover:shadow-emerald-900/5 transition-all duration-500">
                         <CardContent className="p-8">
                             <div className="flex flex-col gap-6">
                               {/* Session Info Row */}
@@ -857,7 +857,7 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 squads.slice(0, 5).map((squad) => (
-                  <Card key={squad.id} className="rounded-3xl border-none bg-white shadow-xl shadow-zinc-200/20 overflow-hidden group hover:shadow-2xl transition-all duration-300">
+                  <Card key={squad.id} className="rounded-3xl border-2 border-emerald-100/30 bg-white shadow-xl shadow-zinc-200/20 overflow-hidden group hover:shadow-2xl transition-all duration-300">
                      <CardContent className="p-4">
                         <div className="flex items-center gap-4">
                            <div className="h-14 w-14 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shrink-0 relative">
@@ -905,7 +905,7 @@ export default function DashboardPage() {
                 </div>
               ) : (
                 pitches.slice(0, 5).map((pitch) => (
-                  <Card key={pitch.id} className="rounded-3xl border-none bg-white shadow-xl shadow-zinc-200/20 overflow-hidden group hover:shadow-2xl transition-all duration-300">
+                  <Card key={pitch.id} className="rounded-3xl border border-zinc-100 bg-white shadow-xl shadow-zinc-200/10 overflow-hidden group hover:shadow-2xl transition-all duration-300">
                      <CardContent className="p-4">
                         <div className="flex items-center gap-4">
                            <div className="h-14 w-20 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shrink-0 relative">
