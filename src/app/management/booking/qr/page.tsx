@@ -188,7 +188,7 @@ function QRInner() {
 
         <p className="text-center text-[10px] font-bold text-zinc-400 no-print uppercase tracking-widest leading-relaxed">
           {toGreekUpperCase('Τοποθετήστε τον κωδικό στην είσοδο του γηπέδου')}<br />
-          {toGreekUpperCase('για να διευκολύνετε τις κρατήσεις των πελατών σας')}
+          {toGreekUpperCase('για να διευκολύνετε τις κρατήσεις των πελατών σας ')}
         </p>
       </div>
     </div>
