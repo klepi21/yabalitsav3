@@ -702,7 +702,7 @@ export default function DashboardPage() {
                                   </div>
                                   <div className="text-right">
                                     <p className="text-2xl font-black text-zinc-900 tracking-tighter">
-                                        {new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit'})}
+                                        {new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit', hour12: false})}
                                     </p>
                                     <p className="text-[10px] font-black text-emerald-500 uppercase">STARTING</p>
                                   </div>
