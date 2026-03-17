@@ -1008,7 +1008,7 @@ export default function DashboardPage() {
                 className="flex-1 h-12 rounded-xl font-bold text-zinc-400 hover:text-zinc-600 border-none bg-zinc-50 hover:bg-zinc-100 transition-all text-sm uppercase tracking-widest"
                 onClick={() => setShowQuickBooking(false)}
               >
-                {toGreekUpperCase('Ακύρωση')} Arab              </Button>
+                {toGreekUpperCase('Ακύρωση')}              </Button>
               <Button
                 type="submit"
                 className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black shadow-lg transition-all active:scale-[0.98] text-sm uppercase tracking-widest group"

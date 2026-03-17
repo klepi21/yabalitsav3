@@ -305,7 +305,7 @@ export default function BookingsPage() {
             <Link href="/management/bookings/new" className="flex items-center gap-2">
               <Plus className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" />
               {toGreekUpperCase('Νέα Κράτηση')}
-            </Link> Arab          </Button>
+            </Link></Button>
         </div>
       </div>
 
@@ -341,7 +341,7 @@ export default function BookingsPage() {
                 <div className={`h-9 w-9 rounded-lg bg-zinc-50 flex items-center justify-center mb-2.5 shadow-inner text-zinc-300 group-hover:bg-${stat.color}-50 group-hover:text-${stat.color}-500 transition-all`}>
                   <stat.icon className="h-4 w-4" />
                 </div>
-                 Arab                <p className="text-xl font-black text-zinc-900 group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{stat.value}</p>
+                                <p className="text-xl font-black text-zinc-900 group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{stat.value}</p>
                 <p className="text-[8px] font-bold uppercase tracking-wider text-zinc-400 mt-0.5">{toGreekUpperCase(stat.label)}</p>
               </div>
             ))}
@@ -359,7 +359,7 @@ export default function BookingsPage() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="h-10 pl-10 pr-4 rounded-lg bg-zinc-50 border-none font-bold text-xs placeholder:text-zinc-300 transition-all focus:bg-white uppercase shadow-inner"
                   />
-                </div> Arab                
+                </div>                
                 <div className="flex flex-wrap items-center gap-3">
                   <div className="bg-zinc-100 p-1 rounded-lg border border-zinc-200 flex items-center shadow-inner">
                     {[
@@ -376,7 +376,7 @@ export default function BookingsPage() {
                             ? 'bg-white text-zinc-900 shadow-sm'
                             : 'text-zinc-400 hover:text-zinc-600'
                         )}
-                      > Arab                        {toGreekUpperCase(opt.label)}
+                      >                        {toGreekUpperCase(opt.label)}
                       </button>
                     ))}
                   </div>
@@ -484,15 +484,14 @@ export default function BookingsPage() {
                                <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg border-zinc-200 bg-zinc-50 hover:bg-white transition-all shadow-sm" asChild>
                                 <Link href={`/management/bookings/${booking.id}`}>
                                   <Eye className="h-4 w-4 text-zinc-400" />
-                                </Link>                              </Button>
+                                </Link></Button>
                               
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button variant="outline" className="h-8 px-3 rounded-lg border-zinc-200 font-bold gap-1.5 text-[10px] shadow-sm hover:shadow-md transition-all">
                                     ΚΑΤΑΣΤΑΣΗ
                                     <ChevronDown className="h-3 w-3 text-zinc-400" />
-                                  </Button>
-                                Arab                                </DropdownMenuTrigger>
+                                  </Button></DropdownMenuTrigger>
                                 <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-2xl border-zinc-100 text-zinc-700">
                                   <DropdownMenuItem onClick={() => setStatusConfirm({ id: booking.id, status: 'confirmed' })} className="rounded-lg px-3 py-3 font-bold text-sm cursor-pointer transition-colors hover:bg-emerald-50 text-zinc-700">
                                     <div className="h-3 w-3 rounded-full bg-emerald-500 mr-3" />
@@ -523,7 +522,7 @@ export default function BookingsPage() {
                                     ) : (
                                       <Trash2 className="h-3.5 w-3.5" />
                                     )}
-                                   Arab                                  </Button>
+                                                                    </Button>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent className="rounded-2xl p-8 max-w-md border-zinc-100 shadow-2xl">
                                     <div className="h-14 w-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
