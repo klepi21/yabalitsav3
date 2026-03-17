@@ -22,6 +22,7 @@ import {
   Menu,
   Smartphone,
   Download,
+  QrCode,
   Search as SearchIcon,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -226,30 +227,32 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
       {/* Promomotion Card & Logout Section */}
       <div className="p-4 space-y-4">
-        {/* Mobile App Card */}
-        <div className="relative overflow-hidden rounded-2xl bg-zinc-900 p-5 group cursor-pointer hover:shadow-xl hover:shadow-emerald-900/10 transition-all duration-500">
-           {/* Abstract Background Shapes */}
-           <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/20 rounded-full blur-2xl group-hover:bg-emerald-500/30 transition-colors" />
-           <div className="absolute -left-4 -bottom-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl" />
-           
-           <div className="relative z-10 flex flex-col gap-3">
-              <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center backdrop-blur-md">
-                <Smartphone className="h-4 w-4 text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-white tracking-tight">
-                  {toGreekUpperCase('Κατεβάστε την εφαρμογή')}
-                </p>
-                <p className="text-[10px] font-medium text-emerald-400/80 mt-0.5">
-                  ΔΙΑΧΕΙΡΙΣΗ ΑΠΟ ΠΑΝΤΟΥ
-                </p>
-              </div>
-              <button className="flex items-center justify-center gap-2 w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-black transition-all active:scale-95 shadow-lg shadow-emerald-900/20">
-                <Download className="h-3 w-3" />
-                DOWNLOAD
-              </button>
-           </div>
-        </div>
+        {/* QR Code Card */}
+        <Link href="/management/booking/qr" onClick={onNavigate}>
+          <div className="relative overflow-hidden rounded-2xl bg-zinc-900 p-5 group cursor-pointer hover:shadow-xl hover:shadow-emerald-900/10 transition-all duration-500">
+             {/* Abstract Background Shapes */}
+             <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/20 rounded-full blur-2xl group-hover:bg-emerald-500/30 transition-colors" />
+             <div className="absolute -left-4 -bottom-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl" />
+             
+             <div className="relative z-10 flex flex-col gap-3">
+                <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center backdrop-blur-md">
+                  <QrCode className="h-4 w-4 text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-white tracking-tight">
+                    {toGreekUpperCase('Δημιουργήστε το QR Code')}
+                  </p>
+                  <p className="text-[10px] font-medium text-emerald-400/80 mt-0.5">
+                    ΓΙΑ ΤΗ ΣΕΛΙΔΑ BOOKING
+                  </p>
+                </div>
+                <div className="flex items-center justify-center gap-2 w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-black transition-all active:scale-95 shadow-lg shadow-emerald-900/20 uppercase">
+                  <QrCode className="h-3 w-3 mr-1" />
+                  ΦΤΙΑΞΕ QR
+                </div>
+             </div>
+          </div>
+        </Link>
 
         <button
           onClick={() => {
