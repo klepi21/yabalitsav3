@@ -69,6 +69,7 @@ export interface Pitch {
   };
   slotDuration: number; // in minutes
   pricePerSlot: number;
+  active: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

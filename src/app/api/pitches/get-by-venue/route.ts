@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
       return {
         id: doc.id,
         ...data,
+        active: data.active ?? true,
         createdAt: data.createdAt?.toDate?.().toISOString() || new Date().toISOString(),
         updatedAt: data.updatedAt?.toDate?.().toISOString() || new Date().toISOString(),
       };

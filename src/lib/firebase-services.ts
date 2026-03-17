@@ -164,6 +164,7 @@ export const pitchService = {
   async create(pitchData: Omit<Pitch, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
     const docRef = await addDoc(collection(db, 'yabalitsa_pitches'), {
       ...pitchData,
+      active: pitchData.active ?? true,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });
@@ -176,6 +177,7 @@ export const pitchService = {
     return querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
+      active: doc.data().active ?? true,
       createdAt: doc.data().createdAt?.toDate() || new Date(),
       updatedAt: doc.data().updatedAt?.toDate() || new Date()
     })) as Pitch[];
@@ -191,6 +193,7 @@ export const pitchService = {
     return querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
+      active: doc.data().active ?? true,
       createdAt: doc.data().createdAt?.toDate() || new Date(),
       updatedAt: doc.data().updatedAt?.toDate() || new Date()
     })) as Pitch[];
@@ -200,12 +203,13 @@ export const pitchService = {
   async getById(id: string): Promise<Pitch | null> {
     const docRef = doc(db, 'yabalitsa_pitches', id);
     const docSnap = await getDoc(docRef);
-    
+
     if (docSnap.exists()) {
       const data = docSnap.data();
       return {
         id: docSnap.id,
         ...data,
+        active: data.active ?? true,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date()
       } as Pitch;

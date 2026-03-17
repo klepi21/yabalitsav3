@@ -55,15 +55,18 @@ export async function POST(request: NextRequest) {
       .where('venueId', '==', venueId)
       .get();
 
-    const pitches = pitchesSnapshot.docs.map(doc => {
-      const data = doc.data();
-      return {
-        id: doc.id,
-        ...data,
-        createdAt: data.createdAt?.toDate?.().toISOString() || new Date().toISOString(),
-        updatedAt: data.updatedAt?.toDate?.().toISOString() || new Date().toISOString(),
-      };
-    });
+    const pitches = pitchesSnapshot.docs
+      .map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          ...data,
+          active: data.active ?? true,
+          createdAt: data.createdAt?.toDate?.().toISOString() || new Date().toISOString(),
+          updatedAt: data.updatedAt?.toDate?.().toISOString() || new Date().toISOString(),
+        };
+      })
+      .filter(pitch => pitch.active !== false);
 
     // Fetch bookings for this venue
     const bookingsSnapshot = await db

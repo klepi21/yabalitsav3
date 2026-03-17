@@ -137,7 +137,8 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
           setVenue(venueData);
 
           // Get pitches for this venue
-          const pitchesData = await pitchService.getByVenue(foundVenue.id);
+          const allPitchesData = await pitchService.getByVenue(foundVenue.id);
+          const pitchesData = allPitchesData.filter(p => p.active === true);
           console.log('Pitches found:', pitchesData?.length || 0);
           if (pitchesData && pitchesData.length > 0) {
             // Get existing bookings for all pitches in this venue

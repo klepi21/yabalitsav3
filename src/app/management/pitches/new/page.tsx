@@ -109,6 +109,7 @@ export default function NewPitchPage() {
         type: data.type,
         slotDuration: data.slotDuration,
         pricePerSlot: data.pricePerSlot,
+        active: true,
         defaultOpeningHours: data.defaultOpeningHours
       });
 

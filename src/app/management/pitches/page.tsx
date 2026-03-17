@@ -10,10 +10,12 @@ import {
   Building2,
   Eye,
   Pencil,
-  Ban
+  Ban,
+  Power,
 } from 'lucide-react';
 import { Pitch } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
+import { pitchService } from '@/lib/firebase-services';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -89,6 +91,15 @@ export default function PitchesPage() {
 
     loadPitches();
   }, [user, venueOwner, authLoading, router, loadPitches, pathname]);
+
+  const togglePitchActive = async (pitchId: string, currentActive: boolean) => {
+    try {
+      await pitchService.update(pitchId, { active: !currentActive });
+      setPitches(prev => prev.map(p => p.id === pitchId ? { ...p, active: !currentActive } : p));
+    } catch (err) {
+      console.error('Error toggling pitch active:', err);
+    }
+  };
 
   const filteredPitches = pitches.filter(pitch =>
     pitch.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -205,18 +216,29 @@ export default function PitchesPage() {
           </Card>
         ) : (
           filteredPitches.map((pitch) => (
-            <Card 
-              key={pitch.id} 
-              className="premium-card group border border-zinc-100/50 overflow-hidden hover:translate-y-[-4px] transition-all duration-300 shadow-sm"
+            <Card
+              key={pitch.id}
+              className={`premium-card group border overflow-hidden hover:translate-y-[-4px] transition-all duration-300 shadow-sm ${
+                pitch.active ? 'border-zinc-100/50' : 'border-red-200/50 opacity-60'
+              }`}
             >
               <CardContent className="p-0">
                 <div className="p-5 space-y-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
-                      <Badge className="bg-emerald-50 text-emerald-700 border-none font-bold text-[8px] uppercase tracking-wider px-1.5 py-0.5 mb-1.5 shadow-none">
-                        {toGreekUpperCase(pitch.type)}
-                      </Badge>
-                      <h3 className="text-lg font-black text-zinc-900 tracking-tight leading-tight group-hover:text-emerald-700 transition-colors uppercase">
+                      <div className="flex items-center gap-1.5 mb-1.5">
+                        <Badge className="bg-emerald-50 text-emerald-700 border-none font-bold text-[8px] uppercase tracking-wider px-1.5 py-0.5 shadow-none">
+                          {toGreekUpperCase(pitch.type)}
+                        </Badge>
+                        {!pitch.active && (
+                          <Badge className="bg-red-50 text-red-600 border-none font-bold text-[8px] uppercase tracking-wider px-1.5 py-0.5 shadow-none">
+                            {toGreekUpperCase('Ανενεργό')}
+                          </Badge>
+                        )}
+                      </div>
+                      <h3 className={`text-lg font-black tracking-tight leading-tight transition-colors uppercase ${
+                        pitch.active ? 'text-zinc-900 group-hover:text-emerald-700' : 'text-zinc-400'
+                      }`}>
                         {pitch.name}
                       </h3>
                     </div>
@@ -243,8 +265,8 @@ export default function PitchesPage() {
 
                   {/* Actions */}
                   <div className="flex gap-2 pt-4 border-t border-zinc-50 group-hover:border-emerald-50 transition-colors">
-                    <Button 
-                      asChild 
+                    <Button
+                      asChild
                       className="flex-1 h-9 rounded-lg bg-zinc-900 hover:bg-black text-white font-bold transition-all text-[11px] group/btn"
                     >
                       <Link href={`/management/pitches/${pitch.id}/edit`} className="flex items-center gap-2">
@@ -252,8 +274,20 @@ export default function PitchesPage() {
                         {toGreekUpperCase('Επεξεργασία')}
                       </Link>
                     </Button>
-                    <Button 
-                      asChild 
+                    <Button
+                      variant="outline"
+                      onClick={() => togglePitchActive(pitch.id, pitch.active)}
+                      className={`h-9 w-9 rounded-lg transition-all ${
+                        pitch.active
+                          ? 'border-zinc-100 text-emerald-500 hover:text-red-500 hover:border-red-100 hover:bg-red-50'
+                          : 'border-red-100 text-red-400 hover:text-emerald-600 hover:border-emerald-100 hover:bg-emerald-50'
+                      }`}
+                      title={pitch.active ? 'Απενεργοποίηση' : 'Ενεργοποίηση'}
+                    >
+                      <Power className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      asChild
                       variant="outline"
                       className="h-9 w-9 rounded-lg border-zinc-100 text-zinc-400 hover:text-emerald-600 hover:border-emerald-100 hover:bg-emerald-50 transition-all"
                     >
