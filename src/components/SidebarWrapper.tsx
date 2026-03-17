@@ -126,7 +126,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50/50">
+    <div className="min-h-screen bg-[#f1f4f8]">
       <Sidebar />
       <div className="lg:pl-[260px]">
         <main className="min-h-screen">
