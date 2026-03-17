@@ -20,15 +20,11 @@ import {
   ChevronDown,
   ChevronRight,
   Menu,
-  Smartphone,
-  Download,
   QrCode,
-  Search as SearchIcon,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { cn, toGreekUpperCase } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
 
 interface NavItem {
   name: string;
@@ -67,7 +63,7 @@ const navigation: NavItem[] = [
 function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const pathname = usePathname();
-  const { signOut, venueOwner } = useAuth();
+  const { signOut } = useAuth();
 
   const toggleMenu = (menuName: string) => {
     setExpandedMenus(prev =>

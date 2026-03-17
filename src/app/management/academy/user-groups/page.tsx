@@ -165,7 +165,7 @@ export default function UserGroupsPage() {
                     <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-0.5">
                             <h3 className="text-lg font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{toGreekUpperCase(group.name)}</h3>
-                            <Badge variant="secondary" className={cn("rounded-md px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-zinc-100 text-zinc-500 border-none shadow-sm", (GROUP_COLORS as any)[group.color] || '')}>
+                            <Badge variant="secondary" className={cn("rounded-md px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-zinc-100 text-zinc-500 border-none shadow-sm", (GROUP_COLORS as Record<string, string>)[group.color] || '')}>
                                 {toGreekUpperCase(group.namePlural)}
                             </Badge>
                         </div>

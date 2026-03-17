@@ -6,9 +6,8 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { academyUserService, userGroupService, squadService } from '@/lib/academy-services';
 import { AcademyUser, UserGroup, Squad, GROUP_COLORS } from '@/types/academy';
-import { Loader2, Plus, Search, Users, Pencil, Trash2, Mail, Phone, GraduationCap, Calendar, Trophy, UserCheck, MoreHorizontal, AlertCircle } from 'lucide-react';
+import { Loader2, Plus, Search, Users, Pencil, Trash2, Mail, Phone, MoreHorizontal, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -132,7 +131,7 @@ export default function AcademyUsersPage() {
     return squad ? `${squad.name} (${squad.ageGroup})` : 'Χωρίς τμήμα';
   };
 
-  const getParentName = (parentId: string) => {
+  const _getParentName = (parentId: string) => {
     const parent = users.find((u) => u.id === parentId);
     return parent?.displayName || 'Άγνωστος';
   };

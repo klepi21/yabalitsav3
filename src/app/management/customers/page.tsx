@@ -9,7 +9,7 @@ import { User } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { toGreekUpperCase } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,

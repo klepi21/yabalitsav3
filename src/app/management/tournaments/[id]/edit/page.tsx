@@ -430,7 +430,7 @@ export default function EditTournamentPage() {
                           "text-[10px] font-bold mt-0.5",
                           isSelected ? "text-emerald-600" : "text-zinc-400/60"
                         )}>
-                          {p.slotDuration}' / {p.pricePerSlot}€
+                          {p.slotDuration}&apos; / {p.pricePerSlot}€
                         </p>
                       </div>
                       {isSelected && (

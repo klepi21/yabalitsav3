@@ -12,7 +12,6 @@ import {
   Loader2,
   Lock,
   CreditCard,
-  CalendarDays,
   LifeBuoy,
   MessageCircle,
   Send,
@@ -28,13 +27,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { venueService } from '@/lib/firebase-services';
 import { Venue } from '@/types';
 import SupportEmail from '@/components/SupportEmail';
-import { calculateDaysRemaining, getSubscriptionEndDate, formatDateSafely } from '@/lib/subscription-utils';
+import { calculateDaysRemaining, getSubscriptionEndDate } from '@/lib/subscription-utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { cn, toGreekUpperCase } from '@/lib/utils';
 

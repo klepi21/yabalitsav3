@@ -20,7 +20,6 @@ import { Tournament } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 type TournamentType = Tournament['type'];
@@ -352,7 +351,7 @@ export default function NewTournamentPage() {
                           "text-[10px] font-bold mt-0.5",
                           isSelected ? "text-emerald-600" : "text-zinc-400/60"
                         )}>
-                          {p.slotDuration}' / {p.pricePerSlot}€
+                          {p.slotDuration}&apos; / {p.pricePerSlot}€
                         </p>
                       </div>
                       {isSelected && (

@@ -10,18 +10,9 @@ import { Booking, Pitch, Venue } from '@/types';
 import {
   CalendarDays,
   Activity,
-  Target,
-  Users,
-  Building2,
-  Settings,
   AlertTriangle,
-  MapPin,
-  Mail,
   Phone,
-  XCircle,
   Plus,
-  ChevronUp,
-  ChevronDown,
   Loader2,
   Pencil,
   Eye,
@@ -29,11 +20,10 @@ import {
   Clock,
   Save,
   User,
-  Search,
   Trophy,
   Smile,
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { squadService } from '@/lib/academy-services';
@@ -64,8 +54,6 @@ import {
   AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
 } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -78,12 +66,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { cn, toGreekUpperCase } from '@/lib/utils';
 
 export default function DashboardPage() {
@@ -96,9 +78,9 @@ export default function DashboardPage() {
   const [trainings, setTrainings] = useState<TrainingSession[]>([]);
   const [venue, setVenue] = useState<Venue | null>(null);
   const [dataLoading, setDataLoading] = useState(true);
-  const [isVenueInfoExpanded, setIsVenueInfoExpanded] = useState(false);
+  const [_isVenueInfoExpanded, _setIsVenueInfoExpanded] = useState(false);
   const [showQuickBooking, setShowQuickBooking] = useState(false);
-  const [showBookingMenu, setShowBookingMenu] = useState(false);
+  const [_showBookingMenu, _setShowBookingMenu] = useState(false);
   const [isCreatingBooking, setIsCreatingBooking] = useState(false);
   const [showStatusConfirm, setShowStatusConfirm] = useState(false);
   const [statusChangeData, setStatusChangeData] = useState<{
@@ -491,7 +473,7 @@ export default function DashboardPage() {
     }
   };
 
-  const handleStatusChange = (bookingId: string, newStatus: 'confirmed' | 'pending' | 'completed' | 'cancelled', oldStatus: string, userName: string) => {
+  const _handleStatusChange = (bookingId: string, newStatus: 'confirmed' | 'pending' | 'completed' | 'cancelled', oldStatus: string, userName: string) => {
     setStatusChangeData({
       bookingId,
       newStatus,

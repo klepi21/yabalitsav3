@@ -1,8 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { HelpCircle, Zap, Sparkles, ArrowUpRight, Bell, CheckCircle2, CalendarDays, Search, MessageSquare, User } from 'lucide-react';
+import { Zap, Bell, Search, MessageSquare, User } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar from './Sidebar';
@@ -247,6 +246,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                   </div>
                   <div className="h-10 w-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
                     {user?.photoURL ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img src={user.photoURL} alt="Avatar" className="h-full w-full object-cover" />
                     ) : (
                       <User className="h-5 w-5 text-emerald-600" />

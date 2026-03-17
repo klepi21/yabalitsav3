@@ -6,9 +6,8 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { squadService, academyUserService } from '@/lib/academy-services';
 import { Squad, AcademyUser } from '@/types/academy';
-import { Loader2, Plus, Pencil, Trash2, Trophy, Users as UsersIcon, AlertCircle, Search } from 'lucide-react';
+import { Loader2, Plus, Trash2, Trophy, Users as UsersIcon, AlertCircle, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { cn, toGreekUpperCase } from '@/lib/utils';
 import {

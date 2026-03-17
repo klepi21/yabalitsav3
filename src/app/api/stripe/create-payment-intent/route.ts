@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { venueService, paymentService } from '@/lib/firebase-services';
+import { venueService, paymentService, venueOwnerService } from '@/lib/firebase-services';
 import { pricingUtils } from '@/lib/pricing';
+
+const DEV_EMAIL = 'nikoskoukis99@gmail.com';
+const DEV_BASE_PRICE = 0.10;
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -55,12 +58,16 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Using Stripe Price ID:', stripePriceId);
 
+    // Check if dev email for testing pricing
+    const owner = await venueOwnerService.getByVenueId(venue.id);
+    const basePrice = owner?.email === DEV_EMAIL ? DEV_BASE_PRICE : plan.basePrice;
+
     // Calculate the amount
-    const totalPrice = pricingUtils.calculateTotalPrice(plan.basePrice, duration as 1 | 6 | 12);
+    const totalPrice = pricingUtils.calculateTotalPrice(basePrice, duration as 1 | 6 | 12);
     const amountInCents = Math.round(totalPrice * 100);
 
     console.log('💰 Payment details:', {
-      basePrice: plan.basePrice,
+      basePrice,
       duration,
       totalPrice,
       amountInCents

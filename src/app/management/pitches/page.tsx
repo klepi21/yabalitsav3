@@ -3,16 +3,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  Loader2, 
-  Plus, 
-  Search, 
-  Building2, 
-  Clock, 
-  Banknote, 
-  Eye, 
-  Pencil, 
-  Ban 
+import {
+  Loader2,
+  Plus,
+  Search,
+  Building2,
+  Eye,
+  Pencil,
+  Ban
 } from 'lucide-react';
 import { Pitch } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { toGreekUpperCase } from '@/lib/utils';
 
 export default function PitchesPage() {
   const router = useRouter();

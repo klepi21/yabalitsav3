@@ -39,7 +39,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { toGreekUpperCase } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
 const emptyTeamStats = {

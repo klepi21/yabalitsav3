@@ -45,7 +45,7 @@ export default function WeeklyCalendar({
   onDeleteBooking, 
   deletingBookingId, 
   onUpdateBookingStatus, 
-  updatingBookingId 
+  updatingBookingId: _updatingBookingId
 }: WeeklyCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<'weekly' | 'daily'>('weekly');

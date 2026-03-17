@@ -9,7 +9,7 @@ import { squadService } from '@/lib/academy-services';
 import { TrainingSession, TRAINING_TYPE_LABELS, TRAINING_TYPE_COLORS } from '@/types/training';
 import { Squad } from '@/types/academy';
 import {
-  Loader2, Plus, Search, Dumbbell, Calendar, Clock, Users, BarChart3,
+  Loader2, Plus, Search, Dumbbell, Clock, BarChart3,
   CheckCircle2, XCircle, AlertCircle, ChevronLeft, ChevronRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
