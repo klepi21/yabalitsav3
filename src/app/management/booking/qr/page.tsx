@@ -3,14 +3,44 @@
 export const dynamic = 'force-dynamic';
 
 import { useSearchParams } from 'next/navigation';
-import { useMemo, Suspense } from 'react';
+import { useMemo, Suspense, useEffect, useState } from 'react';
 import Image from 'next/image';
+import { useAuth } from '@/contexts/AuthContext';
+import { venueService } from '@/lib/firebase-services';
+import { Loader2, QrCode } from 'lucide-react';
+import { toGreekUpperCase } from '@/lib/utils';
 
 function QRInner() {
   const params = useSearchParams();
-  const url = params.get('url') || '';
+  const { venueOwner } = useAuth();
+  const [venueName, setVenueName] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const paramUrl = params.get('url') || '';
+
+  useEffect(() => {
+    async function fetchVenue() {
+      if (venueOwner?.venueId) {
+        try {
+          const venue = await venueService.getById(venueOwner.venueId);
+          if (venue) {
+            setVenueName(venue.name);
+          }
+        } catch (error) {
+          console.error('Error fetching venue:', error);
+        }
+      }
+      setLoading(false);
+    }
+    fetchVenue();
+  }, [venueOwner?.venueId]);
+
+  const venueSlug = useMemo(() => {
+    if (!venueName) return '';
+    return venueName.toLowerCase().replace(/\s+/g, '');
+  }, [venueName]);
 
   const fullUrl = useMemo(() => {
+    const url = paramUrl || (venueSlug ? `/book/${venueSlug}` : '');
     if (!url) return '';
     // Always use production domain for QR
     const BASE = 'https://yabalitsa.com';
@@ -21,7 +51,16 @@ function QRInner() {
     } catch {
       return `${BASE}${url.startsWith('/') ? '' : '/'}${url}`;
     }
-  }, [url]);
+  }, [paramUrl, venueSlug]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+        <p className="text-xs font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Φορτωση...')}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
