@@ -23,6 +23,8 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { venueService } from '@/lib/firebase-services';
 import { Booking, Pitch, Payment } from '@/types';
+import { AcademyPayment } from '@/types/academy';
+import { GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -61,6 +63,9 @@ export default function ReportsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [pitches, setPitches] = useState<Pitch[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [academyPayments, setAcademyPayments] = useState<AcademyPayment[]>([]);
+  const [squads, setSquads] = useState<{ id: string; name: string; ageGroup?: string }[]>([]);
+  const [academyUsers, setAcademyUsers] = useState<{ id: string; displayName: string; groupId: string; squad_ids: string[] }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPinVerified, setIsPinVerified] = useState(false);
@@ -153,12 +158,22 @@ export default function ReportsPage() {
         createdAt: p.createdAt,
         updatedAt: p.updatedAt,
       })));
+      setAcademyPayments((data.academyPayments || []).map((p: Record<string, unknown>) => ({
+        ...p,
+        createdAt: new Date(p.createdAt as string),
+        updatedAt: new Date(p.updatedAt as string),
+      })) as AcademyPayment[]);
+      setSquads((data.squads || []) as { id: string; name: string; ageGroup?: string }[]);
+      setAcademyUsers((data.academyUsers || []) as { id: string; displayName: string; groupId: string; squad_ids: string[] }[]);
     } catch (err) {
       console.error('Error loading data:', err);
       setError(err instanceof Error ? err.message : 'Failed to load reports');
       setBookings([]);
       setPitches([]);
       setPayments([]);
+      setAcademyPayments([]);
+      setSquads([]);
+      setAcademyUsers([]);
     } finally {
       setIsLoading(false);
     }
@@ -211,10 +226,90 @@ export default function ReportsPage() {
     }
   };
 
+  // Academy payments: all paid ones filtered by period
+  const paidAcademyPayments = academyPayments.filter(p => p.paid);
+  const filteredAcademyPayments = paidAcademyPayments.filter(p => {
+    if (!p.paidAt) return false;
+    const paidDate = new Date(p.paidAt as string);
+    return paidDate >= getDateFilter();
+  });
+  const academyRevenue = filteredAcademyPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+
+  // Academy monthly breakdown — group ALL payments by month
+  const academyMonthlyBreakdown = (() => {
+    const byMonth = new Map<string, { paid: number; unpaid: number; paidAmount: number; totalAmount: number; total: number }>();
+    for (const p of academyPayments) {
+      const entry = byMonth.get(p.month) || { paid: 0, unpaid: 0, paidAmount: 0, totalAmount: 0, total: 0 };
+      entry.total++;
+      entry.totalAmount += p.amount || 0;
+      if (p.paid) {
+        entry.paid++;
+        entry.paidAmount += p.amount || 0;
+      } else {
+        entry.unpaid++;
+      }
+      byMonth.set(p.month, entry);
+    }
+    return Array.from(byMonth.entries())
+      .sort((a, b) => b[0].localeCompare(a[0])) // newest first
+      .map(([month, data]) => ({ month, ...data }));
+  })();
+
+  // Academy revenue by squad
+  const academyBySquad = (() => {
+    // Map userId -> squad names
+    const userSquadMap = new Map<string, string[]>();
+    for (const u of academyUsers) {
+      const squadNames = (u.squad_ids || []).map(sid => {
+        const s = squads.find(sq => sq.id === sid);
+        return s ? `${s.name}${s.ageGroup ? ` (${s.ageGroup})` : ''}` : null;
+      }).filter(Boolean) as string[];
+      userSquadMap.set(u.id, squadNames.length > 0 ? squadNames : ['Χωρίς τμήμα']);
+    }
+
+    const bySquad = new Map<string, { paid: number; unpaid: number; paidAmount: number; total: number }>();
+    for (const p of academyPayments) {
+      const squadNames = userSquadMap.get(p.userId) || ['Χωρίς τμήμα'];
+      for (const name of squadNames) {
+        const entry = bySquad.get(name) || { paid: 0, unpaid: 0, paidAmount: 0, total: 0 };
+        entry.total++;
+        if (p.paid) {
+          entry.paid++;
+          entry.paidAmount += p.amount || 0;
+        } else {
+          entry.unpaid++;
+        }
+        bySquad.set(name, entry);
+      }
+    }
+    return Array.from(bySquad.entries())
+      .sort((a, b) => b[1].paidAmount - a[1].paidAmount)
+      .map(([squad, data]) => ({ squad, ...data }));
+  })();
+
+  // Academy yearly summary
+  const academyYearlySummary = (() => {
+    const byYear = new Map<string, { paidAmount: number; totalAmount: number; paid: number; total: number }>();
+    for (const p of academyPayments) {
+      const year = p.month.split('-')[0];
+      const entry = byYear.get(year) || { paidAmount: 0, totalAmount: 0, paid: 0, total: 0 };
+      entry.total++;
+      entry.totalAmount += p.amount || 0;
+      if (p.paid) {
+        entry.paid++;
+        entry.paidAmount += p.amount || 0;
+      }
+      byYear.set(year, entry);
+    }
+    return Array.from(byYear.entries())
+      .sort((a, b) => b[0].localeCompare(a[0]))
+      .map(([year, data]) => ({ year, ...data }));
+  })();
+
   // Metrics — revenue from completed only, counts from all statuses
-  const totalRevenue = filteredBookings.reduce((sum, b) => sum + (b.price || 0), 0);
-  const totalBookings = allFiltered.length;
-  const averageBookingValue = filteredBookings.length > 0 ? totalRevenue / filteredBookings.length : 0;
+  const bookingRevenue = filteredBookings.reduce((sum, b) => sum + (b.price || 0), 0);
+  const totalRevenue = bookingRevenue + academyRevenue;
+  const averageBookingValue = filteredBookings.length > 0 ? bookingRevenue / filteredBookings.length : 0;
   const completedBookings = allFiltered.filter(b => b.status === 'completed').length;
   const pendingBookings = allFiltered.filter(b => b.status === 'pending').length;
   const confirmedBookings = allFiltered.filter(b => b.status === 'confirmed').length;
@@ -471,11 +566,12 @@ export default function ReportsPage() {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {[
           { label: 'Συνολικά Έσοδα', value: `€${totalRevenue.toFixed(0)}`, icon: Euro, color: 'emerald' },
-          { label: 'Κρατήσεις', value: totalBookings.toString(), icon: Calendar, color: 'blue' },
-          { label: 'Μέση Κράτηση', value: `€${averageBookingValue.toFixed(0)}`, icon: Users, color: 'violet' },
+          { label: 'Έσοδα Κρατήσεων', value: `€${bookingRevenue.toFixed(0)}`, icon: Calendar, color: 'blue' },
+          { label: 'Έσοδα Ακαδημίας', value: `€${academyRevenue.toFixed(0)}`, icon: Users, color: 'violet' },
+          { label: 'Μέση Κράτηση', value: `€${averageBookingValue.toFixed(0)}`, icon: TrendingUp, color: 'cyan' },
           { label: 'Σε Αναμονή', value: pendingBookings.toString(), icon: Clock, color: 'amber' },
         ].map((metric) => {
           const Icon = metric.icon;
@@ -483,6 +579,7 @@ export default function ReportsPage() {
             emerald: 'bg-emerald-50 text-emerald-600',
             blue: 'bg-blue-50 text-blue-600',
             violet: 'bg-violet-50 text-violet-600',
+            cyan: 'bg-cyan-50 text-cyan-600',
             amber: 'bg-amber-50 text-amber-600',
           };
           return (
@@ -617,6 +714,158 @@ export default function ReportsPage() {
           })}
         </div>
       </div>
+
+      {/* Academy Revenue Breakdown */}
+      {academyPayments.length > 0 && (
+        <div className="space-y-6">
+          {/* Academy Header */}
+          <div className="flex items-center gap-2.5">
+            <div className="h-8 w-8 rounded-lg bg-violet-50 flex items-center justify-center text-violet-600">
+              <GraduationCap className="h-4 w-4" />
+            </div>
+            <h2 className="text-[15px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ανάλυση Ακαδημίας')}</h2>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Monthly Breakdown Table */}
+            <div className="bg-white rounded-xl border border-zinc-100 shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-zinc-50 flex items-center gap-2.5">
+                <div className="h-7 w-7 rounded-lg bg-violet-50 flex items-center justify-center text-violet-600">
+                  <Calendar className="h-3.5 w-3.5" />
+                </div>
+                <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ανά Μήνα')}</h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-zinc-50/50">
+                      <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Μήνας')}</th>
+                      <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Πληρωμένοι')}</th>
+                      <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Ανεξόφλητοι')}</th>
+                      <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400 text-right">{toGreekUpperCase('Έσοδα')}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-50">
+                    {academyMonthlyBreakdown.map((row) => {
+                      const [y, m] = row.month.split('-').map(Number);
+                      const label = new Date(y, m - 1).toLocaleDateString('el-GR', { month: 'long', year: 'numeric' });
+                      return (
+                        <tr key={row.month} className="hover:bg-zinc-50/50 transition-colors">
+                          <td className="py-2.5 px-4 text-[11px] font-bold text-zinc-900 capitalize">{label}</td>
+                          <td className="py-2.5 px-4 text-center">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700">
+                              {row.paid}/{row.total}
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-4 text-center">
+                            {row.unpaid > 0 ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-50 text-red-600">
+                                {row.unpaid}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-600">✓</span>
+                            )}
+                          </td>
+                          <td className="py-2.5 px-4 text-right">
+                            <span className="text-xs font-black text-zinc-900 tabular-nums">€{row.paidAmount.toFixed(0)}</span>
+                            {row.totalAmount > row.paidAmount && (
+                              <span className="text-[9px] text-zinc-400 ml-1">/ €{row.totalAmount.toFixed(0)}</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Squad Breakdown Table */}
+            <div className="bg-white rounded-xl border border-zinc-100 shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-zinc-50 flex items-center gap-2.5">
+                <div className="h-7 w-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                  <Users className="h-3.5 w-3.5" />
+                </div>
+                <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ανά Τμήμα')}</h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-zinc-50/50">
+                      <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τμήμα')}</th>
+                      <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Πληρωμένοι')}</th>
+                      <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Ανεξόφλητοι')}</th>
+                      <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400 text-right">{toGreekUpperCase('Έσοδα')}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-50">
+                    {academyBySquad.map((row) => (
+                      <tr key={row.squad} className="hover:bg-zinc-50/50 transition-colors">
+                        <td className="py-2.5 px-4 text-[11px] font-bold text-zinc-900">{row.squad}</td>
+                        <td className="py-2.5 px-4 text-center">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700">
+                            {row.paid}/{row.total}
+                          </span>
+                        </td>
+                        <td className="py-2.5 px-4 text-center">
+                          {row.unpaid > 0 ? (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-50 text-red-600">
+                              {row.unpaid}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-600">✓</span>
+                          )}
+                        </td>
+                        <td className="py-2.5 px-4 text-right">
+                          <span className="text-xs font-black text-zinc-900 tabular-nums">€{row.paidAmount.toFixed(0)}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* Yearly Summary */}
+          {academyYearlySummary.length > 0 && (
+            <div className="bg-white rounded-xl border border-zinc-100 shadow-sm overflow-hidden">
+              <div className="p-4 border-b border-zinc-50 flex items-center gap-2.5">
+                <div className="h-7 w-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+                  <TrendingUp className="h-3.5 w-3.5" />
+                </div>
+                <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ετήσια Σύνοψη Ακαδημίας')}</h3>
+              </div>
+              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {academyYearlySummary.map((row) => (
+                  <div key={row.year} className="rounded-xl border border-zinc-100 p-4 space-y-3">
+                    <p className="text-2xl font-black text-zinc-900">{row.year}</p>
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Έσοδα')}</span>
+                        <span className="text-sm font-black text-emerald-600">€{row.paidAmount.toFixed(0)}</span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Αναμενόμενα')}</span>
+                        <span className="text-sm font-black text-zinc-500">€{row.totalAmount.toFixed(0)}</span>
+                      </div>
+                      <div className="w-full bg-zinc-100 rounded-full h-2">
+                        <div
+                          className="bg-emerald-500 h-2 rounded-full transition-all"
+                          style={{ width: `${row.totalAmount > 0 ? (row.paidAmount / row.totalAmount) * 100 : 0}%` }}
+                        />
+                      </div>
+                      <p className="text-[9px] font-bold text-zinc-400 text-right">
+                        {row.paid}/{row.total} {toGreekUpperCase('πληρωμές')}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Payment History */}
       <div className="bg-white rounded-xl border border-zinc-100 shadow-sm overflow-hidden">

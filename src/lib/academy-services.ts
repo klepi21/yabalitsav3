@@ -15,6 +15,7 @@ import {
 import { db } from './firebase';
 import {
   AcademyUser,
+  AcademyPayment,
   UserGroup,
   Squad,
   DEFAULT_GROUPS,
@@ -23,6 +24,7 @@ import {
 const USERS_COLLECTION = 'yabalitsa_academy_users';
 const SQUADS_COLLECTION = 'yabalitsa_squads';
 const GROUPS_COLLECTION = 'yabalitsa_user_groups';
+const PAYMENTS_COLLECTION = 'yabalitsa_academy_payments';
 
 // ============================================
 // User Group Service
@@ -309,5 +311,106 @@ export const squadService = {
       assigned_squads: arrayRemove(squadId),
       updatedAt: serverTimestamp(),
     });
+  },
+};
+
+// ============================================
+// Academy Payment Service (monthly fees)
+// ============================================
+
+function convertToPayment(id: string, data: Record<string, unknown>): AcademyPayment {
+  return {
+    id,
+    venueId: (data.venueId as string) || '',
+    userId: (data.userId as string) || '',
+    userName: (data.userName as string) || '',
+    month: (data.month as string) || '',
+    amount: (data.amount as number) || 0,
+    paid: (data.paid as boolean) || false,
+    paidAt: data.paidAt as string | undefined,
+    notes: data.notes as string | undefined,
+    createdAt: (data.createdAt as { toDate?(): Date })?.toDate?.() || new Date(),
+    updatedAt: (data.updatedAt as { toDate?(): Date })?.toDate?.() || new Date(),
+  };
+}
+
+export const academyPaymentService = {
+  // Get payments for a venue + month
+  async getByVenueAndMonth(venueId: string, month: string): Promise<AcademyPayment[]> {
+    const q = query(
+      collection(db, PAYMENTS_COLLECTION),
+      where('venueId', '==', venueId),
+      where('month', '==', month)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((d) => convertToPayment(d.id, d.data()));
+  },
+
+  // Get all payments for a venue (for reports)
+  async getByVenue(venueId: string): Promise<AcademyPayment[]> {
+    const q = query(
+      collection(db, PAYMENTS_COLLECTION),
+      where('venueId', '==', venueId)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((d) => convertToPayment(d.id, d.data()));
+  },
+
+  // Toggle paid status
+  async togglePaid(paymentId: string, paid: boolean): Promise<void> {
+    await updateDoc(doc(db, PAYMENTS_COLLECTION, paymentId), {
+      paid,
+      paidAt: paid ? new Date().toISOString() : null,
+      updatedAt: serverTimestamp(),
+    });
+  },
+
+  // Create a single payment record
+  async create(data: Omit<AcademyPayment, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    const docRef = await addDoc(collection(db, PAYMENTS_COLLECTION), {
+      ...data,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    });
+    return docRef.id;
+  },
+
+  // Bulk create unpaid records for a list of athletes for a given month
+  async initMonth(
+    venueId: string,
+    athletes: { id: string; displayName: string }[],
+    month: string,
+    defaultAmount: number
+  ): Promise<void> {
+    // Get existing records to avoid duplicates
+    const existing = await this.getByVenueAndMonth(venueId, month);
+    const existingUserIds = new Set(existing.map((p) => p.userId));
+
+    for (const athlete of athletes) {
+      if (existingUserIds.has(athlete.id)) continue;
+      await addDoc(collection(db, PAYMENTS_COLLECTION), {
+        venueId,
+        userId: athlete.id,
+        userName: athlete.displayName,
+        month,
+        amount: defaultAmount,
+        paid: false,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+    }
+  },
+
+  // Update payment
+  async update(id: string, data: Partial<AcademyPayment>): Promise<void> {
+    const updateData: Record<string, unknown> = { ...data, updatedAt: serverTimestamp() };
+    delete updateData.id;
+    delete updateData.createdAt;
+    await updateDoc(doc(db, PAYMENTS_COLLECTION, id), updateData);
+  },
+
+  // Delete payment record
+  async delete(id: string): Promise<void> {
+    await deleteDoc(doc(db, PAYMENTS_COLLECTION, id));
   },
 };

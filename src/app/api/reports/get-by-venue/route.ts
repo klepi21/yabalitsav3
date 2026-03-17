@@ -99,12 +99,59 @@ export async function POST(request: NextRequest) {
       };
     });
 
+    // Fetch ALL academy payments for this venue (paid + unpaid for full stats)
+    const academyPaymentsSnapshot = await db
+      .collection('yabalitsa_academy_payments')
+      .where('venueId', '==', venueId)
+      .get();
+
+    const academyPayments = academyPaymentsSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        paidAt: data.paidAt || null,
+        createdAt: data.createdAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+        updatedAt: data.updatedAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+      };
+    });
+
+    // Fetch squads for grouping
+    const squadsSnapshot = await db
+      .collection('yabalitsa_squads')
+      .where('venueId', '==', venueId)
+      .get();
+
+    const squads = squadsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    // Fetch academy users for squad mapping
+    const academyUsersSnapshot = await db
+      .collection('yabalitsa_academy_users')
+      .where('venueId', '==', venueId)
+      .get();
+
+    const academyUsers = academyUsersSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        displayName: data.displayName || '',
+        groupId: data.groupId || '',
+        squad_ids: data.squad_ids || (data.squad_id ? [data.squad_id] : []),
+      };
+    });
+
     return NextResponse.json(
       {
         success: true,
         bookings,
         pitches,
         payments,
+        academyPayments,
+        squads,
+        academyUsers,
       },
       { status: 200 }
     );

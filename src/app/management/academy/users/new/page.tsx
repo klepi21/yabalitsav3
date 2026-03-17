@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import AcademyUserForm from '@/components/AcademyUserForm';
-import { academyUserService, userGroupService, squadService } from '@/lib/academy-services';
+import { academyUserService, userGroupService, squadService, academyPaymentService } from '@/lib/academy-services';
 import { AcademyUser, UserGroup, Squad } from '@/types/academy';
 import { Loader2, ArrowLeft, UserPlus, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -63,10 +63,30 @@ export default function NewAcademyUserPage() {
       setIsLoading(true);
       setError(null);
 
+      let newUserId: string;
       if (data.parent_uid) {
-        await academyUserService.createWithParent(data, data.parent_uid);
+        newUserId = await academyUserService.createWithParent(data, data.parent_uid);
       } else {
-        await academyUserService.create(data);
+        newUserId = await academyUserService.create(data);
+      }
+
+      // Auto-create payment record if athlete and payments exist for current month
+      const group = groups.find(g => g.id === data.groupId);
+      if (group?.capabilities.includes('squad_assignment') && venueId) {
+        const now = new Date();
+        const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const existingPayments = await academyPaymentService.getByVenueAndMonth(venueId, currentMonth);
+        if (existingPayments.length > 0) {
+          const defaultAmount = existingPayments[0].amount;
+          await academyPaymentService.create({
+            venueId,
+            userId: newUserId,
+            userName: data.displayName,
+            month: currentMonth,
+            amount: defaultAmount,
+            paid: false,
+          });
+        }
       }
 
       router.push('/management/academy/users');

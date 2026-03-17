@@ -4,9 +4,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { academyUserService, userGroupService, squadService } from '@/lib/academy-services';
-import { AcademyUser, UserGroup, Squad, GROUP_COLORS } from '@/types/academy';
-import { Loader2, Plus, Search, Users, Pencil, Trash2, Mail, Phone, MoreHorizontal, AlertCircle } from 'lucide-react';
+import { academyUserService, userGroupService, squadService, academyPaymentService } from '@/lib/academy-services';
+import { AcademyUser, AcademyPayment, UserGroup, Squad, GROUP_COLORS } from '@/types/academy';
+import { Loader2, Plus, Search, Users, Pencil, Trash2, Mail, Phone, MoreHorizontal, AlertCircle, ChevronLeft, ChevronRight, CircleDollarSign, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -55,6 +55,14 @@ export default function AcademyUsersPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [payments, setPayments] = useState<AcademyPayment[]>([]);
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  });
+  const [initAmount, setInitAmount] = useState<string>('');
+  const [showInitDialog, setShowInitDialog] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
 
   const urlGroupId = searchParams.get('group');
   const urlSquad = searchParams.get('squad');
@@ -69,14 +77,34 @@ export default function AcademyUsersPage() {
     const loadData = async () => {
       try {
         setIsLoading(true);
-        const [usersData, groupsData, squadsData] = await Promise.all([
+        const [usersData, groupsData, squadsData, paymentsData] = await Promise.all([
           academyUserService.getByVenue(venueId),
           userGroupService.getOrSeed(venueId),
           squadService.getByVenue(venueId),
+          academyPaymentService.getByVenueAndMonth(venueId, selectedMonth),
         ]);
         setUsers(usersData);
         setGroups(groupsData);
         setSquads(squadsData);
+
+        // Auto-sync: create missing payment records for athletes not yet in this month
+        if (paymentsData.length > 0) {
+          const athleteGroupIds = new Set(groupsData.filter(g => g.capabilities.includes('squad_assignment')).map(g => g.id));
+          const allAthletes = usersData.filter(u => athleteGroupIds.has(u.groupId));
+          const existingUserIds = new Set(paymentsData.map(p => p.userId));
+          const missing = allAthletes.filter(a => !existingUserIds.has(a.id));
+
+          if (missing.length > 0) {
+            const defaultAmount = paymentsData[0].amount;
+            await academyPaymentService.initMonth(venueId, missing, selectedMonth, defaultAmount);
+            const updatedPayments = await academyPaymentService.getByVenueAndMonth(venueId, selectedMonth);
+            setPayments(updatedPayments);
+          } else {
+            setPayments(paymentsData);
+          }
+        } else {
+          setPayments(paymentsData);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης');
       } finally {
@@ -84,7 +112,7 @@ export default function AcademyUsersPage() {
       }
     };
     loadData();
-  }, [user, venueOwner, authLoading, router, venueId, pathname]);
+  }, [user, venueOwner, authLoading, router, venueId, pathname, selectedMonth]);
 
   useEffect(() => {
     if (urlGroupId) setGroupFilter(urlGroupId);
@@ -137,6 +165,55 @@ export default function AcademyUsersPage() {
   };
 
   const activeGroup = groupFilter !== 'all' ? getGroup(groupFilter) : null;
+
+  // Payment helpers
+  const getPaymentForUser = (userId: string) => payments.find(p => p.userId === userId);
+
+  const athleteGroups = groups.filter(g => g.capabilities.includes('squad_assignment'));
+  const isAthleteGroup = (groupId: string) => athleteGroups.some(g => g.id === groupId);
+  const showPayments = groupFilter === 'all' || (activeGroup !== null && isAthleteGroup(groupFilter));
+
+  const togglePayment = async (userId: string) => {
+    const existing = getPaymentForUser(userId);
+    if (existing) {
+      const newPaid = !existing.paid;
+      await academyPaymentService.togglePaid(existing.id, newPaid);
+      setPayments(prev => prev.map(p => p.id === existing.id ? { ...p, paid: newPaid, paidAt: newPaid ? new Date().toISOString() : undefined } : p));
+    }
+  };
+
+  const changeMonth = (delta: number) => {
+    const [y, m] = selectedMonth.split('-').map(Number);
+    const d = new Date(y, m - 1 + delta, 1);
+    setSelectedMonth(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`);
+  };
+
+  const formatMonth = (month: string) => {
+    const [y, m] = month.split('-').map(Number);
+    return new Date(y, m - 1).toLocaleDateString('el-GR', { month: 'long', year: 'numeric' });
+  };
+
+  const handleInitMonth = async () => {
+    const amount = parseFloat(initAmount);
+    if (!amount || amount <= 0 || !venueId) return;
+    setIsInitializing(true);
+    try {
+      const athletes = users.filter(u => isAthleteGroup(u.groupId));
+      await academyPaymentService.initMonth(venueId, athletes, selectedMonth, amount);
+      const updated = await academyPaymentService.getByVenueAndMonth(venueId, selectedMonth);
+      setPayments(updated);
+      setShowInitDialog(false);
+      setInitAmount('');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Αποτυχία αρχικοποίησης');
+    } finally {
+      setIsInitializing(false);
+    }
+  };
+
+  const paidCount = payments.filter(p => p.paid).length;
+  const totalPaymentsAmount = payments.filter(p => p.paid).reduce((sum, p) => sum + p.amount, 0);
+
 
   if (authLoading || isLoading) {
     return (
@@ -244,6 +321,93 @@ export default function AcademyUsersPage() {
               </button>
             );
           })}
+        </div>
+      )}
+
+      {/* Monthly Payments Section */}
+      {showPayments && (
+        <div className="bg-white rounded-xl border border-zinc-100 shadow-sm p-4 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                <CircleDollarSign className="h-4 w-4 text-emerald-600" />
+              </div>
+              <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Μηνιαίες Πληρωμές')}</h3>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button onClick={() => changeMonth(-1)} className="h-8 w-8 rounded-lg bg-zinc-50 hover:bg-zinc-100 flex items-center justify-center transition-colors">
+                <ChevronLeft className="h-4 w-4 text-zinc-500" />
+              </button>
+              <span className="text-sm font-black text-zinc-900 min-w-[160px] text-center uppercase">
+                {toGreekUpperCase(formatMonth(selectedMonth))}
+              </span>
+              <button onClick={() => changeMonth(1)} className="h-8 w-8 rounded-lg bg-zinc-50 hover:bg-zinc-100 flex items-center justify-center transition-colors">
+                <ChevronRight className="h-4 w-4 text-zinc-500" />
+              </button>
+            </div>
+          </div>
+
+          {payments.length > 0 ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="rounded-lg bg-emerald-50 p-3 text-center">
+                  <p className="text-lg font-black text-emerald-700">{paidCount}/{payments.length}</p>
+                  <p className="text-[8px] font-bold uppercase tracking-widest text-emerald-600">{toGreekUpperCase('Πληρωμένοι')}</p>
+                </div>
+                <div className="rounded-lg bg-red-50 p-3 text-center">
+                  <p className="text-lg font-black text-red-600">{payments.length - paidCount}</p>
+                  <p className="text-[8px] font-bold uppercase tracking-widest text-red-500">{toGreekUpperCase('Ανεξόφλητοι')}</p>
+                </div>
+                <div className="rounded-lg bg-blue-50 p-3 text-center">
+                  <p className="text-lg font-black text-blue-700">€{totalPaymentsAmount.toFixed(0)}</p>
+                  <p className="text-[8px] font-bold uppercase tracking-widest text-blue-600">{toGreekUpperCase('Εισπράξεις')}</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-xs text-zinc-400 font-bold mb-3">{toGreekUpperCase('Δεν υπάρχουν εγγραφές πληρωμών για αυτόν τον μήνα')}</p>
+              <AlertDialog open={showInitDialog} onOpenChange={setShowInitDialog}>
+                <AlertDialogTrigger asChild>
+                  <Button className="h-9 px-5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px]">
+                    <Plus className="h-3.5 w-3.5 mr-1.5" />
+                    {toGreekUpperCase('Ετοιμασία Μήνα')}
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="rounded-2xl p-6">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-lg font-black">{toGreekUpperCase('Ετοιμασία Πληρωμών')}</AlertDialogTitle>
+                    <AlertDialogDescription className="text-sm text-zinc-500">
+                      {toGreekUpperCase(`Θα δημιουργηθούν εγγραφές πληρωμών για ${formatMonth(selectedMonth)} για όλους τους αθλητές.`)}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <div className="py-4">
+                    <label className="text-xs font-bold text-zinc-500 uppercase mb-1.5 block">{toGreekUpperCase('Μηνιαίο ποσό (€)')}</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={initAmount}
+                      onChange={(e) => setInitAmount(e.target.value)}
+                      placeholder="π.χ. 50"
+                      className="h-10 rounded-lg font-bold"
+                    />
+                  </div>
+                  <AlertDialogFooter className="gap-2">
+                    <AlertDialogCancel className="h-10 rounded-lg font-bold">{toGreekUpperCase('Ακύρωση')}</AlertDialogCancel>
+                    <Button
+                      onClick={handleInitMonth}
+                      disabled={isInitializing || !initAmount || parseFloat(initAmount) <= 0}
+                      className="h-10 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+                    >
+                      {isInitializing ? <Loader2 className="h-4 w-4 animate-spin" /> : toGreekUpperCase('Δημιουργία')}
+                    </Button>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          )}
         </div>
       )}
 
@@ -375,6 +539,37 @@ export default function AcademyUsersPage() {
                                 <p className="text-xs font-bold text-zinc-900 truncate w-full">{getSquadName(u.squad_id || u.squad_ids![0])}</p>
                              </div>
                         )}
+                        {showPayments && isAthleteGroup(u.groupId) && (() => {
+                          const payment = getPaymentForUser(u.id);
+                          if (!payment) return null;
+                          return (
+                            <button
+                              onClick={() => togglePayment(u.id)}
+                              className={cn(
+                                "flex items-center justify-between gap-3 p-3 rounded-xl col-span-2 transition-all active:scale-[0.98] border-2",
+                                payment.paid
+                                  ? "bg-emerald-50 border-emerald-200 hover:bg-emerald-100"
+                                  : "bg-red-50 border-red-200 hover:bg-red-100"
+                              )}
+                            >
+                              <div className="flex items-center gap-2.5">
+                                {payment.paid
+                                  ? <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+                                  : <XCircle className="h-5 w-5 text-red-500 shrink-0" />
+                                }
+                                <div className="text-left">
+                                  <p className={cn("text-sm font-black", payment.paid ? "text-emerald-700" : "text-red-600")}>
+                                    {payment.paid ? toGreekUpperCase('Εξοφλημένο') : toGreekUpperCase('Ανεξόφλητο')}
+                                  </p>
+                                  <p className="text-[9px] font-bold text-zinc-400 uppercase">{formatMonth(selectedMonth)}</p>
+                                </div>
+                              </div>
+                              <span className={cn("text-lg font-black", payment.paid ? "text-emerald-700" : "text-red-600")}>
+                                €{payment.amount}
+                              </span>
+                            </button>
+                          );
+                        })()}
                     </div>
                   </div>
                 );
@@ -389,6 +584,7 @@ export default function AcademyUsersPage() {
                     <TableHead className="h-10 px-4 text-[8px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Κατηγορία')}</TableHead>
                     <TableHead className="h-10 px-4 text-[8px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Επικοινωνία')}</TableHead>
                     <TableHead className="h-10 px-4 text-[8px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Πληροφορίες')}</TableHead>
+                    {showPayments && <TableHead className="h-10 px-4 text-[8px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Πληρωμή')}</TableHead>}
                     <TableHead className="h-10 px-4 text-right"></TableHead>
                   </TableRow>
                 </TableHeader>
@@ -437,6 +633,32 @@ export default function AcademyUsersPage() {
                             ))}
                           </div>
                         </TableCell>
+                        {showPayments && (
+                          <TableCell className="px-4 py-3 text-center">
+                            {isAthleteGroup(u.groupId) && (() => {
+                              const payment = getPaymentForUser(u.id);
+                              if (!payment) return <span className="text-[10px] text-zinc-300">—</span>;
+                              return (
+                                <button
+                                  onClick={() => togglePayment(u.id)}
+                                  className={cn(
+                                    "inline-flex items-center gap-2 px-4 py-2 rounded-xl font-black text-xs uppercase tracking-wider transition-all border-2 active:scale-95",
+                                    payment.paid
+                                      ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                                      : "bg-red-50 text-red-600 border-red-200 hover:bg-red-100"
+                                  )}
+                                >
+                                  {payment.paid
+                                    ? <CheckCircle2 className="h-4 w-4" />
+                                    : <XCircle className="h-4 w-4" />
+                                  }
+                                  €{payment.amount}
+                                  <span className="hidden xl:inline">— {payment.paid ? toGreekUpperCase('Εξοφλημένο') : toGreekUpperCase('Ανεξόφλητο')}</span>
+                                </button>
+                              );
+                            })()}
+                          </TableCell>
+                        )}
                         <TableCell className="px-4 py-3 text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>

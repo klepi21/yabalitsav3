@@ -161,6 +161,24 @@ export const DEFAULT_GROUPS: Omit<UserGroup, 'id' | 'venueId' | 'createdAt' | 'u
   },
 ];
 
+// ============================================
+// Academy Payment (monthly fee tracking)
+// ============================================
+
+export interface AcademyPayment {
+  id: string;
+  venueId: string;
+  userId: string;        // references AcademyUser.id
+  userName: string;      // denormalized for display
+  month: string;         // format: "YYYY-MM" (e.g., "2026-03")
+  amount: number;        // payment amount in euros
+  paid: boolean;
+  paidAt?: string;       // ISO date string
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 // Legacy type aliases for backward compatibility
 export type AcademyUserRole = 'admin' | 'coach' | 'parent' | 'athlete';
 export type ParentUser = AcademyUser & { fields: { email: string; phone: string; address: string } };
