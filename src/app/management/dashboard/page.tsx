@@ -35,7 +35,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { squadService } from '@/lib/academy-services';
+import { trainingService } from '@/lib/training-services';
 import { Squad } from '@/types/academy';
+import { TrainingSession } from '@/types/training';
 
 const FootballPitch = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -89,6 +91,7 @@ export default function DashboardPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [pitches, setPitches] = useState<Pitch[]>([]);
   const [squads, setSquads] = useState<Squad[]>([]);
+  const [trainings, setTrainings] = useState<TrainingSession[]>([]);
   const [venue, setVenue] = useState<Venue | null>(null);
   const [dataLoading, setDataLoading] = useState(true);
   const [isVenueInfoExpanded, setIsVenueInfoExpanded] = useState(false);
@@ -170,12 +173,16 @@ export default function DashboardPage() {
       setPitches(convertedPitches);
       setVenue(convertedVenue);
 
-      // Fetch squads for academy list
+      // Fetch squads and trainings for academy list
       try {
-        const squadsData = await squadService.getByVenue(venueOwner.venueId);
+        const [squadsData, trainingsData] = await Promise.all([
+          squadService.getByVenue(venueOwner.venueId),
+          trainingService.getByVenue(venueOwner.venueId)
+        ]);
         setSquads(squadsData);
+        setTrainings(trainingsData);
       } catch (err) {
-        console.error('Error loading squads:', err);
+        console.error('Error loading academy data:', err);
       }
 
       if (!convertedVenue && venueOwner.venueId) {
@@ -308,6 +315,13 @@ export default function DashboardPage() {
         return bookingDate >= today && bookingDate < tomorrow && booking.status !== 'completed';
       })
       .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+  };
+
+  const getTodaysTrainings = () => {
+    const today = new Date().toISOString().split('T')[0];
+    return trainings
+      .filter(t => t.date === today && t.status !== 'cancelled')
+      .sort((a, b) => a.startTime.localeCompare(b.startTime));
   };
 
   const getPlayersPerPitch = (pitchType: string) => {
@@ -637,91 +651,185 @@ export default function DashboardPage() {
         ))}
       </div>
 
-        {/* Today's Bookings - Full Width */}
-        <div className="space-y-8">
-           <div className="flex items-center justify-between pb-2">
-              <div className="flex items-center gap-4">
-                 <div className="h-12 w-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-lg">
-                    <Clock className="h-6 w-6 text-emerald-400" />
-                 </div>
-                 <div className="space-y-0.5">
-                    <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Σημερινές Κρατήσεις')}</h2>
-                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Πρόγραμμα ημέρας')}</p>
-                 </div>
-              </div>
-              <Button variant="outline" className="h-10 px-5 rounded-2xl border-none bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-black text-[10px] uppercase tracking-widest transition-all">
-                 {toGreekUpperCase('Προβολη ολων')}
-              </Button>
-           </div>
-
-           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {getTodaysBookings().slice(0, 4).length === 0 ? (
-                <div className="col-span-full py-12 text-center bg-white rounded-[2rem] border-2 border-dashed border-zinc-100 italic text-zinc-400 font-bold">
-                   Δεν υπάρχουν κρατήσεις για σήμερα
+        {/* Today's Schedules - Split Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+          {/* Today's Bookings */}
+          <div className="space-y-8">
+            <div className="flex items-center justify-between pb-2">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-lg">
+                      <Clock className="h-6 w-6 text-emerald-400" />
+                  </div>
+                  <div className="space-y-0.5">
+                      <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Σημερινές Κρατήσεις')}</h2>
+                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Πρόγραμμα ημέρας')}</p>
+                  </div>
                 </div>
-              ) : (
-                getTodaysBookings().slice(0, 4).map((booking) => {
-                  const pitch = pitches.find(p => p.id === booking.pitchId);
-                  return (
-                    <Card key={booking.id} className="rounded-[2.5rem] border-none bg-white shadow-xl shadow-zinc-200/30 overflow-hidden group hover:shadow-2xl hover:shadow-emerald-900/5 transition-all duration-500">
-                       <CardContent className="p-8">
-                          <div className="flex flex-col gap-6">
-                             {/* User Info Row */}
-                             <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-4">
-                                   <div className="h-12 w-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden">
-                                      <User className="h-6 w-6 text-emerald-600" />
-                                   </div>
-                                   <div className="space-y-0.5">
-                                      <h4 className="text-sm font-black text-zinc-900 uppercase tracking-tight">
-                                         {toGreekUpperCase(booking.userName || 'Unknown')}
-                                      </h4>
-                                      <div className="flex items-center gap-2">
-                                         <div className="h-1 w-1 rounded-full bg-emerald-500" />
-                                         <p className="text-[10px] font-bold text-zinc-400">REGISTERED</p>
-                                      </div>
-                                   </div>
-                                </div>
-                                <div className="text-right">
-                                   <p className="text-2xl font-black text-zinc-900 tracking-tighter">
-                                      {new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit'})}
-                                   </p>
-                                   <p className="text-[10px] font-black text-emerald-500 uppercase">STARTING</p>
-                                </div>
-                             </div>
+                <Button variant="outline" className="h-10 px-5 rounded-2xl border-none bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-black text-[10px] uppercase tracking-widest transition-all" asChild>
+                  <Link href="/management/bookings">
+                    {toGreekUpperCase('Προβολη ολων')}
+                  </Link>
+                </Button>
+            </div>
 
-                             {/* Details Row */}
-                             <div className="flex items-center gap-4 py-3 border-y border-zinc-50">
-                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-100">
-                                   <FootballPitch className="h-3 w-3 text-zinc-400" />
-                                   <span className="text-[10px] font-black text-zinc-600 uppercase tracking-tight">{pitch ? toGreekUpperCase(pitch.name) : 'FIELD'}</span>
-                                </div>
-                                {booking.userPhone && (
-                                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-100">
-                                      <Phone className="h-3 w-3 text-zinc-400" />
-                                      <span className="text-[10px] font-black text-zinc-600 tracking-tight">{booking.userPhone}</span>
-                                   </div>
-                                )}
-                             </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {getTodaysBookings().slice(0, 4).length === 0 ? (
+                  <div className="col-span-full py-12 text-center bg-white rounded-[2rem] border-2 border-dashed border-zinc-100 italic text-zinc-400 font-bold">
+                    Δεν υπάρχουν κρατήσεις για σήμερα
+                  </div>
+                ) : (
+                  getTodaysBookings().slice(0, 4).map((booking: Booking) => {
+                    const pitch = pitches.find(p => p.id === booking.pitchId);
+                    return (
+                      <Card key={booking.id} className="rounded-[2.5rem] border-none bg-white shadow-xl shadow-zinc-200/30 overflow-hidden group hover:shadow-2xl hover:shadow-emerald-900/5 transition-all duration-500">
+                        <CardContent className="p-8">
+                            <div className="flex flex-col gap-6">
+                              {/* User Info Row */}
+                              <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-4">
+                                    <div className="h-12 w-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden">
+                                        <User className="h-6 w-6 text-emerald-600" />
+                                    </div>
+                                    <div className="space-y-0.5">
+                                        <h4 className="text-sm font-black text-zinc-900 uppercase tracking-tight">
+                                          {toGreekUpperCase(booking.userName || 'Unknown')}
+                                        </h4>
+                                        <div className="flex items-center gap-2">
+                                          <div className="h-1 w-1 rounded-full bg-emerald-500" />
+                                          <p className="text-[10px] font-bold text-zinc-400">REGISTERED</p>
+                                        </div>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-2xl font-black text-zinc-900 tracking-tighter">
+                                        {new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit'})}
+                                    </p>
+                                    <p className="text-[10px] font-black text-emerald-500 uppercase">STARTING</p>
+                                  </div>
+                              </div>
 
-                             {/* Action Footer */}
-                             <div className="flex items-center gap-3">
-                                <div className="flex-1">
-                                   {getStatusBadge(booking.status)}
-                                </div>
-                                <Button size="icon" variant="outline" className="h-10 w-10 rounded-2xl border-zinc-100 hover:bg-emerald-50 hover:border-emerald-200 text-zinc-400 transition-all" asChild>
-                                   <Link href={`/management/bookings/${booking.id}`}>
-                                      <Eye className="h-4 w-4" />
-                                   </Link>
-                                </Button>
-                             </div>
-                          </div>
-                       </CardContent>
-                    </Card>
-                  );
-                })
-              )}
-           </div>
+                              {/* Details Row */}
+                              <div className="flex items-center gap-4 py-3 border-y border-zinc-50">
+                                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-100">
+                                    <FootballPitch className="h-3 w-3 text-zinc-400" />
+                                    <span className="text-[10px] font-black text-zinc-600 uppercase tracking-tight">{pitch ? toGreekUpperCase(pitch.name) : 'FIELD'}</span>
+                                  </div>
+                                  {booking.userPhone && (
+                                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-100">
+                                        <Phone className="h-3 w-3 text-zinc-400" />
+                                        <span className="text-[10px] font-black text-zinc-600 tracking-tight">{booking.userPhone}</span>
+                                    </div>
+                                  )}
+                              </div>
+
+                              {/* Action Footer */}
+                              <div className="flex items-center gap-3">
+                                  <div className="flex-1">
+                                    {getStatusBadge(booking.status)}
+                                  </div>
+                                  <Button size="icon" variant="outline" className="h-10 w-10 rounded-2xl border-zinc-100 hover:bg-emerald-50 hover:border-emerald-200 text-zinc-400 transition-all" asChild>
+                                    <Link href={`/management/bookings/${booking.id}`}>
+                                        <Eye className="h-4 w-4" />
+                                    </Link>
+                                  </Button>
+                              </div>
+                            </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })
+                )}
+            </div>
+          </div>
+
+          {/* Today's Trainings */}
+          <div className="space-y-8">
+            <div className="flex items-center justify-between pb-2">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-lg">
+                      <Trophy className="h-6 w-6 text-emerald-400" />
+                  </div>
+                  <div className="space-y-0.5">
+                      <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Σημερινές Προπονήσεις')}</h2>
+                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Πρόγραμμα ακαδημίας')}</p>
+                  </div>
+                </div>
+                <Button variant="outline" className="h-10 px-5 rounded-2xl border-none bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-black text-[10px] uppercase tracking-widest transition-all" asChild>
+                  <Link href="/management/academy/training">
+                    {toGreekUpperCase('Προβολη ολων')}
+                  </Link>
+                </Button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {getTodaysTrainings().slice(0, 4).length === 0 ? (
+                  <div className="col-span-full py-12 text-center bg-white rounded-[2rem] border-2 border-dashed border-zinc-100 italic text-zinc-400 font-bold">
+                    Δεν υπάρχουν προπονήσεις για σήμερα
+                  </div>
+                ) : (
+                  getTodaysTrainings().slice(0, 4).map((training: TrainingSession) => {
+                    const squad = squads.find(s => s.id === training.squadId);
+                    return (
+                      <Card key={training.id} className="rounded-[2.5rem] border-none bg-white shadow-xl shadow-zinc-200/30 overflow-hidden group hover:shadow-2xl hover:shadow-emerald-900/5 transition-all duration-500">
+                        <CardContent className="p-8">
+                            <div className="flex flex-col gap-6">
+                              {/* Session Info Row */}
+                              <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-4">
+                                    <div className="h-12 w-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden">
+                                        <Activity className="h-6 w-6 text-emerald-600" />
+                                    </div>
+                                    <div className="space-y-0.5">
+                                        <h4 className="text-sm font-black text-zinc-900 uppercase tracking-tight truncate max-w-[100px]">
+                                          {toGreekUpperCase(squad?.name || 'SQUAD')}
+                                        </h4>
+                                        <div className="flex items-center gap-2">
+                                          <div className="h-1 w-1 rounded-full bg-emerald-500" />
+                                          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{training.type}</p>
+                                        </div>
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-2xl font-black text-zinc-900 tracking-tighter">
+                                        {training.startTime}
+                                    </p>
+                                    <p className="text-[10px] font-black text-emerald-500 uppercase">START</p>
+                                  </div>
+                              </div>
+
+                              {/* Details Row */}
+                              <div className="flex items-center gap-4 py-3 border-y border-zinc-50">
+                                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-100">
+                                    <User className="h-3 w-3 text-zinc-400" />
+                                    <span className="text-[10px] font-black text-zinc-600 uppercase tracking-tight">{toGreekUpperCase(training.coachName || 'COACH')}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-100">
+                                    <Clock className="h-3 w-3 text-zinc-400" />
+                                    <span className="text-[10px] font-black text-zinc-600 tracking-tight">{training.endTime} END</span>
+                                  </div>
+                              </div>
+
+                              {/* Action Footer */}
+                              <div className="flex items-center gap-3">
+                                  <div className="flex-1">
+                                    <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 uppercase font-black text-[9px] px-2 py-0">
+                                      {toGreekUpperCase(training.status)}
+                                    </Badge>
+                                  </div>
+                                  <Button size="icon" variant="outline" className="h-10 w-10 rounded-2xl border-zinc-100 hover:bg-emerald-50 hover:border-emerald-200 text-zinc-400 transition-all" asChild>
+                                    <Link href={`/management/academy/training`}>
+                                        <Eye className="h-4 w-4" />
+                                    </Link>
+                                  </Button>
+                              </div>
+                            </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })
+                )}
+            </div>
+          </div>
         </div>
 
       {/* 50/50 Row for Academies and Pitches */}
