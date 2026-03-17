@@ -31,6 +31,7 @@ import {
   User,
   Search,
   Trophy,
+  Smile,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -675,8 +676,14 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {getTodaysBookings().slice(0, 4).length === 0 ? (
-                  <div className="col-span-full py-12 text-center bg-white rounded-[2rem] border-2 border-dashed border-zinc-100 italic text-zinc-400 font-bold">
-                    Δεν υπάρχουν κρατήσεις για σήμερα
+                  <div className="col-span-full">
+                    <Card className="rounded-[2.5rem] border-2 border-dashed border-zinc-100 bg-zinc-50/50 shadow-none flex flex-col items-center justify-center p-12 text-center group transition-all hover:bg-zinc-50">
+                      <div className="h-16 w-16 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center mb-4 transition-transform group-hover:scale-110 shadow-sm">
+                        <Smile className="h-8 w-8 text-emerald-400" />
+                      </div>
+                      <h3 className="text-zinc-900 font-black uppercase tracking-tight">{toGreekUpperCase('Δεν υπάρχουν άλλες κρατήσεις σήμερα')}</h3>
+                      <p className="text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-widest">{toGreekUpperCase('Ολα ετοιμα για το επομενο match')}</p>
+                    </Card>
                   </div>
                 ) : (
                   getTodaysBookings().slice(0, 4).map((booking: Booking) => {
@@ -764,8 +771,14 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {getTodaysTrainings().slice(0, 4).length === 0 ? (
-                  <div className="col-span-full py-12 text-center bg-white rounded-[2rem] border-2 border-dashed border-zinc-100 italic text-zinc-400 font-bold">
-                    Δεν υπάρχουν προπονήσεις για σήμερα
+                  <div className="col-span-full">
+                    <Card className="rounded-[2.5rem] border-2 border-dashed border-zinc-100 bg-zinc-50/50 shadow-none flex flex-col items-center justify-center p-12 text-center group transition-all hover:bg-zinc-50">
+                      <div className="h-16 w-16 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center mb-4 transition-transform group-hover:scale-110 shadow-sm">
+                        <Smile className="h-8 w-8 text-emerald-400" />
+                      </div>
+                      <h3 className="text-zinc-900 font-black uppercase tracking-tight">{toGreekUpperCase('Δεν υπάρχουν άλλες προπονήσεις σήμερα')}</h3>
+                      <p className="text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-widest">{toGreekUpperCase('Η ακαδημια εχει πρεσαρει αρκετα για σημερα')}</p>
+                    </Card>
                   </div>
                 ) : (
                   getTodaysTrainings().slice(0, 4).map((training: TrainingSession) => {

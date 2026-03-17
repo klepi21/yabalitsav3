@@ -7,7 +7,7 @@ import { useMemo, Suspense, useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { venueService } from '@/lib/firebase-services';
-import { Loader2, QrCode } from 'lucide-react';
+import { Loader2, QrCode, Download, Printer, ExternalLink, Copy, Check } from 'lucide-react';
 import { toGreekUpperCase } from '@/lib/utils';
 
 function QRInner() {
@@ -15,6 +15,7 @@ function QRInner() {
   const { venueOwner } = useAuth();
   const [venueName, setVenueName] = useState<string>('');
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
   const paramUrl = params.get('url') || '';
 
   useEffect(() => {
@@ -42,7 +43,6 @@ function QRInner() {
   const fullUrl = useMemo(() => {
     const url = paramUrl || (venueSlug ? `/book/${venueSlug}` : '');
     if (!url) return '';
-    // Always use production domain for QR
     const BASE = 'https://yabalitsa.com';
     try {
       const isAbsolute = /^https?:\/\//i.test(url);
@@ -52,6 +52,31 @@ function QRInner() {
       return `${BASE}${url.startsWith('/') ? '' : '/'}${url}`;
     }
   }, [paramUrl, venueSlug]);
+
+  const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=${encodeURIComponent(fullUrl)}`;
+
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(qrImageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `qr-booking-${venueSlug || 'yabalitsa'}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download failed:', error);
+    }
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(fullUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   if (loading) {
     return (
@@ -63,51 +88,108 @@ function QRInner() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
-      {/* Print styles: show only the QR when printing */}
+    <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-50 p-6 md:p-12 overflow-hidden relative">
       <style>{`
         @media print {
           .no-print { display: none !important; }
-          .print-qr { display: block !important; }
-          html, body { padding: 0; margin: 0; }
-          img { max-width: 100%; height: auto; }
+          .print-qr { display: block !important; margin: 0 auto; width: 300px !important; height: 300px !important; }
+          body { background: white !important; }
         }
       `}</style>
 
-      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8 w-full max-w-xl text-center">
-        <h1 className="no-print text-2xl font-bold text-gray-900 mb-2">QR Κράτησης</h1>
-        <p className="no-print text-gray-600 mb-4">Σκανάρετε το QR για να ανοίξει η σελίδα κράτησης του γηπέδου.</p>
+      {/* Background Ornaments */}
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[100px] -mr-64 -mt-64 no-print" />
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[100px] -ml-64 -mb-64 no-print" />
 
-        {fullUrl ? (
-          <>
-            <Image
-              src={`https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&data=${encodeURIComponent(fullUrl)}`}
-              alt="QR για Σελίδα Κράτησης"
-              width={1200}
-              height={1200}
-              className="print-qr mx-auto w-full max-w-md h-auto"
-              unoptimized
-            />
-            <div className="no-print mt-6 flex items-center justify-center gap-3">
-              <button
-                onClick={() => window.print()}
-                className="px-4 py-2 rounded-lg bg-gray-900 text-white text-sm font-medium hover:bg-gray-800"
-              >
-                Εκτύπωση QR
-              </button>
-              <a
-                href={fullUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-900 bg-white hover:bg-gray-50"
-              >
-                Άνοιγμα Σελίδας Κράτησης
-              </a>
+      <div className="max-w-2xl w-full space-y-8 relative z-10">
+        <div className="text-center space-y-2 no-print">
+            <div className="inline-flex items-center justify-center h-16 w-16 rounded-[2rem] bg-zinc-900 shadow-xl shadow-zinc-200 mb-4 animate-bounce-slow">
+              <QrCode className="h-8 w-8 text-emerald-400" />
             </div>
-          </>
-        ) : (
-          <div className="no-print text-red-600">Δεν βρέθηκε URL.</div>
-        )}
+            <h1 className="text-4xl font-black text-zinc-900 tracking-tight flex items-center justify-center gap-3">
+              QR <span className="text-emerald-500">BOOKING</span>
+            </h1>
+            <p className="text-sm font-bold text-zinc-400 uppercase tracking-[0.2em]">{toGreekUpperCase('Δημιουργία κωδικού για τη σελίδα σας')}</p>
+        </div>
+
+        <div className="bg-white rounded-[3rem] shadow-2xl shadow-zinc-200 p-8 md:p-12 border border-black/[0.03] relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent pointer-events-none" />
+          
+          <div className="relative flex flex-col items-center gap-8">
+            {fullUrl ? (
+              <>
+                {/* QR Container */}
+                <div className="relative p-6 bg-white rounded-[2rem] border border-zinc-100 shadow-xl group-hover:scale-[1.02] transition-transform duration-700">
+                  <Image
+                    src={qrImageUrl}
+                    alt="QR Booking"
+                    width={400}
+                    height={400}
+                    className="w-full max-w-[280px] h-auto rounded-xl print-qr"
+                    unoptimized
+                  />
+                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-zinc-900 text-white text-[10px] font-black rounded-full shadow-lg no-print">
+                    SCAN ME
+                  </div>
+                </div>
+
+                {/* URL Display */}
+                <div className="w-full no-print">
+                  <div className="flex items-center gap-2 p-4 bg-zinc-50 rounded-2xl border border-zinc-100 group/link">
+                    <div className="flex-1 truncate">
+                      <p className="text-[10px] font-bold text-zinc-400 uppercase mb-0.5 tracking-widest">{toGreekUpperCase('Σύνδεσμος Κράτησης')}</p>
+                      <p className="text-xs font-black text-zinc-900 truncate">{fullUrl}</p>
+                    </div>
+                    <button 
+                      onClick={handleCopy}
+                      className="h-10 w-10 flex items-center justify-center bg-white border border-zinc-100 rounded-xl hover:bg-zinc-900 hover:text-white transition-all shadow-sm active:scale-95"
+                    >
+                      {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                    </button>
+                    <a 
+                      href={fullUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="h-10 w-10 flex items-center justify-center bg-white border border-zinc-100 rounded-xl hover:bg-emerald-500 hover:text-white transition-all shadow-sm active:scale-95"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  </div>
+                </div>
+
+                {/* Main Actions */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full no-print pt-4 border-t border-zinc-50">
+                   <button
+                    onClick={handleDownload}
+                    className="h-14 flex items-center justify-center gap-3 bg-zinc-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-800 transition-all active:scale-95 shadow-xl shadow-zinc-200 group/btn"
+                   >
+                     <Download className="h-4 w-4 text-emerald-400 group-hover:animate-bounce" />
+                     {toGreekUpperCase('Κατέβασμα QR')}
+                   </button>
+                   <button
+                    onClick={() => window.print()}
+                    className="h-14 flex items-center justify-center gap-3 bg-white text-zinc-900 border border-zinc-100 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-50 transition-all active:scale-95 shadow-sm group/btn"
+                   >
+                     <Printer className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900" />
+                     {toGreekUpperCase('Εκτύπωση')}
+                   </button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-12 space-y-4">
+                <div className="h-16 w-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto">
+                   <QrCode className="h-8 w-8 text-red-500 opacity-20" />
+                </div>
+                <p className="text-zinc-400 font-bold uppercase tracking-widest">{toGreekUpperCase('Δεν βρέθηκε URL κράτησης')}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <p className="text-center text-[10px] font-bold text-zinc-400 no-print uppercase tracking-widest leading-relaxed">
+          {toGreekUpperCase('Τοποθετήστε τον κωδικό στην είσοδο του γηπέδου')}<br/>
+          {toGreekUpperCase('για να διευκολύνετε τις κρατήσεις των πελατών σας')}
+        </p>
       </div>
     </div>
   );
