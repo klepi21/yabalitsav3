@@ -7,8 +7,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import AcademyUserForm from '@/components/AcademyUserForm';
 import { academyUserService, userGroupService, squadService } from '@/lib/academy-services';
 import { AcademyUser, UserGroup, Squad } from '@/types/academy';
-import { Loader2, ArrowLeft, Pencil, Users, AlertCircle } from 'lucide-react';
+import { Pencil, ArrowLeft, Users, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toGreekUpperCase } from '@/lib/utils';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -121,14 +122,14 @@ export default function EditAcademyUserPage({ params }: PageProps) {
   if (!user) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="mx-auto h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center mb-4">
-            <Users className="h-6 w-6 text-zinc-400" />
+        <div className="bg-white rounded-[3rem] border border-zinc-100 p-16 text-center shadow-sm max-w-lg w-full">
+          <div className="mx-auto h-24 w-24 rounded-[2rem] bg-zinc-50 flex items-center justify-center mb-8 shadow-inner">
+            <Users className="h-12 w-12 text-zinc-200" />
           </div>
-          <h2 className="text-lg font-semibold text-zinc-900 mb-1">Ο χρήστης δεν βρέθηκε</h2>
-          <p className="text-sm text-zinc-400 mb-5">Ο χρήστης που αναζητάτε δεν υπάρχει.</p>
-          <Button asChild>
-            <Link href="/management/academy/users">Πίσω στους Χρήστες</Link>
+          <h2 className="text-3xl font-black text-zinc-900 mb-2 uppercase tracking-tight">{toGreekUpperCase('Δεν βρέθηκε')}</h2>
+          <p className="text-lg font-bold text-zinc-400 mb-10 uppercase tracking-tight">{toGreekUpperCase('Ο χρήστης που αναζητάτε δεν υπάρχει.')}</p>
+          <Button asChild className="h-16 px-10 rounded-2xl bg-zinc-900 hover:bg-black text-white font-black text-lg uppercase tracking-widest shadow-xl active:scale-95">
+            <Link href="/management/academy/users">{toGreekUpperCase('Πίσω στους Χρήστες')}</Link>
           </Button>
         </div>
       </div>
@@ -138,42 +139,48 @@ export default function EditAcademyUserPage({ params }: PageProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" className="h-9 w-9 border-zinc-200 shrink-0" asChild>
-          <Link href="/management/academy/users">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </Button>
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
-            <Pencil className="h-5 w-5 text-amber-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Επεξεργασία Χρήστη</h1>
-            <p className="text-sm text-zinc-500 mt-0.5">
-              {user.displayName} {userGroup ? `(${userGroup.name})` : ''}
-            </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-10">
+        <div className="flex items-center gap-8">
+           <Button variant="outline" size="icon" className="h-16 w-16 rounded-2xl border-2 border-zinc-100 hover:bg-zinc-50 hover:border-emerald-200 hover:text-emerald-600 transition-all shrink-0 group" asChild>
+            <Link href="/management/academy/users">
+              <ArrowLeft className="h-8 w-8 text-zinc-400 group-hover:text-emerald-500 transition-colors" />
+            </Link>
+          </Button>
+          <div className="flex items-center gap-6">
+            <div className="h-20 w-20 rounded-[1.5rem] bg-zinc-900 flex items-center justify-center text-white shadow-2xl shadow-zinc-200 shrink-0">
+              <Pencil className="h-10 w-10 text-emerald-400" />
+            </div>
+            <div className="space-y-1">
+              <h1 className="text-4xl font-black tracking-tight text-zinc-900 uppercase">
+                {toGreekUpperCase('Επεξεργασία Χρήστη')}
+              </h1>
+              <p className="text-xl font-bold text-zinc-400 uppercase tracking-tight">
+                {user.displayName} {userGroup ? `(${userGroup.name})` : ''}
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4">
+        <div className="bg-red-50 border border-red-100 rounded-3xl p-6 animate-in fade-in slide-in-from-top-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
-              <p className="text-sm text-destructive">{error}</p>
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-red-100 flex items-center justify-center">
+                <AlertCircle className="h-6 w-6 text-red-600" />
+              </div>
+              <p className="text-red-700 font-black uppercase text-lg">{toGreekUpperCase(error)}</p>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => setError(null)} className="text-destructive/60 hover:text-destructive shrink-0">
-              Κλείσιμο
+            <Button variant="ghost" size="sm" onClick={() => setError(null)} className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 font-black uppercase">
+              {toGreekUpperCase('Κλείσιμο')}
             </Button>
           </div>
         </div>
       )}
 
       {/* Form Card */}
-      <div className="rounded-xl border border-zinc-100/60 bg-white p-6 sm:p-8">
+      <div className="rounded-[3rem] border border-zinc-100 bg-white p-10 lg:p-16 shadow-sm overflow-hidden mb-20 animate-in fade-in slide-in-from-bottom-8 duration-500">
         <AcademyUserForm
           venueId={venueId}
           groups={groups}

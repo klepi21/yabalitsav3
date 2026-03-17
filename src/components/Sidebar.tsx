@@ -106,7 +106,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                 <button
                   onClick={() => toggleMenu(item.name)}
                   className={cn(
-                    'flex w-full items-center justify-between rounded-xl px-4 py-3 text-[15px] font-medium transition-all duration-200',
+                    'flex w-full items-center justify-between rounded-xl px-5 py-4 text-[16px] font-bold transition-all duration-200 min-h-[56px]',
                     isParentActive
                       ? 'bg-white/10 text-white shadow-sm'
                       : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'
@@ -137,9 +137,9 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                           href={child.href}
                           onClick={onNavigate}
                           className={cn(
-                            'flex items-center gap-4 rounded-lg px-4 py-2.5 text-[15px] font-medium transition-colors',
+                            'flex items-center gap-4 rounded-lg px-5 py-3 text-[16px] font-medium transition-colors min-h-[48px]',
                             isChildItemActive
-                              ? 'text-emerald-400 font-semibold'
+                              ? 'text-emerald-400 font-bold'
                               : 'text-slate-400 hover:text-slate-100'
                           )}
                         >
@@ -160,9 +160,9 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
               href={item.href!}
               onClick={onNavigate}
               className={cn(
-                'flex items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-medium transition-all duration-200',
+                'flex items-center gap-4 rounded-xl px-5 py-4 text-[16px] font-bold transition-all duration-200 min-h-[56px]',
                 isActive
-                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-900/20'
+                  ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/40 scale-[1.02]'
                   : 'text-slate-400 hover:bg-white/5 hover:text-slate-100'
               )}
             >
@@ -186,7 +186,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
             signOut();
             onNavigate?.();
           }}
-          className="flex w-full items-center gap-4 rounded-xl px-4 py-3 text-[15px] font-medium text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200"
+          className="flex w-full items-center gap-4 rounded-xl px-5 py-4 text-[16px] font-bold text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 min-h-[56px]"
         >
           <LogOut className="h-5 w-5 opacity-60" />
           <span>{toGreekUpperCase('Αποσύνδεση')}</span>
@@ -217,10 +217,10 @@ export default function Sidebar() {
       <div className="lg:hidden fixed top-6 left-6 z-40">
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-xl p-3 bg-white shadow-lg border border-zinc-100 text-zinc-900 hover:bg-zinc-50 transition-all active:scale-95"
+          className="inline-flex items-center justify-center rounded-2xl p-4 bg-white shadow-2xl border border-zinc-100 text-zinc-900 hover:bg-zinc-50 transition-all active:scale-90 ring-4 ring-black/5"
           onClick={() => setSidebarOpen(true)}
         >
-          <Menu className="h-6 w-6" />
+          <Menu className="h-8 w-8" />
         </button>
       </div>
     </>

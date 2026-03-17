@@ -95,6 +95,12 @@ body {
   line-height: 1.6;
 }
 
+@media (min-width: 768px) {
+  body {
+    font-size: 17px;
+  }
+}
+
 /* Premium selection color */
 ::selection {
   background: rgba(5, 150, 105, 0.15);
@@ -121,12 +127,6 @@ body {
   background: rgba(0, 0, 0, 0.2);
 }
 
-/* Accessible utility for large clickable areas */
-.touch-target {
-  min-height: 44px;
-  min-width: 44px;
-}
-
 /* Force 24-hour format for time inputs */
 input[type="time"] {
   -webkit-appearance: none;
@@ -134,12 +134,34 @@ input[type="time"] {
   appearance: none;
 }
 
-/* Better card shadow for depth */
+/* Accessible utility for large clickable areas */
+.touch-target {
+  min-height: 48px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chunky-button {
+  height: 3.5rem !important; /* 56px */
+  border-radius: 1rem !important;
+  font-weight: 800 !important;
+  font-size: 1.125rem !important; /* text-lg */
+}
+
+.high-legibility {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+}
+
+/* Better card shadow for depth - optimized for older eyes to see boundaries */
 .glass-card {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  border: 2px solid var(--border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .premium-card {

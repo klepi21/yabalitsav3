@@ -10,7 +10,7 @@ import { Loader2, Plus, Pencil, Trash2, Trophy, Users as UsersIcon, AlertCircle,
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { cn, toGreekUpperCase } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -116,38 +116,48 @@ export default function SquadsPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-        <div>
-          <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-2">Τμήματα</h1>
-          <p className="text-lg font-medium text-zinc-500">Οργανώστε τους αθλητές σας σε ηλικιακές και αγωνιστικές ομάδες.</p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
+        <div className="flex items-center gap-6">
+           <div className="h-20 w-20 rounded-[1.5rem] bg-zinc-900 flex items-center justify-center text-white shadow-2xl shadow-zinc-200 shrink-0">
+             <Trophy className="h-10 w-10 text-emerald-400" />
+           </div>
+           <div className="space-y-1">
+             <h1 className="text-5xl font-black tracking-tight text-zinc-900 uppercase">
+               {toGreekUpperCase('Τμήματα')}
+             </h1>
+             <p className="text-xl font-bold text-zinc-400 uppercase tracking-tight">
+               {toGreekUpperCase('ΟΡΓΑΝΩΣΗ ΑΘΛΗΤΩΝ ΣΕ ΟΜΑΔΕΣ')}
+             </p>
+           </div>
         </div>
-        <Button asChild className="h-14 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black shadow-lg shadow-emerald-200 transition-all hover:translate-y-[-2px] active:translate-y-[1px]">
-          <Link href="/management/academy/squads/new" className="flex items-center gap-2">
-            <Plus className="h-5 w-5" />
-            Νέο Τμήμα
+        
+        <Button asChild className="h-16 px-10 rounded-2xl bg-zinc-900 hover:bg-black text-white font-black text-lg shadow-xl hover:-translate-y-1 transition-all active:scale-95 group">
+          <Link href="/management/academy/squads/new" className="flex items-center gap-3">
+            <Plus className="h-7 w-7 text-emerald-400 group-hover:scale-110 transition-transform" />
+            {toGreekUpperCase('Νέο Τμήμα')}
           </Link>
         </Button>
       </div>
 
       {/* Stats row */}
-      <div className="flex flex-col md:flex-row items-center gap-4">
-        <div className="flex items-center gap-4 bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm min-w-[280px]">
-          <div className="h-14 w-14 rounded-2xl bg-violet-50 flex items-center justify-center text-violet-600 shrink-0">
-            <Trophy className="h-7 w-7" />
+      <div className="flex flex-col md:flex-row items-center gap-6">
+        <div className="flex items-center gap-6 bg-white p-8 rounded-[2rem] border border-zinc-100 shadow-sm min-w-[320px] group hover:shadow-xl hover:border-emerald-100 transition-all duration-300">
+          <div className="h-16 w-16 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-300 group-hover:bg-emerald-50 group-hover:text-emerald-500 transition-all shadow-inner">
+            <Trophy className="h-8 w-8" />
           </div>
-          <div>
-            <p className="text-3xl font-black text-zinc-900 leading-none mb-1">{squads.length}</p>
-            <p className="text-xs font-black uppercase tracking-widest text-zinc-400">Σύνολο Τμημάτων</p>
+          <div className="space-y-1">
+            <p className="text-4xl font-black text-zinc-900 group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{squads.length}</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{toGreekUpperCase('Σύνολο Τμημάτων')}</p>
           </div>
         </div>
 
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-400" />
+        <div className="relative flex-1 w-full group">
+          <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-zinc-300 group-focus-within:text-emerald-500 transition-colors" />
           <Input
-            placeholder="Αναζήτηση τμημάτων με όνομα ή ηλικία..."
+            placeholder={toGreekUpperCase('Αναζήτηση τμημάτων με όνομα ή ηλικία...')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-14 pl-12 pr-4 bg-white rounded-2xl border-zinc-100 shadow-sm focus:ring-emerald-500 font-medium text-lg placeholder:text-zinc-400"
+            className="h-16 pl-16 pr-6 bg-white border-none rounded-2xl shadow-sm focus:ring-4 focus:ring-emerald-500/10 font-black text-lg placeholder:text-zinc-300 w-full transition-all uppercase"
           />
         </div>
       </div>
@@ -189,43 +199,43 @@ export default function SquadsPage() {
                     color.hover
                 )}
               >
-                <div className="flex items-center justify-between mb-8">
-                  <div className="flex items-center gap-4">
-                    <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 shadow-sm", color.bg)}>
-                      <Trophy className="h-7 w-7" />
+                <div className="flex items-center justify-between mb-10">
+                  <div className="flex items-center gap-5">
+                    <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", color.bg)}>
+                      <Trophy className="h-8 w-8" />
                     </div>
-                    <div>
-                      <h4 className="text-xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{squad.name}</h4>
-                      <p className="text-xs font-black uppercase tracking-widest text-zinc-400">{squad.ageGroup}</p>
+                    <div className="space-y-1">
+                      <h4 className="text-2xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{toGreekUpperCase(squad.name)}</h4>
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{toGreekUpperCase(squad.ageGroup)}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-4 mb-8 flex-1">
-                  <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-2xl group-hover:bg-zinc-100/50 transition-colors">
-                    <span className="text-xs font-black uppercase tracking-widest text-zinc-400 flex items-center gap-2">
-                      <UsersIcon className="h-4 w-4" />
-                      Αθλητές
+                <div className="space-y-6 mb-10 flex-1">
+                  <div className="flex items-center justify-between p-6 bg-zinc-50 rounded-[1.5rem] group-hover:bg-white border border-transparent group-hover:border-emerald-100 group-hover:shadow-lg transition-all">
+                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-3">
+                      <UsersIcon className="h-5 w-5 text-emerald-500/50" />
+                      {toGreekUpperCase('Αθλητές')}
                     </span>
-                    <span className="text-xl font-black text-zinc-900">{athleteCount}</span>
+                    <span className="text-3xl font-black text-zinc-900 group-hover:text-emerald-600 transition-colors">{athleteCount}</span>
                   </div>
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Προπονητής</p>
-                    <p className="text-sm font-bold text-zinc-700 truncate">
-                      {getCoachNames(squad.coachIds)}
+                  <div className="space-y-2 px-1">
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{toGreekUpperCase('Προπονητής')}</p>
+                    <p className="text-[15px] font-extrabold text-zinc-600 uppercase tracking-tight truncate">
+                      {toGreekUpperCase(getCoachNames(squad.coachIds))}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex gap-2 pt-6 border-t border-zinc-50">
-                  <Button variant="ghost" className="flex-1 h-12 rounded-xl font-bold bg-zinc-50 hover:bg-emerald-50 hover:text-emerald-700" asChild>
+                <div className="flex gap-4 pt-8 border-t border-zinc-100 relative z-10">
+                  <Button variant="outline" className="flex-1 h-14 rounded-2xl font-black text-xs uppercase tracking-widest border-zinc-100 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 shadow-sm transition-all active:scale-95" asChild>
                     <Link href={`/management/academy/squads/${squad.id}/edit`}>
-                      Επεξεργασία
+                      {toGreekUpperCase('Επεξεργασία')}
                     </Link>
                   </Button>
-                  <Button variant="outline" className="flex-1 h-12 rounded-xl font-bold border-zinc-100 hover:bg-zinc-50" asChild>
+                  <Button variant="outline" className="flex-1 h-14 rounded-2xl font-black text-xs uppercase tracking-widest border-zinc-100 hover:bg-zinc-900 hover:text-white hover:border-zinc-900 shadow-sm transition-all active:scale-95" asChild>
                     <Link href={`/management/academy/users?squad=${squad.id}`}>
-                      Ρόστερ
+                      {toGreekUpperCase('Ρόστερ')}
                     </Link>
                   </Button>
                   
@@ -233,10 +243,10 @@ export default function SquadsPage() {
                     <AlertDialogTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="h-12 w-12 p-0 rounded-xl text-red-400 hover:text-red-600 hover:bg-red-50"
-                        onClick={() => setDeleteConfirm(squad.id)}
+                        className="h-14 w-14 rounded-2xl text-zinc-300 hover:text-red-600 hover:bg-red-50 hover:border-red-100 border border-transparent transition-all active:scale-90"
+                        onClick={(e) => { e.stopPropagation(); setDeleteConfirm(squad.id); }}
                       >
-                        <Trash2 className="h-5 w-5" />
+                        <Trash2 className="h-6 w-6" />
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent className="rounded-[2.5rem] p-10">

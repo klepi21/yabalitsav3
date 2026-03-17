@@ -9,6 +9,7 @@ import { academyUserService, userGroupService, squadService } from '@/lib/academ
 import { AcademyUser, UserGroup, Squad } from '@/types/academy';
 import { Loader2, ArrowLeft, UserPlus, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { toGreekUpperCase } from '@/lib/utils';
 
 export default function NewAcademyUserPage() {
   const router = useRouter();
@@ -96,20 +97,24 @@ export default function NewAcademyUserPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button variant="outline" size="icon" className="h-9 w-9 border-zinc-200 shrink-0" asChild>
+      <div className="flex items-center gap-6 pb-6 border-b border-zinc-100">
+        <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-zinc-200 shrink-0 hover:bg-zinc-50 hover:border-emerald-200 hover:text-emerald-600 transition-all active:scale-90" asChild>
           <Link href="/management/academy/users">
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-6 w-6" />
           </Link>
         </Button>
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-            <UserPlus className="h-5 w-5 text-emerald-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Νέος Χρήστης</h1>
-            <p className="text-sm text-zinc-500 mt-0.5">Δημιουργία νέου μέλους ακαδημίας</p>
-          </div>
+        <div className="flex items-center gap-5">
+           <div className="h-16 w-16 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-xl shadow-zinc-200 shrink-0">
+             <UserPlus className="h-8 w-8 text-emerald-400" />
+           </div>
+           <div className="space-y-1">
+             <h1 className="text-4xl font-black tracking-tight text-zinc-900 uppercase">
+               {toGreekUpperCase('Νέος Χρήστης')}
+             </h1>
+             <p className="text-lg font-bold text-zinc-400 uppercase tracking-tight">
+               {toGreekUpperCase('ΔΗΜΙΟΥΡΓΙΑ ΝΕΟΥ ΜΕΛΟΥΣ ΑΚΑΔΗΜΙΑΣ')}
+             </p>
+           </div>
         </div>
       </div>
 
@@ -134,7 +139,7 @@ export default function NewAcademyUserPage() {
       )}
 
       {/* Form Card */}
-      <div className="rounded-xl border border-zinc-100/60 bg-white p-6 sm:p-8">
+      <div className="rounded-[3rem] border border-zinc-100 bg-white p-10 sm:p-14 shadow-sm overflow-hidden">
         <AcademyUserForm
           venueId={venueId}
           groups={groups}

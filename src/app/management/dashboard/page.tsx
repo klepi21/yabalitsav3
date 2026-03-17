@@ -24,6 +24,9 @@ import {
   Loader2,
   Pencil,
   Eye,
+  LayoutDashboard,
+  Clock,
+  Save,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -530,54 +533,60 @@ export default function DashboardPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2">
-        <div className="space-y-1">
-          <h1 className="text-3xl font-black tracking-tight text-zinc-900 sm:text-4xl uppercase">
-            {toGreekUpperCase('Πίνακας Ελέγχου')}
-          </h1>
-          <p className="text-[16px] font-medium text-zinc-500">
-            Καλώς ορίσατε στο σύστημα διαχείρισης του <span className="text-emerald-600 font-bold">{venue?.name || 'γηπέδου σας'}</span>
-          </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 pb-4">
+        <div className="flex items-center gap-6">
+           <div className="h-20 w-20 rounded-[1.5rem] bg-zinc-900 flex items-center justify-center text-white shadow-2xl shadow-zinc-200 shrink-0">
+             <LayoutDashboard className="h-10 w-10 text-emerald-400" />
+           </div>
+           <div className="space-y-1">
+             <h1 className="text-5xl font-black tracking-tight text-zinc-900 uppercase">
+               {toGreekUpperCase('Πίνακας Ελέγχου')}
+             </h1>
+             <p className="text-xl font-bold text-zinc-400 uppercase tracking-tight">
+               {toGreekUpperCase('ΔΙΑΧΕΙΡΙΣΗ ΓΗΠΕΔΟΥ')} <span className="text-emerald-500">{venue?.name ? toGreekUpperCase(venue.name) : ''}</span>
+             </p>
+           </div>
         </div>
-        <div className="flex items-center gap-3">
+        
+        <div className="flex flex-wrap items-center gap-4">
           <Button 
             size="lg" 
             onClick={() => setShowQuickBooking(true)}
-            className="h-12 px-6 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-200"
+            className="h-16 px-8 rounded-2xl bg-zinc-900 hover:bg-black text-white font-black text-lg shadow-xl hover:-translate-y-1 transition-all active:scale-95 group"
           >
-            <Plus className="h-5 w-5 mr-2" />
-            Γρήγορη Κράτηση
+            <Plus className="h-6 w-6 mr-3 text-emerald-400 group-hover:scale-110 transition-transform" />
+            {toGreekUpperCase('Γρήγορη Κράτηση')}
           </Button>
 
           <DropdownMenu open={showBookingMenu} onOpenChange={setShowBookingMenu}>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="lg" className="h-12 px-5 rounded-xl font-bold border-zinc-200 hover:bg-zinc-50 text-zinc-700 transition-all active:scale-95">
-                Σελίδα Booking
-                <ChevronDown className="h-4 w-4 ml-2 opacity-50" />
+              <Button variant="outline" size="lg" className="h-16 px-6 rounded-2xl border-zinc-200 hover:bg-zinc-50 text-zinc-900 font-extrabold transition-all active:scale-95 shadow-sm">
+                {toGreekUpperCase('ΣΕΛΙΔΑ BOOKING')}
+                <ChevronDown className="h-5 w-5 ml-3 opacity-40" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-2xl border-zinc-100">
+            <DropdownMenuContent align="end" className="w-64 p-3 rounded-2xl shadow-2xl border-zinc-100 animate-in fade-in slide-in-from-top-2">
               <DropdownMenuItem
-                className="rounded-xl px-4 py-3 font-semibold cursor-pointer"
+                className="rounded-xl px-5 py-4 font-black uppercase tracking-tight cursor-pointer text-[15px] group"
                 onClick={() => {
                   setShowBookingMenu(false);
                   if (bookingPath) router.push(bookingPath);
                 }}
                 disabled={!bookingPath}
               >
-                <Eye className="h-4 w-4 mr-3 text-zinc-400" />
-                Άνοιγμα Σελίδας
+                <Eye className="h-5 w-5 mr-4 text-zinc-400 group-hover:text-emerald-500 transition-colors" />
+                {toGreekUpperCase('Άνοιγμα Σελίδας')}
               </DropdownMenuItem>
               <DropdownMenuItem
-                className="rounded-xl px-4 py-3 font-semibold cursor-pointer"
+                className="rounded-xl px-5 py-4 font-black uppercase tracking-tight cursor-pointer text-[15px] group mt-1"
                 onClick={() => {
                   setShowBookingMenu(false);
                   if (bookingPath) window.open(`/management/booking/qr?url=${encodeURIComponent(bookingPath)}`, '_blank');
                 }}
                 disabled={!bookingPath}
               >
-                <Activity className="h-4 w-4 mr-3 text-zinc-400" />
-                Δημιουργία QR Code
+                <Activity className="h-5 w-5 mr-4 text-zinc-400 group-hover:text-emerald-500 transition-colors" />
+                {toGreekUpperCase('QR CODE')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -585,38 +594,28 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: 'Σύνολο Κρατήσεων', value: bookings.length, icon: CalendarDays, color: 'emerald' },
-          { label: 'Live Αγώνες', value: getLiveBookings(), icon: Activity, color: 'blue' },
-          { label: 'Σημερινές Κρατήσεις', value: getTodaysBookings().length, icon: Target, color: 'amber' },
-          { label: 'Σύνολο Πελατών', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, icon: Users, color: 'violet' }
+          { label: 'Live Αγώνες', value: getLiveBookings(), icon: Activity, color: 'emerald' },
+          { label: 'Σημερινές Κρατήσεις', value: getTodaysBookings().length, icon: Target, color: 'emerald' },
+          { label: 'Σύνολο Πελατών', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, icon: Users, color: 'emerald' }
         ].map((stat, i) => (
-          <Card key={i} className="premium-card overflow-hidden group">
-            <CardContent className="p-8">
+          <Card key={i} className="rounded-[2.5rem] border border-zinc-100 bg-white shadow-sm overflow-hidden group hover:shadow-xl hover:border-emerald-100 transition-all duration-300">
+            <CardContent className="p-10 relative">
               <div className="flex items-center justify-between">
-                <div className="space-y-2">
-                  <p className="text-[14px] text-zinc-500 font-bold tracking-wider">{toGreekUpperCase(stat.label)}</p>
-                  <p className="text-4xl font-extrabold text-zinc-900 tracking-tight">{stat.value}</p>
+                <div className="space-y-4">
+                  <p className="text-[11px] text-zinc-400 font-black tracking-[0.2em] uppercase">{toGreekUpperCase(stat.label)}</p>
+                  <p className="text-6xl font-black text-zinc-900 tracking-tighter group-hover:text-emerald-600 transition-colors uppercase">{stat.value}</p>
                 </div>
-                <div className={cn(
-                  "h-14 w-14 rounded-2xl flex items-center justify-center transition-all duration-300 group-hover:scale-110",
-                  stat.color === 'emerald' && "bg-emerald-50 text-emerald-600",
-                  stat.color === 'blue' && "bg-blue-50 text-blue-600",
-                  stat.color === 'amber' && "bg-amber-50 text-amber-600",
-                  stat.color === 'violet' && "bg-violet-50 text-violet-600"
-                )}>
-                  <stat.icon className="h-7 w-7" />
+                <div className="h-20 w-20 rounded-3xl bg-zinc-50 flex items-center justify-center text-zinc-300 group-hover:bg-emerald-50 group-hover:text-emerald-500 transition-all shadow-inner">
+                  <stat.icon className="h-10 w-10" />
                 </div>
               </div>
+              <div className="absolute bottom-0 right-0 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity">
+                 <stat.icon className="h-24 w-24 translate-x-1/4 translate-y-1/4" />
+              </div>
             </CardContent>
-            <div className={cn(
-              "absolute bottom-0 left-0 right-0 h-1",
-              stat.color === 'emerald' && "bg-emerald-500",
-              stat.color === 'blue' && "bg-blue-500",
-              stat.color === 'amber' && "bg-amber-500",
-              stat.color === 'violet' && "bg-violet-500"
-            )} />
           </Card>
         ))}
       </div>
@@ -625,19 +624,22 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Recent Bookings - 8/12 width */}
         <div className="lg:col-span-8 space-y-6">
-          <Card className="premium-card">
-            <CardHeader className="p-8 pb-4 flex flex-row items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-zinc-100 text-zinc-600">
-                  <CalendarDays className="h-5 w-5" />
+      <Card className="rounded-[3rem] border border-zinc-100 bg-white shadow-sm overflow-hidden">
+            <CardHeader className="p-10 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+              <div className="flex items-center gap-6">
+                <div className="h-14 w-14 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-lg">
+                  <CalendarDays className="h-7 w-7 text-emerald-400" />
                 </div>
-                <CardTitle className="text-xl font-bold">Σημερινές Κρατήσεις</CardTitle>
+                <div>
+                    <CardTitle className="text-2xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Σημερινές Κρατήσεις')}</CardTitle>
+                    <p className="text-sm font-bold text-zinc-400 uppercase tracking-widest mt-1">{toGreekUpperCase('ΠΡΟΓΡΑΜΜΑ ΗΜΕΡΑΣ')}</p>
+                </div>
               </div>
-              <Button variant="ghost" className="font-bold text-emerald-600 h-10 px-4 hover:bg-emerald-50" asChild>
-                <Link href="/management/bookings">Προβολή Όλων</Link>
+              <Button variant="outline" className="h-14 px-8 rounded-2xl font-black text-emerald-600 border-zinc-100 bg-zinc-50/50 hover:bg-emerald-600 hover:text-white transition-all text-xs uppercase tracking-widest" asChild>
+                <Link href="/management/bookings">{toGreekUpperCase('Προβολή Όλων')}</Link>
               </Button>
             </CardHeader>
-            <CardContent className="p-8 pt-4">
+            <CardContent className="p-10 pt-4">
               {!bookings || getTodaysBookings().length === 0 ? (
                 <div className="text-center py-16 bg-zinc-50/50 rounded-2xl border-2 border-dashed border-zinc-200">
                   <div className="h-16 w-16 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -660,91 +662,86 @@ export default function DashboardPage() {
                   )}
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {getTodaysBookings()
-                    .slice(0, 10) // Show more for desktop
+                    .slice(0, 10)
                     .map((booking) => {
                     const pitch = pitches.find(p => p.id === booking.pitchId);
                     return (
-                      <div key={booking.id} className="group border border-zinc-100 rounded-2xl p-6 hover:border-emerald-200 hover:bg-emerald-50/20 transition-all duration-200 shadow-sm hover:shadow-md">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                          <div className="space-y-1">
-                            <h4 className="text-[17px] font-bold text-zinc-900 flex items-center gap-2">
-                              {booking.userName || booking.userEmail || 'Άγνωστος Πελάτης'}
-                              {booking.notes && (
-                                <span className="inline-block p-1 rounded bg-amber-100 text-amber-700" title={booking.notes}>
-                                  <AlertTriangle className="h-3.5 w-3.5" />
-                                </span>
-                              )}
-                            </h4>
-                            <div className="flex flex-wrap items-center gap-4 text-[14px] text-zinc-500 font-medium">
-                              <span className="flex items-center gap-2 bg-zinc-100 px-2.5 py-1 rounded-lg">
-                                <CalendarDays className="h-4 w-4" />
-                                {new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit', hour12: false})}
-                              </span>
-                              {pitch && (
-                                <span className="flex items-center gap-2">
-                                  <Building2 className="h-4 w-4" />
-                                  {pitch.name}
-                                  <Badge variant="outline" className="text-[10px] font-bold py-0 h-5 border-zinc-200 text-zinc-600 bg-white">
-                                    {pitch.type}
-                                  </Badge>
-                                </span>
-                              )}
-                              {booking.userPhone && (
-                                <span className="flex items-center gap-2">
-                                  <Phone className="h-3.5 w-3.5" />
-                                  {booking.userPhone}
-                                </span>
-                              )}
+                      <div key={booking.id} className="group bg-zinc-50 border border-zinc-100/50 rounded-[2.5rem] p-8 hover:border-emerald-200 hover:bg-white hover:shadow-xl transition-all duration-500 relative overflow-hidden">
+                        <div className="flex flex-col gap-8">
+                          <div className="flex items-start justify-between relative z-10">
+                            <div className="space-y-2">
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{toGreekUpperCase('Πελάτης')}</p>
+                                <h4 className="text-2xl font-black text-zinc-900 flex items-center gap-3 uppercase tracking-tight group-hover:text-emerald-700 transition-colors">
+                                {toGreekUpperCase(booking.userName || booking.userEmail || 'Άγνωστος')}
+                                {booking.notes && (
+                                    <div className="h-4 w-4 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.5)] animate-pulse" />
+                                )}
+                                </h4>
                             </div>
+                            <div className="text-right">
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{toGreekUpperCase('Έναρξη')}</p>
+                                <p className="text-3xl font-black text-emerald-600 group-hover:scale-110 transition-transform origin-right">
+                                    {new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit', hour12: false})}
+                                </p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-4 py-6 border-y border-zinc-100 relative z-10">
+                            {pitch && (
+                                <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white border border-zinc-100 shadow-sm">
+                                    <Building2 className="h-4 w-4 text-emerald-500" />
+                                    <span className="text-xs font-black text-zinc-600 uppercase tracking-widest">{toGreekUpperCase(pitch.name)}</span>
+                                </div>
+                            )}
+                            {booking.userPhone && (
+                                <a href={`tel:${booking.userPhone}`} className="flex items-center gap-3 px-4 py-2 rounded-xl bg-white border border-zinc-100 shadow-sm text-xs font-black text-zinc-400 hover:text-emerald-600 hover:border-emerald-200 transition-all group/phone">
+                                    <Phone className="h-4 w-4 group-hover/phone:rotate-12 transition-transform" />
+                                    {booking.userPhone}
+                                </a>
+                            )}
                           </div>
                           
-                          <div className="flex items-center justify-between sm:justify-end gap-6">
-                            <div className="text-right sm:text-right hidden sm:block">
-                              <p className="text-[17px] font-bold text-zinc-900">&euro;{booking.price || pitch?.pricePerSlot || 0}</p>
-                              {pitch && (
-                                <p className="text-xs text-zinc-500 font-medium tracking-tight">
-                                  &euro;{((booking.price || pitch.pricePerSlot || 0) / getPlayersPerPitch(pitch.type)).toFixed(0)}/άτομο
-                                </p>
-                              )}
-                            </div>
-                            
-                            <div className="flex items-center gap-2">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <button className="h-10 px-4 rounded-xl border border-zinc-200 bg-white flex items-center gap-3 font-bold text-[14px] transition-all hover:border-zinc-300 hover:shadow-sm">
-                                    {getStatusBadge(booking.status)}
-                                    <ChevronDown className="h-4 w-4 text-zinc-400" />
-                                  </button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-xl">
-                                  <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'pending', booking.status, booking.userName || 'Άγνωστος')} className="rounded-xl px-4 py-3 font-semibold cursor-pointer">
-                                    <div className="h-3 w-3 rounded-full bg-amber-500 mr-3" />
-                                    Εκκρεμεί
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'confirmed', booking.status, booking.userName || 'Άγνωστος')} className="rounded-xl px-4 py-3 font-semibold cursor-pointer">
-                                    <div className="h-3 w-3 rounded-full bg-emerald-500 mr-3" />
-                                    Επιβεβαιωμένη
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'completed', booking.status, booking.userName || 'Άγνωστος')} className="rounded-xl px-4 py-3 font-semibold cursor-pointer">
-                                    <div className="h-3 w-3 rounded-full bg-zinc-400 mr-3" />
-                                    Ολοκληρωμένη
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'cancelled', booking.status, booking.userName || 'Άγνωστος')} className="rounded-xl px-4 py-3 font-semibold cursor-pointer text-red-600">
-                                    <div className="h-3 w-3 rounded-full bg-red-500 mr-3" />
-                                    Ακυρωμένη
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                              
-                              <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl" asChild>
-                                <Link href={`/management/bookings/${booking.id}`}>
-                                  <Eye className="h-4 w-4" />
-                                </Link>
-                              </Button>
-                            </div>
+                          <div className="flex flex-col sm:flex-row items-center gap-4 relative z-10">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <button className="w-full sm:flex-1 h-14 px-6 rounded-2xl border border-zinc-200 bg-white flex items-center justify-between font-black text-[13px] transition-all hover:border-emerald-200 hover:shadow-lg active:scale-95 group/status uppercase tracking-widest">
+                                        <div className="flex items-center gap-3">
+                                            {getStatusBadge(booking.status)}
+                                        </div>
+                                        <ChevronDown className="h-5 w-5 text-zinc-300 group-hover/status:text-emerald-400 transition-colors" />
+                                        </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end" className="w-72 p-4 rounded-[2rem] shadow-2xl border-zinc-100 animate-in zoom-in-95 duration-200">
+                                        <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'pending', booking.status, booking.userName || 'Άγνωστος')} className="rounded-xl px-5 py-5 font-black text-[14px] uppercase tracking-widest cursor-pointer group">
+                                            <div className="h-3 w-3 rounded-full bg-amber-400 mr-5 group-hover:scale-150 transition-transform shadow-lg shadow-amber-200" />
+                                            {toGreekUpperCase('Εκκρεμεί')}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'confirmed', booking.status, booking.userName || 'Άγνωστος')} className="rounded-xl px-5 py-5 font-black text-[14px] uppercase tracking-widest cursor-pointer group mt-1">
+                                            <div className="h-3 w-3 rounded-full bg-emerald-500 mr-5 group-hover:scale-150 transition-transform shadow-lg shadow-emerald-200" />
+                                            {toGreekUpperCase('Επιβεβαιωμένη')}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'completed', booking.status, booking.userName || 'Άγνωστος')} className="rounded-xl px-5 py-5 font-black text-[14px] uppercase tracking-widest cursor-pointer group mt-1">
+                                            <div className="h-3 w-3 rounded-full bg-zinc-400 mr-5 group-hover:scale-150 transition-transform shadow-lg shadow-zinc-200" />
+                                            {toGreekUpperCase('Ολοκληρωμένη')}
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'cancelled', booking.status, booking.userName || 'Άγνωστος')} className="rounded-xl px-5 py-5 font-black text-[14px] uppercase tracking-widest cursor-pointer group mt-1 text-red-600">
+                                            <div className="h-3 w-3 rounded-full bg-red-500 mr-5 group-hover:scale-150 transition-transform shadow-lg shadow-red-200" />
+                                            {toGreekUpperCase('Ακυρωμένη')}
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                                
+                                <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl bg-white border-zinc-200 hover:border-emerald-200 text-zinc-400 hover:text-emerald-500 hover:shadow-lg transition-all active:scale-90" asChild>
+                                    <Link href={`/management/bookings/${booking.id}`}>
+                                        <Eye className="h-6 w-6" />
+                                    </Link>
+                                </Button>
                           </div>
+                        </div>
+                        <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-[0.03] pointer-events-none transition-opacity">
+                             <CalendarDays className="h-40 w-40 rotate-12" />
                         </div>
                       </div>
                     );
@@ -880,65 +877,70 @@ export default function DashboardPage() {
 
       {/* Quick Booking Dialog - Enhanced */}
       <Dialog open={showQuickBooking} onOpenChange={setShowQuickBooking}>
-        <DialogContent className="max-w-xl p-0 overflow-hidden rounded-3xl border-0 shadow-2xl">
-          <div className="bg-emerald-600 p-8 text-white">
-            <DialogHeader>
-              <DialogTitle className="text-2xl font-extrabold flex items-center gap-3">
-                <Plus className="h-7 w-7" />
-                Γρήγορη Κράτηση
+        <DialogContent className="max-w-2xl p-0 overflow-hidden rounded-[3rem] border-0 shadow-2xl animate-in fade-in zoom-in-95 duration-300">
+          <div className="bg-zinc-900 p-12 text-white relative">
+            <div className="absolute top-0 right-0 p-10 opacity-10">
+                <Plus className="h-32 w-32 rotate-12" />
+            </div>
+            <DialogHeader className="relative z-10">
+              <DialogTitle className="text-4xl font-black flex items-center gap-5 uppercase tracking-tight">
+                <div className="h-14 w-14 rounded-2xl bg-emerald-500 flex items-center justify-center text-zinc-900 shadow-lg shadow-emerald-500/20">
+                    <Plus className="h-8 w-8" />
+                </div>
+                {toGreekUpperCase('Γρήγορη Κράτηση')}
               </DialogTitle>
-              <DialogDescription className="text-emerald-100 font-medium text-[16px]">
-                Εισαγάγετε τα στοιχεία για άμεση δημιουργία κράτησης.
+              <DialogDescription className="text-zinc-400 font-bold text-lg mt-3 uppercase tracking-widest pl-20">
+                {toGreekUpperCase('ΑΜΕΣΗ ΔΗΜΙΟΥΡΓΙΑ ΚΡΑΤΗΣΗΣ ΣΤΟ ΣΥΣΤΗΜΑ')}
               </DialogDescription>
             </DialogHeader>
           </div>
           
-          <form onSubmit={handleQuickBookingSubmit} className="p-8 space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <Label htmlFor="userName" className="text-[14px] font-bold text-zinc-700">Όνομα Πελάτη</Label>
+          <form onSubmit={handleQuickBookingSubmit} className="p-12 space-y-10 bg-white">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+              <div className="space-y-4">
+                <Label htmlFor="userName" className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-1">{toGreekUpperCase('Όνομα Πελάτη *')}</Label>
                 <Input
                   id="userName"
-                  placeholder="π.χ. Γιάννης Παπαδόπουλος"
+                  placeholder={toGreekUpperCase('π.χ. ΓΙΑΝΝΗΣ ΠΑΠΑΔΟΠΟΥΛΟΣ')}
                   value={quickBookingData.userName}
                   onChange={(e) => setQuickBookingData({ ...quickBookingData, userName: e.target.value })}
                   required
-                  className="h-12 rounded-xl border-zinc-200 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="h-16 px-6 rounded-2xl bg-zinc-50 border-none font-bold text-lg focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all uppercase"
                 />
               </div>
-              <div className="space-y-3">
-                <Label htmlFor="userPhone" className="text-[14px] font-bold text-zinc-700">Τηλέφωνο Επικοινωνίας</Label>
+              <div className="space-y-4">
+                <Label htmlFor="userPhone" className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-1">{toGreekUpperCase('Τηλέφωνο Επικοινωνίας *')}</Label>
                 <Input
                   id="userPhone"
                   type="tel"
-                  placeholder="69xxxxxxxx"
+                  placeholder="69XXXXXXXX"
                   value={quickBookingData.userPhone}
                   onChange={(e) => setQuickBookingData({ ...quickBookingData, userPhone: e.target.value })}
                   required
-                  className="h-12 rounded-xl border-zinc-200 focus:ring-emerald-500 focus:border-emerald-500"
+                  className="h-16 px-6 rounded-2xl bg-zinc-50 border-none font-bold text-lg focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all"
                 />
               </div>
-              <div className="space-y-3">
-                <Label htmlFor="pitch" className="text-[14px] font-bold text-zinc-700">Επιλογή Γηπέδου</Label>
+              <div className="space-y-4">
+                <Label htmlFor="pitch" className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-1">{toGreekUpperCase('Επιλογή Γηπέδου *')}</Label>
                 <Select
                   value={quickBookingData.selectedPitchId}
                   onValueChange={(value: string) => setQuickBookingData({ ...quickBookingData, selectedPitchId: value, selectedSlot: '' })}
                   required
                 >
-                  <SelectTrigger id="pitch" className="h-12 rounded-xl border-zinc-200">
-                    <SelectValue placeholder="Επιλέξτε γήπεδο" />
+                  <SelectTrigger id="pitch" className="h-16 px-6 rounded-2xl bg-zinc-50 border-none font-black text-lg focus:ring-4 focus:ring-emerald-500/10 transition-all uppercase shadow-inner">
+                    <SelectValue placeholder={toGreekUpperCase('ΕΠΙΛΕΞΤΕ ΓΗΠΕΔΟ')} />
                   </SelectTrigger>
-                  <SelectContent className="rounded-xl shadow-xl">
+                  <SelectContent className="rounded-2xl border-zinc-100 shadow-2xl p-2">
                     {pitches.map((pitch) => (
-                      <SelectItem key={pitch.id} value={pitch.id} className="cursor-pointer py-3 font-medium">
-                        {pitch.name} ({pitch.type})
+                      <SelectItem key={pitch.id} value={pitch.id} className="cursor-pointer py-4 font-black text-[15px] rounded-xl hover:bg-zinc-50 uppercase">
+                        {toGreekUpperCase(`${pitch.name} (${pitch.type})`)}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
-              <div className="space-y-3">
-                <Label htmlFor="date" className="text-[14px] font-bold text-zinc-700">Ημερομηνία</Label>
+              <div className="space-y-4">
+                <Label htmlFor="date" className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-1">{toGreekUpperCase('Ημερομηνία *')}</Label>
                 <Input
                   id="date"
                   type="date"
@@ -946,24 +948,25 @@ export default function DashboardPage() {
                   value={quickBookingData.selectedDate}
                   onChange={(e) => setQuickBookingData({ ...quickBookingData, selectedDate: e.target.value, selectedSlot: '' })}
                   required
-                  className="h-12 rounded-xl border-zinc-200"
+                  className="h-16 px-6 rounded-2xl bg-zinc-50 border-none font-bold text-lg focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all shadow-inner"
                 />
               </div>
             </div>
 
-            <div className="space-y-3">
-              <Label className="text-[14px] font-bold text-zinc-700">Διαθέσιμες Ώρες</Label>
+            <div className="space-y-6">
+              <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-1">{toGreekUpperCase('Διαθέσιμες Ώρες')}</Label>
               {!quickBookingData.selectedPitchId || !quickBookingData.selectedDate ? (
-                <div className="p-8 text-center bg-zinc-50 rounded-2xl border-2 border-dashed border-zinc-200">
-                  <p className="text-sm font-medium text-zinc-500">
-                    Επιλέξτε γήπεδο και ημερομηνία για να δείτε διαθεσιμότητα
+                <div className="p-12 text-center bg-zinc-50 rounded-[2rem] border border-zinc-100 shadow-inner flex flex-col items-center justify-center gap-4">
+                  <Clock className="h-10 w-10 text-zinc-200" />
+                  <p className="text-xs font-black text-zinc-400 uppercase tracking-widest leading-relaxed">
+                    {toGreekUpperCase('ΕΠΙΛΕΞΤΕ ΓΗΠΕΔΟ ΚΑΙ ΗΜΕΡΟΜΗΝΙΑ')}
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
+                <div className="grid grid-cols-4 sm:grid-cols-6 gap-3 pt-2">
                   {generateAvailableSlots(quickBookingData.selectedPitchId, quickBookingData.selectedDate).length === 0 ? (
-                    <div className="col-span-full p-4 text-center bg-red-50 rounded-xl border border-red-100 text-red-600 text-sm font-bold">
-                      Δεν υπάρχουν διαθέσιμες ώρες για αυτή την ημέρα
+                    <div className="col-span-full p-8 text-center bg-red-50 rounded-2xl border border-red-100 text-red-600 text-sm font-black uppercase tracking-widest">
+                      {toGreekUpperCase('Δεν υπάρχουν διαθέσιμες ώρες')}
                     </div>
                   ) : (
                     generateAvailableSlots(quickBookingData.selectedPitchId, quickBookingData.selectedDate).map((slot) => (
@@ -972,10 +975,10 @@ export default function DashboardPage() {
                         type="button"
                         onClick={() => setQuickBookingData({ ...quickBookingData, selectedSlot: slot.time })}
                         className={cn(
-                          "h-12 rounded-xl text-[14px] font-bold transition-all border-2 active:scale-95",
+                          "h-14 rounded-2xl text-[13px] font-black transition-all border-2 active:scale-95 uppercase tracking-tighter shadow-sm",
                           quickBookingData.selectedSlot === slot.time
-                            ? "bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-200 scale-105 z-10"
-                            : "bg-white border-zinc-100 text-zinc-700 hover:border-emerald-200 hover:bg-emerald-50/50"
+                            ? "bg-zinc-900 border-zinc-900 text-white shadow-xl scale-110 z-10 ring-8 ring-zinc-100"
+                            : "bg-white border-zinc-100 text-zinc-400 hover:border-emerald-200 hover:text-emerald-600"
                         )}
                       >
                         {slot.display}
@@ -986,38 +989,41 @@ export default function DashboardPage() {
               )}
             </div>
 
-            <div className="space-y-3">
-                <Label htmlFor="notes" className="text-[14px] font-bold text-zinc-700">Σημειώσεις (Προαιρετικά)</Label>
+            <div className="space-y-4">
+                <Label htmlFor="notes" className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-1">{toGreekUpperCase('Σημειώσεις (Προαιρετικά)')}</Label>
                 <Textarea
                   id="notes"
-                  placeholder="Ειδικές παρατηρήσεις για την κράτηση..."
+                  placeholder={toGreekUpperCase('ΕΙΔΙΚΕΣ ΠΑΡΑΤΗΡΗΣΕΙΣ...')}
                   value={quickBookingData.notes}
                   onChange={(e) => setQuickBookingData({ ...quickBookingData, notes: e.target.value })}
-                  className="min-h-[100px] rounded-xl border-zinc-200 focus:ring-emerald-500"
+                  className="min-h-[140px] rounded-[2rem] bg-zinc-50 border-none px-8 py-6 font-bold text-lg focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all uppercase placeholder:text-zinc-300 resize-none shadow-inner"
                 />
               </div>
 
-            <div className="flex gap-4 pt-4">
+            <div className="flex flex-col sm:flex-row gap-6 pt-6">
               <Button
                 type="button"
-                variant="ghost"
-                className="flex-1 h-12 rounded-xl font-bold text-zinc-500 hover:bg-zinc-100"
+                variant="outline"
+                className="flex-1 h-20 rounded-[1.5rem] font-black text-zinc-400 hover:text-zinc-600 border-none bg-zinc-50 hover:bg-zinc-100 transition-all text-xl uppercase tracking-widest"
                 onClick={() => setShowQuickBooking(false)}
               >
-                Ακύρωση
+                {toGreekUpperCase('Ακύρωση')}
               </Button>
               <Button
                 type="submit"
-                className="flex-1 h-12 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 shadow-md shadow-emerald-200"
+                className="flex-1 h-20 rounded-[1.5rem] bg-emerald-600 hover:bg-emerald-700 text-white font-black shadow-xl shadow-emerald-100 transition-all hover:scale-[1.02] active:scale-[0.98] text-xl uppercase tracking-widest group"
                 disabled={isCreatingBooking}
               >
                 {isCreatingBooking ? (
                   <>
-                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                    Δημιουργία...
+                    <Loader2 className="h-8 w-8 mr-4 animate-spin" />
+                    {toGreekUpperCase('Δημιουργία...')}
                   </>
                 ) : (
-                  'Δημιουργία Κράτησης'
+                  <>
+                    <Save className="h-8 w-8 mr-4 text-emerald-300 group-hover:scale-110 transition-transform" />
+                    {toGreekUpperCase('Επιβεβαίωση')}
+                  </>
                 )}
               </Button>
             </div>

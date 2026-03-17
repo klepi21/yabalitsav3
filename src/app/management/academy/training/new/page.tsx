@@ -9,11 +9,18 @@ import { squadService, academyUserService, userGroupService } from '@/lib/academ
 import { Squad, AcademyUser } from '@/types/academy';
 import { TrainingType, TRAINING_TYPE_LABELS, TRAINING_TYPE_COLORS, TrainingDrill } from '@/types/training';
 import {
-  Loader2, ArrowLeft, Dumbbell, Plus, Trash2, Clock, AlertCircle, CalendarDays, User, BookOpen, Target,
+  Loader2, ArrowLeft, Dumbbell, Plus, Trash2, Clock, AlertCircle, CalendarDays, User, BookOpen, Target, Save
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn, toGreekUpperCase } from '@/lib/utils';
 
 const TRAINING_TYPES: TrainingType[] = ['training', 'friendly', 'fitness', 'tactical', 'recovery'];
@@ -126,19 +133,19 @@ export default function NewTrainingPage() {
   return (
     <div className="space-y-10 pb-20">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-        <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-zinc-100 hover:bg-zinc-50 shrink-0 shadow-sm" asChild>
+      <div className="flex flex-col md:flex-row md:items-center gap-8">
+        <Button variant="outline" size="icon" className="h-16 w-16 rounded-2xl border-zinc-200 hover:bg-zinc-50 shrink-0 shadow-sm hover:scale-105 active:scale-95 transition-all" asChild>
           <Link href="/management/academy/training">
-            <ArrowLeft className="h-6 w-6 text-zinc-600" />
+            <ArrowLeft className="h-6 w-6 text-zinc-400" />
           </Link>
         </Button>
-        <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-200 shrink-0">
-            <Dumbbell className="h-7 w-7" />
+        <div className="flex items-center gap-6">
+          <div className="h-20 w-20 rounded-[1.5rem] bg-zinc-900 flex items-center justify-center text-white shadow-2xl shadow-zinc-200 shrink-0">
+            <Dumbbell className="h-10 w-10 text-emerald-400" />
           </div>
           <div>
-            <h1 className="text-4xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Νέα Προπόνηση')}</h1>
-            <p className="text-lg font-medium text-zinc-500">Προγραμματίστε την επόμενη δραστηριότητα της ομάδας.</p>
+            <h1 className="text-5xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Νέα Προπόνηση')}</h1>
+            <p className="text-xl font-bold text-zinc-400 mt-1 uppercase tracking-tight">{toGreekUpperCase('Προγραμματίστε την επόμενη δραστηριότητα')}</p>
           </div>
         </div>
       </div>
@@ -189,8 +196,8 @@ export default function NewTrainingPage() {
                 </div>
 
                 <div className="space-y-4">
-                    <Label className="text-xs font-black uppercase tracking-widest text-zinc-400">Τύπος Δραστηριότητας *</Label>
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-1">{toGreekUpperCase('Τύπος Δραστηριότητας *')}</Label>
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
                     {TRAINING_TYPES.map((type) => {
                         const colors = TRAINING_TYPE_COLORS[type];
                         const isSelected = form.type === type;
@@ -200,56 +207,46 @@ export default function NewTrainingPage() {
                             type="button"
                             onClick={() => setForm((p) => ({ ...p, type }))}
                             className={cn(
-                                "h-14 px-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all shadow-sm border-2",
+                                "h-16 px-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm border-2",
                                 isSelected
-                                ? `${colors.bg} ${colors.text} border-emerald-500 scale-[1.05] shadow-lg shadow-emerald-100`
-                                : "bg-white text-zinc-500 border-zinc-100 hover:border-zinc-200"
+                                ? `${colors.bg} ${colors.text} ${colors.border} scale-[1.05] shadow-xl ring-8 ring-zinc-100/50`
+                                : "bg-white text-zinc-400 border-zinc-100 hover:border-zinc-200"
                             )}
                         >
-                            {TRAINING_TYPE_LABELS[type]}
+                            {toGreekUpperCase(TRAINING_TYPE_LABELS[type])}
                         </button>
                         );
                     })}
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <div className="space-y-4">
-                        <Label className="text-xs font-black uppercase tracking-widest text-zinc-400">Τμήμα *</Label>
-                        <div className="relative">
-                            <select
-                                value={form.squadId}
-                                onChange={(e) => setForm((p) => ({ ...p, squadId: e.target.value }))}
-                                className="h-14 w-full rounded-2xl bg-zinc-50 border-none px-6 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/10 appearance-none transition-all"
-                            >
-                                <option value="">Επιλέξτε τμήμα...</option>
+                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-1">{toGreekUpperCase('Τμήμα *')}</Label>
+                         <Select value={form.squadId} onValueChange={(val: string) => setForm((p) => ({ ...p, squadId: val }))}>
+                            <SelectTrigger className="h-16 px-6 bg-zinc-50 border-none rounded-2xl font-black text-lg focus:ring-4 focus:ring-emerald-500/10 uppercase">
+                                <SelectValue placeholder={toGreekUpperCase('Επιλέξτε τμήμα...')} />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-2xl border-zinc-100 shadow-2xl">
                                 {squads.map((s) => (
-                                <option key={s.id} value={s.id}>{s.name} ({s.ageGroup})</option>
+                                <SelectItem key={s.id} value={s.id} className="font-bold text-lg">{toGreekUpperCase(`${s.name} (${s.ageGroup})`)}</SelectItem>
                                 ))}
-                            </select>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
-                                <Plus className="h-4 w-4" />
-                            </div>
-                        </div>
+                            </SelectContent>
+                        </Select>
                     </div>
 
                     <div className="space-y-4">
-                        <Label className="text-xs font-black uppercase tracking-widest text-zinc-400">Υπεύθυνος Προπονητής *</Label>
-                        <div className="relative">
-                            <select
-                                value={form.coachId}
-                                onChange={(e) => setForm((p) => ({ ...p, coachId: e.target.value }))}
-                                className="h-14 w-full rounded-2xl bg-zinc-50 border-none px-6 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/10 appearance-none transition-all"
-                            >
-                                <option value="">Επιλέξτε προπονητή...</option>
+                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-1">{toGreekUpperCase('Υπεύθυνος Προπονητής *')}</Label>
+                        <Select value={form.coachId} onValueChange={(val: string) => setForm((p) => ({ ...p, coachId: val }))}>
+                            <SelectTrigger className="h-16 px-6 bg-zinc-50 border-none rounded-2xl font-black text-lg focus:ring-4 focus:ring-emerald-500/10 uppercase">
+                                <SelectValue placeholder={toGreekUpperCase('Επιλέξτε προπονητή...')} />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-2xl border-zinc-100 shadow-2xl">
                                 {coaches.map((c) => (
-                                <option key={c.id} value={c.id}>{c.displayName}</option>
+                                <SelectItem key={c.id} value={c.id} className="font-bold text-lg">{toGreekUpperCase(c.displayName)}</SelectItem>
                                 ))}
-                            </select>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
-                                <User className="h-4 w-4" />
-                            </div>
-                        </div>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
 
@@ -449,15 +446,19 @@ export default function NewTrainingPage() {
                 <Button 
                     type="submit" 
                     disabled={isSaving} 
-                    className="h-20 w-full rounded-[2rem] bg-zinc-900 hover:bg-emerald-600 text-white font-black text-xl shadow-2xl transition-all hover:translate-y-[-4px] active:translate-y-[2px]"
+                    className="h-24 w-full rounded-[2.5rem] bg-zinc-900 hover:bg-black text-white font-black text-2xl shadow-2xl transition-all hover:translate-y-[-4px] active:translate-y-[2px] group overflow-hidden"
                 >
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                     {isSaving ? (
-                        <div className="flex items-center gap-3">
-                            <Loader2 className="h-7 w-7 animate-spin" />
-                            <span>Αποθήκευση...</span>
+                        <div className="flex items-center gap-4">
+                            <Loader2 className="h-8 w-8 animate-spin" />
+                            <span>{toGreekUpperCase('Αποθήκευση...')}</span>
                         </div>
                     ) : (
-                        'Δημιουργία Προπόνησης'
+                        <div className="flex items-center gap-4">
+                             <Save className="h-8 w-8 text-emerald-400" />
+                             <span>{toGreekUpperCase('Δημιουργία Προπόνησης')}</span>
+                        </div>
                     )}
                 </Button>
                 <Button 

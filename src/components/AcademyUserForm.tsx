@@ -12,7 +12,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Plus, Search, UserPlus, FileText, Upload, Trash2, Download } from 'lucide-react';
+import { cn, toGreekUpperCase } from '@/lib/utils';
+import { Loader2, Plus, Search, UserPlus, FileText, Upload, Trash2, Download, ChevronDown, Phone, Mail } from 'lucide-react';
 import { storageService } from '@/lib/storage-service';
 
 interface AcademyUserFormProps {
@@ -99,7 +100,7 @@ export default function AcademyUserForm({
   const handleGroupChange = (groupId: string) => {
     setSelectedGroupId(groupId);
     setFieldValues({});
-    setSquadId('');
+    setSquadIds([]);
     setParentUid('');
   };
 
@@ -212,8 +213,8 @@ export default function AcademyUserForm({
             type={field.type === 'phone' ? 'tel' : field.type}
             value={value}
             onChange={(e) => setValue(field.key, e.target.value)}
-            placeholder={field.placeholder || ''}
-            className="h-11 bg-white"
+            placeholder={toGreekUpperCase(field.placeholder || '')}
+            className="h-20 px-8 rounded-[1.5rem] bg-zinc-50 border-none font-black text-xl focus:bg-white focus:ring-8 focus:ring-emerald-500/10 transition-all uppercase placeholder:text-zinc-200 shadow-inner"
           />
         );
 
@@ -223,8 +224,8 @@ export default function AcademyUserForm({
             type="number"
             value={value}
             onChange={(e) => setValue(field.key, e.target.value ? Number(e.target.value) : '')}
-            placeholder={field.placeholder || ''}
-            className="h-11 bg-white"
+            placeholder={toGreekUpperCase(field.placeholder || '')}
+            className="h-20 px-8 rounded-[1.5rem] bg-zinc-50 border-none font-black text-xl focus:bg-white focus:ring-8 focus:ring-emerald-500/10 transition-all shadow-inner"
           />
         );
 
@@ -234,7 +235,7 @@ export default function AcademyUserForm({
             type="date"
             value={value ? (typeof value === 'string' ? value : new Date(value).toISOString().split('T')[0]) : ''}
             onChange={(e) => setValue(field.key, e.target.value || null)}
-            className="h-11 bg-white"
+            className="h-20 px-8 rounded-[1.5rem] bg-zinc-50 border-none font-black text-xl focus:bg-white focus:ring-8 focus:ring-emerald-500/10 transition-all shadow-inner"
           />
         );
 
@@ -243,24 +244,27 @@ export default function AcademyUserForm({
           <textarea
             value={value}
             onChange={(e) => setValue(field.key, e.target.value)}
-            rows={2}
-            className="flex w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            placeholder={field.placeholder || ''}
+            rows={5}
+            className="flex w-full rounded-[2.5rem] bg-zinc-50 border-none px-10 py-8 font-black text-xl focus:bg-white focus:ring-8 focus:ring-emerald-500/10 transition-all uppercase placeholder:text-zinc-200 resize-none shadow-inner"
+            placeholder={toGreekUpperCase(field.placeholder || '')}
           />
         );
 
       case 'select':
         return (
-          <select
-            value={value}
-            onChange={(e) => setValue(field.key, e.target.value)}
-            className="flex h-11 w-full rounded-md border border-input bg-white px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 appearance-none"
-          >
-            <option value="">Επιλέξτε...</option>
-            {(field.options || []).map((opt) => (
-              <option key={opt} value={opt}>{opt}</option>
-            ))}
-          </select>
+          <div className="relative group">
+            <select
+              value={value}
+              onChange={(e) => setValue(field.key, e.target.value)}
+              className="flex h-20 w-full rounded-[1.5rem] bg-zinc-50 border-none px-10 py-2 font-black text-xl focus:bg-white focus:ring-8 focus:ring-emerald-500/10 transition-all appearance-none uppercase shadow-inner"
+            >
+              <option value="">{toGreekUpperCase('Επιλέξτε...')}</option>
+              {(field.options || []).map((opt) => (
+                <option key={opt} value={opt}>{toGreekUpperCase(opt)}</option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-8 top-1/2 -translate-y-1/2 h-8 w-8 text-zinc-300 pointer-events-none group-focus-within:text-emerald-500 transition-all group-focus-within:rotate-180" />
+          </div>
         );
 
       default:
@@ -269,7 +273,7 @@ export default function AcademyUserForm({
             type="text"
             value={value}
             onChange={(e) => setValue(field.key, e.target.value)}
-            className="h-11 bg-white"
+            className="h-20 px-8 rounded-[1.5rem] bg-zinc-50 border-none font-black text-xl"
           />
         );
     }
@@ -285,22 +289,26 @@ export default function AcademyUserForm({
 
       {/* Group Selector — only show on create */}
       {!initialData && (
-        <div className="space-y-3">
-          <Label className="text-zinc-700 text-sm font-medium">Κατηγορία *</Label>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="space-y-4">
+          <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-1">{toGreekUpperCase('Κατηγορία *')}</Label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {groups.map((group) => (
               <button
                 key={group.id}
                 type="button"
                 onClick={() => handleGroupChange(group.id)}
-                className={`px-4 py-3 rounded-xl text-sm font-medium transition-all duration-150 flex items-center justify-center gap-2 border ${
+                className={`flex flex-col items-center justify-center p-6 rounded-[2rem] border-2 transition-all duration-300 text-center gap-3 active:scale-95 group/btn ${
                   selectedGroupId === group.id
-                    ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm'
-                    : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
+                    ? 'bg-zinc-900 border-zinc-900 text-white shadow-xl scale-105 z-10'
+                    : 'bg-white text-zinc-400 border-zinc-100 hover:border-emerald-200 hover:text-emerald-600 hover:shadow-lg'
                 }`}
               >
-                <span>{group.icon}</span>
-                {group.name}
+                <div className={`h-12 w-12 rounded-2xl flex items-center justify-center text-2xl transition-all shadow-sm ${
+                   selectedGroupId === group.id ? 'bg-white/10 text-emerald-400' : 'bg-zinc-50 group-hover/btn:bg-emerald-50'
+                }`}>
+                  {group.icon || '👤'}
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em]">{toGreekUpperCase(group.name)}</span>
               </button>
             ))}
           </div>
@@ -308,25 +316,27 @@ export default function AcademyUserForm({
       )}
 
       {/* Display Name */}
-      <div className="space-y-2">
-        <Label htmlFor="displayName" className="text-zinc-700">Ονοματεπώνυμο *</Label>
+      <div className="space-y-4">
+        <Label htmlFor="displayName" className="text-zinc-500 font-black text-xs uppercase tracking-[0.2em] ml-2">
+            {toGreekUpperCase('Ονοματεπώνυμο *')}
+        </Label>
         <Input
           type="text"
           id="displayName"
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
-          className="h-11 bg-white"
-          placeholder="Εισάγετε ονοματεπώνυμο"
+          className="h-24 px-10 rounded-[2rem] bg-zinc-50 border-none font-black text-3xl focus:bg-white focus:ring-[1rem] focus:ring-emerald-500/10 transition-all uppercase placeholder:text-zinc-200 shadow-inner"
+          placeholder={toGreekUpperCase('Εισάγετε ονοματεπώνυμο')}
         />
       </div>
 
       {/* Dynamic Fields from Group Definition */}
       {selectedGroup && selectedGroup.fields.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
           {selectedGroup.fields.map((field) => (
-            <div key={field.key} className={`space-y-2 ${field.type === 'textarea' ? 'sm:col-span-2' : ''}`}>
-              <Label className="text-zinc-700">
-                {field.label} {field.required && <span className="text-red-400">*</span>}
+            <div key={field.key} className={`space-y-4 ${field.type === 'textarea' ? 'sm:col-span-2' : ''}`}>
+              <Label className="text-zinc-500 font-black text-xs uppercase tracking-[0.2em] ml-2">
+                {toGreekUpperCase(field.label)} {field.required && <span className="text-red-400 font-black">*</span>}
               </Label>
               {renderField(field, fieldValues, setFieldValue)}
             </div>
@@ -336,18 +346,18 @@ export default function AcademyUserForm({
 
       {/* Squad Assignment (capability) */}
       {hasCapability('squad_assignment') && squads.length > 0 && (
-        <div className="space-y-3">
-          <Label className="text-zinc-700">Τμήματα</Label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <div className="space-y-4 pt-6 border-t border-zinc-100">
+          <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-1">{toGreekUpperCase('Τμήματα')}</Label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {squads.map((squad) => {
               const isSelected = squadIds.includes(squad.id);
               return (
                 <label
                   key={squad.id}
-                  className={`flex items-center p-3 rounded-xl border cursor-pointer transition-all duration-150 ${
+                  className={`flex flex-col items-center justify-center p-5 rounded-[1.5rem] border-2 cursor-pointer transition-all duration-300 text-center gap-2 active:scale-95 group/squad ${
                     isSelected
-                      ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-                      : 'border-zinc-200 hover:border-zinc-300 text-zinc-600'
+                      ? 'border-emerald-500 bg-emerald-50 text-emerald-800 shadow-lg shadow-emerald-100'
+                      : 'border-zinc-100 bg-zinc-50 text-zinc-400 hover:border-emerald-200 hover:bg-white hover:text-emerald-600'
                   }`}
                 >
                   <input
@@ -360,7 +370,8 @@ export default function AcademyUserForm({
                       );
                     }}
                   />
-                  <span className="text-sm font-medium">{squad.name} ({squad.ageGroup})</span>
+                  <span className="text-[11px] font-black uppercase tracking-widest">{toGreekUpperCase(squad.name)}</span>
+                  <span className="text-[10px] font-bold opacity-60">{toGreekUpperCase(squad.ageGroup)}</span>
                 </label>
               );
             })}
@@ -370,18 +381,18 @@ export default function AcademyUserForm({
 
       {/* Coach Squad Assignment (capability) */}
       {hasCapability('coach_squads') && squads.length > 0 && (
-        <div className="space-y-3">
-          <Label className="text-zinc-700">Ανάθεση Τμημάτων</Label>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        <div className="space-y-4 pt-6 border-t border-zinc-100">
+          <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-1">{toGreekUpperCase('Ανάθεση Τμημάτων')}</Label>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {squads.map((squad) => {
               const isAssigned = assignedSquads.includes(squad.id);
               return (
                 <label
                   key={squad.id}
-                  className={`flex items-center p-3 rounded-xl border cursor-pointer transition-all duration-150 ${
+                  className={`flex flex-col items-center justify-center p-5 rounded-[1.5rem] border-2 cursor-pointer transition-all duration-300 text-center gap-2 active:scale-95 group/coach ${
                     isAssigned
-                      ? 'border-emerald-300 bg-emerald-50 text-emerald-800'
-                      : 'border-zinc-200 hover:border-zinc-300 text-zinc-600'
+                      ? 'border-emerald-500 bg-emerald-50 text-emerald-800 shadow-lg shadow-emerald-100'
+                      : 'border-zinc-100 bg-zinc-50 text-zinc-400 hover:border-emerald-200 hover:bg-white hover:text-emerald-600'
                   }`}
                 >
                   <input
@@ -394,7 +405,8 @@ export default function AcademyUserForm({
                       );
                     }}
                   />
-                  <span className="text-sm font-medium">{squad.name} ({squad.ageGroup})</span>
+                   <span className="text-[11px] font-black uppercase tracking-widest">{toGreekUpperCase(squad.name)}</span>
+                   <span className="text-[10px] font-bold opacity-60">{toGreekUpperCase(squad.ageGroup)}</span>
                 </label>
               );
             })}
@@ -404,111 +416,153 @@ export default function AcademyUserForm({
 
       {/* Parent Linking (capability) */}
       {hasCapability('parent_linking') && (
-        <div className="space-y-3">
+        <div className="space-y-8 pt-10 border-t-2 border-zinc-50">
           <div className="flex items-center justify-between">
-            <Label className="text-zinc-700">Σύνδεση με Γονέα</Label>
+            <Label className="text-zinc-900 font-black text-2xl uppercase tracking-tight">
+                {toGreekUpperCase('Σύνδεση με Γονέα')}
+            </Label>
             {onParentQuickAdd && parentGroup && (
-              <button
+              <Button
                 type="button"
+                variant="outline"
                 onClick={() => setShowQuickAddParent(!showQuickAddParent)}
-                className="text-sm text-emerald-600 hover:text-emerald-700 font-medium flex items-center gap-1"
+                className="h-12 px-6 rounded-2xl border-2 border-emerald-100 text-emerald-600 hover:bg-emerald-50 font-black text-xs uppercase tracking-widest transition-all"
               >
                 {showQuickAddParent ? (
-                  'Ακύρωση'
+                  toGreekUpperCase('Ακύρωση')
                 ) : (
                   <>
-                    <Plus className="h-3.5 w-3.5" />
-                    Γρήγορη Προσθήκη
+                    <Plus className="h-4 w-4 mr-2" />
+                    {toGreekUpperCase('Γρήγορη Προσθήκη')}
                   </>
                 )}
-              </button>
+              </Button>
             )}
           </div>
 
           {!showQuickAddParent ? (
-            <div className="space-y-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+            <div className="space-y-6">
+              <div className="relative group">
+                <Search className="absolute left-8 top-1/2 -translate-y-1/2 h-8 w-8 text-zinc-300 group-focus-within:text-emerald-500 transition-all group-focus-within:scale-110" />
                 <Input
                   type="text"
-                  placeholder="Αναζήτηση γονέα με όνομα, email ή τηλέφωνο..."
+                  placeholder={toGreekUpperCase('Αναζήτηση γονέα με όνομα, email ή τηλέφωνο...')}
                   value={parentSearch}
                   onChange={(e) => setParentSearch(e.target.value)}
-                  className="pl-10 h-11 bg-white"
+                  className="h-20 pl-20 pr-8 bg-zinc-50 border-none rounded-[1.5rem] font-black text-xl focus:bg-white focus:ring-8 focus:ring-emerald-500/10 transition-all uppercase placeholder:text-zinc-200 shadow-inner"
                 />
               </div>
-              <div className="max-h-48 overflow-y-auto rounded-xl border border-zinc-200 divide-y divide-zinc-100">
+              <div className="max-h-[30rem] overflow-y-auto rounded-[2.5rem] border-2 border-zinc-50 bg-white p-4 space-y-3 shadow-inner">
                 {filteredParents.length === 0 ? (
-                  <div className="p-4 text-center text-zinc-400 text-sm">
-                    {parentSearch ? 'Δεν βρέθηκαν γονείς' : 'Δεν υπάρχουν γονείς'}
+                  <div className="p-16 text-center flex flex-col items-center gap-6">
+                    <UserPlus className="h-16 w-16 text-zinc-100" />
+                    <p className="font-black text-lg text-zinc-300 uppercase tracking-widest">
+                      {parentSearch ? toGreekUpperCase('Δεν βρέθηκαν γονείς') : toGreekUpperCase('Δεν υπάρχουν γονείς')}
+                    </p>
                   </div>
                 ) : (
                   filteredParents.map((parent) => (
                     <label
                       key={parent.id}
-                      className={`flex items-center p-4 cursor-pointer hover:bg-zinc-50 transition-colors ${
-                        parentUid === parent.id ? 'bg-emerald-50' : ''
-                      }`}
+                      className={cn(
+                        "flex items-center p-8 rounded-[2rem] cursor-pointer hover:shadow-2xl transition-all border-4 relative overflow-hidden group/parent",
+                        parentUid === parent.id ? 'bg-emerald-600 border-emerald-600 text-white shadow-emerald-200' : 'bg-zinc-50/30 border-transparent hover:bg-white hover:border-emerald-100'
+                      )}
                     >
+                      <div className={cn(
+                        "h-14 w-14 rounded-2xl border-2 flex items-center justify-center transition-all shrink-0",
+                        parentUid === parent.id ? 'border-white/30 bg-white/20 text-white' : 'border-zinc-200 bg-white text-zinc-300 group-hover/parent:border-emerald-200 group-hover/parent:text-emerald-500'
+                      )}>
+                        {parentUid === parent.id ? <Plus className="h-8 w-8 rotate-45" /> : <div className="h-4 w-4 rounded-full border-2 border-current" />}
+                      </div>
+                      <div className="ml-8 min-w-0">
+                        <p className={cn("text-2xl font-black uppercase tracking-tight truncate", parentUid === parent.id ? 'text-white' : 'text-zinc-900')}>
+                            {toGreekUpperCase(parent.displayName)}
+                        </p>
+                        <div className={cn("flex flex-wrap items-center gap-4 mt-2", parentUid === parent.id ? 'text-emerald-100' : 'text-zinc-400')}>
+                          {parent.fields.phone && (
+                              <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest">
+                                  <Phone className="h-3 w-3" />
+                                  {parent.fields.phone}
+                              </div>
+                          )}
+                          {parent.fields.email && (
+                              <div className="flex items-center gap-2 text-[11px] font-black uppercase tracking-widest lowercase">
+                                  <Mail className="h-3 w-3" />
+                                  {parent.fields.email}
+                              </div>
+                          )}
+                        </div>
+                      </div>
                       <input
                         type="radio"
                         name="parent_uid"
                         value={parent.id}
                         checked={parentUid === parent.id}
                         onChange={() => setParentUid(parent.id)}
-                        className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-zinc-300"
+                        className="sr-only"
                       />
-                      <div className="ml-3">
-                        <p className="text-sm font-medium text-zinc-900">{parent.displayName}</p>
-                        <p className="text-xs text-zinc-400">
-                          {parent.fields.phone ? `${parent.fields.phone} \u2022 ` : ''}
-                          {parent.fields.email ?? ''}
-                        </p>
-                      </div>
+                      {parentUid === parent.id && (
+                          <div className="absolute -bottom-6 -right-6 opacity-20">
+                              <UserPlus className="h-24 w-24 -rotate-12" />
+                          </div>
+                      )}
                     </label>
                   ))
                 )}
               </div>
             </div>
           ) : parentGroup ? (
-            <div className="rounded-xl border border-zinc-200 bg-zinc-50/50 p-5 space-y-4">
-              <div className="flex items-center gap-2">
-                <UserPlus className="h-4 w-4 text-zinc-500" />
-                <p className="text-sm font-medium text-zinc-700">Δημιουργία Νέου Γονέα</p>
+            <div className="rounded-[2.5rem] border-2 border-emerald-100 bg-emerald-50/30 p-10 lg:p-16 space-y-10 animate-in zoom-in-95 duration-300 shadow-xl">
+              <div className="flex items-center gap-6">
+                <div className="h-16 w-16 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-lg">
+                    <UserPlus className="h-8 w-8" />
+                </div>
+                <div className="space-y-1">
+                    <h3 className="text-2xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Δημιουργία Νέου Γονέα')}</h3>
+                    <p className="text-sm font-bold text-emerald-600/70 uppercase tracking-widest">{toGreekUpperCase('ΣΥΜΠΛΗΡΩΣΤΕ ΤΑ ΣΤΟΙΧΕΙΑ ΤΟΥ ΓΟΝΕΑ')}</p>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label className="text-zinc-600 text-xs">Ονοματεπώνυμο *</Label>
+              
+              <div className="space-y-4">
+                <Label className="text-zinc-500 font-black text-xs uppercase tracking-[0.2em] ml-2">
+                    {toGreekUpperCase('Ονοματεπώνυμο Γονέα *')}
+                </Label>
                 <Input
                   type="text"
-                  placeholder="Ονοματεπώνυμο γονέα"
+                  placeholder={toGreekUpperCase('π.χ. Ιωάννης Παπαδόπουλος')}
                   value={quickParentName}
                   onChange={(e) => setQuickParentName(e.target.value)}
-                  className="h-11 bg-white"
+                  className="h-20 px-8 bg-white rounded-[1.5rem] border-none shadow-sm focus:ring-8 focus:ring-emerald-500/10 font-black text-xl uppercase transition-all"
                 />
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 {parentGroup.fields.map((field) => (
-                  <div key={field.key} className="space-y-2">
-                    <Label className="text-zinc-600 text-xs">{field.label} {field.required && <span className="text-red-400">*</span>}</Label>
+                  <div key={field.key} className="space-y-4">
+                    <Label className="text-zinc-500 font-black text-xs uppercase tracking-[0.2em] ml-2">
+                        {toGreekUpperCase(field.label)} {field.required && <span className="text-red-400 font-black">*</span>}
+                    </Label>
                     {renderField(field, quickParentFields, (key: string, val: string | number | null) =>
                       setQuickParentFields((prev) => ({ ...prev, [key]: val }))
                     )}
                   </div>
                 ))}
               </div>
+
               <Button
                 type="button"
                 onClick={handleQuickAddParent}
                 disabled={isCreatingParent || !quickParentName}
-                className="w-full"
+                className="h-20 w-full rounded-[1.5rem] bg-emerald-600 hover:bg-zinc-900 text-white font-black text-xl uppercase tracking-widest shadow-2xl transition-all active:scale-95"
               >
                 {isCreatingParent ? (
                   <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Δημιουργία...
+                    <Loader2 className="h-8 w-8 animate-spin mr-4" />
+                    {toGreekUpperCase('Δημιουργία...')}
                   </>
                 ) : (
-                  'Δημιουργία & Σύνδεση Γονέα'
+                  toGreekUpperCase('Δημιουργία & Σύνδεση Γονέα')
                 )}
               </Button>
             </div>
@@ -517,44 +571,48 @@ export default function AcademyUserForm({
       )}
 
       {/* Documents (PDF Upload) */}
-      <div className="space-y-3">
+      <div className="space-y-8 pt-10 border-t-2 border-zinc-50">
         <div className="flex items-center justify-between">
-          <Label className="text-zinc-700 text-sm font-medium">Αρχεία / Έγγραφα (PDF)</Label>
-          <span className="text-xs text-zinc-400">Μέγ. 10MB ανά αρχείο</span>
+          <Label className="text-zinc-900 font-black text-2xl uppercase tracking-tight">
+              {toGreekUpperCase('Αρχεία / Έγγραφα (PDF)')}
+          </Label>
+          <div className="px-5 py-2 bg-zinc-100 rounded-full text-[10px] font-black uppercase text-zinc-400 tracking-widest shadow-inner">
+              {toGreekUpperCase('Μέγ. 10MB ανά αρχείο')}
+          </div>
         </div>
 
         {/* Uploaded Documents List */}
         {documents.length > 0 && (
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {documents.map((doc) => (
               <div
                 key={doc.path}
-                className="flex items-center gap-3 p-3 rounded-xl border border-zinc-200 bg-zinc-50/50 group"
+                className="flex items-center gap-6 p-6 rounded-2xl border-2 border-zinc-50 bg-white hover:border-red-100 hover:bg-red-50/30 transition-all group"
               >
-                <div className="h-9 w-9 rounded-lg bg-red-50 flex items-center justify-center shrink-0">
-                  <FileText className="h-4 w-4 text-red-500" />
+                <div className="h-14 w-14 rounded-2xl bg-red-50 flex items-center justify-center shrink-0 shadow-sm group-hover:scale-110 transition-transform">
+                  <FileText className="h-8 w-8 text-red-500" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-zinc-900 truncate">{doc.name}</p>
-                  <p className="text-xs text-zinc-400">
+                  <p className="text-lg font-black text-zinc-900 truncate uppercase tracking-tight">{toGreekUpperCase(doc.name)}</p>
+                  <p className="text-[11px] font-black text-zinc-400 uppercase tracking-widest mt-1">
                     {formatFileSize(doc.size)} • {new Date(doc.uploadedAt).toLocaleDateString('el-GR')}
                   </p>
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-2 shrink-0">
                   <a
                     href={doc.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 transition-colors"
+                    className="h-12 w-12 rounded-xl flex items-center justify-center bg-zinc-50 text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 transition-all shadow-sm"
                   >
-                    <Download className="h-4 w-4" />
+                    <Download className="h-6 w-6" />
                   </a>
                   <button
                     type="button"
                     onClick={() => handleDeleteDocument(doc)}
-                    className="h-8 w-8 rounded-lg flex items-center justify-center text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                    className="h-12 w-12 rounded-xl flex items-center justify-center bg-zinc-50 text-zinc-300 hover:text-red-500 hover:bg-red-50 transition-all active:scale-90 shadow-sm"
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className="h-6 w-6" />
                   </button>
                 </div>
               </div>
@@ -575,44 +633,49 @@ export default function AcademyUserForm({
           type="button"
           onClick={() => fileInputRef.current?.click()}
           disabled={isUploading}
-          className="w-full flex items-center justify-center gap-2 p-4 rounded-xl border-2 border-dashed border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:text-zinc-700 hover:bg-zinc-50/50 transition-all duration-150"
+          className="w-full h-32 flex flex-col items-center justify-center gap-4 rounded-[2.5rem] border-4 border-dashed border-zinc-100 text-zinc-300 hover:border-emerald-200 hover:text-emerald-600 hover:bg-emerald-50/20 transition-all duration-500 active:scale-[0.98] group bg-zinc-50 shadow-inner"
         >
           {isUploading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span className="text-sm font-medium">Ανέβασμα...</span>
+              <Loader2 className="h-10 w-10 animate-spin text-emerald-500" />
+              <span className="text-xl font-black uppercase tracking-[0.3em]">{toGreekUpperCase('Ανέβασμα...')}</span>
             </>
           ) : (
             <>
-              <Upload className="h-4 w-4" />
-              <span className="text-sm font-medium">Ανέβασμα PDF αρχείων</span>
+              <div className="h-12 w-12 bg-white rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-125 transition-transform duration-500">
+                  <Upload className="h-6 w-6 text-zinc-400 group-hover:text-emerald-500" />
+              </div>
+              <span className="text-xl font-black uppercase tracking-[0.3em] group-hover:text-emerald-700">{toGreekUpperCase('Ανέβασμα PDF αρχείων')}</span>
             </>
           )}
         </button>
       </div>
 
       {/* Submit Buttons */}
-      <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-zinc-100/60">
+      <div className="flex flex-col sm:flex-row gap-6 pt-10 border-t-2 border-zinc-50">
         <Button
           type="button"
           variant="outline"
           onClick={() => window.history.back()}
-          className="flex-1 h-11 border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900"
+          className="flex-1 h-20 rounded-[1.5rem] font-black text-zinc-400 hover:text-zinc-600 border-none bg-zinc-50 hover:bg-zinc-100 transition-all text-xl uppercase tracking-widest"
         >
-          Ακύρωση
+          {toGreekUpperCase('Ακύρωση')}
         </Button>
         <Button
           type="submit"
           disabled={isLoading}
-          className="flex-1 h-11"
+          className="flex-1 h-20 rounded-[1.5rem] bg-zinc-900 hover:bg-black text-white font-black shadow-2xl shadow-zinc-200 transition-all hover:scale-[1.02] active:scale-[0.98] text-xl uppercase tracking-widest group"
         >
           {isLoading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Αποθήκευση...
+              <Loader2 className="h-8 w-8 mr-4 animate-spin" />
+              {toGreekUpperCase('Αποθήκευση...')}
             </>
           ) : (
-            initialData?.id ? 'Ενημέρωση' : 'Δημιουργία'
+            <>
+                <Plus className="h-8 w-8 mr-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+                {initialData?.id ? toGreekUpperCase('Ενημέρωση') : toGreekUpperCase('Δημιουργία')}
+            </>
           )}
         </Button>
       </div>
