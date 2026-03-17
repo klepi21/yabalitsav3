@@ -37,9 +37,7 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
     setIsProcessing(true);
     setMessage(null);
 
-    try {
-      console.log('🔄 Confirming payment with client secret:', clientSecret);
-      
+    try {      
       // Confirm the payment using the card element
       const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
         payment_method: {

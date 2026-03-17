@@ -18,7 +18,7 @@ export default function SubscriptionRenewalPage() {
   const isDevUser = userEmail === DEV_EMAIL;
 
   const plans = pricingUtils.getAllPlans().map(plan =>
-    isDevUser ? { ...plan, basePrice: 0.10 } : plan
+    isDevUser ? { ...plan, basePrice: 0.50 } : plan
   );
 
   const planIcons: Record<string, React.ElementType> = {
@@ -102,6 +102,7 @@ export default function SubscriptionRenewalPage() {
           duration,
           basePrice: selectedPlanData.basePrice,
           userUid: auth.currentUser.uid,
+          customerEmail: auth.currentUser.email,
           amount: pricingUtils.getStripeAmount(selectedPlanData.basePrice, duration),
         }),
       });

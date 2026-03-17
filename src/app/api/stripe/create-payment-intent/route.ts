@@ -4,7 +4,7 @@ import { venueService, paymentService } from '@/lib/firebase-services';
 import { pricingUtils } from '@/lib/pricing';
 
 const DEV_EMAIL = 'nikoskoukis99@gmail.com';
-const DEV_BASE_PRICE = 0.10;
+const DEV_BASE_PRICE = 0.50;
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     console.log('✅ Using Stripe Price ID:', stripePriceId);
 
     // Check if dev email for testing pricing
-    const basePrice = venue.email === DEV_EMAIL ? DEV_BASE_PRICE : plan.basePrice;
+    const basePrice = customerEmail === DEV_EMAIL ? DEV_BASE_PRICE : plan.basePrice;
 
     // Calculate the amount
     const totalPrice = pricingUtils.calculateTotalPrice(basePrice, duration as 1 | 6 | 12);
