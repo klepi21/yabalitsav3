@@ -103,18 +103,18 @@ function QRInner() {
 
       <div className="max-w-2xl w-full space-y-8 relative z-10">
         <div className="text-center space-y-2 no-print">
-            <div className="inline-flex items-center justify-center h-16 w-16 rounded-[2rem] bg-zinc-900 shadow-xl shadow-zinc-200 mb-4 animate-bounce-slow">
-              <QrCode className="h-8 w-8 text-emerald-400" />
-            </div>
-            <h1 className="text-4xl font-black text-zinc-900 tracking-tight flex items-center justify-center gap-3">
-              QR <span className="text-emerald-500">BOOKING</span>
-            </h1>
-            <p className="text-sm font-bold text-zinc-400 uppercase tracking-[0.2em]">{toGreekUpperCase('Δημιουργία κωδικού για τη σελίδα σας')}</p>
+          <div className="inline-flex items-center justify-center h-16 w-16 rounded-[2rem] bg-zinc-900 shadow-xl shadow-zinc-200 mb-4 animate-bounce-slow">
+            <QrCode className="h-8 w-8 text-emerald-400" />
+          </div>
+          <h1 className="text-4xl font-black text-zinc-900 tracking-tight flex items-center justify-center gap-3">
+            QR <span className="text-emerald-500">BOOKING</span>
+          </h1>
+          <p className="text-sm font-bold text-zinc-400 uppercase tracking-[0.2em]">{toGreekUpperCase('Δημιουργία κωδικού για τη σελίδα σας')}</p>
         </div>
 
         <div className="bg-white rounded-[3rem] shadow-2xl shadow-zinc-200 p-8 md:p-12 border border-black/[0.03] relative overflow-hidden group">
           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent pointer-events-none" />
-          
+
           <div className="relative flex flex-col items-center gap-8">
             {fullUrl ? (
               <>
@@ -140,16 +140,16 @@ function QRInner() {
                       <p className="text-[10px] font-bold text-zinc-400 uppercase mb-0.5 tracking-widest">{toGreekUpperCase('Σύνδεσμος Κράτησης')}</p>
                       <p className="text-xs font-black text-zinc-900 truncate">{fullUrl}</p>
                     </div>
-                    <button 
+                    <button
                       onClick={handleCopy}
                       className="h-10 w-10 flex items-center justify-center bg-white border border-zinc-100 rounded-xl hover:bg-zinc-900 hover:text-white transition-all shadow-sm active:scale-95"
                     >
                       {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
                     </button>
-                    <a 
-                      href={fullUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
+                    <a
+                      href={fullUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="h-10 w-10 flex items-center justify-center bg-white border border-zinc-100 rounded-xl hover:bg-emerald-500 hover:text-white transition-all shadow-sm active:scale-95"
                     >
                       <ExternalLink className="h-4 w-4" />
@@ -159,26 +159,26 @@ function QRInner() {
 
                 {/* Main Actions */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full no-print pt-4 border-t border-zinc-50">
-                   <button
+                  <button
                     onClick={handleDownload}
                     className="h-14 flex items-center justify-center gap-3 bg-zinc-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-800 transition-all active:scale-95 shadow-xl shadow-zinc-200 group/btn"
-                   >
-                     <Download className="h-4 w-4 text-emerald-400 group-hover:animate-bounce" />
-                     {toGreekUpperCase('Κατέβασμα QR')}
-                   </button>
-                   <button
+                  >
+                    <Download className="h-4 w-4 text-emerald-400 group-hover:animate-bounce" />
+                    {toGreekUpperCase('Κατέβασμα QR')}
+                  </button>
+                  <button
                     onClick={() => window.print()}
                     className="h-14 flex items-center justify-center gap-3 bg-white text-zinc-900 border border-zinc-100 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-zinc-50 transition-all active:scale-95 shadow-sm group/btn"
-                   >
-                     <Printer className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900" />
-                     {toGreekUpperCase('Εκτύπωση')}
-                   </button>
+                  >
+                    <Printer className="h-4 w-4 text-zinc-400 group-hover:text-zinc-900" />
+                    {toGreekUpperCase('Εκτύπωση')}
+                  </button>
                 </div>
               </>
             ) : (
               <div className="text-center py-12 space-y-4">
                 <div className="h-16 w-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto">
-                   <QrCode className="h-8 w-8 text-red-500 opacity-20" />
+                  <QrCode className="h-8 w-8 text-red-500 opacity-20" />
                 </div>
                 <p className="text-zinc-400 font-bold uppercase tracking-widest">{toGreekUpperCase('Δεν βρέθηκε URL κράτησης')}</p>
               </div>
@@ -187,8 +187,8 @@ function QRInner() {
         </div>
 
         <p className="text-center text-[10px] font-bold text-zinc-400 no-print uppercase tracking-widest leading-relaxed">
-          {toGreekUpperCase('Τοποθετήστε τον κωδικό στην είσοδο του γηπέδου')}<br/>
-          {toGreekUpperCase('για να διευκολύνετε τις κρατήσεις των πελατών σας')}
+          {toGreekUpperCase('Τοποθετήστε τον κωδικό στην είσοδο του γηπέδου')}<br />
+          {toGreekUpperCase('για να  διευκολύνετε τις κρατήσεις των πελατών σας')}
         </p>
       </div>
     </div>
