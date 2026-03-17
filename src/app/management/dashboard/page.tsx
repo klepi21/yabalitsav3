@@ -622,10 +622,10 @@ export default function DashboardPage() {
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'ΣΥΝΟΛΟ ΚΡΑΤΗΣΕΩΝ', value: bookings.length, detail: 'ΤΕΛΕΥΤΑΙΕΣ 30 ΗΜΕΡΕΣ', color: 'bg-emerald-50/50', image: '/dashboard/bookings.png' },
-          { label: 'LIVE ΑΓΩΝΕΣ', value: getLiveBookings(), detail: 'ΑΥΤΗ ΤΗ ΣΤΙΓΜΗ', color: 'bg-blue-50/50', image: '/dashboard/live.png' },
-          { label: 'Κρατήσεις Σήμερα', value: getTodaysBookings().length, detail: 'ΠΡΟΓΡΑΜΜΑ ΗΜΕΡΑΣ', color: 'bg-amber-50/50', image: '/dashboard/today.png' },
-          { label: 'ΣΥΝΟΛΟ ΠΕΛΑΤΩΝ', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, detail: 'ΣΥΝΟΛΟ ΠΕΛΑΤΩΝ', color: 'bg-zinc-50/80', image: '/dashboard/customers.png' }
+          { label: 'ΣΥΝΟΛΟ ΚΡΑΤΗΣΕΩΝ', value: bookings.length, detail: 'ΤΕΛΕΥΤΑΙΕΣ 30 ΗΜΕΡΕΣ', color: 'bg-emerald-50/80', image: '/dashboard/bookings.png' },
+          { label: 'LIVE ΑΓΩΝΕΣ', value: getLiveBookings(), detail: 'ΑΥΤΗ ΤΗ ΣΤΙΓΜΗ', color: 'bg-blue-50/80', image: '/dashboard/live.png' },
+          { label: 'Κρατήσεις Σήμερα', value: getTodaysBookings().length, detail: 'ΠΡΟΓΡΑΜΜΑ ΗΜΕΡΑΣ', color: 'bg-amber-50/80', image: '/dashboard/today.png' },
+          { label: 'ΣΥΝΟΛΟ ΠΕΛΑΤΩΝ', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, detail: 'ΣΥΝΟΛΟ ΠΕΛΑΤΩΝ', color: 'bg-zinc-100/80', image: '/dashboard/customers.png' }
         ].map((stat, i) => (
           <Card key={i} className={cn("rounded-3xl border border-black/[0.08] shadow-xl shadow-zinc-200/50 overflow-hidden group transition-all duration-500 hover:-translate-y-1 relative", stat.color)}>
             <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -633,7 +633,7 @@ export default function DashboardPage() {
                 src={stat.image} 
                 alt="" 
                 fill 
-                className="object-cover opacity-[0.25] grayscale group-hover:scale-110 group-hover:opacity-[0.35] transition-all duration-700"
+                className="object-cover opacity-[0.25] group-hover:scale-110 group-hover:opacity-[0.35] transition-all duration-700"
               />
             </div>
             <CardContent className="p-6 relative z-10">
