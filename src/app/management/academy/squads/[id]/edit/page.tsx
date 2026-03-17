@@ -10,7 +10,6 @@ import { ArrowLeft, Loader2, Trophy, AlertCircle, Users, Search, Plus, X } from 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { cn, toGreekUpperCase } from '@/lib/utils';
 
 const AGE_GROUPS = ['U6', 'U7', 'U8', 'U9', 'U10', 'U11', 'U12', 'U13', 'U14', 'U15', 'U16', 'U17', 'U18', 'U19', 'U21', 'Ανδρών'];
 
@@ -165,41 +164,33 @@ export default function EditSquadPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-10">
-        <div className="flex items-center gap-8">
-           <Button variant="outline" size="icon" className="h-16 w-16 rounded-2xl border-2 border-zinc-100 hover:bg-zinc-50 hover:border-zinc-200 transition-all shrink-0 group" asChild>
-            <Link href="/management/academy/squads">
-              <ArrowLeft className="h-8 w-8 text-zinc-400 group-hover:text-zinc-600 transition-colors" />
-            </Link>
-          </Button>
-          <div className="flex items-center gap-6">
-            <div className="h-20 w-20 rounded-[1.5rem] bg-zinc-900 flex items-center justify-center text-white shadow-2xl shadow-zinc-200 shrink-0">
-              <Trophy className="h-10 w-10 text-emerald-400" />
-            </div>
-            <div className="space-y-1">
-              <h1 className="text-4xl font-black tracking-tight text-zinc-900 uppercase">
-                {toGreekUpperCase('Επεξεργασία Τμήματος')}
-              </h1>
-              <p className="text-xl font-bold text-zinc-400 uppercase tracking-tight">
-                {toGreekUpperCase('Ενημέρωση στοιχείων και μελών')}
-              </p>
-            </div>
+      <div className="flex items-center gap-4">
+        <Button variant="outline" size="icon" className="h-9 w-9 border-zinc-200 shrink-0" asChild>
+          <Link href="/management/academy/squads">
+            <ArrowLeft className="h-4 w-4" />
+          </Link>
+        </Button>
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-lg bg-violet-50 flex items-center justify-center shrink-0">
+            <Trophy className="h-5 w-5 text-violet-600" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Επεξεργασία Τμήματος</h1>
+            <p className="text-sm text-zinc-500 mt-0.5">Ενημέρωση στοιχείων τμήματος</p>
           </div>
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="bg-red-50 border border-red-100 rounded-3xl p-6 animate-in fade-in slide-in-from-top-4">
+        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-red-100 flex items-center justify-center">
-                <AlertCircle className="h-6 w-6 text-red-600" />
-              </div>
-              <p className="text-red-700 font-black uppercase">{toGreekUpperCase(error)}</p>
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+              <p className="text-sm text-destructive">{error}</p>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => setError(null)} className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 font-black uppercase">
-              {toGreekUpperCase('Κλείσιμο')}
+            <Button variant="ghost" size="sm" onClick={() => setError(null)} className="text-destructive/60 hover:text-destructive shrink-0">
+              Κλείσιμο
             </Button>
           </div>
         </div>
@@ -207,35 +198,31 @@ export default function EditSquadPage() {
 
       {/* Form Card */}
       <form onSubmit={handleSubmit}>
-        <div className="rounded-[2.5rem] border border-zinc-100 bg-white p-10 lg:p-16 space-y-12 shadow-sm">
-          <div className="space-y-4">
-            <Label htmlFor="name" className="text-zinc-500 font-black text-xs uppercase tracking-[0.2em] ml-2">
-                {toGreekUpperCase('Όνομα Τμήματος *')}
-            </Label>
+        <div className="rounded-xl border border-zinc-100/60 bg-white p-6 sm:p-8 space-y-8">
+          <div className="space-y-2">
+            <Label htmlFor="name" className="text-zinc-700">Όνομα Τμήματος *</Label>
             <Input
               type="text"
               id="name"
               value={formData.name}
               onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-              placeholder={toGreekUpperCase('π.χ. Λιοντάρια U12')}
-              className="h-20 px-8 bg-zinc-50 rounded-[1.5rem] border-none shadow-inner focus:ring-8 focus:ring-emerald-500/10 font-black text-xl placeholder:text-zinc-200 w-full transition-all uppercase"
+              placeholder="π.χ. Λιοντάρια U12, Ακαδημία Juniors"
+              className="h-11 bg-white"
             />
           </div>
 
-          <div className="space-y-6">
-            <Label className="text-zinc-500 font-black text-xs uppercase tracking-[0.2em] ml-2">
-                {toGreekUpperCase('Ηλικιακή Κατηγορία *')}
-            </Label>
-            <div className="grid grid-cols-4 sm:grid-cols-8 gap-3">
+          <div className="space-y-3">
+            <Label className="text-zinc-700">Ηλικιακή Κατηγορία *</Label>
+            <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
               {AGE_GROUPS.map((ag) => (
                 <button
                   key={ag}
                   type="button"
                   onClick={() => setFormData((prev) => ({ ...prev, ageGroup: ag }))}
-                  className={`h-16 rounded-2xl text-[13px] font-black uppercase tracking-widest transition-all duration-300 border-none shadow-sm ${
+                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150 border ${
                     formData.ageGroup === ag
-                      ? 'bg-zinc-900 text-white shadow-xl scale-110 z-10'
-                      : 'bg-zinc-50 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600'
+                      ? 'bg-zinc-900 text-white border-zinc-900 shadow-sm'
+                      : 'bg-white text-zinc-600 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
                   }`}
                 >
                   {ag}
@@ -245,20 +232,18 @@ export default function EditSquadPage() {
           </div>
 
           {coaches.length > 0 && (
-            <div className="space-y-6">
-              <Label className="text-zinc-500 font-black text-xs uppercase tracking-[0.2em] ml-2">
-                {toGreekUpperCase('Ανάθεση Προπονητών')}
-              </Label>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <Label className="text-zinc-700">Ανάθεση Προπονητών</Label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {coaches.map((coach) => {
                   const isSelected = formData.coachIds.includes(coach.id);
                   return (
                     <label
                       key={coach.id}
-                      className={`flex items-center p-6 rounded-[2rem] border-2 cursor-pointer transition-all duration-300 relative overflow-hidden group/coach ${
+                      className={`flex items-center p-4 rounded-xl border cursor-pointer transition-all duration-150 ${
                         isSelected
-                          ? 'border-emerald-500 bg-emerald-50 shadow-lg scale-[1.02]'
-                          : 'border-zinc-50 bg-zinc-50/50 hover:border-emerald-100 hover:bg-white hover:shadow-xl'
+                          ? 'border-emerald-300 bg-emerald-50'
+                          : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
                       }`}
                     >
                       <input
@@ -267,27 +252,16 @@ export default function EditSquadPage() {
                         checked={isSelected}
                         onChange={() => toggleCoach(coach.id)}
                       />
-                      <div className="flex items-center gap-6 z-10">
-                        <div className={`h-16 w-16 rounded-2xl flex items-center justify-center transition-all duration-300 shrink-0 ${
-                          isSelected ? 'bg-emerald-500 text-white shadow-lg' : 'bg-white text-zinc-300 group-hover/coach:bg-emerald-50 group-hover/coach:text-emerald-500'
+                      <div className="flex items-center gap-3">
+                        <div className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${
+                          isSelected ? 'bg-emerald-100' : 'bg-zinc-100'
                         }`}>
-                          <Trophy className="h-8 w-8" />
+                          <Trophy className={`h-4 w-4 ${isSelected ? 'text-emerald-600' : 'text-zinc-400'}`} />
                         </div>
-                        <div className="space-y-1">
-                          <p className={`text-xl font-black uppercase tracking-tight transition-colors ${isSelected ? 'text-emerald-900' : 'text-zinc-900 group-hover/coach:text-emerald-700'}`}>
-                            {toGreekUpperCase(coach.displayName)}
-                          </p>
-                          {coach.fields.specialization && (
-                            <p className={`text-[11px] font-black uppercase tracking-[0.2em] transition-colors ${isSelected ? 'text-emerald-500' : 'text-zinc-400'}`}>
-                              {toGreekUpperCase(String(coach.fields.specialization))}
-                            </p>
-                          )}
+                        <div>
+                          <p className="text-sm font-medium text-zinc-900">{coach.displayName}</p>
+                          <p className="text-xs text-zinc-400">{coach.fields.specialization}</p>
                         </div>
-                      </div>
-                      <div className={`absolute top-0 right-0 p-4 transition-all duration-500 ${isSelected ? 'scale-100 rotate-0 opacity-100' : 'scale-0 -rotate-45 opacity-0'}`}>
-                           <div className="h-10 w-10 bg-emerald-500 rounded-full flex items-center justify-center text-white shadow-lg">
-                               <Users className="h-5 w-5" />
-                           </div>
                       </div>
                     </label>
                   );
@@ -297,41 +271,37 @@ export default function EditSquadPage() {
           )}
 
           {/* Athletes in Squad */}
-          <div className="space-y-8">
-            <div className="flex items-center justify-between border-b-2 border-zinc-50 pb-4">
-              <Label className="text-zinc-900 font-black text-xl uppercase tracking-tight">
-                {toGreekUpperCase('Αθλητές στο Τμήμα')}
-              </Label>
-              <div className="px-6 py-2 bg-zinc-900 text-white rounded-full text-[11px] font-black uppercase tracking-widest shadow-xl">
-                {squadAthletes.length} {toGreekUpperCase('Αθλητές')}
-              </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <Label className="text-zinc-700">Αθλητές στο Τμήμα</Label>
+              <span className="text-xs text-zinc-400">{squadAthletes.length} αθλητές</span>
             </div>
 
             {/* Current athletes */}
             {squadAthletes.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
                 {squadAthletes.map((athlete) => (
                   <div
                     key={athlete.id}
-                    className="flex items-center justify-between p-6 rounded-[1.5rem] bg-emerald-50/40 border-2 border-emerald-100/50 hover:border-emerald-300 hover:bg-emerald-50 transition-all group"
+                    className="flex items-center justify-between p-3 rounded-xl border border-emerald-200 bg-emerald-50/50"
                   >
-                    <div className="flex items-center gap-5">
-                      <div className="h-12 w-12 rounded-xl bg-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
-                        <Users className="h-6 w-6 text-emerald-500" />
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-lg bg-emerald-100 flex items-center justify-center">
+                        <Users className="h-4 w-4 text-emerald-600" />
                       </div>
                       <div>
-                        <p className="text-lg font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase(athlete.displayName)}</p>
+                        <p className="text-sm font-medium text-zinc-900">{athlete.displayName}</p>
                         {athlete.fields.birth_year && (
-                          <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mt-0.5">{toGreekUpperCase(String(`Γέννηση: ${athlete.fields.birth_year}`))}</p>
+                          <p className="text-xs text-zinc-400">Γέννηση: {athlete.fields.birth_year}</p>
                         )}
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => removeAthleteFromSquad(athlete.id)}
-                      className="h-12 w-12 rounded-xl flex items-center justify-center bg-white text-zinc-300 hover:text-red-500 hover:shadow-lg transition-all active:scale-90 shadow-sm"
+                      className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                     >
-                      <X className="h-6 w-6" />
+                      <X className="h-4 w-4" />
                     </button>
                   </div>
                 ))}
@@ -339,52 +309,41 @@ export default function EditSquadPage() {
             )}
 
             {/* Search & add athletes */}
-            <div className="rounded-[2rem] bg-zinc-50 border-2 border-zinc-100 p-8 space-y-6 shadow-inner">
-              <div className="flex items-center gap-4 text-zinc-400">
-                <div className="h-10 w-10 bg-white rounded-xl flex items-center justify-center shadow-sm">
-                   <Plus className="h-6 w-6" />
-                </div>
-                <span className="font-black text-xs uppercase tracking-[0.2em]">{toGreekUpperCase('Προσθήκη νέου αθλητή στο τμήμα')}</span>
+            <div className="rounded-xl border border-zinc-200 bg-zinc-50/50 p-4 space-y-3">
+              <div className="flex items-center gap-2 text-sm text-zinc-500">
+                <Plus className="h-4 w-4" />
+                <span className="font-medium">Προσθήκη αθλητή</span>
               </div>
-              <div className="relative group">
-                <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-zinc-300 group-focus-within:text-emerald-500 transition-colors" />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <Input
                   type="text"
-                  placeholder={toGreekUpperCase('Αναζήτηση αθλητή από την ακαδημία...')}
+                  placeholder="Αναζήτηση αθλητή..."
                   value={athleteSearch}
                   onChange={(e) => setAthleteSearch(e.target.value)}
-                  className="pl-16 h-16 bg-white rounded-[1.25rem] border-none shadow-sm focus:ring-8 focus:ring-emerald-500/10 font-bold text-lg uppercase transition-all"
+                  className="pl-10 h-10 bg-white"
                 />
               </div>
-              
               {athleteSearch && (
-                <div className="max-h-72 overflow-y-auto rounded-[1.5rem] border-2 border-zinc-100 bg-white shadow-2xl divide-y divide-zinc-50 animate-in fade-in slide-in-from-top-4">
+                <div className="max-h-48 overflow-y-auto rounded-lg border border-zinc-200 bg-white divide-y divide-zinc-100">
                   {availableAthletes.length === 0 ? (
-                    <div className="p-10 text-center flex flex-col items-center gap-4">
-                        <Users className="h-10 w-10 text-zinc-100" />
-                        <p className="font-black text-sm text-zinc-300 uppercase tracking-widest">{toGreekUpperCase('Δεν βρέθηκαν αθλητές')}</p>
-                    </div>
+                    <div className="p-3 text-center text-sm text-zinc-400">Δεν βρέθηκαν αθλητές</div>
                   ) : (
                     availableAthletes.map((athlete) => (
                       <button
                         key={athlete.id}
                         type="button"
                         onClick={() => { addAthleteToSquad(athlete); setAthleteSearch(''); }}
-                        className="w-full flex items-center justify-between p-6 hover:bg-emerald-50 transition-all text-left group/item"
+                        className="w-full flex items-center gap-3 p-3 hover:bg-zinc-50 transition-colors text-left"
                       >
-                        <div className="flex items-center gap-5">
-                            <div className="h-14 w-14 rounded-2xl bg-zinc-50 flex items-center justify-center group-hover/item:bg-white group-hover/item:scale-110 transition-all shrink-0">
-                                <Users className="h-7 w-7 text-zinc-300 group-hover/item:text-emerald-500" />
-                            </div>
-                            <div>
-                                <p className="text-xl font-black text-zinc-900 group-hover/item:text-emerald-700 uppercase tracking-tight transition-colors">{toGreekUpperCase(athlete.displayName)}</p>
-                                {athlete.fields.birth_year && (
-                                    <p className="text-[10px] font-black text-zinc-400 group-hover/item:text-emerald-500 uppercase tracking-widest mt-0.5">{toGreekUpperCase(String(`Γέννηση: ${athlete.fields.birth_year}`))}</p>
-                                )}
-                            </div>
+                        <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center shrink-0">
+                          <Users className="h-4 w-4 text-zinc-400" />
                         </div>
-                        <div className="h-10 w-10 bg-zinc-50 rounded-lg flex items-center justify-center text-zinc-300 group-hover/item:bg-emerald-500 group-hover/item:text-white transition-all shadow-sm">
-                            <Plus className="h-5 w-5" />
+                        <div>
+                          <p className="text-sm font-medium text-zinc-900">{athlete.displayName}</p>
+                          {athlete.fields.birth_year && (
+                            <p className="text-xs text-zinc-400">Γέννηση: {athlete.fields.birth_year}</p>
+                          )}
                         </div>
                       </button>
                     ))
@@ -394,27 +353,27 @@ export default function EditSquadPage() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-6 pt-12 border-t border-zinc-50">
+          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-zinc-100/60">
             <Button
               type="button"
               variant="outline"
-              className="flex-1 h-20 rounded-[1.5rem] border-2 border-zinc-100 text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 font-black uppercase text-lg tracking-widest transition-all"
+              className="flex-1 h-11 border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900"
               onClick={() => router.back()}
             >
-              {toGreekUpperCase('Ακύρωση')}
+              Ακύρωση
             </Button>
             <Button
               type="submit"
               disabled={isSaving}
-              className="flex-1 h-20 rounded-[1.5rem] bg-zinc-900 hover:bg-black text-white font-black uppercase text-xl tracking-widest transition-all shadow-2xl active:scale-95"
+              className="flex-1 h-11"
             >
               {isSaving ? (
                 <>
-                  <Loader2 className="h-7 w-7 animate-spin mr-3 text-emerald-400" />
-                  {toGreekUpperCase('Αποθήκευση...')}
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Αποθήκευση...
                 </>
               ) : (
-                toGreekUpperCase('Αποθήκευση Αλλαγών')
+                'Αποθήκευση Αλλαγών'
               )}
             </Button>
           </div>

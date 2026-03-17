@@ -129,20 +129,20 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
   return (
     <div className="min-h-screen bg-background">
       <Sidebar />
-      <div className="lg:pl-[280px]">
+      <div className="lg:pl-[240px]">
         <main className="min-h-screen">
           {/* Top bar */}
-          <div className="sticky top-0 z-20 bg-background/90 backdrop-blur-md border-b border-zinc-200/50">
-            <div className="px-8 py-4 flex items-center justify-between mx-auto">
+          <div className="sticky top-0 z-20 bg-background/90 backdrop-blur-md border-b border-zinc-100/50">
+            <div className="px-5 py-2 flex items-center justify-between mx-auto">
               {/* Help/Guides */}
               <Link
                 href="/management/guides"
-                className="inline-flex items-center gap-2 text-[15px] font-semibold text-zinc-600 hover:text-emerald-600 transition-all group"
+                className="inline-flex items-center gap-2 text-xs font-black text-zinc-500 hover:text-emerald-600 transition-all group uppercase tracking-tight"
               >
-                <div className="p-1.5 rounded-lg bg-zinc-100 group-hover:bg-emerald-50 transition-colors">
-                  <HelpCircle className="h-5 w-5" />
+                <div className="p-1.5 rounded-lg bg-zinc-50 group-hover:bg-emerald-50 transition-colors">
+                  <HelpCircle className="h-4 w-4" />
                 </div>
-                Οδηγίες Χρήσης
+                {toGreekUpperCase('Οδηγίες Χρήσης')}
               </Link>
 
               {/* Right side: Notifications + Plan Status */}
@@ -151,11 +151,11 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                 <div className="relative notification-bell">
                   <button
                     onClick={() => setShowNotifications(!showNotifications)}
-                    className="relative p-2 text-zinc-500 hover:text-zinc-900 transition-all rounded-xl hover:bg-zinc-100 touch-target"
+                    className="relative p-2 text-zinc-400 hover:text-zinc-600 transition-all rounded-lg hover:bg-zinc-50 touch-target"
                   >
-                    <Bell className="h-5 w-5" />
+                    <Bell className="h-4 w-4" />
                     {pendingBookings.length > 0 && (
-                      <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] rounded-full h-5 w-5 flex items-center justify-center font-bold ring-2 ring-white">
+                      <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] rounded-full h-4 w-4 flex items-center justify-center font-black ring-2 ring-white">
                         {pendingBookings.length}
                       </span>
                     )}
@@ -222,7 +222,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                 </div>
 
                 {/* Separator */}
-                <div className="h-6 w-px bg-zinc-200" />
+                <div className="h-5 w-px bg-zinc-100" />
 
                 {/* Plan Status */}
                 {venueData && (
@@ -281,20 +281,20 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                         )}
                       </>
                     ) : (
-                      <div className="flex items-center gap-4">
-                        <div className="flex flex-col bg-zinc-50 border border-zinc-200 px-4 py-2 rounded-xl">
+                      <div className="flex items-center gap-3">
+                        <div className="flex flex-col bg-zinc-50 border border-zinc-100 px-3 py-1.5 rounded-lg">
                           <div className="flex items-center gap-2">
                             <div className="h-2 w-2 rounded-full bg-zinc-400" />
-                              <span className="text-[13px] font-bold text-zinc-900 uppercase tracking-tight">
+                              <span className="text-[11px] font-black text-zinc-900 uppercase tracking-tight">
                                 {venueData.plan === 'trial' ? toGreekUpperCase('Δωρεάν Δοκιμή') : toGreekUpperCase('Χωρίς Πλάνο')}
                               </span>
                           </div>
                         </div>
                         <Link
                           href="/management/settings/renewal"
-                          className="inline-flex items-center gap-2 text-[13px] font-bold text-white bg-emerald-600 hover:bg-emerald-700 px-5 py-2.5 rounded-xl transition-all shadow-md shadow-emerald-600/20 active:scale-95"
+                          className="inline-flex items-center gap-2 text-[11px] font-black text-white bg-zinc-900 hover:bg-black px-4 py-2 rounded-lg transition-all shadow-md active:scale-95 uppercase"
                         >
-                          <Sparkles className="h-4 w-4" />
+                          <Sparkles className="h-3.5 w-3.5 text-amber-400" />
                           {toGreekUpperCase('Ενεργοποίηση')}
                         </Link>
                       </div>
@@ -305,7 +305,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
             </div>
           </div>
 
-          <div className="max-w-[1600px] mx-auto p-8">
+          <div className="max-w-[1600px] mx-auto p-4 sm:p-5">
             {children}
           </div>
         </main>

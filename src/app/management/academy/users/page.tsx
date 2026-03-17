@@ -172,16 +172,16 @@ export default function AcademyUsersPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-10">
-        <div className="flex items-center gap-8">
-           <div className="h-24 w-24 rounded-[2rem] bg-zinc-900 flex items-center justify-center text-white shadow-2xl shadow-zinc-200 shrink-0">
-             <Users className="h-12 w-12 text-emerald-400" />
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-2 border-b border-zinc-50">
+        <div className="flex items-center gap-3.5">
+           <div className="h-11 w-11 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shrink-0">
+             <Users className="h-5 w-5 text-emerald-400" />
            </div>
-           <div className="space-y-2">
-             <h1 className="text-6xl font-black tracking-tight text-zinc-900 uppercase">
-               {activeGroup ? toGreekUpperCase(activeGroup.namePlural) : toGreekUpperCase('Μέλη Ακαδημίας')}
+           <div className="space-y-0.5">
+             <h1 className="text-xl font-black tracking-tight text-zinc-900 uppercase">
+               {activeGroup ? toGreekUpperCase(activeGroup.namePlural) : toGreekUpperCase('Χρήστες Ακαδημίας')}
              </h1>
-             <p className="text-2xl font-bold text-zinc-400 uppercase tracking-tight">
+             <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight">
                {activeGroup
                  ? toGreekUpperCase(`Διαχείριση των ${activeGroup.namePlural.toLowerCase()}`)
                  : toGreekUpperCase('Δείτε και διαχειριστείτε όλα τα μέλη')}
@@ -189,39 +189,35 @@ export default function AcademyUsersPage() {
            </div>
         </div>
         
-        <Button asChild className="h-20 px-12 rounded-[1.5rem] bg-zinc-900 hover:bg-black text-white font-black text-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] hover:-translate-y-1 transition-all active:scale-95 group">
-          <Link href="/management/academy/users/new" className="flex items-center gap-4">
-            <Plus className="h-8 w-8 text-emerald-400 group-hover:scale-125 transition-transform" />
+        <Button asChild className="h-10 px-5 rounded-lg bg-zinc-900 hover:bg-black text-white font-bold text-[12px] shadow-md transition-all active:scale-95 group">
+          <Link href="/management/academy/users/new" className="flex items-center gap-2">
+            <Plus className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" />
             {toGreekUpperCase('Προσθήκη Μέλους')}
           </Link>
         </Button>
       </div>
 
-
       {/* Stats Cards — hide when filtered by squad */}
       {!urlSquad && (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
           <button
             onClick={() => setGroupFilter('all')}
             className={cn(
-              "flex flex-col items-start p-10 rounded-[2.5rem] border-2 transition-all duration-500 text-left group overflow-hidden relative",
+              "flex flex-col items-start p-4 rounded-xl border transition-all duration-300 text-left group overflow-hidden relative",
               groupFilter === 'all'
-                ? "bg-zinc-900 text-white border-zinc-900 shadow-2xl scale-105 z-10"
-                : "bg-white text-zinc-900 border-zinc-100 hover:border-emerald-200 hover:shadow-2xl"
+                ? "bg-zinc-900 text-white border-zinc-900 shadow-lg scale-105 z-10"
+                : "bg-white text-zinc-900 border-zinc-100 hover:border-emerald-200 hover:shadow-md"
             )}
           >
-            <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center mb-8 transition-all shadow-sm", 
+            <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center mb-3 transition-all shadow-sm", 
               groupFilter === 'all' ? "bg-white/10 text-emerald-400" : "bg-zinc-50 text-zinc-300 group-hover:bg-emerald-50 group-hover:text-emerald-500"
             )}>
-              <Users className="h-8 w-8" />
+              <Users className="h-3.5 w-3.5" />
             </div>
-            <p className="text-5xl font-black leading-none mb-3 tracking-tighter">{userStats.total}</p>
-            <p className={cn("text-[11px] font-black uppercase tracking-[0.3em]", 
+            <p className="text-xl font-black leading-none mb-1 tracking-tight">{userStats.total}</p>
+            <p className={cn("text-[8px] font-bold uppercase tracking-wider", 
               groupFilter === 'all' ? "text-zinc-400" : "text-zinc-400"
-            )}>{toGreekUpperCase('Σύνολο Μελών')}</p>
-            <div className="absolute -bottom-6 -right-6 opacity-0 group-hover:opacity-10 transition-all duration-500 group-hover:scale-110">
-                 <Users className="h-32 w-32 -rotate-12" />
-            </div>
+            )}>{toGreekUpperCase('Σύνολο')}</p>
           </button>
 
           {groups.map((group) => {
@@ -231,24 +227,21 @@ export default function AcademyUsersPage() {
                 key={group.id}
                 onClick={() => setGroupFilter(isActive ? 'all' : group.id)}
                 className={cn(
-                  "flex flex-col items-start p-10 rounded-[2.5rem] border-2 transition-all duration-500 text-left group overflow-hidden relative",
+                  "flex flex-col items-start p-4 rounded-xl border transition-all duration-300 text-left group overflow-hidden relative",
                   isActive
-                    ? "bg-emerald-600 text-white border-emerald-600 shadow-2xl scale-105 z-10 ring-[1rem] ring-emerald-50"
-                    : "bg-white text-zinc-900 border-zinc-100 hover:border-emerald-200 hover:shadow-2xl"
+                    ? "bg-emerald-600 text-white border-emerald-600 shadow-lg scale-105 z-10"
+                    : "bg-white text-zinc-900 border-zinc-100 hover:border-emerald-200 hover:shadow-md"
                 )}
               >
-                <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center mb-8 text-3xl transition-all shadow-sm", 
-                  isActive ? "bg-white/20 text-white shadow-lg" : "bg-zinc-50 shadow-inner group-hover:bg-emerald-50 group-hover:scale-110"
+                <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center mb-3 text-base transition-all shadow-sm", 
+                  isActive ? "bg-white/20 text-white" : "bg-zinc-50"
                 )}>
                   {group.icon || '👤'}
                 </div>
-                <p className="text-5xl font-black leading-none mb-3 tracking-tighter uppercase">{userStats[group.id] || 0}</p>
-                <p className={cn("text-[11px] font-black uppercase tracking-[0.3em]", 
+                <p className="text-xl font-black leading-none mb-1 tracking-tight uppercase">{userStats[group.id] || 0}</p>
+                <p className={cn("text-[8px] font-bold uppercase tracking-wider", 
                   isActive ? "text-emerald-100" : "text-zinc-400"
                 )}>{toGreekUpperCase(group.namePlural)}</p>
-                <div className="absolute -bottom-6 -right-6 opacity-0 group-hover:opacity-10 transition-all duration-500 group-hover:scale-110">
-                     <span className="text-8xl -rotate-12 inline-block">{group.icon || '👤'}</span>
-                </div>
               </button>
             );
           })}
@@ -256,27 +249,27 @@ export default function AcademyUsersPage() {
       )}
 
       {/* Filters Row */}
-      <div className="flex flex-col lg:flex-row items-center gap-6">
+      <div className="flex flex-col md:flex-row items-center gap-4">
         <div className="relative flex-1 w-full group">
-          <Search className="absolute left-8 top-1/2 -translate-y-1/2 h-8 w-8 text-zinc-300 group-focus-within:text-emerald-500 transition-all group-focus-within:scale-110" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-300 group-focus-within:text-emerald-500 transition-colors" />
           <Input
-            placeholder={toGreekUpperCase('Αναζήτηση με όνομα, email ή τηλέφωνο...')}
+            placeholder={toGreekUpperCase('Αναζήτηση...')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-20 pl-20 pr-8 bg-white rounded-[1.5rem] border-2 border-zinc-50 shadow-sm focus:ring-8 focus:ring-emerald-500/10 focus:border-emerald-500 font-black text-xl placeholder:text-zinc-200 w-full transition-all uppercase"
+            className="h-10 pl-10 pr-4 bg-white rounded-lg border-zinc-100 shadow-sm focus:ring-4 focus:ring-emerald-500/10 font-bold text-xs placeholder:text-zinc-300 w-full transition-all uppercase"
           />
         </div>
         
-        <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto">
+        <div className="flex items-center gap-4 w-full md:w-auto">
           {!urlSquad && (
             <Select value={groupFilter} onValueChange={(val: string) => setGroupFilter(val)}>
-                <SelectTrigger className="h-20 px-10 rounded-[1.5rem] bg-white border-2 border-zinc-50 shadow-sm font-black text-[15px] focus:ring-8 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all min-w-[280px] uppercase">
+                <SelectTrigger className="h-10 px-4 rounded-lg bg-white border-zinc-100 shadow-sm font-bold text-xs focus:ring-4 focus:ring-emerald-500/10 transition-all min-w-[180px] uppercase">
                     <SelectValue placeholder={toGreekUpperCase('Όλες οι Κατηγορίες')} />
                 </SelectTrigger>
-                <SelectContent className="rounded-[2.5rem] border-zinc-100 shadow-2xl p-3">
-                    <SelectItem value="all" className="font-black text-[15px] rounded-2xl py-4 uppercase tracking-tight mb-1">{toGreekUpperCase('Όλες οι Κατηγορίες')}</SelectItem>
+                <SelectContent className="rounded-xl border-zinc-100 shadow-2xl p-1">
+                    <SelectItem value="all" className="font-bold text-xs rounded-lg py-2 uppercase tracking-tight">{toGreekUpperCase('Όλες οι Κατηγορίες')}</SelectItem>
                     {groups.map((g) => (
-                        <SelectItem key={g.id} value={g.id} className="font-black text-[15px] rounded-2xl py-4 uppercase tracking-tight mb-1">{toGreekUpperCase(g.namePlural)}</SelectItem>
+                        <SelectItem key={g.id} value={g.id} className="font-bold text-xs rounded-lg py-2 uppercase tracking-tight">{toGreekUpperCase(g.namePlural)}</SelectItem>
                     ))}
                 </SelectContent>
             </Select>
@@ -286,9 +279,8 @@ export default function AcademyUsersPage() {
             <Button
               variant="ghost"
               onClick={() => { setGroupFilter('all'); setSquadFilter(null); setSearchQuery(''); }}
-              className="h-20 px-10 text-zinc-400 hover:text-red-500 font-black rounded-[1.5rem] hover:bg-red-50 transition-all uppercase text-[13px] tracking-[0.25em]"
+              className="h-10 px-4 text-zinc-400 hover:text-zinc-900 font-black rounded-lg hover:bg-zinc-100 touch-target uppercase text-[10px] tracking-[0.2em]"
             >
-              <Trash2 className="h-5 w-5 mr-3" />
               {toGreekUpperCase('Καθαρισμός')}
             </Button>
           )}
@@ -298,12 +290,12 @@ export default function AcademyUsersPage() {
       {/* Users Content Container */}
       <div className="space-y-6">
         {filteredUsers.length === 0 ? (
-          <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm py-32 text-center">
-            <div className="mx-auto h-24 w-24 bg-zinc-50 rounded-[2rem] flex items-center justify-center mb-8 shadow-inner">
-              <Users className="h-12 w-12 text-zinc-200" />
+          <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm py-20 text-center">
+            <div className="mx-auto h-16 w-16 bg-zinc-50 rounded-xl flex items-center justify-center mb-6 shadow-inner">
+              <Users className="h-8 w-8 text-zinc-200" />
             </div>
-            <h3 className="text-2xl font-black text-zinc-900 mb-2">Δεν βρέθηκαν χρήστες</h3>
-            <p className="text-zinc-500 font-medium text-lg max-w-sm mx-auto px-6">
+            <h3 className="text-xl font-black text-zinc-900 mb-1">Δεν βρέθηκαν χρήστες</h3>
+            <p className="text-zinc-500 font-medium text-base max-w-sm mx-auto px-6">
               {searchQuery || groupFilter !== 'all'
                 ? 'Δοκιμάστε να αλλάξετε τα κριτήρια αναζήτησης ή τα φίλτρα σας.'
                 : 'Ξεκινήστε προσθέτοντας τα πρώτα μέλη στην ακαδημία σας.'}
@@ -312,37 +304,30 @@ export default function AcademyUsersPage() {
         ) : (
           <>
             {/* Mobile/Tablet Card Layout (hidden on Desktop) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:hidden">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:hidden">
               {filteredUsers.map((u) => {
                 const group = getGroup(u.groupId);
                 return (
-                  <div key={u.id} className="bg-white rounded-[3rem] border border-zinc-100 p-10 space-y-8 shadow-sm active:bg-zinc-50 transition-all hover:shadow-2xl hover:border-emerald-100 group">
-                    <div className="flex items-start justify-between gap-6">
-                      <div className="flex items-center gap-6">
-                        <div className="h-20 w-20 rounded-[1.75rem] border-2 border-zinc-100 bg-zinc-50 flex items-center justify-center text-3xl font-black text-zinc-300 group-hover:bg-emerald-50 group-hover:text-emerald-500 group-hover:border-emerald-100 transition-all shadow-sm shrink-0">
-                            {toGreekUpperCase(u.displayName.charAt(0))}
-                        </div>
-                        <div className="space-y-2 min-w-0">
-                          <p className="text-3xl font-black text-zinc-900 leading-none uppercase tracking-tight group-hover:text-emerald-700 transition-colors truncate">{toGreekUpperCase(u.displayName)}</p>
-                          {group && (
-                            <div className={cn("inline-flex items-center px-4 py-2 rounded-[1rem] font-black text-[10px] uppercase tracking-[0.25em] border-none shadow-sm", GROUP_COLORS[group.color] || '')}>
-                              {toGreekUpperCase(group.name)}
-                            </div>
-                          )}
-                        </div>
+                  <div key={u.id} className="bg-white rounded-2xl border border-zinc-100 p-5 space-y-4 shadow-sm active:bg-zinc-50 transition-all hover:shadow-md group">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <p className="text-lg font-black text-zinc-900 leading-tight uppercase tracking-tight group-hover:text-emerald-600 transition-colors">{toGreekUpperCase(u.displayName)}</p>
+                        {group && (
+                          <div className={cn("inline-flex items-center px-3 py-1 rounded-lg font-black text-[8px] uppercase tracking-wider border-none shadow-sm", GROUP_COLORS[group.color] || '')}>
+                            {toGreekUpperCase(group.name)}
+                          </div>
+                        )}
                       </div>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-14 w-14 rounded-2xl bg-zinc-50 hover:bg-white border border-zinc-100 shrink-0">
-                            <MoreHorizontal className="h-8 w-8 text-zinc-400" />
+                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg bg-zinc-50 hover:bg-white border border-zinc-100">
+                            <MoreHorizontal className="h-5 w-5 text-zinc-400" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-80 p-5 rounded-[2.5rem] shadow-2xl border-zinc-100 animate-in zoom-in-95 duration-200">
-                          <DropdownMenuItem asChild className="rounded-2xl px-6 py-6 font-black text-[16px] uppercase tracking-widest cursor-pointer group mb-2">
+                        <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-xl border-zinc-100 animate-in zoom-in-95 duration-200">
+                          <DropdownMenuItem asChild className="rounded-xl px-4 py-3 font-bold cursor-pointer transition-colors">
                             <Link href={`/management/academy/users/${u.id}/edit`} className="flex items-center w-full">
-                              <div className="h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center mr-4 group-hover:bg-emerald-50 transition-colors">
-                                <Pencil className="h-6 w-6 text-zinc-400 group-hover:text-emerald-500 transition-colors" />
-                              </div>
+                              <Pencil className="h-4 w-4 mr-3 text-zinc-400" />
                               {toGreekUpperCase('Επεξεργασία')}
                             </Link>
                           </DropdownMenuItem>
@@ -350,26 +335,24 @@ export default function AcademyUsersPage() {
                             <AlertDialogTrigger asChild>
                               <DropdownMenuItem
                                 onSelect={(e: Event) => { e.preventDefault(); setDeleteConfirm(u.id); }}
-                                className="rounded-2xl px-6 py-6 font-black text-[16px] uppercase tracking-widest cursor-pointer text-red-600 focus:text-red-700 group"
+                                className="rounded-xl px-4 py-3 font-bold cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 transition-colors"
                               >
-                                <div className="h-12 w-12 rounded-xl bg-red-50/50 flex items-center justify-center mr-4 group-hover:bg-red-100 transition-colors">
-                                    <Trash2 className="h-6 w-6 text-red-400 group-hover:scale-110 transition-transform" />
-                                </div>
+                                <Trash2 className="h-4 w-4 mr-3" />
                                 {toGreekUpperCase('Διαγραφή')}
                               </DropdownMenuItem>
                             </AlertDialogTrigger>
-                            <AlertDialogContent className="rounded-[3rem] p-12">
+                            <AlertDialogContent className="rounded-[2.5rem] p-10">
                                 <AlertDialogHeader>
-                                    <AlertDialogTitle className="text-3xl font-black text-zinc-900 uppercase tracking-tight">Διαγραφή μέλους</AlertDialogTitle>
-                                    <AlertDialogDescription className="text-xl font-medium text-zinc-500 mt-4 leading-relaxed uppercase">
-                                        Είστε σίγουροι ότι θέλετε να διαγράψετε τον χρήστη <span className="text-zinc-900 font-black underline decoration-red-500/30 underline-offset-8">&quot;{u.displayName}&quot;</span>;
+                                    <AlertDialogTitle className="text-2xl font-black text-zinc-900">Διαγραφή χρήστη</AlertDialogTitle>
+                                    <AlertDialogDescription className="text-lg font-medium text-zinc-500 mt-2">
+                                        Είστε σίγουροι ότι θέλετε να διαγράψετε τον χρήστη <span className="text-zinc-900 font-bold">&quot;{u.displayName}&quot;</span>;
                                     </AlertDialogDescription>
                                 </AlertDialogHeader>
-                                <AlertDialogFooter className="mt-12 gap-4 flex-col sm:flex-row">
-                                    <AlertDialogCancel className="h-20 px-10 rounded-[1.5rem] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-600 bg-zinc-100 border-none">Ακύρωση</AlertDialogCancel>
+                                <AlertDialogFooter className="mt-10 gap-3">
+                                    <AlertDialogCancel className="h-14 px-8 rounded-2xl font-bold border-zinc-100">Ακύρωση</AlertDialogCancel>
                                     <AlertDialogAction 
                                         onClick={() => handleDelete(u.id)}
-                                        className="h-20 px-10 rounded-[1.5rem] bg-red-600 text-white font-black hover:bg-black transition-all text-lg uppercase tracking-widest shadow-xl shadow-red-200"
+                                        className="h-14 px-8 rounded-2xl bg-red-600 text-white font-black hover:bg-red-700 shadow-lg shadow-red-200"
                                     >
                                         Διαγραφή
                                     </AlertDialogAction>
@@ -380,34 +363,18 @@ export default function AcademyUsersPage() {
                       </DropdownMenu>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 pt-8 border-t border-zinc-100">
-                        {u.fields.phone ? (
-                            <a href={`tel:${u.fields.phone}`} className="flex flex-col items-start gap-2 p-5 rounded-[1.5rem] bg-zinc-50 hover:bg-emerald-50 hover:shadow-inner transition-all group/item">
-                                <div className="flex items-center gap-2">
-                                    <Phone className="h-3 w-3 text-zinc-300 group-hover/item:text-emerald-500" />
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 group-hover/item:text-emerald-600">Τηλέφωνο</p>
-                                </div>
-                                <p className="text-lg font-black text-zinc-900 group-hover/item:text-emerald-700">{u.fields.phone}</p>
+                    <div className="grid grid-cols-2 gap-3 pt-2 border-t border-zinc-50">
+                        {u.fields.phone && (
+                            <a href={`tel:${u.fields.phone}`} className="flex flex-col items-start gap-1 p-2 rounded-lg bg-zinc-50">
+                                <p className="text-[9px] font-black uppercase text-zinc-400">Τηλέφωνο</p>
+                                <p className="text-xs font-bold text-zinc-900">{u.fields.phone}</p>
                             </a>
-                        ) : (
-                            <div className="flex flex-col items-start gap-2 p-5 rounded-[1.5rem] bg-zinc-50/50">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-300">Τηλέφωνο</p>
-                                <p className="text-lg font-black text-zinc-200">—</p>
-                            </div>
                         )}
-                        {(u.squad_id || (u.squad_ids && u.squad_ids[0])) ? (
-                             <div className="flex flex-col items-start gap-2 p-5 rounded-[1.5rem] bg-emerald-50/50 border border-emerald-100/50 shadow-sm">
-                                <div className="flex items-center gap-2">
-                                    <Trophy className="h-3 w-3 text-emerald-500" />
-                                    <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600/60">Τμήμα</p>
-                                </div>
-                                <p className="text-lg font-black text-emerald-800 truncate w-full leading-tight">{toGreekUpperCase(getSquadName(u.squad_id || u.squad_ids![0]))}</p>
+                        {(u.squad_id || (u.squad_ids && u.squad_ids[0])) && (
+                             <div className="flex flex-col items-start gap-1 p-2 rounded-lg bg-zinc-50">
+                                <p className="text-[9px] font-black uppercase text-zinc-400">Τμήμα</p>
+                                <p className="text-xs font-bold text-zinc-900 truncate w-full">{getSquadName(u.squad_id || u.squad_ids![0])}</p>
                              </div>
-                        ) : (
-                            <div className="flex flex-col items-start gap-2 p-5 rounded-[1.5rem] bg-zinc-50/50">
-                                <p className="text-[10px] font-black uppercase tracking-widest text-zinc-300">Τμήμα</p>
-                                <p className="text-lg font-black text-zinc-200">—</p>
-                            </div>
                         )}
                     </div>
                   </div>
@@ -415,79 +382,73 @@ export default function AcademyUsersPage() {
               })}
             </div>
 
-            {/* Desktop Table View (hidden on Mobile/Tablet) */}
-            <div className="hidden lg:block bg-white rounded-[3rem] border-2 border-zinc-50 shadow-2xl shadow-zinc-200/40 overflow-hidden">
+            <div className="hidden lg:block bg-white rounded-xl border border-zinc-100 shadow-sm overflow-hidden">
               <Table>
                 <TableHeader>
-                  <TableRow className="border-none hover:bg-transparent bg-zinc-900">
-                    <TableHead className="h-24 px-10 text-[12px] font-black uppercase tracking-[0.3em] text-zinc-400">{toGreekUpperCase('Ονοματεπώνυμο')}</TableHead>
-                    <TableHead className="h-24 px-10 text-[12px] font-black uppercase tracking-[0.3em] text-zinc-400">{toGreekUpperCase('Κατηγορία')}</TableHead>
-                    <TableHead className="h-24 px-10 text-[12px] font-black uppercase tracking-[0.3em] text-zinc-400">{toGreekUpperCase('Επικοινωνία')}</TableHead>
-                    <TableHead className="h-24 px-10 text-[12px] font-black uppercase tracking-[0.3em] text-zinc-400">{toGreekUpperCase('Στοιχεία & Τμήματα')}</TableHead>
-                    <TableHead className="h-24 px-10 text-right"></TableHead>
+                  <TableRow className="border-none hover:bg-transparent bg-zinc-50/50">
+                    <TableHead className="h-10 px-4 text-[8px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Χρήστης')}</TableHead>
+                    <TableHead className="h-10 px-4 text-[8px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Κατηγορία')}</TableHead>
+                    <TableHead className="h-10 px-4 text-[8px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Επικοινωνία')}</TableHead>
+                    <TableHead className="h-10 px-4 text-[8px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Πληροφορίες')}</TableHead>
+                    <TableHead className="h-10 px-4 text-right"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredUsers.map((u) => {
                     const group = getGroup(u.groupId);
                     return (
-                      <TableRow key={u.id} className="group border-t border-zinc-50 hover:bg-emerald-50/40 transition-all duration-300">
-                        <TableCell className="px-10 py-10">
-                            <div className="flex items-center gap-6">
-                                <div className="h-14 w-14 rounded-2xl bg-zinc-50 flex items-center justify-center text-xl font-black text-zinc-300 group-hover:bg-white group-hover:text-emerald-500 transition-all shadow-inner">
-                                    {toGreekUpperCase(u.displayName.charAt(0))}
-                                </div>
-                                <p className="text-2xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight leading-none">{toGreekUpperCase(u.displayName)}</p>
-                            </div>
+                      <TableRow key={u.id} className="group border-t border-zinc-50 hover:bg-zinc-50/50 transition-colors">
+                        <TableCell className="px-4 py-3">
+                            <p className="text-base font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{toGreekUpperCase(u.displayName)}</p>
                         </TableCell>
-                        <TableCell className="px-10 py-10">
+                        <TableCell className="px-4 py-3">
                           {group && (
-                            <div className={cn("inline-flex items-center px-5 py-2 rounded-[1.25rem] font-black text-[11px] uppercase tracking-[0.25em] border-none shadow-sm", GROUP_COLORS[group.color] || '')}>
+                            <div className={cn("inline-flex items-center px-2 py-0.5 rounded-md font-bold text-[8px] uppercase tracking-wider border-none shadow-sm", GROUP_COLORS[group.color] || '')}>
                               {toGreekUpperCase(group.name)}
                             </div>
                           )}
                         </TableCell>
-                        <TableCell className="px-10 py-8">
-                          <div className="space-y-2">
+                        <TableCell className="px-4 py-3">
+                          <div className="space-y-0.5">
                             {u.fields.email && (
-                              <p className="text-[15px] font-black text-zinc-400 flex items-center gap-3 lowercase group-hover:text-zinc-600 transition-colors">
-                                <Mail className="h-4 w-4 text-emerald-500/40" />
+                              <p className="text-[11px] font-bold text-zinc-500 flex items-center gap-1.5">
+                                <Mail className="h-3 w-3 text-zinc-300" />
                                 {u.fields.email}
                               </p>
                             )}
                             {u.fields.phone && (
-                              <p className="text-[15px] font-black text-zinc-900 flex items-center gap-3 group-hover:text-emerald-600 transition-colors">
-                                <Phone className="h-4 w-4 text-emerald-500/40" />
+                              <p className="text-[11px] font-bold text-zinc-500 flex items-center gap-1.5">
+                                <Phone className="h-3 w-3 text-zinc-300" />
                                 {u.fields.phone}
                               </p>
                             )}
                           </div>
                         </TableCell>
-                        <TableCell className="px-10 py-8">
-                          <div className="flex flex-wrap gap-2.5">
+                        <TableCell className="px-4 py-3">
+                          <div className="flex flex-wrap gap-1.5">
                             {u.fields.birth_year && (
-                                <span className="bg-zinc-100 text-zinc-500 font-black text-[11px] px-4 py-1.5 rounded-xl uppercase tracking-widest">
+                                <span className="bg-zinc-50 text-zinc-500 font-bold text-[10px] px-2 py-0.5 rounded-md">
                                     {u.fields.birth_year}
                                 </span>
                             )}
                             {(u.squad_ids || (u.squad_id ? [u.squad_id] : [])).map((sid) => (
-                              <span key={sid} className="bg-emerald-50 text-emerald-600 font-black text-[11px] px-4 py-1.5 rounded-xl border-2 border-emerald-100/50 uppercase tracking-widest">
-                                {toGreekUpperCase(getSquadName(sid))}
+                              <span key={sid} className="bg-emerald-50 text-emerald-600 font-bold text-[10px] px-2 py-0.5 rounded-md border border-emerald-100">
+                                {getSquadName(sid)}
                               </span>
                             ))}
                           </div>
                         </TableCell>
-                        <TableCell className="px-10 py-8 text-right">
+                        <TableCell className="px-4 py-3 text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-14 w-14 rounded-2xl bg-zinc-50 group-hover:bg-white border border-transparent group-hover:border-zinc-100 transition-all">
-                                <MoreHorizontal className="h-7 w-7 text-zinc-400 group-hover:text-zinc-600" />
+                              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
+                                <MoreHorizontal className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-64 p-3 rounded-[2rem] shadow-2xl border-zinc-100 animate-in zoom-in-95 duration-200">
-                              <DropdownMenuItem asChild className="rounded-xl px-5 py-4 font-black text-xs uppercase tracking-[0.2em] cursor-pointer transition-colors group">
-                                <Link href={`/management/academy/users/${u.id}/edit`} className="flex items-center">
-                                  <Pencil className="h-4 w-4 mr-4 text-zinc-300 group-hover:text-emerald-500 transition-colors" />
+                            <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-xl border-zinc-100">
+                              <DropdownMenuItem asChild className="rounded-xl px-4 py-3 font-bold cursor-pointer transition-colors">
+                                <Link href={`/management/academy/users/${u.id}/edit`}>
+                                  <Pencil className="h-4 w-4 mr-3 text-zinc-400" />
                                   Επεξεργασία
                                 </Link>
                               </DropdownMenuItem>
@@ -495,24 +456,24 @@ export default function AcademyUsersPage() {
                                 <AlertDialogTrigger asChild>
                                   <DropdownMenuItem
                                     onSelect={(e: Event) => { e.preventDefault(); setDeleteConfirm(u.id); }}
-                                    className="rounded-xl px-5 py-4 font-black text-xs uppercase tracking-[0.2em] cursor-pointer text-red-600 focus:text-red-700 focus:bg-red-50 transition-colors group mt-1"
+                                    className="rounded-xl px-4 py-3 font-bold cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 transition-colors"
                                   >
-                                    <Trash2 className="h-4 w-4 mr-4 text-red-300 group-hover:scale-110 transition-transform" />
+                                    <Trash2 className="h-4 w-4 mr-3" />
                                     Διαγραφή
                                   </DropdownMenuItem>
                                 </AlertDialogTrigger>
-                                <AlertDialogContent className="rounded-[2.5rem] p-12">
+                                <AlertDialogContent className="rounded-[2.5rem] p-10">
                                   <AlertDialogHeader>
-                                    <AlertDialogTitle className="text-3xl font-black text-zinc-900 uppercase tracking-tight">Διαγραφή μέλους</AlertDialogTitle>
-                                    <AlertDialogDescription className="text-xl font-medium text-zinc-500 mt-4 leading-relaxed uppercase">
-                                      Είστε σίγουροι ότι θέλετε να διαγράψετε τον χρήστη <span className="text-zinc-900 font-black underline decoration-red-500/30 underline-offset-8">&quot;{u.displayName}&quot;</span>;
+                                    <AlertDialogTitle className="text-2xl font-black text-zinc-900">Διαγραφή χρήστη</AlertDialogTitle>
+                                    <AlertDialogDescription className="text-lg font-medium text-zinc-500 mt-2">
+                                      Είστε σίγουροι ότι θέλετε να διαγράψετε τον χρήστη <span className="text-zinc-900 font-bold">&quot;{u.displayName}&quot;</span>;
                                     </AlertDialogDescription>
                                   </AlertDialogHeader>
-                                  <AlertDialogFooter className="mt-12 gap-4">
-                                    <AlertDialogCancel className="h-16 px-10 rounded-[1.25rem] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-600 bg-zinc-100 border-none">Ακύρωση</AlertDialogCancel>
+                                  <AlertDialogFooter className="mt-10 gap-3">
+                                    <AlertDialogCancel className="h-14 px-8 rounded-2xl font-bold border-zinc-100">Ακύρωση</AlertDialogCancel>
                                     <AlertDialogAction 
                                       onClick={() => handleDelete(u.id)}
-                                      className="h-16 px-10 rounded-[1.25rem] bg-red-600 text-white font-black hover:bg-black transition-all text-lg uppercase tracking-widest shadow-xl shadow-red-200"
+                                      className="h-14 px-8 rounded-2xl bg-red-600 text-white font-black hover:bg-red-700 shadow-lg shadow-red-200"
                                     >
                                       Διαγραφή
                                     </AlertDialogAction>

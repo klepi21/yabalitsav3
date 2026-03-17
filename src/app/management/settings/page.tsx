@@ -22,6 +22,7 @@ import {
   Sparkles,
   AlertCircle,
   BarChart3,
+  Settings,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { venueService } from '@/lib/firebase-services';
@@ -316,21 +317,19 @@ export default function SettingsPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <Link
-            href="/management/dashboard"
-            className="inline-flex items-center text-sm font-bold text-zinc-400 hover:text-zinc-600 mb-4 transition-colors"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Επιστροφή στον Πίνακα Ελέγχου
-          </Link>
-          <h1 className="text-4xl font-black tracking-tight text-zinc-900 uppercase">
-            {toGreekUpperCase('Ρυθμίσεις')}
-          </h1>
-          <p className="text-lg font-medium text-zinc-500">
-            Διαμορφώστε τις προτιμήσεις και τις ρυθμίσεις του κέντρου σας.
-          </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1 border-b border-zinc-50">
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-zinc-900 text-white shadow-sm">
+            <Settings className="h-4 w-4" />
+          </div>
+          <div>
+            <h1 className="text-xl font-black tracking-tight text-zinc-900 uppercase">
+                {toGreekUpperCase('Ρυθμίσεις')}
+            </h1>
+            <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight">
+                {toGreekUpperCase('Διαμορφώστε τις παραμέτρους του συστήματός σας.')}
+            </p>
+          </div>
         </div>
 
         {/* Subscription Status Badge */}
@@ -344,30 +343,30 @@ export default function SettingsPage() {
 
             return (
               <div className={cn(
-                "flex items-center gap-4 px-6 py-4 rounded-2xl border-2 shadow-sm font-black transition-all",
+                "flex items-center gap-4 px-5 py-3 rounded-xl border shadow-sm font-bold transition-all",
                 isExpired ? "bg-red-50 border-red-100 text-red-600" :
                 isWarning ? "bg-amber-50 border-amber-100 text-amber-600" :
                 "bg-emerald-50 border-emerald-100 text-emerald-600"
               )}>
                 <div className={cn(
-                  "h-3 w-3 rounded-full",
+                  "h-2.5 w-2.5 rounded-full",
                   isExpired ? "bg-red-500" :
                   isWarning ? "bg-amber-500 animate-pulse" :
                   "bg-emerald-500"
                 )} />
                 <div className="flex flex-col">
-                  <span className="text-[10px] uppercase tracking-widest opacity-60">Τρέχον Πλάνο</span>
-                  <span className="text-sm">{planName} Plan • {daysRemaining} ημέρες</span>
+                  <span className="text-[9px] uppercase tracking-widest opacity-60">Τρέχον Πλάνο</span>
+                  <span className="text-xs">{planName} Plan • {daysRemaining} ημέρες</span>
                 </div>
               </div>
             );
           } else {
             return (
-              <div className="flex items-center gap-4 px-6 py-4 rounded-2xl border-2 border-zinc-100 bg-white text-zinc-400 shadow-sm font-black">
-                <div className="h-3 w-3 rounded-full bg-zinc-200" />
+              <div className="flex items-center gap-4 px-5 py-3 rounded-xl border border-zinc-100 bg-white text-zinc-400 shadow-sm font-bold">
+                <div className="h-2.5 w-2.5 rounded-full bg-zinc-200" />
                 <div className="flex flex-col">
-                  <span className="text-[10px] uppercase tracking-widest opacity-60">Πλάνο</span>
-                  <span className="text-sm">{venue.plan === 'trial' ? 'Δωρεάν Trial' : 'Χωρίς Πλάνο'}</span>
+                  <span className="text-[9px] uppercase tracking-widest opacity-60">Πλάνο</span>
+                  <span className="text-xs">{venue.plan === 'trial' ? 'Δωρεάν Trial' : 'Χωρίς Πλάνο'}</span>
                 </div>
               </div>
             );
@@ -401,11 +400,11 @@ export default function SettingsPage() {
         <div className="space-y-8">
           <Card className="premium-card border-none">
             <CardHeader className="pb-2">
-              <CardTitle className="text-xl font-black flex items-center gap-3 text-zinc-900">
-                <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                  <Building2 className="h-5 w-5 text-emerald-600" />
+              <CardTitle className="text-lg font-black flex items-center gap-3 text-zinc-900 uppercase">
+                <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                  <Building2 className="h-4 w-4 text-emerald-600" />
                 </div>
-                Πληροφορίες Γηπέδου
+                {toGreekUpperCase('Πληροφορίες Γηπέδου')}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
@@ -419,7 +418,7 @@ export default function SettingsPage() {
                       id="name"
                       {...register('name')}
                       placeholder="π.χ. Arena 5x5 Central"
-                      className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-6 font-bold focus:bg-white transition-all"
+                      className="h-11 rounded-xl bg-zinc-50 border-zinc-100 px-5 font-bold focus:bg-white transition-all uppercase text-sm"
                     />
                     {errors.name && (
                       <p className="text-xs font-bold text-red-500 pl-2">{errors.name.message}</p>
@@ -434,7 +433,7 @@ export default function SettingsPage() {
                       id="address"
                       {...register('address')}
                       placeholder="Οδός και αριθμός"
-                      className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-6 font-bold focus:bg-white transition-all"
+                      className="h-11 rounded-xl bg-zinc-50 border-zinc-100 px-5 font-bold focus:bg-white transition-all uppercase text-sm"
                     />
                     {errors.address && (
                       <p className="text-xs font-bold text-red-500 pl-2">{errors.address.message}</p>
@@ -448,7 +447,7 @@ export default function SettingsPage() {
                       <select
                         id="city"
                         {...register('city')}
-                        className="w-full h-14 rounded-2xl bg-zinc-50 border border-zinc-100 px-6 font-bold appearance-none focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                        className="w-full h-11 rounded-xl bg-zinc-50 border border-zinc-100 px-5 font-bold appearance-none focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
                       >
                         <option value="Αθήνα">Αθήνα</option>
                         <option value="Θεσσαλονίκη">Θεσσαλονίκη</option>
@@ -472,7 +471,7 @@ export default function SettingsPage() {
                       id="email"
                       {...register('contactDetails.email')}
                       placeholder="info@example.com"
-                      className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-6 font-bold focus:bg-white transition-all"
+                      className="h-11 rounded-xl bg-zinc-50 border-zinc-100 px-5 font-bold focus:bg-white transition-all text-sm"
                     />
                     {errors.contactDetails?.email && (
                       <p className="text-xs font-bold text-red-500 pl-2">{errors.contactDetails.email.message}</p>
@@ -486,7 +485,7 @@ export default function SettingsPage() {
                       id="phone"
                       {...register('contactDetails.phone')}
                       placeholder="210..."
-                      className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-6 font-bold focus:bg-white transition-all"
+                      className="h-11 rounded-xl bg-zinc-50 border-zinc-100 px-5 font-bold focus:bg-white transition-all text-sm"
                     />
                     {errors.contactDetails?.phone && (
                       <p className="text-xs font-bold text-red-500 pl-2">{errors.contactDetails.phone.message}</p>
@@ -499,7 +498,7 @@ export default function SettingsPage() {
                   <Button
                     type="submit"
                     disabled={isSaving}
-                    className="h-14 px-10 rounded-2xl bg-emerald-600 hover:bg-emerald-700 font-black text-white shadow-lg shadow-emerald-200"
+                    className="h-11 px-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white shadow-lg shadow-emerald-200 transition-all active:scale-95"
                   >
                     {isSaving ? (
                       <>
@@ -518,11 +517,11 @@ export default function SettingsPage() {
           {/* Management PIN Section */}
           <Card className="premium-card border-none">
             <CardHeader className="pb-2">
-              <CardTitle className="text-xl font-black flex items-center gap-3 text-zinc-900">
-                <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                  <Lock className="h-5 w-5 text-blue-600" />
+              <CardTitle className="text-lg font-black flex items-center gap-3 text-zinc-900 uppercase">
+                <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                  <Lock className="h-4 w-4 text-blue-600" />
                 </div>
-                PIN Διαχείρισης
+                {toGreekUpperCase('PIN Διαχείρισης')}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
@@ -592,10 +591,10 @@ export default function SettingsPage() {
 
                   <Button 
                     asChild
-                    className="h-14 w-full rounded-2xl bg-white text-zinc-900 hover:bg-emerald-400 font-black shadow-xl transition-all"
+                    className="h-11 w-full rounded-xl bg-white text-zinc-900 hover:bg-emerald-400 font-bold shadow-lg transition-all active:scale-95"
                   >
                     <Link href="/management/settings/renewal">
-                      <ArrowUpCircle className="h-5 w-5 mr-3" />
+                      <ArrowUpCircle className="h-4 w-4 mr-2" />
                       {toGreekUpperCase('Ανανέωση ή Αναβάθμιση')}
                     </Link>
                   </Button>

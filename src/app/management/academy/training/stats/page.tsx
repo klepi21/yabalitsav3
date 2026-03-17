@@ -195,60 +195,60 @@ export default function TrainingStatsPage() {
               onClick={() => setError(null)} 
               className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 font-bold"
             >
-              Κλείσιμο
+              {toGreekUpperCase('Κλείσιμο')}
             </Button>
           </div>
         </div>
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-        <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-zinc-100 hover:bg-zinc-50 shrink-0 shadow-sm" asChild>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 pb-1 border-b border-zinc-50">
+        <Button variant="outline" size="icon" className="h-9 w-9 rounded-lg border-zinc-100 hover:bg-zinc-50 shrink-0 shadow-sm" asChild>
           <Link href="/management/academy/training">
-            <ArrowLeft className="h-6 w-6 text-zinc-600" />
+            <ArrowLeft className="h-4 w-4 text-zinc-600" />
           </Link>
         </Button>
-        <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-2xl bg-violet-600 flex items-center justify-center text-white shadow-lg shadow-violet-200 shrink-0">
-            <BarChart3 className="h-7 w-7" />
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-md shrink-0">
+            <BarChart3 className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-2 uppercase">
+            <h1 className="text-xl font-black tracking-tight text-zinc-900 mb-0.5 uppercase">
             {toGreekUpperCase('Στατιστικά Προπονήσεων')}
           </h1>
-            <p className="text-lg font-medium text-zinc-500">Ανάλυση παρουσιών και απόδοσης αθλητών.</p>
+            <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight">{toGreekUpperCase('Ανάλυση παρουσιών και απόδοσης αθλητών.')}</p>
           </div>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col lg:flex-row lg:items-center gap-6">
-        <div className="flex flex-wrap items-center gap-4 bg-white p-2 rounded-2xl border border-zinc-100 shadow-sm">
+      <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+        <div className="flex flex-wrap items-center gap-3 bg-white p-1.5 rounded-xl border border-zinc-100 shadow-sm">
             <select
             value={squadFilter}
             onChange={(e) => setSquadFilter(e.target.value)}
-            className="h-12 px-6 rounded-xl bg-zinc-50 border-none text-zinc-900 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-violet-500 min-w-[200px]"
+            className="h-9 px-4 rounded-lg bg-zinc-50 border-none text-zinc-900 font-bold text-xs focus:outline-none focus:ring-1 focus:ring-zinc-200 min-w-[170px]"
             >
-            <option value="all">Όλα τα Τμήματα</option>
+            <option value="all">{toGreekUpperCase('Όλα τα Τμήματα')}</option>
             {squads.map((s) => (
                 <option key={s.id} value={s.id}>{s.name} ({s.ageGroup})</option>
             ))}
             </select>
 
-            <div className="h-8 w-px bg-zinc-100 hidden sm:block" />
+            <div className="h-6 w-px bg-zinc-100 hidden sm:block" />
 
-            <div className="flex gap-1 bg-zinc-50 p-1 rounded-xl">
+            <div className="flex gap-1 bg-zinc-50 p-1 rounded-lg">
             {[
-                { value: 'all', label: 'Όλα' },
-                { value: 'week', label: '7 Ημέρες' },
-                { value: 'month', label: 'Μήνας' },
-                { value: '3months', label: '3 Μήνες' },
-                { value: '6months', label: '6 Μήνες' },
+                { value: 'all', label: toGreekUpperCase('Όλα') },
+                { value: 'week', label: toGreekUpperCase('7 Ημέρες') },
+                { value: 'month', label: toGreekUpperCase('Μήνας') },
+                { value: '3months', label: toGreekUpperCase('3 Μήνες') },
+                { value: '6months', label: toGreekUpperCase('6 Μήνες') },
             ].map((period) => (
                 <button
                 key={period.value}
                 onClick={() => setPeriodFilter(period.value)}
-                className={`px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${
+                className={`px-3 py-1.5 rounded-md text-[9px] font-black uppercase tracking-wider transition-all ${
                     periodFilter === period.value
                     ? 'bg-white text-zinc-900 shadow-sm'
                     : 'text-zinc-400 hover:text-zinc-600'
@@ -262,12 +262,12 @@ export default function TrainingStatsPage() {
       </div>
 
       {/* Global Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-            { label: 'Ολοκληρωμένες', value: globalStats.totalSessions.toString(), icon: CheckCircle2, color: 'violet' },
-            { label: 'Μέση Παρουσία', value: `${globalStats.avgAttendance}%`, icon: TrendingUp, color: 'emerald' },
-            { label: 'Μ.Ο. ανά Προπόνηση', value: globalStats.avgPerSession.toString(), icon: Users, color: 'blue' },
-            { label: 'Σύνολο Αθλητών', value: athleteStats.length.toString(), icon: Trophy, color: 'amber' },
+            { label: toGreekUpperCase('Ολοκληρωμένες'), value: globalStats.totalSessions.toString(), icon: CheckCircle2, color: 'violet' },
+            { label: toGreekUpperCase('Μέση Παρουσία'), value: `${globalStats.avgAttendance}%`, icon: TrendingUp, color: 'emerald' },
+            { label: toGreekUpperCase('Μ.Ο. ανά Προπόνηση'), value: globalStats.avgPerSession.toString(), icon: Users, color: 'blue' },
+            { label: toGreekUpperCase('Σύνολο Αθλητών'), value: athleteStats.length.toString(), icon: Trophy, color: 'amber' },
         ].map((metric) => {
             const Icon = metric.icon;
             const colorStyles: Record<string, string> = {
@@ -277,12 +277,12 @@ export default function TrainingStatsPage() {
                 amber: 'bg-amber-50 text-amber-600',
             };
             return (
-                <div key={metric.label} className="bg-white p-6 rounded-3xl border border-zinc-100 shadow-sm transition-all hover:shadow-md">
-                    <div className={`h-12 w-12 rounded-2xl ${colorStyles[metric.color]} flex items-center justify-center mb-6`}>
-                        <Icon className="h-6 w-6" />
+                <div key={metric.label} className="bg-white p-4 rounded-xl border border-zinc-100 shadow-sm transition-all hover:shadow-md">
+                    <div className={`h-8 w-8 rounded-lg ${colorStyles[metric.color]} flex items-center justify-center mb-4`}>
+                        <Icon className="h-4 w-4" />
                     </div>
-                    <p className="text-3xl font-black text-zinc-900 mb-1 leading-none">{metric.value}</p>
-                    <p className="text-xs font-black uppercase tracking-widest text-zinc-400">{metric.label}</p>
+                    <p className="text-xl font-black text-zinc-900 mb-0.5 leading-none">{metric.value}</p>
+                    <p className="text-[8px] font-black uppercase tracking-wider text-zinc-400">{metric.label}</p>
                 </div>
             );
         })}
@@ -290,26 +290,26 @@ export default function TrainingStatsPage() {
 
       {/* Top / Bottom performers */}
       {athleteStats.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           {/* Top Attendance */}
-          <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm overflow-hidden">
-            <div className="p-8 border-b border-zinc-50 bg-zinc-50/30 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center">
-                        <TrendingUp className="h-5 w-5 text-emerald-600" />
+          <div className="bg-white rounded-xl border border-zinc-100 shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-zinc-50 bg-zinc-50/10 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+                        <TrendingUp className="h-4 w-4 text-emerald-600" />
                     </div>
-                    <h3 className="text-xl font-black text-zinc-900 tracking-tight">Κορυφαίες Παρουσίες</h3>
+                    <h3 className="text-base font-black text-zinc-900 tracking-tight">{toGreekUpperCase('Κορυφαίες Παρουσίες')}</h3>
                 </div>
-                <div className="h-8 w-8 rounded-full bg-emerald-50 flex items-center justify-center">
-                    <Trophy className="h-4 w-4 text-emerald-500" />
+                <div className="h-7 w-7 rounded-full bg-emerald-50 flex items-center justify-center">
+                    <Trophy className="h-3.5 w-3.5 text-emerald-500" />
                 </div>
             </div>
-            <div className="p-8 space-y-4">
+            <div className="p-4 space-y-3">
               {athleteStats.filter((a) => a.totalSessions > 0).slice(0, 5).map((athlete, i) => (
-                <div key={athlete.id} className="flex items-center gap-4 group">
+                <div key={athlete.id} className="flex items-center gap-3 group">
                   <div className={cn(
-                    "h-10 w-10 rounded-xl flex items-center justify-center text-sm font-black transition-all",
-                    i === 0 ? "bg-amber-100 text-amber-700 scale-110 shadow-sm" :
+                    "h-8 w-8 rounded-lg flex items-center justify-center text-[11px] font-black transition-all",
+                    i === 0 ? "bg-amber-100 text-amber-700 shadow-sm" :
                     i === 1 ? "bg-zinc-100 text-zinc-500" :
                     i === 2 ? "bg-orange-50 text-orange-600" :
                     "bg-zinc-50 text-zinc-400"
@@ -317,10 +317,10 @@ export default function TrainingStatsPage() {
                     {i + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-black text-zinc-900 truncate group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{athlete.name}</p>
-                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{athlete.totalSessions} Προπονήσεις</p>
+                    <p className="text-sm font-black text-zinc-900 truncate group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{athlete.name}</p>
+                    <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-wider">{athlete.totalSessions} {toGreekUpperCase('Προπονήσεις')}</p>
                   </div>
-                  <div className={cn("px-4 py-2 rounded-xl text-sm font-black transition-all group-hover:scale-105 shadow-sm", rateColor(athlete.attendanceRate))}>
+                  <div className={cn("px-3 py-1.5 rounded-lg text-xs font-black transition-all group-hover:scale-105 shadow-sm", rateColor(athlete.attendanceRate))}>
                     {athlete.attendanceRate}%
                   </div>
                 </div>
@@ -329,29 +329,29 @@ export default function TrainingStatsPage() {
           </div>
 
           {/* Lowest Attendance */}
-          <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm overflow-hidden">
-            <div className="p-8 border-b border-zinc-50 bg-zinc-50/30 flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-xl bg-red-100 flex items-center justify-center">
-                        <TrendingDown className="h-5 w-5 text-red-600" />
+          <div className="bg-white rounded-xl border border-zinc-100 shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-zinc-50 bg-zinc-50/10 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-red-100 flex items-center justify-center">
+                        <TrendingDown className="h-4 w-4 text-red-600" />
                     </div>
-                    <h3 className="text-xl font-black text-zinc-900 tracking-tight">Χαμηλότερες Παρουσίες</h3>
+                    <h3 className="text-base font-black text-zinc-900 tracking-tight">{toGreekUpperCase('Χαμηλότερες Παρουσίες')}</h3>
                 </div>
-                <div className="h-8 w-8 rounded-full bg-red-50 flex items-center justify-center">
-                    <AlertCircle className="h-4 w-4 text-red-500" />
+                <div className="h-7 w-7 rounded-full bg-red-50 flex items-center justify-center">
+                    <AlertCircle className="h-3.5 w-3.5 text-red-500" />
                 </div>
             </div>
-            <div className="p-8 space-y-4">
+            <div className="p-4 space-y-3">
               {[...athleteStats].filter((a) => a.totalSessions > 0).sort((a, b) => a.attendanceRate - b.attendanceRate).slice(0, 5).map((athlete, i) => (
-                <div key={athlete.id} className="flex items-center gap-4 group">
-                  <div className="h-10 w-10 rounded-xl bg-red-50 flex items-center justify-center text-sm font-black text-red-500 transition-all">
+                <div key={athlete.id} className="flex items-center gap-3 group">
+                  <div className="h-8 w-8 rounded-lg bg-red-50 flex items-center justify-center text-[11px] font-black text-red-500 transition-all">
                     {i + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-base font-black text-zinc-900 truncate group-hover:text-red-700 transition-colors uppercase tracking-tight">{athlete.name}</p>
-                    <p className="text-xs font-bold text-zinc-400 uppercase tracking-widest">{athlete.totalSessions} Προπονήσεις</p>
+                    <p className="text-sm font-black text-zinc-900 truncate group-hover:text-red-700 transition-colors uppercase tracking-tight">{athlete.name}</p>
+                    <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-wider">{athlete.totalSessions} {toGreekUpperCase('Προπονήσεις')}</p>
                   </div>
-                  <div className={cn("px-4 py-2 rounded-xl text-sm font-black transition-all group-hover:scale-105 shadow-sm", rateColor(athlete.attendanceRate))}>
+                  <div className={cn("px-3 py-1.5 rounded-lg text-xs font-black transition-all group-hover:scale-105 shadow-sm", rateColor(athlete.attendanceRate))}>
                     {athlete.attendanceRate}%
                   </div>
                 </div>
@@ -362,77 +362,77 @@ export default function TrainingStatsPage() {
       )}
 
       {/* Full Athletes Table */}
-      <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm overflow-hidden">
-        <div className="p-8 border-b border-zinc-50 flex items-center justify-between">
-            <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center">
-                    <Users className="h-5 w-5 text-zinc-400" />
+      <div className="bg-white rounded-xl border border-zinc-100 shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-zinc-50 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+                <div className="h-8 w-8 rounded-lg bg-zinc-50 flex items-center justify-center">
+                    <Users className="h-4 w-4 text-zinc-400" />
                 </div>
-                <h3 className="text-xl font-black text-zinc-900 tracking-tight">Αναλυτικά ανά Αθλητή</h3>
+                <h3 className="text-base font-black text-zinc-900 tracking-tight">{toGreekUpperCase('Αναλυτικά ανά Αθλητή')}</h3>
             </div>
-            <div className="px-4 py-1.5 rounded-xl bg-zinc-50 text-[10px] font-black uppercase tracking-widest text-zinc-400">
-                {athleteStats.length} Αθλητές
+            <div className="px-3 py-1 rounded-lg bg-zinc-50 text-[9px] font-black uppercase tracking-widest text-zinc-400">
+                {athleteStats.length} {toGreekUpperCase('ΑΘΛΗΤΕΣ')}
             </div>
         </div>
-        
+
         {athleteStats.length === 0 ? (
           <div className="py-20 text-center">
             <div className="mx-auto h-20 w-20 bg-zinc-50 rounded-[1.5rem] flex items-center justify-center mb-6">
                 <Users className="h-10 w-10 text-zinc-200" />
             </div>
-            <p className="text-lg font-bold text-zinc-400">Δεν υπάρχουν δεδομένα για τα επιλεγμένα φίλτρα</p>
+            <p className="text-base font-bold text-zinc-400">{toGreekUpperCase('Δεν υπάρχουν δεδομένα για τα επιλεγμένα φίλτρα')}</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-zinc-50/50">
-                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-zinc-400">Αθλητής</th>
-                  <th className="py-5 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Τμήμα</th>
-                  <th className="py-5 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Προπ.</th>
-                  <th className="py-5 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Παρών</th>
-                  <th className="py-5 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Απών</th>
-                  <th className="py-5 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Καθ.</th>
-                  <th className="py-5 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Τραυμ.</th>
-                  <th className="py-5 px-8 text-[10px] font-black uppercase tracking-widest text-zinc-400 lg:min-w-[200px]">Ποσοστό Παρουσίας</th>
+                  <th className="py-3 px-5 text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Αθλητής')}</th>
+                  <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Τμήμα')}</th>
+                  <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Προπ.')}</th>
+                  <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Παρών')}</th>
+                  <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Απών')}</th>
+                  <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Καθ.')}</th>
+                  <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Τραυμ.')}</th>
+                  <th className="py-3 px-5 text-[9px] font-black uppercase tracking-widest text-zinc-400 lg:min-w-[180px]">{toGreekUpperCase('Παρουσία')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-50">
                 {athleteStats.map((athlete) => (
                   <tr key={athlete.id} className="group hover:bg-zinc-50/50 transition-colors">
-                    <td className="py-5 px-8">
-                      <p className="text-sm font-black text-zinc-900 uppercase tracking-tight group-hover:text-violet-700 transition-colors">{athlete.name}</p>
+                    <td className="py-3 px-5">
+                      <p className="text-xs font-black text-zinc-900 uppercase tracking-tight group-hover:text-violet-700 transition-colors">{athlete.name}</p>
                     </td>
-                    <td className="py-5 px-6 text-center">
-                      <span className="text-xs font-bold text-zinc-500 whitespace-nowrap">
+                    <td className="py-3 px-4 text-center">
+                      <span className="text-[10px] font-bold text-zinc-500 whitespace-nowrap">
                         {athlete.squadIds.map((sid) => getSquadName(sid)).filter(Boolean).join(', ') || '—'}
                       </span>
                     </td>
-                    <td className="py-5 px-6 text-center">
-                      <span className="text-sm font-black text-zinc-900">{athlete.totalSessions}</span>
+                    <td className="py-3 px-4 text-center">
+                      <span className="text-xs font-black text-zinc-900">{athlete.totalSessions}</span>
                     </td>
-                    <td className="py-5 px-6 text-center">
-                      <span className="text-sm font-bold text-emerald-600">{athlete.present}</span>
+                    <td className="py-3 px-4 text-center">
+                      <span className="text-xs font-bold text-emerald-600">{athlete.present}</span>
                     </td>
-                    <td className="py-5 px-6 text-center">
-                      <span className="text-sm font-bold text-red-500">{athlete.absent}</span>
+                    <td className="py-3 px-4 text-center">
+                      <span className="text-xs font-bold text-red-500">{athlete.absent}</span>
                     </td>
-                    <td className="py-5 px-6 text-center">
-                      <span className="text-sm font-bold text-amber-600">{athlete.late}</span>
+                    <td className="py-3 px-4 text-center">
+                      <span className="text-xs font-bold text-amber-600">{athlete.late}</span>
                     </td>
-                    <td className="py-5 px-6 text-center">
-                      <span className="text-sm font-bold text-zinc-400">{athlete.injured}</span>
+                    <td className="py-3 px-4 text-center">
+                      <span className="text-xs font-bold text-zinc-400">{athlete.injured}</span>
                     </td>
-                    <td className="py-5 px-8">
-                      <div className="flex items-center gap-4">
-                        <div className="flex-1 h-3 rounded-full bg-zinc-100 overflow-hidden shadow-inner">
+                    <td className="py-3 px-5">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 h-2 rounded-full bg-zinc-100 overflow-hidden shadow-inner">
                           <div
                             className={cn("h-full rounded-full transition-all duration-700", rateBarColor(athlete.attendanceRate))}
                             style={{ width: `${athlete.attendanceRate}%` }}
                           />
                         </div>
                         <span className={cn(
-                          "text-sm font-black min-w-[45px] text-right rounded-lg px-2 py-1",
+                          "text-[10px] font-black min-w-[35px] text-right rounded-md px-1.5 py-0.5",
                           athlete.totalSessions === 0 ? "text-zinc-300" : rateColor(athlete.attendanceRate)
                         )}>
                           {athlete.totalSessions === 0 ? '—' : `${athlete.attendanceRate}%`}

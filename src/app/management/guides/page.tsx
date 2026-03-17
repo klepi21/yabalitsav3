@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { toGreekUpperCase } from '@/lib/utils';
 import Image from 'next/image';
 import {
   Loader2,
@@ -39,7 +40,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 function SectionCard({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`rounded-xl border border-zinc-100/60 bg-white p-6 ${className}`}>
+    <div className={`rounded-lg border border-zinc-100/50 bg-white p-3 ${className}`}>
       {children}
     </div>
   );
@@ -47,29 +48,29 @@ function SectionCard({ children, className = '' }: { children: React.ReactNode; 
 
 function StepBox({ color, icon: Icon, title, children }: { color: 'blue' | 'amber' | 'emerald'; icon: React.ElementType; title: string; children: React.ReactNode }) {
   const colorMap = {
-    blue: { bg: 'bg-blue-50', border: 'border-blue-100', title: 'text-blue-900', text: 'text-blue-800', icon: 'bg-blue-100 text-blue-600' },
-    amber: { bg: 'bg-amber-50', border: 'border-amber-100', title: 'text-amber-900', text: 'text-amber-800', icon: 'bg-amber-100 text-amber-600' },
-    emerald: { bg: 'bg-emerald-50', border: 'border-emerald-100', title: 'text-emerald-900', text: 'text-emerald-800', icon: 'bg-emerald-100 text-emerald-600' },
+    blue: { bg: 'bg-blue-50/50', border: 'border-blue-100/50', title: 'text-blue-900', text: 'text-blue-800', icon: 'bg-blue-100 text-blue-600' },
+    amber: { bg: 'bg-amber-50/50', border: 'border-amber-100/50', title: 'text-amber-900', text: 'text-amber-800', icon: 'bg-amber-100 text-amber-600' },
+    emerald: { bg: 'bg-emerald-50/50', border: 'border-emerald-100/50', title: 'text-emerald-900', text: 'text-emerald-800', icon: 'bg-emerald-100 text-emerald-600' },
   };
   const c = colorMap[color];
   return (
-    <div className={`${c.bg} border ${c.border} rounded-xl p-5`}>
-      <div className="flex items-center gap-2.5 mb-3">
-        <div className={`flex items-center justify-center w-7 h-7 rounded-lg ${c.icon}`}>
-          <Icon className="h-4 w-4" />
+    <div className={`${c.bg} border ${c.border} rounded-lg p-3.5`}>
+      <div className="flex items-center gap-2 mb-2">
+        <div className={`flex items-center justify-center w-6 h-6 rounded-md ${c.icon}`}>
+          <Icon className="h-3 w-3" />
         </div>
-        <h4 className={`font-medium ${c.title}`}>{title}</h4>
+        <h4 className={`text-xs font-black uppercase tracking-tight ${c.title}`}>{toGreekUpperCase(title)}</h4>
       </div>
-      <div className={c.text}>{children}</div>
+      <div className={`text-[11px] leading-relaxed font-medium ${c.text}`}>{children}</div>
     </div>
   );
 }
 
 function InfoCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-zinc-100/60 bg-zinc-50/50 p-5">
-      <h4 className="font-medium text-zinc-900 mb-3">{title}</h4>
-      {children}
+    <div className="rounded-lg border border-zinc-100/50 bg-zinc-50/30 p-4">
+      <h4 className="text-xs font-black text-zinc-900 mb-2 uppercase tracking-tight">{toGreekUpperCase(title)}</h4>
+      <div className="text-[11px] leading-relaxed text-zinc-500 font-medium">{children}</div>
     </div>
   );
 }
@@ -83,22 +84,22 @@ function SectionHeading({ icon: Icon, title, color = 'emerald' }: { icon: React.
     rose: 'bg-rose-100 text-rose-600',
   };
   return (
-    <div className="flex items-center gap-2.5">
-      <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${colorMap[color] || colorMap.emerald}`}>
-        <Icon className="h-4 w-4" />
+    <div className="flex items-center gap-2">
+      <div className={`flex items-center justify-center w-7 h-7 rounded-lg ${colorMap[color] || colorMap.emerald}`}>
+        <Icon className="h-3.5 w-3.5" />
       </div>
-      <h3 className="text-lg font-semibold tracking-tight text-zinc-900">{title}</h3>
+      <h3 className="text-sm font-black tracking-tight text-zinc-900 uppercase">{toGreekUpperCase(title)}</h3>
     </div>
   );
 }
 
 function BulletList({ items }: { items: string[] }) {
   return (
-    <ul className="space-y-2 text-zinc-500">
+    <ul className="space-y-1.5 text-zinc-500">
       {items.map((item, i) => (
         <li key={i} className="flex items-start gap-2">
-          <ArrowRight className="h-4 w-4 mt-0.5 shrink-0 text-zinc-400" />
-          <span>{item}</span>
+          <ArrowRight className="h-3 w-3 mt-1 shrink-0 text-zinc-400" />
+          <span className="text-[11px] leading-tight">{item}</span>
         </li>
       ))}
     </ul>
@@ -107,12 +108,12 @@ function BulletList({ items }: { items: string[] }) {
 
 function TipsList({ items }: { items: string[] }) {
   return (
-    <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-5">
-      <ul className="space-y-2.5">
+    <div className="rounded-lg border border-emerald-100 bg-emerald-50/30 p-4">
+      <ul className="space-y-2">
         {items.map((item, i) => (
-          <li key={i} className="flex items-start gap-2.5 text-zinc-700">
-            <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-emerald-500" />
-            <span>{item}</span>
+          <li key={i} className="flex items-start gap-2 text-zinc-700">
+            <CheckCircle2 className="h-3.5 w-3.5 mt-0.5 shrink-0 text-emerald-600" />
+            <span className="text-[11px] font-bold leading-tight">{item}</span>
           </li>
         ))}
       </ul>
@@ -139,72 +140,76 @@ export default function GuidesPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600">
-          <BookOpen className="h-5 w-5" />
+    <div className="max-w-6xl mx-auto px-4 space-y-5">
+      <div className="flex items-center gap-2.5 pb-1 border-b border-zinc-50">
+        <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-zinc-900 text-white shadow-sm">
+          <BookOpen className="h-3.5 w-3.5" />
         </div>
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Οδηγίες Χρήσης</h1>
-          <p className="text-sm text-zinc-500">
-            Αναλυτικός οδηγός για όλες τις λειτουργίες του Yabalitsa Management
+          <h1 className="text-xl font-black tracking-tight text-zinc-900 uppercase">
+            {toGreekUpperCase('Οδηγίες Χρήσης')}
+          </h1>
+          <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight">
+            {toGreekUpperCase('Αναλυτικός οδηγός για όλες τις λειτουργίες')}
           </p>
         </div>
       </div>
 
       <Tabs defaultValue="getting-started">
         <TabsList className="flex flex-wrap h-auto gap-1 bg-zinc-100/80 p-1 rounded-xl">
-          <TabsTrigger value="getting-started" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            <Rocket className="h-4 w-4" />
-            <span>Ξεκινώντας</span>
+          <TabsTrigger value="getting-started" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+            <Rocket className="h-3.5 w-3.5" />
+            <span>{toGreekUpperCase('Ξεκινώντας')}</span>
           </TabsTrigger>
-          <TabsTrigger value="bookings" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            <Calendar className="h-4 w-4" />
-            <span>Κρατήσεις</span>
+          <TabsTrigger value="bookings" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+            <Calendar className="h-3.5 w-3.5" />
+            <span>{toGreekUpperCase('Κρατήσεις')}</span>
           </TabsTrigger>
-          <TabsTrigger value="pitches" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            <Goal className="h-4 w-4" />
-            <span>Γήπεδα</span>
+          <TabsTrigger value="pitches" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+            <Goal className="h-3.5 w-3.5" />
+            <span>{toGreekUpperCase('Γήπεδα')}</span>
           </TabsTrigger>
-          <TabsTrigger value="customers" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            <Users className="h-4 w-4" />
-            <span>Πελάτες</span>
+          <TabsTrigger value="customers" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+            <Users className="h-3.5 w-3.5" />
+            <span>{toGreekUpperCase('Πελάτες')}</span>
           </TabsTrigger>
-          <TabsTrigger value="reports" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            <BarChart3 className="h-4 w-4" />
-            <span>Αναφορές</span>
+          <TabsTrigger value="reports" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+            <BarChart3 className="h-3.5 w-3.5" />
+            <span>{toGreekUpperCase('Αναφορές')}</span>
           </TabsTrigger>
-          <TabsTrigger value="settings" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            <Settings className="h-4 w-4" />
-            <span>Ρυθμίσεις</span>
+          <TabsTrigger value="settings" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+            <Settings className="h-3.5 w-3.5" />
+            <span>{toGreekUpperCase('Ρυθμίσεις')}</span>
           </TabsTrigger>
-          <TabsTrigger value="academy" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            <GraduationCap className="h-4 w-4" />
-            <span>Ακαδημία</span>
+          <TabsTrigger value="academy" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+            <GraduationCap className="h-3.5 w-3.5" />
+            <span>{toGreekUpperCase('Ακαδημία')}</span>
           </TabsTrigger>
-          <TabsTrigger value="tournaments" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            <Trophy className="h-4 w-4" />
-            <span>Τουρνουά</span>
+          <TabsTrigger value="tournaments" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+            <Trophy className="h-3.5 w-3.5" />
+            <span>{toGreekUpperCase('Τουρνουά')}</span>
           </TabsTrigger>
-          <TabsTrigger value="training" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            <Dumbbell className="h-4 w-4" />
-            <span>Προπονήσεις</span>
+          <TabsTrigger value="training" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+            <Dumbbell className="h-3.5 w-3.5" />
+            <span>{toGreekUpperCase('Προπονήσεις')}</span>
           </TabsTrigger>
-          <TabsTrigger value="fse" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm">
-            <Search className="h-4 w-4" />
-            <span>FSE</span>
+          <TabsTrigger value="fse" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+            <Search className="h-3.5 w-3.5" />
+            <span>{toGreekUpperCase('FSE')}</span>
           </TabsTrigger>
         </TabsList>
 
         {/* 1. Getting Started Panel */}
         <TabsContent value="getting-started">
           <SectionCard>
-            <h2 className="text-xl font-semibold tracking-tight text-zinc-900 mb-1">Ξεκινώντας με το Yabalitsa Management</h2>
-            <p className="text-sm text-zinc-500 mb-6">
-              Το Yabalitsa Management σάς βοηθά να διαχειριστείτε πλήρως τις εγκαταστάσεις σας.
-              Ακολουθήστε αυτόν τον οδηγό για να ξεκινήσετε.
-            </p>
+            <div className="mb-5 pb-5 border-b border-zinc-50">
+                <h2 className="text-base font-black tracking-tight text-zinc-900 mb-0.5 uppercase">
+                {toGreekUpperCase('Ξεκινώντας')}
+                </h2>
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">
+                {toGreekUpperCase('Το Yabalitsa Management σάς βοηθά να διαχειριστείτε πλήρως τις εγκαταστάσεις σας.')}
+                </p>
+            </div>
 
             <div className="space-y-8">
               <div className="space-y-3">

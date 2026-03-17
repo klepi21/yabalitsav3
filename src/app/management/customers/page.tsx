@@ -9,6 +9,7 @@ import { User } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
+import { cn, toGreekUpperCase } from '@/lib/utils';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -101,24 +102,29 @@ export default function CustomersPage() {
   }
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-6">
       {/* Header & New Customer Button */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-          <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-2">
-            Πελατολόγιο
-          </h1>
-          <p className="text-lg font-medium text-zinc-500">
-            Διαχειριστείτε τους πελάτες σας και δείτε το ιστορικό τους.
-          </p>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-1 border-b border-zinc-50">
+        <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-center w-7 h-7 rounded-lg bg-zinc-900 text-white shadow-sm">
+            <Users className="h-3.5 w-3.5" />
+          </div>
+          <div>
+            <h1 className="text-xl font-black tracking-tight text-zinc-900 uppercase">
+                {toGreekUpperCase('Πελατολόγιο')}
+            </h1>
+            <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight">
+                {toGreekUpperCase('Διαχειριστείτε τους πελάτες σας και δείτε το ιστορικό τους.')}
+            </p>
+          </div>
         </div>
         <Button 
           asChild 
-          className="h-14 px-8 rounded-2xl bg-zinc-900 border-0 hover:bg-emerald-600 font-black text-white shadow-xl shadow-zinc-200 transition-all hover:translate-y-[-2px] active:translate-y-[1px]"
+          className="h-9 px-4 rounded-lg bg-zinc-900 border-0 hover:bg-emerald-600 font-black text-[11px] text-white shadow-md transition-all active:scale-95 uppercase tracking-tight"
         >
-          <Link href="/management/customers/new" className="flex items-center gap-3">
-            <Plus className="h-6 w-6" />
-            Νέος Πελάτης
+          <Link href="/management/customers/new" className="flex items-center gap-2">
+            <Plus className="h-3.5 w-3.5 text-emerald-400" />
+            {toGreekUpperCase('Νέος Πελάτης')}
           </Link>
         </Button>
       </div>
@@ -149,25 +155,25 @@ export default function CustomersPage() {
 
       {/* Stats row & Search row */}
       <div className="flex flex-col lg:flex-row lg:items-center gap-6">
-        <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-zinc-100 shadow-sm">
-          <div className="flex items-center gap-4 px-6 border-r border-zinc-100">
-            <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
-              <Users className="h-5 w-5 text-blue-600" />
+        <div className="flex items-center gap-4 bg-white p-1.5 rounded-xl border border-zinc-100 shadow-sm">
+          <div className="flex items-center gap-3 px-4 border-r border-zinc-100">
+            <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
+              <Users className="h-4 w-4 text-blue-600" />
             </div>
             <div>
-              <p className="text-xl font-black text-zinc-900">{customers.length}</p>
-              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Σύνολο</p>
+              <p className="text-lg font-black text-zinc-900 leading-none">{customers.length}</p>
+              <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">Σύνολο</p>
             </div>
           </div>
           
-          <div className="relative flex-1 min-w-[280px]">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-300" />
+          <div className="relative flex-1 min-w-[320px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-300" />
             <Input
               type="text"
-              placeholder="Αναζήτηση με όνομα, email ή τηλέφωνο..."
+              placeholder={toGreekUpperCase('Αναζήτηση με όνομα, email ή τηλέφωνο...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-12 pl-12 border-0 bg-transparent focus:ring-0 text-zinc-900 font-bold placeholder:text-zinc-400 placeholder:font-normal"
+              className="h-10 pl-10 border-0 bg-transparent focus:ring-0 text-zinc-900 font-bold text-sm placeholder:text-zinc-300 placeholder:font-normal uppercase"
             />
           </div>
         </div>
@@ -207,34 +213,34 @@ export default function CustomersPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-zinc-100">
-                    <th className="py-6 px-8 text-xs font-black uppercase tracking-widest text-zinc-400">Πελάτης</th>
-                    <th className="py-6 px-8 text-xs font-black uppercase tracking-widest text-zinc-400 hidden md:table-cell">Email</th>
-                    <th className="py-6 px-8 text-xs font-black uppercase tracking-widest text-zinc-400 hidden sm:table-cell">Τηλέφωνο</th>
-                    <th className="py-6 px-8 text-right w-[100px]"></th>
+                    <th className="py-4 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400">Πελάτης</th>
+                    <th className="py-4 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 hidden md:table-cell">Email</th>
+                    <th className="py-4 px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 hidden sm:table-cell">Τηλέφωνο</th>
+                    <th className="py-4 px-6 text-right w-[80px]"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-50">
                   {filteredCustomers.map((customer) => (
                     <tr key={customer.id} className="group hover:bg-zinc-50/50 transition-colors">
-                      <td className="py-6 px-8">
-                        <div className="flex items-center gap-4">
-                          <div className="h-12 w-12 rounded-2xl bg-zinc-100 flex items-center justify-center font-black text-zinc-400 group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors">
+                      <td className="py-4 px-6">
+                        <div className="flex items-center gap-3">
+                          <div className="h-10 w-10 rounded-xl bg-zinc-100 flex items-center justify-center font-bold text-zinc-400 group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors text-xs">
                             {customer.name?.charAt(0).toUpperCase()}
                           </div>
                           <div>
-                            <p className="text-lg font-black text-zinc-900 group-hover:text-emerald-700 transition-colors">
+                            <p className="text-sm font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase">
                               {customer.name}
                             </p>
-                            <p className="text-xs font-bold text-zinc-400 md:hidden">{customer.email}</p>
+                            <p className="text-[10px] font-bold text-zinc-400 md:hidden">{customer.email}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="py-6 px-8 hidden md:table-cell">
-                        <span className="text-sm font-bold text-zinc-500">{customer.email || '—'}</span>
+                      <td className="py-4 px-6 hidden md:table-cell">
+                        <span className="text-xs font-bold text-zinc-500">{customer.email || '—'}</span>
                       </td>
-                      <td className="py-6 px-8 hidden sm:table-cell">
-                        <div className="flex items-center gap-2 text-sm font-black text-zinc-900 tabular-nums">
-                          <Phone className="h-4 w-4 text-zinc-300" />
+                      <td className="py-4 px-6 hidden sm:table-cell">
+                        <div className="flex items-center gap-2 text-xs font-bold text-zinc-900 tabular-nums">
+                          <Phone className="h-3.5 w-3.5 text-zinc-300" />
                           {customer.phone || '—'}
                         </div>
                       </td>

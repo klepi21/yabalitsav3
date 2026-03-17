@@ -20,7 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { cn, toGreekUpperCase } from '@/lib/utils';
 
 export default function PitchesPage() {
   const router = useRouter();
@@ -108,99 +108,98 @@ export default function PitchesPage() {
   return (
     <div className="space-y-10 pb-20">
       {/* Header & New Pitch Button */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-1 border-b border-zinc-50">
         <div>
-          <h1 className="text-4xl font-black tracking-tight text-zinc-900 mb-2">
-            Τα Γήπεδά σας
+          <h1 className="text-xl font-black tracking-tight text-zinc-900 uppercase">
+            {toGreekUpperCase('Τα Γήπεδά σας')}
           </h1>
-          <p className="text-lg font-medium text-zinc-500">
-            Διαχειριστείτε τις λεπτομέρειες και τη διαθεσιμότητα των γηπέδων σας.
+          <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight">
+            {toGreekUpperCase('Διαχειριστείτε τις λεπτομέρειες και τη διαθεσιμότητα των γηπέδων σας.')}
           </p>
         </div>
         <Button 
           asChild 
-          className="h-14 px-8 rounded-2xl bg-zinc-900 border-0 hover:bg-emerald-600 font-black text-white shadow-xl shadow-zinc-200 transition-all hover:translate-y-[-2px] active:translate-y-[1px]"
+          className="h-9 px-5 rounded-lg bg-zinc-900 border-0 hover:bg-black font-bold text-[12px] text-white shadow-md transition-all active:scale-95 group"
         >
-          <Link href="/management/pitches/new" className="flex items-center gap-3">
-            <Plus className="h-6 w-6" />
-            Προσθήκη Γηπέδου
+          <Link href="/management/pitches/new" className="flex items-center gap-2">
+            <Plus className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" />
+            {toGreekUpperCase('Προσθήκη Γηπέδου')}
           </Link>
         </Button>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-100 rounded-3xl p-6 animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="bg-red-50 border border-red-100 rounded-2xl p-4 animate-in fade-in slide-in-from-top-4 duration-300">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-red-100 flex items-center justify-center">
-                <Ban className="h-6 w-6 text-red-600" />
+            <div className="flex items-center gap-3">
+              <div className="h-9 w-9 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
+                <Ban className="h-4 w-4 text-red-600" />
               </div>
               <div>
-                <h3 className="text-sm font-black text-red-900 uppercase tracking-wider">Σφάλμα</h3>
-                <p className="text-red-700 font-bold">{error}</p>
+                <p className="text-xs font-black text-red-900 uppercase tracking-wider">{toGreekUpperCase('Σφάλμα')}</p>
+                <p className="text-xs text-red-700 font-bold">{error}</p>
               </div>
             </div>
             <Button
               variant="outline"
               size="sm"
               onClick={() => { setError(null); loadPitches(); }}
-              className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 font-bold"
+              className="h-8 rounded-lg border-red-200 text-red-600 hover:bg-red-50 font-bold text-[10px]"
             >
-              Δοκιμάστε ξανά
+              {toGreekUpperCase('Δοκιμάστε ξανά')}
             </Button>
           </div>
         </div>
       )}
 
       {/* Filter & Search Bar Row */}
-      <div className="flex flex-col lg:flex-row lg:items-center gap-6">
-        <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-zinc-100 shadow-sm">
-          <div className="flex items-center gap-4 px-6 border-r border-zinc-100">
-            <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-              <Building2 className="h-5 w-5 text-emerald-600" />
+      <div className="flex flex-col lg:flex-row lg:items-center gap-3">
+        <div className="flex items-center gap-3 bg-white p-1.5 rounded-xl border border-zinc-100 shadow-sm">
+          <div className="flex items-center gap-2.5 px-3 border-r border-zinc-50">
+            <div className="h-7 w-7 rounded-lg bg-emerald-50 flex items-center justify-center">
+              <Building2 className="h-3.5 w-3.5 text-emerald-600" />
             </div>
             <div>
-              <p className="text-xl font-black text-zinc-900">{pitches.length}</p>
-              <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Σύνολο</p>
+              <p className="text-lg font-black text-zinc-900 leading-none">{pitches.length}</p>
             </div>
           </div>
           
-          <div className="relative flex-1 min-w-[280px]">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-zinc-300" />
+          <div className="relative flex-1 min-w-[240px]">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-300" />
             <Input
               type="text"
-              placeholder="Αναζήτηση με όνομα ή τύπο..."
+              placeholder={toGreekUpperCase('Αναζήτηση...')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-12 pl-12 border-0 bg-transparent focus:ring-0 text-zinc-900 font-bold placeholder:text-zinc-300 placeholder:font-normal"
+              className="h-9 pl-9 border-0 bg-transparent focus:ring-0 text-zinc-900 font-bold text-xs placeholder:text-zinc-300 uppercase"
             />
           </div>
         </div>
       </div>
 
       {/* Pitch Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filteredPitches.length === 0 ? (
-          <Card className="col-span-full premium-card border-none bg-zinc-50/50 py-20">
+          <Card className="col-span-full border-none bg-zinc-50/50 py-12">
             <CardContent className="flex flex-col items-center justify-center text-center">
-              <div className="h-24 w-24 rounded-[2.5rem] bg-white border border-zinc-100 flex items-center justify-center mb-8 shadow-sm">
-                <Building2 className="h-12 w-12 text-zinc-200" />
+              <div className="h-16 w-16 rounded-xl bg-white border border-zinc-100 flex items-center justify-center mb-6 shadow-sm">
+                <Building2 className="h-8 w-8 text-zinc-200" />
               </div>
-              <h3 className="text-2xl font-black text-zinc-900 mb-2">
-                {searchTerm ? 'Δεν βρέθηκαν αποτελέσματα' : 'Δεν υπάρχουν γήπεδα'}
+              <h3 className="text-lg font-black text-zinc-900 mb-1">
+                {searchTerm ? 'Δεν βρέθηκαν γήπεδα' : 'Δεν υπάρχουν γήπεδα'}
               </h3>
-              <p className="text-zinc-500 font-medium max-w-sm mb-10">
+              <p className="text-zinc-500 font-medium text-xs max-w-xs mb-8">
                 {searchTerm 
-                  ? 'Δοκιμάστε μια διαφορετική αναζήτηση ή καθαρίστε τα φίλτρα.' 
+                  ? 'Δοκιμάστε μια διαφορετική αναζήτηση.' 
                   : 'Ξεκινήστε την οργάνωση του χώρου σας προσθέτοντας το πρώτο σας γήπεδο.'}
               </p>
               {!searchTerm && (
                 <Button 
                   asChild 
-                  className="h-14 px-10 rounded-2xl bg-emerald-600 hover:bg-emerald-700 font-black text-white"
+                  className="h-12 px-8 rounded-xl bg-zinc-900 hover:bg-black font-black text-white uppercase text-xs"
                 >
                   <Link href="/management/pitches/new">
-                    Προσθήκη Γηπέδου
+                    {toGreekUpperCase('Προσθήκη Γηπέδου')}
                   </Link>
                 </Button>
               )}
@@ -210,61 +209,58 @@ export default function PitchesPage() {
           filteredPitches.map((pitch) => (
             <Card 
               key={pitch.id} 
-              className="premium-card group border-0 overflow-hidden hover:translate-y-[-4px] transition-all duration-300"
+              className="premium-card group border border-zinc-100/50 overflow-hidden hover:translate-y-[-4px] transition-all duration-300 shadow-sm"
             >
               <CardContent className="p-0">
-                {/* Header Decoration */}
-                <div className="h-2 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-                
-                <div className="p-8 space-y-8">
-                  <div className="flex items-start justify-between gap-4">
+                <div className="p-5 space-y-4">
+                  <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
-                      <Badge className="bg-emerald-50 text-emerald-700 border-none font-black text-[10px] uppercase tracking-wider px-3 py-1 mb-2">
-                        {pitch.type}
+                      <Badge className="bg-emerald-50 text-emerald-700 border-none font-bold text-[8px] uppercase tracking-wider px-1.5 py-0.5 mb-1.5 shadow-none">
+                        {toGreekUpperCase(pitch.type)}
                       </Badge>
-                      <h3 className="text-2xl font-black text-zinc-900 tracking-tight leading-tight group-hover:text-emerald-700 transition-colors">
+                      <h3 className="text-lg font-black text-zinc-900 tracking-tight leading-tight group-hover:text-emerald-700 transition-colors uppercase">
                         {pitch.name}
                       </h3>
                     </div>
-                    <div className="h-14 w-14 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-all duration-500">
-                      <Building2 className="h-7 w-7 text-zinc-300 group-hover:text-emerald-600 transition-colors" />
+                    <div className="h-9 w-9 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0 group-hover:scale-110 group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-all duration-500">
+                      <Building2 className="h-4 w-4 text-zinc-300 group-hover:text-emerald-600 transition-colors" />
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-zinc-50 rounded-2xl p-4 border border-zinc-100 group-hover:bg-white group-hover:border-emerald-100 transition-all">
-                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Τιμή (Slot)</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-zinc-50/50 rounded-lg p-3 border border-zinc-100 group-hover:bg-white transition-all">
+                      <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Τιμή (Slot)</p>
                       <div className="flex items-end gap-1">
-                        <span className="text-2xl font-black text-zinc-900 tracking-tight">&euro;{pitch.pricePerSlot}</span>
+                        <span className="text-lg font-black text-zinc-900 tracking-tight">&euro;{pitch.pricePerSlot}</span>
                       </div>
                     </div>
-                    <div className="bg-zinc-50 rounded-2xl p-4 border border-zinc-100 group-hover:bg-white group-hover:border-emerald-100 transition-all">
-                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Διάρκεια</p>
+                    <div className="bg-zinc-50/50 rounded-lg p-3 border border-zinc-100 group-hover:bg-white transition-all">
+                      <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-widest mb-1.5">Διάρκεια</p>
                       <div className="flex items-end gap-1">
-                        <span className="text-2xl font-black text-zinc-900 tracking-tight">{pitch.slotDuration}</span>
-                        <span className="text-[10px] font-black text-zinc-400 pb-1">λεπτά</span>
+                        <span className="text-lg font-black text-zinc-900 tracking-tight">{pitch.slotDuration}</span>
+                        <span className="text-[8px] font-bold text-zinc-400 pb-0.5 uppercase">{toGreekUpperCase('Λεπτά')}</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Actions */}
-                  <div className="flex gap-3 pt-6 border-t border-zinc-100">
+                  <div className="flex gap-2 pt-4 border-t border-zinc-50 group-hover:border-emerald-50 transition-colors">
                     <Button 
                       asChild 
-                      className="flex-1 h-12 rounded-xl bg-zinc-900 hover:bg-emerald-600 text-white font-bold transition-all"
+                      className="flex-1 h-9 rounded-lg bg-zinc-900 hover:bg-black text-white font-bold transition-all text-[11px] group/btn"
                     >
                       <Link href={`/management/pitches/${pitch.id}/edit`} className="flex items-center gap-2">
-                        <Pencil className="h-4 w-4" />
-                        Επεξεργασία
+                        <Pencil className="h-3 w-3 group-hover/btn:scale-110 transition-transform" />
+                        {toGreekUpperCase('Επεξεργασία')}
                       </Link>
                     </Button>
                     <Button 
                       asChild 
                       variant="outline"
-                      className="h-12 w-12 rounded-xl border-zinc-200 text-zinc-400 hover:text-emerald-600 hover:border-emerald-200 hover:bg-emerald-50 transition-all"
+                      className="h-9 w-9 rounded-lg border-zinc-100 text-zinc-400 hover:text-emerald-600 hover:border-emerald-100 hover:bg-emerald-50 transition-all"
                     >
                       <Link href={`/management/pitches/${pitch.id}`}>
-                        <Eye className="h-5 w-5" />
+                        <Eye className="h-3.5 w-3.5" />
                       </Link>
                     </Button>
                   </div>

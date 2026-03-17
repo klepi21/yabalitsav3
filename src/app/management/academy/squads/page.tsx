@@ -116,66 +116,65 @@ export default function SquadsPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-8">
-        <div className="flex items-center gap-6">
-           <div className="h-20 w-20 rounded-[1.5rem] bg-zinc-900 flex items-center justify-center text-white shadow-2xl shadow-zinc-200 shrink-0">
-             <Trophy className="h-10 w-10 text-emerald-400" />
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-1 border-b border-zinc-50">
+        <div className="flex items-center gap-3.5">
+           <div className="h-11 w-11 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shrink-0">
+             <Trophy className="h-5 w-5 text-emerald-400" />
            </div>
-           <div className="space-y-1">
-             <h1 className="text-5xl font-black tracking-tight text-zinc-900 uppercase">
+           <div className="space-y-0.5">
+             <h1 className="text-xl font-black tracking-tight text-zinc-900 uppercase">
                {toGreekUpperCase('Τμήματα')}
              </h1>
-             <p className="text-xl font-bold text-zinc-400 uppercase tracking-tight">
-               {toGreekUpperCase('ΟΡΓΑΝΩΣΗ ΑΘΛΗΤΩΝ ΣΕ ΟΜΑΔΕΣ')}
+             <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight">
+               {toGreekUpperCase('Οργάνωση αθλητών σε ομάδες')}
              </p>
            </div>
         </div>
-        
-        <Button asChild className="h-16 px-10 rounded-2xl bg-zinc-900 hover:bg-black text-white font-black text-lg shadow-xl hover:-translate-y-1 transition-all active:scale-95 group">
-          <Link href="/management/academy/squads/new" className="flex items-center gap-3">
-            <Plus className="h-7 w-7 text-emerald-400 group-hover:scale-110 transition-transform" />
+        <Button asChild className="h-10 px-5 rounded-lg bg-zinc-900 hover:bg-black text-white font-bold text-[12px] shadow-md transition-all active:scale-95 group">
+          <Link href="/management/academy/squads/new" className="flex items-center gap-2">
+            <Plus className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" />
             {toGreekUpperCase('Νέο Τμήμα')}
           </Link>
         </Button>
       </div>
 
       {/* Stats row */}
-      <div className="flex flex-col md:flex-row items-center gap-6">
-        <div className="flex items-center gap-6 bg-white p-8 rounded-[2rem] border border-zinc-100 shadow-sm min-w-[320px] group hover:shadow-xl hover:border-emerald-100 transition-all duration-300">
-          <div className="h-16 w-16 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-300 group-hover:bg-emerald-50 group-hover:text-emerald-500 transition-all shadow-inner">
-            <Trophy className="h-8 w-8" />
+      <div className="flex flex-col md:flex-row items-center gap-4">
+        <div className="flex items-center gap-3 bg-white p-3 rounded-xl border border-zinc-100 shadow-sm min-w-[200px] group hover:shadow-md transition-all duration-300">
+          <div className="h-9 w-9 rounded-lg bg-zinc-50 flex items-center justify-center text-zinc-300 group-hover:bg-emerald-50 group-hover:text-emerald-500 transition-all shadow-inner">
+            <Trophy className="h-4 w-4" />
           </div>
-          <div className="space-y-1">
-            <p className="text-4xl font-black text-zinc-900 group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{squads.length}</p>
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{toGreekUpperCase('Σύνολο Τμημάτων')}</p>
+          <div className="space-y-0.5">
+            <p className="text-lg font-black text-zinc-900 group-hover:text-emerald-600 transition-colors uppercase tracking-tight">{squads.length}</p>
+            <p className="text-[8px] font-bold uppercase tracking-wider text-zinc-400">{toGreekUpperCase('Σύνολο Τμημάτων')}</p>
           </div>
         </div>
 
         <div className="relative flex-1 w-full group">
-          <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-zinc-300 group-focus-within:text-emerald-500 transition-colors" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-300 group-focus-within:text-emerald-500 transition-colors" />
           <Input
-            placeholder={toGreekUpperCase('Αναζήτηση τμημάτων με όνομα ή ηλικία...')}
+            placeholder={toGreekUpperCase('Αναζήτηση...')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="h-16 pl-16 pr-6 bg-white border-none rounded-2xl shadow-sm focus:ring-4 focus:ring-emerald-500/10 font-black text-lg placeholder:text-zinc-300 w-full transition-all uppercase"
+            className="h-10 pl-10 pr-4 bg-white border-zinc-100 rounded-lg shadow-sm focus:ring-4 focus:ring-emerald-500/10 font-bold text-xs placeholder:text-zinc-300 w-full transition-all uppercase"
           />
         </div>
       </div>
 
       {/* Squads Grid */}
       {filteredSquads.length === 0 ? (
-        <div className="rounded-[2.5rem] border-2 border-dashed border-zinc-100 bg-white p-20 text-center">
-            <div className="mx-auto h-24 w-24 bg-zinc-50 rounded-[2rem] flex items-center justify-center mb-8 shadow-inner">
-                <Trophy className="h-12 w-12 text-zinc-200" />
+        <div className="rounded-2xl border border-zinc-100 bg-white p-12 text-center">
+            <div className="mx-auto h-16 w-16 bg-zinc-50 rounded-xl flex items-center justify-center mb-6 shadow-inner">
+                <Trophy className="h-8 w-8 text-zinc-200" />
             </div>
-          <h3 className="text-2xl font-black text-zinc-900 mb-2">
+          <h3 className="text-lg font-black text-zinc-900 mb-1">
             {searchTerm ? 'Δεν βρέθηκαν τμήματα' : 'Δεν υπάρχουν τμήματα ακόμα'}
           </h3>
-          <p className="text-zinc-500 font-medium text-lg max-w-sm mx-auto">
-            {searchTerm ? 'Δοκιμάστε να αλλάξετε τους όρους αναζήτησης.' : 'Δημιουργήστε το πρώτο τμήμα για να οργανώσετε τους αθλητές σας.'}
+          <p className="text-zinc-500 font-medium text-xs max-w-sm mx-auto">
+            {searchTerm ? 'Δοκιμάστε να αλλάξετε την αναζήτηση.' : 'Δημιουργήστε το πρώτο τμήμα.'}
           </p>
           {!searchTerm && (
-            <Button asChild className="mt-10 h-14 px-10 rounded-2xl bg-emerald-600 text-white font-black">
+            <Button asChild className="mt-8 h-12 px-8 rounded-xl bg-zinc-900 text-white font-black uppercase text-[12px]">
               <Link href="/management/academy/squads/new">Δημιουργία Τμήματος</Link>
             </Button>
           )}
@@ -195,45 +194,45 @@ export default function SquadsPage() {
               <div
                 key={squad.id}
                 className={cn(
-                    "group relative flex flex-col rounded-[2rem] border border-zinc-100 bg-white p-8 transition-all duration-300 hover:shadow-xl",
+                    "group relative flex flex-col rounded-2xl border border-zinc-100 bg-white p-4 transition-all duration-300 hover:shadow-lg",
                     color.hover
                 )}
               >
-                <div className="flex items-center justify-between mb-10">
-                  <div className="flex items-center gap-5">
-                    <div className={cn("h-16 w-16 rounded-2xl flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", color.bg)}>
-                      <Trophy className="h-8 w-8" />
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className={cn("h-10 w-10 rounded-lg flex items-center justify-center transition-all group-hover:scale-110 shadow-sm", color.bg)}>
+                      <Trophy className="h-5 w-5" />
                     </div>
-                    <div className="space-y-1">
-                      <h4 className="text-2xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{toGreekUpperCase(squad.name)}</h4>
-                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{toGreekUpperCase(squad.ageGroup)}</p>
+                    <div className="space-y-0.5">
+                      <h4 className="text-base font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{toGreekUpperCase(squad.name)}</h4>
+                      <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-400">{toGreekUpperCase(squad.ageGroup)}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="space-y-6 mb-10 flex-1">
-                  <div className="flex items-center justify-between p-6 bg-zinc-50 rounded-[1.5rem] group-hover:bg-white border border-transparent group-hover:border-emerald-100 group-hover:shadow-lg transition-all">
-                    <span className="text-[11px] font-black uppercase tracking-[0.2em] text-zinc-400 flex items-center gap-3">
-                      <UsersIcon className="h-5 w-5 text-emerald-500/50" />
+                <div className="space-y-3 mb-6 flex-1">
+                  <div className="flex items-center justify-between p-3 bg-zinc-50 rounded-lg group-hover:bg-white border border-transparent group-hover:border-emerald-100 transition-all shadow-inner group-hover:shadow-none">
+                    <span className="text-[8px] font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                      <UsersIcon className="h-3.5 w-3.5 text-emerald-500/50" />
                       {toGreekUpperCase('Αθλητές')}
                     </span>
-                    <span className="text-3xl font-black text-zinc-900 group-hover:text-emerald-600 transition-colors">{athleteCount}</span>
+                    <span className="text-lg font-black text-zinc-900 group-hover:text-emerald-600 transition-colors">{athleteCount}</span>
                   </div>
-                  <div className="space-y-2 px-1">
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">{toGreekUpperCase('Προπονητής')}</p>
-                    <p className="text-[15px] font-extrabold text-zinc-600 uppercase tracking-tight truncate">
+                  <div className="space-y-0.5 px-1">
+                    <p className="text-[8px] font-bold uppercase tracking-wider text-zinc-400">{toGreekUpperCase('Προπονητής')}</p>
+                    <p className="text-[11px] font-bold text-zinc-600 uppercase tracking-tight truncate">
                       {toGreekUpperCase(getCoachNames(squad.coachIds))}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex gap-4 pt-8 border-t border-zinc-100 relative z-10">
-                  <Button variant="outline" className="flex-1 h-14 rounded-2xl font-black text-xs uppercase tracking-widest border-zinc-100 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 shadow-sm transition-all active:scale-95" asChild>
+                <div className="flex gap-3 pt-6 border-t border-zinc-100 relative z-10">
+                  <Button variant="outline" className="flex-1 h-10 rounded-xl font-bold text-[10px] uppercase tracking-widest border-zinc-100 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 shadow-sm transition-all active:scale-95" asChild>
                     <Link href={`/management/academy/squads/${squad.id}/edit`}>
                       {toGreekUpperCase('Επεξεργασία')}
                     </Link>
                   </Button>
-                  <Button variant="outline" className="flex-1 h-14 rounded-2xl font-black text-xs uppercase tracking-widest border-zinc-100 hover:bg-zinc-900 hover:text-white hover:border-zinc-900 shadow-sm transition-all active:scale-95" asChild>
+                  <Button variant="outline" className="flex-1 h-10 rounded-xl font-bold text-[10px] uppercase tracking-widest border-zinc-100 hover:bg-zinc-900 hover:text-white hover:border-zinc-900 shadow-sm transition-all active:scale-95" asChild>
                     <Link href={`/management/academy/users?squad=${squad.id}`}>
                       {toGreekUpperCase('Ρόστερ')}
                     </Link>
@@ -243,10 +242,10 @@ export default function SquadsPage() {
                     <AlertDialogTrigger asChild>
                       <Button
                         variant="ghost"
-                        className="h-14 w-14 rounded-2xl text-zinc-300 hover:text-red-600 hover:bg-red-50 hover:border-red-100 border border-transparent transition-all active:scale-90"
+                        className="h-10 w-10 rounded-xl text-zinc-300 hover:text-red-600 hover:bg-red-50 hover:border-red-100 border border-transparent transition-all active:scale-90"
                         onClick={(e) => { e.stopPropagation(); setDeleteConfirm(squad.id); }}
                       >
-                        <Trash2 className="h-6 w-6" />
+                        <Trash2 className="h-5 w-5" />
                       </Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent className="rounded-[2.5rem] p-10">
