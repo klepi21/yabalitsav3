@@ -84,19 +84,16 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col bg-white border-r border-zinc-100/80">
       {/* Logo Area */}
-      <div className="flex h-16 items-center px-6 shrink-0 mb-1">
-        <div className="flex items-center gap-2.5">
-          <div className="h-8 w-8 bg-emerald-600 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-200">
-            <Image
-              src="/yabalitsalogo.png"
-              alt="Yabalitsa"
-              width={20}
-              height={20}
-              className="h-4 w-auto brightness-0 invert"
-            />
-          </div>
-          <span className="text-lg font-black text-zinc-900 tracking-tight">Yabalitsa</span>
-        </div>
+      <div className="flex h-20 items-center px-6 shrink-0 mb-2">
+        <Link href="/management/dashboard" className="flex items-center gap-3">
+          <Image
+            src="/yabalitsalogo.png"
+            alt="Yabalitsa"
+            width={160}
+            height={45}
+            className="h-9 w-auto object-contain"
+          />
+        </Link>
       </div>
 
       {/* Navigation */}

@@ -27,6 +27,8 @@ import {
   LayoutDashboard,
   Clock,
   Save,
+  User,
+  Search,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -533,302 +535,223 @@ export default function DashboardPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-1">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6">
         <div className="flex items-center gap-4">
-           <div className="h-12 w-12 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shadow-zinc-200 shrink-0">
-             <LayoutDashboard className="h-6 w-6 text-emerald-400" />
+           <div className="h-14 w-14 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-xl shadow-zinc-200 shrink-0">
+             <LayoutDashboard className="h-7 w-7 text-emerald-400" />
            </div>
            <div className="space-y-0.5">
-             <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
+             <h1 className="text-3xl font-black tracking-tighter text-zinc-900 uppercase">
                {toGreekUpperCase('Πίνακας Ελέγχου')}
              </h1>
              <div className="flex items-center gap-2">
-               <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
-                 {toGreekUpperCase('Διαχειριση γηπεδου')} <span className="text-emerald-600 font-black">{venue?.name ? toGreekUpperCase(venue.name) : ''}</span>
+               <p className="text-[11px] font-black text-zinc-400 uppercase tracking-widest">
+                 {toGreekUpperCase('Διαχειριση γηπεδου')} <span className="text-emerald-500 font-black">{venue?.name ? toGreekUpperCase(venue.name) : ''}</span>
                </p>
              </div>
            </div>
         </div>
         
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex items-center gap-3">
           <Button 
-            size="sm" 
             onClick={() => setShowQuickBooking(true)}
-            className="h-10 px-5 rounded-lg bg-zinc-900 hover:bg-black text-white font-bold text-[12px] shadow-md transition-all active:scale-95 group"
+            className="h-12 px-6 rounded-2xl bg-zinc-900 hover:bg-black text-white font-black text-[11px] shadow-lg shadow-zinc-900/10 transition-all active:scale-95 group uppercase tracking-widest"
           >
-            <Plus className="h-4 w-4 mr-1.5 text-emerald-400 group-hover:scale-110 transition-transform" />
+            <Plus className="h-4 w-4 mr-2 text-emerald-400 group-hover:rotate-90 transition-transform duration-500" />
             {toGreekUpperCase('Γρήγορη Κράτηση')}
           </Button>
 
-          <DropdownMenu open={showBookingMenu} onOpenChange={setShowBookingMenu}>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="h-10 px-4 rounded-lg border-zinc-200 hover:bg-zinc-50 text-zinc-900 font-bold text-[12px] transition-all active:scale-95 shadow-sm">
-                {toGreekUpperCase('Σελιδα Booking')}
-                <ChevronDown className="h-3 w-3 ml-2 opacity-40" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-64 p-3 rounded-2xl shadow-2xl border-zinc-100 animate-in fade-in slide-in-from-top-2">
-              <DropdownMenuItem
-                className="rounded-xl px-5 py-4 font-black uppercase tracking-tight cursor-pointer text-[15px] group"
-                onClick={() => {
-                  setShowBookingMenu(false);
-                  if (bookingPath) router.push(bookingPath);
-                }}
-                disabled={!bookingPath}
-              >
-                <Eye className="h-5 w-5 mr-4 text-zinc-400 group-hover:text-emerald-500 transition-colors" />
-                {toGreekUpperCase('Άνοιγμα Σελίδας')}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                className="rounded-xl px-5 py-4 font-black uppercase tracking-tight cursor-pointer text-[15px] group mt-1"
-                onClick={() => {
-                  setShowBookingMenu(false);
-                  if (bookingPath) window.open(`/management/booking/qr?url=${encodeURIComponent(bookingPath)}`, '_blank');
-                }}
-                disabled={!bookingPath}
-              >
-                <Activity className="h-5 w-5 mr-4 text-zinc-400 group-hover:text-emerald-500 transition-colors" />
-                {toGreekUpperCase('QR CODE')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button 
+            variant="outline"
+            onClick={() => {
+              if (bookingPath) router.push(bookingPath);
+            }}
+            disabled={!bookingPath}
+            className="h-12 px-6 rounded-2xl border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-900 font-black text-[11px] transition-all active:scale-95 shadow-sm uppercase tracking-widest"
+          >
+            {toGreekUpperCase('Σελιδα Booking')}
+          </Button>
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Quick Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { label: 'Σύνολο Κρατήσεων', value: bookings.length, icon: CalendarDays, color: 'emerald', detail: 'ΤΕΛΕΥΤΑΙΕΣ 30 ΗΜΕΡΕΣ' },
-          { label: 'Live Αγώνες', value: getLiveBookings(), icon: Activity, color: 'emerald', detail: 'ΑΥΤΗ ΤΗ ΣΤΙΓΜΗ' },
-          { label: 'Κρατήσεις Σήμερα', value: getTodaysBookings().length, icon: Target, color: 'emerald', detail: 'ΠΡΟΓΡΑΜΜΑ ΗΜΕΡΑΣ' },
-          { label: 'Εγγεγραμμένοι', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, icon: Users, color: 'emerald', detail: 'ΣΥΝΟΛΟ ΠΕΛΑΤΩΝ' }
+          { label: 'ΣΥΝΟΛΟ ΚΡΑΤΗΣΕΩΝ', value: bookings.length, detail: 'ΤΕΛΕΥΤΑΙΕΣ 30 ΗΜΕΡΕΣ', sparkline: "M0 30 Q10 25 20 28 T40 20 T60 25 T80 15 T100 22" },
+          { label: 'LIVE ΑΓΩΝΕΣ', value: getLiveBookings(), detail: 'ΑΥΤΗ ΤΗ ΣΤΙΓΜΗ', sparkline: "M0 25 Q15 25 30 20 T60 28 T90 22 T120 25" },
+          { label: 'Κρατήσεις Σήμερα', value: getTodaysBookings().length, detail: 'ΠΡΟΓΡΑΜΜΑ ΗΜΕΡΑΣ', sparkline: "M0 28 Q20 28 40 22 T80 25 T120 18 T160 24" },
+          { label: 'ΣΥΝΟΛΟ ΠΕΛΑΤΩΝ', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, detail: 'ΣΥΝΟΛΟ ΠΕΛΑΤΩΝ', sparkline: "M0 22 Q25 22 50 28 T100 20 T150 25 T200 15" }
         ].map((stat, i) => (
-          <Card key={i} className="rounded-2xl border border-zinc-100 bg-white shadow-sm overflow-hidden group hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-500">
-            <CardContent className="p-6 relative">
-              <div className="flex items-start justify-between">
-                <div className="space-y-3">
-                  <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-inner">
-                    <stat.icon className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-[10px] text-zinc-400 font-bold tracking-[0.1em] uppercase mb-1">{toGreekUpperCase(stat.label)}</p>
-                    <div className="flex items-baseline gap-2">
-                       <p className="text-3xl font-black text-zinc-900 tracking-tighter uppercase">{stat.value}</p>
-                       <span className="text-[9px] font-black text-emerald-500 bg-emerald-50 px-1.5 py-0.5 rounded uppercase">Live</span>
-                    </div>
-                    <p className="text-[9px] font-bold text-zinc-300 uppercase mt-2">{toGreekUpperCase(stat.detail)}</p>
-                  </div>
+          <Card key={i} className="rounded-3xl border-none bg-white shadow-xl shadow-zinc-200/50 overflow-hidden group transition-all duration-500 hover:-translate-y-1">
+            <CardContent className="p-6">
+              <div className="flex flex-col gap-4">
+                <div className="flex justify-between items-start">
+                   <div className="space-y-1">
+                     <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{stat.label}</p>
+                     <p className="text-4xl font-black text-zinc-900 tracking-tighter">{stat.value}</p>
+                   </div>
+                   <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                     <CalendarDays className="h-5 w-5 text-zinc-300" />
+                   </div>
                 </div>
-              </div>
-              {/* Subtle background decoration */}
-              <div className="absolute -right-6 -bottom-6 opacity-[0.03] group-hover:opacity-[0.07] transition-opacity duration-500">
-                 <stat.icon className="h-32 w-32 rotate-12" />
+                
+                {/* Sparkline Visual */}
+                <div className="h-10 w-full mt-2">
+                   <svg viewBox="0 0 100 40" className="h-full w-full stroke-emerald-500 fill-none stroke-[2.5] stroke-round">
+                      <path d={stat.sparkline} className="opacity-40" />
+                      <circle cx="100" cy="22" r="2" className="fill-emerald-500" />
+                   </svg>
+                </div>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Recent Bookings - 8/12 width */}
-        <div className="lg:col-span-8 space-y-6">
-          <Card className="rounded-xl border border-zinc-100 bg-white shadow-sm overflow-hidden">
-            <CardHeader className="p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-zinc-50/50 border-b border-zinc-100">
+        {/* Today's Bookings - Left Column */}
+        <div className="lg:col-span-8 space-y-8">
+           <div className="flex items-center justify-between pb-2">
               <div className="flex items-center gap-4">
-                <div className="h-11 w-11 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shadow-zinc-200">
-                  <CalendarDays className="h-5 w-5 text-emerald-400" />
-                </div>
-                <div>
-                  <CardTitle className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Πρόγραμμα Ημέρας')}</CardTitle>
-                  <p className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] mt-0.5">
-                    {new Date().toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase()}
-                  </p>
-                </div>
+                 <div className="h-12 w-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-lg">
+                    <Clock className="h-6 w-6 text-emerald-400" />
+                 </div>
+                 <div className="space-y-0.5">
+                    <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Σημερινές Κρατήσεις')}</h2>
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Πρόγραμμα ημέρας')}</p>
+                 </div>
               </div>
-              <Button variant="outline" className="h-10 px-6 rounded-xl font-black text-emerald-600 border-emerald-100 bg-white hover:bg-emerald-600 hover:text-white transition-all text-xs uppercase tracking-widest shadow-sm" asChild>
-                <Link href="/management/bookings">{toGreekUpperCase('Ημερολογιο')}</Link>
+              <Button variant="outline" className="h-10 px-5 rounded-2xl border-none bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-black text-[10px] uppercase tracking-widest transition-all">
+                 {toGreekUpperCase('Προβολη ολων')}
               </Button>
-            </CardHeader>
-            <CardContent className="p-4 pt-1">
-              {!bookings || getTodaysBookings().length === 0 ? (
-                <div className="text-center py-12 bg-zinc-50/50 rounded-2xl border-2 border-dashed border-zinc-200">
-                  <div className="h-12 w-12 bg-zinc-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <CalendarDays className="h-6 w-6 text-zinc-400" />
-                  </div>
-                  <h3 className="text-[14px] font-bold text-zinc-900">
-                    {!bookings ? 'Φόρτωση κρατήσεων...' : 'Καμία κράτηση προγραμματισμένη'}
-                  </h3>
-                  <p className="text-xs text-zinc-500 mt-1 max-w-[280px] mx-auto">
-                    {!bookings ? 'Παρακαλώ περιμένετε' : 'Δεν υπάρχουν κρατήσεις για σήμερα στο σύστημα.'}
-                  </p>
-                  {bookings && (
-                    <Button 
-                      variant="outline" 
-                      className="mt-6 font-bold rounded-xl"
-                      onClick={() => setShowQuickBooking(true)}
-                    >
-                      Προσθήκη Κράτησης
-                    </Button>
-                  )}
+           </div>
+
+           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {getTodaysBookings().slice(0, 4).length === 0 ? (
+                <div className="col-span-full py-12 text-center bg-white rounded-[2rem] border-2 border-dashed border-zinc-100 italic text-zinc-400 font-bold">
+                   Δεν υπάρχουν κρατήσεις για σήμερα
                 </div>
               ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {getTodaysBookings()
-                    .slice(0, 10)
-                    .map((booking) => {
-                    const pitch = pitches.find(p => p.id === booking.pitchId);
-                    return (
-                      <div key={booking.id} className="group bg-zinc-50 border border-zinc-100/50 rounded-xl p-4 hover:border-emerald-200 hover:bg-white hover:shadow-md transition-all duration-300 relative overflow-hidden">
-                        <div className="flex flex-col gap-4">
-                          <div className="flex items-start justify-between relative z-10">
-                            <div className="space-y-0.5">
-                                <p className="text-[8px] font-bold uppercase tracking-wider text-zinc-400">{toGreekUpperCase('Πελάτης')}</p>
-                                <h4 className="text-base font-black text-zinc-900 flex items-center gap-1.5 uppercase tracking-tight group-hover:text-emerald-700 transition-colors">
-                                {toGreekUpperCase(booking.userName || booking.userEmail || 'Άγνωστος')}
-                                {booking.notes && (
-                                    <div className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-                                )}
-                                </h4>
-                            </div>
-                            <div className="text-right">
-                                <p className="text-[8px] font-bold uppercase tracking-wider text-zinc-400">{toGreekUpperCase('Έναρξη')}</p>
-                                <p className="text-lg font-black text-emerald-600 group-hover:scale-105 transition-transform origin-right">
-                                    {new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit', hour12: false})}
-                                </p>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-wrap items-center gap-2 py-2 border-y border-zinc-100 relative z-10">
-                            {pitch && (
-                                <div className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white border border-zinc-100">
-                                    <Building2 className="h-2.5 w-2.5 text-emerald-500" />
-                                    <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-tight">{toGreekUpperCase(pitch.name)}</span>
+                getTodaysBookings().slice(0, 4).map((booking) => {
+                  const pitch = pitches.find(p => p.id === booking.pitchId);
+                  return (
+                    <Card key={booking.id} className="rounded-[2.5rem] border-none bg-white shadow-xl shadow-zinc-200/30 overflow-hidden group hover:shadow-2xl hover:shadow-emerald-900/5 transition-all duration-500">
+                       <CardContent className="p-8">
+                          <div className="flex flex-col gap-6">
+                             {/* User Info Row */}
+                             <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                   <div className="h-12 w-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden">
+                                      <User className="h-6 w-6 text-emerald-600" />
+                                   </div>
+                                   <div className="space-y-0.5">
+                                      <h4 className="text-sm font-black text-zinc-900 uppercase tracking-tight truncate max-w-[120px]">
+                                         {toGreekUpperCase(booking.userName || 'Unknown')}
+                                      </h4>
+                                      <div className="flex items-center gap-2">
+                                         <div className="h-1 w-1 rounded-full bg-emerald-500" />
+                                         <p className="text-[10px] font-bold text-zinc-400">REGISTERED</p>
+                                      </div>
+                                   </div>
                                 </div>
-                            )}
-                            {booking.userPhone && (
-                                <a href={`tel:${booking.userPhone}`} className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white border border-zinc-100 text-[9px] font-bold text-zinc-400 hover:text-emerald-600 transition-all group/phone">
-                                    <Phone className="h-2.5 w-2.5 group-hover/phone:rotate-12 transition-transform" />
-                                    {booking.userPhone}
-                                </a>
-                            )}
-                          </div>
-                          
-                          <div className="flex flex-col sm:flex-row items-center gap-2 relative z-10">
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <button className="w-full sm:flex-1 h-8 px-3 rounded-lg border border-zinc-200 bg-white flex items-center justify-between font-bold text-[10px] transition-all hover:border-emerald-200 active:scale-95 group/status uppercase tracking-tight">
-                                        <div className="flex items-center gap-1.5">
-                                            {getStatusBadge(booking.status)}
-                                        </div>
-                                        <ChevronDown className="h-3 w-3 text-zinc-300 group-hover/status:text-emerald-400 transition-colors" />
-                                        </button>
-                                     </DropdownMenuTrigger>
-                                     <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl shadow-xl border-zinc-100 animate-in zoom-in-95 duration-200">
-                                         <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'pending', booking.status, booking.userName || 'Άγνωστος')} className="rounded-lg px-3 py-2.5 font-bold text-[11px] uppercase tracking-wider cursor-pointer group">
-                                             <div className="h-2 w-2 rounded-full bg-amber-400 mr-3 group-hover:scale-125 transition-transform" />
-                                             {toGreekUpperCase('Εκκρεμεί')}
-                                         </DropdownMenuItem>
-                                         <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'confirmed', booking.status, booking.userName || 'Άγνωστος')} className="rounded-lg px-3 py-2.5 font-bold text-[11px] uppercase tracking-wider cursor-pointer group mt-0.5">
-                                             <div className="h-2 w-2 rounded-full bg-emerald-500 mr-3 group-hover:scale-125 transition-transform" />
-                                             {toGreekUpperCase('Επιβεβαιωμένη')}
-                                         </DropdownMenuItem>
-                                         <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'completed', booking.status, booking.userName || 'Άγνωστος')} className="rounded-lg px-3 py-2.5 font-bold text-[11px] uppercase tracking-wider cursor-pointer group mt-0.5">
-                                             <div className="h-2 w-2 rounded-full bg-zinc-400 mr-3 group-hover:scale-125 transition-transform" />
-                                             {toGreekUpperCase('Ολοκληρωμένη')}
-                                         </DropdownMenuItem>
-                                         <DropdownMenuItem onClick={() => handleStatusChange(booking.id, 'cancelled', booking.status, booking.userName || 'Άγνωστος')} className="rounded-lg px-3 py-2.5 font-bold text-[11px] uppercase tracking-wider cursor-pointer group mt-0.5 text-red-600">
-                                             <div className="h-2 w-2 rounded-full bg-red-500 mr-3 group-hover:scale-125 transition-transform" />
-                                             {toGreekUpperCase('Ακυρωμένη')}
-                                         </DropdownMenuItem>
-                                     </DropdownMenuContent>
-                                 </DropdownMenu>
-                                
-                                <Button variant="outline" size="icon" className="h-8 w-8 rounded-lg bg-white border-zinc-200 hover:border-emerald-200 text-zinc-400 hover:text-emerald-500 transition-all active:scale-90" asChild>
-                                    <Link href={`/management/bookings/${booking.id}`}>
-                                        <Eye className="h-4 w-4" />
-                                    </Link>
+                                <div className="text-right">
+                                   <p className="text-2xl font-black text-zinc-900 tracking-tighter">
+                                      {new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit'})}
+                                   </p>
+                                   <p className="text-[10px] font-black text-emerald-500 uppercase">STARTING</p>
+                                </div>
+                             </div>
+
+                             {/* Details Row */}
+                             <div className="flex items-center gap-4 py-3 border-y border-zinc-50">
+                                <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-100">
+                                   <Building2 className="h-3 w-3 text-zinc-400" />
+                                   <span className="text-[10px] font-black text-zinc-600 uppercase tracking-tight">{pitch ? toGreekUpperCase(pitch.name) : 'FIELD'}</span>
+                                </div>
+                                {booking.userPhone && (
+                                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-100">
+                                      <Phone className="h-3 w-3 text-zinc-400" />
+                                      <span className="text-[10px] font-black text-zinc-600 tracking-tight">{booking.userPhone}</span>
+                                   </div>
+                                )}
+                             </div>
+
+                             {/* Action Footer */}
+                             <div className="flex items-center gap-3">
+                                <div className="flex-1">
+                                   {getStatusBadge(booking.status)}
+                                </div>
+                                <Button size="icon" variant="outline" className="h-10 w-10 rounded-2xl border-zinc-100 hover:bg-emerald-50 hover:border-emerald-200 text-zinc-400 transition-all" asChild>
+                                   <Link href={`/management/bookings/${booking.id}`}>
+                                      <Eye className="h-4 w-4" />
+                                   </Link>
                                 </Button>
+                             </div>
                           </div>
-                        </div>
-                        <div className="absolute top-0 right-0 p-8 opacity-0 group-hover:opacity-[0.03] pointer-events-none transition-opacity">
-                             <CalendarDays className="h-40 w-40 rotate-12" />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                       </CardContent>
+                    </Card>
+                  );
+                })
               )}
-            </CardContent>
-          </Card>
+           </div>
         </div>
 
         {/* Sidebar Management - 4/12 width */}
         <div className="lg:col-span-4 space-y-6">
           {/* Pitches List */}
-          <Card className="rounded-xl border border-zinc-100 bg-white shadow-sm overflow-hidden">
-            <CardHeader className="p-4 flex flex-row items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="h-9 w-9 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-600">
-                  <Building2 className="h-5 w-5" />
-                </div>
-                <div>
-                   <CardTitle className="text-lg font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Γήπεδα')}</CardTitle>
-                </div>
+        {/* Pitches List - Right Column */}
+        <div className="lg:col-span-4 space-y-8">
+           <div className="flex items-center justify-between pb-2">
+              <div className="flex items-center gap-4">
+                 <div className="h-12 w-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-lg">
+                    <Building2 className="h-6 w-6 text-emerald-400" />
+                 </div>
+                 <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Γήπεδα')}</h2>
               </div>
-              <Button size="icon" variant="outline" className="h-8 w-8 rounded-lg border-zinc-200 hover:bg-zinc-50" asChild>
-                <Link href="/management/pitches/new">
-                  <Plus className="h-4 w-4" />
-                </Link>
+              <Button size="icon" variant="ghost" className="h-10 w-10 rounded-2xl bg-zinc-100 hover:bg-zinc-200" asChild>
+                 <Link href="/management/pitches/new">
+                    <Plus className="h-5 w-5" />
+                 </Link>
               </Button>
-            </CardHeader>
-            <CardContent className="p-4 pt-1">
+           </div>
+
+           <div className="space-y-4">
               {pitches.length === 0 ? (
-                <div className="text-center py-8 bg-zinc-50/50 rounded-xl border-2 border-dashed border-zinc-200">
-                  <Building2 className="h-8 w-8 text-zinc-300 mx-auto mb-2" />
-                  <h3 className="text-[12px] font-bold text-zinc-900">Δεν υπάρχουν γήπεδα</h3>
-                  <Button variant="link" size="sm" className="font-bold text-emerald-600 p-0 h-auto mt-1 text-[11px]" asChild>
-                     <Link href="/management/pitches/new">Προσθήκη γηπέδου</Link>
-                  </Button>
+                <div className="py-12 text-center bg-white rounded-[2rem] border-2 border-dashed border-zinc-100 italic text-zinc-400 font-bold">
+                   Δεν υπάρχουν γήπεδα
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {pitches.slice(0, 5).map((pitch, index) => {
-                    const colors = [
-                      { bg: 'bg-emerald-50', text: 'text-emerald-600', badge: 'border-emerald-200 bg-emerald-50 text-emerald-700' },
-                      { bg: 'bg-blue-50', text: 'text-blue-600', badge: 'border-blue-200 bg-blue-50 text-blue-700' },
-                      { bg: 'bg-violet-50', text: 'text-violet-600', badge: 'border-violet-200 bg-violet-50 text-violet-700' },
-                    ];
-                    const color = colors[index % colors.length];
-                    return (
-                      <div key={pitch.id} className="group flex items-center gap-3 p-3 rounded-xl border border-zinc-100 hover:border-emerald-200 hover:bg-white hover:shadow-sm transition-all duration-200">
-                        <div className={`h-10 w-10 rounded-lg ${color.bg} flex items-center justify-center shrink-0 shadow-sm transition-all group-hover:scale-105`}>
-                          <Building2 className={`h-5 w-5 ${color.text}`} />
+                pitches.slice(0, 5).map((pitch) => (
+                  <Card key={pitch.id} className="rounded-3xl border-none bg-white shadow-xl shadow-zinc-200/20 overflow-hidden group hover:shadow-2xl transition-all duration-300">
+                     <CardContent className="p-4">
+                        <div className="flex items-center gap-4">
+                           <div className="h-14 w-20 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shrink-0 relative">
+                              <Building2 className="h-6 w-6 text-emerald-600 relative z-10" />
+                              {/* Background blueprint-style lines */}
+                              <div className="absolute inset-0 opacity-10">
+                                 <svg className="h-full w-full" viewBox="0 0 100 60">
+                                    <rect x="5" y="5" width="90" height="50" rx="2" fill="none" stroke="currentColor" strokeWidth="1" />
+                                    <line x1="50" y1="5" x2="50" y2="55" stroke="currentColor" strokeWidth="1" />
+                                    <circle cx="50" cy="30" r="8" fill="none" stroke="currentColor" strokeWidth="1" />
+                                 </svg>
+                              </div>
+                           </div>
+                           <div className="flex-1 min-w-0">
+                              <h5 className="text-sm font-black text-zinc-900 uppercase tracking-tight truncate">{toGreekUpperCase(pitch.name)} <span className="text-[10px] text-zinc-400 ml-1">{pitch.type}</span></h5>
+                              <p className="text-[11px] font-bold text-zinc-500 mt-1">
+                                 €{pitch.pricePerSlot} <span className="text-zinc-300 mx-1">•</span> €{getPricePerPerson(pitch.pricePerSlot, pitch.type)}/άτομο
+                              </p>
+                           </div>
+                           <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" asChild>
+                              <Link href={`/management/pitches/${pitch.id}`}>
+                                 <Pencil className="h-4 w-4" />
+                              </Link>
+                           </Button>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <h4 className="text-[14px] font-black text-zinc-900 truncate uppercase tracking-tight">{toGreekUpperCase(pitch.name)}</h4>
-                            <Badge variant="outline" className={cn("text-[8px] font-bold uppercase px-1.5 py-0 border-none", color.badge)}>
-                              {pitch.type}
-                            </Badge>
-                          </div>
-                          <p className="text-[13px] text-zinc-500 font-medium mt-0.5">
-                            &euro;{pitch.pricePerSlot} &middot; &euro;{getPricePerPerson(pitch.pricePerSlot, pitch.type)}/άτομο
-                          </p>
-                        </div>
-                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" asChild>
-                          <Link href={`/management/pitches/${pitch.id}`}>
-                            <Pencil className="h-4 w-4" />
-                          </Link>
-                        </Button>
-                      </div>
-                    );
-                  })}
-                </div>
+                     </CardContent>
+                  </Card>
+                ))
               )}
-            </CardContent>
-          </Card>
+           </div>
 
           {/* Venue Info Info Card - more prominent */}
           {venue && (
@@ -887,6 +810,87 @@ export default function DashboardPage() {
             </Card>
           )}
         </div>
+      </div>
+      {/* Player Information Table */}
+      <div className="space-y-6 pt-4">
+         <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+               <div className="h-12 w-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-lg">
+                  <Users className="h-6 w-6 text-emerald-400" />
+               </div>
+               <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Πληροφορίες Παίκτη')}</h2>
+            </div>
+            {/* Search Input for table */}
+            <div className="relative group hidden sm:block">
+               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-300 group-focus-within:text-emerald-500 transition-colors">
+                  <Search className="h-4 w-4" />
+               </div>
+               <input 
+                  type="text" 
+                  placeholder={toGreekUpperCase('Αναζητηση...')}
+                  className="h-10 pl-11 pr-4 rounded-xl bg-white border border-zinc-100 focus:border-emerald-200 focus:ring-4 focus:ring-emerald-500/5 transition-all text-xs font-bold w-64 outline-none uppercase"
+               />
+            </div>
+         </div>
+
+         <div className="bg-white rounded-[2rem] shadow-xl shadow-zinc-200/40 border border-zinc-100/50 overflow-hidden">
+            <div className="overflow-x-auto">
+               <table className="w-full text-left border-collapse">
+                  <thead>
+                     <tr className="border-b border-zinc-50 bg-zinc-50/30">
+                        <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Παικτης')}</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Σημαντη')}</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Γηπεδο')}</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Τηλεφωνο')}</th>
+                        <th className="px-8 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Ποσο / ατομο')}</th>
+                        <th className="px-8 py-5"></th>
+                     </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-50">
+                     {bookings.slice(0, 5).map((booking) => {
+                        const pitch = pitches.find(p => p.id === booking.pitchId);
+                        return (
+                           <tr key={booking.id} className="group hover:bg-zinc-50/50 transition-colors">
+                              <td className="px-8 py-5">
+                                 <div className="flex items-center gap-4">
+                                    <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center overflow-hidden">
+                                       <User className="h-5 w-5 text-emerald-600" />
+                                    </div>
+                                    <span className="text-sm font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase(booking.userName || 'Unknown')}</span>
+                                 </div>
+                              </td>
+                              <td className="px-8 py-5">
+                                 <div className="flex items-center gap-2">
+                                    <Clock className="h-3.5 w-3.5 text-emerald-500" />
+                                    <span className="text-sm font-black text-zinc-900">{new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit'})}</span>
+                                 </div>
+                              </td>
+                              <td className="px-8 py-5">
+                                 <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-100 border border-zinc-200">
+                                    <Building2 className="h-3 w-3 text-zinc-400" />
+                                    <span className="text-[10px] font-black text-zinc-600 uppercase tracking-tight">{pitch ? toGreekUpperCase(pitch.name) : 'FIELD'}</span>
+                                 </div>
+                              </td>
+                              <td className="px-8 py-5 text-sm font-bold text-zinc-500 tracking-tight">
+                                 {booking.userPhone || '—'}
+                              </td>
+                              <td className="px-8 py-5">
+                                 <span className="text-sm font-black text-emerald-600">
+                                    €{pitch ? getPricePerPerson(pitch.pricePerSlot, pitch.type) : '0'}/ατ.
+                                 </span>
+                              </td>
+                              <td className="px-8 py-5 text-right">
+                                 <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Pencil className="h-4 w-4 text-zinc-400" />
+                                 </Button>
+                              </td>
+                           </tr>
+                        );
+                     })}
+                  </tbody>
+               </table>
+            </div>
+         </div>
       </div>
 
       <Dialog open={showQuickBooking} onOpenChange={setShowQuickBooking}>
