@@ -29,10 +29,23 @@ import {
   Save,
   User,
   Search,
+  Trophy,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { squadService } from '@/lib/academy-services';
+import { Squad } from '@/types/academy';
+
+const FootballPitch = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="2" y="3" width="20" height="18" rx="2" />
+    <line x1="12" y1="3" x2="12" y2="21" />
+    <circle cx="12" cy="12" r="3" />
+    <path d="M2 9c2 0 4 1 4 3s-2 3-4 3" />
+    <path d="M22 9c-2 0-4 1-4 3s2 3 4 3" />
+  </svg>
+);
 import {
   Dialog,
   DialogContent,
@@ -75,7 +88,9 @@ export default function DashboardPage() {
   const pathname = usePathname();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [pitches, setPitches] = useState<Pitch[]>([]);
+  const [squads, setSquads] = useState<Squad[]>([]);
   const [venue, setVenue] = useState<Venue | null>(null);
+  const [dataLoading, setDataLoading] = useState(true);
   const [isVenueInfoExpanded, setIsVenueInfoExpanded] = useState(false);
   const [showQuickBooking, setShowQuickBooking] = useState(false);
   const [showBookingMenu, setShowBookingMenu] = useState(false);
@@ -105,6 +120,7 @@ export default function DashboardPage() {
     }
 
     setLoadError(null);
+    setDataLoading(true);
 
     try {
       const token = await user.getIdToken();
@@ -154,6 +170,14 @@ export default function DashboardPage() {
       setPitches(convertedPitches);
       setVenue(convertedVenue);
 
+      // Fetch squads for academy list
+      try {
+        const squadsData = await squadService.getByVenue(venueOwner.venueId);
+        setSquads(squadsData);
+      } catch (err) {
+        console.error('Error loading squads:', err);
+      }
+
       if (!convertedVenue && venueOwner.venueId) {
         setLoadError('Venue data not found. Please contact support.');
       }
@@ -161,6 +185,8 @@ export default function DashboardPage() {
       console.error('Error loading dashboard data:', error);
       const errorMessage = error instanceof Error ? error.message : 'Failed to load dashboard data';
       setLoadError(errorMessage);
+    } finally {
+      setDataLoading(false);
     }
   }, [venueOwner?.venueId, user]);
 
@@ -239,11 +265,14 @@ export default function DashboardPage() {
 
   const bookingPath = venue ? `/book/${getVenueSlug(venue.name)}` : '';
 
-  // Show loading while checking authentication
-  if (authLoading) {
+  // Show loading while checking authentication or fetching initial data
+  if (authLoading || (dataLoading && (bookings.length === 0 || pitches.length === 0))) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+      <div className="flex items-center justify-center min-h-[60vh] flex-col gap-4">
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+        <p className="text-xs font-black text-zinc-400 uppercase tracking-widest animate-pulse">
+          {toGreekUpperCase('Φορτωση δεδομενων...')}
+        </p>
       </div>
     );
   }
@@ -664,7 +693,7 @@ export default function DashboardPage() {
                              {/* Details Row */}
                              <div className="flex items-center gap-4 py-3 border-y border-zinc-50">
                                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-100">
-                                   <Building2 className="h-3 w-3 text-zinc-400" />
+                                   <FootballPitch className="h-3 w-3 text-zinc-400" />
                                    <span className="text-[10px] font-black text-zinc-600 uppercase tracking-tight">{pitch ? toGreekUpperCase(pitch.name) : 'FIELD'}</span>
                                 </div>
                                 {booking.userPhone && (
@@ -695,59 +724,53 @@ export default function DashboardPage() {
            </div>
         </div>
 
-      {/* 50/50 Row for Player Info and Pitches */}
+      {/* 50/50 Row for Academies and Pitches */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 pt-4">
-        {/* Player Information Table - Left Side */}
+        {/* Academies List - Left Side */}
         <div className="space-y-6">
            <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                  <div className="h-12 w-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-lg">
-                    <Users className="h-6 w-6 text-emerald-400" />
+                    <Trophy className="h-6 w-6 text-emerald-400" />
                  </div>
-                 <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Πληροφορίες Παίκτη')}</h2>
+                 <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ακαδημίες')}</h2>
               </div>
+              <Button size="icon" variant="ghost" className="h-10 w-10 rounded-2xl bg-zinc-100 hover:bg-zinc-200" asChild>
+                 <Link href="/management/academy/squads">
+                    <Plus className="h-5 w-5" />
+                 </Link>
+              </Button>
            </div>
 
-           <div className="bg-white rounded-[2rem] shadow-xl shadow-zinc-200/40 border border-zinc-100/50 overflow-hidden">
-              <div className="overflow-x-auto">
-                 <table className="w-full text-left border-collapse">
-                    <thead>
-                       <tr className="border-b border-zinc-50 bg-zinc-50/30">
-                          <th className="px-6 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Παικτης')}</th>
-                          <th className="px-6 py-5 text-[10px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Σημαντη')}</th>
-                          <th className="px-6 py-5 text-right"></th>
-                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-zinc-50">
-                       {bookings.slice(0, 5).map((booking) => {
-                          const pitch = pitches.find(p => p.id === booking.pitchId);
-                          return (
-                             <tr key={booking.id} className="group hover:bg-zinc-50/50 transition-colors">
-                                <td className="px-6 py-5">
-                                   <div className="flex items-center gap-4">
-                                      <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center overflow-hidden">
-                                         <User className="h-5 w-5 text-emerald-600" />
-                                      </div>
-                                      <span className="text-sm font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase(booking.userName || 'Unknown')}</span>
-                                   </div>
-                                </td>
-                                <td className="px-6 py-5">
-                                   <div className="flex items-center gap-2">
-                                      <Clock className="h-3.5 w-3.5 text-emerald-500" />
-                                      <span className="text-sm font-black text-zinc-900">{new Date(booking.startTime).toLocaleTimeString('el-GR', {hour: '2-digit', minute:'2-digit'})}</span>
-                                   </div>
-                                </td>
-                                <td className="px-6 py-5 text-right">
-                                   <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity">
-                                      <Pencil className="h-4 w-4 text-zinc-400" />
-                                   </Button>
-                                </td>
-                             </tr>
-                          );
-                       })}
-                    </tbody>
-                 </table>
-              </div>
+           <div className="space-y-4">
+              {squads.length === 0 ? (
+                <div className="py-12 text-center bg-white rounded-[2rem] border-2 border-dashed border-zinc-100 italic text-zinc-400 font-bold">
+                   Δεν υπάρχουν ακαδημίες / τμήματα
+                </div>
+              ) : (
+                squads.slice(0, 5).map((squad) => (
+                  <Card key={squad.id} className="rounded-3xl border-none bg-white shadow-xl shadow-zinc-200/20 overflow-hidden group hover:shadow-2xl transition-all duration-300">
+                     <CardContent className="p-4">
+                        <div className="flex items-center gap-4">
+                           <div className="h-14 w-14 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shrink-0 relative">
+                              <Trophy className="h-6 w-6 text-emerald-600 relative z-10" />
+                           </div>
+                           <div className="flex-1 min-w-0">
+                              <h5 className="text-sm font-black text-zinc-900 uppercase tracking-tight truncate">{toGreekUpperCase(squad.name)}</h5>
+                              <p className="text-[11px] font-bold text-zinc-500 mt-1 uppercase tracking-wider">
+                                 {toGreekUpperCase(squad.ageGroup)}
+                              </p>
+                           </div>
+                           <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" asChild>
+                              <Link href={`/management/academy/squads`}>
+                                 <Eye className="h-4 w-4" />
+                              </Link>
+                           </Button>
+                        </div>
+                     </CardContent>
+                  </Card>
+                ))
+              )}
            </div>
         </div>
 
@@ -756,7 +779,7 @@ export default function DashboardPage() {
            <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                  <div className="h-12 w-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-lg">
-                    <Building2 className="h-6 w-6 text-emerald-400" />
+                    <FootballPitch className="h-6 w-6 text-emerald-400" />
                  </div>
                  <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Γήπεδα')}</h2>
               </div>
@@ -778,14 +801,8 @@ export default function DashboardPage() {
                      <CardContent className="p-4">
                         <div className="flex items-center gap-4">
                            <div className="h-14 w-20 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shrink-0 relative">
-                              <Building2 className="h-6 w-6 text-emerald-600 relative z-10" />
-                              <div className="absolute inset-0 opacity-10">
-                                 <svg className="h-full w-full" viewBox="0 0 100 60">
-                                    <rect x="5" y="5" width="90" height="50" rx="2" fill="none" stroke="currentColor" strokeWidth="1" />
-                                    <line x1="50" y1="5" x2="50" y2="55" stroke="currentColor" strokeWidth="1" />
-                                    <circle cx="50" cy="30" r="8" fill="none" stroke="currentColor" strokeWidth="1" />
-                                 </svg>
-                              </div>
+                              <FootballPitch className="h-10 w-16 text-emerald-600/20 absolute -right-2 -bottom-2 rotate-12" />
+                              <FootballPitch className="h-6 w-6 text-emerald-600 relative z-10" />
                            </div>
                            <div className="flex-1 min-w-0">
                               <h5 className="text-sm font-black text-zinc-900 uppercase tracking-tight truncate">{toGreekUpperCase(pitch.name)} <span className="text-[10px] text-zinc-400 ml-1">{pitch.type}</span></h5>
