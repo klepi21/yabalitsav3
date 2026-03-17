@@ -640,8 +640,9 @@ export default function DashboardPage() {
               <div className="flex flex-col gap-4">
                 <div className="flex justify-between items-start">
                    <div className="space-y-1">
-                     <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{stat.label}</p>
-                     <p className="text-4xl font-black text-zinc-900 tracking-tighter">{stat.value}</p>
+                     <p className="text-[10px] font-black text-black uppercase tracking-widest">{stat.label}</p>
+                     <p className="text-4xl font-black text-black tracking-tighter">{stat.value}</p>
+                     <p className="text-[9px] font-bold text-zinc-900/60 uppercase tracking-tight">{stat.detail}</p>
                    </div>
                    <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                      <CalendarDays className="h-5 w-5 text-zinc-300" />
