@@ -199,22 +199,22 @@ export default function AcademyUsersPage() {
 
       {/* Stats Cards — hide when filtered by squad */}
       {!urlSquad && (
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           <button
             onClick={() => setGroupFilter('all')}
             className={cn(
-              "flex flex-col items-start p-4 rounded-xl border transition-all duration-300 text-left group overflow-hidden relative",
+              "flex flex-col items-start p-3 rounded-xl border transition-all duration-300 text-left group overflow-hidden relative",
               groupFilter === 'all'
                 ? "bg-zinc-900 text-white border-zinc-900 shadow-lg scale-105 z-10"
                 : "bg-white text-zinc-900 border-zinc-100 hover:border-emerald-200 hover:shadow-md"
             )}
           >
-            <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center mb-3 transition-all shadow-sm", 
+            <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center mb-2 transition-all shadow-sm", 
               groupFilter === 'all' ? "bg-white/10 text-emerald-400" : "bg-zinc-50 text-zinc-300 group-hover:bg-emerald-50 group-hover:text-emerald-500"
             )}>
-              <Users className="h-3.5 w-3.5" />
+              <Users className="h-3 w-3" />
             </div>
-            <p className="text-xl font-black leading-none mb-1 tracking-tight">{userStats.total}</p>
+            <p className="text-lg font-black leading-none mb-1 tracking-tight">{userStats.total}</p>
             <p className={cn("text-[8px] font-bold uppercase tracking-wider", 
               groupFilter === 'all' ? "text-zinc-400" : "text-zinc-400"
             )}>{toGreekUpperCase('Σύνολο')}</p>
@@ -227,18 +227,18 @@ export default function AcademyUsersPage() {
                 key={group.id}
                 onClick={() => setGroupFilter(isActive ? 'all' : group.id)}
                 className={cn(
-                  "flex flex-col items-start p-4 rounded-xl border transition-all duration-300 text-left group overflow-hidden relative",
+                  "flex flex-col items-start p-3 rounded-xl border transition-all duration-300 text-left group overflow-hidden relative",
                   isActive
                     ? "bg-emerald-600 text-white border-emerald-600 shadow-lg scale-105 z-10"
                     : "bg-white text-zinc-900 border-zinc-100 hover:border-emerald-200 hover:shadow-md"
                 )}
               >
-                <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center mb-3 text-base transition-all shadow-sm", 
+                <div className={cn("h-7 w-7 rounded-lg flex items-center justify-center mb-2 text-sm transition-all shadow-sm", 
                   isActive ? "bg-white/20 text-white" : "bg-zinc-50"
                 )}>
                   {group.icon || '👤'}
                 </div>
-                <p className="text-xl font-black leading-none mb-1 tracking-tight uppercase">{userStats[group.id] || 0}</p>
+                <p className="text-lg font-black leading-none mb-1 tracking-tight uppercase">{userStats[group.id] || 0}</p>
                 <p className={cn("text-[8px] font-bold uppercase tracking-wider", 
                   isActive ? "text-emerald-100" : "text-zinc-400"
                 )}>{toGreekUpperCase(group.namePlural)}</p>
@@ -311,7 +311,7 @@ export default function AcademyUsersPage() {
                   <div key={u.id} className="bg-white rounded-2xl border border-zinc-100 p-5 space-y-4 shadow-sm active:bg-zinc-50 transition-all hover:shadow-md group">
                     <div className="flex items-start justify-between">
                       <div className="space-y-1">
-                        <p className="text-lg font-black text-zinc-900 leading-tight uppercase tracking-tight group-hover:text-emerald-600 transition-colors">{toGreekUpperCase(u.displayName)}</p>
+                        <p className="text-lg font-bold text-zinc-900 leading-tight uppercase tracking-tight group-hover:text-emerald-600 transition-colors">{toGreekUpperCase(u.displayName)}</p>
                         {group && (
                           <div className={cn("inline-flex items-center px-3 py-1 rounded-lg font-black text-[8px] uppercase tracking-wider border-none shadow-sm", GROUP_COLORS[group.color] || '')}>
                             {toGreekUpperCase(group.name)}
@@ -399,7 +399,7 @@ export default function AcademyUsersPage() {
                     return (
                       <TableRow key={u.id} className="group border-t border-zinc-50 hover:bg-zinc-50/50 transition-colors">
                         <TableCell className="px-4 py-3">
-                            <p className="text-base font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{toGreekUpperCase(u.displayName)}</p>
+                            <p className="text-base font-bold text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{toGreekUpperCase(u.displayName)}</p>
                         </TableCell>
                         <TableCell className="px-4 py-3">
                           {group && (
