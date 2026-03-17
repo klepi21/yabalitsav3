@@ -25,8 +25,7 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
                       pathname.startsWith('/book/') ||
                       pathname === '/terms' ||
                       pathname === '/privacy' ||
-                      pathname === '/payment/checkout' ||
-                      pathname === '/management/booking/qr';
+                      pathname === '/payment/checkout';
 
   // Pages that need AuthProvider but are not in the sidebar
   const isAuthPage = pathname === '/venue-login';
