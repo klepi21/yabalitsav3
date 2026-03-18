@@ -26,7 +26,10 @@ import {
   XCircle,
   CreditCard,
   BanknoteIcon,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -84,6 +87,10 @@ export default function DashboardPage() {
   const [venue, setVenue] = useState<Venue | null>(null);
   const [medicalAlerts, setMedicalAlerts] = useState<{ expired: AcademyUser[]; expiringSoon: AcademyUser[] }>({ expired: [], expiringSoon: [] });
   const [paymentAlerts, setPaymentAlerts] = useState<{ user: AcademyUser; unpaidMonths: string[] }[]>([]);
+  const [isMedicalExpanded, setIsMedicalExpanded] = useState(false);
+  const [isPaymentsExpanded, setIsPaymentsExpanded] = useState(false);
+  const [isSquadsExpanded, setIsSquadsExpanded] = useState(false);
+  const [isPitchesExpanded, setIsPitchesExpanded] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
   const [_isVenueInfoExpanded, _setIsVenueInfoExpanded] = useState(false);
   const [showQuickBooking, setShowQuickBooking] = useState(false);
@@ -925,9 +932,12 @@ export default function DashboardPage() {
 
           {/* Medical Alerts - Left */}
           {(medicalAlerts.expired.length > 0 || medicalAlerts.expiringSoon.length > 0) && (
-            <div className="rounded-3xl bg-white border-2 border-red-100 overflow-hidden shadow-lg shadow-red-50">
+            <div className="rounded-3xl bg-white border-2 border-red-100 overflow-hidden shadow-lg shadow-red-50 h-fit">
               {/* Header */}
-              <div className="bg-red-600 px-6 py-4 flex items-center justify-between">
+              <div 
+                className="bg-red-600 px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-red-700 transition-colors"
+                onClick={() => setIsMedicalExpanded(!isMedicalExpanded)}
+              >
                 <div className="flex items-center gap-3">
                   <div className="h-9 w-9 rounded-xl bg-white/20 flex items-center justify-center">
                     <HeartPulse className="h-5 w-5 text-white" />
@@ -937,66 +947,79 @@ export default function DashboardPage() {
                     <p className="text-[10px] font-bold text-red-200 uppercase tracking-widest">Απαιτείται άμεση ενέργεια</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  {medicalAlerts.expired.length > 0 && (
-                    <div className="px-2.5 py-1 rounded-full bg-white/20 text-white text-xs font-black">
-                      {medicalAlerts.expired.length} ληγμένα
-                    </div>
-                  )}
-                  {medicalAlerts.expiringSoon.length > 0 && (
-                    <div className="px-2.5 py-1 rounded-full bg-amber-400/30 text-amber-100 text-xs font-black">
-                      {medicalAlerts.expiringSoon.length} λήγουν
-                    </div>
-                  )}
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 hidden sm:flex">
+                    {medicalAlerts.expired.length > 0 && (
+                      <div className="px-2.5 py-1 rounded-full bg-white/20 text-white text-[10px] font-black">
+                        {medicalAlerts.expired.length} ΛΗΞΑΝΤΑ
+                      </div>
+                    )}
+                  </div>
+                  {isMedicalExpanded ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
                 </div>
               </div>
-              {/* Expired athletes list */}
-              <div className="divide-y divide-zinc-50">
-                {medicalAlerts.expired.slice(0, 5).map((u) => (
-                  <div key={u.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-red-50/40 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-lg bg-red-100 flex items-center justify-center">
-                        <XCircle className="h-4 w-4 text-red-600" />
-                      </div>
-                      <span className="text-sm font-bold text-zinc-900">{u.displayName}</span>
+
+              <AnimatePresence>
+                {isMedicalExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  >
+                    {/* Expired athletes list */}
+                    <div className="divide-y divide-zinc-50 max-h-[400px] overflow-y-auto">
+                      {medicalAlerts.expired.slice(0, 10).map((u) => (
+                        <div key={u.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-red-50/40 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-lg bg-red-100 flex items-center justify-center">
+                              <XCircle className="h-4 w-4 text-red-600" />
+                            </div>
+                            <span className="text-sm font-bold text-zinc-900">{u.displayName}</span>
+                          </div>
+                          <span className="text-[10px] font-black text-red-500 uppercase bg-red-50 px-2 py-0.5 rounded-full">ΛΗΓΜΕΝΟ</span>
+                        </div>
+                      ))}
+                      {medicalAlerts.expiringSoon.slice(0, 5).map((u) => (
+                        <div key={u.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-amber-50/40 transition-colors">
+                          <div className="flex items-center gap-3">
+                            <div className="h-8 w-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                              <Clock className="h-4 w-4 text-amber-600" />
+                            </div>
+                            <span className="text-sm font-bold text-zinc-900">{u.displayName}</span>
+                          </div>
+                          <span className="text-[10px] font-black text-amber-600 uppercase bg-amber-50 px-2 py-0.5 rounded-full">ΛΗΓΕΙ ΣΥΝΤΟΜΑ</span>
+                        </div>
+                      ))}
+                      {(medicalAlerts.expired.length + medicalAlerts.expiringSoon.length) > 15 && (
+                        <div className="px-6 py-2 text-center text-[10px] font-black text-zinc-400 uppercase">
+                          +{medicalAlerts.expired.length + medicalAlerts.expiringSoon.length - 15} ακόμα
+                        </div>
+                      )}
                     </div>
-                    <span className="text-[10px] font-black text-red-500 uppercase bg-red-50 px-2 py-0.5 rounded-full">ΛΗΓΜΕΝΟ</span>
-                  </div>
-                ))}
-                {medicalAlerts.expiringSoon.slice(0, 3).map((u) => (
-                  <div key={u.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-amber-50/40 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <div className="h-8 w-8 rounded-lg bg-amber-100 flex items-center justify-center">
-                        <Clock className="h-4 w-4 text-amber-600" />
-                      </div>
-                      <span className="text-sm font-bold text-zinc-900">{u.displayName}</span>
+                    {/* Footer */}
+                    <div className="px-6 pb-6 pt-2">
+                      <Link
+                        href="/management/academy/medical"
+                        className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase tracking-widest transition-all active:scale-95"
+                      >
+                        Προβολή Ιατρικών
+                      </Link>
                     </div>
-                    <span className="text-[10px] font-black text-amber-600 uppercase bg-amber-50 px-2 py-0.5 rounded-full">ΛΗΓΕΙ ΣΥΝΤΟΜΑ</span>
-                  </div>
-                ))}
-                {(medicalAlerts.expired.length + medicalAlerts.expiringSoon.length) > 8 && (
-                  <div className="px-6 py-2 text-center text-[10px] font-black text-zinc-400 uppercase">
-                    +{medicalAlerts.expired.length + medicalAlerts.expiringSoon.length - 8} ακόμα
-                  </div>
+                  </motion.div>
                 )}
-              </div>
-              {/* Footer */}
-              <div className="px-6 pb-4 pt-2">
-                <Link
-                  href="/management/academy/medical"
-                  className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase tracking-widest transition-all active:scale-95"
-                >
-                  Προβολή Ιατρικών
-                </Link>
-              </div>
+              </AnimatePresence>
             </div>
           )}
 
           {/* Payment Alerts - Right */}
           {paymentAlerts.length > 0 && (
-            <div className="rounded-3xl bg-white border-2 border-orange-100 overflow-hidden shadow-lg shadow-orange-50">
+            <div className="rounded-3xl bg-white border-2 border-orange-100 overflow-hidden shadow-lg shadow-orange-50 h-fit">
               {/* Header */}
-              <div className="bg-orange-500 px-6 py-4 flex items-center justify-between">
+              <div 
+                className="bg-orange-500 px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-orange-600 transition-colors"
+                onClick={() => setIsPaymentsExpanded(!isPaymentsExpanded)}
+              >
                 <div className="flex items-center gap-3">
                   <div className="h-9 w-9 rounded-xl bg-white/20 flex items-center justify-center">
                     <BanknoteIcon className="h-5 w-5 text-white" />
@@ -1006,49 +1029,64 @@ export default function DashboardPage() {
                     <p className="text-[10px] font-bold text-orange-200 uppercase tracking-widest">Τρέχον έτος · {new Date().getFullYear()}</p>
                   </div>
                 </div>
-                <div className="px-2.5 py-1 rounded-full bg-white/20 text-white text-xs font-black">
-                  {paymentAlerts.length} αθλητές
+                <div className="flex items-center gap-3">
+                  <div className="px-2.5 py-1 rounded-full bg-white/20 text-white text-[10px] font-black hidden sm:block">
+                    {paymentAlerts.length} ΑΘΛΗΤΕΣ
+                  </div>
+                  {isPaymentsExpanded ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
                 </div>
               </div>
-              {/* Unpaid athletes list */}
-              <div className="divide-y divide-zinc-50">
-                {paymentAlerts.slice(0, 6).map(({ user: u, unpaidMonths }) => (
-                  <div key={u.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-orange-50/40 transition-colors gap-3">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="h-8 w-8 rounded-lg bg-orange-100 flex items-center justify-center shrink-0">
-                        <CreditCard className="h-4 w-4 text-orange-500" />
-                      </div>
-                      <span className="text-sm font-bold text-zinc-900 truncate">{u.displayName}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1 shrink-0 justify-end">
-                      {unpaidMonths.slice(0, 4).map((m) => (
-                        <span key={m} className="text-[9px] font-black text-orange-600 bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded-md">
-                          {m}
-                        </span>
+
+              <AnimatePresence>
+                {isPaymentsExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  >
+                    {/* Unpaid athletes list */}
+                    <div className="divide-y divide-zinc-50 max-h-[400px] overflow-y-auto">
+                      {paymentAlerts.slice(0, 10).map(({ user: u, unpaidMonths }) => (
+                        <div key={u.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-orange-50/40 transition-colors gap-3">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="h-8 w-8 rounded-lg bg-orange-100 flex items-center justify-center shrink-0">
+                              <CreditCard className="h-4 w-4 text-orange-500" />
+                            </div>
+                            <span className="text-sm font-bold text-zinc-900 truncate">{u.displayName}</span>
+                          </div>
+                          <div className="flex flex-wrap gap-1 shrink-0 justify-end">
+                            {unpaidMonths.slice(0, 4).map((m) => (
+                              <span key={m} className="text-[9px] font-black text-orange-600 bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded-md">
+                                {m}
+                              </span>
+                            ))}
+                            {unpaidMonths.length > 4 && (
+                              <span className="text-[9px] font-black text-orange-400 bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded-md">
+                                +{unpaidMonths.length - 4}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       ))}
-                      {unpaidMonths.length > 4 && (
-                        <span className="text-[9px] font-black text-orange-400 bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded-md">
-                          +{unpaidMonths.length - 4}
-                        </span>
+                      {paymentAlerts.length > 10 && (
+                        <div className="px-6 py-2 text-center text-[10px] font-black text-zinc-400 uppercase">
+                          +{paymentAlerts.length - 10} ακόμα αθλητές
+                        </div>
                       )}
                     </div>
-                  </div>
-                ))}
-                {paymentAlerts.length > 6 && (
-                  <div className="px-6 py-2 text-center text-[10px] font-black text-zinc-400 uppercase">
-                    +{paymentAlerts.length - 6} ακόμα αθλητές
-                  </div>
+                    {/* Footer */}
+                    <div className="px-6 pb-6 pt-2">
+                      <Link
+                        href="/management/academy/payments"
+                        className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-all active:scale-95"
+                      >
+                        Προβολή Πληρωμών
+                      </Link>
+                    </div>
+                  </motion.div>
                 )}
-              </div>
-              {/* Footer */}
-              <div className="px-6 pb-4 pt-2">
-                <Link
-                  href="/management/academy/payments"
-                  className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-all active:scale-95"
-                >
-                  Προβολή Πληρωμών
-                </Link>
-              </div>
+              </AnimatePresence>
             </div>
           )}
 
@@ -1059,99 +1097,135 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 pt-4">
         {/* Academies List - Left Side */}
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
+          <div 
+            className="flex items-center justify-between cursor-pointer group/header"
+            onClick={() => setIsSquadsExpanded(!isSquadsExpanded)}
+          >
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg hover:border-emerald-200 transition-colors">
+              <div className="h-12 w-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg group-hover/header:border-emerald-200 transition-colors">
                 <Trophy className="h-6 w-6 text-emerald-500" />
               </div>
-              <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ακαδημίες')}</h2>
+              <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight flex items-center gap-3">
+                {toGreekUpperCase('Ακαδημίες')}
+                {isSquadsExpanded ? <ChevronUp className="h-5 w-5 text-zinc-300" /> : <ChevronDown className="h-5 w-5 text-zinc-300" />}
+              </h2>
             </div>
-            <Button size="icon" variant="ghost" className="h-10 w-10 rounded-2xl bg-zinc-100 hover:bg-zinc-200" asChild>
+            <Button size="icon" variant="ghost" className="h-10 w-10 rounded-2xl bg-zinc-100 hover:bg-zinc-200" asChild onClick={(e) => e.stopPropagation()}>
               <Link href="/management/academy/squads">
                 <Plus className="h-5 w-5" />
               </Link>
             </Button>
           </div>
 
-          <div className="space-y-4">
-            {squads.length === 0 ? (
-              <div className="py-12 text-center bg-white rounded-[2rem] border-2 border-dashed border-zinc-100 italic text-zinc-400 font-bold">
-                Δεν υπάρχουν ακαδημίες / τμήματα
-              </div>
-            ) : (
-              squads.slice(0, 5).map((squad) => (
-                <Card key={squad.id} className="rounded-3xl border border-black/[0.08] bg-white shadow-xl shadow-zinc-200/20 overflow-hidden group hover:shadow-2xl transition-all duration-300">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <div className="h-14 w-14 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shrink-0 relative">
-                        <Trophy className="h-6 w-6 text-emerald-600 relative z-10" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h5 className="text-sm font-black text-zinc-900 uppercase tracking-tight truncate">{toGreekUpperCase(squad.name)}</h5>
-                        <p className="text-[11px] font-bold text-zinc-500 mt-1 uppercase tracking-wider">
-                          {toGreekUpperCase(squad.ageGroup)}
-                        </p>
-                      </div>
-                      <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" asChild>
-                        <Link href={`/management/academy/squads`}>
-                          <Eye className="h-4 w-4" />
-                        </Link>
-                      </Button>
+          <AnimatePresence>
+            {isSquadsExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="overflow-hidden"
+              >
+                <div className="space-y-4">
+                  {squads.length === 0 ? (
+                    <div className="py-12 text-center bg-white rounded-[2rem] border-2 border-dashed border-zinc-100 italic text-zinc-400 font-bold">
+                      Δεν υπάρχουν ακαδημίες / τμήματα
                     </div>
-                  </CardContent>
-                </Card>
-              ))
+                  ) : (
+                    squads.slice(0, 5).map((squad) => (
+                      <Card key={squad.id} className="rounded-3xl border border-black/[0.08] bg-white shadow-xl shadow-zinc-200/20 overflow-hidden group hover:shadow-2xl transition-all duration-300">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-4">
+                            <div className="h-14 w-14 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shrink-0 relative">
+                              <Trophy className="h-6 w-6 text-emerald-600 relative z-10" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h5 className="text-sm font-black text-zinc-900 uppercase tracking-tight truncate">{toGreekUpperCase(squad.name)}</h5>
+                              <p className="text-[11px] font-bold text-zinc-500 mt-1 uppercase tracking-wider">
+                                {toGreekUpperCase(squad.ageGroup)}
+                              </p>
+                            </div>
+                            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" asChild>
+                              <Link href={`/management/academy/squads`}>
+                                <Eye className="h-4 w-4" />
+                              </Link>
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </div>
 
         {/* Pitches List - Right Side */}
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
+          <div 
+            className="flex items-center justify-between cursor-pointer group/header"
+            onClick={() => setIsPitchesExpanded(!isPitchesExpanded)}
+          >
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg hover:border-emerald-200 transition-colors">
+              <div className="h-12 w-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg group-hover/header:border-emerald-200 transition-colors">
                 <FootballPitch className="h-6 w-6 text-emerald-500" />
               </div>
-              <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Γήπεδα')}</h2>
+              <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight flex items-center gap-3">
+                {toGreekUpperCase('Γήπεδα')}
+                {isPitchesExpanded ? <ChevronUp className="h-5 w-5 text-zinc-300" /> : <ChevronDown className="h-5 w-5 text-zinc-300" />}
+              </h2>
             </div>
-            <Button size="icon" variant="ghost" className="h-10 w-10 rounded-2xl bg-zinc-100 hover:bg-zinc-200" asChild>
+            <Button size="icon" variant="ghost" className="h-10 w-10 rounded-2xl bg-zinc-100 hover:bg-zinc-200" asChild onClick={(e) => e.stopPropagation()}>
               <Link href="/management/pitches/new">
                 <Plus className="h-5 w-5" />
               </Link>
             </Button>
           </div>
 
-          <div className="space-y-4">
-            {pitches.length === 0 ? (
-              <div className="py-12 text-center bg-white rounded-[2rem] border-2 border-dashed border-zinc-100 italic text-zinc-400 font-bold">
-                Δεν υπάρχουν γήπεδα
-              </div>
-            ) : (
-              pitches.slice(0, 5).map((pitch) => (
-                <Card key={pitch.id} className="rounded-3xl border border-black/[0.08] bg-white shadow-xl shadow-zinc-200/10 overflow-hidden group hover:shadow-2xl transition-all duration-300">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <div className="h-14 w-20 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shrink-0 relative">
-                        <FootballPitch className="h-10 w-16 text-emerald-600/20 absolute -right-2 -bottom-2 rotate-12" />
-                        <FootballPitch className="h-6 w-6 text-emerald-600 relative z-10" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h5 className="text-sm font-black text-zinc-900 uppercase tracking-tight truncate">{toGreekUpperCase(pitch.name)} <span className="text-[10px] text-zinc-400 ml-1">{pitch.type}</span></h5>
-                        <p className="text-[11px] font-bold text-zinc-500 mt-1">
-                          €{pitch.pricePerSlot} <span className="text-zinc-300 mx-1">•</span> €{getPricePerPerson(pitch.pricePerSlot, pitch.type)}/άτομο
-                        </p>
-                      </div>
-                      <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" asChild>
-                        <Link href={`/management/pitches/${pitch.id}`}>
-                          <Pencil className="h-4 w-4" />
-                        </Link>
-                      </Button>
+          <AnimatePresence>
+            {isPitchesExpanded && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="overflow-hidden"
+              >
+                <div className="space-y-4">
+                  {pitches.length === 0 ? (
+                    <div className="py-12 text-center bg-white rounded-[2rem] border-2 border-dashed border-zinc-100 italic text-zinc-400 font-bold">
+                      Δεν υπάρχουν γήπεδα
                     </div>
-                  </CardContent>
-                </Card>
-              ))
+                  ) : (
+                    pitches.slice(0, 5).map((pitch) => (
+                      <Card key={pitch.id} className="rounded-3xl border border-black/[0.08] bg-white shadow-xl shadow-zinc-200/10 overflow-hidden group hover:shadow-2xl transition-all duration-300">
+                        <CardContent className="p-4">
+                          <div className="flex items-center gap-4">
+                            <div className="h-14 w-20 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shrink-0 relative">
+                              <FootballPitch className="h-10 w-16 text-emerald-600/20 absolute -right-2 -bottom-2 rotate-12" />
+                              <FootballPitch className="h-6 w-6 text-emerald-600 relative z-10" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h5 className="text-sm font-black text-zinc-900 uppercase tracking-tight truncate">{toGreekUpperCase(pitch.name)} <span className="text-[10px] text-zinc-400 ml-1">{pitch.type}</span></h5>
+                              <p className="text-[11px] font-bold text-zinc-500 mt-1">
+                                €{pitch.pricePerSlot} <span className="text-zinc-300 mx-1">•</span> €{getPricePerPerson(pitch.pricePerSlot, pitch.type)}/άτομο
+                              </p>
+                            </div>
+                            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" asChild>
+                              <Link href={`/management/pitches/${pitch.id}`}>
+                                <Pencil className="h-4 w-4" />
+                              </Link>
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
+                </div>
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </div>
       </div>
 
