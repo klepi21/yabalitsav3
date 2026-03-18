@@ -7,6 +7,7 @@ import dynamic from 'next/dynamic';
 const AuthProvider = dynamic(() => import('@/contexts/AuthContext').then(m => m.AuthProvider), { ssr: false });
 const SidebarWrapper = dynamic(() => import('./SidebarWrapper'), { ssr: false });
 const GoogleAnalytics = dynamic(() => import('./GoogleAnalytics'), { ssr: false });
+const CookieConsent = dynamic(() => import('./CookieConsent'), { ssr: false });
 
 // authService removed from static imports to prevent loading Firebase SDK on public pages
 
@@ -80,6 +81,7 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
   if (isPublicPage) {
     return (
       <>
+        <CookieConsent />
         <GoogleAnalytics />
         {children}
       </>
@@ -92,11 +94,13 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
       <AuthProvider>
         {isAuthPage ? (
           <>
+            <CookieConsent />
             <GoogleAnalytics />
             {children}
           </>
         ) : (
           <SidebarWrapper>
+            <CookieConsent />
             <GoogleAnalytics />
             {children}
           </SidebarWrapper>

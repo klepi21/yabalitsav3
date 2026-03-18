@@ -4,9 +4,6 @@ import { GoogleAnalytics } from '@next/third-parties/google';
 import './globals.css';
 
 import ConditionalWrapper from '@/components/ConditionalWrapper';
-import dynamic from 'next/dynamic';
-
-const CookieConsent = dynamic(() => import('@/components/CookieConsent'), { ssr: false });
 
 const roboto = Roboto_Flex({ 
   subsets: ['latin', 'greek'],
@@ -114,7 +111,6 @@ export default function RootLayout({
         <ConditionalWrapper>
           {children}
         </ConditionalWrapper>
-        <CookieConsent />
         <GoogleAnalytics gaId="G-GWX4K2ZM6J" />
       </body>
     </html>
