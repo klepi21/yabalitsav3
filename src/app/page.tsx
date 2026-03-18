@@ -11,7 +11,7 @@ export default function RootPage() {
           loop
           muted
           playsInline
-          className="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-40 mix-blend-screen"
+          className="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-70"
         >
           <source src="/backvide.mp4" type="video/mp4" />
         </video>
