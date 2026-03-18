@@ -24,13 +24,16 @@ import {
   Smile,
   HeartPulse,
   XCircle,
+  CreditCard,
+  BanknoteIcon,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { squadService, academyUserService, userGroupService } from '@/lib/academy-services';
+import { academyPaymentService } from '@/lib/academy-services';
 import { trainingService } from '@/lib/training-services';
-import { Squad, AcademyUser } from '@/types/academy';
+import { Squad, AcademyUser, AcademyPayment } from '@/types/academy';
 import { TrainingSession } from '@/types/training';
 
 const FootballPitch = ({ className }: { className?: string }) => (
@@ -80,6 +83,7 @@ export default function DashboardPage() {
   const [trainings, setTrainings] = useState<TrainingSession[]>([]);
   const [venue, setVenue] = useState<Venue | null>(null);
   const [medicalAlerts, setMedicalAlerts] = useState<{ expired: AcademyUser[]; expiringSoon: AcademyUser[] }>({ expired: [], expiringSoon: [] });
+  const [paymentAlerts, setPaymentAlerts] = useState<{ user: AcademyUser; unpaidMonths: string[] }[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [_isVenueInfoExpanded, _setIsVenueInfoExpanded] = useState(false);
   const [showQuickBooking, setShowQuickBooking] = useState(false);
@@ -201,6 +205,35 @@ export default function DashboardPage() {
           }
         }
         setMedicalAlerts({ expired, expiringSoon });
+
+        // Payment alerts – show athletes with unpaid months in the current year
+        try {
+          const paymentsData: AcademyPayment[] = await academyPaymentService.getByVenue(venueOwner.venueId);
+          const paymentGroupIds = new Set(
+            groupsData.filter((g) => g.capabilities?.includes('monthly_payment')).map((g) => g.id)
+          );
+          const paymentUsers = usersData.filter((u) => paymentGroupIds.has(u.groupId));
+          const currentYear = new Date().getFullYear();
+          const currentMonth = new Date().getMonth(); // 0-indexed
+          const GREEK_MONTHS_SHORT = ['ΙΑΝ','ΦΕΒ','ΜΑΡ','ΑΠΡ','ΜΑΪ','ΙΟΥΝ','ΙΟΥΛ','ΑΥΓ','ΣΕΠ','ΟΚΤ','ΝΟΕ','ΔΕΚ'];
+          const alerts: { user: AcademyUser; unpaidMonths: string[] }[] = [];
+          for (const u of paymentUsers) {
+            const unpaid: string[] = [];
+            for (let m = 0; m <= currentMonth; m++) {
+              const monthStr = `${currentYear}-${String(m + 1).padStart(2, '0')}`;
+              const payment = paymentsData.find((p) => p.userId === u.id && p.month === monthStr);
+              if (!payment || !payment.paid) {
+                unpaid.push(GREEK_MONTHS_SHORT[m]);
+              }
+            }
+            if (unpaid.length > 0) {
+              alerts.push({ user: u, unpaidMonths: unpaid });
+            }
+          }
+          setPaymentAlerts(alerts);
+        } catch (err) {
+          console.error('Error loading payment alerts:', err);
+        }
       } catch (err) {
         console.error('Error loading academy data:', err);
       }
@@ -886,56 +919,140 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Medical Alerts Widget */}
-      {(medicalAlerts.expired.length > 0 || medicalAlerts.expiringSoon.length > 0) && (
-        <Card className="rounded-3xl border-2 border-red-200 bg-gradient-to-r from-red-50 to-amber-50 shadow-xl shadow-red-100/30 overflow-hidden">
-          <CardContent className="p-6">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start gap-4">
-                <div className="h-12 w-12 rounded-2xl bg-red-600 flex items-center justify-center text-white shadow-lg shrink-0">
-                  <HeartPulse className="h-6 w-6" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-black text-red-800 uppercase tracking-tight">
-                    {toGreekUpperCase('Ιατρικά Πιστοποιητικά')}
-                  </h3>
-                  <div className="flex flex-wrap gap-3 mt-2">
-                    {medicalAlerts.expired.length > 0 && (
-                      <div className="flex items-center gap-1.5">
-                        <XCircle className="h-4 w-4 text-red-600" />
-                        <span className="text-sm font-black text-red-700">
-                          {medicalAlerts.expired.length} ληγμένα/χωρίς
-                        </span>
-                      </div>
-                    )}
-                    {medicalAlerts.expiringSoon.length > 0 && (
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="h-4 w-4 text-amber-600" />
-                        <span className="text-sm font-black text-amber-700">
-                          {medicalAlerts.expiringSoon.length} λήγουν σύντομα
-                        </span>
-                      </div>
-                    )}
+      {/* Alerts Row: Medical + Payments */}
+      {(medicalAlerts.expired.length > 0 || medicalAlerts.expiringSoon.length > 0 || paymentAlerts.length > 0) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* Medical Alerts - Left */}
+          {(medicalAlerts.expired.length > 0 || medicalAlerts.expiringSoon.length > 0) && (
+            <div className="rounded-3xl bg-white border-2 border-red-100 overflow-hidden shadow-lg shadow-red-50">
+              {/* Header */}
+              <div className="bg-red-600 px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-white/20 flex items-center justify-center">
+                    <HeartPulse className="h-5 w-5 text-white" />
                   </div>
+                  <div>
+                    <h3 className="text-sm font-black text-white uppercase tracking-wider">Ιατρικά Πιστοποιητικά</h3>
+                    <p className="text-[10px] font-bold text-red-200 uppercase tracking-widest">Απαιτείται άμεση ενέργεια</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
                   {medicalAlerts.expired.length > 0 && (
-                    <p className="text-xs text-red-500 font-medium mt-2">
-                      {medicalAlerts.expired.slice(0, 3).map(u => u.displayName).join(', ')}
-                      {medicalAlerts.expired.length > 3 && ` +${medicalAlerts.expired.length - 3} ακόμα`}
-                    </p>
+                    <div className="px-2.5 py-1 rounded-full bg-white/20 text-white text-xs font-black">
+                      {medicalAlerts.expired.length} ληγμένα
+                    </div>
+                  )}
+                  {medicalAlerts.expiringSoon.length > 0 && (
+                    <div className="px-2.5 py-1 rounded-full bg-amber-400/30 text-amber-100 text-xs font-black">
+                      {medicalAlerts.expiringSoon.length} λήγουν
+                    </div>
                   )}
                 </div>
               </div>
-              <Button
-                asChild
-                className="rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold shadow-lg shrink-0"
-              >
-                <Link href="/management/academy/medical">
-                  Προβολή
+              {/* Expired athletes list */}
+              <div className="divide-y divide-zinc-50">
+                {medicalAlerts.expired.slice(0, 5).map((u) => (
+                  <div key={u.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-red-50/40 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-lg bg-red-100 flex items-center justify-center">
+                        <XCircle className="h-4 w-4 text-red-600" />
+                      </div>
+                      <span className="text-sm font-bold text-zinc-900">{u.displayName}</span>
+                    </div>
+                    <span className="text-[10px] font-black text-red-500 uppercase bg-red-50 px-2 py-0.5 rounded-full">ΛΗΓΜΕΝΟ</span>
+                  </div>
+                ))}
+                {medicalAlerts.expiringSoon.slice(0, 3).map((u) => (
+                  <div key={u.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-amber-50/40 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-lg bg-amber-100 flex items-center justify-center">
+                        <Clock className="h-4 w-4 text-amber-600" />
+                      </div>
+                      <span className="text-sm font-bold text-zinc-900">{u.displayName}</span>
+                    </div>
+                    <span className="text-[10px] font-black text-amber-600 uppercase bg-amber-50 px-2 py-0.5 rounded-full">ΛΗΓΕΙ ΣΥΝΤΟΜΑ</span>
+                  </div>
+                ))}
+                {(medicalAlerts.expired.length + medicalAlerts.expiringSoon.length) > 8 && (
+                  <div className="px-6 py-2 text-center text-[10px] font-black text-zinc-400 uppercase">
+                    +{medicalAlerts.expired.length + medicalAlerts.expiringSoon.length - 8} ακόμα
+                  </div>
+                )}
+              </div>
+              {/* Footer */}
+              <div className="px-6 pb-4 pt-2">
+                <Link
+                  href="/management/academy/medical"
+                  className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase tracking-widest transition-all active:scale-95"
+                >
+                  Προβολή Ιατρικών
                 </Link>
-              </Button>
+              </div>
             </div>
-          </CardContent>
-        </Card>
+          )}
+
+          {/* Payment Alerts - Right */}
+          {paymentAlerts.length > 0 && (
+            <div className="rounded-3xl bg-white border-2 border-orange-100 overflow-hidden shadow-lg shadow-orange-50">
+              {/* Header */}
+              <div className="bg-orange-500 px-6 py-4 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-xl bg-white/20 flex items-center justify-center">
+                    <BanknoteIcon className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-white uppercase tracking-wider">Ανεξόφλητες Συνδρομές</h3>
+                    <p className="text-[10px] font-bold text-orange-200 uppercase tracking-widest">Τρέχον έτος · {new Date().getFullYear()}</p>
+                  </div>
+                </div>
+                <div className="px-2.5 py-1 rounded-full bg-white/20 text-white text-xs font-black">
+                  {paymentAlerts.length} αθλητές
+                </div>
+              </div>
+              {/* Unpaid athletes list */}
+              <div className="divide-y divide-zinc-50">
+                {paymentAlerts.slice(0, 6).map(({ user: u, unpaidMonths }) => (
+                  <div key={u.id} className="flex items-center justify-between px-6 py-3.5 hover:bg-orange-50/40 transition-colors gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="h-8 w-8 rounded-lg bg-orange-100 flex items-center justify-center shrink-0">
+                        <CreditCard className="h-4 w-4 text-orange-500" />
+                      </div>
+                      <span className="text-sm font-bold text-zinc-900 truncate">{u.displayName}</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1 shrink-0 justify-end">
+                      {unpaidMonths.slice(0, 4).map((m) => (
+                        <span key={m} className="text-[9px] font-black text-orange-600 bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded-md">
+                          {m}
+                        </span>
+                      ))}
+                      {unpaidMonths.length > 4 && (
+                        <span className="text-[9px] font-black text-orange-400 bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded-md">
+                          +{unpaidMonths.length - 4}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {paymentAlerts.length > 6 && (
+                  <div className="px-6 py-2 text-center text-[10px] font-black text-zinc-400 uppercase">
+                    +{paymentAlerts.length - 6} ακόμα αθλητές
+                  </div>
+                )}
+              </div>
+              {/* Footer */}
+              <div className="px-6 pb-4 pt-2">
+                <Link
+                  href="/management/academy/payments"
+                  className="flex items-center justify-center gap-2 w-full h-10 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-all active:scale-95"
+                >
+                  Προβολή Πληρωμών
+                </Link>
+              </div>
+            </div>
+          )}
+
+        </div>
       )}
 
       {/* 50/50 Row for Academies and Pitches */}
