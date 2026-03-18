@@ -66,7 +66,9 @@ export default function RootPage() {
                     src="/yabalo.png" 
                     alt="Yabalitsa Logo" 
                     width={320} 
-                    height={64} 
+                    height={64}
+                    priority
+                    fetchPriority="high"
                     className="w-[160px] sm:w-[200px] md:w-[260px] lg:w-[290px] h-auto filter brightness-0 invert drop-shadow-[0_0_10px_rgba(255,255,255,0.6)] translate-y-[2px] md:translate-y-[4px]" 
                   />
                 </span>

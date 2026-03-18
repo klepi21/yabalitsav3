@@ -96,6 +96,11 @@ export default function RootLayout({
   return (
     <html lang="el" className="scroll-smooth">
       <head>
+        {/* Resource Hints (PageSpeed Optimization) */}
+        <link rel="preconnect" href="https://yabalitsa-6f5e8.firebaseapp.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://firebase.googleapis.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://firebaseinstallations.googleapis.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://www.googleapis.com" crossOrigin="anonymous" />
         {/* Favicon */}
         <link rel="icon" type="image/png" sizes="32x32" href="/fav.png" />
         <link rel="icon" type="image/png" sizes="16x16" href="/fav.png" />
