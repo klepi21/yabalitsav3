@@ -14,6 +14,7 @@ const PUBLIC_ROUTES = [
   '/api/verification',
   '/api/stripe',
   '/api/booking/finalize',
+  '/blog'
 ];
 
 export async function middleware(request: NextRequest) {

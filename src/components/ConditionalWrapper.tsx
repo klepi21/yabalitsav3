@@ -24,7 +24,9 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
     pathname.startsWith('/book/') ||
     pathname === '/terms' ||
     pathname === '/privacy' ||
-    pathname === '/payment/checkout',
+    pathname === '/payment/checkout' ||
+    pathname === '/blog' ||
+    pathname.startsWith('/blog/'),
   [pathname]);
 
   // Pages that need AuthProvider but are not in the sidebar
