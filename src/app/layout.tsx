@@ -52,7 +52,7 @@ export const metadata: Metadata = {
     description: 'Εκσυγχρονίστε το αθλητικό σας κέντρο. Αυτόματο ημερολόγιο κρατήσεων 5x5 και ψηφιακό Player Passport για ακαδημίες.',
     images: [
       {
-        url: '/ogpreview.png',
+        url: 'https://yabalitsa.com/ogpreview.png',
         width: 1200,
         height: 630,
         alt: 'Yabalitsa SaaS - Διαχείριση Γηπέδων & Ακαδημιών',
@@ -64,7 +64,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Yabalitsa | Λογισμικό Διαχείρισης Γηπέδων 5x5',
     description: 'Εκσυγχρονίστε το αθλητικό σας κέντρο με το Yabalitsa. Αυτόματο ημερολόγιο κρατήσεων και Player Passport για ακαδημίες.',
-    images: ['/ogpreview.png'],
+    images: ['https://yabalitsa.com/ogpreview.png'],
     creator: '@yabalitsa',
   },
   robots: {
