@@ -372,6 +372,7 @@ export default function RootPage() {
               const isPopular = plan.popular;
               const duration = plan.durationMonths || 1;
               const monthlyPrice = pricingUtils.calculateMonthlyPrice(plan.basePrice, duration as 1 | 6 | 12);
+              const totalPrice = pricingUtils.calculateTotalPrice(plan.basePrice, duration as 1 | 6 | 12);
               
               return (
                 <div 
@@ -395,11 +396,16 @@ export default function RootPage() {
                   
                   <div className="mb-8">
                     <div className="flex items-end gap-1">
-                      <span className="text-5xl font-black text-white">{pricingUtils.formatPrice(monthlyPrice).replace('€', '')}</span>
+                      <span className="text-5xl font-black text-white">{pricingUtils.formatPrice(totalPrice).replace('€', '')}</span>
                       <span className="text-emerald-400 font-bold text-xl">€</span>
-                      <span className="text-zinc-500 mb-1 ml-1">/ μήνα</span>
+                      <span className="text-zinc-500 mb-1 ml-1">{duration === 1 ? '/ μήνα' : 'συνολικά'}</span>
                     </div>
-                    <p className="text-xs text-zinc-500 mt-2 font-medium">περιλαμβάνει ΦΠΑ 24%</p>
+                    {duration > 1 && (
+                      <div className="inline-block mt-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1 rounded-lg text-sm font-semibold tracking-wide">
+                        Βγαίνει {pricingUtils.formatPrice(monthlyPrice).replace('€', '')}€ / μήνα
+                      </div>
+                    )}
+                    <p className={`text-xs text-zinc-500 font-medium ${duration > 1 ? 'mt-3' : 'mt-2'}`}>περιλαμβάνει ΦΠΑ 24%</p>
                   </div>
 
                   <ul className="space-y-4 mb-8 flex-1">
