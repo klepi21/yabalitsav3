@@ -184,6 +184,7 @@ export interface AcademyPayment {
   paid: boolean;
   paidAt?: string;       // ISO date string
   notes?: string;
+  lastNotifiedAt?: string;  // ISO date string — last time a payment reminder was sent
   createdAt: Date;
   updatedAt: Date;
 }

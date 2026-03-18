@@ -194,6 +194,16 @@ export default function PaymentsDashboardPage() {
       });
 
       if (!res.ok) throw new Error('Failed');
+
+      // Save lastNotifiedAt to the payment record
+      const now = new Date().toISOString();
+      if (payment) {
+        await academyPaymentService.update(payment.id, { lastNotifiedAt: now });
+        setAllPayments((prev) =>
+          prev.map((p) => p.id === payment.id ? { ...p, lastNotifiedAt: now } : p)
+        );
+      }
+
       setNotifySuccess(key);
       setTimeout(() => setNotifySuccess(null), 3000);
     } catch {
@@ -438,8 +448,15 @@ export default function PaymentsDashboardPage() {
                                 <button
                                   onClick={() => setNotifyConfirm({ athlete, month })}
                                   disabled={notifying === key}
-                                  className="text-[8px] text-zinc-300 hover:text-amber-500 transition-colors"
-                                  title="Ειδοποίηση γονέα"
+                                  className={`text-[8px] transition-colors ${
+                                    payment.lastNotifiedAt
+                                      ? 'text-amber-400 hover:text-amber-600'
+                                      : 'text-zinc-300 hover:text-amber-500'
+                                  }`}
+                                  title={payment.lastNotifiedAt
+                                    ? `Τελευταία ειδοποίηση: ${new Date(payment.lastNotifiedAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+                                    : 'Ειδοποίηση'
+                                  }
                                 >
                                   {notifying === key ? (
                                     <Loader2 className="h-3 w-3 animate-spin" />
@@ -598,6 +615,16 @@ export default function PaymentsDashboardPage() {
                       </div>
                     </div>
                   </div>
+
+                  {/* Last notified info */}
+                  {payment?.lastNotifiedAt && (
+                    <div className="flex items-center gap-2 p-2.5 bg-amber-50 rounded-lg">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                      <p className="text-[11px] text-amber-700 font-medium">
+                        Τελευταία ειδοποίηση: {new Date(payment.lastNotifiedAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* Footer */}
