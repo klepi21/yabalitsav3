@@ -118,12 +118,13 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         
         // Get all venues and find the one matching the URL
         const allVenues = await venueService.getAll();
+        const decodedVenueName = decodeURIComponent(venueName);
         const foundVenue = allVenues.find(v => 
-          v.name && v.name.toLowerCase().replace(/\s+/g, '') === venueName.toLowerCase().replace(/\s+/g, '')
+          v.name && v.name.toLowerCase().replace(/\s+/g, '') === decodedVenueName.toLowerCase().replace(/\s+/g, '')
         );
 
         console.log('All venues found:', allVenues.map(v => v.name));
-        console.log('Looking for:', venueName);
+        console.log('Looking for:', decodedVenueName);
 
         if (foundVenue) {
           // Set venue data
