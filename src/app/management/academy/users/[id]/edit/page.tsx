@@ -37,7 +37,7 @@ export default function EditAcademyUserPage({ params }: PageProps) {
         setIsDataLoading(true);
         const [userData, groupsData, squadsData, allUsers] = await Promise.all([
           academyUserService.getById(id),
-          userGroupService.getOrSeed(venueId),
+          userGroupService.getByVenue(venueId),
           squadService.getByVenue(venueId),
           academyUserService.getByVenue(venueId),
         ]);

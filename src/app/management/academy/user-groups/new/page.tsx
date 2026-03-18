@@ -8,9 +8,12 @@ import { userGroupService } from '@/lib/academy-services';
 import {
   UserGroupField,
   UserGroupFieldType,
+  GroupCapability,
   AVAILABLE_COLORS,
   AVAILABLE_ICONS,
   GROUP_COLORS,
+  ALL_CAPABILITIES,
+  CAPABILITY_LABELS,
 } from '@/types/academy';
 import { ArrowLeft, Loader2, X, Plus, Users, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -46,6 +49,7 @@ export default function NewUserGroupPage() {
   const [icon, setIcon] = useState('⭐');
   const [color, setColor] = useState('blue');
   const [fields, setFields] = useState<UserGroupField[]>([]);
+  const [capabilities, setCapabilities] = useState<GroupCapability[]>([]);
 
   // New field form
   const [newField, setNewField] = useState<UserGroupField>({
@@ -110,7 +114,7 @@ export default function NewUserGroupPage() {
         icon,
         color,
         fields,
-        capabilities: [],
+        capabilities,
         order: 99,
         venueId,
       });
@@ -213,6 +217,39 @@ export default function NewUserGroupPage() {
                 </button>
               ))}
             </div>
+          </div>
+        </div>
+
+        {/* Capabilities */}
+        <div className="rounded-xl border border-zinc-100/60 bg-white p-6 sm:p-8 space-y-6">
+          <div>
+            <h2 className="text-[15px] font-semibold text-zinc-900 mb-1">Δυνατότητες</h2>
+            <p className="text-[13px] text-zinc-400">Ενεργοποιήστε τις λειτουργίες που θέλετε για αυτή την κατηγορία</p>
+          </div>
+          <div className="space-y-3">
+            {ALL_CAPABILITIES.map((cap) => {
+              const info = CAPABILITY_LABELS[cap];
+              const isChecked = capabilities.includes(cap);
+              return (
+                <label key={cap} className="flex items-start gap-3 p-3 rounded-xl border border-zinc-100 hover:bg-zinc-50 cursor-pointer transition-colors">
+                  <Checkbox
+                    checked={isChecked}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setCapabilities((prev) => [...prev, cap]);
+                      } else {
+                        setCapabilities((prev) => prev.filter((c) => c !== cap));
+                      }
+                    }}
+                    className="mt-0.5"
+                  />
+                  <div>
+                    <p className="text-sm font-medium text-zinc-900">{info.label}</p>
+                    <p className="text-xs text-zinc-400">{info.description}</p>
+                  </div>
+                </label>
+              );
+            })}
           </div>
         </div>
 

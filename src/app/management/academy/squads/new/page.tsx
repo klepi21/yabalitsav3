@@ -34,7 +34,7 @@ export default function NewSquadPage() {
     if (!user || !venueOwner) { router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`); return; }
     const loadCoaches = async () => {
       try {
-        const groups = await userGroupService.getOrSeed(venueId);
+        const groups = await userGroupService.getByVenue(venueId);
         const coachGroup = groups.find((g) => g.name === 'Προπονητής');
         if (coachGroup) {
           const coachUsers = await academyUserService.getByGroup(venueId, coachGroup.id);

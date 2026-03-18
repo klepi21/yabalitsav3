@@ -16,6 +16,7 @@ import {
   Swords,
   ClipboardList,
   Dumbbell,
+  Euro,
   LogOut,
   ChevronDown,
   ChevronRight,
@@ -46,6 +47,7 @@ const navigation: NavItem[] = [
       { name: 'Τμήματα', href: '/management/academy/squads', icon: Trophy },
       { name: 'Κατηγορίες Χρηστών', href: '/management/academy/user-groups', icon: ClipboardList },
       { name: 'Προπονήσεις', href: '/management/academy/training', icon: Dumbbell },
+      { name: 'Πληρωμές', href: '/management/academy/payments', icon: Euro },
     ]
   },
   {

@@ -44,7 +44,7 @@ export default function EditSquadPage() {
         setIsLoading(true);
         const [squad, groups] = await Promise.all([
           squadService.getById(squadId),
-          userGroupService.getOrSeed(venueId),
+          userGroupService.getByVenue(venueId),
         ]);
 
         if (!squad) {

@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { userGroupService } from '@/lib/academy-services';
 import { UserGroup, GROUP_COLORS } from '@/types/academy';
-import { Loader2, Plus, Pencil, Trash2, ClipboardList, Shield, Link2, Users, AlertCircle } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, ClipboardList, Shield, Link2, Users, AlertCircle, Euro } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn, toGreekUpperCase } from '@/lib/utils';
@@ -39,7 +39,7 @@ export default function UserGroupsPage() {
     const loadGroups = async () => {
       try {
         setIsLoading(true);
-        const data = await userGroupService.getOrSeed(venueId);
+        const data = await userGroupService.getByVenue(venueId);
         setGroups(data);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης');
@@ -257,6 +257,12 @@ export default function UserGroupsPage() {
                                     <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-emerald-600 border-none bg-emerald-50/50">
                                         <ClipboardList className="h-3.5 w-3.5 mr-1.5" />
                                         {toGreekUpperCase('Ανάθεση τμημάτων')}
+                                    </Badge>
+                                )}
+                                {group.capabilities.includes('monthly_payment') && (
+                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-teal-600 border-none bg-teal-50/50">
+                                        <Euro className="h-3.5 w-3.5 mr-1.5" />
+                                        {toGreekUpperCase('Μηνιαία πληρωμή')}
                                     </Badge>
                                 )}
                             </div>

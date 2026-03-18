@@ -31,7 +31,7 @@ export default function NewAcademyUserPage() {
       try {
         setIsDataLoading(true);
         const [groupsData, squadsData, allUsers] = await Promise.all([
-          userGroupService.getOrSeed(venueId),
+          userGroupService.getByVenue(venueId),
           squadService.getByVenue(venueId),
           academyUserService.getByVenue(venueId),
         ]);
@@ -72,7 +72,7 @@ export default function NewAcademyUserPage() {
 
       // Auto-create payment record if athlete and payments exist for current month
       const group = groups.find(g => g.id === data.groupId);
-      if (group?.capabilities.includes('squad_assignment') && venueId) {
+      if (group?.capabilities.includes('monthly_payment') && venueId) {
         const now = new Date();
         const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
         const existingPayments = await academyPaymentService.getByVenueAndMonth(venueId, currentMonth);

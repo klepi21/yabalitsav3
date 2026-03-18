@@ -18,7 +18,6 @@ import {
   AcademyPayment,
   UserGroup,
   Squad,
-  DEFAULT_GROUPS,
 } from '../types/academy';
 
 const USERS_COLLECTION = 'yabalitsa_academy_users';
@@ -45,48 +44,6 @@ export const userGroupService = {
       updatedAt: d.data().updatedAt?.toDate?.() || new Date(),
     })) as UserGroup[];
     return groups.sort((a, b) => a.order - b.order);
-  },
-
-  // Get or seed groups (creates defaults if none exist)
-  async getOrSeed(venueId: string): Promise<UserGroup[]> {
-    let existing = await this.getByVenue(venueId);
-
-    // Deduplicate by name (cleanup for race condition duplicates)
-    const seen = new Map<string, UserGroup>();
-    const duplicateIds: string[] = [];
-    for (const group of existing) {
-      if (seen.has(group.name)) {
-        duplicateIds.push(group.id);
-      } else {
-        seen.set(group.name, group);
-      }
-    }
-    // Delete duplicates in background
-    if (duplicateIds.length > 0) {
-      duplicateIds.forEach((id) => deleteDoc(doc(db, GROUPS_COLLECTION, id)));
-      existing = Array.from(seen.values());
-    }
-
-    if (existing.length > 0) return existing;
-
-    // Seed default groups sequentially to avoid races
-    const created: UserGroup[] = [];
-    for (const group of DEFAULT_GROUPS) {
-      const docRef = await addDoc(collection(db, GROUPS_COLLECTION), {
-        ...group,
-        venueId,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-      created.push({
-        ...group,
-        id: docRef.id,
-        venueId,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      });
-    }
-    return created;
   },
 
   // Get group by ID

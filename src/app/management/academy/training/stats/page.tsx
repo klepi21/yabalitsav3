@@ -50,7 +50,7 @@ export default function TrainingStatsPage() {
         const [sessionsData, squadsData, groups, allUsers] = await Promise.all([
           trainingService.getByVenue(venueId),
           squadService.getByVenue(venueId),
-          userGroupService.getOrSeed(venueId),
+          userGroupService.getByVenue(venueId),
           academyUserService.getByVenue(venueId),
         ]);
         setSessions(sessionsData);

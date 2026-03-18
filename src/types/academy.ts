@@ -16,7 +16,7 @@ export interface UserGroupField {
 }
 
 // Special capabilities a group can have (for built-in features)
-export type GroupCapability = 'squad_assignment' | 'parent_linking' | 'coach_squads';
+export type GroupCapability = 'squad_assignment' | 'parent_linking' | 'coach_squads' | 'monthly_payment';
 
 // User Group definition - stored per venue in Firestore
 export interface UserGroup {
@@ -48,6 +48,15 @@ export const GROUP_COLORS: Record<string, string> = {
 };
 
 export const AVAILABLE_COLORS = Object.keys(GROUP_COLORS);
+
+export const CAPABILITY_LABELS: Record<GroupCapability, { label: string; description: string }> = {
+  squad_assignment: { label: 'Ανάθεση σε τμήμα', description: 'Οι χρήστες μπορούν να ανατεθούν σε τμήματα/ομάδες' },
+  parent_linking: { label: 'Σύνδεση γονέα', description: 'Μπορούν να συνδεθούν ως γονείς αθλητών' },
+  coach_squads: { label: 'Διαχείριση τμημάτων', description: 'Μπορούν να αναλάβουν τμήματα ως προπονητές' },
+  monthly_payment: { label: 'Μηνιαία πληρωμή', description: 'Παρακολούθηση μηνιαίας συνδρομής' },
+};
+
+export const ALL_CAPABILITIES: GroupCapability[] = ['squad_assignment', 'parent_linking', 'coach_squads', 'monthly_payment'];
 
 export const AVAILABLE_ICONS = [
   '⚽', '🏆', '👨‍👩‍👧', '👤', '🏃', '🎓', '🏅', '💪',

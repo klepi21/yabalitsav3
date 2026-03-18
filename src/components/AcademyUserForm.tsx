@@ -161,6 +161,12 @@ export default function AcademyUserForm({
       }
     }
 
+    // If group has parent_linking and no parent selected, email is required
+    if (hasCapability('parent_linking') && !parentUid && !fieldValues['contact_email']) {
+      setError('Χωρίς σύνδεση γονέα, το email επικοινωνίας είναι υποχρεωτικό');
+      return;
+    }
+
     try {
       setError(null);
       await onSubmit({
@@ -437,6 +443,25 @@ export default function AcademyUserForm({
 
           {!showQuickAddParent ? (
             <div className="space-y-4">
+              {parentUid && (
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-200">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                      <Plus className="h-5 w-5" />
+                    </div>
+                    <p className="text-sm font-black text-emerald-800 uppercase tracking-tight">
+                      {toGreekUpperCase(parentCandidates.find(p => p.id === parentUid)?.displayName || 'Συνδεδεμένος γονέας')}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setParentUid('')}
+                    className="text-xs font-bold text-red-500 hover:text-red-700 bg-white px-3 py-1.5 rounded-lg border border-red-200 hover:bg-red-50 transition-all"
+                  >
+                    Αφαίρεση
+                  </button>
+                </div>
+              )}
               <div className="relative group">
                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 h-6 w-6 text-zinc-300 group-focus-within:text-emerald-500 transition-colors" />
                 <Input
@@ -479,7 +504,8 @@ export default function AcademyUserForm({
                         name="parent_uid"
                         value={parent.id}
                         checked={parentUid === parent.id}
-                        onChange={() => setParentUid(parent.id)}
+                        onChange={() => setParentUid(parentUid === parent.id ? '' : parent.id)}
+                        onClick={() => { if (parentUid === parent.id) setParentUid(''); }}
                         className="sr-only"
                       />
                     </label>
@@ -530,6 +556,32 @@ export default function AcademyUserForm({
               </Button>
             </div>
           ) : null}
+        </div>
+      )}
+
+      {/* Contact Email — shown when parent_linking is enabled but no parent is linked */}
+      {hasCapability('parent_linking') && !parentUid && (
+        <div className="space-y-4 pt-6 border-t border-amber-100 bg-amber-50/30 -mx-4 px-4 pb-6 rounded-2xl sm:-mx-6 sm:px-6">
+          <div className="flex items-start gap-3">
+            <div className="h-8 w-8 rounded-lg bg-amber-100 flex items-center justify-center shrink-0 mt-0.5">
+              <span className="text-amber-600 text-sm">📧</span>
+            </div>
+            <div>
+              <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-amber-700">
+                {toGreekUpperCase('Email Επικοινωνίας *')}
+              </Label>
+              <p className="text-[11px] text-amber-600/70 font-medium mt-0.5">
+                Χωρίς σύνδεση γονέα, χρειάζεται email για ειδοποιήσεις
+              </p>
+            </div>
+          </div>
+          <Input
+            type="email"
+            value={(fieldValues['contact_email'] as string) || ''}
+            onChange={(e) => setFieldValue('contact_email', e.target.value)}
+            placeholder="email@example.com"
+            className="h-16 px-6 rounded-2xl bg-white border-amber-200 font-bold text-lg focus:ring-4 focus:ring-amber-500/10 transition-all placeholder:text-zinc-300"
+          />
         </div>
       )}
 

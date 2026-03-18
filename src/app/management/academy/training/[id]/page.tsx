@@ -71,7 +71,7 @@ export default function TrainingDetailPage({ params }: PageProps) {
         const [sessionData, squadsData, groups] = await Promise.all([
           trainingService.getById(id),
           squadService.getByVenue(venueId),
-          userGroupService.getOrSeed(venueId),
+          userGroupService.getByVenue(venueId),
         ]);
 
         if (!sessionData) { setError('Η προπόνηση δεν βρέθηκε'); setIsLoading(false); return; }

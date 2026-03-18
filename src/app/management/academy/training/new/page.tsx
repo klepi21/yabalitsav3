@@ -59,7 +59,7 @@ export default function NewTrainingPage() {
         setIsLoading(true);
         const [squadsData, groups] = await Promise.all([
           squadService.getByVenue(venueId),
-          userGroupService.getOrSeed(venueId),
+          userGroupService.getByVenue(venueId),
         ]);
         setSquads(squadsData);
 
