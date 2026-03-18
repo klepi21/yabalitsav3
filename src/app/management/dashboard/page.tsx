@@ -935,27 +935,27 @@ export default function DashboardPage() {
             <div className="rounded-3xl bg-white border-2 border-red-100 overflow-hidden shadow-lg shadow-red-50 h-fit">
               {/* Header */}
               <div 
-                className="bg-red-600 px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-red-700 transition-colors"
+                className="bg-white border-b-2 border-red-100 px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-red-50 transition-colors"
                 onClick={() => setIsMedicalExpanded(!isMedicalExpanded)}
               >
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-xl bg-white/20 flex items-center justify-center">
-                    <HeartPulse className="h-5 w-5 text-white" />
+                  <div className="h-9 w-9 rounded-xl bg-red-100 flex items-center justify-center">
+                    <HeartPulse className="h-5 w-5 text-red-600" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-wider">Ιατρικά Πιστοποιητικά</h3>
-                    <p className="text-[10px] font-bold text-red-200 uppercase tracking-widest">Απαιτείται άμεση ενέργεια</p>
+                    <h3 className="text-sm font-black text-red-600 uppercase tracking-wider">Ιατρικά Πιστοποιητικά</h3>
+                    <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Απαιτείται άμεση ενέργεια</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2 hidden sm:flex">
                     {medicalAlerts.expired.length > 0 && (
-                      <div className="px-2.5 py-1 rounded-full bg-white/20 text-white text-[10px] font-black">
+                      <div className="px-2.5 py-1 rounded-full bg-red-100 text-red-600 text-[10px] font-black">
                         {medicalAlerts.expired.length} ΛΗΞΑΝΤΑ
                       </div>
                     )}
                   </div>
-                  {isMedicalExpanded ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
+                  {isMedicalExpanded ? <ChevronUp className="h-5 w-5 text-red-500" /> : <ChevronDown className="h-5 w-5 text-red-500" />}
                 </div>
               </div>
 
@@ -1017,23 +1017,23 @@ export default function DashboardPage() {
             <div className="rounded-3xl bg-white border-2 border-orange-100 overflow-hidden shadow-lg shadow-orange-50 h-fit">
               {/* Header */}
               <div 
-                className="bg-orange-500 px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-orange-600 transition-colors"
+                className="bg-white border-b-2 border-orange-100 px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-orange-50 transition-colors"
                 onClick={() => setIsPaymentsExpanded(!isPaymentsExpanded)}
               >
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-xl bg-white/20 flex items-center justify-center">
-                    <BanknoteIcon className="h-5 w-5 text-white" />
+                  <div className="h-9 w-9 rounded-xl bg-orange-100 flex items-center justify-center">
+                    <BanknoteIcon className="h-5 w-5 text-orange-600" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-wider">Ανεξόφλητες Συνδρομές</h3>
-                    <p className="text-[10px] font-bold text-orange-200 uppercase tracking-widest">Τρέχον έτος · {new Date().getFullYear()}</p>
+                    <h3 className="text-sm font-black text-orange-600 uppercase tracking-wider">Ανεξόφλητες Συνδρομές</h3>
+                    <p className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">Τρέχον έτος · {new Date().getFullYear()}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="px-2.5 py-1 rounded-full bg-white/20 text-white text-[10px] font-black hidden sm:block">
+                  <div className="px-2.5 py-1 rounded-full bg-orange-100 text-orange-600 text-[10px] font-black hidden sm:block">
                     {paymentAlerts.length} ΑΘΛΗΤΕΣ
                   </div>
-                  {isPaymentsExpanded ? <ChevronUp className="h-5 w-5 text-white" /> : <ChevronDown className="h-5 w-5 text-white" />}
+                  {isPaymentsExpanded ? <ChevronUp className="h-5 w-5 text-orange-500" /> : <ChevronDown className="h-5 w-5 text-orange-500" />}
                 </div>
               </div>
 
