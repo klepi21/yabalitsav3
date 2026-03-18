@@ -9,7 +9,7 @@ import { squadService, academyUserService, userGroupService } from '@/lib/academ
 import { Squad, AcademyUser } from '@/types/academy';
 import { TrainingType, TRAINING_TYPE_LABELS, TRAINING_TYPE_COLORS, TrainingDrill } from '@/types/training';
 import {
-  Loader2, ArrowLeft, Dumbbell, Plus, Trash2, Clock, AlertCircle, CalendarDays, User, BookOpen, Target, Save
+  Loader2, ArrowLeft, Dumbbell, Plus, Trash2, Clock, AlertCircle, CalendarDays, User, BookOpen, Target, Save, Repeat, X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -51,6 +51,39 @@ export default function NewTrainingPage() {
   const [drills, setDrills] = useState<TrainingDrill[]>([]);
   const [newDrill, setNewDrill] = useState({ name: '', duration: 15, description: '' });
 
+  // Recurring
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurringDays, setRecurringDays] = useState<number[]>([]);
+  const [recurringWeeks, setRecurringWeeks] = useState(4);
+
+  const DAYS = ['Δευ', 'Τρι', 'Τετ', 'Πεμ', 'Παρ', 'Σαβ', 'Κυρ'];
+
+  const toggleRecurringDay = (day: number) => {
+    setRecurringDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort()
+    );
+  };
+
+  const getRecurringDates = (): string[] => {
+    if (!isRecurring || recurringDays.length === 0) return [form.date];
+    const dates: string[] = [];
+    const startDate = new Date(form.date + 'T00:00:00');
+    const weekStart = new Date(startDate);
+    const dayOfWeek = weekStart.getDay();
+    weekStart.setDate(weekStart.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1));
+    for (let week = 0; week < recurringWeeks; week++) {
+      for (const day of recurringDays) {
+        const d = new Date(weekStart);
+        d.setDate(d.getDate() + week * 7 + day);
+        if (d >= startDate) {
+          const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          dates.push(key);
+        }
+      }
+    }
+    return dates.sort();
+  };
+
   useEffect(() => {
     if (authLoading) return;
     if (!user || !venueOwner) { router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`); return; }
@@ -62,7 +95,6 @@ export default function NewTrainingPage() {
           userGroupService.getByVenue(venueId),
         ]);
         setSquads(squadsData);
-
         const coachGroup = groups.find((g) => g.capabilities?.includes('coach_squads'));
         if (coachGroup) {
           const coachUsers = await academyUserService.getByGroup(venueId, coachGroup.id);
@@ -97,22 +129,26 @@ export default function NewTrainingPage() {
       setIsSaving(true);
       setError(null);
       const coach = coaches.find((c) => c.id === form.coachId);
-      await trainingService.create({
-        venueId,
-        squadId: form.squadId,
-        title: form.title.trim(),
-        date: form.date,
-        startTime: form.startTime,
-        endTime: form.endTime,
-        type: form.type,
-        coachId: form.coachId,
-        coachName: coach?.displayName || '',
-        assistantCoachIds: form.assistantCoachIds,
-        notes: form.notes,
-        drills,
-        attendance: [],
-        status: 'scheduled',
-      });
+      const dates = getRecurringDates();
+      const promises = dates.map((date) =>
+        trainingService.create({
+          venueId,
+          squadId: form.squadId,
+          title: form.title.trim(),
+          date,
+          startTime: form.startTime,
+          endTime: form.endTime,
+          type: form.type,
+          coachId: form.coachId,
+          coachName: coach?.displayName || '',
+          assistantCoachIds: form.assistantCoachIds,
+          notes: form.notes,
+          drills,
+          attendance: [],
+          status: 'scheduled',
+        })
+      );
+      await Promise.all(promises);
       router.push('/management/academy/training');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Αποτυχία δημιουργίας');
@@ -125,350 +161,432 @@ export default function NewTrainingPage() {
   if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-10 w-10 animate-spin text-emerald-600" />
+        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-10 pb-20">
+    <div className="space-y-8 pb-20">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center gap-8">
-        <Button variant="outline" size="icon" className="h-16 w-16 rounded-2xl border-zinc-200 hover:bg-zinc-50 shrink-0 shadow-sm hover:scale-105 active:scale-95 transition-all" asChild>
-          <Link href="/management/academy/training">
-            <ArrowLeft className="h-6 w-6 text-zinc-400" />
-          </Link>
-        </Button>
-        <div className="flex items-center gap-6">
-          <div className="h-20 w-20 rounded-[1.5rem] bg-zinc-900 flex items-center justify-center text-white shadow-2xl shadow-zinc-200 shrink-0">
-            <Dumbbell className="h-10 w-10 text-emerald-400" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-zinc-50">
+        <div className="flex items-center gap-3.5">
+          <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-zinc-200 shrink-0" asChild>
+            <Link href="/management/academy/training">
+              <ArrowLeft className="h-4 w-4 text-zinc-400" />
+            </Link>
+          </Button>
+          <div className="h-12 w-12 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shadow-zinc-200 shrink-0">
+            <Dumbbell className="h-6 w-6 text-emerald-400" />
           </div>
           <div>
-            <h1 className="text-5xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Νέα Προπόνηση')}</h1>
-            <p className="text-xl font-bold text-zinc-400 mt-1 uppercase tracking-tight">{toGreekUpperCase('Προγραμματίστε την επόμενη δραστηριότητα')}</p>
+            <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
+              {toGreekUpperCase('Νέα Προπόνηση')}
+            </h1>
+            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+              {toGreekUpperCase('Προγραμματίστε την επόμενη δραστηριότητα')}
+            </p>
           </div>
         </div>
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-100 rounded-3xl p-6 animate-in fade-in slide-in-from-top-4">
+        <div className="bg-red-50 border border-red-100 rounded-2xl p-4 animate-in fade-in">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-red-100 flex items-center justify-center">
-                <AlertCircle className="h-6 w-6 text-red-600" />
-              </div>
-              <p className="text-red-700 font-bold">{error}</p>
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-red-500" />
+              <p className="text-sm font-bold text-red-700">{error}</p>
             </div>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setError(null)} 
-              className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 font-bold"
-            >
-              Κλείσιμο
+            <Button variant="ghost" size="sm" onClick={() => setError(null)} className="text-red-400 hover:text-red-600">
+              <X className="h-4 w-4" />
             </Button>
           </div>
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-10">
-            {/* General Info Card */}
-            <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-8 sm:p-10 space-y-8">
-                <div className="flex items-center gap-4 mb-2">
-                    <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center">
-                        <CalendarDays className="h-5 w-5 text-zinc-400" />
-                    </div>
-                    <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Γενικά Στοιχεία</h2>
+          <div className="lg:col-span-2 space-y-6">
+            {/* General Info */}
+            <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-6 space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-lg bg-zinc-50 flex items-center justify-center">
+                  <CalendarDays className="h-4 w-4 text-zinc-400" />
+                </div>
+                <h2 className="text-base font-black text-zinc-900 tracking-tight uppercase">
+                  {toGreekUpperCase('Γενικά Στοιχεία')}
+                </h2>
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τίτλος Προπόνησης')} *</Label>
+                <Input
+                  value={form.title}
+                  onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
+                  placeholder="π.χ. Προπόνηση U12 - Τακτική & Τελειώματα"
+                  className="h-11 bg-zinc-50 border-none rounded-xl px-4 font-bold text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τύπος Δραστηριότητας')} *</Label>
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  {TRAINING_TYPES.map((type) => {
+                    const colors = TRAINING_TYPE_COLORS[type];
+                    const isSelected = form.type === type;
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setForm((p) => ({ ...p, type }))}
+                        className={cn(
+                          "h-10 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border",
+                          isSelected
+                            ? `${colors.bg} ${colors.text} ${colors.border} shadow-md ring-2 ring-zinc-100`
+                            : "bg-white text-zinc-400 border-zinc-100 hover:border-zinc-200"
+                        )}
+                      >
+                        {toGreekUpperCase(TRAINING_TYPE_LABELS[type])}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τμήμα')} *</Label>
+                  <Select value={form.squadId} onValueChange={(val: string) => setForm((p) => ({ ...p, squadId: val }))}>
+                    <SelectTrigger className="h-11 px-4 bg-zinc-50 border-none rounded-xl font-bold text-sm focus:ring-2 focus:ring-emerald-500/20 uppercase">
+                      <SelectValue placeholder={toGreekUpperCase('Επιλέξτε τμήμα...')} />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-zinc-100 shadow-2xl">
+                      {squads.map((s) => (
+                        <SelectItem key={s.id} value={s.id} className="font-bold text-sm">{toGreekUpperCase(`${s.name} (${s.ageGroup})`)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                <div className="space-y-4">
-                    <Label className="text-xs font-black uppercase tracking-widest text-zinc-400">Τίτλος Προπόνησης *</Label>
-                    <Input
-                    value={form.title}
-                    onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
-                    placeholder="π.χ. Προπόνηση U12 - Τακτική & Τελειώματα"
-                    className="h-16 bg-zinc-50 border-none rounded-2xl px-6 font-bold text-lg focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all"
-                    />
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Προπονητής')} *</Label>
+                  <Select value={form.coachId} onValueChange={(val: string) => setForm((p) => ({ ...p, coachId: val }))}>
+                    <SelectTrigger className="h-11 px-4 bg-zinc-50 border-none rounded-xl font-bold text-sm focus:ring-2 focus:ring-emerald-500/20 uppercase">
+                      <SelectValue placeholder={toGreekUpperCase('Επιλέξτε προπονητή...')} />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-zinc-100 shadow-2xl">
+                      {coaches.map((c) => (
+                        <SelectItem key={c.id} value={c.id} className="font-bold text-sm">{toGreekUpperCase(c.displayName)}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              {/* Date & Time */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Ημερομηνία')} *</Label>
+                  <Input
+                    type="date"
+                    value={form.date}
+                    onChange={(e) => setForm((p) => ({ ...p, date: e.target.value }))}
+                    className="h-11 bg-zinc-50 border-none rounded-xl px-4 font-bold text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Έναρξη')} *</Label>
+                  <Input
+                    type="time"
+                    value={form.startTime}
+                    onChange={(e) => setForm((p) => ({ ...p, startTime: e.target.value }))}
+                    className="h-11 bg-zinc-50 border-none rounded-xl px-4 font-bold text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Λήξη')} *</Label>
+                  <Input
+                    type="time"
+                    value={form.endTime}
+                    onChange={(e) => setForm((p) => ({ ...p, endTime: e.target.value }))}
+                    className="h-11 bg-zinc-50 border-none rounded-xl px-4 font-bold text-sm focus:bg-white focus:ring-2 focus:ring-emerald-500/20 transition-all"
+                  />
+                </div>
+              </div>
+
+              {/* Recurring */}
+              <div className="space-y-3 pt-4 border-t border-zinc-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Repeat className="h-4 w-4 text-zinc-400" />
+                    <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">
+                      {toGreekUpperCase('Επαναλαμβανόμενη')}
+                    </Label>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsRecurring(!isRecurring)}
+                    className={cn(
+                      "relative h-6 w-10 rounded-full transition-all",
+                      isRecurring ? "bg-emerald-500" : "bg-zinc-200"
+                    )}
+                  >
+                    <div className={cn(
+                      "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-all",
+                      isRecurring ? "left-[18px]" : "left-0.5"
+                    )} />
+                  </button>
                 </div>
 
-                <div className="space-y-4">
-                    <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-1">{toGreekUpperCase('Τύπος Δραστηριότητας *')}</Label>
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
-                    {TRAINING_TYPES.map((type) => {
-                        const colors = TRAINING_TYPE_COLORS[type];
-                        const isSelected = form.type === type;
-                        return (
-                        <button
-                            key={type}
+                {isRecurring && (
+                  <div className="bg-emerald-50/50 border border-emerald-100 rounded-xl p-4 space-y-4 animate-in fade-in slide-in-from-top-2">
+                    <div className="space-y-2">
+                      <Label className="text-[8px] font-black uppercase tracking-widest text-emerald-600">
+                        {toGreekUpperCase('Ημέρες')}
+                      </Label>
+                      <div className="grid grid-cols-7 gap-1.5">
+                        {DAYS.map((day, i) => (
+                          <button
+                            key={i}
                             type="button"
-                            onClick={() => setForm((p) => ({ ...p, type }))}
+                            onClick={() => toggleRecurringDay(i)}
                             className={cn(
-                                "h-16 px-4 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shadow-sm border-2",
-                                isSelected
-                                ? `${colors.bg} ${colors.text} ${colors.border} scale-[1.05] shadow-xl ring-8 ring-zinc-100/50`
-                                : "bg-white text-zinc-400 border-zinc-100 hover:border-zinc-200"
+                              "h-9 rounded-lg text-[9px] font-black uppercase transition-all",
+                              recurringDays.includes(i)
+                                ? "bg-emerald-600 text-white shadow-sm"
+                                : "bg-white text-zinc-400 border border-zinc-200 hover:border-emerald-300"
                             )}
-                        >
-                            {toGreekUpperCase(TRAINING_TYPE_LABELS[type])}
-                        </button>
-                        );
-                    })}
-                    </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-4">
-                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-1">{toGreekUpperCase('Τμήμα *')}</Label>
-                         <Select value={form.squadId} onValueChange={(val: string) => setForm((p) => ({ ...p, squadId: val }))}>
-                            <SelectTrigger className="h-16 px-6 bg-zinc-50 border-none rounded-2xl font-black text-lg focus:ring-4 focus:ring-emerald-500/10 uppercase">
-                                <SelectValue placeholder={toGreekUpperCase('Επιλέξτε τμήμα...')} />
-                            </SelectTrigger>
-                            <SelectContent className="rounded-2xl border-zinc-100 shadow-2xl">
-                                {squads.map((s) => (
-                                <SelectItem key={s.id} value={s.id} className="font-bold text-lg">{toGreekUpperCase(`${s.name} (${s.ageGroup})`)}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                          >
+                            {day}
+                          </button>
+                        ))}
+                      </div>
                     </div>
 
-                    <div className="space-y-4">
-                        <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 ml-1">{toGreekUpperCase('Υπεύθυνος Προπονητής *')}</Label>
-                        <Select value={form.coachId} onValueChange={(val: string) => setForm((p) => ({ ...p, coachId: val }))}>
-                            <SelectTrigger className="h-16 px-6 bg-zinc-50 border-none rounded-2xl font-black text-lg focus:ring-4 focus:ring-emerald-500/10 uppercase">
-                                <SelectValue placeholder={toGreekUpperCase('Επιλέξτε προπονητή...')} />
-                            </SelectTrigger>
-                            <SelectContent className="rounded-2xl border-zinc-100 shadow-2xl">
-                                {coaches.map((c) => (
-                                <SelectItem key={c.id} value={c.id} className="font-bold text-lg">{toGreekUpperCase(c.displayName)}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                    <div className="space-y-2">
+                      <Label className="text-[8px] font-black uppercase tracking-widest text-emerald-600">
+                        {toGreekUpperCase('Εβδομάδες')}
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        {[2, 4, 6, 8, 12].map((w) => (
+                          <button
+                            key={w}
+                            type="button"
+                            onClick={() => setRecurringWeeks(w)}
+                            className={cn(
+                              "h-8 px-3 rounded-lg text-xs font-black transition-all",
+                              recurringWeeks === w
+                                ? "bg-emerald-600 text-white shadow-sm"
+                                : "bg-white text-zinc-500 border border-zinc-200 hover:border-emerald-300"
+                            )}
+                          >
+                            {w}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                </div>
 
-                {/* Date & Time */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                    <div className="space-y-4">
-                        <Label className="text-xs font-black uppercase tracking-widest text-zinc-400">Ημερομηνία *</Label>
-                        <Input
-                            type="date"
-                            value={form.date}
-                            onChange={(e) => setForm((p) => ({ ...p, date: e.target.value }))}
-                            className="h-14 bg-zinc-50 border-none rounded-2xl px-6 font-bold focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all"
-                        />
-                    </div>
-                    <div className="space-y-4">
-                        <Label className="text-xs font-black uppercase tracking-widest text-zinc-400">Έναρξη *</Label>
-                        <Input
-                            type="time"
-                            value={form.startTime}
-                            onChange={(e) => setForm((p) => ({ ...p, startTime: e.target.value }))}
-                            className="h-14 bg-zinc-50 border-none rounded-2xl px-6 font-bold focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all"
-                        />
-                    </div>
-                    <div className="space-y-4">
-                        <Label className="text-xs font-black uppercase tracking-widest text-zinc-400">Λήξη *</Label>
-                        <Input
-                            type="time"
-                            value={form.endTime}
-                            onChange={(e) => setForm((p) => ({ ...p, endTime: e.target.value }))}
-                            className="h-14 bg-zinc-50 border-none rounded-2xl px-6 font-bold focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all"
-                        />
-                    </div>
-                </div>
+                    {recurringDays.length > 0 && (
+                      <div className="flex items-center gap-2 p-2.5 bg-white rounded-lg border border-emerald-100">
+                        <CalendarDays className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                        <p className="text-[10px] font-bold text-emerald-700">
+                          <span className="font-black">{getRecurringDates().length}</span> προπονήσεις
+                          ({recurringDays.map((d) => DAYS[d]).join(', ')} x {recurringWeeks} εβδ.)
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Drills Section Card */}
-            <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-8 sm:p-10 space-y-8">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-xl bg-violet-50 flex items-center justify-center">
-                            <Target className="h-5 w-5 text-violet-600" />
-                        </div>
-                        <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Ασκήσεις & Πρόγραμμα</h2>
-                    </div>
-                    {drills.length > 0 && (
-                        <div className="flex items-center gap-2 px-4 py-2 bg-violet-50 rounded-xl">
-                            <Clock className="h-4 w-4 text-violet-600" />
-                            <span className="text-sm font-black text-violet-700">{totalDrillMinutes} λ.</span>
-                        </div>
-                    )}
+            {/* Drills */}
+            <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-6 space-y-5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-violet-50 flex items-center justify-center">
+                    <Target className="h-4 w-4 text-violet-600" />
+                  </div>
+                  <h2 className="text-base font-black text-zinc-900 tracking-tight uppercase">
+                    {toGreekUpperCase('Ασκήσεις')}
+                  </h2>
                 </div>
-
                 {drills.length > 0 && (
-                    <div className="space-y-3">
-                    {drills.map((drill, i) => (
-                        <div key={i} className="flex items-center gap-6 p-6 rounded-2xl border border-zinc-100 bg-zinc-50/50 group transition-all hover:border-violet-200 hover:bg-white hover:shadow-md">
-                            <div className="h-10 w-10 rounded-xl bg-white border border-zinc-100 flex items-center justify-center font-black text-zinc-400">
-                                {i + 1}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-3 mb-1">
-                                    <p className="text-lg font-black text-zinc-900 uppercase tracking-tight">{drill.name}</p>
-                                    <span className="px-3 py-1 bg-violet-100 text-violet-700 rounded-lg text-xs font-black">{drill.duration} λ.</span>
-                                </div>
-                                {drill.description && <p className="text-sm font-medium text-zinc-500">{drill.description}</p>}
-                            </div>
-                            <button type="button" onClick={() => removeDrill(i)} className="h-10 w-10 rounded-xl flex items-center justify-center text-zinc-300 hover:text-red-600 hover:bg-red-50 hover:border-red-100 border border-transparent transition-all">
-                                <Trash2 className="h-5 w-5" />
-                            </button>
-                        </div>
-                    ))}
-                    </div>
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 bg-violet-50 rounded-lg">
+                    <Clock className="h-3.5 w-3.5 text-violet-600" />
+                    <span className="text-xs font-black text-violet-700">{totalDrillMinutes} λ.</span>
+                  </div>
                 )}
+              </div>
 
-                {/* Add drill form */}
-                <div className="bg-zinc-50/50 border-2 border-dashed border-zinc-200 rounded-3xl p-6 sm:p-8 space-y-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-[1fr_120px] gap-6">
-                        <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Όνομα Άσκησης</Label>
-                            <Input
-                            placeholder="π.χ. Προθέρμανση με μπάλα..."
-                            value={newDrill.name}
-                            onChange={(e) => setNewDrill((p) => ({ ...p, name: e.target.value }))}
-                            className="h-14 bg-white border-none rounded-2xl px-6 font-bold focus:ring-4 focus:ring-violet-500/10 transition-all"
-                            />
+              {drills.length > 0 && (
+                <div className="space-y-2">
+                  {drills.map((drill, i) => (
+                    <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-zinc-100 bg-zinc-50/50 hover:bg-white hover:shadow-sm transition-all">
+                      <div className="h-8 w-8 rounded-lg bg-white border border-zinc-100 flex items-center justify-center text-sm font-black text-zinc-400">
+                        {i + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-bold text-zinc-900 truncate">{drill.name}</p>
+                          <span className="px-2 py-0.5 bg-violet-100 text-violet-700 rounded-md text-[9px] font-black shrink-0">{drill.duration} λ.</span>
                         </div>
-                        <div className="space-y-4">
-                            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Διάρκεια (λ.)</Label>
-                            <Input
-                            type="number"
-                            placeholder="Λεπτά"
-                            value={newDrill.duration}
-                            onChange={(e) => setNewDrill((p) => ({ ...p, duration: Number(e.target.value) || 0 }))}
-                            className="h-14 bg-white border-none rounded-2xl px-4 text-center font-black focus:ring-4 focus:ring-violet-500/10 transition-all"
-                            min={1}
-                            />
-                        </div>
+                        {drill.description && <p className="text-[11px] text-zinc-400 truncate mt-0.5">{drill.description}</p>}
+                      </div>
+                      <button type="button" onClick={() => removeDrill(i)} className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-300 hover:text-red-500 hover:bg-red-50 transition-all">
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
                     </div>
-                    <div className="space-y-4">
-                        <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Περιγραφή (Προαιρετικά)</Label>
-                        <Input
-                        placeholder="Περιγράψτε το στόχο ή τον τρόπο εκτέλεσης της άσκησης..."
-                        value={newDrill.description}
-                        onChange={(e) => setNewDrill((p) => ({ ...p, description: e.target.value }))}
-                        className="h-14 bg-white border-none rounded-2xl px-6 font-bold focus:ring-4 focus:ring-violet-500/10 transition-all"
-                        />
-                    </div>
-                    <Button 
-                        type="button" 
-                        variant="outline" 
-                        onClick={addDrill} 
-                        disabled={!newDrill.name.trim()}
-                        className="h-14 w-full rounded-2xl border-none bg-white text-zinc-900 font-bold shadow-sm hover:shadow-md hover:bg-zinc-50 transition-all flex items-center justify-center gap-2"
-                    >
-                        <Plus className="h-5 w-5 text-violet-600" />
-                        Προσθήκη στο Πρόγραμμα
-                    </Button>
+                  ))}
                 </div>
+              )}
+
+              {/* Add drill */}
+              <div className="bg-zinc-50/50 border border-dashed border-zinc-200 rounded-xl p-4 space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-[1fr_100px] gap-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-[8px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Άσκηση')}</Label>
+                    <Input
+                      placeholder="π.χ. Προθέρμανση με μπάλα..."
+                      value={newDrill.name}
+                      onChange={(e) => setNewDrill((p) => ({ ...p, name: e.target.value }))}
+                      className="h-10 bg-white border-none rounded-lg px-3 font-bold text-sm focus:ring-2 focus:ring-violet-500/20"
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-[8px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Λεπτά')}</Label>
+                    <Input
+                      type="number"
+                      value={newDrill.duration}
+                      onChange={(e) => setNewDrill((p) => ({ ...p, duration: Number(e.target.value) || 0 }))}
+                      className="h-10 bg-white border-none rounded-lg px-3 text-center font-black text-sm focus:ring-2 focus:ring-violet-500/20"
+                      min={1}
+                    />
+                  </div>
+                </div>
+                <Input
+                  placeholder="Περιγραφή (προαιρετικά)..."
+                  value={newDrill.description}
+                  onChange={(e) => setNewDrill((p) => ({ ...p, description: e.target.value }))}
+                  className="h-10 bg-white border-none rounded-lg px-3 font-bold text-sm focus:ring-2 focus:ring-violet-500/20"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={addDrill}
+                  disabled={!newDrill.name.trim()}
+                  className="h-10 w-full rounded-lg border-zinc-200 font-bold text-xs hover:bg-white"
+                >
+                  <Plus className="h-4 w-4 mr-2 text-violet-600" />
+                  {toGreekUpperCase('Προσθήκη')}
+                </Button>
+              </div>
             </div>
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-10">
-            {/* Assistant Coaches Card */}
+          <div className="space-y-6">
+            {/* Assistant Coaches */}
             {coaches.length > 1 && (
-                <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-8 space-y-8">
-                    <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                            <User className="h-5 w-5 text-blue-600" />
-                        </div>
-                        <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Βοηθοί</h2>
-                    </div>
-
-                    <div className="space-y-2">
-                        {coaches.filter((c) => c.id !== form.coachId).map((coach) => {
-                        const isSelected = form.assistantCoachIds.includes(coach.id);
-                        return (
-                            <label
-                            key={coach.id}
-                            className={cn(
-                                "flex items-center gap-4 p-4 rounded-2xl border-2 cursor-pointer transition-all duration-300",
-                                isSelected
-                                ? "border-blue-500 bg-blue-50 text-blue-900 shadow-md"
-                                : "border-zinc-50 bg-zinc-50 text-zinc-500 hover:border-zinc-200 hover:bg-white"
-                            )}
-                            >
-                            <input
-                                type="checkbox"
-                                className="sr-only"
-                                checked={isSelected}
-                                onChange={() => {
-                                setForm((p) => ({
-                                    ...p,
-                                    assistantCoachIds: isSelected
-                                    ? p.assistantCoachIds.filter((id) => id !== coach.id)
-                                    : [...p.assistantCoachIds, coach.id],
-                                }));
-                                }}
-                            />
-                            <div className={cn(
-                                "h-5 w-5 rounded-md border-2 flex items-center justify-center transition-all",
-                                isSelected ? "bg-blue-600 border-blue-600" : "bg-white border-zinc-200"
-                            )}>
-                                {isSelected && <Plus className="h-3 w-3 text-white" />}
-                            </div>
-                            <span className="text-sm font-black uppercase tracking-tight">{coach.displayName}</span>
-                            </label>
-                        );
-                        })}
-                    </div>
+              <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-6 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-lg bg-blue-50 flex items-center justify-center">
+                    <User className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <h2 className="text-base font-black text-zinc-900 tracking-tight uppercase">
+                    {toGreekUpperCase('Βοηθοί')}
+                  </h2>
                 </div>
+                <div className="space-y-2">
+                  {coaches.filter((c) => c.id !== form.coachId).map((coach) => {
+                    const isSelected = form.assistantCoachIds.includes(coach.id);
+                    return (
+                      <label
+                        key={coach.id}
+                        className={cn(
+                          "flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all",
+                          isSelected
+                            ? "border-blue-300 bg-blue-50 shadow-sm"
+                            : "border-zinc-100 bg-zinc-50 hover:border-zinc-200 hover:bg-white"
+                        )}
+                      >
+                        <input
+                          type="checkbox"
+                          className="sr-only"
+                          checked={isSelected}
+                          onChange={() => {
+                            setForm((p) => ({
+                              ...p,
+                              assistantCoachIds: isSelected
+                                ? p.assistantCoachIds.filter((id) => id !== coach.id)
+                                : [...p.assistantCoachIds, coach.id],
+                            }));
+                          }}
+                        />
+                        <div className={cn(
+                          "h-5 w-5 rounded-md border-2 flex items-center justify-center transition-all",
+                          isSelected ? "bg-blue-600 border-blue-600" : "bg-white border-zinc-200"
+                        )}>
+                          {isSelected && <Plus className="h-3 w-3 text-white" />}
+                        </div>
+                        <span className={cn("text-xs font-bold uppercase", isSelected ? "text-blue-900" : "text-zinc-500")}>
+                          {coach.displayName}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
             )}
 
-            {/* Notes Card */}
-            <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-8 space-y-8">
-                <div className="flex items-center gap-4">
-                    <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center">
-                        <BookOpen className="h-5 w-5 text-amber-600" />
-                    </div>
-                    <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Σημειώσεις</h2>
+            {/* Notes */}
+            <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="h-9 w-9 rounded-lg bg-amber-50 flex items-center justify-center">
+                  <BookOpen className="h-4 w-4 text-amber-600" />
                 </div>
-
-                <div className="space-y-4">
-                    <Label className="text-xs font-black uppercase tracking-widest text-zinc-400">Παρατηρήσεις Προπονητή</Label>
-                    <textarea
-                    value={form.notes}
-                    onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
-                    rows={6}
-                    className="w-full rounded-2xl bg-zinc-50 border-none p-6 font-bold text-sm focus:outline-none focus:ring-4 focus:ring-amber-500/10 placeholder:text-zinc-300 resize-none transition-all"
-                    placeholder="Στόχοι προπόνησης, απαραίτητος εξοπλισμός, ειδικές οδηγίες..."
-                    />
-                </div>
+                <h2 className="text-base font-black text-zinc-900 tracking-tight uppercase">
+                  {toGreekUpperCase('Σημειώσεις')}
+                </h2>
+              </div>
+              <textarea
+                value={form.notes}
+                onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
+                rows={5}
+                className="w-full rounded-xl bg-zinc-50 border-none p-4 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 placeholder:text-zinc-300 resize-none transition-all"
+                placeholder="Στόχοι, εξοπλισμός, οδηγίες..."
+              />
             </div>
 
             {/* Actions */}
-            <div className="flex flex-col gap-4">
-                <Button 
-                    type="submit" 
-                    disabled={isSaving} 
-                    className="h-24 w-full rounded-[2.5rem] bg-zinc-900 hover:bg-black text-white font-black text-2xl shadow-2xl transition-all hover:translate-y-[-4px] active:translate-y-[2px] group overflow-hidden"
-                >
-                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                    {isSaving ? (
-                        <div className="flex items-center gap-4">
-                            <Loader2 className="h-8 w-8 animate-spin" />
-                            <span>{toGreekUpperCase('Αποθήκευση...')}</span>
-                        </div>
-                    ) : (
-                        <div className="flex items-center gap-4">
-                             <Save className="h-8 w-8 text-emerald-400" />
-                             <span>{toGreekUpperCase('Δημιουργία Προπόνησης')}</span>
-                        </div>
-                    )}
-                </Button>
-                <Button 
-                    type="button" 
-                    variant="ghost" 
-                    className="h-14 w-full rounded-2xl font-black text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100" 
-                    onClick={() => router.back()}
-                >
-                    Ακύρωση
-                </Button>
+            <div className="flex flex-col gap-3">
+              <Button
+                type="submit"
+                disabled={isSaving}
+                className="h-12 w-full rounded-xl bg-zinc-900 hover:bg-black text-white font-black text-sm shadow-lg transition-all active:scale-[0.98]"
+              >
+                {isSaving ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Save className="h-4 w-4 mr-2 text-emerald-400" />
+                )}
+                {isSaving
+                  ? toGreekUpperCase('Αποθήκευση...')
+                  : isRecurring && recurringDays.length > 0
+                    ? toGreekUpperCase(`Δημιουργία ${getRecurringDates().length} Προπονήσεων`)
+                    : toGreekUpperCase('Δημιουργία Προπόνησης')
+                }
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                className="h-10 w-full rounded-xl font-bold text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 text-sm"
+                onClick={() => router.back()}
+              >
+                {toGreekUpperCase('Ακύρωση')}
+              </Button>
             </div>
           </div>
         </div>

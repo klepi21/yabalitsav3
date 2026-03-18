@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import AcademyUserForm from '@/components/AcademyUserForm';
 import { academyUserService, userGroupService, squadService, academyPaymentService } from '@/lib/academy-services';
 import { AcademyUser, UserGroup, Squad } from '@/types/academy';
-import { Loader2, ArrowLeft, UserPlus, AlertCircle } from 'lucide-react';
+import { Loader2, ArrowLeft, UserPlus, AlertCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toGreekUpperCase } from '@/lib/utils';
 
@@ -38,7 +38,6 @@ export default function NewAcademyUserPage() {
         setGroups(groupsData);
         setSquads(squadsData);
 
-        // Find parent group and filter parent candidates
         const pGroup = groupsData.find((g) => g.name === 'Γονέας');
         if (pGroup) {
           setParentCandidates(allUsers.filter((u) => u.groupId === pGroup.id || u.groupId === 'parent'));
@@ -52,7 +51,6 @@ export default function NewAcademyUserPage() {
     loadData();
   }, [user, venueOwner, authLoading, router, venueId, pathname]);
 
-  // Find the parent group to load parent candidates
   const parentGroup = useMemo(
     () => groups.find((g) => g.name === 'Γονέας'),
     [groups]
@@ -70,7 +68,6 @@ export default function NewAcademyUserPage() {
         newUserId = await academyUserService.create(data);
       }
 
-      // Auto-create payment record if athlete and payments exist for current month
       const group = groups.find(g => g.id === data.groupId);
       if (group?.capabilities.includes('monthly_payment') && venueId) {
         const now = new Date();
@@ -98,7 +95,6 @@ export default function NewAcademyUserPage() {
 
   const handleQuickAddParent = async (parentData: Omit<AcademyUser, 'id' | 'createdAt' | 'updatedAt'>): Promise<string> => {
     const parentId = await academyUserService.create(parentData);
-    // Refresh parent candidates
     if (parentGroup) {
       const updated = await academyUserService.getByGroup(venueId, parentGroup.id);
       setParentCandidates(updated);
@@ -115,51 +111,44 @@ export default function NewAcademyUserPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 pb-20">
       {/* Header */}
-      <div className="flex items-center gap-6 pb-6 border-b border-zinc-100">
-        <Button variant="outline" size="icon" className="h-14 w-14 rounded-2xl border-zinc-200 shrink-0 hover:bg-zinc-50 hover:border-emerald-200 hover:text-emerald-600 transition-all active:scale-90" asChild>
+      <div className="flex items-center gap-3.5 pb-2 border-b border-zinc-50">
+        <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-zinc-200 shrink-0" asChild>
           <Link href="/management/academy/users">
-            <ArrowLeft className="h-6 w-6" />
+            <ArrowLeft className="h-4 w-4 text-zinc-400" />
           </Link>
         </Button>
-        <div className="flex items-center gap-5">
-           <div className="h-16 w-16 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-xl shadow-zinc-200 shrink-0">
-             <UserPlus className="h-8 w-8 text-emerald-400" />
-           </div>
-           <div className="space-y-1">
-             <h1 className="text-4xl font-black tracking-tight text-zinc-900 uppercase">
-               {toGreekUpperCase('Νέος Χρήστης')}
-             </h1>
-             <p className="text-lg font-bold text-zinc-400 uppercase tracking-tight">
-               {toGreekUpperCase('ΔΗΜΙΟΥΡΓΙΑ ΝΕΟΥ ΜΕΛΟΥΣ ΑΚΑΔΗΜΙΑΣ')}
-             </p>
-           </div>
+        <div className="h-12 w-12 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shadow-zinc-200 shrink-0">
+          <UserPlus className="h-6 w-6 text-emerald-400" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
+            {toGreekUpperCase('Νέος Χρήστης')}
+          </h1>
+          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+            {toGreekUpperCase('Δημιουργία νέου μέλους ακαδημίας')}
+          </p>
         </div>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-4">
+        <div className="bg-red-50 border border-red-100 rounded-2xl p-4 animate-in fade-in">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
-              <p className="text-sm text-destructive">{error}</p>
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-red-500" />
+              <p className="text-sm font-bold text-red-700">{error}</p>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setError(null)}
-              className="text-destructive/60 hover:text-destructive shrink-0"
-            >
-              Κλείσιμο
+            <Button variant="ghost" size="sm" onClick={() => setError(null)} className="text-red-400 hover:text-red-600">
+              <X className="h-4 w-4" />
             </Button>
           </div>
         </div>
       )}
 
       {/* Form Card */}
-      <div className="rounded-[3rem] border border-zinc-100 bg-white p-10 sm:p-14 shadow-sm overflow-hidden">
+      <div className="rounded-2xl border border-zinc-100 bg-white p-6 sm:p-8 shadow-sm">
         <AcademyUserForm
           venueId={venueId}
           groups={groups}
