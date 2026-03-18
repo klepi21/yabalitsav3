@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Όροι Χρήσης - Yabalitsa',
-    description: 'Όροι χρήσης και προϋποθέσεις για τη χρήση της πλατφόρμας Yabalitsa.',
+    description: 'Όροι χρήσης και προϋποθέσεις για τη χρήση της πλατφόρμας Yabalitsa .',
     images: ['/prev.png'],
   },
 };
