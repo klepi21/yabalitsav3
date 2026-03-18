@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Calendar, Trophy, BarChart3, Users, Zap, Shield, ChevronRight, CheckCircle2, LayoutDashboard, Target, Smartphone } from 'lucide-react';
+import HeroVideo from '@/components/HeroVideo';
 
 export default function RootPage() {
   return (
@@ -10,15 +11,7 @@ export default function RootPage() {
       <section className="relative min-h-screen w-full flex flex-col overflow-hidden">
         {/* Background Video */}
         <div className="absolute inset-0 w-full h-full overflow-hidden">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-80"
-          >
-            <source src="/backvide.mp4" type="video/mp4" />
-          </video>
+          <HeroVideo />
           {/* Dark gradient overlay to ensure text readability & blend to next section */}
           <div className="absolute inset-0 bg-gradient-to-b from-[#040D12]/70 via-[#040D12]/40 to-[#040D12] z-0" />
         </div>
