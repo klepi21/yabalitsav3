@@ -59,19 +59,29 @@ export default function RootPage() {
 
         {/* Hero Content */}
         <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pt-4 pb-24 w-full h-full">
-          {/* Glassmorphic Container for Readability */}
-          <div className="flex flex-col items-center text-center max-w-[900px] w-full mx-auto p-6 sm:p-8 md:py-12 md:px-14 rounded-[2rem] bg-black/20 backdrop-blur-md border border-white/10 shadow-2xl relative overflow-hidden">
+        {/* Glassmorphic Container for Readability */}
+          <div className="flex flex-col items-center text-center max-w-[1100px] w-full mx-auto p-6 sm:p-6 md:py-8 md:px-20 rounded-[2rem] bg-black/20 backdrop-blur-md border border-white/10 shadow-2xl relative overflow-hidden">
             
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[50%] bg-emerald-500/10 blur-[80px] rounded-full pointer-events-none" />
 
-            <h1 className="relative z-10 text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5rem] font-medium leading-[1.1] tracking-tight mb-5">
+            <h1 className="relative z-10 text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5rem] font-medium leading-[1.1] tracking-tight mb-4">
               <span className="text-zinc-100 drop-shadow">Το μέλλον της διαχείρισης</span><br />
-              <span className="text-white flex items-center justify-center gap-2 sm:gap-4 flex-wrap mt-1 sm:mt-2 drop-shadow-md">
-                έγινε <span className="font-serif italic lowercase text-white tracking-normal px-1">digital</span> <span className="font-black text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.4)]">+ Yabalitsa</span>
+              <span className="text-white flex items-center justify-center gap-2 md:gap-4 flex-wrap mt-1 sm:mt-2 drop-shadow-md">
+                έγινε <span className="font-serif italic lowercase text-white tracking-normal px-1">digital</span>
+                <span className="flex items-center gap-2 md:gap-3 font-black text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.4)] ml-1">
+                  +
+                  <Image 
+                    src="/yabalo.png" 
+                    alt="Yabalitsa Logo" 
+                    width={320} 
+                    height={64} 
+                    className="w-[160px] sm:w-[200px] md:w-[260px] lg:w-[290px] h-auto filter brightness-0 invert drop-shadow-[0_0_10px_rgba(255,255,255,0.6)] translate-y-[2px] md:translate-y-[4px]" 
+                  />
+                </span>
               </span>
             </h1>
             
-            <p className="relative z-10 text-zinc-300 text-sm md:text-base lg:text-lg max-w-2xl mx-auto mb-8 font-light leading-relaxed tracking-wide drop-shadow">
+            <p className="relative z-10 text-zinc-300 text-sm md:text-base lg:text-lg max-w-3xl mx-auto mb-6 font-light leading-relaxed tracking-wide drop-shadow">
               Σας βοηθάμε να αυτοματοποιήσετε τις κρατήσεις σας, να ελέγχετε τις συνδρομές των ακαδημιών και να εξοικονομείτε χρόνο σε ένα σύγχρονο οικοσύστημα.
             </p>
 
