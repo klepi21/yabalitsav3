@@ -34,6 +34,7 @@ function convertSession(id: string, data: Record<string, unknown>): TrainingSess
     drills: (data.drills as TrainingSession['drills']) || [],
     attendance: (data.attendance as TrainingSession['attendance']) || [],
     status: (data.status as TrainingSession['status']) || 'scheduled',
+    recurringGroupId: data.recurringGroupId as string | undefined,
     createdAt: (data.createdAt as { toDate?(): Date })?.toDate?.() || new Date(),
     updatedAt: (data.updatedAt as { toDate?(): Date })?.toDate?.() || new Date(),
   };
@@ -120,5 +121,50 @@ export const trainingService = {
       status: 'cancelled',
       updatedAt: serverTimestamp(),
     });
+  },
+
+  // Get all sessions in a recurring group
+  async getByRecurringGroup(recurringGroupId: string): Promise<TrainingSession[]> {
+    const q = query(
+      collection(db, COLLECTION),
+      where('recurringGroupId', '==', recurringGroupId),
+      orderBy('date', 'asc')
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map((d) => convertSession(d.id, d.data()));
+  },
+
+  // Update all sessions in a recurring group
+  async updateRecurringAll(recurringGroupId: string, data: Partial<TrainingSession>): Promise<void> {
+    const sessions = await this.getByRecurringGroup(recurringGroupId);
+    for (const session of sessions) {
+      await this.update(session.id, data);
+    }
+  },
+
+  // Update this session and all future ones in the recurring group
+  async updateRecurringFuture(recurringGroupId: string, fromDate: string, data: Partial<TrainingSession>): Promise<void> {
+    const sessions = await this.getByRecurringGroup(recurringGroupId);
+    const future = sessions.filter((s) => s.date >= fromDate);
+    for (const session of future) {
+      await this.update(session.id, data);
+    }
+  },
+
+  // Delete all sessions in a recurring group
+  async deleteRecurringAll(recurringGroupId: string): Promise<void> {
+    const sessions = await this.getByRecurringGroup(recurringGroupId);
+    for (const session of sessions) {
+      await deleteDoc(doc(db, COLLECTION, session.id));
+    }
+  },
+
+  // Delete this and future sessions in a recurring group
+  async deleteRecurringFuture(recurringGroupId: string, fromDate: string): Promise<void> {
+    const sessions = await this.getByRecurringGroup(recurringGroupId);
+    const future = sessions.filter((s) => s.date >= fromDate);
+    for (const session of future) {
+      await deleteDoc(doc(db, COLLECTION, session.id));
+    }
   },
 };

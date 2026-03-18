@@ -62,6 +62,7 @@ export interface TrainingSession {
   drills: TrainingDrill[];
   attendance: TrainingAttendance[];
   status: TrainingStatus;
+  recurringGroupId?: string;  // links recurring sessions together
   createdAt: Date;
   updatedAt: Date;
 }

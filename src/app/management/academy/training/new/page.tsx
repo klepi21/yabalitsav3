@@ -130,8 +130,9 @@ export default function NewTrainingPage() {
       setError(null);
       const coach = coaches.find((c) => c.id === form.coachId);
       const dates = getRecurringDates();
-      const promises = dates.map((date) =>
-        trainingService.create({
+      const recurringGroupId = isRecurring && dates.length > 1 ? crypto.randomUUID() : undefined;
+      for (const date of dates) {
+        await trainingService.create({
           venueId,
           squadId: form.squadId,
           title: form.title.trim(),
@@ -146,9 +147,9 @@ export default function NewTrainingPage() {
           drills,
           attendance: [],
           status: 'scheduled',
-        })
-      );
-      await Promise.all(promises);
+          ...(recurringGroupId ? { recurringGroupId } : {}),
+        });
+      }
       router.push('/management/academy/training');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Αποτυχία δημιουργίας');
