@@ -553,9 +553,9 @@ export default function SettingsPage() {
         <div className="space-y-8">
           {/* Current Plan Info */}
           {venue && (
-            <Card className="premium-card border-none bg-zinc-900 text-white overflow-hidden group shadow-2xl shadow-zinc-200">
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:scale-110 transition-transform">
-                <Sparkles className="h-32 w-32" />
+            <Card className="premium-card border-zinc-200 bg-white shadow-xl shadow-zinc-200/50 overflow-hidden group">
+              <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform pointer-events-none">
+                <Sparkles className="h-32 w-32 text-zinc-900" />
               </div>
               <CardHeader>
                 <CardTitle className="text-zinc-400 font-black text-xs uppercase tracking-widest">{toGreekUpperCase('Τρέχον Πλάνο')}</CardTitle>
@@ -563,25 +563,25 @@ export default function SettingsPage() {
               <CardContent>
                 <div className="flex flex-col gap-8 relative z-10">
                   <div className="flex items-end gap-3">
-                    <span className="text-5xl font-black text-white">
+                    <span className="text-5xl font-black text-zinc-900 tracking-tighter">
                       {toGreekUpperCase(venue.planType || 'Basic')}
                     </span>
-                    <span className="text-zinc-400 font-bold mb-2">
+                    <span className="text-zinc-400 font-black mb-2 text-[10px] uppercase tracking-widest">
                       {toGreekUpperCase(venue.plan === 'subscription' ? 'Plan' : 'Free Trial')}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                      <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1">{toGreekUpperCase('Υπόλοιπο')}</p>
-                      <p className="text-2xl font-black text-white">
-                        {calculateDaysRemaining(venue) ?? 0} <span className="text-sm font-bold opacity-60 uppercase">{toGreekUpperCase('ημέρες')}</span>
+                    <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100/50">
+                      <p className="text-zinc-400 text-[9px] font-black uppercase tracking-widest mb-1">{toGreekUpperCase('Υπόλοιπο')}</p>
+                      <p className="text-2xl font-black text-zinc-900">
+                        {calculateDaysRemaining(venue) ?? 0} <span className="text-xs font-bold text-zinc-400 uppercase tracking-tight">{toGreekUpperCase('ημέρες')}</span>
                       </p>
                     </div>
 
-                    <div className="bg-white/5 rounded-2xl p-6 border border-white/10">
-                      <p className="text-zinc-500 text-[10px] font-black uppercase tracking-widest mb-1">{toGreekUpperCase('Λήξη')}</p>
-                      <p className="text-sm font-black text-white truncate">
+                    <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100/50">
+                      <p className="text-zinc-400 text-[9px] font-black uppercase tracking-widest mb-1">{toGreekUpperCase('Λήξη')}</p>
+                      <p className="text-sm font-black text-zinc-900 truncate">
                         {(() => {
                           const endDateInfo = getSubscriptionEndDate(venue, lastPayment);
                           return endDateInfo ? new Date(endDateInfo.date).toLocaleDateString('el-GR', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
@@ -592,10 +592,10 @@ export default function SettingsPage() {
 
                   <Button 
                     asChild
-                    className="h-11 w-full rounded-xl bg-white text-zinc-900 hover:bg-emerald-400 font-bold shadow-lg transition-all active:scale-95"
+                    className="h-12 w-full rounded-2xl bg-zinc-900 text-white hover:bg-black font-black text-[11px] shadow-lg transition-all active:scale-95 uppercase tracking-widest"
                   >
                     <Link href="/management/settings/renewal">
-                      <ArrowUpCircle className="h-4 w-4 mr-2" />
+                      <ArrowUpCircle className="h-4 w-4 mr-2 text-emerald-400" />
                       {toGreekUpperCase('Ανανέωση ή Αναβάθμιση')}
                     </Link>
                   </Button>

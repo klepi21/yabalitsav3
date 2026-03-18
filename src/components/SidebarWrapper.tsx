@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { Zap, Bell, Search, MessageSquare, User } from 'lucide-react';
+import { Zap, Bell, User } from 'lucide-react';
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar from './Sidebar';
@@ -132,30 +132,13 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
         <main className="min-h-screen">
           {/* Top bar - Modern Donezo Style */}
           <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-zinc-100/80">
-            <div className="px-6 py-4 flex items-center justify-between gap-8 mx-auto">
+            <div className="px-6 py-4 flex items-center justify-end gap-8 mx-auto">
               
-              {/* Modern Search Bar */}
-              <div className="flex-1 max-w-md relative group">
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-emerald-600 transition-colors">
-                  <Search className="h-4 w-4" />
-                </div>
-                <input 
-                  type="text" 
-                  placeholder={toGreekUpperCase('Αναζήτηση...')}
-                  className="w-full h-11 pl-11 pr-4 rounded-2xl bg-zinc-100/50 border-transparent focus:bg-white focus:border-emerald-100 focus:ring-4 focus:ring-emerald-500/5 transition-all text-[13px] font-bold placeholder:text-zinc-400 outline-none"
-                />
-                <div className="absolute right-3 top-1/2 -translate-y-1/2 px-1.5 py-1 rounded-lg bg-zinc-200/50 text-zinc-400 text-[10px] font-black border border-zinc-200">
-                  ⌘ F
-                </div>
-              </div>
+
 
               {/* Right Side Actions */}
               <div className="flex items-center gap-2">
-                {/* Messages */}
-                <button className="p-2.5 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all border border-transparent hover:border-zinc-100 relative">
-                  <MessageSquare className="h-5 w-5" />
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-emerald-500 rounded-full border-2 border-white" />
-                </button>
+
 
                 {/* Notifications */}
                 <div className="relative notification-bell">
