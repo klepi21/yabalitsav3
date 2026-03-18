@@ -2,10 +2,13 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
-import { AuthProvider } from '@/contexts/AuthContext';
-import SidebarWrapper from './SidebarWrapper';
-import GoogleAnalytics from './GoogleAnalytics';
-import { authService } from '@/lib/firebase-services';
+import dynamic from 'next/dynamic';
+
+const AuthProvider = dynamic(() => import('@/contexts/AuthContext').then(m => m.AuthProvider), { ssr: false });
+const SidebarWrapper = dynamic(() => import('./SidebarWrapper'), { ssr: false });
+const GoogleAnalytics = dynamic(() => import('./GoogleAnalytics'), { ssr: false });
+
+// authService removed from static imports to prevent loading Firebase SDK on public pages
 
 interface ConditionalWrapperProps {
   children: React.ReactNode;
@@ -42,17 +45,27 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
   useEffect(() => {
     if (!needsAuth) return;
 
-    const unsubscribe = authService.onAuthStateChanged((user) => {
-      if (user) {
-        setIsAuthenticated(true);
-      } else {
-        setIsAuthenticated(false);
-        router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`);
-      }
-      setIsChecking(false);
-    });
+    let unsubscribe: (() => void) | undefined;
 
-    return () => unsubscribe();
+    const initAuth = async () => {
+      // Dynamic import of firebase-services to avoid bundling Firebase SDK on public pages
+      const { authService } = await import('@/lib/firebase-services');
+      unsubscribe = authService.onAuthStateChanged((user) => {
+        if (user) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+          router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`);
+        }
+        setIsChecking(false);
+      });
+    };
+
+    initAuth();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, [pathname, needsAuth, router]);
 
   // Show loading state while checking authentication
