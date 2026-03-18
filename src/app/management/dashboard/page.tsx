@@ -1096,25 +1096,32 @@ export default function DashboardPage() {
       {/* 50/50 Row for Academies and Pitches */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 pt-4">
         {/* Academies List - Left Side */}
-        <div className="space-y-6">
+        <div className="rounded-3xl bg-white border border-zinc-200/80 overflow-hidden shadow-xl shadow-zinc-200/20 h-fit">
           <div 
-            className="flex items-center justify-between cursor-pointer group/header"
+            className="flex items-center justify-between cursor-pointer group/header px-6 py-5 bg-zinc-50/50 hover:bg-zinc-50 transition-colors border-b border-zinc-100"
             onClick={() => setIsSquadsExpanded(!isSquadsExpanded)}
           >
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg group-hover/header:border-emerald-200 transition-colors">
-                <Trophy className="h-6 w-6 text-emerald-500" />
+              <div className="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 shadow-inner group-hover/header:bg-emerald-200 transition-colors shrink-0">
+                <Trophy className="h-5 w-5" />
               </div>
-              <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight flex items-center gap-3">
-                {toGreekUpperCase('Ακαδημίες')}
-                {isSquadsExpanded ? <ChevronUp className="h-5 w-5 text-zinc-300" /> : <ChevronDown className="h-5 w-5 text-zinc-300" />}
-              </h2>
+              <div>
+                <h2 className="text-sm font-black text-zinc-900 uppercase tracking-widest">
+                  {toGreekUpperCase('Ακαδημίες')}
+                </h2>
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
+                  Τμήματα & Ομάδες
+                </p>
+              </div>
             </div>
-            <Button size="icon" variant="ghost" className="h-10 w-10 rounded-2xl bg-zinc-100 hover:bg-zinc-200" asChild onClick={(e) => e.stopPropagation()}>
-              <Link href="/management/academy/squads">
-                <Plus className="h-5 w-5" />
-              </Link>
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button size="icon" variant="ghost" className="h-8 w-8 rounded-xl bg-white shadow-sm border border-zinc-200 hover:bg-zinc-100 text-zinc-600 shrink-0" asChild onClick={(e) => e.stopPropagation()}>
+                <Link href="/management/academy/squads">
+                  <Plus className="h-4 w-4" />
+                </Link>
+              </Button>
+              {isSquadsExpanded ? <ChevronUp className="h-5 w-5 text-zinc-400 shrink-0" /> : <ChevronDown className="h-5 w-5 text-zinc-400 shrink-0" />}
+            </div>
           </div>
 
           <AnimatePresence>
@@ -1124,16 +1131,16 @@ export default function DashboardPage() {
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="overflow-hidden"
+                className="overflow-hidden bg-white"
               >
-                <div className="space-y-4">
+                <div className="p-6 space-y-4">
                   {squads.length === 0 ? (
-                    <div className="py-12 text-center bg-white rounded-[2rem] border-2 border-dashed border-zinc-100 italic text-zinc-400 font-bold">
+                    <div className="py-12 text-center bg-zinc-50 rounded-[2rem] border-2 border-dashed border-zinc-200 italic text-zinc-400 font-bold">
                       Δεν υπάρχουν ακαδημίες / τμήματα
                     </div>
                   ) : (
                     squads.slice(0, 5).map((squad) => (
-                      <Card key={squad.id} className="rounded-3xl border border-black/[0.08] bg-white shadow-xl shadow-zinc-200/20 overflow-hidden group hover:shadow-2xl transition-all duration-300">
+                      <Card key={squad.id} className="rounded-3xl border border-black/[0.08] bg-white shadow-md shadow-zinc-200/20 overflow-hidden group hover:shadow-lg transition-all duration-300">
                         <CardContent className="p-4">
                           <div className="flex items-center gap-4">
                             <div className="h-14 w-14 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shrink-0 relative">
@@ -1162,25 +1169,32 @@ export default function DashboardPage() {
         </div>
 
         {/* Pitches List - Right Side */}
-        <div className="space-y-6">
+        <div className="rounded-3xl bg-white border border-zinc-200/80 overflow-hidden shadow-xl shadow-zinc-200/20 h-fit">
           <div 
-            className="flex items-center justify-between cursor-pointer group/header"
+            className="flex items-center justify-between cursor-pointer group/header px-6 py-5 bg-zinc-50/50 hover:bg-zinc-50 transition-colors border-b border-zinc-100"
             onClick={() => setIsPitchesExpanded(!isPitchesExpanded)}
           >
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg group-hover/header:border-emerald-200 transition-colors">
-                <FootballPitch className="h-6 w-6 text-emerald-500" />
+              <div className="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 shadow-inner group-hover/header:bg-emerald-200 transition-colors shrink-0">
+                <FootballPitch className="h-5 w-5" />
               </div>
-              <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight flex items-center gap-3">
-                {toGreekUpperCase('Γήπεδα')}
-                {isPitchesExpanded ? <ChevronUp className="h-5 w-5 text-zinc-300" /> : <ChevronDown className="h-5 w-5 text-zinc-300" />}
-              </h2>
+              <div>
+                <h2 className="text-sm font-black text-zinc-900 uppercase tracking-widest">
+                  {toGreekUpperCase('Γήπεδα')}
+                </h2>
+                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
+                  Εγκαταστάσεις Venue
+                </p>
+              </div>
             </div>
-            <Button size="icon" variant="ghost" className="h-10 w-10 rounded-2xl bg-zinc-100 hover:bg-zinc-200" asChild onClick={(e) => e.stopPropagation()}>
-              <Link href="/management/pitches/new">
-                <Plus className="h-5 w-5" />
-              </Link>
-            </Button>
+            <div className="flex items-center gap-3">
+              <Button size="icon" variant="ghost" className="h-8 w-8 rounded-xl bg-white shadow-sm border border-zinc-200 hover:bg-zinc-100 text-zinc-600 shrink-0" asChild onClick={(e) => e.stopPropagation()}>
+                <Link href="/management/pitches/new">
+                  <Plus className="h-4 w-4" />
+                </Link>
+              </Button>
+              {isPitchesExpanded ? <ChevronUp className="h-5 w-5 text-zinc-400 shrink-0" /> : <ChevronDown className="h-5 w-5 text-zinc-400 shrink-0" />}
+            </div>
           </div>
 
           <AnimatePresence>
@@ -1190,16 +1204,16 @@ export default function DashboardPage() {
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
-                className="overflow-hidden"
+                className="overflow-hidden bg-white"
               >
-                <div className="space-y-4">
+                <div className="p-6 space-y-4">
                   {pitches.length === 0 ? (
-                    <div className="py-12 text-center bg-white rounded-[2rem] border-2 border-dashed border-zinc-100 italic text-zinc-400 font-bold">
+                    <div className="py-12 text-center bg-zinc-50 rounded-[2rem] border-2 border-dashed border-zinc-200 italic text-zinc-400 font-bold">
                       Δεν υπάρχουν γήπεδα
                     </div>
                   ) : (
                     pitches.slice(0, 5).map((pitch) => (
-                      <Card key={pitch.id} className="rounded-3xl border border-black/[0.08] bg-white shadow-xl shadow-zinc-200/10 overflow-hidden group hover:shadow-2xl transition-all duration-300">
+                      <Card key={pitch.id} className="rounded-3xl border border-black/[0.08] bg-white shadow-md shadow-zinc-200/10 overflow-hidden group hover:shadow-lg transition-all duration-300">
                         <CardContent className="p-4">
                           <div className="flex items-center gap-4">
                             <div className="h-14 w-20 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shrink-0 relative">
