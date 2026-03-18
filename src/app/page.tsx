@@ -33,12 +33,10 @@ export default function RootPage() {
               <Link href="#academies" className="hover:text-emerald-400 transition">Ακαδημίες</Link>
               <Link href="#pitches" className="hover:text-emerald-400 transition">Γήπεδα</Link>
               <Link href="#reports" className="hover:text-emerald-400 transition">Αναφορές</Link>
+              <Link href="/blog" className="hover:text-emerald-400 transition">Blog</Link>
             </nav>
           </div>
           <div className="flex items-center gap-6">
-            <Link href="/venue-login" className="hidden sm:flex items-center gap-1 text-zinc-300 hover:text-white transition">
-              Για Παίκτες <span className="text-[10px]">↗</span>
-            </Link>
             <div className="flex items-center gap-3">
               <Link href="/venue-login" className="hidden sm:flex px-4 py-2 rounded border border-zinc-600 bg-white/5 hover:bg-white/10 text-white transition">
                 Σύνδεση
