@@ -17,6 +17,7 @@ import {
   ClipboardList,
   Dumbbell,
   Euro,
+  HeartPulse,
   LogOut,
   ChevronDown,
   ChevronRight,
@@ -48,6 +49,7 @@ const navigation: NavItem[] = [
       { name: 'Κατηγορίες Χρηστών', href: '/management/academy/user-groups', icon: ClipboardList },
       { name: 'Προπονήσεις', href: '/management/academy/training', icon: Dumbbell },
       { name: 'Πληρωμές', href: '/management/academy/payments', icon: Euro },
+      { name: 'Ιατρικά', href: '/management/academy/medical', icon: HeartPulse },
     ]
   },
   {

@@ -348,6 +348,31 @@ export default function AcademyUserForm({
         </div>
       )}
 
+      {/* Medical Certificate (capability) — only show if not already a dynamic field */}
+      {hasCapability('medical_tracking') && !selectedGroup?.fields.some(f => f.key === 'medical_cert_expiry') && (
+        <div className="space-y-4 pt-6 border-t border-red-100">
+          <div className="flex items-start gap-3">
+            <div className="h-8 w-8 rounded-lg bg-red-50 flex items-center justify-center shrink-0 mt-0.5">
+              <span className="text-red-500 text-sm">🏥</span>
+            </div>
+            <div>
+              <Label className="text-[11px] font-black uppercase tracking-[0.2em] text-red-700">
+                {toGreekUpperCase('Ημ. Λήξης Ιατρικού Πιστοποιητικού')}
+              </Label>
+              <p className="text-[11px] text-red-500/70 font-medium mt-0.5">
+                Απαραίτητο για τη συμμετοχή σε προπονήσεις και αγώνες
+              </p>
+            </div>
+          </div>
+          <Input
+            type="date"
+            value={(fieldValues['medical_cert_expiry'] as string) || ''}
+            onChange={(e) => setFieldValue('medical_cert_expiry', e.target.value || null)}
+            className="h-16 px-6 rounded-2xl bg-zinc-50 border-none font-bold text-lg focus:bg-white focus:ring-4 focus:ring-red-500/10 transition-all shadow-inner"
+          />
+        </div>
+      )}
+
       {/* Squad Assignment (capability) */}
       {hasCapability('squad_assignment') && squads.length > 0 && (
         <div className="space-y-4 pt-6 border-t border-zinc-100">

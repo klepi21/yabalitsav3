@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { userGroupService } from '@/lib/academy-services';
 import { UserGroup, GROUP_COLORS } from '@/types/academy';
-import { Loader2, Plus, Pencil, Trash2, ClipboardList, Shield, Link2, Users, AlertCircle, Euro } from 'lucide-react';
+import { Loader2, Plus, Pencil, Trash2, ClipboardList, Shield, Link2, Users, AlertCircle, Euro, HeartPulse } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn, toGreekUpperCase } from '@/lib/utils';
@@ -263,6 +263,12 @@ export default function UserGroupsPage() {
                                     <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-teal-600 border-none bg-teal-50/50">
                                         <Euro className="h-3.5 w-3.5 mr-1.5" />
                                         {toGreekUpperCase('Μηνιαία πληρωμή')}
+                                    </Badge>
+                                )}
+                                {group.capabilities.includes('medical_tracking') && (
+                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-red-600 border-none bg-red-50/50">
+                                        <HeartPulse className="h-3.5 w-3.5 mr-1.5" />
+                                        {toGreekUpperCase('Ιατρικό πιστοποιητικό')}
                                     </Badge>
                                 )}
                             </div>

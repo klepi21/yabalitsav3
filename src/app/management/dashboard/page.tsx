@@ -22,13 +22,15 @@ import {
   User,
   Trophy,
   Smile,
+  HeartPulse,
+  XCircle,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { squadService } from '@/lib/academy-services';
+import { squadService, academyUserService, userGroupService } from '@/lib/academy-services';
 import { trainingService } from '@/lib/training-services';
-import { Squad } from '@/types/academy';
+import { Squad, AcademyUser } from '@/types/academy';
 import { TrainingSession } from '@/types/training';
 
 const FootballPitch = ({ className }: { className?: string }) => (
@@ -77,6 +79,7 @@ export default function DashboardPage() {
   const [squads, setSquads] = useState<Squad[]>([]);
   const [trainings, setTrainings] = useState<TrainingSession[]>([]);
   const [venue, setVenue] = useState<Venue | null>(null);
+  const [medicalAlerts, setMedicalAlerts] = useState<{ expired: AcademyUser[]; expiringSoon: AcademyUser[] }>({ expired: [], expiringSoon: [] });
   const [dataLoading, setDataLoading] = useState(true);
   const [_isVenueInfoExpanded, _setIsVenueInfoExpanded] = useState(false);
   const [showQuickBooking, setShowQuickBooking] = useState(false);
@@ -165,6 +168,39 @@ export default function DashboardPage() {
         ]);
         setSquads(squadsData);
         setTrainings(trainingsData);
+
+        // Medical alerts
+        const [usersData, groupsData] = await Promise.all([
+          academyUserService.getByVenue(venueOwner.venueId),
+          userGroupService.getByVenue(venueOwner.venueId),
+        ]);
+        const medicalGroupIds = new Set(
+          groupsData.filter((g) => g.capabilities?.includes('medical_tracking')).map((g) => g.id)
+        );
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const in30Days = new Date(today);
+        in30Days.setDate(in30Days.getDate() + 30);
+
+        const medicalUsers = usersData.filter((u) => medicalGroupIds.has(u.groupId));
+        const expired: AcademyUser[] = [];
+        const expiringSoon: AcademyUser[] = [];
+
+        for (const u of medicalUsers) {
+          const expiry = u.fields?.medical_cert_expiry as string | undefined;
+          if (!expiry) {
+            expired.push(u); // No cert = treat as expired
+            continue;
+          }
+          const expiryDate = new Date(expiry);
+          expiryDate.setHours(0, 0, 0, 0);
+          if (expiryDate < today) {
+            expired.push(u);
+          } else if (expiryDate <= in30Days) {
+            expiringSoon.push(u);
+          }
+        }
+        setMedicalAlerts({ expired, expiringSoon });
       } catch (err) {
         console.error('Error loading academy data:', err);
       }
@@ -848,6 +884,58 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+      {/* Medical Alerts Widget */}
+      {(medicalAlerts.expired.length > 0 || medicalAlerts.expiringSoon.length > 0) && (
+        <Card className="rounded-3xl border-2 border-red-200 bg-gradient-to-r from-red-50 to-amber-50 shadow-xl shadow-red-100/30 overflow-hidden">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="h-12 w-12 rounded-2xl bg-red-600 flex items-center justify-center text-white shadow-lg shrink-0">
+                  <HeartPulse className="h-6 w-6" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-red-800 uppercase tracking-tight">
+                    {toGreekUpperCase('Ιατρικά Πιστοποιητικά')}
+                  </h3>
+                  <div className="flex flex-wrap gap-3 mt-2">
+                    {medicalAlerts.expired.length > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <XCircle className="h-4 w-4 text-red-600" />
+                        <span className="text-sm font-black text-red-700">
+                          {medicalAlerts.expired.length} ληγμένα/χωρίς
+                        </span>
+                      </div>
+                    )}
+                    {medicalAlerts.expiringSoon.length > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <Clock className="h-4 w-4 text-amber-600" />
+                        <span className="text-sm font-black text-amber-700">
+                          {medicalAlerts.expiringSoon.length} λήγουν σύντομα
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  {medicalAlerts.expired.length > 0 && (
+                    <p className="text-xs text-red-500 font-medium mt-2">
+                      {medicalAlerts.expired.slice(0, 3).map(u => u.displayName).join(', ')}
+                      {medicalAlerts.expired.length > 3 && ` +${medicalAlerts.expired.length - 3} ακόμα`}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <Button
+                asChild
+                className="rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold shadow-lg shrink-0"
+              >
+                <Link href="/management/academy/medical">
+                  Προβολή
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* 50/50 Row for Academies and Pitches */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 pt-4">
