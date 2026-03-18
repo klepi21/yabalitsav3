@@ -16,7 +16,7 @@ export interface UserGroupField {
 }
 
 // Special capabilities a group can have (for built-in features)
-export type GroupCapability = 'squad_assignment' | 'parent_linking' | 'coach_squads' | 'monthly_payment' | 'medical_tracking';
+export type GroupCapability = 'squad_assignment' | 'parent_linking' | 'coach_squads' | 'monthly_payment' | 'medical_tracking' | 'athlete_card';
 
 // User Group definition - stored per venue in Firestore
 export interface UserGroup {
@@ -56,9 +56,10 @@ export const CAPABILITY_LABELS: Record<GroupCapability, { label: string; descrip
   coach_squads: { label: 'Διαχείριση τμημάτων', description: 'Μπορούν να αναλάβουν τμήματα ως προπονητές' },
   monthly_payment: { label: 'Μηνιαία πληρωμή', description: 'Παρακολούθηση μηνιαίας συνδρομής' },
   medical_tracking: { label: 'Ιατρικό πιστοποιητικό', description: 'Παρακολούθηση λήξης ιατρικού πιστοποιητικού' },
+  athlete_card: { label: 'Καρτέλα αθλητή', description: 'Προβολή πλήρους καρτέλας με στοιχεία, πληρωμές & πιστοποιητικά' },
 };
 
-export const ALL_CAPABILITIES: GroupCapability[] = ['squad_assignment', 'parent_linking', 'coach_squads', 'monthly_payment', 'medical_tracking'];
+export const ALL_CAPABILITIES: GroupCapability[] = ['squad_assignment', 'parent_linking', 'coach_squads', 'monthly_payment', 'medical_tracking', 'athlete_card'];
 
 export const AVAILABLE_ICONS = [
   '⚽', '🏆', '👨‍👩‍👧', '👤', '🏃', '🎓', '🏅', '💪',

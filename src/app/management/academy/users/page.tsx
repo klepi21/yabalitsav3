@@ -4,9 +4,9 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
-import { academyUserService, userGroupService, squadService } from '@/lib/academy-services';
-import { AcademyUser, UserGroup, Squad, GROUP_COLORS } from '@/types/academy';
-import { Loader2, Plus, Search, Users, Pencil, Trash2, Mail, Phone, MoreHorizontal, AlertCircle } from 'lucide-react';
+import { academyUserService, userGroupService, squadService, academyPaymentService } from '@/lib/academy-services';
+import { AcademyUser, AcademyPayment, UserGroup, Squad, GROUP_COLORS, PAYMENT_METHOD_LABELS } from '@/types/academy';
+import { Loader2, Plus, Search, Users, Pencil, Trash2, Mail, Phone, MoreHorizontal, AlertCircle, FileUser, Check, X, ShieldAlert } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -55,6 +55,9 @@ export default function AcademyUsersPage() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [cardUser, setCardUser] = useState<AcademyUser | null>(null);
+  const [cardPayments, setCardPayments] = useState<AcademyPayment[]>([]);
+  const [cardLoading, setCardLoading] = useState(false);
 
   const urlGroupId = searchParams.get('group');
   const urlSquad = searchParams.get('squad');
@@ -129,6 +132,19 @@ export default function AcademyUsersPage() {
   const getSquadName = (squadId: string) => {
     const squad = squads.find((s) => s.id === squadId);
     return squad ? `${squad.name} (${squad.ageGroup})` : 'Χωρίς τμήμα';
+  };
+
+  const openAthleteCard = async (athlete: AcademyUser) => {
+    setCardUser(athlete);
+    setCardLoading(true);
+    try {
+      const payments = await academyPaymentService.getByVenue(venueId);
+      setCardPayments(payments.filter((p) => p.userId === athlete.id));
+    } catch {
+      setCardPayments([]);
+    } finally {
+      setCardLoading(false);
+    }
   };
 
   const activeGroup = groupFilter !== 'all' ? getGroup(groupFilter) : null;
@@ -319,6 +335,15 @@ export default function AcademyUsersPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-xl border-zinc-100 animate-in zoom-in-95 duration-200">
+                          {group?.capabilities.includes('athlete_card') && (
+                            <DropdownMenuItem
+                              onSelect={() => openAthleteCard(u)}
+                              className="rounded-xl px-4 py-3 font-bold cursor-pointer transition-colors"
+                            >
+                              <FileUser className="h-4 w-4 mr-3 text-emerald-500" />
+                              {toGreekUpperCase('Καρτέλα')}
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem asChild className="rounded-xl px-4 py-3 font-bold cursor-pointer transition-colors">
                             <Link href={`/management/academy/users/${u.id}/edit`} className="flex items-center w-full">
                               <Pencil className="h-4 w-4 mr-3 text-zinc-400" />
@@ -440,6 +465,15 @@ export default function AcademyUsersPage() {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-xl border-zinc-100">
+                              {group?.capabilities.includes('athlete_card') && (
+                                <DropdownMenuItem
+                                  onSelect={() => openAthleteCard(u)}
+                                  className="rounded-xl px-4 py-3 font-bold cursor-pointer transition-colors"
+                                >
+                                  <FileUser className="h-4 w-4 mr-3 text-emerald-500" />
+                                  Καρτέλα
+                                </DropdownMenuItem>
+                              )}
                               <DropdownMenuItem asChild className="rounded-xl px-4 py-3 font-bold cursor-pointer transition-colors">
                                 <Link href={`/management/academy/users/${u.id}/edit`}>
                                   <Pencil className="h-4 w-4 mr-3 text-zinc-400" />
@@ -486,6 +520,210 @@ export default function AcademyUsersPage() {
           </>
         )}
       </div>
+      {/* Athlete Card Dialog */}
+      <AlertDialog open={cardUser !== null} onOpenChange={(open) => !open && setCardUser(null)}>
+        <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl p-0 max-w-lg overflow-hidden max-h-[90vh] overflow-y-auto">
+          {cardUser && (() => {
+            const group = getGroup(cardUser.groupId);
+            const parent = users.find((u) => u.linked_athletes?.includes(cardUser.id));
+            const athleteSquadIds = cardUser.squad_ids || (cardUser.squad_id ? [cardUser.squad_id] : []);
+            const athleteSquads = squads.filter((s) => athleteSquadIds.includes(s.id));
+            const medicalExpiry = cardUser.fields?.medical_cert_expiry as string | undefined;
+            const medicalDate = medicalExpiry ? new Date(medicalExpiry) : null;
+            const isMedicalExpired = medicalDate ? medicalDate < new Date() : false;
+            const isMedicalExpiringSoon = medicalDate ? !isMedicalExpired && medicalDate < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : false;
+            const currentYear = new Date().getFullYear();
+            const yearPayments = cardPayments.filter((p) => p.month.startsWith(`${currentYear}-`));
+            const paidCount = yearPayments.filter((p) => p.paid).length;
+            const unpaidCount = yearPayments.filter((p) => !p.paid).length;
+            const totalPaid = yearPayments.filter((p) => p.paid).reduce((s, p) => s + p.amount, 0);
+
+            const MONTHS_SHORT = ['ΙΑΝ', 'ΦΕΒ', 'ΜΑΡ', 'ΑΠΡ', 'ΜΑΪ', 'ΙΟΥΝ', 'ΙΟΥΛ', 'ΑΥΓ', 'ΣΕΠ', 'ΟΚΤ', 'ΝΟΕ', 'ΔΕΚ'];
+
+            return (
+              <>
+                {/* Header */}
+                <div className="bg-gradient-to-br from-zinc-800 via-zinc-900 to-black px-8 pt-8 pb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="h-14 w-14 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center text-2xl shadow-lg">
+                      {group?.icon || '⚽'}
+                    </div>
+                    <div>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="text-xl font-black text-white tracking-tight text-left">
+                          {cardUser.displayName}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-zinc-400 text-sm font-medium text-left">
+                          {group?.name || 'Χρήστης'}
+                          {athleteSquads.length > 0 && (
+                            <span className="ml-2 text-emerald-400">• {athleteSquads.map((s) => s.name).join(', ')}</span>
+                          )}
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="px-8 py-6 space-y-6">
+                  {/* Personal Info */}
+                  <div className="space-y-3">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-zinc-300">
+                      {toGreekUpperCase('Στοιχεία')}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {cardUser.fields?.birth_year && (
+                        <div className="p-3 bg-zinc-50 rounded-xl">
+                          <p className="text-[9px] font-bold text-zinc-400 uppercase">Έτος Γέννησης</p>
+                          <p className="text-sm font-black text-zinc-900 mt-0.5">{cardUser.fields.birth_year}</p>
+                        </div>
+                      )}
+                      {cardUser.fields?.phone && (
+                        <div className="p-3 bg-zinc-50 rounded-xl">
+                          <p className="text-[9px] font-bold text-zinc-400 uppercase">Τηλέφωνο</p>
+                          <p className="text-sm font-black text-zinc-900 mt-0.5">{cardUser.fields.phone}</p>
+                        </div>
+                      )}
+                      {cardUser.fields?.email && (
+                        <div className="p-3 bg-zinc-50 rounded-xl">
+                          <p className="text-[9px] font-bold text-zinc-400 uppercase">Email</p>
+                          <p className="text-sm font-bold text-zinc-900 mt-0.5 truncate">{cardUser.fields.email}</p>
+                        </div>
+                      )}
+                      {parent && (
+                        <div className="p-3 bg-blue-50 rounded-xl">
+                          <p className="text-[9px] font-bold text-blue-400 uppercase">Γονέας</p>
+                          <p className="text-sm font-black text-blue-900 mt-0.5">{parent.displayName}</p>
+                          {parent.fields?.email && (
+                            <p className="text-[10px] text-blue-500 truncate">{parent.fields.email as string}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Medical Certificate */}
+                  {group?.capabilities.includes('medical_tracking') && (
+                    <div className="space-y-3">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-zinc-300">
+                        {toGreekUpperCase('Ιατρικό Πιστοποιητικό')}
+                      </p>
+                      <div className={cn(
+                        "flex items-center gap-3 p-4 rounded-xl border",
+                        isMedicalExpired
+                          ? "bg-red-50 border-red-200"
+                          : isMedicalExpiringSoon
+                            ? "bg-amber-50 border-amber-200"
+                            : medicalDate
+                              ? "bg-emerald-50 border-emerald-200"
+                              : "bg-zinc-50 border-zinc-200"
+                      )}>
+                        <ShieldAlert className={cn("h-5 w-5",
+                          isMedicalExpired ? "text-red-500" : isMedicalExpiringSoon ? "text-amber-500" : medicalDate ? "text-emerald-500" : "text-zinc-400"
+                        )} />
+                        <div>
+                          <p className={cn("text-sm font-black",
+                            isMedicalExpired ? "text-red-700" : isMedicalExpiringSoon ? "text-amber-700" : medicalDate ? "text-emerald-700" : "text-zinc-500"
+                          )}>
+                            {isMedicalExpired ? 'Ληγμένο' : isMedicalExpiringSoon ? 'Λήγει σύντομα' : medicalDate ? 'Σε ισχύ' : 'Δεν έχει καταχωρηθεί'}
+                          </p>
+                          {medicalDate && (
+                            <p className="text-[11px] text-zinc-500 font-medium mt-0.5">
+                              Λήξη: {medicalDate.toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Payments */}
+                  {group?.capabilities.includes('monthly_payment') && (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-300">
+                          {toGreekUpperCase(`Πληρωμές ${currentYear}`)}
+                        </p>
+                        {cardLoading && <Loader2 className="h-3 w-3 animate-spin text-zinc-300" />}
+                      </div>
+                      {!cardLoading && (
+                        <>
+                          <div className="grid grid-cols-3 gap-2">
+                            <div className="p-3 bg-emerald-50 rounded-xl text-center">
+                              <p className="text-lg font-black text-emerald-600">{paidCount}</p>
+                              <p className="text-[8px] font-bold text-emerald-400 uppercase">Εξοφλημένοι</p>
+                            </div>
+                            <div className="p-3 bg-red-50 rounded-xl text-center">
+                              <p className="text-lg font-black text-red-500">{unpaidCount}</p>
+                              <p className="text-[8px] font-bold text-red-400 uppercase">Ανεξόφλητοι</p>
+                            </div>
+                            <div className="p-3 bg-zinc-50 rounded-xl text-center">
+                              <p className="text-lg font-black text-zinc-900">&euro;{totalPaid}</p>
+                              <p className="text-[8px] font-bold text-zinc-400 uppercase">Σύνολο</p>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-6 gap-1.5">
+                            {Array.from({ length: 12 }, (_, i) => {
+                              const monthStr = `${currentYear}-${String(i + 1).padStart(2, '0')}`;
+                              const payment = yearPayments.find((p) => p.month === monthStr);
+                              const isPaid = payment?.paid || false;
+                              return (
+                                <div
+                                  key={i}
+                                  className={cn(
+                                    "rounded-lg p-1.5 text-center border",
+                                    isPaid
+                                      ? "bg-emerald-100 border-emerald-200"
+                                      : payment
+                                        ? "bg-red-50 border-red-200"
+                                        : "bg-zinc-50 border-zinc-100"
+                                  )}
+                                  title={isPaid
+                                    ? `${MONTHS_SHORT[i]}: Εξοφλημένο${payment?.paymentMethod ? ` (${PAYMENT_METHOD_LABELS[payment.paymentMethod]})` : ''}`
+                                    : `${MONTHS_SHORT[i]}: Ανεξόφλητο`
+                                  }
+                                >
+                                  <p className="text-[7px] font-bold text-zinc-400">{MONTHS_SHORT[i]}</p>
+                                  {isPaid ? (
+                                    <Check className="h-3 w-3 mx-auto text-emerald-600 mt-0.5" />
+                                  ) : payment ? (
+                                    <X className="h-3 w-3 mx-auto text-red-500 mt-0.5" />
+                                  ) : (
+                                    <span className="text-[8px] text-zinc-300 block mt-0.5">—</span>
+                                  )}
+                                  {payment && (
+                                    <p className="text-[7px] font-bold text-zinc-400 mt-0.5">&euro;{payment.amount}</p>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer */}
+                <div className="px-8 pb-8 flex gap-2">
+                  <AlertDialogCancel className="flex-1 h-11 rounded-xl border-zinc-200 text-zinc-500 font-bold text-sm">
+                    Κλείσιμο
+                  </AlertDialogCancel>
+                  <Button
+                    variant="outline"
+                    asChild
+                    className="flex-1 h-11 rounded-xl font-bold text-sm"
+                  >
+                    <Link href={`/management/academy/users/${cardUser.id}/edit`}>
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Επεξεργασία
+                    </Link>
+                  </Button>
+                </div>
+              </>
+            );
+          })()}
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

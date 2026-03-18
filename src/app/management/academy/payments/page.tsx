@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { academyPaymentService, userGroupService, academyUserService, squadService } from '@/lib/academy-services';
@@ -284,6 +284,45 @@ export default function PaymentsDashboardPage() {
     a.displayName.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Group athletes by squad
+  const athletesBySquad = (() => {
+    const grouped: { squad: Squad | null; athletes: AcademyUser[] }[] = [];
+    const squadMap = new Map<string, AcademyUser[]>();
+    const noSquad: AcademyUser[] = [];
+
+    for (const athlete of filteredAthletes) {
+      const athleteSquadIds = athlete.squad_ids || (athlete.squad_id ? [athlete.squad_id] : []);
+      if (athleteSquadIds.length === 0) {
+        noSquad.push(athlete);
+      } else {
+        // Use the first squad for grouping
+        const primarySquadId = athleteSquadIds[0];
+        if (!squadMap.has(primarySquadId)) {
+          squadMap.set(primarySquadId, []);
+        }
+        squadMap.get(primarySquadId)!.push(athlete);
+      }
+    }
+
+    // Sort squads alphabetically
+    const sortedSquadIds = Array.from(squadMap.keys()).sort((a, b) => {
+      const sa = squads.find((s) => s.id === a);
+      const sb = squads.find((s) => s.id === b);
+      return (sa?.name || '').localeCompare(sb?.name || '');
+    });
+
+    for (const squadId of sortedSquadIds) {
+      const squad = squads.find((s) => s.id === squadId) || null;
+      grouped.push({ squad, athletes: squadMap.get(squadId)! });
+    }
+
+    if (noSquad.length > 0) {
+      grouped.push({ squad: null, athletes: noSquad });
+    }
+
+    return grouped;
+  })();
+
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
 
@@ -421,95 +460,126 @@ export default function PaymentsDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredAthletes.map((athlete) => {
-                  const parent = findParent(athlete.id);
-                  const group = groups.find((g) => g.id === athlete.groupId);
-                  const expectedAmount = getExpectedAmount(athlete);
-                  return (
-                    <tr key={athlete.id} className="border-b border-zinc-50 hover:bg-zinc-50/50 transition-colors">
-                      <td className="p-3 sticky left-0 bg-white z-10">
-                        <div className="flex items-center gap-3">
-                          <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center text-sm">
-                            {group?.icon || '⚽'}
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-zinc-900">{athlete.displayName}</p>
-                            {parent && (
-                              <p className="text-[10px] text-zinc-400">
-                                {parent.displayName}
-                                {parent.fields?.email && (
-                                  <span className="ml-1 text-zinc-300">({parent.fields.email as string})</span>
-                                )}
-                              </p>
-                            )}
-                          </div>
+                {athletesBySquad.map(({ squad, athletes: squadAthletes }, groupIdx) => (
+                  <React.Fragment key={squad?.id || 'no-squad'}>
+                    {/* Squad header row */}
+                    <tr className={`${groupIdx > 0 ? 'border-t-2 border-zinc-200' : ''}`}>
+                      <td className="p-3 sticky left-0 bg-zinc-50 z-10" colSpan={1}>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm">📋</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                            {squad ? toGreekUpperCase(squad.name) : toGreekUpperCase('Χωρίς τμήμα')}
+                          </span>
+                          <span className="text-[9px] font-bold text-zinc-300 ml-1">
+                            ({squadAthletes.length})
+                          </span>
+                          <span className="text-[9px] font-bold text-emerald-500 ml-auto">
+                            €{squad?.monthlyAmount || defaultAmount}/μήνα
+                            {!squad?.monthlyAmount && <span className="text-zinc-300 ml-1"></span>}
+                          </span>
                         </div>
                       </td>
-                      {Array.from({ length: 12 }, (_, month) => {
-                        const payment = getPayment(athlete.id, month);
-                        const isCurrentMonth = month === currentMonth && selectedYear === currentYear;
-                        const key = `${athlete.id}-${month}`;
-                        const amount = expectedAmount;
-                        const isPaid = payment?.paid || false;
-                        const isToggling = togglingPayment === `pay-${athlete.id}-${month}` || togglingPayment === `unpay-${payment?.id}`;
-
-                        return (
-                          <td key={month} className={`text-center p-1.5 ${focusedMonth === month ? 'bg-emerald-50/50' : isCurrentMonth ? 'bg-emerald-50/30' : ''}`}>
-                            <div className="flex flex-col items-center gap-0.5">
-                              <button
-                                onClick={() => handlePaymentClick(athlete, month)}
-                                disabled={isToggling}
-                                className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all active:scale-90 ${
-                                  isPaid
-                                    ? 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200'
-                                    : 'bg-red-100 text-red-600 hover:bg-red-200'
-                                }`}
-                                title={isPaid
-                                  ? `Εξοφλημένο - €${amount}${payment?.paymentMethod ? ` (${PAYMENT_METHOD_LABELS[payment.paymentMethod]})` : ''}`
-                                  : `Ανεξόφλητο - €${amount}`
-                                }
-                              >
-                                {isToggling ? (
-                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : isPaid ? (
-                                  <span className="text-xs">{payment?.paymentMethod ? PAYMENT_METHOD_ICONS[payment.paymentMethod] : <Check className="h-3.5 w-3.5" />}</span>
-                                ) : (
-                                  <X className="h-3.5 w-3.5" />
+                      {Array.from({ length: 12 }, (_, i) => (
+                        <td key={i} className={`bg-zinc-50 ${focusedMonth === i ? 'bg-emerald-50/80' : ''}`} />
+                      ))}
+                    </tr>
+                    {/* Athletes in this squad */}
+                    {squadAthletes.map((athlete) => {
+                      const parent = findParent(athlete.id);
+                      const group = groups.find((g) => g.id === athlete.groupId);
+                      const expectedAmount = getExpectedAmount(athlete);
+                      return (
+                        <tr key={athlete.id} className="border-b border-zinc-50 hover:bg-zinc-50/50 transition-colors">
+                          <td className="p-3 sticky left-0 bg-white z-10">
+                            <div className="flex items-center gap-3">
+                              <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center text-sm">
+                                {group?.icon || '⚽'}
+                              </div>
+                              <div>
+                                <p className="text-sm font-bold text-zinc-900">{athlete.displayName}</p>
+                                {parent && (
+                                  <p className="text-[10px] text-zinc-400">
+                                    {parent.displayName}
+                                    {parent.fields?.email && (
+                                      <span className="ml-1 text-zinc-300">({parent.fields.email as string})</span>
+                                    )}
+                                  </p>
                                 )}
-                              </button>
-                              <span className="text-[8px] font-bold text-zinc-400">
-                                €{amount}
-                              </span>
-                              {!isPaid && getNotificationEmail(athlete) && (
-                                <button
-                                  onClick={() => setNotifyConfirm({ athlete, month })}
-                                  disabled={notifying === key}
-                                  className={`text-[8px] transition-colors ${
-                                    payment?.lastNotifiedAt
-                                      ? 'text-amber-400 hover:text-amber-600'
-                                      : 'text-zinc-300 hover:text-amber-500'
-                                  }`}
-                                  title={payment?.lastNotifiedAt
-                                    ? `Τελευταία ειδοποίηση: ${new Date(payment.lastNotifiedAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
-                                    : 'Ειδοποίηση'
-                                  }
-                                >
-                                  {notifying === key ? (
-                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                  ) : notifySuccess === key ? (
-                                    <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                                  ) : (
-                                    <Send className="h-3 w-3" />
-                                  )}
-                                </button>
-                              )}
+                              </div>
                             </div>
                           </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
+                          {Array.from({ length: 12 }, (_, month) => {
+                            const payment = getPayment(athlete.id, month);
+                            const isCurrentMonth = month === currentMonth && selectedYear === currentYear;
+                            const key = `${athlete.id}-${month}`;
+                            const amount = expectedAmount;
+                            const isPaid = payment?.paid || false;
+                            const isToggling = togglingPayment === `pay-${athlete.id}-${month}` || togglingPayment === `unpay-${payment?.id}`;
+
+                            return (
+                              <td key={month} className={`text-center p-1.5 group/cell ${focusedMonth === month ? 'bg-emerald-50/50' : isCurrentMonth ? 'bg-emerald-50/30' : ''}`}>
+                                <div className="flex flex-col items-center gap-0.5">
+                                  <button
+                                    onClick={() => handlePaymentClick(athlete, month)}
+                                    disabled={isToggling}
+                                    className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all active:scale-90 ${
+                                      isPaid
+                                        ? 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200'
+                                        : 'bg-red-100 text-red-600 hover:bg-red-200'
+                                    }`}
+                                    title={isPaid
+                                      ? `Εξοφλημένο - €${amount}${payment?.paymentMethod ? ` (${PAYMENT_METHOD_LABELS[payment.paymentMethod]})` : ''}`
+                                      : `Ανεξόφλητο - €${amount}`
+                                    }
+                                  >
+                                    {isToggling ? (
+                                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    ) : isPaid ? (
+                                      <span className="text-xs">{payment?.paymentMethod ? PAYMENT_METHOD_ICONS[payment.paymentMethod] : <Check className="h-3.5 w-3.5" />}</span>
+                                    ) : (
+                                      <X className="h-3.5 w-3.5" />
+                                    )}
+                                  </button>
+                                  <span className="text-[8px] font-bold text-zinc-400">
+                                    €{amount}
+                                  </span>
+                                  {isPaid && payment?.paymentMethod && (
+                                    <span className="text-[7px] font-bold text-emerald-400 opacity-0 group-hover/cell:opacity-100 transition-opacity">
+                                      {PAYMENT_METHOD_LABELS[payment.paymentMethod]}
+                                    </span>
+                                  )}
+                                  {!isPaid && getNotificationEmail(athlete) && (
+                                    <button
+                                      onClick={() => setNotifyConfirm({ athlete, month })}
+                                      disabled={notifying === key}
+                                      className={`text-[8px] transition-colors ${
+                                        payment?.lastNotifiedAt
+                                          ? 'text-amber-400 hover:text-amber-600'
+                                          : 'text-zinc-300 hover:text-amber-500'
+                                      }`}
+                                      title={payment?.lastNotifiedAt
+                                        ? `Τελευταία ειδοποίηση: ${new Date(payment.lastNotifiedAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+                                        : 'Ειδοποίηση'
+                                      }
+                                    >
+                                      {notifying === key ? (
+                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                      ) : notifySuccess === key ? (
+                                        <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                                      ) : (
+                                        <Send className="h-3 w-3" />
+                                      )}
+                                    </button>
+                                  )}
+                                </div>
+                              </td>
+                            );
+                          })}
+                        </tr>
+                      );
+                    })}
+                  </React.Fragment>
+                ))}
               </tbody>
             </table>
           </div>
