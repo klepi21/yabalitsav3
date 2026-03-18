@@ -653,14 +653,15 @@ export default function DashboardPage() {
                 fill
                 className="object-cover opacity-100 group-hover:scale-110 transition-all duration-700"
               />
+              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
             </div>
             <CardContent className="p-6 relative z-10">
               <div className="flex flex-col gap-4">
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
-                    <p className="text-[10px] font-black text-black uppercase tracking-widest">{stat.label}</p>
-                    <p className="text-4xl font-black text-black tracking-tighter">{stat.value}</p>
-                    <p className="text-[9px] font-bold text-zinc-900/60 uppercase tracking-tight">{stat.detail}</p>
+                    <p className="text-[10px] font-black text-white uppercase tracking-widest">{stat.label}</p>
+                    <p className="text-4xl font-black text-white tracking-tighter">{stat.value}</p>
+                    <p className="text-[9px] font-bold text-white/70 uppercase tracking-tight">{stat.detail}</p>
                   </div>
                   <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <CalendarDays className="h-5 w-5 text-zinc-300" />
