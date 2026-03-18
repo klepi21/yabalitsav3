@@ -590,7 +590,7 @@ export default function DashboardPage() {
                   loadDashboardData();
                 }}
               >
-                Δοκιμάστε ξανά
+                Δοκιμάστε  ξανά
               </Button>
             </div>
           </AlertDescription>
