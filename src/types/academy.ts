@@ -16,7 +16,7 @@ export interface UserGroupField {
 }
 
 // Special capabilities a group can have (for built-in features)
-export type GroupCapability = 'squad_assignment' | 'parent_linking' | 'coach_squads' | 'monthly_payment' | 'medical_tracking' | 'athlete_card';
+export type GroupCapability = 'squad_assignment' | 'parent_linking' | 'coach_squads' | 'monthly_payment' | 'medical_tracking' | 'athlete_card' | 'player_evaluation';
 
 // User Group definition - stored per venue in Firestore
 export interface UserGroup {
@@ -57,9 +57,10 @@ export const CAPABILITY_LABELS: Record<GroupCapability, { label: string; descrip
   monthly_payment: { label: 'Μηνιαία πληρωμή', description: 'Παρακολούθηση μηνιαίας συνδρομής' },
   medical_tracking: { label: 'Ιατρικό πιστοποιητικό', description: 'Παρακολούθηση λήξης ιατρικού πιστοποιητικού' },
   athlete_card: { label: 'Καρτέλα αθλητή', description: 'Προβολή πλήρους καρτέλας με στοιχεία, πληρωμές & πιστοποιητικά' },
+  player_evaluation: { label: 'Αξιολόγηση αθλητή', description: 'Περιοδική αξιολόγηση δεξιοτήτων & κάρτα προόδου' },
 };
 
-export const ALL_CAPABILITIES: GroupCapability[] = ['squad_assignment', 'parent_linking', 'coach_squads', 'monthly_payment', 'medical_tracking', 'athlete_card'];
+export const ALL_CAPABILITIES: GroupCapability[] = ['squad_assignment', 'parent_linking', 'coach_squads', 'monthly_payment', 'medical_tracking', 'athlete_card', 'player_evaluation'];
 
 export const AVAILABLE_ICONS = [
   '⚽', '🏆', '👨‍👩‍👧', '👤', '🏃', '🎓', '🏅', '💪',
@@ -248,6 +249,62 @@ export const BROADCAST_TEMPLATES: { key: string; label: string; subject: string;
     subject: 'Ανακοίνωση',
     message: '',
   },
+];
+
+// ============================================
+// Player Evaluation
+// ============================================
+
+export interface EvaluationSkill {
+  key: string;        // unique key (e.g., 'passing', 'shooting')
+  label: string;      // display name (e.g., 'Πάσα', 'Σουτ')
+}
+
+// Template that defines which skills to evaluate — per venue
+export interface EvaluationTemplate {
+  id: string;
+  venueId: string;
+  name: string;       // e.g., 'Αξιολόγηση Ποδοσφαίρου'
+  skills: EvaluationSkill[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// A single evaluation for a player
+export interface PlayerEvaluation {
+  id: string;
+  venueId: string;
+  athleteId: string;
+  athleteName: string;       // denormalized
+  squadId: string;
+  squadName: string;         // denormalized
+  coachId: string;
+  coachName: string;         // denormalized
+  templateId: string;
+  period: string;            // e.g., '2026-Q1', '2026-Q2'
+  periodLabel: string;       // e.g., 'Ιαν-Μαρ 2026'
+  ratings: Record<string, number>;  // skill key → 1-5
+  notes: string;             // coach comments
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export const DEFAULT_EVALUATION_SKILLS: EvaluationSkill[] = [
+  { key: 'technique', label: 'Τεχνική' },
+  { key: 'passing', label: 'Πάσα' },
+  { key: 'shooting', label: 'Σουτ' },
+  { key: 'speed', label: 'Ταχύτητα' },
+  { key: 'stamina', label: 'Αντοχή' },
+  { key: 'tactical', label: 'Τακτική' },
+  { key: 'teamwork', label: 'Ομαδικότητα' },
+  { key: 'discipline', label: 'Πειθαρχία' },
+];
+
+export const EVALUATION_PERIODS = [
+  { value: 'Q1', label: 'Ιαν - Μαρ' },
+  { value: 'Q2', label: 'Απρ - Ιουν' },
+  { value: 'Q3', label: 'Ιουλ - Σεπ' },
+  { value: 'Q4', label: 'Οκτ - Δεκ' },
 ];
 
 // Legacy type aliases for backward compatibility

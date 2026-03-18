@@ -22,6 +22,7 @@ import {
   ChevronRight,
   Menu,
   QrCode,
+  TrendingUp,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
@@ -51,6 +52,7 @@ const navigation: NavItem[] = [
       { name: 'Προπονήσεις', href: '/management/academy/training', icon: Dumbbell },
       { name: 'Πληρωμές', href: '/management/academy/payments', icon: Euro },
       { name: 'Ιατρικά', href: '/management/academy/medical', icon: HeartPulse },
+      { name: 'Αξιολογήσεις', href: '/management/academy/evaluations', icon: TrendingUp },
     ]
   },
   {

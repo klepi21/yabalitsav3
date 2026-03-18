@@ -5,8 +5,9 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { academyUserService, userGroupService, squadService, academyPaymentService } from '@/lib/academy-services';
-import { AcademyUser, AcademyPayment, UserGroup, Squad, GROUP_COLORS, PAYMENT_METHOD_LABELS } from '@/types/academy';
-import { Loader2, Plus, Search, Users, Pencil, Trash2, Mail, Phone, MoreHorizontal, AlertCircle, FileUser, Check, X, ShieldAlert } from 'lucide-react';
+import { playerEvaluationService } from '@/lib/evaluation-services';
+import { AcademyUser, AcademyPayment, PlayerEvaluation, UserGroup, Squad, GROUP_COLORS, PAYMENT_METHOD_LABELS } from '@/types/academy';
+import { Loader2, Plus, Search, Users, Pencil, Trash2, Mail, Phone, MoreHorizontal, AlertCircle, FileUser, Check, X, ShieldAlert, Star, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -57,6 +58,7 @@ export default function AcademyUsersPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [cardUser, setCardUser] = useState<AcademyUser | null>(null);
   const [cardPayments, setCardPayments] = useState<AcademyPayment[]>([]);
+  const [cardEvaluations, setCardEvaluations] = useState<PlayerEvaluation[]>([]);
   const [cardLoading, setCardLoading] = useState(false);
 
   const urlGroupId = searchParams.get('group');
@@ -138,10 +140,15 @@ export default function AcademyUsersPage() {
     setCardUser(athlete);
     setCardLoading(true);
     try {
-      const payments = await academyPaymentService.getByVenue(venueId);
+      const [payments, evals] = await Promise.all([
+        academyPaymentService.getByVenue(venueId),
+        playerEvaluationService.getByAthlete(venueId, athlete.id),
+      ]);
       setCardPayments(payments.filter((p) => p.userId === athlete.id));
+      setCardEvaluations(evals);
     } catch {
       setCardPayments([]);
+      setCardEvaluations([]);
     } finally {
       setCardLoading(false);
     }
@@ -699,6 +706,42 @@ export default function AcademyUsersPage() {
                           </div>
                         </>
                       )}
+                    </div>
+                  )}
+
+                  {/* Evaluations */}
+                  {group?.capabilities.includes('player_evaluation') && (
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-300">
+                          {toGreekUpperCase('Αξιολογήσεις')}
+                        </p>
+                        {cardLoading && <Loader2 className="h-3 w-3 animate-spin text-zinc-300" />}
+                      </div>
+                      {!cardLoading && cardEvaluations.length > 0 ? (
+                        <>
+                          <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-xl border border-amber-100">
+                            <Star className="h-5 w-5 text-amber-400 fill-amber-400" />
+                            <div>
+                              <p className="text-lg font-black text-amber-700">
+                                {(Object.values(cardEvaluations[0].ratings).reduce((s, v) => s + v, 0) / Object.values(cardEvaluations[0].ratings).length).toFixed(1)}
+                                <span className="text-xs font-bold text-amber-400 ml-1">/ 5</span>
+                              </p>
+                              <p className="text-[9px] text-amber-500 font-bold">{cardEvaluations[0].periodLabel}</p>
+                            </div>
+                            <div className="ml-auto text-right">
+                              <p className="text-[9px] font-bold text-amber-400">{cardEvaluations.length} αξιολ.</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm" asChild className="w-full h-8 rounded-lg text-[9px] font-bold uppercase border-zinc-200">
+                            <Link href="/management/academy/evaluations">
+                              <TrendingUp className="h-3 w-3 mr-1.5" />{toGreekUpperCase('Ιστορικό Αξιολογήσεων')}
+                            </Link>
+                          </Button>
+                        </>
+                      ) : !cardLoading ? (
+                        <p className="text-[10px] text-zinc-300 italic">Χωρίς αξιολόγηση</p>
+                      ) : null}
                     </div>
                   )}
                 </div>
