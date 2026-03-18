@@ -3,8 +3,11 @@
 import { useState, useEffect } from "react";
 import { use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, MapPin, ArrowLeft, X, RotateCcw } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, ArrowLeft, X, RotateCcw, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 interface Booking {
   id: string;
@@ -647,107 +650,70 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-900 to-emerald-700">
+    <div className="min-h-screen bg-[#f8fafc] selection:bg-emerald-100 selection:text-emerald-900">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b border-emerald-100">
+      <header className="sticky top-0 z-30 bg-white/70 backdrop-blur-xl border-b border-zinc-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center h-16">
-            <Image src="/yabalitsalogo.png" alt="Yabalitsa" width={120} height={32} className="h-8 w-auto" />
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Venue name above component */}
-        <div className="text-center mb-4">
-          <h1 className="text-3xl md:text-4xl font-extrabold text-white">{venue.name}</h1>
-        </div>
-
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-          {/* Progress Steps - hidden */}
-          <div className="hidden bg-gradient-to-r from-emerald-600 to-emerald-700 px-6 py-4">
-            <div className="flex items-center justify-center space-x-8">
-              {[
-                { step: 'pitch', label: 'Γήπεδο' },
-                { step: 'date', label: 'Ημερομηνία' },
-                { step: 'slots', label: 'Ώρα' },
-                { step: 'confirmation', label: 'Επιβεβαίωση' }
-              ].map(({ step, label }) => (
-                <div key={step} className="flex items-center space-x-2">
-                  <div className={`
-                    w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
-                    ${currentStep === step 
-                      ? 'bg-white text-emerald-600' 
-                      : 'bg-emerald-500/30 text-white'
-                    }
-                  `}>
-                    {step === 'pitch' ? '1' : 
-                     step === 'date' ? '2' : 
-                     step === 'slots' ? '3' : '4'}
-                  </div>
-                  <span className={`text-sm font-medium ${
-                    currentStep === step ? 'text-white' : 'text-emerald-100'
-                  }`}>
-                    {label}
-                  </span>
-                </div>
-              ))}
+          <div className="flex items-center justify-between h-16">
+            <Link href="/" className="flex items-center gap-2">
+              <Image src="/yabalitsalogo.png" alt="Yabalitsa" width={120} height={32} className="h-7 w-auto object-contain" />
+            </Link>
+            <div className="flex items-center gap-3">
+              <span className="hidden sm:block text-[10px] font-black text-zinc-400 uppercase tracking-widest">SECURE BOOKING</span>
+              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
             </div>
           </div>
+        </div>
+      </header>
 
-          {/* Content Area */}
+      {/* Main */}
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        {/* Venue Info */}
+        <div className="text-center mb-10">
+          <p className="text-[10px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-2">ΚΑΛΩΣ ΗΡΘΑΤΕ ΣΤΟ</p>
+          <h1 className="text-4xl sm:text-5xl font-black text-zinc-900 tracking-tight uppercase mb-4">{venue.name}</h1>
+          <div className="flex items-center justify-center gap-4">
+            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-zinc-100 shadow-sm">
+              <MapPin className="h-3 w-3 text-emerald-500" />
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-tight">{venue.address}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Booking Card */}
+        <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-emerald-900/5 border border-zinc-100/50 overflow-hidden">
           <div className="p-6 lg:p-8">
             <AnimatePresence mode="wait">
-              {/* Step 1: Pitch Selection */}
-              {currentStep === 'pitch' && (
-                <motion.div
-                  key="pitch"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="space-y-6"
-                >
-                  <div className="text-center">
-                    <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-                      Επιλέξτε Γήπεδο
-                    </h2>
-                    <p className="text-gray-600">Διαλέξτε το γήπεδο που θέλετε να κλείσετε</p>
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Step 1: Pitch */}
+              {currentStep === 'pitch' && (
+                <motion.div key="pitch" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
+                  <div className="text-center">
+                    <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">Επιλέξτε Γήπεδο</h2>
+                    <p className="text-xs font-bold text-zinc-400 mt-1 uppercase">ΔΙΑΛΕΞΤΕ ΤΟ ΓΗΠΕΔΟ ΠΟΥ ΣΑΣ ΤΑΙΡΙΑΖΕΙ</p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4">
                     {pitches.map((pitch) => (
                       <motion.div
                         key={pitch.id}
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                        whileHover={{ scale: 1.01 }}
+                        whileTap={{ scale: 0.99 }}
                         onClick={() => handlePitchSelect(pitch)}
-                        className="bg-white rounded-xl p-6 border border-emerald-100 hover:border-emerald-300 cursor-pointer transition-all shadow-lg shadow-emerald-900/20 hover:shadow-emerald-900/30"
+                        className="group relative bg-white rounded-3xl p-6 border border-zinc-100 hover:border-emerald-200 cursor-pointer transition-all hover:bg-emerald-50/30"
                       >
-                        <div className="text-center space-y-3">
-                          <div className="flex items-center justify-center mx-auto">
-                            <span className="text-4xl">🏟️</span>
+                        <div className="flex items-center gap-6">
+                          <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-4xl group-hover:bg-white group-hover:scale-110 transition-all duration-500">🏟️</div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-lg font-black text-zinc-900 uppercase tracking-tight mb-1">{pitch.name}</h3>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="bg-zinc-50 text-zinc-500 border-zinc-100 text-[9px] font-black px-2 py-0.5 uppercase">{pitch.type}</Badge>
+                              <span className="text-[10px] font-bold text-zinc-400 group-hover:text-emerald-600 transition-colors uppercase">{pitch.slotDuration} ΛΕΠΤΑ</span>
+                            </div>
                           </div>
-                          <h3 className="text-lg font-semibold text-gray-900">{pitch.name}</h3>
-                          <p className="text-sm text-gray-600">{pitch.type}</p>
-                          <div className="text-2xl font-bold text-emerald-600">
-                            €{pitch.pricePerSlot}
+                          <div className="text-right">
+                            <div className="text-2xl font-black text-zinc-900 tracking-tighter group-hover:text-emerald-600 transition-colors">€{pitch.pricePerSlot.toFixed(0)}</div>
+                            <p className="text-[9px] font-black text-zinc-400 uppercase">ΑΝΑ ΩΡΑ</p>
                           </div>
-                          {(() => {
-                            const match = (pitch.type || '').match(/(\d+)\s*x\s*(\d+)/i);
-                            if (match) {
-                              const left = parseInt(match[1], 10);
-                              const right = parseInt(match[2], 10);
-                              const total = (isNaN(left) ? 0 : left) + (isNaN(right) ? 0 : right);
-                              if (total > 0) {
-                                const per = pitch.pricePerSlot / total;
-                                return (
-                                  <p className="text-xs text-gray-600">{total} άτομα • €{per.toFixed(2)}/άτομο</p>
-                                );
-                              }
-                            }
-                            return <p className="text-xs text-gray-500">ανά ώρα</p>;
-                          })()}
                         </div>
                       </motion.div>
                     ))}
@@ -755,90 +721,46 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                 </motion.div>
               )}
 
-              {/* Step 2: Date Selection */}
+              {/* Step 2: Date */}
               {currentStep === 'date' && (
-                <motion.div
-                  key="date"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="space-y-6"
-                >
-                  {/* Back Button */}
-                  <div className="flex justify-start">
-                    <button
-                      onClick={() => goToStep('pitch')}
-                      className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      <ArrowLeft className="w-4 h-4" />
-                      <span>Πίσω στο Γήπεδο</span>
+                <motion.div key="date" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <button onClick={() => goToStep('pitch')} className="group flex items-center gap-2 px-4 py-2 text-zinc-400 hover:text-zinc-900 transition-colors">
+                      <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">ΠΙΣΩ ΣΤΑ ΓΗΠΕΔΑ</span>
                     </button>
+                    <div className="flex items-center gap-2 p-1 bg-zinc-100 rounded-xl border border-zinc-100">
+                      <button onClick={() => handleWeekNavigation('prev')} className="p-2 hover:bg-white rounded-lg transition-all active:scale-90">
+                        <ChevronLeft className="w-4 h-4 text-zinc-600" />
+                      </button>
+                      <div className="px-4 text-[10px] font-black text-zinc-900 uppercase tracking-widest min-w-[140px] text-center">{weekRange}</div>
+                      <button onClick={() => handleWeekNavigation('next')} className="p-2 hover:bg-white rounded-lg transition-all active:scale-90">
+                        <ChevronRight className="w-4 h-4 text-zinc-600" />
+                      </button>
+                    </div>
                   </div>
-
                   <div className="text-center">
-                    <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-                      Επιλέξτε Ημερομηνία
-                    </h2>
-                    <p className="text-gray-600">Διαλέξτε την ημερομηνία για την κράτησή σας</p>
+                    <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">Επιλέξτε Ημερομηνία</h2>
+                    <p className="text-xs font-bold text-zinc-400 mt-1 uppercase">ΔΙΑΛΕΞΤΕ ΤΗΝ ΗΜΕΡΑ ΤΗΣ ΚΡΑΤΗΣΗΣ ΣΑΣ</p>
                   </div>
-
-                  {/* Week Navigation */}
-                  <div className="flex items-center justify-between max-w-md mx-auto">
-                    <button
-                      onClick={() => handleWeekNavigation('prev')}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      <ChevronLeft className="w-6 h-6 text-gray-600" />
-                    </button>
-                    <h3 className="text-lg font-semibold text-gray-900">{weekRange}</h3>
-                    <button
-                      onClick={() => handleWeekNavigation('next')}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      <ChevronRight className="w-6 h-6 text-gray-600" />
-                    </button>
-                  </div>
-
-                  {/* Day Grid */}
-                  <div className="grid grid-cols-7 gap-2 sm:gap-3 max-w-2xl mx-auto">
+                  <div className="grid grid-cols-4 sm:grid-cols-7 gap-3 pb-4">
                     {weekSchedule.map((day) => (
-                      <motion.button
+                      <button
                         key={day.date}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
                         onClick={() => day.hasAvailability && handleDateSelect(day.date)}
                         disabled={!day.hasAvailability}
-                        className={`
-                          p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/50
-                          ${day.hasAvailability
-                            ? 'border-gray-200 bg-white hover:border-emerald-300 hover:bg-emerald-50'
-                            : 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed'
-                          }
-                        `}
+                        className={cn(
+                          "flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all active:scale-95",
+                          !day.hasAvailability ? "bg-zinc-50 border-zinc-50 text-zinc-300 cursor-not-allowed opacity-50" :
+                          selectedDate?.toLocaleDateString('el-GR', { day: '2-digit', month: 'short' }) === day.date
+                            ? "bg-zinc-900 border-zinc-900 text-white shadow-xl shadow-zinc-900/10"
+                            : "bg-white border-zinc-50 text-zinc-400 hover:border-emerald-200 hover:text-zinc-900"
+                        )}
                       >
-                        <div className="text-center space-y-1 sm:space-y-2">
-                          <div className="text-xs sm:text-sm font-medium text-gray-500">
-                            {day.dayName === 'Σήμερα' ? 'Σήμερα' : day.dayName.slice(0, 3)}
-                          </div>
-                          <div className="text-lg sm:text-xl font-bold text-gray-900">
-                            {day.dayNumber}
-                          </div>
-                          {day.hasAvailability && (
-                            <div className="flex justify-center space-x-1 hidden sm:flex">
-                              {(() => {
-                                const availableSlots = day.slots.length;
-                                if (availableSlots === 0) {
-                                  return <div className="w-2 h-2 bg-red-500 rounded-full"></div>;
-                                } else if (availableSlots < 3) {
-                                  return <div className="w-2 h-2 bg-orange-500 rounded-full"></div>;
-                                } else {
-                                  return <div className="w-2 h-2 bg-green-500 rounded-full"></div>;
-                                }
-                              })()}
-                            </div>
-                          )}
-                        </div>
-                      </motion.button>
+                        <span className="text-[8px] font-black uppercase tracking-widest mb-1">{day.dayName.slice(0, 3)}</span>
+                        <span className="text-lg font-black tracking-tight">{day.dayNumber}</span>
+                        <div className={cn("w-1 h-1 rounded-full mt-2", day.hasAvailability ? "bg-emerald-500" : "bg-zinc-200")} />
+                      </button>
                     ))}
                   </div>
                 </motion.div>
@@ -846,124 +768,75 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
               {/* Step 3: Time Slots */}
               {currentStep === 'slots' && selectedDate && (
-                <motion.div
-                  key="slots"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="space-y-6"
-                >
-                  {/* Back Button */}
-                  <div className="flex justify-start">
-                    <button
-                      onClick={() => goToStep('date')}
-                      className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      <ArrowLeft className="w-4 h-4" />
-                      <span>Πίσω στην Ημερομηνία</span>
-                    </button>
-                  </div>
-
+                <motion.div key="slots" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
+                  <button onClick={() => goToStep('date')} className="group flex items-center gap-2 px-4 py-2 text-zinc-400 hover:text-zinc-900 transition-colors">
+                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">ΠΙΣΩ ΣΤΗΝ ΗΜΕΡΟΜΗΝΙΑ</span>
+                  </button>
                   <div className="text-center">
-                    <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-                      Επιλέξτε Ώρα
-                    </h2>
-                    <p className="text-gray-600">
-                      Διαθέσιμες ώρες για {selectedDate ? selectedDate.toLocaleDateString('el-GR', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
-                      }) : ''}
+                    <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">Επιλέξτε Ώρα</h2>
+                    <p className="text-xs font-bold text-zinc-400 mt-1 uppercase">
+                      {selectedDate.toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long' })}
                     </p>
                   </div>
-
                   <div className="max-w-4xl mx-auto">
                     {(() => {
                       const selectedDay = weekSchedule.find(d => {
                         if (!selectedDate) return false;
-                        // Find the day by its position in the week (0-6)
                         const dayIndex = weekSchedule.findIndex(day => day.date === d.date);
                         const dayDate = new Date(currentWeek);
                         dayDate.setDate(currentWeek.getDate() + dayIndex);
-                        
                         return dayDate.toDateString() === selectedDate.toDateString();
                       });
                       if (!selectedDay || !selectedDay.hasAvailability) {
                         return (
                           <div className="text-center py-12">
-                            <p className="text-gray-500 text-lg">
-                              Δεν υπάρχουν διαθέσιμες ώρες για αυτή την ημερομηνία
-                            </p>
+                            <p className="text-zinc-400 font-bold text-sm">Δεν υπάρχουν διαθέσιμες ώρες για αυτή την ημερομηνία</p>
                           </div>
                         );
                       }
-
+                      const now = new Date();
+                      const isToday = selectedDate && selectedDate.toDateString() === now.toDateString();
+                      const filteredSlots = selectedDay.slots.filter(slot => {
+                        if (!isToday) return true;
+                        const [slotHour] = slot.time.split(':').map(Number);
+                        const slotTime = new Date(now);
+                        slotTime.setHours(slotHour, 0, 0, 0);
+                        const bufferTime = new Date(now);
+                        bufferTime.setHours(now.getHours() + 1, 0, 0, 0);
+                        return slotTime >= bufferTime;
+                      });
+                      if (filteredSlots.length === 0) {
+                        return (
+                          <div className="text-center py-12">
+                            <p className="text-zinc-400 font-bold text-sm">Δεν υπάρχουν διαθέσιμες ώρες για σήμερα</p>
+                          </div>
+                        );
+                      }
                       return (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                          {(() => {
-                            const now = new Date();
-                            const isToday = selectedDate && selectedDate.toDateString() === now.toDateString();
-                            
-                            // Filter slots based on current time and minimum gap
-                            const filteredSlots = selectedDay.slots.filter(slot => {
-                              if (!isToday) return true; // Show all slots for future dates
-                              
-                              // Extract start time from slot (e.g., "14:00" from "14:00 - 15:00")
-                              const slotStartTime = slot.time.split(' - ')[0];
-                              const [slotHour, slotMinute] = slotStartTime.split(':').map(Number);
-                              
-                              // Create slot time for today
-                              const slotTime = new Date(now);
-                              slotTime.setHours(slotHour, slotMinute, 0, 0);
-                              
-                              // Add minimum 1 hour buffer
-                              const bufferTime = new Date(now);
-                              bufferTime.setHours(now.getHours() + 1, 0, 0, 0);
-                              
-                              // Only show slots that are at least 1 hour in the future
-                              return slotTime >= bufferTime;
-                            });
-                            
-                            if (filteredSlots.length === 0) {
-                              return (
-                                <div className="col-span-full text-center py-12">
-                                  <p className="text-gray-500 text-lg">
-                                    Δεν υπάρχουν διαθέσιμες ώρες για σήμερα
-                                  </p>
-                                  <p className="text-sm text-gray-400 mt-2">
-                                    Όλες οι ώρες έχουν παρέλθει ή είναι πολύ κοντά
-                                  </p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {filteredSlots.map((slot) => (
+                            <motion.button
+                              key={slot.time}
+                              whileHover={{ scale: 1.02 }}
+                              whileTap={{ scale: 0.98 }}
+                              onClick={() => slot.available && selectedDate && handleTimeSlotSelect(selectedDate.toLocaleDateString('el-GR', { day: '2-digit', month: 'short' }), slot.time)}
+                              disabled={!slot.available}
+                              className={cn(
+                                "p-4 rounded-2xl border-2 transition-all",
+                                slot.available
+                                  ? "border-zinc-100 bg-white hover:border-emerald-300 hover:bg-emerald-50/30 cursor-pointer"
+                                  : "border-red-100 bg-red-50/50 opacity-60 cursor-not-allowed"
+                              )}
+                            >
+                              <div className="text-center">
+                                <div className={cn("text-sm font-black uppercase", slot.available ? "text-zinc-900" : "text-red-400")}>{slot.time}</div>
+                                <div className={cn("text-[8px] font-black uppercase mt-1", slot.available ? "text-emerald-600" : "text-red-400")}>
+                                  {slot.available ? "ΔΙΑΘΕΣΙΜΟ" : "ΚΛΕΙΣΜΕΝΟ"}
                                 </div>
-                              );
-                            }
-                            
-                            return filteredSlots.map((slot) => (
-                              <motion.button
-                                key={slot.time}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                                onClick={() => slot.available && selectedDate && handleTimeSlotSelect(selectedDate.toLocaleDateString('el-GR', { day: '2-digit', month: 'short' }), slot.time)}
-                                disabled={!slot.available}
-                                className={`
-                                  p-4 rounded-xl border-2 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/50
-                                  ${slot.available
-                                    ? 'border-gray-200 bg-white hover:border-emerald-300 hover:bg-emerald-50 text-gray-900 cursor-pointer'
-                                    : 'border-red-200 bg-red-50 text-red-600 cursor-not-allowed opacity-80'
-                                  }
-                                `}
-                              >
-                                <div className="text-center">
-                                  <div className="text-sm font-medium">{slot.time}</div>
-                                  {!slot.available && slot.conflictingBookings && slot.conflictingBookings.length > 0 && (
-                                    <div className="text-xs text-red-500 mt-1">
-                                      Κλεισμένο
-                                    </div>
-                                  )}
-                                </div>
-                              </motion.button>
-                            ));
-                          })()}
+                              </div>
+                            </motion.button>
+                          ))}
                         </div>
                       );
                     })()}
@@ -973,466 +846,249 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
               {/* Step 4: Confirmation */}
               {currentStep === 'confirmation' && selectedTimeSlot && (
-                <motion.div
-                  key="confirmation"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="space-y-6"
-                >
-                  {/* Back Button */}
-                  <div className="flex justify-start">
-                    <button
-                      onClick={() => goToStep('slots')}
-                      className="flex items-center space-x-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      <ArrowLeft className="w-4 h-4" />
-                      <span>Πίσω στις Ώρες</span>
-                    </button>
-                  </div>
-
+                <motion.div key="confirmation" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
+                  <button onClick={() => goToStep('slots')} className="group flex items-center gap-2 px-4 py-2 text-zinc-400 hover:text-zinc-900 transition-colors">
+                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">ΠΙΣΩ ΣΤΙΣ ΩΡΕΣ</span>
+                  </button>
                   <div className="text-center">
-                    <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-                      Επιβεβαίωση Κράτησης
-                    </h2>
-                    <p className="text-gray-600">Συμπληρώστε τα στοιχεία σας για να ολοκληρώσετε την κράτηση</p>
+                    <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">Επιβεβαίωση Κράτησης</h2>
+                    <p className="text-xs font-bold text-zinc-400 mt-1 uppercase">ΣΥΜΠΛΗΡΩΣΤΕ ΤΑ ΣΤΟΙΧΕΙΑ ΣΑΣ ΓΙΑ ΝΑ ΟΛΟΚΛΗΡΩΣΕΤΕ</p>
                   </div>
-
-                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 max-w-6xl mx-auto">
-                    {/* Left Column - Booking Summary */}
-                    <div className="space-y-6">
-                      <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-200">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
-                          Σύνοψη Κράτησης
-                        </h3>
-                        <div className="space-y-4">
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-800 font-medium">Γήπεδο:</span>
-                            <span className="font-semibold text-gray-900">{selectedPitch.name}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-800 font-medium">Ημερομηνία:</span>
-                            <span className="font-semibold text-gray-900">{selectedDate ? selectedDate.toLocaleDateString('el-GR', { 
-                              weekday: 'long', 
-                              year: 'numeric', 
-                              month: 'long', 
-                              day: 'numeric' 
-                            }) : ''}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-800 font-medium">Ώρα:</span>
-                            <span className="font-semibold text-gray-900">{selectedTimeSlot.time}</span>
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-gray-800 font-medium">Τιμή:</span>
-                            <span className="text-xl font-bold text-emerald-600">
-                              €{selectedPitch.pricePerSlot}
-                            </span>
-                          </div>
+                  <div className="grid grid-cols-1 gap-6">
+                    {/* Summary Card */}
+                    <div className="bg-zinc-50 rounded-3xl p-6 border border-zinc-100">
+                      <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-6 text-center">ΣΥΝΟΨΗ ΚΡΑΤΗΣΗΣ</h3>
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
+                          <span className="text-[10px] font-black text-zinc-400 uppercase">ΓΗΠΕΔΟ</span>
+                          <span className="text-xs font-black text-zinc-900 uppercase">{selectedPitch.name}</span>
+                        </div>
+                        <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
+                          <span className="text-[10px] font-black text-zinc-400 uppercase">ΗΜΕΡΟΜΗΝΙΑ</span>
+                          <span className="text-xs font-black text-zinc-900 uppercase">{selectedDate?.toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+                        </div>
+                        <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
+                          <span className="text-[10px] font-black text-zinc-400 uppercase">ΩΡΑ</span>
+                          <span className="text-xs font-black text-zinc-900 uppercase">{selectedTimeSlot.time}</span>
+                        </div>
+                        <div className="flex items-center justify-between pt-2">
+                          <span className="text-[10px] font-black text-emerald-600 uppercase">ΣΥΝΟΛΙΚΟ ΠΟΣΟ</span>
+                          <span className="text-2xl font-black text-emerald-600 tracking-tighter">€{selectedPitch.pricePerSlot}</span>
                         </div>
                       </div>
-
-                      {/* Ιαστεράκι - Venue Info (χωρίς αξιολογήσεις) */}
-                      <div className="bg-gray-50 rounded-xl p-6">
-                        <div className="flex items-center space-x-4">
-                          <Image
-                            src={venue.imageUrl}
-                            alt={venue.name}
-                            width={64}
-                            height={64}
-                            className="w-16 h-16 rounded-lg object-cover"
-                            unoptimized
-                          />
-                          <div>
-                            <h4 className="text-lg font-semibold text-gray-900">{venue.name}</h4>
-                            <div className="flex items-center space-x-2 text-sm text-gray-600 mt-1">
-                              <MapPin className="w-4 h-4" />
-                              <span>{venue.address}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
                     </div>
 
-                    {/* Right Column - Booking Form */}
-                    <div className="space-y-6">
-                      <div className="bg-white rounded-xl p-6 border border-gray-200">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                          Στοιχεία Κράτησης
-                        </h3>
-                        <div className="space-y-4">
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Όνομα *
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="Εισάγετε το όνομά σας"
-                                value={formData.firstName}
-                                onChange={(e) => handleFormChange('firstName', e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                                required
-                              />
-                            </div>
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Επώνυμο *
-                              </label>
-                              <input
-                                type="text"
-                                placeholder="Εισάγετε το επώνυμό σας"
-                                value={formData.lastName}
-                                onChange={(e) => handleFormChange('lastName', e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                                required
-                              />
-                            </div>
+                    {/* Form Card */}
+                    <div className="bg-white rounded-3xl p-6 border border-zinc-100 shadow-xl shadow-emerald-900/5">
+                      <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-6">ΣΤΟΙΧΕΙΑ ΠΕΛΑΤΗ</h3>
+                      <div className="space-y-5">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-zinc-400 uppercase ml-1">ΟΝΟΜΑ</label>
+                            <input type="text" value={formData.firstName} onChange={(e) => handleFormChange('firstName', e.target.value)}
+                              className="w-full h-12 px-4 rounded-xl bg-zinc-50 border-none font-bold text-xs focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all uppercase placeholder:text-zinc-300"
+                              placeholder="ΟΝΟΜΑ" />
                           </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Τηλέφωνο *
-                            </label>
-                            <div className="relative">
-                              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <span className="text-gray-500 text-lg font-medium">+30</span>
-                              </div>
-                              <input
-                                type="tel"
-                                placeholder="697xxxxxxx"
-                                value={formData.phone}
-                                onChange={(e) => {
-                                  // Only allow digits and limit to 10 characters
-                                  const value = e.target.value.replace(/\D/g, '').slice(0, 10);
-                                  handleFormChange('phone', value);
-                                }}
-                                className="w-full pl-16 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                                required
-                                maxLength={10}
-                              />
-                            </div>
-                            <p className="text-xs text-gray-500 mt-1">
-                              Εισάγετε τον αριθμό χωρίς το +30 (π.χ. 6973625633)
-                            </p>
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                              Email *
-                            </label>
-                            <input
-                              type="email"
-                              placeholder="Εισάγετε το email σας"
-                              value={formData.email}
-                              onChange={(e) => handleFormChange('email', e.target.value)}
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                              required
-                            />
-                          </div>
-                          <div className="flex items-start space-x-3">
-                            <input
-                              type="checkbox"
-                              id="terms"
-                              checked={formData.termsAccepted}
-                              onChange={(e) => handleFormChange('termsAccepted', e.target.checked)}
-                              className="mt-1 h-5 w-5 text-emerald-500 focus:ring-emerald-500 border-gray-300 rounded"
-                              required
-                            />
-                            <label htmlFor="terms" className="text-sm text-gray-700">
-                              Συμφωνώ με τους{' '}
-                              <span className="text-emerald-600 underline cursor-pointer">
-                                όρους χρήσης
-                              </span>{' '}
-                              *
-                            </label>
+                          <div className="space-y-2">
+                            <label className="text-[10px] font-black text-zinc-400 uppercase ml-1">ΕΠΩΝΥΜΟ</label>
+                            <input type="text" value={formData.lastName} onChange={(e) => handleFormChange('lastName', e.target.value)}
+                              className="w-full h-12 px-4 rounded-xl bg-zinc-50 border-none font-bold text-xs focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all uppercase placeholder:text-zinc-300"
+                              placeholder="ΕΠΩΝΥΜΟ" />
                           </div>
                         </div>
-                      </div>
-
-                      {/* Action Buttons */}
-                      <div className="flex flex-col sm:flex-row gap-4">
-                        <button
-                          onClick={() => goToStep('slots')}
-                          className="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition-colors"
-                        >
-                          Πίσω
-                        </button>
-                        <button
-                          onClick={handleConfirmBooking}
-                          className="flex-1 px-6 py-3 bg-emerald-500 text-white rounded-lg font-medium hover:bg-emerald-600 transition-colors flex items-center justify-center space-x-2"
-                        >
-                          <span>Επιβεβαίωση Κράτησης</span>
-                          <span>✅</span>
-                        </button>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-zinc-400 uppercase ml-1">ΤΗΛΕΦΩΝΟ</label>
+                          <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-black text-zinc-400">+30</span>
+                            <input type="tel" value={formData.phone} onChange={(e) => handleFormChange('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
+                              className="w-full h-12 pl-12 pr-4 rounded-xl bg-zinc-50 border-none font-bold text-xs focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all"
+                              placeholder="69XXXXXXXX" />
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-black text-zinc-400 uppercase ml-1">EMAIL</label>
+                          <input type="email" value={formData.email} onChange={(e) => handleFormChange('email', e.target.value)}
+                            className="w-full h-12 px-4 rounded-xl bg-zinc-50 border-none font-bold text-xs focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all placeholder:text-zinc-300"
+                            placeholder="YOUR@EMAIL.COM" />
+                        </div>
+                        <label className="flex items-center gap-3 cursor-pointer group pt-2 px-1">
+                          <div className="relative flex items-center justify-center">
+                            <input type="checkbox" checked={formData.termsAccepted} onChange={(e) => handleFormChange('termsAccepted', e.target.checked)}
+                              className="peer appearance-none w-5 h-5 rounded-lg bg-zinc-100 border-none checked:bg-emerald-500 transition-all cursor-pointer" />
+                            <CheckCircle2 className="absolute h-3 w-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
+                          </div>
+                          <span className="text-[10px] font-bold text-zinc-500 group-hover:text-zinc-900 transition-colors">
+                            Αποδοχή όρων χρήσης και πολιτικής απορρήτου
+                          </span>
+                        </label>
                       </div>
                     </div>
+
+                    <button
+                      onClick={handleConfirmBooking}
+                      className="w-full h-14 rounded-2xl bg-zinc-900 hover:bg-black text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-zinc-900/10 transition-all active:scale-95 flex items-center justify-center gap-3 group"
+                    >
+                      ΕΠΙΒΕΒΑΙΩΣΗ ΚΡΑΤΗΣΗΣ
+                      <div className="h-6 w-6 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-emerald-500/20 group-hover:text-emerald-400 transition-all">
+                        <ArrowLeft className="h-3 w-3 rotate-180" />
+                      </div>
+                    </button>
                   </div>
                 </motion.div>
               )}
+
             </AnimatePresence>
           </div>
         </div>
+      </main>
 
-        {/* Venue contact info under component */}
-        <div className="mt-6 flex justify-center">
-          <div className="w-full max-w-xl rounded-2xl border border-white/20 bg-white/10 backdrop-blur-md shadow-2xl px-5 py-4 md:px-6 md:py-5">
-            <div className="flex flex-col items-center gap-2 text-white text-base md:text-lg">
-              <div className="flex items-center gap-2">
-                <span>📍</span>
-                <span className="text-center">{venue.address}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span>📞</span>
-                <span className="text-center">{venue.phone}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Email Verification Popup */}
+      {/* Email Verification Modal */}
       {showEmailVerification && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl"
+            initial={{ opacity: 0, y: 40, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            className="bg-white rounded-[2rem] p-8 max-w-md w-full shadow-2xl"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-gray-900">Επιβεβαίωση Email</h3>
-              <button
-                onClick={() => {
-                  setShowEmailVerification(false);
-                  setEmailCode('');
-                  setEmailSent(false);
-                }}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                <X className="w-5 h-5 text-gray-500" />
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="text-base font-black text-zinc-900 uppercase tracking-tight">Επιβεβαίωση Email</h3>
+                <p className="text-[10px] font-bold text-zinc-400 mt-0.5">{formData.email}</p>
+              </div>
+              <button onClick={() => { setShowEmailVerification(false); setEmailCode(''); setEmailSent(false); }}
+                className="h-8 w-8 rounded-xl bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-all active:scale-90">
+                <X className="w-4 h-4 text-zinc-500" />
               </button>
             </div>
 
-            {/* Email Display */}
-            <div className="text-center mb-6">
-              <p className="text-gray-600 mb-2">Θα σας στείλουμε κωδικό στο:</p>
-              <p className="text-lg font-semibold text-gray-900">{formData.email}</p>
-            </div>
-
-            {/* Send Email Button */}
             {!emailSent && (
-              <button
-                onClick={sendEmailVerification}
-                disabled={isSendingEmail}
-                className="w-full bg-emerald-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4"
-              >
-                {isSendingEmail ? 'Αποστολή...' : 'Αποστολή Κωδικού'}
+              <button onClick={sendEmailVerification} disabled={isSendingEmail}
+                className="w-full h-14 rounded-2xl bg-zinc-900 hover:bg-black text-white font-black text-xs uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 mb-4">
+                {isSendingEmail ? 'ΑΠΟΣΤΟΛΗ...' : 'ΑΠΟΣΤΟΛΗ ΚΩΔΙΚΟΥ'}
               </button>
             )}
 
-            {/* Email Code Input */}
             {emailSent && (
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Κωδικός Email
-                  </label>
-                  
-                  {/* 6-Digit Code Input */}
-                  <div className="flex justify-center space-x-2 mb-4">
-                    {[0, 1, 2, 3, 4, 5].map((index) => (
-                      <input
-                        key={index}
-                        type="text"
-                        maxLength={1}
-                        data-index={index}
-                        value={emailCode[index] || ''}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (value && /^\d$/.test(value)) { // Only allow digits
-                            const newCode = emailCode.split('');
-                            newCode[index] = value;
-                            const finalCode = newCode.join('');
-                            setEmailCode(finalCode);
-                            
-                            // Auto-focus next input
-                            if (index < 5) {
-                              setTimeout(() => {
-                                const nextInput = document.querySelector(`input[data-index="${index + 1}"]`) as HTMLInputElement;
-                                if (nextInput) nextInput.focus();
-                              }, 10);
-                            }
-                          }
-                        }}
-                        onKeyDown={(e) => {
-                          // Handle backspace
-                          if (e.key === 'Backspace') {
-                            if (!emailCode[index] && index > 0) {
-                              // If current input is empty, go to previous
-                              setTimeout(() => {
-                                const prevInput = document.querySelector(`input[data-index="${index - 1}"]`) as HTMLInputElement;
-                                if (prevInput) prevInput.focus();
-                              }, 10);
-                            } else if (emailCode[index]) {
-                              // If current input has value, clear it first
-                              const newCode = emailCode.split('');
-                              newCode[index] = '';
-                              setEmailCode(newCode.join(''));
-                            }
-                          }
-                        }}
-                        onPaste={(e) => {
-                          e.preventDefault();
-                          const pastedData = e.clipboardData.getData('text');
-                          const digits = pastedData.replace(/\D/g, '').slice(0, 6);
-                          
-                          if (digits.length === 6) {
-                            setEmailCode(digits);
-                            // Focus last input
+              <div className="space-y-6">
+                <div className="flex justify-center gap-3">
+                  {[0, 1, 2, 3, 4, 5].map((index) => (
+                    <input
+                      key={index}
+                      type="text"
+                      maxLength={1}
+                      data-index={index}
+                      value={emailCode[index] || ''}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (value && /^\d$/.test(value)) {
+                          const newCode = emailCode.split('');
+                          newCode[index] = value;
+                          setEmailCode(newCode.join(''));
+                          if (index < 5) {
                             setTimeout(() => {
-                              const lastInput = document.querySelector(`input[data-index="5"]`) as HTMLInputElement;
-                              if (lastInput) lastInput.focus();
+                              const next = document.querySelector(`input[data-index="${index + 1}"]`) as HTMLInputElement;
+                              if (next) next.focus();
                             }, 10);
                           }
-                        }}
-                        className={`
-                          w-12 h-12 text-center text-xl font-bold border-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all
-                          ${emailCode[index] 
-                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700' 
-                            : 'border-gray-300 bg-white text-gray-900'
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Backspace') {
+                          if (!emailCode[index] && index > 0) {
+                            setTimeout(() => {
+                              const prev = document.querySelector(`input[data-index="${index - 1}"]`) as HTMLInputElement;
+                              if (prev) prev.focus();
+                            }, 10);
+                          } else if (emailCode[index]) {
+                            const newCode = emailCode.split('');
+                            newCode[index] = '';
+                            setEmailCode(newCode.join(''));
                           }
-                          ${index === emailCode.length ? 'ring-2 ring-emerald-500' : ''}
-                        `}
-                        placeholder=""
-                      />
-                    ))}
-                  </div>
-                  
-                  <p className="text-sm text-gray-500 text-center mb-4">
-                    Εισάγετε τον 6ψήφιο κωδικό που λάβατε στο email
-                  </p>
+                        }
+                      }}
+                      onPaste={(e) => {
+                        e.preventDefault();
+                        const digits = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                        if (digits.length === 6) {
+                          setEmailCode(digits);
+                          setTimeout(() => {
+                            const last = document.querySelector(`input[data-index="5"]`) as HTMLInputElement;
+                            if (last) last.focus();
+                          }, 10);
+                        }
+                      }}
+                      className={cn(
+                        "w-11 h-14 text-center text-xl font-black rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/30",
+                        emailCode[index] ? "bg-emerald-50 text-emerald-700" : "bg-zinc-50 text-zinc-900"
+                      )}
+                    />
+                  ))}
                 </div>
-
-                {/* Verify Button */}
-                <button
-                  onClick={verifyEmailCode}
-                  disabled={!emailCode || emailCode.length !== 6 || isVerifyingEmail}
-                  className="w-full bg-emerald-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-emerald-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mb-4"
-                >
-                  {isVerifyingEmail ? 'Επιβεβαίωση...' : 'Επιβεβαίωση Κωδικού'}
+                <p className="text-[10px] font-bold text-zinc-400 uppercase text-center">Εισάγετε τον 6ψήφιο κωδικό του email σας</p>
+                <button onClick={verifyEmailCode} disabled={!emailCode || emailCode.length !== 6 || isVerifyingEmail}
+                  className="w-full h-14 rounded-2xl bg-zinc-900 hover:bg-black text-white font-black text-xs uppercase tracking-widest transition-all active:scale-95 disabled:opacity-40">
+                  {isVerifyingEmail ? 'ΕΠΙΒΕΒΑΙΩΣΗ...' : 'ΕΠΙΒΕΒΑΙΩΣΗ ΚΩΔΙΚΟΥ'}
                 </button>
-
-                {/* Resend Email */}
                 <div className="text-center">
                   {countdown > 0 ? (
-                    <p className="text-sm text-gray-500">
-                      Επαναποστολή σε {countdown} δευτερόλεπτα
-                    </p>
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase">Επαναποστολή σε {countdown}δ.</p>
                   ) : (
-                    <button
-                      onClick={sendEmailVerification}
-                      disabled={!canResend}
-                      className="flex items-center justify-center space-x-2 text-sm text-emerald-600 hover:text-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed mx-auto"
-                    >
-                      <RotateCcw className="w-4 h-4" />
-                      <span>Επαναποστολή Email</span>
+                    <button onClick={sendEmailVerification} disabled={!canResend}
+                      className="flex items-center justify-center gap-2 text-[10px] font-black text-emerald-600 uppercase tracking-widest mx-auto disabled:opacity-50">
+                      <RotateCcw className="w-3 h-3" />
+                      ΕΠΑΝΑΠΟΣΤΟΛΗ EMAIL
                     </button>
                   )}
-                  {emailError && (
-                    <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
-                      <p className="text-sm text-red-800 font-medium">{emailError}</p>
-                    </div>
-                  )}
+                  {emailError && <p className="text-xs font-bold text-red-500 mt-3">{emailError}</p>}
                 </div>
               </div>
             )}
-
-            {/* Info */}
-            <div className="text-xs text-gray-500 text-center mt-4">
-              Η κράτηση θα ολοκληρωθεί μόνο μετά την επιβεβαίωση του email σας.
-            </div>
+            <p className="text-[9px] font-bold text-zinc-300 text-center mt-6 uppercase">Η κράτηση ολοκληρώνεται μόνο μετά την επιβεβαίωση.</p>
           </motion.div>
         </div>
       )}
 
-      {/* Success Popup */}
+      {/* Success Modal */}
       {showSuccessPopup && successBookingData && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-          onClick={() => {
-            setShowSuccessPopup(false);
-            setSuccessBookingData(null);
-          }}
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-4"
+          onClick={() => { setShowSuccessPopup(false); setSuccessBookingData(null); }}
         >
           <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center"
+            initial={{ scale: 0.9, y: 40, opacity: 0 }}
+            animate={{ scale: 1, y: 0, opacity: 1 }}
+            className="bg-white rounded-[2rem] shadow-2xl max-w-md w-full p-8 text-center"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Success Icon */}
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-4xl">🎉</span>
             </div>
+            <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight mb-1">Κράτηση Επιβεβαιώθηκε!</h2>
+            <p className="text-xs font-bold text-zinc-400 uppercase mb-8">Θα λάβετε επιβεβαίωση στο email σας</p>
 
-            {/* Success Message */}
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Η κράτηση ολοκληρώθηκε!
-            </h2>
-            <p className="text-gray-600 mb-8">
-              Θα λάβετε επιβεβαίωση στο τηλέφωνό σας
-            </p>
-
-            {/* Booking Details */}
-            <div className="bg-gray-50 rounded-xl p-6 mb-8 text-left">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">
-                Λεπτομέρειες Κράτησης
-              </h3>
-              
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">👤 Όνομα:</span>
-                  <span className="font-medium text-gray-900">{successBookingData.userName}</span>
+            <div className="bg-zinc-50 rounded-2xl p-6 mb-8 text-left space-y-3">
+              {[
+                { label: '👤 Όνομα', value: successBookingData.userName },
+                { label: '⚽ Γήπεδο', value: successBookingData.pitchName },
+                { label: '📅 Ημερομηνία', value: successBookingData.date },
+                { label: '🕐 Ώρα', value: successBookingData.time },
+              ].map(({ label, value }) => (
+                <div key={label} className="flex justify-between">
+                  <span className="text-[10px] font-black text-zinc-400 uppercase">{label}</span>
+                  <span className="text-[10px] font-black text-zinc-900 uppercase text-right max-w-[60%]">{value}</span>
                 </div>
-                
-                <div className="flex justify-between">
-                  <span className="text-gray-600">📱 Τηλέφωνο:</span>
-                  <span className="font-medium text-gray-900">{successBookingData.userPhone}</span>
-                </div>
-                
-                <div className="flex justify-between">
-                  <span className="text-gray-600">⚽ Γήπεδο:</span>
-                  <span className="font-medium text-gray-900">{successBookingData.pitchName}</span>
-                </div>
-                
-                <div className="flex justify-between">
-                  <span className="text-gray-600">📅 Ημερομηνία:</span>
-                  <span className="font-medium text-gray-900">{successBookingData.date}</span>
-                </div>
-                
-                <div className="flex justify-between">
-                  <span className="text-gray-600">🕐 Ώρα:</span>
-                  <span className="font-medium text-gray-900">{successBookingData.time}</span>
-                </div>
-                
-                <div className="flex justify-between border-t pt-3">
-                  <span className="text-gray-600">💰 Τιμή:</span>
-                  <span className="font-bold text-green-600 text-lg">€{successBookingData.price}</span>
-                </div>
+              ))}
+              <div className="flex justify-between border-t border-zinc-100 pt-3">
+                <span className="text-[10px] font-black text-emerald-600 uppercase">💰 Τιμή</span>
+                <span className="font-black text-emerald-600 text-lg tabular-nums">€{successBookingData.price}</span>
               </div>
             </div>
-
-            {/* Close Button */}
             <button
-              onClick={() => {
-                setShowSuccessPopup(false);
-                setSuccessBookingData(null);
-              }}
-              className="w-full bg-emerald-500 text-white py-3 px-6 rounded-xl font-medium hover:bg-emerald-600 transition-colors"
+              onClick={() => { setShowSuccessPopup(false); setSuccessBookingData(null); }}
+              className="w-full h-14 bg-zinc-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all active:scale-95"
             >
               Τέλεια! 🎯
             </button>
