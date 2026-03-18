@@ -600,8 +600,8 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6">
         <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-xl shadow-zinc-200 shrink-0">
-            <LayoutDashboard className="h-7 w-7 text-emerald-400" />
+          <div className="h-14 w-14 rounded-2xl bg-white border border-zinc-200 flex items-center justify-center text-zinc-900 shadow-xl shadow-zinc-200 shrink-0 hover:border-emerald-200 transition-colors">
+            <LayoutDashboard className="h-7 w-7 text-emerald-500" />
           </div>
           <div className="space-y-0.5">
             <h1 className="text-3xl font-black tracking-tighter text-zinc-900 uppercase">
@@ -678,8 +678,8 @@ export default function DashboardPage() {
         <div className="space-y-8">
           <div className="flex items-center justify-between pb-2">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-lg">
-                <Clock className="h-6 w-6 text-emerald-400" />
+              <div className="h-12 w-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg hover:border-emerald-200 transition-colors">
+                <Clock className="h-6 w-6 text-emerald-500" />
               </div>
               <div className="space-y-0.5">
                 <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Σημερινές Κρατήσεις')}</h2>
@@ -783,8 +783,8 @@ export default function DashboardPage() {
         <div className="space-y-8">
           <div className="flex items-center justify-between pb-2">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-lg">
-                <Trophy className="h-6 w-6 text-emerald-400" />
+              <div className="h-12 w-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg hover:border-emerald-200 transition-colors">
+                <Trophy className="h-6 w-6 text-emerald-500" />
               </div>
               <div className="space-y-0.5">
                 <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Σημερινές Προπονήσεις')}</h2>
@@ -943,8 +943,8 @@ export default function DashboardPage() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-lg">
-                <Trophy className="h-6 w-6 text-emerald-400" />
+              <div className="h-12 w-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg hover:border-emerald-200 transition-colors">
+                <Trophy className="h-6 w-6 text-emerald-500" />
               </div>
               <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ακαδημίες')}</h2>
             </div>
@@ -991,8 +991,8 @@ export default function DashboardPage() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-zinc-900 flex items-center justify-center text-white shadow-lg">
-                <FootballPitch className="h-6 w-6 text-emerald-400" />
+              <div className="h-12 w-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg hover:border-emerald-200 transition-colors">
+                <FootballPitch className="h-6 w-6 text-emerald-500" />
               </div>
               <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Γήπεδα')}</h2>
             </div>
