@@ -17,6 +17,8 @@ import {
   Save,
   X,
   Plus,
+  Send,
+  Pencil,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { blockedDateService } from '@/lib/firebase-services';
@@ -36,7 +38,10 @@ import {
 } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
@@ -67,6 +72,14 @@ export default function MatchesPage() {
   const [editAwayScore, setEditAwayScore] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
+  // Match detail edit dialog
+  const [editDetailMatch, setEditDetailMatch] = useState<TournamentMatch | null>(null);
+  const [editDate, setEditDate] = useState('');
+  const [editTime, setEditTime] = useState('');
+  const [editRound, setEditRound] = useState(1);
+  const [editRoundLabel, setEditRoundLabel] = useState('');
+  const [isSavingDetail, setIsSavingDetail] = useState(false);
+
   // New match form
   const [showNewMatch, setShowNewMatch] = useState(false);
   const [newHomeTeam, setNewHomeTeam] = useState('');
@@ -76,7 +89,13 @@ export default function MatchesPage() {
   const [newTime, setNewTime] = useState('20:00');
   const [isCreating, setIsCreating] = useState(false);
 
+  // Notify captains
+  const [notifyingMatch, setNotifyingMatch] = useState<string | null>(null);
+  const [notifySuccess, setNotifySuccess] = useState<string | null>(null);
+  const [notifyConfirm, setNotifyConfirm] = useState<TournamentMatch | null>(null);
+
   const tournamentId = params.id as string;
+  const teamMap = new Map(teams.map(t => [t.id, t]));
 
   const loadData = useCallback(async () => {
     if (!tournamentId || !venueOwner) return;
@@ -181,6 +200,36 @@ export default function MatchesPage() {
     setEditAwayScore(match.awayScore?.toString() ?? '');
   };
 
+  const startEditingDetail = (match: TournamentMatch) => {
+    setEditDetailMatch(match);
+    const dateStr = match.scheduledDate instanceof Date
+      ? match.scheduledDate.toISOString().split('T')[0]
+      : new Date(match.scheduledDate).toISOString().split('T')[0];
+    setEditDate(dateStr);
+    setEditTime(match.scheduledTime || '20:00');
+    setEditRound(match.round);
+    setEditRoundLabel(match.roundLabel || `Αγωνιστική ${match.round}`);
+  };
+
+  const handleSaveDetail = async () => {
+    if (!editDetailMatch || !editDate) return;
+    setIsSavingDetail(true);
+    try {
+      await tournamentMatchService.update(editDetailMatch.id, {
+        scheduledDate: new Date(editDate),
+        scheduledTime: editTime,
+        round: editRound,
+        roundLabel: editRoundLabel || `Αγωνιστική ${editRound}`,
+      });
+      setEditDetailMatch(null);
+      await loadData();
+    } catch (error) {
+      console.error('Error saving match details:', error);
+    } finally {
+      setIsSavingDetail(false);
+    }
+  };
+
   const handleSaveScore = async () => {
     if (!editingMatch) return;
     setIsSaving(true);
@@ -280,6 +329,53 @@ export default function MatchesPage() {
     }
   };
 
+  const handleNotifyCaptains = async (match: TournamentMatch) => {
+    const home = teamMap.get(match.homeTeamId);
+    const away = teamMap.get(match.awayTeamId);
+    if (!home || !away || !tournament) return;
+
+    setNotifyingMatch(match.id);
+    try {
+      const isCompleted = match.status === 'completed';
+      const matchDate = new Date(match.scheduledDate).toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+      const captains = [
+        { email: home.captainEmail, name: home.captainName, team: home.name, opponent: away.name },
+        { email: away.captainEmail, name: away.captainName, team: away.name, opponent: home.name },
+      ].filter((c) => c.email);
+
+      for (const captain of captains) {
+        await fetch('/api/tournament/notify-captain', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            captainEmail: captain.email,
+            captainName: captain.name,
+            teamName: captain.team,
+            opponentName: captain.opponent,
+            matchDate,
+            matchTime: match.scheduledTime,
+            tournamentName: tournament.name,
+            venueName: venueOwner?.name || '',
+            type: isCompleted ? 'result' : 'next_match',
+            ...(isCompleted ? {
+              homeScore: match.homeScore,
+              awayScore: match.awayScore,
+              homeTeam: home.name,
+              awayTeam: away.name,
+            } : {}),
+          }),
+        });
+      }
+      setNotifySuccess(match.id);
+      setTimeout(() => setNotifySuccess(null), 3000);
+    } catch (error) {
+      console.error('Error notifying captains:', error);
+    } finally {
+      setNotifyingMatch(null);
+    }
+  };
+
   if (authLoading || isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -302,7 +398,6 @@ export default function MatchesPage() {
     );
   }
 
-  const teamMap = new Map(teams.map(t => [t.id, t]));
   const rounds = [...new Set(matches.map(m => m.round))].sort((a, b) => a - b);
   const filteredMatches = filterRound === 'all'
     ? matches
@@ -658,6 +753,43 @@ export default function MatchesPage() {
                           {isCompleted ? 'Επεξεργασία Σκορ' : 'Καταχώρηση Σκορ'}
                         </Button>
                       )}
+                      {/* Notify captains - only for future scheduled matches */}
+                      {isScheduled && (home?.captainEmail || away?.captainEmail) && (() => {
+                        const matchDateTime = new Date(`${new Date(match.scheduledDate).toISOString().split('T')[0]}T${match.scheduledTime || '23:59'}`);
+                        const isFuture = matchDateTime > new Date();
+                        if (!isFuture) return null;
+                        return (
+                          <Button
+                            variant="outline"
+                            onClick={() => setNotifyConfirm(match)}
+                            disabled={notifyingMatch === match.id}
+                            className={cn(
+                              "h-12 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm transition-all",
+                              notifySuccess === match.id
+                                ? "text-emerald-600 border-emerald-200 bg-emerald-50"
+                                : "text-zinc-500 border-zinc-200 hover:border-blue-200 hover:text-blue-600 hover:bg-blue-50"
+                            )}
+                          >
+                            {notifyingMatch === match.id ? (
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : notifySuccess === match.id ? (
+                              <CheckCircle2 className="h-4 w-4 mr-2 text-emerald-500" />
+                            ) : (
+                              <Send className="h-4 w-4 mr-2" />
+                            )}
+                            Ειδοποίηση
+                          </Button>
+                        );
+                      })()}
+                      {isScheduled && (
+                        <Button
+                          variant="outline"
+                          onClick={() => startEditingDetail(match)}
+                          className="h-12 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest text-zinc-500 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
+                        >
+                          <Pencil className="h-4 w-4 mr-2" /> Επεξεργασία
+                        </Button>
+                      )}
                       {isScheduled && (
                         <Button
                           variant="ghost"
@@ -675,6 +807,155 @@ export default function MatchesPage() {
           })}
         </div>
       )}
+      {/* Edit Match Detail Dialog */}
+      <AlertDialog open={editDetailMatch !== null} onOpenChange={(open) => !open && setEditDetailMatch(null)}>
+        <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl p-0 max-w-sm overflow-hidden">
+          {editDetailMatch && (() => {
+            const home = teamMap.get(editDetailMatch.homeTeamId);
+            const away = teamMap.get(editDetailMatch.awayTeamId);
+            return (
+              <>
+                <div className="bg-gradient-to-br from-zinc-800 via-zinc-900 to-black px-8 pt-8 pb-6 text-center">
+                  <div className="mx-auto h-14 w-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+                    <Pencil className="h-6 w-6 text-white" />
+                  </div>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-lg font-black text-white tracking-tight">
+                      Επεξεργασία Αγώνα
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-zinc-400 text-sm mt-1">
+                      {home?.name || '—'} vs {away?.name || '—'}
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                </div>
+                <div className="px-8 py-6 space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Αγωνιστική</label>
+                    <Input
+                      value={editRoundLabel}
+                      onChange={(e) => setEditRoundLabel(e.target.value)}
+                      className="h-11 bg-zinc-50 border-none rounded-xl px-4 font-bold text-sm"
+                      placeholder="π.χ. Αγωνιστική 1"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Ημερομηνία</label>
+                      <Input
+                        type="date"
+                        value={editDate}
+                        onChange={(e) => setEditDate(e.target.value)}
+                        className="h-11 bg-zinc-50 border-none rounded-xl px-4 font-bold text-sm"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Ώρα</label>
+                      <Input
+                        type="time"
+                        value={editTime}
+                        onChange={(e) => setEditTime(e.target.value)}
+                        className="h-11 bg-zinc-50 border-none rounded-xl px-4 font-bold text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="px-8 pb-8">
+                  <AlertDialogFooter className="flex flex-col gap-2.5 sm:flex-col">
+                    <AlertDialogAction
+                      onClick={handleSaveDetail}
+                      disabled={isSavingDetail}
+                      className="h-12 w-full rounded-xl bg-zinc-900 hover:bg-black text-white font-bold text-sm shadow-lg transition-all active:scale-[0.98] m-0"
+                    >
+                      {isSavingDetail ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+                      Αποθήκευση
+                    </AlertDialogAction>
+                    <AlertDialogCancel className="h-10 w-full rounded-xl border-none bg-transparent text-zinc-400 hover:text-zinc-600 font-bold text-sm m-0">
+                      Ακύρωση
+                    </AlertDialogCancel>
+                  </AlertDialogFooter>
+                </div>
+              </>
+            );
+          })()}
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Notify Captains Confirmation Dialog */}
+      <AlertDialog open={notifyConfirm !== null} onOpenChange={(open) => !open && setNotifyConfirm(null)}>
+        <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl p-0 max-w-sm overflow-hidden">
+          {notifyConfirm && (() => {
+            const home = teamMap.get(notifyConfirm.homeTeamId);
+            const away = teamMap.get(notifyConfirm.awayTeamId);
+            const recipients = [home, away].filter((t) => t?.captainEmail);
+            return (
+              <>
+                <div className="bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 px-8 pt-8 pb-6 text-center">
+                  <div className="mx-auto h-14 w-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-blue-600/20">
+                    <Send className="h-6 w-6 text-white" />
+                  </div>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-lg font-black text-white tracking-tight">
+                      Ειδοποίηση Αγώνα
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-blue-100 text-sm mt-1">
+                      Email στους αρχηγούς των ομάδων
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                </div>
+                <div className="px-8 py-6 space-y-4">
+                  {/* Match info */}
+                  <div className="flex items-center justify-center gap-3 p-4 bg-zinc-50 rounded-xl">
+                    <span className="text-sm font-black text-zinc-900">{home?.name || '—'}</span>
+                    <span className="text-xs font-black text-zinc-400 bg-white px-3 py-1 rounded-lg border border-zinc-200">VS</span>
+                    <span className="text-sm font-black text-zinc-900">{away?.name || '—'}</span>
+                  </div>
+
+                  {/* Date */}
+                  <div className="text-center">
+                    <p className="text-[10px] text-zinc-400 font-bold">
+                      {new Date(notifyConfirm.scheduledDate).toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                      {notifyConfirm.scheduledTime && ` • ${notifyConfirm.scheduledTime}`}
+                    </p>
+                  </div>
+
+                  {/* Recipients */}
+                  <div className="space-y-2">
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-300">Παραλήπτες ({recipients.length})</p>
+                    {recipients.map((team) => (
+                      <div key={team!.id} className="flex items-center gap-2.5 p-2.5 bg-zinc-50 rounded-lg">
+                        <div className="h-7 w-7 rounded-md bg-blue-50 flex items-center justify-center">
+                          <Send className="h-3 w-3 text-blue-500" />
+                        </div>
+                        <div>
+                          <p className="text-xs font-bold text-zinc-900">{team!.captainName}</p>
+                          <p className="text-[10px] text-zinc-400">{team!.captainEmail} • {team!.name}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="px-8 pb-8">
+                  <AlertDialogFooter className="flex flex-col gap-2.5 sm:flex-col">
+                    <AlertDialogAction
+                      onClick={() => {
+                        handleNotifyCaptains(notifyConfirm);
+                        setNotifyConfirm(null);
+                      }}
+                      className="h-12 w-full rounded-xl bg-zinc-900 hover:bg-black text-white font-bold text-sm shadow-lg transition-all active:scale-[0.98] m-0"
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Αποστολή σε {recipients.length} αρχηγούς
+                    </AlertDialogAction>
+                    <AlertDialogCancel className="h-10 w-full rounded-xl border-none bg-transparent text-zinc-400 hover:text-zinc-600 font-bold text-sm m-0">
+                      Ακύρωση
+                    </AlertDialogCancel>
+                  </AlertDialogFooter>
+                </div>
+              </>
+            );
+          })()}
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

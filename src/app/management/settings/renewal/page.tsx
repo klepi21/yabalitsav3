@@ -14,7 +14,7 @@ export default function SubscriptionRenewalPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
-  const DEV_EMAIL = 'nikoskoukis99@gmail.com';
+  const DEV_EMAIL = process.env.NEXT_PUBLIC_DEV_EMAIL || '';
   const isDevUser = userEmail === DEV_EMAIL;
 
   const plans = pricingUtils.getAllPlans().map(plan =>

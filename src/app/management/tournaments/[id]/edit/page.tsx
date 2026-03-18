@@ -19,7 +19,6 @@ import { Tournament } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 type TournamentType = Tournament['type'];
@@ -201,11 +200,6 @@ export default function EditTournamentPage() {
               {tournament.name}
             </p>
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline" className="h-8 px-4 rounded-lg bg-zinc-50 border-none text-[10px] font-black uppercase tracking-widest text-zinc-400">
-            ID: {tournament.id.slice(0, 8)}
-          </Badge>
         </div>
       </div>
 

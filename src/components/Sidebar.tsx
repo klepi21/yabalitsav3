@@ -55,12 +55,7 @@ const navigation: NavItem[] = [
       { name: 'Αξιολογήσεις', href: '/management/academy/evaluations', icon: TrendingUp },
     ]
   },
-  {
-    name: 'Τουρνουά',
-    icon: Trophy,
-    disabled: true,
-    badge: 'Soon',
-  },
+  { name: 'Τουρνουά', href: '/management/tournaments', icon: Trophy },
   { name: 'Αναφορές', href: '/management/reports', icon: BarChart3 },
   { name: 'Ρυθμίσεις', href: '/management/settings', icon: Settings },
 ];

@@ -41,6 +41,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import KnockoutBracket from '@/components/KnockoutBracket';
+import TournamentLeaderboards from '@/components/TournamentLeaderboards';
 
 const statusConfig: Record<string, { label: string; className: string }> = {
   draft: { label: 'Πρόχειρο', className: 'bg-zinc-50 text-zinc-600 border-zinc-200' },
@@ -167,18 +169,6 @@ export default function TournamentDetailPage() {
     if (gdB !== gdA) return gdB - gdA;
     return b.stats.goalsFor - a.stats.goalsFor;
   });
-
-  // Top scorers
-  const topScorers = [...players]
-    .filter(p => p.stats.goals > 0)
-    .sort((a, b) => b.stats.goals - a.stats.goals)
-    .slice(0, 10);
-
-  // Top assists
-  const topAssists = [...players]
-    .filter(p => p.stats.assists > 0)
-    .sort((a, b) => b.stats.assists - a.stats.assists)
-    .slice(0, 10);
 
   // Recent & upcoming matches
   const recentMatches = [...matches]
@@ -798,139 +788,69 @@ export default function TournamentDetailPage() {
 
       {/* ─── STATS ─── */}
       {activeTab === 'stats' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-          {/* Top Scorers */}
-          <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-8 space-y-8">
-            <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center">
-                <Target className="h-5 w-5 text-amber-600" />
-              </div>
-              <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Πρώτοι Σκόρερ</h2>
+        <div className="space-y-6">
+          {/* Knockout Bracket */}
+          {tournament.type !== 'league' && matches.length > 0 && (
+            <div className="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
+              <h3 className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-4">Bracket</h3>
+              <KnockoutBracket matches={matches} teams={teams} />
             </div>
+          )}
 
-            {topScorers.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center bg-zinc-50 rounded-3xl border-2 border-dashed border-zinc-100">
-                <Target className="h-12 w-12 text-zinc-200 mb-4" />
-                <p className="text-sm font-bold text-zinc-400">Δεν υπάρχουν ακόμα γκολ</p>
-              </div>
-            ) : (
-              <div className="overflow-hidden rounded-[2rem] border border-zinc-100">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-zinc-50/50">
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-400">Κατάταξη</th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-400">Παίκτης</th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Γκολ</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-50">
-                    {topScorers.map((player, idx) => {
-                      const team = teamMap.get(player.teamId);
-                      return (
-                        <tr key={player.id} className="group hover:bg-zinc-50 transition-colors">
-                          <td className="px-6 py-4">
-                            {idx < 3 ? (
-                              <div className={cn(
-                                "h-8 w-8 rounded-xl flex items-center justify-center shadow-sm",
-                                idx === 0 ? "bg-amber-100 text-amber-600" :
-                                idx === 1 ? "bg-zinc-100 text-zinc-400" :
-                                "bg-orange-50 text-orange-600"
-                              )}>
-                                <Medal className="h-4 w-4" />
-                              </div>
-                            ) : (
-                              <span className="text-xs font-black text-zinc-300 ml-3">{idx + 1}</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex flex-col">
-                              <span className="text-sm font-black text-zinc-900 uppercase group-hover:text-amber-600 transition-colors">
-                                {player.name}
-                              </span>
-                              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">
-                                {team?.name || '—'}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <span className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-amber-50 text-amber-600 text-lg font-black">
-                              {player.stats.goals}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+          {/* Leaderboards */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <TournamentLeaderboards players={players} teams={teams} />
 
-          {/* Top Assists */}
-          <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-8 space-y-8">
-            <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                <Users className="h-5 w-5 text-emerald-600" />
-              </div>
-              <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Κορυφαίοι σε Ασίστ</h2>
-            </div>
-
-            {topAssists.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center bg-zinc-50 rounded-3xl border-2 border-dashed border-zinc-100">
-                <Users className="h-12 w-12 text-zinc-200 mb-4" />
-                <p className="text-sm font-bold text-zinc-400">Δεν υπάρχουν ακόμα ασίστ</p>
-              </div>
-            ) : (
-              <div className="overflow-hidden rounded-[2rem] border border-zinc-100">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-zinc-50/50">
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-400">Κατάταξη</th>
-                      <th className="px-6 py-4 text-[10px) font-black uppercase tracking-widest text-zinc-400">Παίκτης</th>
-                      <th className="px-6 py-4 text-[10px) font-black uppercase tracking-widest text-zinc-400 text-center">Ασίστ</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zinc-50">
-                    {topAssists.map((player, idx) => {
-                      const team = teamMap.get(player.teamId);
-                      return (
-                        <tr key={player.id} className="group hover:bg-zinc-50 transition-colors">
-                          <td className="px-6 py-4">
-                            {idx < 3 ? (
-                              <div className={cn(
-                                "h-8 w-8 rounded-xl flex items-center justify-center shadow-sm",
-                                idx === 0 ? "bg-emerald-100 text-emerald-600" :
-                                idx === 1 ? "bg-zinc-100 text-zinc-400" :
-                                "bg-emerald-50 text-emerald-600"
-                              )}>
-                                <Medal className="h-4 w-4" />
-                              </div>
-                            ) : (
-                              <span className="text-xs font-black text-zinc-300 ml-3">{idx + 1}</span>
-                            )}
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex flex-col">
-                              <span className="text-sm font-black text-zinc-900 uppercase group-hover:text-emerald-600 transition-colors">
-                                {player.name}
-                              </span>
-                              <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">
-                                {team?.name || '—'}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <span className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-emerald-50 text-emerald-600 text-lg font-black">
-                              {player.stats.assists}
-                            </span>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            {/* Group stage standings (for group+knockout) */}
+            {tournament.type === 'group+knockout' && (() => {
+              const groupLabels = [...new Set(teams.filter((t) => t.groupLabel).map((t) => t.groupLabel!))].sort();
+              if (groupLabels.length === 0) return null;
+              return (
+                <div className="space-y-4">
+                  <h3 className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Όμιλοι</h3>
+                  {groupLabels.map((label) => {
+                    const groupTeams = teams
+                      .filter((t) => t.groupLabel === label)
+                      .sort((a, b) => b.stats.points - a.stats.points || (b.stats.goalsFor - b.stats.goalsAgainst) - (a.stats.goalsFor - a.stats.goalsAgainst));
+                    return (
+                      <div key={label} className="rounded-2xl border border-zinc-100 bg-white shadow-sm overflow-hidden">
+                        <div className="px-4 py-2.5 bg-zinc-50 border-b border-zinc-100">
+                          <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Όμιλος {label}</span>
+                        </div>
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b border-zinc-50">
+                              <th className="px-3 py-2 text-left text-[8px] font-black uppercase tracking-wider text-zinc-400">#</th>
+                              <th className="px-3 py-2 text-left text-[8px] font-black uppercase tracking-wider text-zinc-400">Ομάδα</th>
+                              <th className="px-3 py-2 text-center text-[8px] font-black uppercase tracking-wider text-zinc-400">ΑΓ</th>
+                              <th className="px-3 py-2 text-center text-[8px] font-black uppercase tracking-wider text-zinc-400">Ν</th>
+                              <th className="px-3 py-2 text-center text-[8px] font-black uppercase tracking-wider text-zinc-400">Ι</th>
+                              <th className="px-3 py-2 text-center text-[8px] font-black uppercase tracking-wider text-zinc-400">Η</th>
+                              <th className="px-3 py-2 text-center text-[8px] font-black uppercase tracking-wider text-zinc-400">ΔΓ</th>
+                              <th className="px-3 py-2 text-center text-[8px] font-black uppercase tracking-wider text-zinc-400 font-black">Β</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {groupTeams.map((team, idx) => (
+                              <tr key={team.id} className={cn("border-b border-zinc-50 hover:bg-zinc-50/50", idx < 2 && "bg-emerald-50/30")}>
+                                <td className="px-3 py-2 text-xs font-black text-zinc-400">{idx + 1}</td>
+                                <td className="px-3 py-2 text-xs font-bold text-zinc-900">{team.name}</td>
+                                <td className="px-3 py-2 text-center text-xs text-zinc-500">{team.stats.played}</td>
+                                <td className="px-3 py-2 text-center text-xs text-emerald-600 font-bold">{team.stats.won}</td>
+                                <td className="px-3 py-2 text-center text-xs text-zinc-500">{team.stats.drawn}</td>
+                                <td className="px-3 py-2 text-center text-xs text-red-500">{team.stats.lost}</td>
+                                <td className="px-3 py-2 text-center text-xs text-zinc-500">{team.stats.goalsFor - team.stats.goalsAgainst}</td>
+                                <td className="px-3 py-2 text-center text-sm font-black text-zinc-900">{team.stats.points}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}

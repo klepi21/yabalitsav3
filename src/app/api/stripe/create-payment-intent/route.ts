@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { venueService, paymentService } from '@/lib/firebase-services';
 import { pricingUtils } from '@/lib/pricing';
 
-const DEV_EMAIL = 'nikoskoukis99@gmail.com';
+const DEV_EMAIL = process.env.DEV_EMAIL || '';
 const DEV_BASE_PRICE = 0.50;
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
