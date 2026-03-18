@@ -50,6 +50,7 @@ export default function NewUserGroupPage() {
   const [color, setColor] = useState('blue');
   const [fields, setFields] = useState<UserGroupField[]>([]);
   const [capabilities, setCapabilities] = useState<GroupCapability[]>([]);
+  const [monthlyAmount, setMonthlyAmount] = useState<number>(0);
 
   // New field form
   const [newField, setNewField] = useState<UserGroupField>({
@@ -115,6 +116,7 @@ export default function NewUserGroupPage() {
         color,
         fields,
         capabilities,
+        monthlyAmount: capabilities.includes('monthly_payment') ? monthlyAmount : undefined,
         order: 99,
         venueId,
       });
@@ -251,6 +253,26 @@ export default function NewUserGroupPage() {
               );
             })}
           </div>
+
+          {/* Monthly amount - shown when monthly_payment is enabled */}
+          {capabilities.includes('monthly_payment') && (
+            <div className="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+              <Label className="text-sm font-bold text-emerald-800 mb-2 block">
+                Μηνιαίο Ποσό Συνδρομής (€)
+              </Label>
+              <p className="text-xs text-emerald-600 mb-3">
+                Το default ποσό που θα εμφανίζεται κατά τη δημιουργία πληρωμών. Μπορεί να αλλάξει ανά μήνα/αθλητή.
+              </p>
+              <Input
+                type="number"
+                value={monthlyAmount || ''}
+                onChange={(e) => setMonthlyAmount(Number(e.target.value))}
+                placeholder="π.χ. 50"
+                className="h-11 max-w-[200px] bg-white"
+                min={0}
+              />
+            </div>
+          )}
         </div>
 
         {/* Fields */}

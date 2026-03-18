@@ -25,6 +25,7 @@ export default function NewSquadPage() {
     name: '',
     ageGroup: 'U12',
     coachIds: [] as string[],
+    monthlyAmount: 0,
   });
 
   const venueId = venueOwner?.venueId || '';
@@ -190,6 +191,20 @@ export default function NewSquadPage() {
               </div>
             </div>
           )}
+
+          {/* Monthly Amount */}
+          <div className="space-y-2">
+            <Label className="text-zinc-700">Μηνιαία Συνδρομή (€)</Label>
+            <p className="text-xs text-zinc-400">Το ποσό πληρωμής για τους αθλητές αυτού του τμήματος. Αν είναι 0, χρησιμοποιείται η γενική τιμή.</p>
+            <Input
+              type="number"
+              value={formData.monthlyAmount || ''}
+              onChange={(e) => setFormData((prev) => ({ ...prev, monthlyAmount: Number(e.target.value) }))}
+              placeholder="π.χ. 50"
+              className="h-11 max-w-[200px] bg-white"
+              min={0}
+            />
+          </div>
 
           <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-zinc-100/60">
             <Button

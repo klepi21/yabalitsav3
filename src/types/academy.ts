@@ -28,6 +28,7 @@ export interface UserGroup {
   color: string;         // tailwind color key (e.g., 'green', 'blue')
   fields: UserGroupField[];
   capabilities: GroupCapability[];  // special built-in features
+  monthlyAmount?: number;  // default monthly fee for this group (used by monthly_payment capability)
   order: number;         // display order
   createdAt: Date;
   updatedAt: Date;
@@ -104,6 +105,7 @@ export interface Squad {
   venueId: string;
   ageGroup: string;
   coachIds: string[];
+  monthlyAmount?: number;  // monthly fee for athletes in this squad
   createdAt: Date;
   updatedAt: Date;
 }
@@ -176,6 +178,22 @@ export const DEFAULT_GROUPS: Omit<UserGroup, 'id' | 'venueId' | 'createdAt' | 'u
 // Academy Payment (monthly fee tracking)
 // ============================================
 
+export type PaymentMethod = 'cash' | 'bank_transfer' | 'card' | 'other';
+
+export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
+  cash: 'Μετρητά',
+  bank_transfer: 'Τραπεζική Μεταφορά',
+  card: 'Κάρτα',
+  other: 'Άλλο',
+};
+
+export const PAYMENT_METHOD_ICONS: Record<PaymentMethod, string> = {
+  cash: '💵',
+  bank_transfer: '🏦',
+  card: '💳',
+  other: '📋',
+};
+
 export interface AcademyPayment {
   id: string;
   venueId: string;
@@ -185,11 +203,51 @@ export interface AcademyPayment {
   amount: number;        // payment amount in euros
   paid: boolean;
   paidAt?: string;       // ISO date string
+  paymentMethod?: PaymentMethod;  // how the payment was made
   notes?: string;
   lastNotifiedAt?: string;  // ISO date string — last time a payment reminder was sent
   createdAt: Date;
   updatedAt: Date;
 }
+
+// ============================================
+// Broadcast (squad/academy announcements)
+// ============================================
+
+export interface Broadcast {
+  id: string;
+  venueId: string;
+  squadId?: string;        // null = whole academy
+  squadName?: string;
+  subject: string;
+  message: string;
+  template?: string;       // template key used
+  recipientCount: number;
+  recipientEmails: string[];
+  sentBy: string;          // venue owner name
+  createdAt: Date;
+}
+
+export const BROADCAST_TEMPLATES: { key: string; label: string; subject: string; message: string }[] = [
+  {
+    key: 'cancel_training',
+    label: 'Ακύρωση Προπόνησης',
+    subject: 'Ακύρωση Προπόνησης',
+    message: 'Σας ενημερώνουμε ότι η σημερινή προπόνηση ακυρώνεται λόγω καιρικών συνθηκών. Θα σας ενημερώσουμε για την επόμενη προπόνηση.',
+  },
+  {
+    key: 'time_change',
+    label: 'Αλλαγή Ώρας',
+    subject: 'Αλλαγή Ώρας Προπόνησης',
+    message: 'Σας ενημερώνουμε ότι η ώρα της προπόνησης έχει αλλάξει.',
+  },
+  {
+    key: 'general',
+    label: 'Γενική Ανακοίνωση',
+    subject: 'Ανακοίνωση',
+    message: '',
+  },
+];
 
 // Legacy type aliases for backward compatibility
 export type AcademyUserRole = 'admin' | 'coach' | 'parent' | 'athlete';

@@ -33,6 +33,7 @@ export default function EditSquadPage() {
     name: '',
     ageGroup: 'U12',
     coachIds: [] as string[],
+    monthlyAmount: 0,
   });
 
   useEffect(() => {
@@ -57,6 +58,7 @@ export default function EditSquadPage() {
           name: squad.name,
           ageGroup: squad.ageGroup,
           coachIds: squad.coachIds || [],
+          monthlyAmount: squad.monthlyAmount || 0,
         });
 
         const allUsers = await academyUserService.getByVenue(venueId);
@@ -100,6 +102,7 @@ export default function EditSquadPage() {
         name: formData.name,
         ageGroup: formData.ageGroup,
         coachIds: formData.coachIds,
+        monthlyAmount: formData.monthlyAmount || undefined,
       });
 
       // Update athlete squad assignments
@@ -269,6 +272,20 @@ export default function EditSquadPage() {
               </div>
             </div>
           )}
+
+          {/* Monthly Amount */}
+          <div className="space-y-2">
+            <Label className="text-zinc-700">Μηνιαία Συνδρομή (€)</Label>
+            <p className="text-xs text-zinc-400">Το ποσό πληρωμής για τους αθλητές αυτού του τμήματος. Αν είναι 0, χρησιμοποιείται η γενική τιμή.</p>
+            <Input
+              type="number"
+              value={formData.monthlyAmount || ''}
+              onChange={(e) => setFormData((prev) => ({ ...prev, monthlyAmount: Number(e.target.value) }))}
+              placeholder="π.χ. 50"
+              className="h-11 max-w-[200px] bg-white"
+              min={0}
+            />
+          </div>
 
           {/* Athletes in Squad */}
           <div className="space-y-3">

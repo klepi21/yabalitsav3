@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { academyPaymentService, userGroupService, academyUserService } from '@/lib/academy-services';
-import { AcademyPayment, AcademyUser, UserGroup } from '@/types/academy';
+import { academyPaymentService, userGroupService, academyUserService, squadService } from '@/lib/academy-services';
+import { AcademyPayment, AcademyUser, UserGroup, Squad, PaymentMethod, PAYMENT_METHOD_LABELS, PAYMENT_METHOD_ICONS } from '@/types/academy';
 import {
   Loader2,
   Euro,
@@ -52,16 +52,18 @@ export default function PaymentsDashboardPage() {
   const [athletes, setAthletes] = useState<AcademyUser[]>([]);
   const [allUsers, setAllUsers] = useState<AcademyUser[]>([]);
   const [groups, setGroups] = useState<UserGroup[]>([]);
+  const [squads, setSquads] = useState<Squad[]>([]);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [search, setSearch] = useState('');
   const [defaultAmount, setDefaultAmount] = useState(50);
-  const [initDialogOpen, setInitDialogOpen] = useState(false);
-  const [initMonth, setInitMonth] = useState<number | null>(null);
   const [notifying, setNotifying] = useState<string | null>(null);
   const [notifySuccess, setNotifySuccess] = useState<string | null>(null);
   const [togglingPayment, setTogglingPayment] = useState<string | null>(null);
   const [focusedMonth, setFocusedMonth] = useState<number | null>(new Date().getMonth());
   const [notifyConfirm, setNotifyConfirm] = useState<{ athlete: AcademyUser; month: number } | null>(null);
+  const [payConfirm, setPayConfirm] = useState<{ athlete: AcademyUser; month: number; payment?: AcademyPayment } | null>(null);
+  const [unpayConfirm, setUnpayConfirm] = useState<{ athlete: AcademyUser; month: number; payment: AcademyPayment } | null>(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<PaymentMethod>('cash');
 
   const venueId = venueOwner?.venueId || '';
   const venueName = venueOwner?.name || '';
@@ -77,20 +79,23 @@ export default function PaymentsDashboardPage() {
     if (!venueId) return;
     try {
       setIsLoading(true);
-      const [paymentsData, usersData, groupsData] = await Promise.all([
+      const [paymentsData, usersData, groupsData, squadsData] = await Promise.all([
         academyPaymentService.getByVenue(venueId),
         academyUserService.getByVenue(venueId),
         userGroupService.getByVenue(venueId),
+        squadService.getByVenue(venueId),
       ]);
       setAllPayments(paymentsData);
       setAllUsers(usersData);
       setGroups(groupsData);
+      setSquads(squadsData);
 
-      // Filter athletes = users whose group has monthly_payment capability
-      const paymentGroupIds = new Set(
-        groupsData.filter((g) => g.capabilities.includes('monthly_payment')).map((g) => g.id)
-      );
+      const paymentGroups = groupsData.filter((g) => g.capabilities.includes('monthly_payment'));
+      const paymentGroupIds = new Set(paymentGroups.map((g) => g.id));
       setAthletes(usersData.filter((u) => paymentGroupIds.has(u.groupId)));
+
+      const firstGroupAmount = paymentGroups.find((g) => g.monthlyAmount)?.monthlyAmount;
+      if (firstGroupAmount) setDefaultAmount(firstGroupAmount);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης');
     } finally {
@@ -102,24 +107,79 @@ export default function PaymentsDashboardPage() {
     loadData();
   }, [loadData]);
 
-  // Get payment for a specific athlete and month
+  // Get the expected amount for an athlete (squad > group > default)
+  const getExpectedAmount = useCallback((athlete: AcademyUser) => {
+    const athleteSquadIds = athlete.squad_ids || (athlete.squad_id ? [athlete.squad_id] : []);
+    for (const sid of athleteSquadIds) {
+      const squad = squads.find((s) => s.id === sid);
+      if (squad?.monthlyAmount) return squad.monthlyAmount;
+    }
+    const group = groups.find((g) => g.id === athlete.groupId);
+    if (group?.monthlyAmount) return group.monthlyAmount;
+    return defaultAmount;
+  }, [squads, groups, defaultAmount]);
+
+  // Get payment record (or null if none exists yet)
   const getPayment = (userId: string, month: number) => {
     const monthStr = `${selectedYear}-${String(month + 1).padStart(2, '0')}`;
-    return allPayments.find((p) => p.userId === userId && p.month === monthStr);
+    return allPayments.find((p) => p.userId === userId && p.month === monthStr) || null;
   };
 
-  // Toggle payment status
-  const handleTogglePayment = async (userId: string, month: number) => {
-    const payment = getPayment(userId, month);
-    if (!payment) return;
-    const key = `${payment.id}`;
+  // Create a payment record on-the-fly (lazy creation)
+  const ensurePaymentRecord = async (athlete: AcademyUser, month: number): Promise<AcademyPayment> => {
+    const existing = getPayment(athlete.id, month);
+    if (existing) return existing;
+
+    const monthStr = `${selectedYear}-${String(month + 1).padStart(2, '0')}`;
+    const amount = getExpectedAmount(athlete);
+    const id = await academyPaymentService.create({
+      venueId,
+      userId: athlete.id,
+      userName: athlete.displayName,
+      month: monthStr,
+      amount,
+      paid: false,
+    });
+    const newPayment: AcademyPayment = {
+      id,
+      venueId,
+      userId: athlete.id,
+      userName: athlete.displayName,
+      month: monthStr,
+      amount,
+      paid: false,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    setAllPayments((prev) => [...prev, newPayment]);
+    return newPayment;
+  };
+
+  // Click on payment cell
+  const handlePaymentClick = (athlete: AcademyUser, month: number) => {
+    const payment = getPayment(athlete.id, month);
+    if (payment?.paid) {
+      setUnpayConfirm({ athlete, month, payment });
+    } else {
+      setSelectedPaymentMethod('cash');
+      setPayConfirm({ athlete, month, payment: payment || undefined });
+    }
+  };
+
+  // Mark as paid
+  const handleConfirmPayment = async () => {
+    if (!payConfirm) return;
+    const { athlete, month } = payConfirm;
+    const key = `pay-${athlete.id}-${month}`;
     setTogglingPayment(key);
+    setPayConfirm(null);
     try {
-      await academyPaymentService.togglePaid(payment.id, !payment.paid);
+      const payment = await ensurePaymentRecord(athlete, month);
+      await academyPaymentService.togglePaid(payment.id, true, selectedPaymentMethod);
       setAllPayments((prev) =>
         prev.map((p) =>
           p.id === payment.id
-            ? { ...p, paid: !p.paid, paidAt: !p.paid ? new Date().toISOString() : undefined }
+            ? { ...p, paid: true, paidAt: new Date().toISOString(), paymentMethod: selectedPaymentMethod }
             : p
         )
       );
@@ -130,33 +190,34 @@ export default function PaymentsDashboardPage() {
     }
   };
 
-  // Init a month for all athletes
-  const handleInitMonth = async () => {
-    if (initMonth === null) return;
-    const monthStr = `${selectedYear}-${String(initMonth + 1).padStart(2, '0')}`;
+  // Unmark payment
+  const handleConfirmUnpay = async () => {
+    if (!unpayConfirm) return;
+    const { payment } = unpayConfirm;
+    setTogglingPayment(`unpay-${payment.id}`);
+    setUnpayConfirm(null);
     try {
-      await academyPaymentService.initMonth(
-        venueId,
-        athletes.map((a) => ({ id: a.id, displayName: a.displayName })),
-        monthStr,
-        defaultAmount
+      await academyPaymentService.togglePaid(payment.id, false);
+      setAllPayments((prev) =>
+        prev.map((p) =>
+          p.id === payment.id
+            ? { ...p, paid: false, paidAt: undefined, paymentMethod: undefined }
+            : p
+        )
       );
-      setInitDialogOpen(false);
-      setInitMonth(null);
-      await loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Αποτυχία δημιουργίας');
+      setError(err instanceof Error ? err.message : 'Αποτυχία ενημέρωσης');
+    } finally {
+      setTogglingPayment(null);
     }
   };
 
   // Find parent for an athlete
   const findParent = (athleteId: string) => {
-    return allUsers.find(
-      (u) => u.linked_athletes?.includes(athleteId)
-    );
+    return allUsers.find((u) => u.linked_athletes?.includes(athleteId));
   };
 
-  // Get notification email for an athlete (parent email or contact_email fallback)
+  // Get notification email
   const getNotificationEmail = (athlete: AcademyUser) => {
     const parent = findParent(athlete.id);
     if (parent?.fields?.email) return { email: parent.fields.email as string, name: parent.displayName, isParent: true };
@@ -172,38 +233,29 @@ export default function PaymentsDashboardPage() {
       setError(`Δεν βρέθηκε email για τον/την ${athlete.displayName}`);
       return;
     }
-    const parentEmail = contact.email;
-
-    const payment = getPayment(athlete.id, month);
     const key = `${athlete.id}-${month}`;
     setNotifying(key);
-
     try {
+      const payment = await ensurePaymentRecord(athlete, month);
       const monthStr = `${selectedYear}-${String(month + 1).padStart(2, '0')}`;
       const res = await fetch('/api/academy/notify-parent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          parentEmail,
+          parentEmail: contact.email,
           parentName: contact.name,
           athleteName: athlete.displayName,
           month: monthStr,
-          amount: payment?.amount || defaultAmount,
+          amount: payment.amount,
           venueName,
         }),
       });
-
       if (!res.ok) throw new Error('Failed');
-
-      // Save lastNotifiedAt to the payment record
       const now = new Date().toISOString();
-      if (payment) {
-        await academyPaymentService.update(payment.id, { lastNotifiedAt: now });
-        setAllPayments((prev) =>
-          prev.map((p) => p.id === payment.id ? { ...p, lastNotifiedAt: now } : p)
-        );
-      }
-
+      await academyPaymentService.update(payment.id, { lastNotifiedAt: now });
+      setAllPayments((prev) =>
+        prev.map((p) => p.id === payment.id ? { ...p, lastNotifiedAt: now } : p)
+      );
       setNotifySuccess(key);
       setTimeout(() => setNotifySuccess(null), 3000);
     } catch {
@@ -213,22 +265,25 @@ export default function PaymentsDashboardPage() {
     }
   };
 
-  // Stats for a month
+  // Stats for a month (combines real records + virtual)
   const getMonthStats = (month: number) => {
     const monthStr = `${selectedYear}-${String(month + 1).padStart(2, '0')}`;
     const monthPayments = allPayments.filter((p) => p.month === monthStr);
-    const paid = monthPayments.filter((p) => p.paid).length;
-    const unpaid = monthPayments.filter((p) => !p.paid).length;
-    const total = monthPayments.reduce((sum, p) => (p.paid ? sum + p.amount : sum), 0);
-    return { paid, unpaid, total, hasRecords: monthPayments.length > 0 };
+    const paidFromRecords = monthPayments.filter((p) => p.paid).length;
+    const unpaidFromRecords = monthPayments.filter((p) => !p.paid).length;
+    // Athletes without a record are implicitly unpaid
+    const athletesWithRecord = new Set(monthPayments.map((p) => p.userId));
+    const athletesWithoutRecord = athletes.filter((a) => !athletesWithRecord.has(a.id)).length;
+    const totalPaid = paidFromRecords;
+    const totalUnpaid = unpaidFromRecords + athletesWithoutRecord;
+    const totalCollected = monthPayments.filter((p) => p.paid).reduce((sum, p) => sum + p.amount, 0);
+    return { paid: totalPaid, unpaid: totalUnpaid, total: totalCollected, count: athletes.length };
   };
 
-  // Filter athletes by search
   const filteredAthletes = athletes.filter((a) =>
     a.displayName.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Current month index (0-11)
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
 
@@ -271,25 +326,12 @@ export default function PaymentsDashboardPage() {
             </p>
           </div>
         </div>
-
-        {/* Year selector */}
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-10 w-10 rounded-xl"
-            onClick={() => setSelectedYear((y) => y - 1)}
-          >
+          <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl" onClick={() => setSelectedYear((y) => y - 1)}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <span className="text-lg font-black text-zinc-900 min-w-[80px] text-center">{selectedYear}</span>
-          <Button
-            variant="outline"
-            size="icon"
-            className="h-10 w-10 rounded-xl"
-            onClick={() => setSelectedYear((y) => y + 1)}
-            disabled={selectedYear >= currentYear}
-          >
+          <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl" onClick={() => setSelectedYear((y) => y + 1)} disabled={selectedYear >= currentYear}>
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>
@@ -310,19 +352,13 @@ export default function PaymentsDashboardPage() {
                     ? 'border-emerald-200 bg-emerald-50/50'
                     : 'border-zinc-100 bg-white hover:border-zinc-200'
               }`}
-              onClick={() => {
-                setFocusedMonth(i);
-                if (!stats.hasRecords) {
-                  setInitMonth(i);
-                  setInitDialogOpen(true);
-                }
-              }}
+              onClick={() => setFocusedMonth(i)}
             >
               <p className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">{GREEK_MONTHS[i]}</p>
-              {stats.hasRecords ? (
+              {athletes.length > 0 ? (
                 <>
                   <p className="text-sm font-black text-emerald-600 mt-1">{stats.paid}</p>
-                  <p className="text-[8px] font-bold text-zinc-300">/{stats.paid + stats.unpaid}</p>
+                  <p className="text-[8px] font-bold text-zinc-300">/{stats.count}</p>
                   {stats.unpaid > 0 && (
                     <p className="text-[8px] font-bold text-red-400 mt-0.5">{stats.unpaid} ανεξόφλ.</p>
                   )}
@@ -359,7 +395,6 @@ export default function PaymentsDashboardPage() {
           </p>
         </div>
       ) : (
-        /* Payment Grid */
         <div className="rounded-2xl border border-zinc-100 bg-white overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px]">
@@ -389,6 +424,7 @@ export default function PaymentsDashboardPage() {
                 {filteredAthletes.map((athlete) => {
                   const parent = findParent(athlete.id);
                   const group = groups.find((g) => g.id === athlete.groupId);
+                  const expectedAmount = getExpectedAmount(athlete);
                   return (
                     <tr key={athlete.id} className="border-b border-zinc-50 hover:bg-zinc-50/50 transition-colors">
                       <td className="p-3 sticky left-0 bg-white z-10">
@@ -413,47 +449,47 @@ export default function PaymentsDashboardPage() {
                         const payment = getPayment(athlete.id, month);
                         const isCurrentMonth = month === currentMonth && selectedYear === currentYear;
                         const key = `${athlete.id}-${month}`;
-                        const isToggling = togglingPayment === payment?.id;
-
-                        if (!payment) {
-                          return (
-                            <td key={month} className={`text-center p-1.5 ${focusedMonth === month ? 'bg-emerald-50/50' : isCurrentMonth ? 'bg-emerald-50/30' : ''}`}>
-                              <span className="text-zinc-200">—</span>
-                            </td>
-                          );
-                        }
+                        const amount = expectedAmount;
+                        const isPaid = payment?.paid || false;
+                        const isToggling = togglingPayment === `pay-${athlete.id}-${month}` || togglingPayment === `unpay-${payment?.id}`;
 
                         return (
                           <td key={month} className={`text-center p-1.5 ${focusedMonth === month ? 'bg-emerald-50/50' : isCurrentMonth ? 'bg-emerald-50/30' : ''}`}>
                             <div className="flex flex-col items-center gap-0.5">
                               <button
-                                onClick={() => handleTogglePayment(athlete.id, month)}
+                                onClick={() => handlePaymentClick(athlete, month)}
                                 disabled={isToggling}
                                 className={`h-8 w-8 rounded-lg flex items-center justify-center transition-all active:scale-90 ${
-                                  payment.paid
+                                  isPaid
                                     ? 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200'
                                     : 'bg-red-100 text-red-600 hover:bg-red-200'
                                 }`}
-                                title={payment.paid ? `Εξοφλημένο - €${payment.amount}` : `Ανεξόφλητο - €${payment.amount}`}
+                                title={isPaid
+                                  ? `Εξοφλημένο - €${amount}${payment?.paymentMethod ? ` (${PAYMENT_METHOD_LABELS[payment.paymentMethod]})` : ''}`
+                                  : `Ανεξόφλητο - €${amount}`
+                                }
                               >
                                 {isToggling ? (
                                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : payment.paid ? (
-                                  <Check className="h-3.5 w-3.5" />
+                                ) : isPaid ? (
+                                  <span className="text-xs">{payment?.paymentMethod ? PAYMENT_METHOD_ICONS[payment.paymentMethod] : <Check className="h-3.5 w-3.5" />}</span>
                                 ) : (
                                   <X className="h-3.5 w-3.5" />
                                 )}
                               </button>
-                              {!payment.paid && getNotificationEmail(athlete) && (
+                              <span className="text-[8px] font-bold text-zinc-400">
+                                €{amount}
+                              </span>
+                              {!isPaid && getNotificationEmail(athlete) && (
                                 <button
                                   onClick={() => setNotifyConfirm({ athlete, month })}
                                   disabled={notifying === key}
                                   className={`text-[8px] transition-colors ${
-                                    payment.lastNotifiedAt
+                                    payment?.lastNotifiedAt
                                       ? 'text-amber-400 hover:text-amber-600'
                                       : 'text-zinc-300 hover:text-amber-500'
                                   }`}
-                                  title={payment.lastNotifiedAt
+                                  title={payment?.lastNotifiedAt
                                     ? `Τελευταία ειδοποίηση: ${new Date(payment.lastNotifiedAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
                                     : 'Ειδοποίηση'
                                   }
@@ -487,6 +523,16 @@ export default function PaymentsDashboardPage() {
             const yearPayments = allPayments.filter((p) => p.month.startsWith(`${selectedYear}-`));
             const totalPaid = yearPayments.filter((p) => p.paid).reduce((s, p) => s + p.amount, 0);
             const totalUnpaid = yearPayments.filter((p) => !p.paid).reduce((s, p) => s + p.amount, 0);
+            // Add expected amounts for athletes without records
+            const virtualUnpaid = athletes.reduce((sum, athlete) => {
+              let athleteVirtual = 0;
+              for (let m = 0; m < 12; m++) {
+                const monthStr = `${selectedYear}-${String(m + 1).padStart(2, '0')}`;
+                const hasRecord = yearPayments.some((p) => p.userId === athlete.id && p.month === monthStr);
+                if (!hasRecord) athleteVirtual += getExpectedAmount(athlete);
+              }
+              return sum + athleteVirtual;
+            }, 0);
             return (
               <>
                 <div className="rounded-2xl border border-zinc-100 bg-white p-5">
@@ -499,13 +545,13 @@ export default function PaymentsDashboardPage() {
                   <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
                     {toGreekUpperCase('Ανεξόφλητα')} {selectedYear}
                   </p>
-                  <p className="text-2xl font-black text-red-500">&euro;{totalUnpaid.toLocaleString()}</p>
+                  <p className="text-2xl font-black text-red-500">&euro;{(totalUnpaid + virtualUnpaid).toLocaleString()}</p>
                 </div>
                 <div className="rounded-2xl border border-zinc-100 bg-white p-5">
                   <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
                     {toGreekUpperCase('Σύνολο')} {selectedYear}
                   </p>
-                  <p className="text-2xl font-black text-zinc-900">&euro;{(totalPaid + totalUnpaid).toLocaleString()}</p>
+                  <p className="text-2xl font-black text-zinc-900">&euro;{(totalPaid + totalUnpaid + virtualUnpaid).toLocaleString()}</p>
                 </div>
               </>
             );
@@ -513,47 +559,144 @@ export default function PaymentsDashboardPage() {
         </div>
       )}
 
-      {/* Init Month Dialog */}
-      <AlertDialog open={initDialogOpen} onOpenChange={setInitDialogOpen}>
-        <AlertDialogContent className="rounded-3xl border-none shadow-2xl p-8 max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-black text-zinc-900">
-              Ετοιμασία Μήνα {initMonth !== null ? GREEK_MONTHS_FULL[initMonth] : ''} {selectedYear}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-zinc-500 mt-2">
-              Θα δημιουργηθούν εγγραφές πληρωμής για {athletes.length} αθλητές.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+      {/* Payment Confirmation Dialog */}
+      <AlertDialog open={payConfirm !== null} onOpenChange={(open) => !open && setPayConfirm(null)}>
+        <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl p-0 max-w-sm overflow-hidden">
+          {payConfirm && (() => {
+            const { athlete } = payConfirm;
+            const group = groups.find((g) => g.id === athlete.groupId);
+            const amount = getExpectedAmount(athlete);
+            return (
+              <>
+                <div className="bg-gradient-to-br from-emerald-400 via-emerald-500 to-green-600 px-8 pt-8 pb-6 text-center">
+                  <div className="mx-auto h-14 w-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-emerald-600/20">
+                    <Check className="h-6 w-6 text-white" />
+                  </div>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-lg font-black text-white tracking-tight">
+                      Επιβεβαίωση Πληρωμής
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-emerald-100 text-sm mt-1">
+                      Καταχώρηση εξόφλησης αθλητή
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                </div>
+                <div className="px-8 py-6 space-y-5">
+                  <div className="flex items-center gap-3 p-3 bg-zinc-50 rounded-xl">
+                    <div className="h-10 w-10 rounded-xl bg-white border border-zinc-100 flex items-center justify-center text-lg shadow-sm">
+                      {group?.icon || '⚽'}
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-zinc-900">{athlete.displayName}</p>
+                      <p className="text-[11px] text-zinc-400 font-medium">
+                        {GREEK_MONTHS_FULL[payConfirm.month]} {selectedYear}
+                      </p>
+                    </div>
+                    <div className="ml-auto">
+                      <span className="text-lg font-black text-emerald-600">&euro;{amount}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-2.5">
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-300">
+                      {toGreekUpperCase('Τρόπος Πληρωμής')}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((method) => (
+                        <button
+                          key={method}
+                          onClick={() => setSelectedPaymentMethod(method)}
+                          className={`flex items-center gap-2 p-3 rounded-xl border-2 transition-all text-left ${
+                            selectedPaymentMethod === method
+                              ? 'border-emerald-400 bg-emerald-50 shadow-sm'
+                              : 'border-zinc-100 bg-white hover:border-zinc-200'
+                          }`}
+                        >
+                          <span className="text-lg">{PAYMENT_METHOD_ICONS[method]}</span>
+                          <span className={`text-xs font-bold ${selectedPaymentMethod === method ? 'text-emerald-700' : 'text-zinc-600'}`}>
+                            {PAYMENT_METHOD_LABELS[method]}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="px-8 pb-8">
+                  <AlertDialogFooter className="flex flex-col gap-2.5 sm:flex-col">
+                    <AlertDialogAction
+                      onClick={handleConfirmPayment}
+                      className="h-12 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg transition-all active:scale-[0.98] m-0"
+                    >
+                      <Check className="h-4 w-4 mr-2" />
+                      Εξοφλήθηκε
+                    </AlertDialogAction>
+                    <AlertDialogCancel className="h-10 w-full rounded-xl border-none bg-transparent text-zinc-400 hover:text-zinc-600 font-bold text-sm m-0">
+                      Ακύρωση
+                    </AlertDialogCancel>
+                  </AlertDialogFooter>
+                </div>
+              </>
+            );
+          })()}
+        </AlertDialogContent>
+      </AlertDialog>
 
-          <div className="space-y-4 my-4">
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-zinc-700">Ποσό Συνδρομής (€)</label>
-              <Input
-                type="number"
-                value={defaultAmount}
-                onChange={(e) => setDefaultAmount(Number(e.target.value))}
-                className="h-11"
-                min={0}
-              />
-            </div>
-            <div className="bg-zinc-50 rounded-xl p-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-zinc-500">Αθλητές</span>
-                <span className="font-bold">{athletes.length}</span>
-              </div>
-              <div className="flex justify-between text-sm mt-2">
-                <span className="text-zinc-500">Σύνολο</span>
-                <span className="font-bold text-emerald-600">&euro;{(athletes.length * defaultAmount).toLocaleString()}</span>
-              </div>
-            </div>
-          </div>
-
-          <AlertDialogFooter className="gap-3">
-            <AlertDialogCancel className="h-12 rounded-xl font-bold">Ακύρωση</AlertDialogCancel>
-            <AlertDialogAction onClick={handleInitMonth} className="h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold">
-              Δημιουργία
-            </AlertDialogAction>
-          </AlertDialogFooter>
+      {/* Unpay Confirmation Dialog */}
+      <AlertDialog open={unpayConfirm !== null} onOpenChange={(open) => !open && setUnpayConfirm(null)}>
+        <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl p-0 max-w-sm overflow-hidden">
+          {unpayConfirm && (() => {
+            const { athlete, payment } = unpayConfirm;
+            const group = groups.find((g) => g.id === athlete.groupId);
+            return (
+              <>
+                <div className="bg-gradient-to-br from-red-400 via-red-500 to-rose-600 px-8 pt-8 pb-6 text-center">
+                  <div className="mx-auto h-14 w-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-red-600/20">
+                    <X className="h-6 w-6 text-white" />
+                  </div>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-lg font-black text-white tracking-tight">
+                      Αναίρεση Πληρωμής
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-red-100 text-sm mt-1">
+                      Σίγουρα θέλετε να αναιρέσετε αυτή την πληρωμή;
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                </div>
+                <div className="px-8 py-6">
+                  <div className="flex items-center gap-3 p-3 bg-zinc-50 rounded-xl">
+                    <div className="h-10 w-10 rounded-xl bg-white border border-zinc-100 flex items-center justify-center text-lg shadow-sm">
+                      {group?.icon || '⚽'}
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-zinc-900">{athlete.displayName}</p>
+                      <p className="text-[11px] text-zinc-400 font-medium">
+                        {GREEK_MONTHS_FULL[unpayConfirm.month]} {selectedYear}
+                      </p>
+                    </div>
+                    <div className="ml-auto text-right">
+                      <span className="text-lg font-black text-emerald-600">&euro;{payment.amount}</span>
+                      {payment.paymentMethod && (
+                        <p className="text-[10px] text-zinc-400">{PAYMENT_METHOD_LABELS[payment.paymentMethod]}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="px-8 pb-8">
+                  <AlertDialogFooter className="flex flex-col gap-2.5 sm:flex-col">
+                    <AlertDialogAction
+                      onClick={handleConfirmUnpay}
+                      className="h-12 w-full rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm shadow-lg transition-all active:scale-[0.98] m-0"
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Αναίρεση Πληρωμής
+                    </AlertDialogAction>
+                    <AlertDialogCancel className="h-10 w-full rounded-xl border-none bg-transparent text-zinc-400 hover:text-zinc-600 font-bold text-sm m-0">
+                      Ακύρωση
+                    </AlertDialogCancel>
+                  </AlertDialogFooter>
+                </div>
+              </>
+            );
+          })()}
         </AlertDialogContent>
       </AlertDialog>
 
@@ -564,9 +707,9 @@ export default function PaymentsDashboardPage() {
             const contact = getNotificationEmail(notifyConfirm.athlete);
             const payment = getPayment(notifyConfirm.athlete.id, notifyConfirm.month);
             const group = groups.find((g) => g.id === notifyConfirm.athlete.groupId);
+            const amount = getExpectedAmount(notifyConfirm.athlete);
             return (
               <>
-                {/* Header gradient */}
                 <div className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 px-8 pt-8 pb-6 text-center">
                   <div className="mx-auto h-14 w-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-amber-600/20">
                     <Send className="h-6 w-6 text-white" />
@@ -580,10 +723,7 @@ export default function PaymentsDashboardPage() {
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                 </div>
-
-                {/* Content */}
                 <div className="px-8 py-6 space-y-5">
-                  {/* Athlete info */}
                   <div className="flex items-center gap-3 p-3 bg-zinc-50 rounded-xl">
                     <div className="h-10 w-10 rounded-xl bg-white border border-zinc-100 flex items-center justify-center text-lg shadow-sm">
                       {group?.icon || '⚽'}
@@ -593,30 +733,24 @@ export default function PaymentsDashboardPage() {
                       <p className="text-[11px] text-zinc-400 font-medium">{GREEK_MONTHS_FULL[notifyConfirm.month]} {selectedYear}</p>
                     </div>
                     <div className="ml-auto">
-                      <span className="text-lg font-black text-red-500">&euro;{payment?.amount || defaultAmount}</span>
+                      <span className="text-lg font-black text-red-500">&euro;{amount}</span>
                     </div>
                   </div>
-
-                  {/* Recipient info */}
                   <div className="space-y-2.5">
                     <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-300">{toGreekUpperCase('Παραλήπτης')}</p>
-                    <div className="space-y-1.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                          <Users className="h-3.5 w-3.5 text-blue-500" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-bold text-zinc-900">{contact?.name || '—'}</p>
-                          <p className="text-[11px] text-zinc-400 font-medium">
-                            {contact?.email || 'Δεν υπάρχει email'}
-                            {contact?.isParent && <span className="ml-1 text-blue-400">(Γονέας)</span>}
-                          </p>
-                        </div>
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                        <Users className="h-3.5 w-3.5 text-blue-500" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-zinc-900">{contact?.name || '—'}</p>
+                        <p className="text-[11px] text-zinc-400 font-medium">
+                          {contact?.email || 'Δεν υπάρχει email'}
+                          {contact?.isParent && <span className="ml-1 text-blue-400">(Γονέας)</span>}
+                        </p>
                       </div>
                     </div>
                   </div>
-
-                  {/* Last notified info */}
                   {payment?.lastNotifiedAt && (
                     <div className="flex items-center gap-2 p-2.5 bg-amber-50 rounded-lg">
                       <CheckCircle2 className="h-3.5 w-3.5 text-amber-500 shrink-0" />
@@ -626,8 +760,6 @@ export default function PaymentsDashboardPage() {
                     </div>
                   )}
                 </div>
-
-                {/* Footer */}
                 <div className="px-8 pb-8">
                   <AlertDialogFooter className="flex flex-col gap-2.5 sm:flex-col">
                     <AlertDialogAction

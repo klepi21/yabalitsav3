@@ -18,6 +18,7 @@ import {
   AcademyPayment,
   UserGroup,
   Squad,
+  Broadcast,
 } from '../types/academy';
 
 const USERS_COLLECTION = 'yabalitsa_academy_users';
@@ -100,6 +101,7 @@ function convertToUser(id: string, data: Record<string, unknown>): AcademyUser {
     parent_uid: data.parent_uid as string | undefined,
     linked_athletes: data.linked_athletes as string[] | undefined,
     assigned_squads: data.assigned_squads as string[] | undefined,
+    lastMedicalNotifiedAt: data.lastMedicalNotifiedAt as string | undefined,
     createdAt: (data.createdAt as { toDate?(): Date })?.toDate?.() || new Date(),
     updatedAt: (data.updatedAt as { toDate?(): Date })?.toDate?.() || new Date(),
   };
@@ -285,6 +287,7 @@ function convertToPayment(id: string, data: Record<string, unknown>): AcademyPay
     amount: (data.amount as number) || 0,
     paid: (data.paid as boolean) || false,
     paidAt: data.paidAt as string | undefined,
+    paymentMethod: data.paymentMethod as AcademyPayment['paymentMethod'],
     notes: data.notes as string | undefined,
     lastNotifiedAt: data.lastNotifiedAt as string | undefined,
     createdAt: (data.createdAt as { toDate?(): Date })?.toDate?.() || new Date(),
@@ -315,10 +318,11 @@ export const academyPaymentService = {
   },
 
   // Toggle paid status
-  async togglePaid(paymentId: string, paid: boolean): Promise<void> {
+  async togglePaid(paymentId: string, paid: boolean, paymentMethod?: string): Promise<void> {
     await updateDoc(doc(db, PAYMENTS_COLLECTION, paymentId), {
       paid,
       paidAt: paid ? new Date().toISOString() : null,
+      paymentMethod: paid ? (paymentMethod || null) : null,
       updatedAt: serverTimestamp(),
     });
   },
@@ -334,9 +338,10 @@ export const academyPaymentService = {
   },
 
   // Bulk create unpaid records for a list of athletes for a given month
+  // Each athlete can have its own amount (falls back to defaultAmount)
   async initMonth(
     venueId: string,
-    athletes: { id: string; displayName: string }[],
+    athletes: { id: string; displayName: string; amount?: number }[],
     month: string,
     defaultAmount: number
   ): Promise<void> {
@@ -351,12 +356,29 @@ export const academyPaymentService = {
         userId: athlete.id,
         userName: athlete.displayName,
         month,
-        amount: defaultAmount,
+        amount: athlete.amount ?? defaultAmount,
         paid: false,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
       });
     }
+  },
+
+  // Remove duplicate payment records (keep first per userId+month)
+  async deduplicateMonth(venueId: string, month: string): Promise<number> {
+    const payments = await this.getByVenueAndMonth(venueId, month);
+    const seen = new Set<string>();
+    let removed = 0;
+    for (const p of payments) {
+      const key = `${p.userId}-${p.month}`;
+      if (seen.has(key)) {
+        await deleteDoc(doc(db, PAYMENTS_COLLECTION, p.id));
+        removed++;
+      } else {
+        seen.add(key);
+      }
+    }
+    return removed;
   },
 
   // Update payment
@@ -370,5 +392,35 @@ export const academyPaymentService = {
   // Delete payment record
   async delete(id: string): Promise<void> {
     await deleteDoc(doc(db, PAYMENTS_COLLECTION, id));
+  },
+};
+
+// ============================================
+// Broadcast Service (squad/academy announcements)
+// ============================================
+
+const BROADCASTS_COLLECTION = 'yabalitsa_broadcasts';
+
+export const broadcastService = {
+  async create(data: Omit<Broadcast, 'id' | 'createdAt'>): Promise<string> {
+    const docRef = await addDoc(collection(db, BROADCASTS_COLLECTION), {
+      ...data,
+      createdAt: serverTimestamp(),
+    });
+    return docRef.id;
+  },
+
+  async getByVenue(venueId: string): Promise<Broadcast[]> {
+    const q = query(
+      collection(db, BROADCASTS_COLLECTION),
+      where('venueId', '==', venueId)
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs
+      .map((d) => ({
+        id: d.id,
+        ...d.data(),
+        createdAt: d.data().createdAt?.toDate?.() || new Date(),
+      })) as Broadcast[];
   },
 };

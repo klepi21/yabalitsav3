@@ -5,11 +5,13 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { squadService, academyUserService } from '@/lib/academy-services';
-import { Squad, AcademyUser } from '@/types/academy';
-import { Loader2, Plus, Trash2, Trophy, Users as UsersIcon, AlertCircle, Search } from 'lucide-react';
+import { Squad, AcademyUser, BROADCAST_TEMPLATES } from '@/types/academy';
+import { Loader2, Plus, Trash2, Trophy, Users as UsersIcon, AlertCircle, Search, Megaphone, Send, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { cn, toGreekUpperCase } from '@/lib/utils';
+import { broadcastService } from '@/lib/academy-services';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +23,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
 
 export default function SquadsPage() {
   const router = useRouter();
@@ -33,7 +42,15 @@ export default function SquadsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Broadcast state
+  const [broadcastSquad, setBroadcastSquad] = useState<Squad | null>(null);
+  const [broadcastSubject, setBroadcastSubject] = useState('');
+  const [broadcastMessage, setBroadcastMessage] = useState('');
+  const [broadcastSending, setBroadcastSending] = useState(false);
+  const [broadcastResult, setBroadcastResult] = useState<{ sent: number; failed: number } | null>(null);
+
   const venueId = venueOwner?.venueId || '';
+  const venueName = venueOwner?.name || '';
 
   useEffect(() => {
     if (authLoading) return;
@@ -81,6 +98,92 @@ export default function SquadsPage() {
     squad.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     squad.ageGroup.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // Get all email recipients for a squad (parents + athletes with contact_email)
+  const getSquadRecipients = (squadId: string) => {
+    const squadAthletes = users.filter(
+      (u) => (u.squad_ids || []).includes(squadId) || u.squad_id === squadId
+    );
+    const recipients: { email: string; name: string }[] = [];
+    const seen = new Set<string>();
+
+    for (const athlete of squadAthletes) {
+      // Find linked parent
+      const parent = users.find((u) => u.linked_athletes?.includes(athlete.id));
+      const parentEmail = parent?.fields?.email as string | undefined;
+      if (parentEmail && !seen.has(parentEmail)) {
+        recipients.push({ email: parentEmail, name: parent!.displayName });
+        seen.add(parentEmail);
+      }
+      // Fallback: athlete's own email
+      const contactEmail = (athlete.fields?.contact_email || athlete.fields?.email) as string | undefined;
+      if (contactEmail && !seen.has(contactEmail)) {
+        recipients.push({ email: contactEmail, name: athlete.displayName });
+        seen.add(contactEmail);
+      }
+    }
+    return recipients;
+  };
+
+  const openBroadcast = (squad: Squad) => {
+    setBroadcastSquad(squad);
+    setBroadcastSubject('');
+    setBroadcastMessage('');
+    setBroadcastResult(null);
+  };
+
+  const applyTemplate = (templateKey: string) => {
+    const tpl = BROADCAST_TEMPLATES.find((t) => t.key === templateKey);
+    if (tpl) {
+      setBroadcastSubject(tpl.subject);
+      setBroadcastMessage(tpl.message);
+    }
+  };
+
+  const handleBroadcast = async () => {
+    if (!broadcastSquad || !broadcastSubject.trim() || !broadcastMessage.trim()) return;
+
+    const recipients = getSquadRecipients(broadcastSquad.id);
+    if (recipients.length === 0) {
+      setError('Δεν βρέθηκαν email παραληπτών για αυτό το τμήμα');
+      return;
+    }
+
+    setBroadcastSending(true);
+    try {
+      const res = await fetch('/api/academy/broadcast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipients,
+          subject: broadcastSubject,
+          message: broadcastMessage,
+          venueName,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      // Save to history
+      await broadcastService.create({
+        venueId,
+        squadId: broadcastSquad.id,
+        squadName: broadcastSquad.name,
+        subject: broadcastSubject,
+        message: broadcastMessage,
+        recipientCount: recipients.length,
+        recipientEmails: recipients.map((r) => r.email),
+        sentBy: venueName,
+      });
+
+      setBroadcastResult({ sent: data.sent, failed: data.failed });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Αποτυχία αποστολής');
+    } finally {
+      setBroadcastSending(false);
+    }
+  };
 
   if (authLoading || isLoading) {
     return (
@@ -242,18 +345,26 @@ export default function SquadsPage() {
                   </div>
                 </div>
 
-                <div className="flex gap-3 pt-6 border-t border-zinc-100 relative z-10">
-                  <Button variant="outline" className="flex-1 h-10 rounded-xl font-bold text-[10px] uppercase tracking-widest border-zinc-100 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 shadow-sm transition-all active:scale-95" asChild>
+                <div className="flex gap-2 pt-6 border-t border-zinc-100 relative z-10">
+                  <Button variant="outline" className="flex-1 h-10 rounded-xl font-bold text-[9px] uppercase tracking-widest border-zinc-100 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 shadow-sm transition-all active:scale-95" asChild>
                     <Link href={`/management/academy/squads/${squad.id}/edit`}>
                       {toGreekUpperCase('Επεξεργασία')}
                     </Link>
                   </Button>
-                  <Button variant="outline" className="flex-1 h-10 rounded-xl font-bold text-[10px] uppercase tracking-widest border-zinc-100 hover:bg-zinc-900 hover:text-white hover:border-zinc-900 shadow-sm transition-all active:scale-95" asChild>
+                  <Button variant="outline" className="flex-1 h-10 rounded-xl font-bold text-[9px] uppercase tracking-widest border-zinc-100 hover:bg-zinc-900 hover:text-white hover:border-zinc-900 shadow-sm transition-all active:scale-95" asChild>
                     <Link href={`/management/academy/users?squad=${squad.id}`}>
                       {toGreekUpperCase('Ρόστερ')}
                     </Link>
                   </Button>
-                  
+                  <Button
+                    variant="outline"
+                    className="h-10 w-10 rounded-xl border-zinc-100 hover:bg-amber-500 hover:text-white hover:border-amber-500 shadow-sm transition-all active:scale-95"
+                    onClick={() => openBroadcast(squad)}
+                    title="Ανακοίνωση"
+                  >
+                    <Megaphone className="h-4 w-4" />
+                  </Button>
+
                   <AlertDialog open={deleteConfirm === squad.id} onOpenChange={(open: boolean) => !open && setDeleteConfirm(null)}>
                     <AlertDialogTrigger asChild>
                       <Button
@@ -288,6 +399,127 @@ export default function SquadsPage() {
           })}
         </div>
       )}
+      {/* Broadcast Dialog */}
+      <Dialog open={broadcastSquad !== null} onOpenChange={(open) => !open && setBroadcastSquad(null)}>
+        <DialogContent className="rounded-[2rem] border-none shadow-2xl p-0 max-w-lg overflow-hidden">
+          {broadcastSquad && (
+            <>
+              {/* Header */}
+              <div className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 px-8 pt-8 pb-6 text-center">
+                <div className="mx-auto h-14 w-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-amber-600/20">
+                  <Megaphone className="h-6 w-6 text-white" />
+                </div>
+                <DialogHeader>
+                  <DialogTitle className="text-lg font-black text-white tracking-tight">
+                    {toGreekUpperCase('Ανακοίνωση')}
+                  </DialogTitle>
+                  <DialogDescription className="text-amber-100 text-sm mt-1">
+                    {toGreekUpperCase(broadcastSquad.name)} — {getSquadRecipients(broadcastSquad.id).length} παραλήπτες
+                  </DialogDescription>
+                </DialogHeader>
+              </div>
+
+              {broadcastResult ? (
+                /* Success state */
+                <div className="px-8 py-10 text-center space-y-4">
+                  <div className="mx-auto h-16 w-16 bg-emerald-50 rounded-2xl flex items-center justify-center">
+                    <CheckCircle2 className="h-8 w-8 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-black text-zinc-900">Η ανακοίνωση στάλθηκε!</p>
+                    <p className="text-sm text-zinc-500 mt-1">
+                      {broadcastResult.sent} email στάλθηκαν επιτυχώς
+                      {broadcastResult.failed > 0 && `, ${broadcastResult.failed} απέτυχαν`}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => setBroadcastSquad(null)}
+                    className="h-11 px-8 rounded-xl bg-zinc-900 hover:bg-black text-white font-bold"
+                  >
+                    Κλείσιμο
+                  </Button>
+                </div>
+              ) : (
+                /* Form */
+                <div className="px-8 py-6 space-y-5">
+                  {/* Templates */}
+                  <div className="space-y-2">
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Πρότυπα')}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {BROADCAST_TEMPLATES.map((tpl) => (
+                        <button
+                          key={tpl.key}
+                          type="button"
+                          onClick={() => applyTemplate(tpl.key)}
+                          className="px-3 py-1.5 rounded-lg text-[11px] font-bold bg-zinc-100 text-zinc-600 hover:bg-amber-100 hover:text-amber-700 transition-colors"
+                        >
+                          {tpl.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Subject */}
+                  <div className="space-y-2">
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Θέμα')}</p>
+                    <Input
+                      value={broadcastSubject}
+                      onChange={(e) => setBroadcastSubject(e.target.value)}
+                      placeholder="Θέμα ανακοίνωσης..."
+                      className="h-11 rounded-xl"
+                    />
+                  </div>
+
+                  {/* Message */}
+                  <div className="space-y-2">
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Μήνυμα')}</p>
+                    <Textarea
+                      value={broadcastMessage}
+                      onChange={(e) => setBroadcastMessage(e.target.value)}
+                      placeholder="Γράψτε το μήνυμά σας..."
+                      rows={5}
+                      className="rounded-xl resize-none"
+                    />
+                  </div>
+
+                  {/* Recipients preview */}
+                  <div className="bg-zinc-50 rounded-xl p-3">
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mb-2">{toGreekUpperCase('Παραλήπτες')}</p>
+                    <div className="flex flex-wrap gap-1.5 max-h-20 overflow-y-auto">
+                      {getSquadRecipients(broadcastSquad.id).map((r) => (
+                        <span key={r.email} className="text-[10px] font-bold text-zinc-500 bg-white px-2 py-1 rounded-md border border-zinc-100">
+                          {r.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="flex flex-col gap-2.5 pt-2">
+                    <Button
+                      onClick={handleBroadcast}
+                      disabled={broadcastSending || !broadcastSubject.trim() || !broadcastMessage.trim()}
+                      className="h-12 w-full rounded-xl bg-zinc-900 hover:bg-black text-white font-bold text-sm shadow-lg transition-all active:scale-[0.98]"
+                    >
+                      {broadcastSending ? (
+                        <><Loader2 className="h-4 w-4 mr-2 animate-spin" /> Αποστολή...</>
+                      ) : (
+                        <><Send className="h-4 w-4 mr-2" /> Αποστολή σε {getSquadRecipients(broadcastSquad.id).length} παραλήπτες</>
+                      )}
+                    </Button>
+                    <button
+                      onClick={() => setBroadcastSquad(null)}
+                      className="h-10 w-full rounded-xl text-zinc-400 hover:text-zinc-600 font-bold text-sm transition-colors"
+                    >
+                      Ακύρωση
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
