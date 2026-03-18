@@ -283,8 +283,7 @@ export default function PrivacyPage() {
                   🏟️ Εγγραφή για Γήπεδα
                 </Link>
                 <div className="text-sm text-zinc-400">
-                  <p>Email: privacy@yabalitsa.gr</p>
-                  <p>Τηλέφωνο: +30 210 1234567</p>
+                  <p>Email: support@yabalitsa.com</p>
                 </div>
               </div>
             </div>
