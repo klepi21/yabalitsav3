@@ -9,8 +9,8 @@
   --card-foreground: #0f172a;
   --popover: #ffffff;
   --popover-foreground: #0f172a;
-  --primary: #059669;
-  --primary-foreground: #ffffff;
+  --primary: #74ee16;
+  --primary-foreground: #000000;
   --secondary: #f1f5f9;
   --secondary-foreground: #475569;
   --muted: #f1f5f9;
@@ -21,25 +21,49 @@
   --destructive-foreground: #ffffff;
   --border: #e2e8f0;
   --input: #e2e8f0;
-  --ring: #059669;
+  --ring: #74ee16;
   --radius: 0.75rem;
-  --chart-1: #059669;
-  --chart-2: #10b981;
-  --chart-3: #34d399;
-  --chart-4: #6ee7b7;
-  --chart-5: #a7f3d0;
+  --chart-1: #74ee16;
+  --chart-2: #5dc611;
+  --chart-3: #9ef087;
+  --chart-4: #c8f7b7;
+  --chart-5: #e5fbdd;
   --sidebar-bg: #1e293b;
   --sidebar-foreground: #94a3b8;
-  --sidebar-primary: #059669;
-  --sidebar-primary-foreground: #ffffff;
+  --sidebar-primary: #74ee16;
+  --sidebar-primary-foreground: #000000;
   --sidebar-accent: rgba(255, 255, 255, 0.05);
   --sidebar-accent-foreground: #f8fafc;
   --sidebar-border: rgba(255, 255, 255, 0.06);
-  --sidebar-ring: #059669;
+  --sidebar-ring: #74ee16;
   --sidebar: #1e293b;
 }
 
 @theme inline {
+  --color-emerald-50: #f4fdf0;
+  --color-emerald-100: #e5fbdd;
+  --color-emerald-200: #c8f7b7;
+  --color-emerald-300: #9ef087;
+  --color-emerald-400: #74ee16; 
+  --color-emerald-500: #5dc611;
+  --color-emerald-600: #479a0d;
+  --color-emerald-700: #37750c;
+  --color-emerald-800: #2c5d0c;
+  --color-emerald-900: #254d0d;
+  --color-emerald-950: #112a04;
+  
+  --color-green-50: #f4fdf0;
+  --color-green-100: #e5fbdd;
+  --color-green-200: #c8f7b7;
+  --color-green-300: #9ef087;
+  --color-green-400: #74ee16; 
+  --color-green-500: #5dc611;
+  --color-green-600: #479a0d;
+  --color-green-700: #37750c;
+  --color-green-800: #2c5d0c;
+  --color-green-900: #254d0d;
+  --color-green-950: #112a04;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -103,7 +127,7 @@ body {
 
 /* Premium selection color */
 ::selection {
-  background: rgba(5, 150, 105, 0.15);
+  background: rgba(116, 238, 22, 0.15);
   color: var(--primary);
 }
 

@@ -83,11 +83,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/yabalo.png', sizes: '32x32', type: 'image/png' },
-      { url: '/yabalo.png', sizes: '16x16', type: 'image/png' },
+      { url: '/fav.png', sizes: '32x32', type: 'image/png' },
+      { url: '/fav.png', sizes: '16x16', type: 'image/png' },
     ],
-    shortcut: '/yabalo.png',
-    apple: '/yabalo.png',
+    shortcut: '/fav.png',
+    apple: '/fav.png',
   },
 };
 
@@ -100,10 +100,10 @@ export default function RootLayout({
     <html lang="el" className="scroll-smooth">
       <head>
         {/* Favicon */}
-        <link rel="icon" type="image/png" sizes="32x32" href="/yabalo.png" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/yabalo.png" />
-        <link rel="shortcut icon" href="/yabalo.png" />
-        <link rel="apple-touch-icon" href="/yabalo.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/fav.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/fav.png" />
+        <link rel="shortcut icon" href="/fav.png" />
+        <link rel="apple-touch-icon" href="/fav.png" />
         
       </head>
       <body className={inter.className} suppressHydrationWarning={true}>
