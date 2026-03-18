@@ -400,7 +400,7 @@ export default function SquadsPage() {
         </div>
       )}
       {/* Broadcast Dialog */}
-      <Dialog open={broadcastSquad !== null} onOpenChange={(open) => !open && setBroadcastSquad(null)}>
+      <Dialog open={broadcastSquad !== null} onOpenChange={(open: boolean) => !open && setBroadcastSquad(null)}>
         <DialogContent className="rounded-[2rem] border-none shadow-2xl p-0 max-w-lg overflow-hidden">
           {broadcastSquad && (
             <>
