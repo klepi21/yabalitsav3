@@ -103,9 +103,12 @@ export default function RootPage() {
       </section>
 
       {/* ================= FEATURES GRID ================= */}
-      <section id="features" className="py-32 px-6 max-w-[1400px] mx-auto relative">
+      <section id="features" className="py-32 w-full relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/bg_features.png')] bg-cover bg-center opacity-[0.15] pointer-events-none mix-blend-overlay" />
         <div className="absolute top-40 left-20 w-72 h-72 bg-emerald-600/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-10 right-20 w-96 h-96 bg-blue-600/10 rounded-full blur-[150px] pointer-events-none" />
+        
+        <div className="max-w-[1400px] mx-auto px-6 relative z-10 w-full">
         
         <div className="text-center mb-20 relative z-10">
           <h2 className="text-3xl md:text-5xl lg:text-6xl font-medium tracking-tight mb-6">
@@ -167,11 +170,13 @@ export default function RootPage() {
             <p className="text-zinc-400 text-sm leading-relaxed">Πρόσβαση στο ταμείο με κρυπτογραφημένο PIN, ασφαλής τήρηση προσωπικών δεδομένων Ακαδημίας σε servers στο Cloud.</p>
           </div>
         </div>
+        </div>
       </section>
 
       {/* ================= ACADEMIES SHOWCASE ================= */}
-      <section id="academies" className="py-24 px-6 overflow-hidden bg-[#03090C] border-y border-white/5 relative">
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <section id="academies" className="py-24 px-6 overflow-hidden bg-[#03090C] border-y border-white/5 relative w-full">
+        <div className="absolute inset-0 bg-[url('/bg_academies.png')] bg-cover bg-center opacity-[0.15] pointer-events-none mix-blend-screen" />
+        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10 w-full">
           
           <div className="order-2 lg:order-1 relative">
             {/* Fake Mockup UI for Academy */}
@@ -251,10 +256,11 @@ export default function RootPage() {
       </section>
 
       {/* ================= PITCHES / BOOKING SHOWCASE ================= */}
-      <section id="pitches" className="py-24 px-6 relative max-w-[1400px] mx-auto">
+      <section id="pitches" className="py-24 relative w-full overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/bg_pitches.png')] bg-cover bg-center opacity-[0.15] pointer-events-none mix-blend-overlay" />
         <div className="absolute top-1/2 right-1/4 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[150px] pointer-events-none" />
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10 w-full">
           
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest mb-6">
@@ -319,8 +325,9 @@ export default function RootPage() {
       </section>
 
       {/* ================= REPORTS / INSIGHTS ================= */}
-      <section id="reports" className="py-24 px-6 border-t border-white/5 bg-[#03090C]">
-        <div className="max-w-[800px] mx-auto text-center">
+      <section id="reports" className="py-24 px-6 border-t border-white/5 bg-[#03090C] relative w-full overflow-hidden">
+        <div className="absolute inset-0 bg-[url('/bg_reports.png')] bg-cover bg-center opacity-[0.15] pointer-events-none mix-blend-lighten" />
+        <div className="max-w-[800px] mx-auto text-center relative z-10 w-full">
           <div className="h-16 w-16 mx-auto bg-purple-500/10 text-purple-400 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.2)]">
             <BarChart3 className="h-8 w-8" />
           </div>
