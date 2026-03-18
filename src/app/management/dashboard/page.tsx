@@ -651,7 +651,7 @@ export default function DashboardPage() {
                 src={stat.image}
                 alt=""
                 fill
-                className="object-cover opacity-[0.25] group-hover:scale-110 group-hover:opacity-[0.35] transition-all duration-700"
+                className="object-cover opacity-100 group-hover:scale-110 transition-all duration-700"
               />
             </div>
             <CardContent className="p-6 relative z-10">
