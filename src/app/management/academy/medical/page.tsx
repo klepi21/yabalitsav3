@@ -17,10 +17,21 @@ import {
   Search,
   Pencil,
   Users,
+  Send,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn, toGreekUpperCase } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 type MedicalStatus = 'expired' | 'expiring_soon' | 'valid' | 'missing';
 
@@ -63,8 +74,12 @@ export default function MedicalTrackingPage() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [athletes, setAthletes] = useState<AthleteWithMedical[]>([]);
+  const [allUsers, setAllUsers] = useState<AcademyUser[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<MedicalStatus | 'all'>('all');
+  const [notifyConfirm, setNotifyConfirm] = useState<AthleteWithMedical | null>(null);
+  const [notifying, setNotifying] = useState<string | null>(null);
+  const [notifySuccess, setNotifySuccess] = useState<string | null>(null);
 
   const venueId = venueOwner?.venueId || '';
 
@@ -84,6 +99,8 @@ export default function MedicalTrackingPage() {
         userGroupService.getByVenue(venueId),
         squadService.getByVenue(venueId),
       ]);
+
+      setAllUsers(usersData);
 
       // Find groups with medical_tracking capability
       const medicalGroupIds = new Set(
@@ -134,6 +151,62 @@ export default function MedicalTrackingPage() {
     valid: athletes.filter((a) => a.status === 'valid').length,
     missing: athletes.filter((a) => a.status === 'missing').length,
   }), [athletes]);
+
+  const venueName = venueOwner?.name || '';
+
+  // Find parent for an athlete
+  const findParent = (athleteId: string) => {
+    return allUsers.find((u) => u.linked_athletes?.includes(athleteId));
+  };
+
+  // Get notification email (parent → contact_email → email)
+  const getNotificationEmail = (athleteUser: AcademyUser) => {
+    const parent = findParent(athleteUser.id);
+    if (parent?.fields?.email) return { email: parent.fields.email as string, name: parent.displayName, isParent: true };
+    if (athleteUser.fields?.contact_email) return { email: athleteUser.fields.contact_email as string, name: athleteUser.displayName, isParent: false };
+    if (athleteUser.fields?.email) return { email: athleteUser.fields.email as string, name: athleteUser.displayName, isParent: false };
+    return null;
+  };
+
+  const handleNotify = async (athlete: AthleteWithMedical) => {
+    const contact = getNotificationEmail(athlete.user);
+    if (!contact) return;
+
+    setNotifying(athlete.user.id);
+    try {
+      const res = await fetch('/api/academy/notify-medical', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          recipientEmail: contact.email,
+          recipientName: contact.name,
+          athleteName: athlete.user.displayName,
+          expiryDate: athlete.expiryDate,
+          status: athlete.status,
+          venueName,
+        }),
+      });
+      if (!res.ok) throw new Error('Failed');
+
+      // Save lastMedicalNotifiedAt on the user record
+      const now = new Date().toISOString();
+      await academyUserService.update(athlete.user.id, { lastMedicalNotifiedAt: now });
+      setAthletes((prev) =>
+        prev.map((a) =>
+          a.user.id === athlete.user.id
+            ? { ...a, user: { ...a.user, lastMedicalNotifiedAt: now } }
+            : a
+        )
+      );
+
+      setNotifySuccess(athlete.user.id);
+      setTimeout(() => setNotifySuccess(null), 3000);
+    } catch {
+      console.error('Failed to notify');
+    } finally {
+      setNotifying(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -305,17 +378,47 @@ export default function MedicalTrackingPage() {
                   )}
                 </div>
 
-                {/* Edit button */}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-9 w-9 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                  asChild
-                >
-                  <Link href={`/management/academy/users/${athlete.user.id}/edit`}>
-                    <Pencil className="h-4 w-4" />
-                  </Link>
-                </Button>
+                {/* Actions */}
+                <div className="flex items-center gap-1 shrink-0">
+                  {athlete.status !== 'valid' && getNotificationEmail(athlete.user) && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        "h-9 w-9 rounded-xl transition-all",
+                        notifySuccess === athlete.user.id
+                          ? "text-emerald-500"
+                          : athlete.user.lastMedicalNotifiedAt
+                            ? "text-amber-400 hover:text-amber-600 hover:bg-amber-50"
+                            : "text-zinc-300 hover:text-amber-500 hover:bg-amber-50"
+                      )}
+                      onClick={() => setNotifyConfirm(athlete)}
+                      disabled={notifying === athlete.user.id}
+                      title={athlete.user.lastMedicalNotifiedAt
+                        ? `Τελευταία ειδοποίηση: ${new Date(athlete.user.lastMedicalNotifiedAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
+                        : 'Αποστολή ειδοποίησης'
+                      }
+                    >
+                      {notifying === athlete.user.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : notifySuccess === athlete.user.id ? (
+                        <CheckCircle2 className="h-4 w-4" />
+                      ) : (
+                        <Send className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-9 w-9 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity"
+                    asChild
+                  >
+                    <Link href={`/management/academy/users/${athlete.user.id}/edit`}>
+                      <Pencil className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </div>
               </div>
             );
           })}
@@ -328,6 +431,94 @@ export default function MedicalTrackingPage() {
           )}
         </div>
       )}
+      {/* Notify Confirmation Dialog */}
+      <AlertDialog open={notifyConfirm !== null} onOpenChange={(open) => !open && setNotifyConfirm(null)}>
+        <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl p-0 max-w-sm overflow-hidden">
+          {notifyConfirm && (() => {
+            const contact = getNotificationEmail(notifyConfirm.user);
+            const cfg = STATUS_CONFIG[notifyConfirm.status];
+            return (
+              <>
+                <div className="bg-gradient-to-br from-red-500 via-red-600 to-rose-600 px-8 pt-8 pb-6 text-center">
+                  <div className="mx-auto h-14 w-14 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-4 shadow-lg shadow-red-800/20">
+                    <HeartPulse className="h-6 w-6 text-white" />
+                  </div>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-lg font-black text-white tracking-tight">
+                      Ειδοποίηση Πιστοποιητικού
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-red-100 text-sm mt-1">
+                      Υπενθύμιση ανανέωσης ιατρικού
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                </div>
+
+                <div className="px-8 py-6 space-y-5">
+                  <div className="flex items-center gap-3 p-3 bg-zinc-50 rounded-xl">
+                    <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center", cfg.bg)}>
+                      <cfg.icon className={cn("h-5 w-5", cfg.color)} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-black text-zinc-900">{notifyConfirm.user.displayName}</p>
+                      <p className={cn("text-[11px] font-bold", cfg.color)}>
+                        {notifyConfirm.expiryDate
+                          ? `${cfg.label} — ${new Date(notifyConfirm.expiryDate).toLocaleDateString('el-GR')}`
+                          : 'Χωρίς πιστοποιητικό'
+                        }
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2.5">
+                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-300">{toGreekUpperCase('Παραλήπτης')}</p>
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                        <Users className="h-3.5 w-3.5 text-blue-500" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-zinc-900">{contact?.name || '—'}</p>
+                        <p className="text-[11px] text-zinc-400 font-medium">
+                          {contact?.email || 'Δεν υπάρχει email'}
+                          {contact?.isParent && <span className="ml-1 text-blue-400">(Γονέας)</span>}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {notifyConfirm.user.lastMedicalNotifiedAt && (
+                  <div className="px-8">
+                    <div className="flex items-center gap-2 p-2.5 bg-amber-50 rounded-lg">
+                      <CheckCircle2 className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                      <p className="text-[11px] text-amber-700 font-medium">
+                        Τελευταία ειδοποίηση: {new Date(notifyConfirm.user.lastMedicalNotifiedAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="px-8 pb-8">
+                  <AlertDialogFooter className="flex flex-col gap-2.5 sm:flex-col">
+                    <AlertDialogAction
+                      onClick={() => {
+                        handleNotify(notifyConfirm);
+                        setNotifyConfirm(null);
+                      }}
+                      className="h-12 w-full rounded-xl bg-zinc-900 hover:bg-black text-white font-bold text-sm shadow-lg transition-all active:scale-[0.98] m-0"
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      Αποστολή Email
+                    </AlertDialogAction>
+                    <AlertDialogCancel className="h-10 w-full rounded-xl border-none bg-transparent text-zinc-400 hover:text-zinc-600 font-bold text-sm m-0">
+                      Ακύρωση
+                    </AlertDialogCancel>
+                  </AlertDialogFooter>
+                </div>
+              </>
+            );
+          })()}
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

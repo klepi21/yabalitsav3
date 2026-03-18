@@ -13,7 +13,6 @@ import {
   BarChart3,
   Settings,
   Trophy,
-  Swords,
   ClipboardList,
   Dumbbell,
   Euro,
@@ -32,6 +31,8 @@ interface NavItem {
   name: string;
   href?: string;
   icon: React.ElementType;
+  disabled?: boolean;
+  badge?: string;
   children?: { name: string; href: string; icon: React.ElementType }[];
 }
 
@@ -55,10 +56,8 @@ const navigation: NavItem[] = [
   {
     name: 'Τουρνουά',
     icon: Trophy,
-    children: [
-      { name: 'Όλα τα Τουρνουά', href: '/management/tournaments', icon: Swords },
-      { name: 'Νέο Τουρνουά', href: '/management/tournaments/new', icon: ClipboardList },
-    ]
+    disabled: true,
+    badge: 'Soon',
   },
   { name: 'Αναφορές', href: '/management/reports', icon: BarChart3 },
   { name: 'Ρυθμίσεις', href: '/management/settings', icon: Settings },
@@ -148,6 +147,23 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                 const isParentActive = isChildActive(item);
                 const isExpanded = expandedMenus.includes(item.name) || isParentActive;
                 const Icon = item.icon;
+
+                if (item.disabled) {
+                  return (
+                    <div
+                      key={item.name}
+                      className="group relative flex items-center gap-3 rounded-lg px-4 py-2 text-[12px] font-bold text-zinc-300 cursor-not-allowed"
+                    >
+                      <Icon className="h-4 w-4 text-zinc-200" />
+                      <span>{toGreekUpperCase(item.name)}</span>
+                      {item.badge && (
+                        <span className="ml-auto bg-zinc-100 text-zinc-400 text-[8px] px-1.5 py-0.5 rounded-md font-black uppercase tracking-wider">
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
+                  );
+                }
 
                 if (item.children) {
                   return (

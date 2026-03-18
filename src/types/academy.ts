@@ -89,6 +89,7 @@ export interface AcademyUser {
   parent_uid?: string;
   linked_athletes?: string[];
   assigned_squads?: string[];
+  lastMedicalNotifiedAt?: string;  // ISO date — last medical cert reminder sent
   createdAt: Date;
   updatedAt: Date;
 }
