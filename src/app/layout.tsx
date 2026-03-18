@@ -1,12 +1,15 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Roboto_Flex } from 'next/font/google';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import './globals.css';
 
 import ConditionalWrapper from '@/components/ConditionalWrapper';
 import CookieConsent from '@/components/CookieConsent';
 
-const inter = Inter({ subsets: ['latin', 'greek'] });
+const roboto = Roboto_Flex({ 
+  subsets: ['latin', 'greek'],
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: {
@@ -106,7 +109,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/fav.png" />
         
       </head>
-      <body className={inter.className} suppressHydrationWarning={true}>
+      <body className={roboto.className} suppressHydrationWarning={true}>
         <ConditionalWrapper>
           {children}
         </ConditionalWrapper>
