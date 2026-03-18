@@ -13,24 +13,23 @@ const roboto = Roboto_Flex({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Yabalitsa - Βρες και Κλείσε Γήπεδο Ποδοσφαίρου',
+    default: 'Yabalitsa | Λογισμικό Διαχείρισης Γηπέδων 5x5 & Ακαδημιών',
     template: '%s | Yabalitsa'
   },
-  description: 'Βρες και κλείσε γήπεδο ποδοσφαίρου στην Ελλάδα. Εύκολη κράτηση γηπέδων 5x5, 6x6, 7x7, 8x8. Διαχείριση γηπέδων για ιδιοκτήτες.',
+  description: 'Η Νο.1 πλατφόρμα (SaaS) για διαχείριση αθλητικών κέντρων, γηπέδων 5x5 και ακαδημιών ποδοσφαίρου στην Ελλάδα. Online κρατήσεις, player passport και οικονομικά reports.',
   keywords: [
-    'γήπεδο ποδοσφαίρου',
-    'κράτηση γηπέδου',
-    '5x5',
-    '6x6', 
-    '7x7',
-    '8x8',
-    'ποδόσφαιρο',
-    'γήπεδα Αθήνα',
-    'γήπεδα Θεσσαλονίκη',
-    'διαχείριση γηπέδων',
-    'booking γηπέδου',
-    'football pitch',
-    'soccer field'
+    'διαχείριση ακαδημιών ποδοσφαίρου',
+    'λογισμικό γηπέδων 5x5',
+    'online κρατήσεις γηπέδων 5x5',
+    'πρόγραμμα ακαδημιών',
+    'management αθλητικών κέντρων',
+    'εφαρμογή για γήπεδα 5x5',
+    'έλεγχος συνδρομών ακαδημίας',
+    'booking γηπέδων Ελλάδα',
+    'κράτηση 5x5',
+    'ποδόσφαιρο SaaS',
+    'sports facility management software',
+    'football academy software'
   ],
   authors: [{ name: 'Yabalitsa Team' }],
   creator: 'Yabalitsa',
@@ -44,32 +43,27 @@ export const metadata: Metadata = {
   alternates: {
     canonical: '/',
   },
-  verification: {
-    google: 'your-google-verification-code',
-    yandex: 'your-yandex-verification-code',
-    yahoo: 'your-yahoo-verification-code',
-  },
   openGraph: {
     type: 'website',
     locale: 'el_GR',
     url: 'https://yabalitsa.com',
     siteName: 'Yabalitsa',
-    title: 'Yabalitsa - Βρες και Κλείσε Γήπεδο Ποδοσφαίρου',
-    description: 'Βρες και κλείσε γήπεδο ποδοσφαίρου στην Ελλάδα. Εύκολη κράτηση γηπέδων 5x5, 6x6, 7x7, 8x8.',
+    title: 'Yabalitsa | Λογισμικό Διαχείρισης Γηπέδων 5x5 & Ακαδημιών',
+    description: 'Εκσυγχρονίστε το αθλητικό σας κέντρο. Αυτόματο ημερολόγιο κρατήσεων 5x5 και ψηφιακό Player Passport για ακαδημίες.',
     images: [
       {
         url: '/ogpreview.png',
         width: 1200,
         height: 630,
-        alt: 'Yabalitsa - Γήπεδα Ποδοσφαίρου',
+        alt: 'Yabalitsa SaaS - Διαχείριση Γηπέδων & Ακαδημιών',
         type: 'image/png',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Yabalitsa - Βρες και Κλείσε Γήπεδο Ποδοσφαίρου',
-    description: 'Βρες και κλείσε γήπεδο ποδοσφαίρου στην Ελλάδα. Εύκολη κράτηση γηπέδων.',
+    title: 'Yabalitsa | Λογισμικό Διαχείρισης Γηπέδων 5x5',
+    description: 'Εκσυγχρονίστε το αθλητικό σας κέντρο με το Yabalitsa. Αυτόματο ημερολόγιο κρατήσεων και Player Passport για ακαδημίες.',
     images: ['/ogpreview.png'],
     creator: '@yabalitsa',
   },
