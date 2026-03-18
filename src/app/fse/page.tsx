@@ -48,7 +48,7 @@ export default function FSEPage() {
     const day = date.getDate();
     const month = monthNames[date.getMonth()];
     
-    return \`\${dayName} \${day} \${month}\`;
+    return `${dayName} ${day} ${month}`;
   };
 
   const handleBookNow = (venueId: string, pitchId: string, time: string) => {
@@ -58,7 +58,7 @@ export default function FSEPage() {
       date: searchQuery.date,
       time
     });
-    router.push(\`/book?\${params.toString()}\`);
+    router.push(`/book?${params.toString()}`);
   };
 
   const handleSearch = () => {
@@ -95,9 +95,9 @@ export default function FSEPage() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col pt-32 pb-20 relative z-10">
-        <div className={\`text-center px-4 w-full transition-all duration-700 ease-in-out \${
+        <div className={`text-center px-4 w-full transition-all duration-700 ease-in-out ${
           !hasSearched ? 'flex-1 flex flex-col justify-center max-w-[1000px] mx-auto' : 'mb-12 max-w-[1000px] mx-auto'
-        }\`}>
+        }`}>
           
           <div className="mb-12">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-medium tracking-tight mb-4">
@@ -174,7 +174,7 @@ export default function FSEPage() {
                     {(() => {
                       const availableHours = [];
                       for (let hour = 8; hour <= 23; hour++) {
-                        availableHours.push(\`\${hour.toString().padStart(2, '0')}:00\`);
+                        availableHours.push(`${hour.toString().padStart(2, '0')}:00`);
                       }
                       return availableHours.map(timeString => (
                         <option key={timeString} value={timeString}>
