@@ -21,6 +21,9 @@ import {
   Sparkles,
   PartyPopper,
   ChevronDown,
+  CheckCircle2,
+  Trophy,
+  LineChart,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -151,61 +154,78 @@ export default function ForVenuesPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left panel — brand */}
-      <div className="hidden lg:flex lg:w-[480px] xl:w-[520px] bg-[#0f172a] relative overflow-hidden flex-col justify-between p-12 shrink-0">
-        <div>
-          <Image
-            src="/yabalitsalogo.png"
-            alt="Yabalitsa"
-            width={160}
-            height={48}
-            className="h-10 w-auto brightness-0 invert opacity-90"
-          />
+      <div className="hidden lg:flex lg:w-[480px] xl:w-[560px] relative overflow-hidden flex-col justify-between p-12 bg-[#040D12] shrink-0">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image src="/bg_auth_football.png" alt="Yabalitsa background" fill className="object-cover opacity-40 mix-blend-overlay" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#040D12] via-[#040D12]/80 to-[#040D12]/40" />
         </div>
 
-        <div className="relative z-10 space-y-8">
-          <div>
-            <h1 className="text-3xl font-semibold text-white leading-tight tracking-tight">
-              Διαχειρίσου τα<br />γηπεδάκια σου εύκολα
-            </h1>
-            <p className="mt-4 text-slate-400 text-[15px] leading-relaxed max-w-sm">
-              Κρατήσεις, πελάτες, έσοδα — όλα σε μία πλατφόρμα. Ξεκίνα δωρεάν σήμερα.
-            </p>
-          </div>
+        <div className="relative z-10">
+          <Link href="/">
+            <Image
+              src="/yabalo.png"
+              alt="Yabalitsa"
+              width={160}
+              height={32}
+              className="h-9 w-auto brightness-0 invert hover:opacity-80 transition cursor-pointer"
+            />
+          </Link>
+        </div>
 
-          <div className="space-y-4">
-            {[
-              'Online κρατήσεις 24/7',
-              'Διαχείριση πελατών & ακαδημίας',
-              'Αναλυτικά reports εσόδων',
-              'QR code για άμεσες κρατήσεις',
-            ].map((feature) => (
-              <div key={feature} className="flex items-center gap-3">
-                <div className="h-6 w-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
-                  <Check className="h-3.5 w-3.5 text-emerald-400" />
-                </div>
-                <span className="text-slate-300 text-sm">{feature}</span>
+        <div className="relative z-10 mb-8 mt-auto">
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1 inline-flex items-center gap-2 mb-6 shadow-[0_0_15px_-3px_rgba(52,211,153,0.3)]">
+            <Sparkles className="h-4 w-4 text-emerald-400" />
+            <span className="text-xs font-semibold text-emerald-400">15 ημέρες δωρεάν δοκιμή</span>
+          </div>
+          
+          <h1 className="text-3xl sm:text-4xl font-medium text-white leading-tight tracking-tight mb-10">
+            Ολοκληρωμένη διαχείριση<br/>
+            για το <span className="text-emerald-400 font-bold">αθλητικό σας κέντρο</span>
+          </h1>
+
+          <div className="space-y-8">
+            <div className="flex items-start gap-5">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-2xl text-emerald-400 mt-1 shadow-[0_0_15px_-3px_rgba(52,211,153,0.3)]">
+                <CheckCircle2 className="w-6 h-6" />
               </div>
-            ))}
-          </div>
-
-          <div className="bg-white/[0.04] border border-white/[0.06] rounded-xl p-5">
-            <div className="flex items-center gap-2 mb-2">
-              <Sparkles className="h-4 w-4 text-emerald-400" />
-              <span className="text-sm font-medium text-white">15 ημέρες δωρεάν</span>
+              <div>
+                <h3 className="text-white font-semibold text-lg">Αστραπιαίες Κρατήσεις</h3>
+                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Αυτόματο ημερολόγιο γηπέδων 5x5, αυτόματος έλεγχος διαθεσιμότητας και οργάνωση πελατολογίου.</p>
+              </div>
             </div>
-            <p className="text-slate-400 text-[13px] leading-relaxed">
-              Χωρίς πιστωτική κάρτα. Χωρίς δεσμεύσεις. Επίλεξε πλάνο μετά τη δοκιμαστική περίοδο.
-            </p>
+            
+            <div className="flex items-start gap-5">
+              <div className="bg-blue-500/10 border border-blue-500/20 p-2.5 rounded-2xl text-blue-400 mt-1 shadow-[0_0_15px_-3px_rgba(59,130,246,0.3)]">
+                <Trophy className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-white font-semibold text-lg">Λογισμικό Ακαδημίας</h3>
+                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Διαχείριση ιατρικών πιστοποιητικών, οργάνωση ηλικιακών τμημάτων ομάδων και αυτόματο Player Passport.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-5">
+              <div className="bg-orange-500/10 border border-orange-500/20 p-2.5 rounded-2xl text-orange-400 mt-1 shadow-[0_0_15px_-3px_rgba(249,115,22,0.3)]">
+                <LineChart className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-white font-semibold text-lg">Οικονομικά Reports</h3>
+                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Πλήρης έλεγχος των μηνιαίων συνδρομών, έξυπνες ειδοποιήσεις για ανεξόφλητες καρτέλες αθλητών.</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <p className="text-slate-600 text-xs relative z-10">
-          &copy; {new Date().getFullYear()} Yabalitsa
-        </p>
-
-        {/* Decorative gradient orbs */}
-        <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-emerald-600/20 rounded-full blur-3xl" />
-        <div className="absolute -top-16 -right-16 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl" />
+        <div className="relative z-10 flex items-center justify-between pt-8 border-t border-white/10 mt-10">
+          <p className="text-zinc-500 text-xs font-medium">
+            &copy; {new Date().getFullYear()} Yabalitsa SaaS
+          </p>
+          <div className="flex gap-4 text-[10px] font-black tracking-widest text-emerald-500/80">
+            <span>SECURE ENCRYPTED</span>
+            <span>GDPR COMPLIANT</span>
+          </div>
+        </div>
       </div>
 
       {/* Right panel — form */}
@@ -475,7 +495,7 @@ export default function ForVenuesPage() {
                 <Checkbox
                   id="acceptTerms"
                   checked={form.acceptTerms}
-                  onCheckedChange={(checked) => setForm({ ...form, acceptTerms: checked === true })}
+                  onCheckedChange={(checked: boolean | "indeterminate") => setForm({ ...form, acceptTerms: checked === true })}
                   className="mt-0.5"
                 />
                 <label htmlFor="acceptTerms" className="text-[13px] text-zinc-500 leading-relaxed select-none cursor-pointer">

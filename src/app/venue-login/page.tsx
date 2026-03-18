@@ -6,9 +6,10 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { authService } from '@/lib/firebase-services';
-import { Mail, Lock, Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2, ArrowRight, CheckCircle2, Trophy, LineChart } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -84,33 +85,73 @@ function VenueLoginContent() {
   return (
     <div className="min-h-screen flex">
       {/* Left panel — brand */}
-      <div className="hidden lg:flex lg:w-[480px] xl:w-[560px] bg-[#0f172a] relative overflow-hidden flex-col justify-between p-12">
-        <div>
-          <Image
-            src="/yabalitsalogo.png"
-            alt="Yabalitsa"
-            width={160}
-            height={48}
-            className="h-10 w-auto brightness-0 invert opacity-90"
-          />
+      <div className="hidden lg:flex lg:w-[480px] xl:w-[560px] relative overflow-hidden flex-col justify-between p-12 bg-[#040D12]">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image src="/bg_auth_football.png" alt="Yabalitsa background" fill className="object-cover opacity-40 mix-blend-overlay" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#040D12] via-[#040D12]/80 to-[#040D12]/40" />
         </div>
 
         <div className="relative z-10">
-          <h1 className="text-3xl font-semibold text-white leading-tight tracking-tight">
-            Διαχειριστείτε τις<br />κρατήσεις σας εύκολα
-          </h1>
-          <p className="mt-4 text-slate-400 text-[15px] leading-relaxed max-w-sm">
-            Η πλατφόρμα που απλοποιεί τη διαχείριση γηπέδων, κρατήσεων και πελατών σας.
-          </p>
+          <Link href="/">
+            <Image
+              src="/yabalo.png"
+              alt="Yabalitsa"
+              width={160}
+              height={32}
+              className="h-9 w-auto brightness-0 invert hover:opacity-80 transition cursor-pointer"
+            />
+          </Link>
         </div>
 
-        <p className="text-slate-600 text-xs">
-          &copy; {new Date().getFullYear()} Yabalitsa
-        </p>
+        <div className="relative z-10 mb-8 mt-auto">
+          <h1 className="text-3xl sm:text-4xl font-medium text-white leading-tight tracking-tight mb-10">
+            Ολοκληρωμένη διαχείριση<br/>
+            για το <span className="text-emerald-400 font-bold">αθλητικό σας κέντρο</span>
+          </h1>
 
-        {/* Decorative gradient orbs */}
-        <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-emerald-600/20 rounded-full blur-3xl" />
-        <div className="absolute -top-16 -right-16 w-48 h-48 bg-emerald-500/10 rounded-full blur-2xl" />
+          <div className="space-y-8">
+            <div className="flex items-start gap-5">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-2xl text-emerald-400 mt-1 shadow-[0_0_15px_-3px_rgba(52,211,153,0.3)]">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-white font-semibold text-lg">Αστραπιαίες Κρατήσεις</h3>
+                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Αυτόματο ημερολόγιο γηπέδων 5x5, αυτόματος έλεγχος διαθεσιμότητας και οργάνωση πελατολογίου.</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-5">
+              <div className="bg-blue-500/10 border border-blue-500/20 p-2.5 rounded-2xl text-blue-400 mt-1 shadow-[0_0_15px_-3px_rgba(59,130,246,0.3)]">
+                <Trophy className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-white font-semibold text-lg">Λογισμικό Ακαδημίας</h3>
+                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Διαχείριση ιατρικών πιστοποιητικών, οργάνωση ηλικιακών τμημάτων ομάδων και αυτόματο Player Passport.</p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-5">
+              <div className="bg-orange-500/10 border border-orange-500/20 p-2.5 rounded-2xl text-orange-400 mt-1 shadow-[0_0_15px_-3px_rgba(249,115,22,0.3)]">
+                <LineChart className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-white font-semibold text-lg">Οικονομικά Reports</h3>
+                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Πλήρης έλεγχος των μηνιαίων συνδρομών, έξυπνες ειδοποιήσεις για ανεξόφλητες καρτέλες αθλητών.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="relative z-10 flex items-center justify-between pt-8 border-t border-white/10 mt-10">
+          <p className="text-zinc-500 text-xs font-medium">
+            &copy; {new Date().getFullYear()} Yabalitsa SaaS
+          </p>
+          <div className="flex gap-4 text-[10px] font-black tracking-widest text-emerald-500/80">
+            <span>SECURE ENCRYPTED</span>
+            <span>GDPR COMPLIANT</span>
+          </div>
+        </div>
       </div>
 
       {/* Right panel — form */}
