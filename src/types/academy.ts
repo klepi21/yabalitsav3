@@ -285,6 +285,7 @@ export interface PlayerEvaluation {
   periodLabel: string;       // e.g., 'Ιαν-Μαρ 2026'
   ratings: Record<string, number>;  // skill key → 1-5
   notes: string;             // coach comments
+  sentAt?: string;           // ISO date when PDF was sent to parent
   createdAt: Date;
   updatedAt: Date;
 }

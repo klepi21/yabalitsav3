@@ -34,6 +34,7 @@ function convertEvaluation(id: string, data: Record<string, unknown>): PlayerEva
     periodLabel: (data.periodLabel as string) || '',
     ratings: (data.ratings as Record<string, number>) || {},
     notes: (data.notes as string) || '',
+    sentAt: data.sentAt as string | undefined,
     createdAt: (data.createdAt as { toDate?(): Date })?.toDate?.() || new Date(),
     updatedAt: (data.updatedAt as { toDate?(): Date })?.toDate?.() || new Date(),
   };
