@@ -50,7 +50,7 @@ export default function RootPage() {
               <Link href="/venue-login" className="hidden sm:flex px-4 py-2 rounded border border-zinc-600 bg-white/5 hover:bg-white/10 text-white transition">
                 Σύνδεση
               </Link>
-              <Link href="/venue-login" className="px-5 py-2 rounded bg-emerald-400 hover:bg-emerald-500 text-black font-bold transition">
+              <Link href="https://www.yabalitsa.com/for-venues" className="px-5 py-2 rounded bg-emerald-400 hover:bg-emerald-500 text-black font-bold transition">
                 Ξεκινήστε δωρεάν
               </Link>
             </div>
@@ -357,7 +357,7 @@ export default function RootPage() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link 
-              href="/venue-login" 
+              href="https://www.yabalitsa.com/for-venues" 
               className="w-full sm:w-auto px-8 py-4 font-bold text-black bg-emerald-400 hover:bg-emerald-300 rounded-2xl transition-all shadow-[0_0_30px_rgba(52,211,153,0.3)] hover:shadow-[0_0_50px_rgba(52,211,153,0.6)] flex items-center justify-center gap-3 hover:-translate-y-1"
             >
               Αποκτήστε Πρόσβαση (SaaS) <ChevronRight className="h-4 w-4" />
