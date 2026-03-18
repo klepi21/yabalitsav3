@@ -69,7 +69,7 @@ export default function RootPage() {
                     height={64}
                     priority
                     fetchPriority="high"
-                    quality={85}
+                    quality={60}
                     sizes="(max-width: 768px) 200px, 320px"
                     className="w-[160px] sm:w-[200px] md:w-[260px] lg:w-[290px] h-auto filter brightness-0 invert drop-shadow-[0_0_10px_rgba(255,255,255,0.6)] translate-y-[2px] md:translate-y-[4px]" 
                   />
@@ -107,7 +107,9 @@ export default function RootPage() {
 
       {/* ================= FEATURES GRID ================= */}
       <section id="features" className="py-32 w-full relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/bg_features.png')] bg-cover bg-center opacity-[0.15] pointer-events-none mix-blend-overlay" />
+        <div className="absolute inset-0 pointer-events-none opacity-[0.15] mix-blend-overlay">
+          <Image src="/bg_features.png" alt="Features Background" fill className="object-cover object-center" quality={60} sizes="100vw" />
+        </div>
         <div className="absolute top-40 left-20 w-72 h-72 bg-emerald-600/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute bottom-10 right-20 w-96 h-96 bg-blue-600/10 rounded-full blur-[150px] pointer-events-none" />
         
@@ -178,7 +180,9 @@ export default function RootPage() {
 
       {/* ================= ACADEMIES SHOWCASE ================= */}
       <section id="academies" className="py-24 px-6 overflow-hidden bg-[#03090C] border-y border-white/5 relative w-full">
-        <div className="absolute inset-0 bg-[url('/bg_academies.png')] bg-cover bg-center opacity-[0.15] pointer-events-none mix-blend-screen" />
+        <div className="absolute inset-0 pointer-events-none opacity-[0.15] mix-blend-screen">
+          <Image src="/bg_academies.png" alt="Academies Background" fill className="object-cover object-center" quality={60} sizes="100vw" />
+        </div>
         <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10 w-full">
           
           <div className="order-2 lg:order-1 relative">
@@ -260,7 +264,9 @@ export default function RootPage() {
 
       {/* ================= PITCHES / BOOKING SHOWCASE ================= */}
       <section id="pitches" className="py-24 relative w-full overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/bg_pitches.png')] bg-cover bg-center opacity-[0.15] pointer-events-none mix-blend-overlay" />
+        <div className="absolute inset-0 pointer-events-none opacity-[0.15] mix-blend-overlay">
+          <Image src="/bg_pitches.png" alt="Pitches Background" fill className="object-cover object-center" quality={60} sizes="100vw" />
+        </div>
         <div className="absolute top-1/2 right-1/4 w-[500px] h-[500px] bg-emerald-600/10 rounded-full blur-[150px] pointer-events-none" />
         
         <div className="max-w-[1400px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10 w-full">
@@ -329,7 +335,9 @@ export default function RootPage() {
 
       {/* ================= REPORTS / INSIGHTS ================= */}
       <section id="reports" className="py-24 px-6 border-t border-white/5 bg-[#03090C] relative w-full overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/bg_reports.png')] bg-cover bg-center opacity-[0.15] pointer-events-none mix-blend-lighten" />
+        <div className="absolute inset-0 pointer-events-none opacity-[0.15] mix-blend-lighten">
+          <Image src="/bg_reports.png" alt="Reports Background" fill className="object-cover object-center" quality={60} sizes="100vw" />
+        </div>
         <div className="max-w-[800px] mx-auto text-center relative z-10 w-full">
           <div className="h-16 w-16 mx-auto bg-purple-500/10 text-purple-400 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(168,85,247,0.2)]">
             <BarChart3 className="h-8 w-8" />
