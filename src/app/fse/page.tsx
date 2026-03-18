@@ -61,16 +61,53 @@ export default function FSEPage() {
     router.push(`/book?${params.toString()}`);
   };
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     setIsSearching(true);
     setHasSearched(true);
     
-    // Simulate API search
-    setTimeout(() => {
+    try {
+      const { venueService, pitchService } = await import('@/lib/firebase-services');
+      const allVenues = await venueService.getAll();
+      
+      let filteredVenues = allVenues;
+      if (searchQuery.city) {
+        filteredVenues = filteredVenues.filter(v => 
+          (v.address && v.address.toLowerCase().includes(searchQuery.city.toLowerCase())) || 
+          (v.city && v.city.toLowerCase() === searchQuery.city.toLowerCase())
+        );
+      }
+      
+      const results: SearchResult[] = [];
+      
+      await Promise.all(filteredVenues.map(async (venue) => {
+        try {
+          const pitches = await pitchService.getByVenue(venue.id);
+          const activePitches = pitches.filter(p => p.active !== false);
+          
+          activePitches.forEach(pitch => {
+            if (searchQuery.pitchType && pitch.type !== searchQuery.pitchType) return;
+            
+            // We do not check booking availability in this MVP step unless date/time is handled deeply, 
+            // so we return the pitch if it matches basic criteria.
+            results.push({
+              venue: venue as Venue,
+              pitch: pitch as Pitch,
+              price: pitch.pricePerSlot || 0
+            });
+          });
+        } catch (err) {
+          console.error(`Failed to load pitches for venue ${venue.id}`, err);
+        }
+      }));
+      
+      setSearchResults(results);
+      setSuggestions([]);
+    } catch (error) {
+      console.error('Error fetching search results:', error);
       setSearchResults([]);
-      setSuggestions([]); // Currently returning empty state
+    } finally {
       setIsSearching(false);
-    }, 1200);
+    }
   };
 
   return (
@@ -210,6 +247,57 @@ export default function FSEPage() {
           <div className="w-full flex-1 flex flex-col items-center justify-center mt-12">
             <div className="w-12 h-12 border-4 border-white/10 border-t-[#74ee16] rounded-full animate-spin mb-4" />
             <p className="text-zinc-400 animate-pulse">Αναζήτηση διαθεσιμότητας...</p>
+          </div>
+        )}
+
+        {/* Search Results rendering */}
+        {hasSearched && !isSearching && searchResults.length > 0 && (
+          <div className="max-w-[1000px] mx-auto px-4 w-full flex flex-col gap-6 mt-8">
+            <h2 className="text-xl font-medium text-white mb-2">
+              Βρέθηκαν <span className="text-[#74ee16] font-bold">{searchResults.length}</span> γήπεδα
+            </h2>
+            
+            {searchResults.map((result, idx) => (
+              <div key={`${result.venue.id}-${result.pitch.id}-${idx}`} className="bg-[#0B151C] border border-white/10 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 hover:border-white/20 transition-all group shadow-xl">
+                
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-2xl font-bold text-white group-hover:text-[#74ee16] transition-colors">{result.venue.name}</h3>
+                    <span className="bg-white/10 text-zinc-300 text-xs px-3 py-1 rounded-full font-medium tracking-wide shadow-sm">
+                      {result.pitch.type}
+                    </span>
+                  </div>
+                  
+                  <div className="flex items-center text-zinc-400 text-sm mb-4">
+                    <MapPin className="w-4 h-4 mr-1.5 opacity-70" />
+                    <span>{result.venue.address || 'Διεύθυνση μη διαθέσιμη'}</span>
+                  </div>
+                  
+                  <div className="bg-white/5 border border-white/5 inline-flex flex-col sm:flex-row gap-4 p-3 rounded-xl px-5 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-[#74ee16] animate-pulse" />
+                      <span className="font-bold text-white">{result.pitch.name}</span>
+                    </div>
+                    <div className="hidden sm:block w-[1px] bg-white/10" />
+                    <div className="text-zinc-400">Διάρκεια: <span className="text-white font-medium">{result.pitch.slotDuration} λεπτά</span></div>
+                  </div>
+                </div>
+
+                <div className="flex flex-col md:items-end w-full md:w-auto gap-4 border-t border-white/5 md:border-t-0 pt-6 md:pt-0">
+                  <div className="flex items-end gap-1">
+                    <span className="text-4xl font-black text-white">{result.price}</span>
+                    <span className="text-[#74ee16] font-bold text-xl mb-1">€</span>
+                  </div>
+                  <Link 
+                    href={`/book/${encodeURIComponent(result.venue.name || result.venue.id)}`}
+                    className="w-full md:w-auto bg-[#74ee16] hover:bg-[#5dc611] text-black font-bold py-3 px-8 rounded-xl transition-all shadow-[0_0_20px_rgba(116,238,22,0.15)] hover:shadow-[0_0_25px_rgba(116,238,22,0.3)] text-center shadow-lg"
+                  >
+                    Κράτηση Τώρα
+                  </Link>
+                </div>
+
+              </div>
+            ))}
           </div>
         )}
 
