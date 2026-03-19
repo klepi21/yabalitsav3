@@ -1001,22 +1001,25 @@ function AdminDashboard() {
         </div>
 
         {/* Academy Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
           {[
-            { label: 'ΣΥΝΟΛΟ ΤΜΗΜΑΤΩΝ', value: squads.length, detail: 'ΕΝΕΡΓΑ ΤΜΗΜΑΤΑ', icon: <Trophy className="h-4 w-4 text-emerald-600" />, color: 'bg-emerald-50' },
-            { label: 'ΣΥΝΟΛΟ ΑΘΛΗΤΩΝ', value: getTotalAthletes(), detail: 'ΕΝΕΡΓΟΙ ΑΘΛΗΤΕΣ', icon: <Users className="h-4 w-4 text-blue-600" />, color: 'bg-blue-50' },
-            { label: 'ΠΡΟΠΟΝΗΣΕΙΣ', value: getTodaysTrainings().length, detail: 'ΣΗΜΕΡΑ', icon: <CalendarDays className="h-4 w-4 text-amber-600" />, color: 'bg-amber-50' },
-            { label: 'ΙΑΤΡΙΚΑ', value: medicalAlerts.expired.length + medicalAlerts.expiringSoon.length, detail: 'ΕΚΚΡΕΜΟΤΗΤΕΣ', icon: <HeartPulse className="h-4 w-4 text-red-600" />, color: 'bg-red-50' }
+            { label: 'ΣΥΝΟΛΟ ΤΜΗΜΑΤΩΝ', value: squads.length, detail: 'ΕΝΕΡΓΑ ΤΜΗΜΑΤΑ', icon: <Trophy className="h-5 w-5 text-emerald-600" />, color: 'bg-emerald-50 border-b-4 border-emerald-200/50' },
+            { label: 'ΣΥΝΟΛΟ ΑΘΛΗΤΩΝ', value: getTotalAthletes(), detail: 'ΕΝΕΡΓΟΙ ΑΘΛΗΤΕΣ', icon: <Users className="h-5 w-5 text-blue-600" />, color: 'bg-blue-50 border-b-4 border-blue-200/50' },
+            { label: 'ΠΡΟΠΟΝΗΣΕΙΣ', value: getTodaysTrainings().length, detail: 'ΣΗΜΕΡΑ', icon: <CalendarDays className="h-5 w-5 text-amber-600" />, color: 'bg-amber-50 border-b-4 border-amber-200/50' },
+            { label: 'ΙΑΤΡΙΚΑ', value: medicalAlerts.expired.length + medicalAlerts.expiringSoon.length, detail: 'ΕΚΚΡΕΜΟΤΗΤΕΣ', icon: <HeartPulse className="h-5 w-5 text-red-600" />, color: 'bg-red-50 border-b-4 border-red-200/50' }
           ].map((stat, i) => (
-            <Card key={i} className={cn("rounded-2xl border border-black/[0.05] shadow-sm overflow-hidden group transition-all h-28 relative", stat.color)}>
-              <CardContent className="p-4 h-full flex flex-col justify-center">
+            <Card key={i} className={cn("rounded-[2rem] border-t border-x border-black/[0.02] shadow-xl shadow-zinc-200/50 transition-all hover:translate-y-[-2px] h-32 relative", stat.color)}>
+              <CardContent className="p-5 h-full flex flex-col justify-center">
                 <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                    <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
-                    <p className="text-2xl font-black text-zinc-900 tracking-tighter leading-none">{stat.value}</p>
-                    <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-tight mt-1">{stat.detail}</p>
+                  <div className="space-y-1.5">
+                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
+                    <p className="text-3xl font-black text-zinc-900 tracking-tighter leading-none">{stat.value}</p>
+                    <div className="flex items-center gap-1.5 mt-2">
+                       <div className="h-1 w-1 rounded-full bg-zinc-300" />
+                       <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-tight">{stat.detail}</p>
+                    </div>
                   </div>
-                  <div className="h-8 w-8 rounded-lg bg-white shadow-sm flex items-center justify-center shrink-0">
+                  <div className="h-10 w-10 rounded-2xl bg-white shadow-sm border border-zinc-50 flex items-center justify-center shrink-0">
                     {stat.icon}
                   </div>
                 </div>
