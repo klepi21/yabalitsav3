@@ -51,12 +51,11 @@ export default function RootPage() {
 
         {/* Hero Content */}
         <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pt-4 pb-24 w-full h-full">
-        {/* Glassmorphic Container for Readability */}
-          <div className="flex flex-col items-center text-center max-w-[1100px] w-full mx-auto p-6 sm:p-6 md:py-8 md:px-20 rounded-[2rem] bg-black/20 backdrop-blur-md border border-white/10 shadow-2xl relative overflow-hidden">
-            
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[50%] bg-emerald-500/10 blur-[80px] rounded-full pointer-events-none" />
+        {/* Glassmorphic Unified Hero Card */}
+          <div className="flex flex-col items-center text-center max-w-[1200px] w-full mx-auto p-4 pt-10 sm:p-8 sm:pt-16 rounded-[2rem] sm:rounded-[3rem] bg-black/20 backdrop-blur-md border border-white/10 shadow-3xl relative overflow-hidden">
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[30%] bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none" />
 
-            <h1 className="relative z-10 text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5rem] font-medium leading-[1.1] tracking-tight mb-4">
+            <h1 className="relative z-10 text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5rem] font-medium leading-[1.1] tracking-tight mb-4 mt-4">
               <span className="text-zinc-100 drop-shadow">Το μέλλον της διαχείρισης</span><br />
               <span className="text-white flex items-center justify-center gap-2 md:gap-4 flex-wrap mt-1 sm:mt-2 drop-shadow-md">
                 έγινε <span className="font-serif italic lowercase text-white tracking-normal px-1">digital</span>
@@ -77,31 +76,29 @@ export default function RootPage() {
               </span>
             </h1>
             
-            <p className="relative z-10 text-zinc-300 text-sm md:text-base lg:text-lg max-w-3xl mx-auto mb-6 font-light leading-relaxed tracking-wide drop-shadow">
+            <p className="relative z-10 text-zinc-300 text-sm md:text-base lg:text-lg max-w-3xl mx-auto mb-8 font-light leading-relaxed tracking-wide drop-shadow px-4">
               Σας βοηθάμε να αυτοματοποιήσετε τις κρατήσεις σας, να ελέγχετε τις συνδρομές των ακαδημιών και να εξοικονομείτε χρόνο σε ένα σύγχρονο οικοσύστημα.
             </p>
 
             <Link 
               href="/venue-login" 
-              className="relative z-10 group px-6 py-3 md:px-8 md:py-3.5 font-bold text-white bg-emerald-500 hover:bg-emerald-400 rounded-2xl transition-all duration-300 overflow-hidden shadow-[0_0_30px_-5px_rgba(52,211,153,0.3)] hover:shadow-[0_0_40px_-5px_rgba(52,211,153,0.5)] flex items-center gap-3 hover:scale-105 active:scale-95 text-sm md:text-base"
+              className="relative z-10 group px-8 py-3.5 md:px-10 md:py-4 font-bold text-white bg-emerald-500 hover:bg-emerald-400 rounded-2xl transition-all duration-300 overflow-hidden shadow-[0_0_30px_-5px_rgba(52,211,153,0.3)] hover:shadow-[0_0_40px_-5px_rgba(52,211,153,0.5)] flex items-center gap-3 hover:scale-105 active:scale-95 text-sm md:text-base mb-16 md:mb-24"
             >
               <span>Μπείτε στη Νέα Εποχή</span>
             </Link>
-          </div>
 
-          {/* Dashboard Preview Presentation */}
-          <div className="relative mt-12 sm:mt-16 w-full max-w-[1100px] mx-auto z-10 [perspective:2000px]">
-            <div className="relative w-full aspect-[16/10] sm:aspect-[16/9] lg:aspect-[21/9] rounded-xl sm:rounded-2xl lg:rounded-t-3xl overflow-hidden shadow-[0_30px_100px_-20px_rgba(52,211,153,0.25)] border-[0.5px] border-white/20 [transform:rotateX(8deg)_translateY(20px)] hover:[transform:rotateX(0deg)_translateY(0px)] transition-all duration-700 ease-in-out group bg-black/50">
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#040D12] z-10 opacity-80 pointer-events-none" />
-              <div className="absolute inset-0 bg-emerald-500/10 group-hover:bg-transparent transition-colors duration-700 z-10 pointer-events-none" />
-              <Image
-                src="/dashboard-preview.png"
-                alt="Yabalitsa Dashboard Preview"
-                fill
-                quality={90}
-                sizes="(max-width: 1200px) 100vw, 1200px"
-                className="object-cover object-top opacity-90 group-hover:opacity-100 transition-opacity duration-700"
-              />
+            {/* Integrated Dashboard Uncropped Screenshot */}
+            <div className="relative z-10 w-full max-w-[1050px] mx-auto rounded-t-xl sm:rounded-t-2xl shadow-[0_-30px_80px_-20px_rgba(52,211,153,0.25)] border-t border-l border-r border-white/20 bg-[#f8fafc] overflow-hidden">
+               <Image
+                 src="/dashboard-preview.png"
+                 alt="Yabalitsa Dashboard Preview"
+                 width={1920}
+                 height={1080}
+                 quality={100}
+                 sizes="(max-width: 1200px) 100vw, 1200px"
+                 className="w-full h-auto object-contain block hover:scale-[1.02] transition-transform duration-700 ease-out origin-top"
+               />
+               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none opacity-50" />
             </div>
           </div>
         </main>
