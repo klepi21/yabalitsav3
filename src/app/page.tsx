@@ -88,6 +88,22 @@ export default function RootPage() {
               <span>Μπείτε στη Νέα Εποχή</span>
             </Link>
           </div>
+
+          {/* Dashboard Preview Presentation */}
+          <div className="relative mt-12 sm:mt-16 w-full max-w-[1100px] mx-auto z-10 [perspective:2000px]">
+            <div className="relative w-full aspect-[16/10] sm:aspect-[16/9] lg:aspect-[21/9] rounded-xl sm:rounded-2xl lg:rounded-t-3xl overflow-hidden shadow-[0_30px_100px_-20px_rgba(52,211,153,0.25)] border-[0.5px] border-white/20 [transform:rotateX(8deg)_translateY(20px)] hover:[transform:rotateX(0deg)_translateY(0px)] transition-all duration-700 ease-in-out group bg-black/50">
+              <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#040D12] z-10 opacity-80 pointer-events-none" />
+              <div className="absolute inset-0 bg-emerald-500/10 group-hover:bg-transparent transition-colors duration-700 z-10 pointer-events-none" />
+              <Image
+                src="/dashboard-preview.png"
+                alt="Yabalitsa Dashboard Preview"
+                fill
+                quality={90}
+                sizes="(max-width: 1200px) 100vw, 1200px"
+                className="object-cover object-top opacity-90 group-hover:opacity-100 transition-opacity duration-700"
+              />
+            </div>
+          </div>
         </main>
       </section>
 
