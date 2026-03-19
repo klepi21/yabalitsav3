@@ -525,7 +525,7 @@ function AdminDashboard() {
       }
 
       if (!convertedVenue && venueOwner.venueId) {
-        setLoadError('Venue data not found. Please contact support. ');
+        setLoadError('Venue data not found. Please contact support.');
       }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
