@@ -1008,16 +1008,16 @@ function AdminDashboard() {
             { label: 'ΠΡΟΠΟΝΗΣΕΙΣ', value: getTodaysTrainings().length, detail: 'ΣΗΜΕΡΑ', icon: <CalendarDays className="h-4 w-4 text-amber-500" />, bgColor: 'bg-amber-50' },
             { label: 'ΙΑΤΡΙΚΑ', value: medicalAlerts.expired.length + medicalAlerts.expiringSoon.length, detail: 'alerts', icon: <HeartPulse className="h-4 w-4 text-red-500" />, bgColor: 'bg-red-50' }
           ].map((stat, i) => (
-            <Card key={i} className="rounded-[2rem] border border-black/[0.05] bg-white/80 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center py-4 px-2 min-h-[110px]">
-              <div className={cn("h-10 w-10 rounded-2xl flex items-center justify-center mb-2 shadow-sm", stat.bgColor)}>
-                {stat.icon}
+            <Card key={i} className="rounded-2xl border border-black/[0.05] bg-white/90 shadow-sm hover:shadow-md transition-all h-28 flex items-center px-5 gap-4">
+              <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm", stat.bgColor)}>
+                <div className="scale-110">{stat.icon}</div>
               </div>
-              <div className="text-center w-full">
-                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">{stat.label}</p>
-                <div className="flex flex-col items-center">
-                  <p className="text-2xl font-black text-zinc-900 tracking-tighter leading-none">{stat.value}</p>
-                  <p className="text-[8px] font-black text-zinc-400 uppercase opacity-60 mt-1">{stat.detail}</p>
+              <div className="flex flex-col justify-center min-w-0">
+                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1.5 truncate">{stat.label}</p>
+                <div className="flex items-baseline gap-1">
+                  <p className="text-3xl font-black text-zinc-900 tracking-tighter leading-none">{stat.value}</p>
                 </div>
+                <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-tight mt-1.5">{stat.detail}</p>
               </div>
             </Card>
           ))}
