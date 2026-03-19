@@ -1003,21 +1003,20 @@ function AdminDashboard() {
         {/* Academy Stats Grid */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
-            { label: 'ΣΥΝΟΛΟ ΤΜΗΜΑΤΩΝ', value: squads.length, detail: 'ΕΝΕΡΓΑ ΤΜΗΜΑΤΑ', icon: <Trophy className="h-4 w-4" />, color: 'bg-emerald-600' },
-            { label: 'ΣΥΝΟΛΟ ΑΘΛΗΤΩΝ', value: getTotalAthletes(), detail: 'ΕΝΕΡΓΟΙ ΑΘΛΗΤΕΣ', icon: <Users className="h-4 w-4" />, color: 'bg-blue-600' },
-            { label: 'ΠΡΟΠΟΝΗΣΕΙΣ', value: getTodaysTrainings().length, detail: 'ΣΗΜΕΡΑ', icon: <CalendarDays className="h-4 w-4" />, color: 'bg-amber-600' },
-            { label: 'ΙΑΤΡΙΚΑ', value: medicalAlerts.expired.length + medicalAlerts.expiringSoon.length, detail: 'ΕΚΚΡΕΜΟΤΗΤΕΣ', icon: <HeartPulse className="h-4 w-4" />, color: 'bg-red-600' }
+            { label: 'ΣΥΝΟΛΟ ΤΜΗΜΑΤΩΝ', value: squads.length, detail: 'ΕΝΕΡΓΑ ΤΜΗΜΑΤΑ', icon: <Trophy className="h-4 w-4 text-emerald-600" />, color: 'bg-emerald-50' },
+            { label: 'ΣΥΝΟΛΟ ΑΘΛΗΤΩΝ', value: getTotalAthletes(), detail: 'ΕΝΕΡΓΟΙ ΑΘΛΗΤΕΣ', icon: <Users className="h-4 w-4 text-blue-600" />, color: 'bg-blue-50' },
+            { label: 'ΠΡΟΠΟΝΗΣΕΙΣ', value: getTodaysTrainings().length, detail: 'ΣΗΜΕΡΑ', icon: <CalendarDays className="h-4 w-4 text-amber-600" />, color: 'bg-amber-50' },
+            { label: 'ΙΑΤΡΙΚΑ', value: medicalAlerts.expired.length + medicalAlerts.expiringSoon.length, detail: 'ΕΚΚΡΕΜΟΤΗΤΕΣ', icon: <HeartPulse className="h-4 w-4 text-red-600" />, color: 'bg-red-50' }
           ].map((stat, i) => (
-            <Card key={i} className={cn("rounded-2xl border-none shadow-sm overflow-hidden group transition-all duration-500 hover:shadow-md h-28 relative", stat.color)}>
-              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
-              <CardContent className="p-4 relative z-10 h-full flex flex-col justify-center">
+            <Card key={i} className={cn("rounded-2xl border border-black/[0.05] shadow-sm overflow-hidden group transition-all h-28 relative", stat.color)}>
+              <CardContent className="p-4 h-full flex flex-col justify-center">
                 <div className="flex justify-between items-start">
                   <div className="space-y-1">
-                    <p className="text-[9px] font-black text-white/70 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
-                    <p className="text-2xl font-black text-white tracking-tighter leading-none">{stat.value}</p>
-                    <p className="text-[8px] font-bold text-white/50 uppercase tracking-tight mt-1">{stat.detail}</p>
+                    <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
+                    <p className="text-2xl font-black text-zinc-900 tracking-tighter leading-none">{stat.value}</p>
+                    <p className="text-[8px] font-bold text-zinc-500 uppercase tracking-tight mt-1">{stat.detail}</p>
                   </div>
-                  <div className="h-8 w-8 rounded-lg bg-white/20 flex items-center justify-center text-white shrink-0">
+                  <div className="h-8 w-8 rounded-lg bg-white shadow-sm flex items-center justify-center shrink-0">
                     {stat.icon}
                   </div>
                 </div>
