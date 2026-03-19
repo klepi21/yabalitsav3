@@ -255,7 +255,7 @@ export default function RootPage() {
               <span className="text-emerald-400">Player Passport</span>
             </h2>
             <p className="text-zinc-400 text-lg mb-8 font-light leading-relaxed">
-              Ελέγξτε τις πληρωμές, οργανώστε τις προπονήσεις και παρακολουθήστε την πορεία κάθε αθλητή ξεχωριστά. Δεν χρειάζεται πλέον να ρωτάτε "ποιος χρωστάει" ή "ποιανού έληξε το χαρτί γιατρού".
+              Ελέγξτε τις πληρωμές, οργανώστε τις προπονήσεις και παρακολουθήστε την πορεία κάθε αθλητή ξεχωριστά. Δεν χρειάζεται πλέον να ρωτάτε &quot;ποιος χρωστάει&quot; ή &quot;ποιανού έληξε το χαρτί γιατρού&quot;.
             </p>
             
             <ul className="space-y-4 mb-10">
@@ -293,7 +293,7 @@ export default function RootPage() {
               δεν κάνει <span className="underline decoration-emerald-500 underline-offset-8">λάθη.</span>
             </h2>
             <p className="text-zinc-400 text-lg mb-8 font-light leading-relaxed">
-              Το booking system είναι καρδιά της εγκατάστασης. Σχεδιάσαμε ένα Mobile-First ημερολόγιο που σας επιτρέπει να προσθέτετε κρατήσεις "στο φτερό", χωρίς overlaps και με ξεκάθαρη εικόνα του τζίρου.
+              Το booking system είναι καρδιά της εγκατάστασης. Σχεδιάσαμε ένα Mobile-First ημερολόγιο που σας επιτρέπει να προσθέτετε κρατήσεις &quot;στο φτερό&quot;, χωρίς overlaps και με ξεκάθαρη εικόνα του τζίρου.
             </p>
             
             <ul className="space-y-4 mb-10">

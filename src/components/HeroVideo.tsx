@@ -8,6 +8,7 @@ export default function HeroVideo() {
   useEffect(() => {
     // Only mount the video on the client to avoid blocking the initial SSR payload 
     // and to defer the heavy download by a split second.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
 
