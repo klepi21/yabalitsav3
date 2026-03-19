@@ -1008,14 +1008,16 @@ function AdminDashboard() {
             { label: 'ΠΡΟΠΟΝΗΣΕΙΣ', value: getTodaysTrainings().length, detail: 'ΣΗΜΕΡΑ', icon: <CalendarDays className="h-4 w-4 text-amber-500" />, bgColor: 'bg-amber-50' },
             { label: 'ΙΑΤΡΙΚΑ', value: medicalAlerts.expired.length + medicalAlerts.expiringSoon.length, detail: 'alerts', icon: <HeartPulse className="h-4 w-4 text-red-500" />, bgColor: 'bg-red-50' }
           ].map((stat, i) => (
-            <Card key={i} className="rounded-2xl border border-zinc-100 bg-white/50 shadow-sm hover:shadow-md transition-all h-20 flex items-center p-4 gap-3">
-              <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0", stat.bgColor)}>
+            <Card key={i} className="rounded-[2rem] border border-black/[0.05] bg-white/80 shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center py-4 px-2 min-h-[110px]">
+              <div className={cn("h-10 w-10 rounded-2xl flex items-center justify-center mb-2 shadow-sm", stat.bgColor)}>
                 {stat.icon}
               </div>
-              <div className="min-w-0">
-                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest truncate">{stat.label}</p>
-                <p className="text-xl font-black text-zinc-900 tracking-tighter leading-none my-0.5">{stat.value}</p>
-                <p className="text-[8px] font-black text-zinc-400 uppercase opacity-60">{stat.detail}</p>
+              <div className="text-center w-full">
+                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                <div className="flex flex-col items-center">
+                  <p className="text-2xl font-black text-zinc-900 tracking-tighter leading-none">{stat.value}</p>
+                  <p className="text-[8px] font-black text-zinc-400 uppercase opacity-60 mt-1">{stat.detail}</p>
+                </div>
               </div>
             </Card>
           ))}
