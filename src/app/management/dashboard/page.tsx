@@ -20,6 +20,7 @@ import {
   Clock,
   Save,
   User,
+  Users,
   Trophy,
   Smile,
   HeartPulse,
@@ -36,8 +37,12 @@ import { Badge } from '@/components/ui/badge';
 import { squadService, academyUserService, userGroupService } from '@/lib/academy-services';
 import { academyPaymentService } from '@/lib/academy-services';
 import { trainingService } from '@/lib/training-services';
-import { Squad, AcademyUser, AcademyPayment } from '@/types/academy';
+import { Squad, AcademyUser, AcademyPayment, UserGroup } from '@/types/academy';
 import { TrainingSession } from '@/types/training';
+
+export interface DashboardSquad extends Squad {
+  athleteCount?: number;
+}
 
 const FootballPitch = ({ className }: { className?: string }) => (
   <svg viewBox="0 0 24 24" className={className} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -80,7 +85,7 @@ function CoachDashboard() {
   const { user, venueOwner, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const [squads, setSquads] = useState<Squad[]>([]);
+  const [squads, setSquads] = useState<DashboardSquad[]>([]);
   const [trainings, setTrainings] = useState<TrainingSession[]>([]);
   const [medicalAlerts, setMedicalAlerts] = useState<{ expired: AcademyUser[]; expiringSoon: AcademyUser[] }>({ expired: [], expiringSoon: [] });
   const [dataLoading, setDataLoading] = useState(true);
@@ -102,8 +107,11 @@ function CoachDashboard() {
           userGroupService.getByVenue(venueId),
         ]);
 
-        // Filter squads for coach
-        const visibleSquads = canViewAll ? squadsData : squadsData.filter(s => coachSquadIds.includes(s.id));
+        // Filter squads for coach and count athletes
+        const visibleSquads = (canViewAll ? squadsData : squadsData.filter(s => coachSquadIds.includes(s.id))).map(s => {
+          const count = usersData.filter(u => u.squad_id === s.id || u.squad_ids?.includes(s.id)).length;
+          return { ...s, athleteCount: count };
+        });
         setSquads(visibleSquads);
 
         // Filter trainings for coach's squads
@@ -361,8 +369,10 @@ function AdminDashboard() {
   const pathname = usePathname();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [pitches, setPitches] = useState<Pitch[]>([]);
-  const [squads, setSquads] = useState<Squad[]>([]);
+  const [squads, setSquads] = useState<DashboardSquad[]>([]);
   const [trainings, setTrainings] = useState<TrainingSession[]>([]);
+  const [academyUsers, setAcademyUsers] = useState<AcademyUser[]>([]);
+  const [userGroups, setUserGroups] = useState<UserGroup[]>([]);
   const [venue, setVenue] = useState<Venue | null>(null);
   const [medicalAlerts, setMedicalAlerts] = useState<{ expired: AcademyUser[]; expiringSoon: AcademyUser[] }>({ expired: [], expiringSoon: [] });
   const [paymentAlerts, setPaymentAlerts] = useState<{ user: AcademyUser; unpaidMonths: string[] }[]>([]);
@@ -464,6 +474,8 @@ function AdminDashboard() {
           academyUserService.getByVenue(venueOwner.venueId),
           userGroupService.getByVenue(venueOwner.venueId),
         ]);
+        setAcademyUsers(usersData);
+        setUserGroups(groupsData);
         const medicalGroupIds = new Set(
           groupsData.filter((g) => g.capabilities?.includes('medical_tracking')).map((g) => g.id)
         );
@@ -640,6 +652,12 @@ function AdminDashboard() {
       // A booking is "live" if it started and hasn't ended yet
       return startTime <= now && endTime > now;
     }).length;
+  };
+
+  const getTotalAthletes = () => {
+    // Group IDs with 'squad_assignment' capability
+    const athleteGroupIds = new Set(userGroups.filter(g => g.capabilities?.includes('squad_assignment')).map(g => g.id));
+    return academyUsers.filter(u => athleteGroupIds.has(u.groupId)).length;
   };
 
   const getTodaysBookings = () => {
@@ -956,40 +974,52 @@ function AdminDashboard() {
         </div>
       </div>
 
-      {/* Quick Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { label: 'ΣΥΝΟΛΟ ΚΡΑΤΗΣΕΩΝ', value: bookings.length, detail: 'ΤΕΛΕΥΤΑΙΕΣ 30 ΗΜΕΡΕΣ', color: 'bg-emerald-50/80', image: '/dashboard/bookings.png' },
-          { label: 'LIVE ΑΓΩΝΕΣ', value: getLiveBookings(), detail: 'ΑΥΤΗ ΤΗ ΣΤΙΓΜΗ', color: 'bg-blue-50/80', image: '/dashboard/live.png' },
-          { label: 'Κρατήσεις Σήμερα', value: getTodaysBookings().length, detail: 'ΠΡΟΓΡΑΜΜΑ ΗΜΕΡΑΣ', color: 'bg-amber-50/80', image: '/dashboard/today.png' },
-          { label: 'ΣΥΝΟΛΟ ΠΕΛΑΤΩΝ', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, detail: 'ΣΥΝΟΛΟ ΠΕΛΑΤΩΝ', color: 'bg-zinc-100/80', image: '/dashboard/customers.png' }
-        ].map((stat, i) => (
-          <Card key={i} className={cn("rounded-3xl border border-black/[0.08] shadow-xl shadow-zinc-200/50 overflow-hidden group transition-all duration-500 hover:-translate-y-1 relative", stat.color)}>
-            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-              <Image
-                src={stat.image}
-                alt=""
-                fill
-                className="object-cover opacity-100 group-hover:scale-110 transition-all duration-700"
-              />
-              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors duration-500" />
-            </div>
-            <CardContent className="p-6 relative z-10">
-              <div className="flex flex-col gap-4">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1">
-                    <p className="text-[10px] font-black text-white uppercase tracking-widest">{stat.label}</p>
-                    <p className="text-4xl font-black text-white tracking-tighter">{stat.value}</p>
-                    <p className="text-[9px] font-bold text-white/70 uppercase tracking-tight">{stat.detail}</p>
-                  </div>
-                  <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <CalendarDays className="h-5 w-5 text-zinc-300" />
-                  </div>
-                </div>
+      {/* Stats Grids */}
+      <div className="space-y-4">
+        {/* Quick Stats Grid - Bookings & Venues */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: 'ΚΡΑΤΗΣΕΙΣ', value: bookings.length, detail: '30 ΗΜΕΡΕΣ', color: 'bg-emerald-500', image: '/dashboard/bookings.png' },
+            { label: 'LIVE', value: getLiveBookings(), detail: 'ΤΩΡΑ', color: 'bg-blue-500', image: '/dashboard/live.png' },
+            { label: 'ΣΗΜΕΡΑ', value: getTodaysBookings().length, detail: 'MATCHES', color: 'bg-amber-500', image: '/dashboard/today.png' },
+            { label: 'ΠΕΛΑΤΕΣ', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, detail: 'DATABASE', color: 'bg-zinc-800', image: '/dashboard/customers.png' }
+          ].map((stat, i) => (
+            <Card key={i} className="rounded-2xl border-none shadow-sm overflow-hidden group transition-all duration-500 hover:shadow-md h-28 relative">
+              <div className="absolute inset-0 z-0">
+                <Image src={stat.image} alt="" fill className="object-cover opacity-60 group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
               </div>
-            </CardContent>
-          </Card>
-        ))}
+              <CardContent className="p-4 relative z-10 h-full flex flex-col justify-center">
+                <p className="text-[9px] font-black text-white/70 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
+                <div className="flex items-baseline gap-1">
+                  <p className="text-2xl font-black text-white tracking-tighter leading-none">{stat.value}</p>
+                </div>
+                <p className="text-[8px] font-bold text-white/50 uppercase tracking-tight mt-1">{stat.detail}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Academy Stats Grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: 'ΤΜΗΜΑΤΑ', value: squads.length, detail: 'ΕΝΕΡΓΑ', icon: <Trophy className="h-4 w-4 text-emerald-500" />, bgColor: 'bg-emerald-50' },
+            { label: 'ΑΘΛΗΤΕΣ', value: getTotalAthletes(), detail: 'ΣΥΝΟΛΟ', icon: <Users className="h-4 w-4 text-blue-500" />, bgColor: 'bg-blue-50' },
+            { label: 'ΠΡΟΠΟΝΗΣΕΙΣ', value: getTodaysTrainings().length, detail: 'ΣΗΜΕΡΑ', icon: <CalendarDays className="h-4 w-4 text-amber-500" />, bgColor: 'bg-amber-50' },
+            { label: 'ΙΑΤΡΙΚΑ', value: medicalAlerts.expired.length + medicalAlerts.expiringSoon.length, detail: 'alerts', icon: <HeartPulse className="h-4 w-4 text-red-500" />, bgColor: 'bg-red-50' }
+          ].map((stat, i) => (
+            <Card key={i} className="rounded-2xl border border-zinc-100 bg-white/50 shadow-sm hover:shadow-md transition-all h-20 flex items-center p-4 gap-3">
+              <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center shrink-0", stat.bgColor)}>
+                {stat.icon}
+              </div>
+              <div className="min-w-0">
+                <p className="text-[9px] font-black text-zinc-400 uppercase tracking-widest truncate">{stat.label}</p>
+                <p className="text-xl font-black text-zinc-900 tracking-tighter leading-none my-0.5">{stat.value}</p>
+                <p className="text-[8px] font-black text-zinc-400 uppercase opacity-60">{stat.detail}</p>
+              </div>
+            </Card>
+          ))}
+        </div>
       </div>
 
       {/* Today's Schedules - Split Row */}
