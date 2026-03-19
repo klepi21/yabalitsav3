@@ -50,14 +50,14 @@ export default function RootPage() {
         </header>
 
         {/* Hero Content */}
-        <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pt-4 pb-24 w-full h-full">
-        {/* Glassmorphic Unified Hero Card */}
-          <div className="flex flex-col items-center text-center max-w-[1200px] w-full mx-auto p-4 pt-10 sm:p-8 sm:pt-16 rounded-[2rem] sm:rounded-[3rem] bg-black/20 backdrop-blur-md border border-white/10 shadow-3xl relative overflow-hidden">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80%] h-[30%] bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none" />
+        <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pt-4 lg:pt-10 pb-20 w-full h-full">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[40%] bg-emerald-500/10 blur-[120px] rounded-full pointer-events-none" />
 
-            <h1 className="relative z-10 text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5rem] font-medium leading-[1.1] tracking-tight mb-4 mt-4">
-              <span className="text-zinc-100 drop-shadow">Το μέλλον της διαχείρισης</span><br />
-              <span className="text-white flex items-center justify-center gap-2 md:gap-4 flex-wrap mt-1 sm:mt-2 drop-shadow-md">
+          {/* Text Content Container (No large backgrounds) */}
+          <div className="flex flex-col items-center text-center max-w-[1000px] w-full mx-auto relative z-10">
+            <h1 className="text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5rem] font-medium leading-[1.1] tracking-tight mb-4 mt-6">
+              <span className="text-zinc-50 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Το μέλλον της διαχείρισης</span><br />
+              <span className="text-white flex items-center justify-center gap-2 md:gap-4 flex-wrap mt-1 sm:mt-3 drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">
                 έγινε <span className="font-serif italic lowercase text-white tracking-normal px-1">digital</span>
                 <span className="flex items-center gap-2 md:gap-3 font-black text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.4)] ml-1">
                   +
@@ -70,36 +70,36 @@ export default function RootPage() {
                     fetchPriority="high"
                     quality={60}
                     sizes="(max-width: 768px) 200px, 320px"
-                    className="w-[160px] sm:w-[200px] md:w-[260px] lg:w-[290px] h-auto filter brightness-0 invert drop-shadow-[0_0_10px_rgba(255,255,255,0.6)] translate-y-[2px] md:translate-y-[4px]" 
+                    className="w-[160px] sm:w-[200px] md:w-[260px] lg:w-[290px] h-auto filter brightness-0 invert drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)] translate-y-[2px] md:translate-y-[4px]" 
                   />
                 </span>
               </span>
             </h1>
             
-            <p className="relative z-10 text-zinc-300 text-sm md:text-base lg:text-lg max-w-3xl mx-auto mb-8 font-light leading-relaxed tracking-wide drop-shadow px-4">
+            <p className="text-zinc-200 text-sm md:text-base lg:text-lg max-w-2xl mx-auto mb-10 font-medium leading-relaxed tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] px-4">
               Σας βοηθάμε να αυτοματοποιήσετε τις κρατήσεις σας, να ελέγχετε τις συνδρομές των ακαδημιών και να εξοικονομείτε χρόνο σε ένα σύγχρονο οικοσύστημα.
             </p>
 
             <Link 
               href="/venue-login" 
-              className="relative z-10 group px-8 py-3.5 md:px-10 md:py-4 font-bold text-white bg-emerald-500 hover:bg-emerald-400 rounded-2xl transition-all duration-300 overflow-hidden shadow-[0_0_30px_-5px_rgba(52,211,153,0.3)] hover:shadow-[0_0_40px_-5px_rgba(52,211,153,0.5)] flex items-center gap-3 hover:scale-105 active:scale-95 text-sm md:text-base mb-16 md:mb-24"
+              className="group px-8 py-3.5 md:px-10 md:py-4 font-bold text-white bg-emerald-500 hover:bg-emerald-400 rounded-2xl transition-all duration-300 overflow-hidden shadow-[0_0_30px_-5px_rgba(52,211,153,0.4)] hover:shadow-[0_0_40px_-5px_rgba(52,211,153,0.6)] flex items-center gap-3 hover:scale-105 active:scale-95 text-sm md:text-base mb-16 md:mb-24"
             >
               <span>Μπείτε στη Νέα Εποχή</span>
             </Link>
+          </div>
 
-            {/* Integrated Dashboard Uncropped Screenshot */}
-            <div className="relative z-10 w-full max-w-[1050px] mx-auto rounded-t-xl sm:rounded-t-2xl shadow-[0_-30px_80px_-20px_rgba(52,211,153,0.25)] border-t border-l border-r border-white/20 bg-[#f8fafc] overflow-hidden">
-               <Image
-                 src="/dashboard-preview.png"
-                 alt="Yabalitsa Dashboard Preview"
-                 width={1920}
-                 height={1080}
-                 quality={100}
-                 sizes="(max-width: 1200px) 100vw, 1200px"
-                 className="w-full h-auto object-contain block hover:scale-[1.02] transition-transform duration-700 ease-out origin-top"
-               />
-               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none opacity-50" />
-            </div>
+          {/* Floating Dashboard Screenshot */}
+          <div className="relative z-10 w-full max-w-[1050px] mx-auto rounded-t-xl sm:rounded-t-2xl shadow-[0_-30px_80px_-20px_rgba(52,211,153,0.3)] border-t border-l border-r border-white/20 bg-[#f8fafc] overflow-hidden">
+             <Image
+               src="/dashboard-preview.png"
+               alt="Yabalitsa Dashboard Preview"
+               width={1920}
+               height={1080}
+               quality={100}
+               sizes="(max-width: 1200px) 100vw, 1200px"
+               className="w-full h-auto object-contain block hover:scale-[1.02] transition-transform duration-700 ease-out origin-top"
+             />
+             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none opacity-50" />
           </div>
         </main>
       </section>
