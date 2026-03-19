@@ -34,6 +34,8 @@ function VenueLoginContent() {
       ? 'Η συνδρομή σας έχει λήξει. Ανανεώστε για να συνεχίσετε.'
       : searchParams.get('error') === 'trial_expired'
       ? 'Η δοκιμαστική περίοδος έληξε. Επιλέξτε πλάνο για να συνεχίσετε.'
+      : searchParams.get('error') === 'disabled'
+      ? 'Ο λογαριασμός σας έχει απενεργοποιηθεί. Επικοινωνήστε με τον διαχειριστή.'
       : null
   );
   const [showPassword, setShowPassword] = useState(false);

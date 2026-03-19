@@ -74,6 +74,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           const owner = await venueOwnerService.getByEmail(firebaseUser.email || '');
 
+          // Check if account is disabled
+          if (owner?.permissions?.includes('disabled')) {
+            await forceLogout('disabled');
+            return;
+          }
+
           // Check if venue is active
           if (owner?.venueId) {
             await checkSubscription(owner.venueId);
@@ -107,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       unsubscribe();
       if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
     };
-  }, [router, checkSubscription]);
+  }, [router, checkSubscription, forceLogout]);
 
   const signOut = async () => {
     try {

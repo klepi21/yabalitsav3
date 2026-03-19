@@ -93,21 +93,36 @@ export default function CoachManagementPage() {
     }
   };
 
+  const isCoachDisabled = (coach: VenueOwner) => coach.permissions?.includes('disabled');
+
   const handleDeactivate = async () => {
     if (!deactivateConfirm) return;
     setDeactivating(true);
     try {
-      // Remove from venueOwners (soft delete — coach can't login anymore)
       await venueOwnerService.update(deactivateConfirm.id, {
-        role: 'coach' as VenueOwner['role'],
         permissions: ['disabled'],
       });
-      setOwners(prev => prev.filter(o => o.id !== deactivateConfirm.id));
+      setOwners(prev => prev.map(o =>
+        o.id === deactivateConfirm.id ? { ...o, permissions: ['disabled'] } : o
+      ));
       setDeactivateConfirm(null);
     } catch (err) {
       console.error('Failed to deactivate:', err);
     } finally {
       setDeactivating(false);
+    }
+  };
+
+  const handleReactivate = async (coach: VenueOwner) => {
+    try {
+      await venueOwnerService.update(coach.id, {
+        permissions: [],
+      });
+      setOwners(prev => prev.map(o =>
+        o.id === coach.id ? { ...o, permissions: [] } : o
+      ));
+    } catch (err) {
+      console.error('Failed to reactivate:', err);
     }
   };
 
@@ -192,35 +207,56 @@ export default function CoachManagementPage() {
               {coaches.map(coach => {
                 const assignedCount = (coach.assignedSquadIds || []).length;
                 const viewMode = coach.coachViewMode || 'own_squads';
+                const disabled = isCoachDisabled(coach);
                 return (
-                  <Card key={coach.id} className="rounded-2xl border-none shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => openEdit(coach)}>
+                  <Card key={coach.id} className={cn("rounded-2xl border-none shadow-sm hover:shadow-md transition-shadow cursor-pointer", disabled && "opacity-60")} onClick={() => !disabled && openEdit(coach)}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                            <Users className="h-5 w-5 text-blue-600" />
+                          <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center", disabled ? "bg-red-50" : "bg-blue-50")}>
+                            <Users className={cn("h-5 w-5", disabled ? "text-red-400" : "text-blue-600")} />
                           </div>
                           <div>
-                            <p className="text-sm font-bold text-zinc-900">{coach.name}</p>
+                            <p className={cn("text-sm font-bold", disabled ? "text-zinc-400" : "text-zinc-900")}>{coach.name}</p>
                             <p className="text-xs text-zinc-400">{coach.email}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge className={cn('text-[9px] font-black border-none', getRoleColor('coach'))}>
-                            {toGreekUpperCase(getRoleLabel('coach'))}
-                          </Badge>
-                          <ChevronRight className="h-4 w-4 text-zinc-300" />
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 mt-3 ml-13">
-                        <div className="flex items-center gap-1 text-xs text-zinc-400">
-                          {viewMode === 'all_squads' ? (
-                            <><Eye className="h-3 w-3" /> Όλα τα τμήματα</>
+                          {disabled ? (
+                            <Badge className="text-[9px] font-black border-none bg-red-100 text-red-600">
+                              {toGreekUpperCase('Ανενεργός')}
+                            </Badge>
                           ) : (
-                            <><EyeOff className="h-3 w-3" /> {assignedCount} τμήμα{assignedCount !== 1 ? 'τα' : ''}</>
+                            <Badge className={cn('text-[9px] font-black border-none', getRoleColor('coach'))}>
+                              {toGreekUpperCase(getRoleLabel('coach'))}
+                            </Badge>
+                          )}
+                          {disabled ? (
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={(e) => { e.stopPropagation(); handleReactivate(coach); }}
+                              className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 h-8 px-3 rounded-lg"
+                            >
+                              <UserCheck className="h-3 w-3 mr-1" />
+                              Ενεργοποίηση
+                            </Button>
+                          ) : (
+                            <ChevronRight className="h-4 w-4 text-zinc-300" />
                           )}
                         </div>
                       </div>
+                      {!disabled && (
+                        <div className="flex items-center gap-3 mt-3 ml-13">
+                          <div className="flex items-center gap-1 text-xs text-zinc-400">
+                            {viewMode === 'all_squads' ? (
+                              <><Eye className="h-3 w-3" /> Όλα τα τμήματα</>
+                            ) : (
+                              <><EyeOff className="h-3 w-3" /> {assignedCount} τμήμα{assignedCount !== 1 ? 'τα' : ''}</>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 );
