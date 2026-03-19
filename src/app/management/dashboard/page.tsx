@@ -501,7 +501,7 @@ function AdminDashboard() {
           const paymentUsers = usersData.filter((u) => paymentGroupIds.has(u.groupId));
           const currentYear = new Date().getFullYear();
           const currentMonth = new Date().getMonth(); // 0-indexed
-          const GREEK_MONTHS_SHORT = ['ΙΑΝ','ΦΕΒ','ΜΑΡ','ΑΠΡ','ΜΑΪ','ΙΟΥΝ','ΙΟΥΛ','ΑΥΓ','ΣΕΠ','ΟΚΤ','ΝΟΕ','ΔΕΚ'];
+          const GREEK_MONTHS_SHORT = ['ΙΑΝ', 'ΦΕΒ', 'ΜΑΡ', 'ΑΠΡ', 'ΜΑΪ', 'ΙΟΥΝ', 'ΙΟΥΛ', 'ΑΥΓ', 'ΣΕΠ', 'ΟΚΤ', 'ΝΟΕ', 'ΔΕΚ'];
           const alerts: { user: AcademyUser; unpaidMonths: string[] }[] = [];
           for (const u of paymentUsers) {
             const unpaid: string[] = [];
@@ -525,7 +525,7 @@ function AdminDashboard() {
       }
 
       if (!convertedVenue && venueOwner.venueId) {
-        setLoadError('Venue data not found. Please contact support.');
+        setLoadError('Venue data not found. Please contact support. ');
       }
     } catch (error) {
       console.error('Error loading dashboard data:', error);
@@ -1213,7 +1213,7 @@ function AdminDashboard() {
           {(medicalAlerts.expired.length > 0 || medicalAlerts.expiringSoon.length > 0) && (
             <div className="rounded-3xl bg-white border-2 border-red-100 overflow-hidden shadow-lg shadow-red-50 h-fit">
               {/* Header */}
-              <div 
+              <div
                 className="bg-white border-b-2 border-red-100 px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-red-50 transition-colors"
                 onClick={() => setIsMedicalExpanded(!isMedicalExpanded)}
               >
@@ -1295,7 +1295,7 @@ function AdminDashboard() {
           {paymentAlerts.length > 0 && (
             <div className="rounded-3xl bg-white border-2 border-orange-100 overflow-hidden shadow-lg shadow-orange-50 h-fit">
               {/* Header */}
-              <div 
+              <div
                 className="bg-white border-b-2 border-orange-100 px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-orange-50 transition-colors"
                 onClick={() => setIsPaymentsExpanded(!isPaymentsExpanded)}
               >
@@ -1376,7 +1376,7 @@ function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 pt-4">
         {/* Academies List - Left Side */}
         <div className="rounded-3xl bg-white border border-zinc-200/80 overflow-hidden shadow-xl shadow-zinc-200/20 h-fit">
-          <div 
+          <div
             className="flex items-center justify-between cursor-pointer group/header px-6 py-5 bg-zinc-50/50 hover:bg-zinc-50 transition-colors border-b border-zinc-100"
             onClick={() => setIsSquadsExpanded(!isSquadsExpanded)}
           >
@@ -1449,7 +1449,7 @@ function AdminDashboard() {
 
         {/* Pitches List - Right Side */}
         <div className="rounded-3xl bg-white border border-zinc-200/80 overflow-hidden shadow-xl shadow-zinc-200/20 h-fit">
-          <div 
+          <div
             className="flex items-center justify-between cursor-pointer group/header px-6 py-5 bg-zinc-50/50 hover:bg-zinc-50 transition-colors border-b border-zinc-100"
             onClick={() => setIsPitchesExpanded(!isPitchesExpanded)}
           >
