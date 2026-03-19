@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
       email: ownerEmail,
       name: ownerName,
       phone: ownerPhone || '',
-      role: 'owner',
+      role: 'admin',
       permissions: ['manage:all'],
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),

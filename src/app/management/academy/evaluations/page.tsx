@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCoachFilter } from '@/hooks/useCoachFilter';
 import { academyUserService, userGroupService, squadService } from '@/lib/academy-services';
 import { evaluationTemplateService, playerEvaluationService } from '@/lib/evaluation-services';
 import {
@@ -180,6 +181,7 @@ export default function EvaluationsPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
+  const { filterSquads, isUserInVisibleSquad } = useCoachFilter();
 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -227,14 +229,14 @@ export default function EvaluationsPage() {
         playerEvaluationService.getByVenue(venueId),
         evaluationTemplateService.getByVenue(venueId),
       ]);
-      setSquads(squadsData);
+      setSquads(filterSquads(squadsData));
       setAllUsers(usersData);
       setEvaluations(evalsData);
       setTemplates(templatesData);
 
       const evalGroups = groupsData.filter((g) => g.capabilities.includes('player_evaluation'));
       const evalGroupIds = new Set(evalGroups.map((g) => g.id));
-      setAthletes(usersData.filter((u) => evalGroupIds.has(u.groupId)));
+      setAthletes(usersData.filter((u) => evalGroupIds.has(u.groupId) && isUserInVisibleSquad(u)));
 
       // Init template skills
       if (templatesData.length > 0) {
@@ -247,7 +249,7 @@ export default function EvaluationsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [venueId]);
+  }, [venueId, filterSquads, isUserInVisibleSquad]);
 
   useEffect(() => {
     if (authLoading) return;

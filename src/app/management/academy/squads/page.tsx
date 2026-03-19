@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCoachFilter } from '@/hooks/useCoachFilter';
 import { squadService, academyUserService } from '@/lib/academy-services';
 import { Squad, AcademyUser, BROADCAST_TEMPLATES } from '@/types/academy';
 import { Loader2, Plus, Trash2, Trophy, Users as UsersIcon, AlertCircle, Search, Megaphone, Send, CheckCircle2 } from 'lucide-react';
@@ -35,6 +36,7 @@ export default function SquadsPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
+  const { filterSquads } = useCoachFilter();
   const [squads, setSquads] = useState<Squad[]>([]);
   const [users, setUsers] = useState<AcademyUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,7 +64,7 @@ export default function SquadsPage() {
           squadService.getByVenue(venueId),
           academyUserService.getByVenue(venueId),
         ]);
-        setSquads(squadsData);
+        setSquads(filterSquads(squadsData));
         setUsers(usersData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Αποτυχία φόρτωσης τμημάτων');
@@ -71,7 +73,7 @@ export default function SquadsPage() {
       }
     };
     loadData();
-  }, [user, venueOwner, authLoading, router, venueId, pathname]);
+  }, [user, venueOwner, authLoading, router, venueId, pathname, filterSquads]);
 
   const handleDelete = async (squadId: string) => {
     try {

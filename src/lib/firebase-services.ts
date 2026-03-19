@@ -510,6 +510,24 @@ export const venueOwnerService = {
     return null;
   },
 
+  // Get all venue owners for a venue (admin + coaches)
+  async getAllByVenueId(venueId: string): Promise<VenueOwner[]> {
+    const q = query(
+      collection(db, 'yabalitsa_venueOwners'),
+      where('venueId', '==', venueId)
+    );
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: data.createdAt?.toDate() || new Date(),
+        updatedAt: data.updatedAt?.toDate() || new Date()
+      } as VenueOwner;
+    });
+  },
+
   // Get venue owner by email
   async getByEmail(email: string): Promise<VenueOwner | null> {
     const q = query(

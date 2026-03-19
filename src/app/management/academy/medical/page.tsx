@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCoachFilter } from '@/hooks/useCoachFilter';
 import { academyUserService, userGroupService, squadService } from '@/lib/academy-services';
 import { AcademyUser, UserGroup, Squad } from '@/types/academy';
 import {
@@ -71,6 +72,7 @@ export default function MedicalTrackingPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
+  const { isUserInVisibleSquad } = useCoachFilter();
 
   const [isLoading, setIsLoading] = useState(true);
   const [athletes, setAthletes] = useState<AthleteWithMedical[]>([]);
@@ -107,9 +109,9 @@ export default function MedicalTrackingPage() {
         groupsData.filter((g) => g.capabilities.includes('medical_tracking')).map((g) => g.id)
       );
 
-      // Get athletes in those groups
+      // Get athletes in those groups (filtered by coach visibility)
       const medicalAthletes: AthleteWithMedical[] = usersData
-        .filter((u) => medicalGroupIds.has(u.groupId))
+        .filter((u) => medicalGroupIds.has(u.groupId) && isUserInVisibleSquad(u))
         .map((u) => {
           const expiryDate = (u.fields?.medical_cert_expiry as string) || null;
           const { status, daysUntilExpiry } = getMedicalStatus(expiryDate);
@@ -130,7 +132,7 @@ export default function MedicalTrackingPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [venueId]);
+  }, [venueId, isUserInVisibleSquad]);
 
   useEffect(() => {
     loadData();

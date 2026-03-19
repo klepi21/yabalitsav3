@@ -161,8 +161,11 @@ export interface VenueOwner {
   password: string; // This will be hashed in Firebase Auth
   name: string;
   phone: string;
-  role: 'owner' | 'manager' | 'staff';
+  role: 'admin' | 'coach';
   permissions: string[];
+  academyUserId?: string;        // Link to AcademyUser doc (for coaches)
+  assignedSquadIds?: string[];   // Squads this user can access (for coaches)
+  coachViewMode?: 'own_squads' | 'all_squads';  // Coach visibility: own squads only or all (set by admin)
   createdAt: Date;
   updatedAt: Date;
 }

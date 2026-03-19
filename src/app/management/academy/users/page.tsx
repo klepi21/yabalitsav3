@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { academyUserService, userGroupService, squadService, academyPaymentService } from '@/lib/academy-services';
 import { playerEvaluationService } from '@/lib/evaluation-services';
 import { AcademyUser, AcademyPayment, PlayerEvaluation, UserGroup, Squad, GROUP_COLORS, PAYMENT_METHOD_LABELS } from '@/types/academy';
-import { Loader2, Plus, Search, Users, Pencil, Trash2, Mail, Phone, MoreHorizontal, AlertCircle, FileUser, Check, X, ShieldAlert, Star, TrendingUp } from 'lucide-react';
+import { Loader2, Plus, Search, Users, Pencil, Trash2, Mail, Phone, MoreHorizontal, AlertCircle, FileUser, Check, X, ShieldAlert, Star, TrendingUp, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -60,6 +60,10 @@ export default function AcademyUsersPage() {
   const [cardPayments, setCardPayments] = useState<AcademyPayment[]>([]);
   const [cardEvaluations, setCardEvaluations] = useState<PlayerEvaluation[]>([]);
   const [cardLoading, setCardLoading] = useState(false);
+  const [inviteUser, setInviteUser] = useState<AcademyUser | null>(null);
+  const [inviteViewMode, setInviteViewMode] = useState<'own_squads' | 'all_squads'>('own_squads');
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteSuccess, setInviteSuccess] = useState<string | null>(null);
 
   const urlGroupId = searchParams.get('group');
   const urlSquad = searchParams.get('squad');
@@ -129,6 +133,44 @@ export default function AcademyUsersPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Αποτυχία διαγραφής');
     }
+  };
+
+  const handleInviteCoach = async () => {
+    if (!inviteUser || !venueOwner) return;
+    const coachEmail = typeof inviteUser.fields.email === 'string' ? inviteUser.fields.email : '';
+    if (!coachEmail) {
+      setError('Ο προπονητής δεν έχει email');
+      return;
+    }
+    setInviteLoading(true);
+    try {
+      const res = await fetch('/api/academy/invite-coach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: coachEmail,
+          name: inviteUser.displayName,
+          venueId,
+          venueName: venueOwner.name,
+          academyUserId: inviteUser.id,
+          assignedSquadIds: inviteUser.assigned_squads || inviteUser.squad_ids || [],
+          coachViewMode: inviteViewMode,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Αποτυχία');
+      setInviteSuccess(coachEmail);
+      setInviteUser(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Αποτυχία πρόσκλησης');
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
+  const isCoachGroup = (groupId: string) => {
+    const group = groups.find(g => g.id === groupId);
+    return group?.capabilities.includes('coach_squads') || false;
   };
 
   const getSquadName = (squadId: string) => {
@@ -351,6 +393,15 @@ export default function AcademyUsersPage() {
                               {toGreekUpperCase('Καρτέλα')}
                             </DropdownMenuItem>
                           )}
+                          {isCoachGroup(u.groupId) && u.fields.email && (
+                            <DropdownMenuItem
+                              onSelect={() => { setInviteUser(u); setInviteViewMode('own_squads'); }}
+                              className="rounded-xl px-4 py-3 font-bold cursor-pointer transition-colors"
+                            >
+                              <UserPlus className="h-4 w-4 mr-3 text-blue-500" />
+                              {toGreekUpperCase('Πρόσκληση σύνδεσης')}
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem asChild className="rounded-xl px-4 py-3 font-bold cursor-pointer transition-colors">
                             <Link href={`/management/academy/users/${u.id}/edit`} className="flex items-center w-full">
                               <Pencil className="h-4 w-4 mr-3 text-zinc-400" />
@@ -479,6 +530,15 @@ export default function AcademyUsersPage() {
                                 >
                                   <FileUser className="h-4 w-4 mr-3 text-emerald-500" />
                                   Καρτέλα
+                                </DropdownMenuItem>
+                              )}
+                              {isCoachGroup(u.groupId) && u.fields.email && (
+                                <DropdownMenuItem
+                                  onSelect={() => { setInviteUser(u); setInviteViewMode('own_squads'); }}
+                                  className="rounded-xl px-4 py-3 font-bold cursor-pointer transition-colors"
+                                >
+                                  <UserPlus className="h-4 w-4 mr-3 text-blue-500" />
+                                  Πρόσκληση σύνδεσης
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuItem asChild className="rounded-xl px-4 py-3 font-bold cursor-pointer transition-colors">
@@ -767,6 +827,108 @@ export default function AcademyUsersPage() {
           })()}
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Coach Invite Dialog */}
+      <AlertDialog open={!!inviteUser} onOpenChange={(open) => !open && setInviteUser(null)}>
+        <AlertDialogContent className="rounded-[2rem] p-8 max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-black text-zinc-900">
+              Πρόσκληση Προπονητή
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-zinc-500 mt-1">
+              Θα δημιουργηθεί λογαριασμός σύνδεσης και θα σταλεί email πρόσκλησης.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+
+          {inviteUser && (
+            <div className="space-y-4 mt-4">
+              <div className="bg-zinc-50 rounded-xl p-4 space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-xs font-bold text-zinc-400">ΟΝΟΜΑ</span>
+                  <span className="text-sm font-bold text-zinc-900">{inviteUser.displayName}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-xs font-bold text-zinc-400">EMAIL</span>
+                  <span className="text-sm font-bold text-zinc-900">{String(inviteUser.fields.email || '')}</span>
+                </div>
+                {(inviteUser.assigned_squads || inviteUser.squad_ids || []).length > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-xs font-bold text-zinc-400">ΤΜΗΜΑΤΑ</span>
+                    <span className="text-sm font-bold text-zinc-900">
+                      {(inviteUser.assigned_squads || inviteUser.squad_ids || [])
+                        .map(id => getSquadName(id)).join(', ')}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-xs font-black text-zinc-400 uppercase tracking-wider">Ορατότητα τμημάτων</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setInviteViewMode('own_squads')}
+                    className={cn(
+                      'flex items-center gap-2 p-3 rounded-xl border-2 text-sm font-bold transition-all',
+                      inviteViewMode === 'own_squads'
+                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                        : 'border-zinc-100 text-zinc-500 hover:border-zinc-200'
+                    )}
+                  >
+                    <EyeOff className="h-4 w-4" />
+                    Μόνο τα δικά του
+                  </button>
+                  <button
+                    onClick={() => setInviteViewMode('all_squads')}
+                    className={cn(
+                      'flex items-center gap-2 p-3 rounded-xl border-2 text-sm font-bold transition-all',
+                      inviteViewMode === 'all_squads'
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-zinc-100 text-zinc-500 hover:border-zinc-200'
+                    )}
+                  >
+                    <Eye className="h-4 w-4" />
+                    Όλα τα τμήματα
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <AlertDialogFooter className="mt-6 gap-3">
+            <AlertDialogCancel className="h-12 px-6 rounded-xl font-bold border-zinc-100">
+              Ακύρωση
+            </AlertDialogCancel>
+            <Button
+              onClick={handleInviteCoach}
+              disabled={inviteLoading}
+              className="h-12 px-6 rounded-xl bg-emerald-600 text-white font-black hover:bg-emerald-700 shadow-lg shadow-emerald-200"
+            >
+              {inviteLoading ? (
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              ) : (
+                <Mail className="h-4 w-4 mr-2" />
+              )}
+              Αποστολή Πρόσκλησης
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Invite Success Toast */}
+      {inviteSuccess && (
+        <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-emerald-600 text-white rounded-2xl px-6 py-4 shadow-2xl flex items-center gap-3">
+            <Check className="h-5 w-5" />
+            <div>
+              <p className="font-bold text-sm">Πρόσκληση στάλθηκε!</p>
+              <p className="text-xs text-emerald-100">{inviteSuccess}</p>
+            </div>
+            <button onClick={() => setInviteSuccess(null)} className="ml-4 hover:bg-emerald-700 rounded-lg p-1">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -99,7 +99,7 @@ async function setupTestData() {
         email: ownerEmail,
         name: "Test Venue Owner",
         phone: "+30 697 123 4567",
-        role: "owner",
+        role: "admin",
         permissions: ["manage_venue", "manage_pitches", "manage_bookings", "manage_customers"],
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()

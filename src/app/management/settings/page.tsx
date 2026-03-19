@@ -515,6 +515,28 @@ export default function SettingsPage() {
             </CardContent>
           </Card>
 
+          {/* Coach Management Section */}
+          <Link href="/management/settings/coaches">
+            <Card className="premium-card border-none hover:shadow-lg transition-shadow cursor-pointer">
+              <CardContent className="p-6 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                    <Settings className="h-5 w-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-zinc-900 uppercase">
+                      {toGreekUpperCase('Διαχείριση Χρηστών')}
+                    </p>
+                    <p className="text-xs text-zinc-400 mt-0.5">
+                      Προπονητές, δικαιώματα, ορατότητα τμημάτων
+                    </p>
+                  </div>
+                </div>
+                <ArrowUpCircle className="h-5 w-5 text-zinc-300 rotate-90" />
+              </CardContent>
+            </Card>
+          </Link>
+
           {/* Management PIN Section */}
           <Card className="premium-card border-none">
             <CardHeader className="pb-2">

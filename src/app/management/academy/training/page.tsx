@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCoachFilter } from '@/hooks/useCoachFilter';
 import { trainingService } from '@/lib/training-services';
 import { squadService, academyUserService, userGroupService } from '@/lib/academy-services';
 import { TrainingSession, TRAINING_TYPE_LABELS, TRAINING_TYPE_COLORS } from '@/types/training';
@@ -54,6 +55,7 @@ export default function TrainingListPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
+  const { filterSquads, isVisibleSquad } = useCoachFilter();
   const [sessions, setSessions] = useState<TrainingSession[]>([]);
   const [squads, setSquads] = useState<Squad[]>([]);
   const [coaches, setCoaches] = useState<AcademyUser[]>([]);
@@ -90,8 +92,8 @@ export default function TrainingListPage() {
           squadService.getByVenue(venueId),
           userGroupService.getByVenue(venueId),
         ]);
-        setSessions(sessionsData);
-        setSquads(squadsData);
+        setSessions(sessionsData.filter(s => isVisibleSquad(s.squadId)));
+        setSquads(filterSquads(squadsData));
         // Load coaches
         const coachGroup = groupsData.find((g) => g.capabilities?.includes('coach_squads'));
         if (coachGroup) {
@@ -105,7 +107,7 @@ export default function TrainingListPage() {
       }
     };
     loadData();
-  }, [user, venueOwner, authLoading, router, venueId, pathname]);
+  }, [user, venueOwner, authLoading, router, venueId, pathname, filterSquads, isVisibleSquad]);
 
   const getSquadName = (squadId: string) => {
     const squad = squads.find((s) => s.id === squadId);

@@ -109,7 +109,7 @@ async function createVenueOwner() {
       firstName: venueOwnerData.firstName,
       lastName: venueOwnerData.lastName,
       phone: venueOwnerData.phone,
-      role: 'venue_owner',
+      role: 'admin',
       isActive: true,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()

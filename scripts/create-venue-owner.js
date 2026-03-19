@@ -60,7 +60,7 @@ async function createVenueOwnerAndVenue() {
       email: venueOwnerData.email,
       name: venueOwnerData.name,
       phone: venueOwnerData.phone,
-      role: 'venue_owner',
+      role: 'admin',
       isActive: true,
       createdAt: new Date(),
       updatedAt: new Date()

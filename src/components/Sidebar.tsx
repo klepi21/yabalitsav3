@@ -28,13 +28,22 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { cn, toGreekUpperCase } from '@/lib/utils';
 
+import { SIDEBAR_PERMISSIONS, type AppRole } from '@/config/roles';
+
+interface NavChild {
+  name: string;
+  href: string;
+  icon: React.ElementType;
+}
+
 interface NavItem {
   name: string;
   href?: string;
   icon: React.ElementType;
   disabled?: boolean;
   badge?: string;
-  children?: { name: string; href: string; icon: React.ElementType }[];
+  isAcademy?: boolean;
+  children?: NavChild[];
 }
 
 const navigation: NavItem[] = [
@@ -45,6 +54,7 @@ const navigation: NavItem[] = [
   {
     name: 'Ακαδημία',
     icon: GraduationCap,
+    isAcademy: true,
     children: [
       { name: 'Όλοι οι Χρήστες', href: '/management/academy/users', icon: Users },
       { name: 'Τμήματα', href: '/management/academy/squads', icon: Trophy },
@@ -60,10 +70,40 @@ const navigation: NavItem[] = [
   { name: 'Ρυθμίσεις', href: '/management/settings', icon: Settings },
 ];
 
+function getFilteredNavigation(role: AppRole | null): NavItem[] {
+  const userRole = role || 'admin';
+  const perms = SIDEBAR_PERMISSIONS[userRole];
+
+  return navigation
+    .filter(item => {
+      if (item.isAcademy) return true; // academy filtered by children
+      if (item.href) return perms.visibleRoutes.includes(item.href);
+      return true;
+    })
+    .map(item => {
+      if (item.children && item.isAcademy) {
+        const filteredChildren = item.children.filter(
+          child => perms.visibleAcademyRoutes.includes(child.href)
+        );
+        if (filteredChildren.length === 0) return null;
+        return { ...item, children: filteredChildren };
+      }
+      return item;
+    })
+    .filter((item): item is NavItem => item !== null);
+}
+
 function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const pathname = usePathname();
-  const { signOut } = useAuth();
+  const { signOut, userRole } = useAuth();
+  const role = userRole || 'admin';
+  const filteredNav = getFilteredNavigation(userRole);
+  const perms = SIDEBAR_PERMISSIONS[role];
+
+  // Split: items with href go to "menu", items with children or management go to "management"
+  const menuItems = filteredNav.filter(item => item.href && !['Τουρνουά', 'Αναφορές', 'Ρυθμίσεις'].includes(item.name));
+  const managementItems = filteredNav.filter(item => item.children || ['Τουρνουά', 'Αναφορές', 'Ρυθμίσεις'].includes(item.name));
 
   const toggleMenu = (menuName: string) => {
     setExpandedMenus(prev =>
@@ -102,7 +142,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
               {toGreekUpperCase('Μενού')}
             </p>
             <div className="space-y-0.5">
-              {navigation.slice(0, 4).map((item) => {
+              {menuItems.map((item) => {
                 const isActive = item.href ? pathname === item.href || pathname.startsWith(item.href + '/') : false;
                 const Icon = item.icon;
                 return (
@@ -139,7 +179,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
               {toGreekUpperCase('Διαχείριση')}
             </p>
             <div className="space-y-1">
-              {navigation.slice(4).map((item) => {
+              {managementItems.map((item) => {
                 const isActive = item.href ? pathname === item.href || pathname.startsWith(item.href + '/') : false;
                 const isParentActive = isChildActive(item);
                 const isExpanded = expandedMenus.includes(item.name) || isParentActive;
@@ -241,7 +281,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
       {/* Promomotion Card & Logout Section */}
       <div className="p-4 space-y-4">
         {/* QR Code Card */}
-        <Link href="/management/booking/qr" onClick={onNavigate}>
+        {perms.showQrCard && <Link href="/management/booking/qr" onClick={onNavigate}>
           <div className="relative overflow-hidden rounded-2xl bg-zinc-900 p-5 group cursor-pointer hover:shadow-xl hover:shadow-emerald-900/10 transition-all duration-500">
              {/* Abstract Background Shapes */}
              <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/20 rounded-full blur-2xl group-hover:bg-emerald-500/30 transition-colors" />
@@ -265,7 +305,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                 </div>
              </div>
           </div>
-        </Link>
+        </Link>}
 
         <button
           onClick={() => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -76,7 +76,286 @@ import {
 } from '@/components/ui/select';
 import { cn, toGreekUpperCase } from '@/lib/utils';
 
+function CoachDashboard() {
+  const { user, venueOwner, isLoading: authLoading } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [squads, setSquads] = useState<Squad[]>([]);
+  const [trainings, setTrainings] = useState<TrainingSession[]>([]);
+  const [medicalAlerts, setMedicalAlerts] = useState<{ expired: AcademyUser[]; expiringSoon: AcademyUser[] }>({ expired: [], expiringSoon: [] });
+  const [dataLoading, setDataLoading] = useState(true);
+
+  const venueId = venueOwner?.venueId || '';
+  const coachSquadIds = useMemo(() => venueOwner?.assignedSquadIds || [], [venueOwner?.assignedSquadIds]);
+  const canViewAll = venueOwner?.coachViewMode === 'all_squads';
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user || !venueOwner) { router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`); return; }
+
+    const load = async () => {
+      try {
+        const [squadsData, trainingsData, usersData, groupsData] = await Promise.all([
+          squadService.getByVenue(venueId),
+          trainingService.getByVenue(venueId),
+          academyUserService.getByVenue(venueId),
+          userGroupService.getByVenue(venueId),
+        ]);
+
+        // Filter squads for coach
+        const visibleSquads = canViewAll ? squadsData : squadsData.filter(s => coachSquadIds.includes(s.id));
+        setSquads(visibleSquads);
+
+        // Filter trainings for coach's squads
+        const visibleSquadIds = new Set(visibleSquads.map(s => s.id));
+        const visibleTrainings = trainingsData.filter(t => t.squadId && visibleSquadIds.has(t.squadId));
+        setTrainings(visibleTrainings);
+
+        // Medical alerts for athletes in coach's squads
+        const medicalGroupIds = new Set(groupsData.filter(g => g.capabilities?.includes('medical_tracking')).map(g => g.id));
+        const athletes = usersData.filter(u => {
+          if (!medicalGroupIds.has(u.groupId)) return false;
+          const userSquads = u.squad_ids || (u.squad_id ? [u.squad_id] : []);
+          return canViewAll || userSquads.some(sid => coachSquadIds.includes(sid));
+        });
+
+        const today = new Date(); today.setHours(0, 0, 0, 0);
+        const in30Days = new Date(today); in30Days.setDate(in30Days.getDate() + 30);
+        const expired: AcademyUser[] = [];
+        const expiringSoon: AcademyUser[] = [];
+        for (const u of athletes) {
+          const expiry = u.fields?.medical_cert_expiry as string | undefined;
+          if (!expiry) { expired.push(u); continue; }
+          const d = new Date(expiry); d.setHours(0, 0, 0, 0);
+          if (d < today) expired.push(u);
+          else if (d <= in30Days) expiringSoon.push(u);
+        }
+        setMedicalAlerts({ expired, expiringSoon });
+      } catch (err) {
+        console.error('Coach dashboard error:', err);
+      } finally {
+        setDataLoading(false);
+      }
+    };
+    load();
+  }, [user, venueOwner, authLoading, router, pathname, venueId, canViewAll, coachSquadIds]);
+
+  if (authLoading || dataLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+      </div>
+    );
+  }
+
+  const today = new Date();
+  const todayStr = today.toISOString().split('T')[0];
+  const todayTrainings = trainings.filter(t => t.date === todayStr && t.status !== 'cancelled');
+  const upcomingTrainings = trainings
+    .filter(t => t.date >= todayStr && t.status !== 'cancelled')
+    .sort((a, b) => a.date.localeCompare(b.date) || a.startTime.localeCompare(b.startTime))
+    .slice(0, 5);
+
+  const totalAthletes = squads.reduce((sum, s) => sum + (s.athleteCount || 0), 0);
+  const totalMedicalIssues = medicalAlerts.expired.length + medicalAlerts.expiringSoon.length;
+
+  return (
+    <div className="min-h-screen bg-zinc-50/50">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-2xl font-black text-zinc-900">
+            {toGreekUpperCase(`Γεια σου, ${venueOwner?.name?.split(' ')[0] || 'Προπονητή'}!`)}
+          </h1>
+          <p className="text-sm text-zinc-500 mt-1">Πίνακας ελέγχου προπονητή</p>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+          <Card className="rounded-2xl border-none shadow-sm">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                  <Trophy className="h-5 w-5 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-black text-zinc-900">{squads.length}</p>
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase">Τμήματα</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl border-none shadow-sm">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <User className="h-5 w-5 text-blue-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-black text-zinc-900">{totalAthletes}</p>
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase">Αθλητές</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl border-none shadow-sm">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                  <CalendarDays className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <p className="text-2xl font-black text-zinc-900">{todayTrainings.length}</p>
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase">Σήμερα</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="rounded-2xl border-none shadow-sm">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3">
+                <div className={cn("h-10 w-10 rounded-xl flex items-center justify-center", totalMedicalIssues > 0 ? "bg-red-50" : "bg-emerald-50")}>
+                  <HeartPulse className={cn("h-5 w-5", totalMedicalIssues > 0 ? "text-red-600" : "text-emerald-600")} />
+                </div>
+                <div>
+                  <p className="text-2xl font-black text-zinc-900">{totalMedicalIssues}</p>
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase">Ιατρικά</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Medical Alerts */}
+        {totalMedicalIssues > 0 && (
+          <Card className="rounded-2xl border-none shadow-sm mb-6 border-l-4 border-l-red-500">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3 mb-3">
+                <AlertTriangle className="h-5 w-5 text-red-500" />
+                <h3 className="font-black text-zinc-900">{toGreekUpperCase('Ιατρικά Πιστοποιητικά')}</h3>
+              </div>
+              <div className="space-y-2">
+                {medicalAlerts.expired.length > 0 && (
+                  <p className="text-sm">
+                    <span className="font-bold text-red-600">{medicalAlerts.expired.length}</span>
+                    <span className="text-zinc-500"> αθλητές με ληγμένο πιστοποιητικό</span>
+                  </p>
+                )}
+                {medicalAlerts.expiringSoon.length > 0 && (
+                  <p className="text-sm">
+                    <span className="font-bold text-amber-600">{medicalAlerts.expiringSoon.length}</span>
+                    <span className="text-zinc-500"> λήγουν σε 30 ημέρες</span>
+                  </p>
+                )}
+              </div>
+              <Link href="/management/academy/medical" className="text-xs font-bold text-emerald-600 hover:underline mt-3 inline-block">
+                Προβολή λεπτομερειών →
+              </Link>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Upcoming Trainings */}
+        <Card className="rounded-2xl border-none shadow-sm mb-6">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-black text-zinc-900">{toGreekUpperCase('Επόμενες Προπονήσεις')}</h3>
+              <Link href="/management/academy/training">
+                <Button variant="ghost" size="sm" className="text-xs font-bold text-emerald-600">
+                  Όλες →
+                </Button>
+              </Link>
+            </div>
+            {upcomingTrainings.length === 0 ? (
+              <p className="text-sm text-zinc-400 text-center py-6">Δεν υπάρχουν προγραμματισμένες προπονήσεις</p>
+            ) : (
+              <div className="space-y-2">
+                {upcomingTrainings.map(t => {
+                  const squad = squads.find(s => s.id === t.squadId);
+                  const isToday = t.date === todayStr;
+                  return (
+                    <Link key={t.id} href={`/management/academy/training/${t.id}`}>
+                      <div className={cn(
+                        "flex items-center justify-between p-3 rounded-xl transition-colors hover:bg-zinc-50",
+                        isToday && "bg-emerald-50/50"
+                      )}>
+                        <div className="flex items-center gap-3">
+                          <div className={cn(
+                            "h-10 w-10 rounded-lg flex flex-col items-center justify-center text-center",
+                            isToday ? "bg-emerald-600 text-white" : "bg-zinc-100 text-zinc-600"
+                          )}>
+                            <span className="text-[9px] font-bold uppercase leading-none">
+                              {new Date(t.date + 'T00:00:00').toLocaleDateString('el-GR', { weekday: 'short' })}
+                            </span>
+                            <span className="text-sm font-black leading-none mt-0.5">
+                              {new Date(t.date + 'T00:00:00').getDate()}
+                            </span>
+                          </div>
+                          <div>
+                            <p className="text-sm font-bold text-zinc-900">{t.title}</p>
+                            <p className="text-xs text-zinc-400">
+                              {squad ? `${squad.name} (${squad.ageGroup})` : ''} · {t.startTime} - {t.endTime}
+                            </p>
+                          </div>
+                        </div>
+                        {isToday && (
+                          <Badge className="bg-emerald-100 text-emerald-700 text-[9px] font-black border-none">ΣΗΜΕΡΑ</Badge>
+                        )}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Squads */}
+        <Card className="rounded-2xl border-none shadow-sm">
+          <CardContent className="p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-black text-zinc-900">{toGreekUpperCase('Τα Τμήματά μου')}</h3>
+              <Link href="/management/academy/squads">
+                <Button variant="ghost" size="sm" className="text-xs font-bold text-emerald-600">
+                  Όλα →
+                </Button>
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {squads.map(s => (
+                <Link key={s.id} href={`/management/academy/squads`}>
+                  <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 hover:bg-zinc-100 transition-colors">
+                    <div className="h-10 w-10 rounded-lg bg-emerald-100 flex items-center justify-center">
+                      <Trophy className="h-5 w-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-zinc-900">{s.name}</p>
+                      <p className="text-xs text-zinc-400">{s.ageGroup} · {s.athleteCount || 0} αθλητές</p>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
+  const { venueOwner, isLoading: authLoading, isCoach } = useAuth();
+
+  // Coach gets a dedicated simplified dashboard
+  if (!authLoading && venueOwner && isCoach) {
+    return <CoachDashboard />;
+  }
+
+  // Admin dashboard continues below
+  return <AdminDashboard />;
+}
+
+function AdminDashboard() {
   const { user, venueOwner, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();

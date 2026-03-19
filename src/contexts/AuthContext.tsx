@@ -10,6 +10,10 @@ interface AuthContextType {
   user: FirebaseUser | null;
   venueOwner: VenueOwner | null;
   isLoading: boolean;
+  isAdmin: boolean;
+  isCoach: boolean;
+  userRole: 'admin' | 'coach' | null;
+  canViewAllSquads: boolean;  // true for admin, or coach with 'all_squads' mode
   signOut: () => Promise<void>;
 }
 
@@ -116,10 +120,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Normalize role: treat legacy 'owner' and 'venue_owner' as 'admin'
+  const normalizedRole = venueOwner?.role
+    ? (['owner', 'venue_owner'].includes(venueOwner.role) ? 'admin' : venueOwner.role as 'admin' | 'coach')
+    : null;
+
+  const isAdmin = normalizedRole === 'admin';
+  const isCoach = normalizedRole === 'coach';
+
   const value = {
     user,
     venueOwner,
     isLoading,
+    isAdmin,
+    isCoach,
+    userRole: normalizedRole,
+    canViewAllSquads: isAdmin || venueOwner?.coachViewMode === 'all_squads',
     signOut,
   };
 

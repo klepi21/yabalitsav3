@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Search, MapPin, ArrowLeft } from 'lucide-react';
 import Image from 'next/image';
@@ -13,16 +12,7 @@ interface SearchResult {
   price: number;
 }
 
-interface SmartSuggestion {
-  date: string;
-  time: string;
-  venue: Venue;
-  pitch: Pitch;
-  price: number;
-}
-
 export default function FSEPage() {
-  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState({
     date: '',
     pitchType: '',
@@ -33,33 +23,7 @@ export default function FSEPage() {
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const [suggestions, setSuggestions] = useState<SmartSuggestion[]>([]);
 
-  const formatGreekDate = (dateStr: string): string => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    const dayNames = ['Κυριακή', 'Δευτέρα', 'Τρίτη', 'Τετάρτη', 'Πέμπτη', 'Παρασκευή', 'Σάββατο'];
-    const monthNames = [
-      'Ιανουαρίου', 'Φεβρουαρίου', 'Μαρτίου', 'Απριλίου', 'Μαΐου', 'Ιουνίου',
-      'Ιουλίου', 'Αυγούστου', 'Σεπτεμβρίου', 'Οκτωβρίου', 'Νοεμβρίου', 'Δεκεμβρίου'
-    ];
-    
-    const dayName = dayNames[date.getDay()];
-    const day = date.getDate();
-    const month = monthNames[date.getMonth()];
-    
-    return `${dayName} ${day} ${month}`;
-  };
-
-  const handleBookNow = (venueId: string, pitchId: string, time: string) => {
-    const params = new URLSearchParams({
-      venueId,
-      pitchId,
-      date: searchQuery.date,
-      time
-    });
-    router.push(`/book?${params.toString()}`);
-  };
 
   const handleSearch = async () => {
     setIsSearching(true);
@@ -101,7 +65,6 @@ export default function FSEPage() {
       }));
       
       setSearchResults(results);
-      setSuggestions([]);
     } catch (error) {
       console.error('Error fetching search results:', error);
       setSearchResults([]);
