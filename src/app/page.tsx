@@ -87,12 +87,12 @@ export default function RootPage() {
               <span>Μπείτε στη Νέα Εποχή</span>
             </Link>
 
-            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[10px] md:text-xs font-bold text-zinc-500 uppercase tracking-[0.2em] -mt-10 md:-mt-16 mb-20 md:mb-32 opacity-70">
-              <span className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-emerald-500" /> 14 Ημερες Δωρεαν Δοκιμη</span>
-              <span className="hidden sm:block w-1.5 h-1.5 bg-zinc-800 rounded-full" />
-              <span className="flex items-center gap-2"><Zap className="w-3.5 h-3.5 text-emerald-500" /> Χωρις Πιστωτικη Καρτα</span>
-              <span className="hidden sm:block w-1.5 h-1.5 bg-zinc-800 rounded-full" />
-              <span className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Καμια Δεσμευση</span>
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[11px] md:text-xs font-bold text-white/90 uppercase tracking-[0.2em] -mt-10 md:-mt-16 mb-24 md:mb-36 drop-shadow-lg">
+              <span className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-emerald-400" /> 14 Ημερες Δωρεαν Δοκιμη</span>
+              <span className="hidden sm:block w-1.5 h-1.5 bg-white/20 rounded-full" />
+              <span className="flex items-center gap-2"><Zap className="w-3.5 h-3.5 text-emerald-400" /> Χωρις Πιστωτικη Καρτα</span>
+              <span className="hidden sm:block w-1.5 h-1.5 bg-white/20 rounded-full" />
+              <span className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Καμια Δεσμευση</span>
             </div>
           </div>
 
