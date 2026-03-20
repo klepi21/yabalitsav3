@@ -349,31 +349,61 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
         )}
 
         {/* QR Code Card */}
-        {perms.showQrCard && bookingsEnabled && <Link href="/management/booking/qr" onClick={onNavigate}>
-          <div className="relative overflow-hidden rounded-2xl bg-zinc-900 p-5 group cursor-pointer hover:shadow-xl hover:shadow-emerald-900/10 transition-all duration-500">
-             {/* Abstract Background Shapes */}
-             <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/20 rounded-full blur-2xl group-hover:bg-emerald-500/30 transition-colors" />
-             <div className="absolute -left-4 -bottom-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl" />
-             
-             <div className="relative z-10 flex flex-col gap-3">
-                <div className="h-8 w-8 rounded-lg bg-white/10 flex items-center justify-center backdrop-blur-md">
-                  <QrCode className="h-4 w-4 text-emerald-400" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-white tracking-tight">
-                    {toGreekUpperCase('Δημιουργήστε το QR Code')}
-                  </p>
-                  <p className="text-[10px] font-medium text-emerald-400/80 mt-0.5">
-                    ΓΙΑ ΤΗ ΣΕΛΙΔΑ BOOKING
-                  </p>
-                </div>
-                <div className="flex items-center justify-center gap-2 w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-black transition-all active:scale-95 shadow-lg shadow-emerald-900/20 uppercase">
-                  <QrCode className="h-3 w-3 mr-1" />
-                  ΦΤΙΑΞΕ QR
-                </div>
-             </div>
+        {perms.showQrCard && (
+          <div className="relative">
+            <Link 
+              href={bookingsEnabled ? "/management/booking/qr" : "#"} 
+              onClick={(e) => {
+                if (!bookingsEnabled) e.preventDefault();
+                onNavigate?.();
+              }}
+              className={cn(
+                "block relative overflow-hidden rounded-2xl p-5 group transition-all duration-500",
+                bookingsEnabled 
+                  ? "bg-zinc-900 border-0 cursor-pointer hover:shadow-xl hover:shadow-emerald-900/10" 
+                  : "bg-zinc-100 border border-zinc-200 cursor-not-allowed opacity-80"
+              )}
+            >
+               {/* Abstract Background Shapes */}
+               {bookingsEnabled && (
+                 <>
+                   <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/20 rounded-full blur-2xl group-hover:bg-emerald-500/30 transition-colors" />
+                   <div className="absolute -left-4 -bottom-4 w-20 h-20 bg-emerald-500/10 rounded-full blur-2xl" />
+                 </>
+               )}
+               
+               <div className="relative z-10 flex flex-col gap-3">
+                  <div className={cn(
+                    "h-8 w-8 rounded-lg flex items-center justify-center backdrop-blur-md",
+                    bookingsEnabled ? "bg-white/10" : "bg-zinc-200"
+                  )}>
+                    <QrCode className={cn("h-4 w-4", bookingsEnabled ? "text-emerald-400" : "text-zinc-400")} />
+                  </div>
+                  
+                  <div>
+                    <p className={cn(
+                      "text-sm font-bold tracking-tight",
+                      bookingsEnabled ? "text-white" : "text-zinc-400"
+                    )}>
+                      {bookingsEnabled ? toGreekUpperCase('Δημιουργήστε το QR Code') : toGreekUpperCase('QR Code Ανενεργό')}
+                    </p>
+                    <p className={cn(
+                      "text-[10px] font-medium mt-0.5",
+                      bookingsEnabled ? "text-emerald-400/80" : "text-zinc-400/60"
+                    )}>
+                      {bookingsEnabled ? 'ΓΙΑ ΤΗ ΣΕΛΙΔΑ BOOKING' : 'Online Κρατήσεις: OFF'}
+                    </p>
+                  </div>
+                  {bookingsEnabled && (
+                    <div className="flex items-center justify-center gap-2 w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-black transition-all active:scale-95 shadow-lg shadow-emerald-900/20 uppercase">
+                      <QrCode className="h-3 w-3 mr-1" />
+                      ΦΤΙΑΞΕ QR
+                    </div>
+                  )}
+               </div>
+            </Link>
           </div>
-        </Link>}
+        )}
 
         <button
           onClick={() => {
