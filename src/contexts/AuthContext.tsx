@@ -146,6 +146,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isAdmin = normalizedRole === 'admin';
   const isCoach = normalizedRole === 'coach';
 
+  const updateBookingsEnabled = async (enabled: boolean) => {
+    if (!venueOwner?.venueId) return;
+    
+    // Optimistic update
+    setBookingsEnabled(enabled);
+    
+    try {
+      await venueService.update(venueOwner.venueId, { bookingsEnabled: enabled });
+    } catch (error) {
+      console.error('Error updating bookingsEnabled:', error);
+      // Revert on error
+      setBookingsEnabled(!enabled);
+    }
+  };
+
   const value = {
     user,
     venueOwner,
@@ -155,7 +170,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     userRole: normalizedRole,
     canViewAllSquads: isAdmin || venueOwner?.coachViewMode === 'all_squads',
     bookingsEnabled,
-    setBookingsEnabled,
+    setBookingsEnabled: updateBookingsEnabled,
     signOut,
   };
 

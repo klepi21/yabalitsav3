@@ -44,6 +44,8 @@ export const SIDEBAR_PERMISSIONS: Record<AppRole, {
   visibleAcademyRoutes: string[];
   // Show QR code card
   showQrCard: boolean;
+  // Show Online Bookings toggle
+  showBookingsToggle: boolean;
   // Show plan/subscription info in top bar
   showPlanInfo: boolean;
 }> = {
@@ -67,6 +69,7 @@ export const SIDEBAR_PERMISSIONS: Record<AppRole, {
       '/management/academy/evaluations',
     ],
     showQrCard: true,
+    showBookingsToggle: true,
     showPlanInfo: true,
   },
   coach: {
@@ -80,6 +83,7 @@ export const SIDEBAR_PERMISSIONS: Record<AppRole, {
       '/management/academy/evaluations',
     ],
     showQrCard: false,
+    showBookingsToggle: false,
     showPlanInfo: false,
   },
 };

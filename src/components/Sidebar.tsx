@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
+import { Switch } from '@/components/ui/switch';
 import { cn, toGreekUpperCase } from '@/lib/utils';
 
 import { SIDEBAR_PERMISSIONS, type AppRole } from '@/config/roles';
@@ -136,7 +137,7 @@ function SidebarSkeleton() {
 function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const pathname = usePathname();
-  const { signOut, userRole, bookingsEnabled, isLoading } = useAuth();
+  const { signOut, userRole, bookingsEnabled, setBookingsEnabled, isLoading } = useAuth();
 
   // Show skeleton while auth is loading
   if (isLoading) return <SidebarSkeleton />;
@@ -322,8 +323,31 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
         </div>
       </nav>
 
-      {/* Promomotion Card & Logout Section */}
       <div className="p-4 space-y-4">
+        {/* Bookings Status Toggle (Admin Only) */}
+        {perms.showBookingsToggle && (
+          <div className="px-4 py-3 rounded-2xl bg-zinc-50 border border-zinc-100/50 flex items-center justify-between gap-3 shadow-inner group">
+            <div className="flex flex-col gap-0.5 min-w-0">
+              <p className={cn(
+                "text-[10px] font-black uppercase tracking-widest transition-colors truncate",
+                bookingsEnabled ? "text-emerald-600" : "text-zinc-400 group-hover:text-red-400"
+              )}>
+                {bookingsEnabled ? toGreekUpperCase('Online Κρατήσεις') : toGreekUpperCase('Κρατήσεις Ανενεργές')}
+              </p>
+              {!bookingsEnabled && (
+                <p className="text-[7px] font-bold text-red-400/70 uppercase leading-none tracking-tighter">
+                  {toGreekUpperCase('Σελίδα & QR Ανενεργά')}
+                </p>
+              )}
+            </div>
+            <Switch
+              checked={bookingsEnabled}
+              onCheckedChange={setBookingsEnabled}
+              className="scale-[0.8] data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-zinc-200"
+            />
+          </div>
+        )}
+
         {/* QR Code Card */}
         {perms.showQrCard && bookingsEnabled && <Link href="/management/booking/qr" onClick={onNavigate}>
           <div className="relative overflow-hidden rounded-2xl bg-zinc-900 p-5 group cursor-pointer hover:shadow-xl hover:shadow-emerald-900/10 transition-all duration-500">
