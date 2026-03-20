@@ -49,6 +49,7 @@ interface Venue {
   imageUrl: string;
   rating: number;
   reviewCount: number;
+  bookingsEnabled?: boolean;
 }
 
 interface Pitch {
@@ -126,10 +127,20 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         console.log('All venues found:', allVenues.map(v => v.name));
         console.log('Looking for:', decodedVenueName);
 
-        if (foundVenue && (foundVenue.bookingsEnabled ?? true) === false) {
-          setLoadError('Οι online κρατήσεις δεν είναι διαθέσιμες αυτή τη στιγμή. Επικοινωνήστε απευθείας με το γήπεδο.');
-          setIsLoading(false);
-          return;
+        if (foundVenue) {
+          console.log('Loading Venue:', {
+            id: foundVenue.id,
+            name: foundVenue.name,
+            bookingsEnabled: foundVenue.bookingsEnabled
+          });
+          if (foundVenue.bookingsEnabled === false) {
+            console.log('Bookings are DISABLED for this venue');
+            setLoadError('Οι online κρατήσεις δεν είναι διαθέσιμες αυτή τη στιγμή. Επικοινωνήστε απευθείας με το γήπεδο.');
+            setDataLoaded(true);
+            return;
+          }
+        } else {
+          console.warn('Venue not found matching:', decodedVenueName);
         }
 
         if (foundVenue) {
@@ -496,7 +507,13 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
   // Create booking in database
   const createBooking = async () => {
-    if (!selectedPitch || !selectedDate || !selectedTimeSlot) return;
+    if (!selectedPitch || !selectedDate || !selectedTimeSlot || !venue) return;
+    
+    // Safety check again
+    if ((venue.bookingsEnabled ?? true) === false) {
+      setLoadError('Οι online κρατήσεις είναι απενεργοποιημένες.');
+      return;
+    }
 
     try {
       const { bookingService, userService } = await import('@/lib/firebase-services');
@@ -866,24 +883,27 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                   </div>
                   <div className="grid grid-cols-1 gap-6">
                     {/* Summary Card */}
-                    <div className="bg-zinc-50 rounded-3xl p-6 border border-zinc-100">
-                      <h3 className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-6 text-center">ΣΥΝΟΨΗ ΚΡΑΤΗΣΗΣ</h3>
-                      <div className="space-y-4">
-                        <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
-                          <span className="text-[10px] font-black text-zinc-400 uppercase">ΓΗΠΕΔΟ</span>
-                          <span className="text-xs font-black text-zinc-900 uppercase">{selectedPitch.name}</span>
+                    <div className="premium-card bg-emerald-600 border-0 rounded-3xl p-6 shadow-xl shadow-emerald-900/10 overflow-hidden relative">
+                      <div className="absolute top-0 right-0 p-4 opacity-10">
+                        <CheckCircle2 className="h-16 w-16 text-white" />
+                      </div>
+                      <h3 className="text-[10px] font-black text-white/60 uppercase tracking-[0.2em] mb-6 text-center">ΣΥΝΟΨΗ ΚΡΑΤΗΣΗΣ</h3>
+                      <div className="space-y-4 relative z-10">
+                        <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                          <span className="text-[10px] font-black text-white/60 uppercase">ΓΗΠΕΔΟ</span>
+                          <span className="text-xs font-black text-white uppercase">{selectedPitch.name}</span>
                         </div>
-                        <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
-                          <span className="text-[10px] font-black text-zinc-400 uppercase">ΗΜΕΡΟΜΗΝΙΑ</span>
-                          <span className="text-xs font-black text-zinc-900 uppercase">{selectedDate?.toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+                        <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                          <span className="text-[10px] font-black text-white/60 uppercase">ΗΜΕΡΟΜΗΝΙΑ</span>
+                          <span className="text-xs font-black text-white uppercase">{selectedDate?.toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
                         </div>
-                        <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
-                          <span className="text-[10px] font-black text-zinc-400 uppercase">ΩΡΑ</span>
-                          <span className="text-xs font-black text-zinc-900 uppercase">{selectedTimeSlot.time}</span>
+                        <div className="flex items-center justify-between pb-4 border-b border-white/10">
+                          <span className="text-[10px] font-black text-white/60 uppercase">ΩΡΑ</span>
+                          <span className="text-xs font-black text-white uppercase">{selectedTimeSlot.time}</span>
                         </div>
                         <div className="flex items-center justify-between pt-2">
-                          <span className="text-[10px] font-black text-emerald-600 uppercase">ΣΥΝΟΛΙΚΟ ΠΟΣΟ</span>
-                          <span className="text-2xl font-black text-emerald-600 tracking-tighter">€{selectedPitch.pricePerSlot}</span>
+                          <span className="text-[10px] font-black text-emerald-100 uppercase">ΣΥΝΟΛΙΚΟ ΠΟΣΟ</span>
+                          <span className="text-2xl font-black text-white tracking-tighter">€{selectedPitch.pricePerSlot}</span>
                         </div>
                       </div>
                     </div>

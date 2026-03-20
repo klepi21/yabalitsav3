@@ -789,25 +789,25 @@ export default function NewBookingPage() {
           <Card className="premium-card bg-emerald-600 border-0 overflow-hidden shadow-2xl shadow-emerald-200">
             <CardContent className="p-8 text-white">
               <div className="flex items-center justify-between mb-8">
-                <p className="text-xs font-black uppercase tracking-[3px] opacity-70">{toGreekUpperCase('Σύνοψη Πληρωμής')}</p>
+                <p className="text-xs font-black uppercase tracking-[3px] text-white/70">{toGreekUpperCase('Σύνοψη Πληρωμής')}</p>
                 <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">
-                  <Euro className="h-5 w-5 text-emerald-100" />
+                  <Euro className="h-5 w-5 text-white" />
                 </div>
               </div>
               
               <div className="space-y-6">
                  <div className="flex items-end justify-between">
-                   <p className="text-sm font-bold opacity-80">Τιμή ανά γήπεδο:</p>
-                   <p className="text-2xl font-black">&euro;{pitches.find(p => p.id === watch('pitchId'))?.pricePerSlot?.toFixed(2) || '0.00'}</p>
+                   <p className="text-sm font-bold text-white/90">Τιμή ανά γήπεδο:</p>
+                   <p className="text-2xl font-black text-white">&euro;{pitches.find(p => p.id === watch('pitchId'))?.pricePerSlot?.toFixed(2) || '0.00'}</p>
                  </div>
                  
                  {isRecurring && recurringSettings.occurrences > 1 && (
                    <div className="flex items-end justify-between pt-4 border-t border-white/10">
                      <div>
-                       <p className="text-sm font-bold opacity-80">Σύνολο ({recurringSettings.occurrences}):</p>
-                       <p className="text-[10px] uppercase font-black opacity-50 tracking-wider">Προσεγγιστικά</p>
+                       <p className="text-sm font-bold text-white/90">Σύνολο ({recurringSettings.occurrences}):</p>
+                       <p className="text-[10px] uppercase font-black text-white/50 tracking-wider">Προσεγγιστικά</p>
                      </div>
-                     <p className="text-4xl font-black">
+                     <p className="text-4xl font-black text-white">
                        &euro;{((pitches.find(p => p.id === watch('pitchId'))?.pricePerSlot || 0) * recurringSettings.occurrences).toFixed(2)}
                      </p>
                    </div>
@@ -815,7 +815,7 @@ export default function NewBookingPage() {
               </div>
 
               <div className="mt-8 p-4 bg-emerald-700/50 rounded-2xl border border-white/10">
-                <p className="text-xs font-bold leading-relaxed">Η πληρωμή θα πραγματοποιηθεί με την άφιξη του πελάτη στον χώρο.</p>
+                <p className="text-xs font-bold leading-relaxed text-white">Η πληρωμή θα πραγματοποιηθεί με την άφιξη του πελάτη στον χώρο.</p>
               </div>
             </CardContent>
           </Card>
