@@ -88,8 +88,7 @@ export default function ForVenuesPage() {
       if (form.password !== form.confirmPassword) {
         throw new Error('Οι κωδικοί δεν ταιριάζουν.');
       }
-      const afmOk = /^\d{9}$/.test(form.venueAfm);
-      if (!afmOk) {
+      if (form.venueAfm && !/^\d{9}$/.test(form.venueAfm)) {
         throw new Error('Το ΑΦΜ πρέπει να έχει 9 ψηφία.');
       }
       if (!form.acceptTerms) {
@@ -444,8 +443,7 @@ export default function ForVenuesPage() {
                       className="pl-10 h-11 bg-white"
                       value={form.venueAfm}
                       onChange={e => setForm({ ...form, venueAfm: e.target.value })}
-                      placeholder="9 ψηφία"
-                      required
+                      placeholder="9 ψηφία (προαιρετικό)"
                     />
                   </div>
                 </div>
