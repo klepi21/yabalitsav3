@@ -14,6 +14,7 @@ import {
   CheckCircle2, XCircle, AlertCircle, ChevronLeft, ChevronRight,
   CalendarDays, List, Users,
 } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn, toGreekUpperCase } from '@/lib/utils';
@@ -65,7 +66,14 @@ export default function TrainingListPage() {
   const [squadFilter, setSquadFilter] = useState<string>('all');
   const [coachFilter, setCoachFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<'week' | 'list'>('week');
+
+  useEffect(() => {
+    if (isMobile) {
+      setViewMode('list');
+    }
+  }, [isMobile]);
   const [attendanceSession, setAttendanceSession] = useState<TrainingSession | null>(null);
   const [attendanceEdits, setAttendanceEdits] = useState<Record<string, AttendanceStatus>>({});
   const [savingAttendance, setSavingAttendance] = useState(false);

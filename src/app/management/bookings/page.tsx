@@ -52,6 +52,7 @@ import {
 } from '@/components/ui/select';
 import { cn, toGreekUpperCase } from '@/lib/utils';
 import { ChevronDown } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export default function BookingsPage() {
   const router = useRouter();
@@ -64,7 +65,14 @@ export default function BookingsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('calendar');
+
+  useEffect(() => {
+    if (isMobile) {
+      setViewMode('list');
+    }
+  }, [isMobile]);
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterPitch, setFilterPitch] = useState<string>('all');
   const [deletingBookingId, setDeletingBookingId] = useState<string | null>(null);
