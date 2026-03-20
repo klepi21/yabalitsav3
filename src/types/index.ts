@@ -99,6 +99,10 @@ export interface Booking {
   price: number;
   status: 'confirmed' | 'pending' | 'completed' | 'cancelled';
   notes?: string;
+  // Payment collection tracking
+  totalSlots?: number;       // total players expected
+  paidSlots?: number;        // how many have paid
+  collectionStatus?: 'pending' | 'partial' | 'complete';
   createdAt: Date;
   updatedAt: Date;
 }
