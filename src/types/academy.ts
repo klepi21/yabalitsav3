@@ -107,6 +107,7 @@ export interface Squad {
   venueId: string;
   ageGroup: string;
   coachIds: string[];
+  paymentsEnabled?: boolean;  // whether this squad appears in payments dashboard
   monthlyAmount?: number;  // monthly fee for athletes in this squad
   createdAt: Date;
   updatedAt: Date;

@@ -96,7 +96,7 @@ function getFilteredNavigation(role: AppRole | null): NavItem[] {
 function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const pathname = usePathname();
-  const { signOut, userRole } = useAuth();
+  const { signOut, userRole, bookingsEnabled } = useAuth();
   const role = userRole || 'admin';
   const filteredNav = getFilteredNavigation(userRole);
   const perms = SIDEBAR_PERMISSIONS[role];
@@ -281,7 +281,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
       {/* Promomotion Card & Logout Section */}
       <div className="p-4 space-y-4">
         {/* QR Code Card */}
-        {perms.showQrCard && <Link href="/management/booking/qr" onClick={onNavigate}>
+        {perms.showQrCard && bookingsEnabled && <Link href="/management/booking/qr" onClick={onNavigate}>
           <div className="relative overflow-hidden rounded-2xl bg-zinc-900 p-5 group cursor-pointer hover:shadow-xl hover:shadow-emerald-900/10 transition-all duration-500">
              {/* Abstract Background Shapes */}
              <div className="absolute -right-4 -top-4 w-24 h-24 bg-emerald-500/20 rounded-full blur-2xl group-hover:bg-emerald-500/30 transition-colors" />

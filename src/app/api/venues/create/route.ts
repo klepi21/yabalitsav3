@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
       ownerId: uid,
       plan: plan,
       active: true,
+      bookingsEnabled: true,
       tax: {
         afm: venueAfm,
         doy: venueDoy || '',

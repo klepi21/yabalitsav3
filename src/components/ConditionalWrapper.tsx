@@ -35,9 +35,10 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
 
   // Pages that need AuthProvider but are not in the sidebar
   const isAuthPage = pathname === '/venue-login';
+  const isFullscreenAuthPage = pathname.startsWith('/coach/attendance') || pathname.startsWith('/coach/evaluate');
 
   // No auth check needed for public/auth pages
-  const needsAuth = !isPublicPage && !isAuthPage;
+  const needsAuth = !isPublicPage && !isAuthPage && !isFullscreenAuthPage;
 
   const [isChecking, setIsChecking] = useState(needsAuth);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -89,12 +90,17 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
   }
 
   // For auth pages (like login) and management pages, wrap with AuthProvider
-  if (isAuthPage || isAuthenticated) {
+  if (isAuthPage || isFullscreenAuthPage || isAuthenticated) {
     return (
       <AuthProvider>
         {isAuthPage ? (
           <>
             <CookieConsent />
+            <GoogleAnalytics />
+            {children}
+          </>
+        ) : isFullscreenAuthPage ? (
+          <>
             <GoogleAnalytics />
             {children}
           </>

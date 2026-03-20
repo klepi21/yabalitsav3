@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
-import { bookingService } from '@/lib/firebase-services';
+import { bookingService, venueService } from '@/lib/firebase-services';
 import { Booking, Pitch, Venue } from '@/types';
 import {
   CalendarDays,
@@ -29,6 +29,8 @@ import {
   BanknoteIcon,
   ChevronDown,
   ChevronUp,
+  ClipboardList,
+  Star,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -87,6 +89,7 @@ function CoachDashboard() {
   const pathname = usePathname();
   const [squads, setSquads] = useState<DashboardSquad[]>([]);
   const [trainings, setTrainings] = useState<TrainingSession[]>([]);
+  const [athletes, setAthletes] = useState<AcademyUser[]>([]);
   const [medicalAlerts, setMedicalAlerts] = useState<{ expired: AcademyUser[]; expiringSoon: AcademyUser[] }>({ expired: [], expiringSoon: [] });
   const [dataLoading, setDataLoading] = useState(true);
 
@@ -118,6 +121,15 @@ function CoachDashboard() {
         const visibleSquadIds = new Set(visibleSquads.map(s => s.id));
         const visibleTrainings = trainingsData.filter(t => t.squadId && visibleSquadIds.has(t.squadId));
         setTrainings(visibleTrainings);
+
+        // Athletes in coach's squads (for evaluation section)
+        const athleteGroupIds = new Set(groupsData.filter(g => g.capabilities?.includes('squad_assignment')).map(g => g.id));
+        const visibleAthletes = usersData.filter(u => {
+          if (!athleteGroupIds.has(u.groupId)) return false;
+          const userSquads = u.squad_ids || (u.squad_id ? [u.squad_id] : []);
+          return canViewAll || userSquads.some(sid => coachSquadIds.includes(sid));
+        });
+        setAthletes(visibleAthletes);
 
         // Medical alerts for athletes in coach's squads
         const medicalGroupIds = new Set(groupsData.filter(g => g.capabilities?.includes('medical_tracking')).map(g => g.id));
@@ -282,35 +294,41 @@ function CoachDashboard() {
                   const squad = squads.find(s => s.id === t.squadId);
                   const isToday = t.date === todayStr;
                   return (
-                    <Link key={t.id} href={`/management/academy/training/${t.id}`}>
-                      <div className={cn(
-                        "flex items-center justify-between p-3 rounded-xl transition-colors hover:bg-zinc-50",
-                        isToday && "bg-emerald-50/50"
-                      )}>
-                        <div className="flex items-center gap-3">
-                          <div className={cn(
-                            "h-10 w-10 rounded-lg flex flex-col items-center justify-center text-center",
-                            isToday ? "bg-emerald-600 text-white" : "bg-zinc-100 text-zinc-600"
-                          )}>
-                            <span className="text-[9px] font-bold uppercase leading-none">
-                              {new Date(t.date + 'T00:00:00').toLocaleDateString('el-GR', { weekday: 'short' })}
-                            </span>
-                            <span className="text-sm font-black leading-none mt-0.5">
-                              {new Date(t.date + 'T00:00:00').getDate()}
-                            </span>
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-zinc-900">{t.title}</p>
-                            <p className="text-xs text-zinc-400">
-                              {squad ? `${squad.name} (${squad.ageGroup})` : ''} · {t.startTime} - {t.endTime}
-                            </p>
-                          </div>
+                    <div key={t.id} className={cn(
+                      "flex items-center justify-between p-3 rounded-xl transition-colors",
+                      isToday && "bg-emerald-50/50"
+                    )}>
+                      <Link href={`/management/academy/training/${t.id}`} className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className={cn(
+                          "h-10 w-10 rounded-lg flex flex-col items-center justify-center text-center flex-shrink-0",
+                          isToday ? "bg-emerald-600 text-white" : "bg-zinc-100 text-zinc-600"
+                        )}>
+                          <span className="text-[9px] font-bold uppercase leading-none">
+                            {new Date(t.date + 'T00:00:00').toLocaleDateString('el-GR', { weekday: 'short' })}
+                          </span>
+                          <span className="text-sm font-black leading-none mt-0.5">
+                            {new Date(t.date + 'T00:00:00').getDate()}
+                          </span>
                         </div>
-                        {isToday && (
-                          <Badge className="bg-emerald-100 text-emerald-700 text-[9px] font-black border-none">ΣΗΜΕΡΑ</Badge>
-                        )}
-                      </div>
-                    </Link>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-zinc-900 truncate">{t.title}</p>
+                          <p className="text-xs text-zinc-400 truncate">
+                            {squad ? `${squad.name} (${squad.ageGroup})` : ''} · {t.startTime} - {t.endTime}
+                          </p>
+                        </div>
+                      </Link>
+                      {isToday ? (
+                        <Link href={`/coach/attendance/${t.id}`} className="sm:hidden flex-shrink-0 ml-2">
+                          <Button size="sm" className="h-8 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px]">
+                            <ClipboardList className="h-3.5 w-3.5 mr-1" />
+                            Απουσιολόγιο
+                          </Button>
+                        </Link>
+                      ) : null}
+                      {isToday ? (
+                        <Badge className="hidden sm:inline-flex bg-emerald-100 text-emerald-700 text-[9px] font-black border-none ml-2">ΣΗΜΕΡΑ</Badge>
+                      ) : null}
+                    </div>
                   );
                 })}
               </div>
@@ -346,6 +364,51 @@ function CoachDashboard() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Mobile Quick Evaluate — only on mobile */}
+        {athletes.length > 0 && (
+          <Card className="rounded-2xl border-none shadow-sm sm:hidden">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-black text-zinc-900">{toGreekUpperCase('Γρήγορη Αξιολόγηση')}</h3>
+                <Link href="/management/academy/evaluations">
+                  <Button variant="ghost" size="sm" className="text-xs font-bold text-emerald-600">
+                    Όλες →
+                  </Button>
+                </Link>
+              </div>
+              <div className="space-y-2">
+                {squads.map(squad => {
+                  const squadAthletes = athletes.filter(a => {
+                    const sids = a.squad_ids || (a.squad_id ? [a.squad_id] : []);
+                    return sids.includes(squad.id);
+                  });
+                  if (squadAthletes.length === 0) return null;
+                  return (
+                    <div key={squad.id}>
+                      <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-2 px-1">
+                        {squad.name} ({squad.ageGroup})
+                      </p>
+                      <div className="space-y-1">
+                        {squadAthletes.map(a => (
+                          <div key={a.id} className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-50">
+                            <p className="text-sm font-bold text-zinc-900 truncate flex-1">{a.displayName}</p>
+                            <Link href={`/coach/evaluate/${a.id}`}>
+                              <Button size="sm" className="h-7 px-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[10px]">
+                                <Star className="h-3 w-3 mr-1" />
+                                Αξιολόγηση
+                              </Button>
+                            </Link>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
@@ -934,6 +997,55 @@ function AdminDashboard() {
         </Alert>
       )}
 
+      {/* Online Bookings Toggle */}
+      {venue && (
+        <div className={cn(
+          "flex items-center justify-between p-4 rounded-2xl border transition-all",
+          (venue.bookingsEnabled ?? true)
+            ? "bg-emerald-50/50 border-emerald-100"
+            : "bg-zinc-50 border-zinc-200"
+        )}>
+          <div className="flex items-center gap-3">
+            <div className={cn(
+              "h-10 w-10 rounded-xl flex items-center justify-center",
+              (venue.bookingsEnabled ?? true) ? "bg-emerald-100" : "bg-zinc-200"
+            )}>
+              <CalendarDays className={cn("h-5 w-5", (venue.bookingsEnabled ?? true) ? "text-emerald-600" : "text-zinc-400")} />
+            </div>
+            <div>
+              <p className="text-sm font-black text-zinc-900">
+                {(venue.bookingsEnabled ?? true) ? 'Online Κρατήσεις Ενεργές' : 'Online Κρατήσεις Ανενεργές'}
+              </p>
+              <p className="text-[10px] text-zinc-400 font-medium">
+                {(venue.bookingsEnabled ?? true)
+                  ? `yabalitsa.com/book/${venue.name?.toLowerCase().replace(/\s+/g, '')}`
+                  : 'Η σελίδα κρατήσεων και το QR code είναι απενεργοποιημένα'}
+              </p>
+            </div>
+          </div>
+          <div
+            onClick={async () => {
+              const newVal = !(venue.bookingsEnabled ?? true);
+              try {
+                await venueService.update(venue.id, { bookingsEnabled: newVal });
+                window.location.reload();
+              } catch (err) {
+                console.error('Failed to toggle bookings:', err);
+              }
+            }}
+            className={cn(
+              "relative h-7 w-12 rounded-full transition-colors cursor-pointer flex-shrink-0",
+              (venue.bookingsEnabled ?? true) ? "bg-emerald-500" : "bg-zinc-300"
+            )}
+          >
+            <div className={cn(
+              "absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform",
+              (venue.bookingsEnabled ?? true) && "translate-x-5"
+            )} />
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6">
         <div className="flex items-center gap-4">
@@ -1218,7 +1330,7 @@ function AdminDashboard() {
                               </Badge>
                             </div>
                             <Button size="icon" variant="outline" className="h-10 w-10 rounded-2xl border-zinc-100 hover:bg-emerald-50 hover:border-emerald-200 text-zinc-400 transition-all" asChild>
-                              <Link href={`/management/academy/training`}>
+                              <Link href={`/management/academy/training/${training.id}`}>
                                 <Eye className="h-4 w-4" />
                               </Link>
                             </Button>

@@ -14,6 +14,7 @@ interface AuthContextType {
   isCoach: boolean;
   userRole: 'admin' | 'coach' | null;
   canViewAllSquads: boolean;  // true for admin, or coach with 'all_squads' mode
+  bookingsEnabled: boolean;  // whether online bookings are active for this venue
   signOut: () => Promise<void>;
 }
 
@@ -22,6 +23,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const [venueOwner, setVenueOwner] = useState<VenueOwner | null>(null);
+  const [bookingsEnabled, setBookingsEnabled] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
   const checkIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -87,6 +89,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           setVenueOwner(owner);
 
+          // Fetch venue bookingsEnabled
+          if (owner?.venueId) {
+            try {
+              const { venueService } = await import('@/lib/firebase-services');
+              const venue = await venueService.getById(owner.venueId);
+              setBookingsEnabled(venue?.bookingsEnabled ?? true);
+            } catch { /* default true */ }
+          }
+
           // Start periodic check every 5 minutes
           if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
           if (owner?.venueId) {
@@ -142,6 +153,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isCoach,
     userRole: normalizedRole,
     canViewAllSquads: isAdmin || venueOwner?.coachViewMode === 'all_squads',
+    bookingsEnabled,
     signOut,
   };
 

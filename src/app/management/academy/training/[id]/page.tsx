@@ -439,7 +439,7 @@ export default function TrainingDetailPage({ params }: PageProps) {
                 <h3 className="text-base font-black text-zinc-900 uppercase">{toGreekUpperCase('Απουσιολόγιο')}</h3>
                 <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">{athletes.length} αθλητές</p>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 <Button variant="outline" size="sm" onClick={() => setAttendance((prev) => prev.map((a) => ({ ...a, status: 'present' })))} className="h-9 px-4 rounded-lg text-emerald-600 border-emerald-100 bg-emerald-50/50 hover:bg-emerald-600 hover:text-white font-bold text-[10px] uppercase">
                   {toGreekUpperCase('Όλοι Παρόντες')}
                 </Button>

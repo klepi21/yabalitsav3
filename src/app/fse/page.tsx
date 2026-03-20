@@ -33,7 +33,7 @@ export default function FSEPage() {
       const { venueService, pitchService } = await import('@/lib/firebase-services');
       const allVenues = await venueService.getAll();
       
-      let filteredVenues = allVenues;
+      let filteredVenues = allVenues.filter(v => (v.bookingsEnabled ?? true));
       if (searchQuery.city) {
         filteredVenues = filteredVenues.filter(v => 
           (v.address && v.address.toLowerCase().includes(searchQuery.city.toLowerCase())) || 

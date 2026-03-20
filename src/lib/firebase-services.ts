@@ -64,6 +64,7 @@ export const venueService = {
     const docRef = await addDoc(collection(db, 'yabalitsa_venues'), {
       ...firebaseData,
       active: (firebaseData.active as boolean) ?? true,
+      bookingsEnabled: (firebaseData.bookingsEnabled as boolean) ?? true,
       daysRemaining: (firebaseData.daysRemaining as number) ?? 15,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
@@ -92,6 +93,7 @@ export const venueService = {
         subscriptionEndDate: data.subscriptionEndDate,
         managementPinHash: data.managementPinHash,
         active: data.active ?? true,
+        bookingsEnabled: data.bookingsEnabled ?? true,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date()
       } as Venue;
@@ -102,7 +104,7 @@ export const venueService = {
   async getById(id: string): Promise<Venue | null> {
     const docRef = doc(db, 'yabalitsa_venues', id);
     const docSnap = await getDoc(docRef);
-    
+
     if (docSnap.exists()) {
       const data = docSnap.data() as FirebaseVenueData;
       return {
@@ -121,6 +123,7 @@ export const venueService = {
         subscriptionEndDate: data.subscriptionEndDate,
         managementPinHash: data.managementPinHash,
         active: data.active ?? true,
+        bookingsEnabled: data.bookingsEnabled ?? true,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date()
       } as Venue;

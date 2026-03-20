@@ -12,7 +12,7 @@ import { toGreekUpperCase } from '@/lib/utils';
 
 function QRInner() {
   const params = useSearchParams();
-  const { venueOwner } = useAuth();
+  const { venueOwner, bookingsEnabled } = useAuth();
   const [venueName, setVenueName] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -83,6 +83,23 @@ function QRInner() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 gap-4">
         <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
         <p className="text-xs font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Φορτωση...')}</p>
+      </div>
+    );
+  }
+
+  if (!bookingsEnabled) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-50 p-6">
+        <div className="max-w-md text-center space-y-4">
+          <div className="inline-flex items-center justify-center h-16 w-16 rounded-[2rem] bg-zinc-200 mb-4">
+            <QrCode className="h-8 w-8 text-zinc-400" />
+          </div>
+          <h2 className="text-2xl font-black text-zinc-900">{toGreekUpperCase('Online Κρατήσεις Απενεργοποιημένες')}</h2>
+          <p className="text-sm text-zinc-400">
+            Οι online κρατήσεις είναι απενεργοποιημένες για το venue σας.
+            Ενεργοποιήστε τις από τον Πίνακα Ελέγχου για να δημιουργήσετε QR Code.
+          </p>
+        </div>
       </div>
     );
   }

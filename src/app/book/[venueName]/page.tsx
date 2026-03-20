@@ -126,6 +126,12 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         console.log('All venues found:', allVenues.map(v => v.name));
         console.log('Looking for:', decodedVenueName);
 
+        if (foundVenue && (foundVenue.bookingsEnabled ?? true) === false) {
+          setLoadError('Οι online κρατήσεις δεν είναι διαθέσιμες αυτή τη στιγμή. Επικοινωνήστε απευθείας με το γήπεδο.');
+          setIsLoading(false);
+          return;
+        }
+
         if (foundVenue) {
           // Set venue data
           const venueData: Venue = {
@@ -637,14 +643,16 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
             {loadError || 'Το venue δεν βρέθηκε'}
           </h1>
           <p className="text-emerald-200 mb-6">
-            Δεν μπορέσαμε να βρούμε το venue &quot;{decodeURIComponent(venueName)}&quot;. Ελέγξτε τη διεύθυνση και δοκιμάστε ξανά.
+            {loadError
+              ? 'Παρακαλούμε δοκιμάστε ξανά αργότερα ή επικοινωνήστε απευθείας με το γήπεδο.'
+              : `Δεν μπορέσαμε να βρούμε το venue "${decodeURIComponent(venueName)}". Ελέγξτε τη διεύθυνση και δοκιμάστε ξανά.`}
           </p>
-          <a
-            href="/management/dashboard"
+          <Link
+            href="/"
             className="inline-flex items-center px-6 py-3 bg-white text-emerald-700 rounded-xl font-medium hover:bg-emerald-50 transition-colors"
           >
             Αρχική Σελίδα
-          </a>
+          </Link>
         </div>
       </div>
     );

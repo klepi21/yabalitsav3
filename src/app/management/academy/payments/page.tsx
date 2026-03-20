@@ -88,11 +88,18 @@ export default function PaymentsDashboardPage() {
       setAllPayments(paymentsData);
       setAllUsers(usersData);
       setGroups(groupsData);
-      setSquads(squadsData);
+      const enabledSquads = squadsData.filter(s => s.paymentsEnabled);
+      setSquads(enabledSquads);
 
+      const enabledSquadIds = new Set(enabledSquads.map(s => s.id));
       const paymentGroups = groupsData.filter((g) => g.capabilities.includes('monthly_payment'));
       const paymentGroupIds = new Set(paymentGroups.map((g) => g.id));
-      setAthletes(usersData.filter((u) => paymentGroupIds.has(u.groupId)));
+      // Only show athletes that belong to a squad with payments enabled
+      setAthletes(usersData.filter((u) => {
+        if (!paymentGroupIds.has(u.groupId)) return false;
+        const userSquadIds = u.squad_ids || (u.squad_id ? [u.squad_id] : []);
+        return userSquadIds.some(sid => enabledSquadIds.has(sid));
+      }));
 
       const firstGroupAmount = paymentGroups.find((g) => g.monthlyAmount)?.monthlyAmount;
       if (firstGroupAmount) setDefaultAmount(firstGroupAmount);
@@ -290,13 +297,14 @@ export default function PaymentsDashboardPage() {
     const squadMap = new Map<string, AcademyUser[]>();
     const noSquad: AcademyUser[] = [];
 
+    const enabledSquadIds = new Set(squads.map(s => s.id));
     for (const athlete of filteredAthletes) {
       const athleteSquadIds = athlete.squad_ids || (athlete.squad_id ? [athlete.squad_id] : []);
-      if (athleteSquadIds.length === 0) {
+      // Find the first squad that has payments enabled
+      const primarySquadId = athleteSquadIds.find(sid => enabledSquadIds.has(sid));
+      if (!primarySquadId) {
         noSquad.push(athlete);
       } else {
-        // Use the first squad for grouping
-        const primarySquadId = athleteSquadIds[0];
         if (!squadMap.has(primarySquadId)) {
           squadMap.set(primarySquadId, []);
         }
@@ -461,7 +469,7 @@ export default function PaymentsDashboardPage() {
               </thead>
               <tbody>
                 {athletesBySquad.map(({ squad, athletes: squadAthletes }, groupIdx) => (
-                  <React.Fragment key={squad?.id || 'no-squad'}>
+                  <React.Fragment key={squad?.id || `no-squad-${groupIdx}`}>
                     {/* Squad header row */}
                     <tr className={`${groupIdx > 0 ? 'border-t-2 border-zinc-200' : ''}`}>
                       <td className="p-3 sticky left-0 bg-zinc-50 z-10" colSpan={1}>

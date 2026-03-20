@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { squadService, academyUserService, userGroupService } from '@/lib/academy-services';
 import { AcademyUser } from '@/types/academy';
 import { ArrowLeft, Loader2, Trophy, AlertCircle, Users, Search, Plus, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -33,6 +34,7 @@ export default function EditSquadPage() {
     name: '',
     ageGroup: 'U12',
     coachIds: [] as string[],
+    paymentsEnabled: false,
     monthlyAmount: 0,
   });
 
@@ -58,6 +60,7 @@ export default function EditSquadPage() {
           name: squad.name,
           ageGroup: squad.ageGroup,
           coachIds: squad.coachIds || [],
+          paymentsEnabled: squad.paymentsEnabled ?? false,
           monthlyAmount: squad.monthlyAmount || 0,
         });
 
@@ -98,12 +101,18 @@ export default function EditSquadPage() {
     try {
       setIsSaving(true);
       setError(null);
-      await squadService.update(squadId, {
+      const updateData: Record<string, unknown> = {
         name: formData.name,
         ageGroup: formData.ageGroup,
         coachIds: formData.coachIds,
-        monthlyAmount: formData.monthlyAmount || undefined,
-      });
+        paymentsEnabled: formData.paymentsEnabled,
+      };
+      if (formData.paymentsEnabled && formData.monthlyAmount) {
+        updateData.monthlyAmount = formData.monthlyAmount;
+      } else {
+        updateData.monthlyAmount = 0;
+      }
+      await squadService.update(squadId, updateData);
 
       // Update athlete squad assignments
       const currentSquadAthleteIds = squadAthletes.map((a) => a.id);
@@ -273,18 +282,40 @@ export default function EditSquadPage() {
             </div>
           )}
 
-          {/* Monthly Amount */}
-          <div className="space-y-2">
-            <Label className="text-zinc-700">Μηνιαία Συνδρομή (€)</Label>
-            <p className="text-xs text-zinc-400">Το ποσό πληρωμής για τους αθλητές αυτού του τμήματος. Αν είναι 0, χρησιμοποιείται η γενική τιμή.</p>
-            <Input
-              type="number"
-              value={formData.monthlyAmount || ''}
-              onChange={(e) => setFormData((prev) => ({ ...prev, monthlyAmount: Number(e.target.value) }))}
-              placeholder="π.χ. 50"
-              className="h-11 max-w-[200px] bg-white"
-              min={0}
-            />
+          {/* Payments Toggle */}
+          <div className="space-y-4">
+            <label className="flex items-center gap-3 cursor-pointer">
+              <div
+                onClick={() => setFormData(prev => ({ ...prev, paymentsEnabled: !prev.paymentsEnabled }))}
+                className={cn(
+                  "relative h-6 w-11 rounded-full transition-colors cursor-pointer",
+                  formData.paymentsEnabled ? "bg-emerald-500" : "bg-zinc-200"
+                )}
+              >
+                <div className={cn(
+                  "absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform",
+                  formData.paymentsEnabled && "translate-x-5"
+                )} />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-zinc-900">Ενεργοποίηση μηνιαίων πληρωμών</p>
+                <p className="text-xs text-zinc-400">Αν ενεργοποιηθεί, το τμήμα θα εμφανίζεται στη σελίδα πληρωμών</p>
+              </div>
+            </label>
+
+            {formData.paymentsEnabled && (
+              <div className="space-y-2 ml-14">
+                <Label className="text-zinc-700">Μηνιαία Συνδρομή (€)</Label>
+                <Input
+                  type="number"
+                  value={formData.monthlyAmount || ''}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, monthlyAmount: Number(e.target.value) }))}
+                  placeholder="π.χ. 50"
+                  className="h-11 max-w-[200px] bg-white"
+                  min={0}
+                />
+              </div>
+            )}
           </div>
 
           {/* Athletes in Squad */}
