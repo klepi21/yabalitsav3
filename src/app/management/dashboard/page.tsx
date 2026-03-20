@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
-import { bookingService, venueService } from '@/lib/firebase-services';
+import { bookingService } from '@/lib/firebase-services';
 import { Booking, Pitch, Venue } from '@/types';
 import {
   CalendarDays,
@@ -482,7 +482,7 @@ export default function DashboardPage() {
 }
 
 function AdminDashboard() {
-  const { user, venueOwner, isLoading: authLoading, setBookingsEnabled } = useAuth();
+  const { user, venueOwner, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -1080,59 +1080,6 @@ function AdminDashboard() {
         </Alert>
       )}
 
-      {/* Online Bookings Toggle */}
-      {venue && (
-        <div className={cn(
-          "flex items-center justify-between p-4 rounded-2xl border transition-all",
-          (venue.bookingsEnabled ?? true)
-            ? "bg-emerald-50/50 border-emerald-100"
-            : "bg-zinc-50 border-zinc-200"
-        )}>
-          <div className="flex items-center gap-3">
-            <div className={cn(
-              "h-10 w-10 rounded-xl flex items-center justify-center",
-              (venue.bookingsEnabled ?? true) ? "bg-emerald-100" : "bg-zinc-200"
-            )}>
-              <CalendarDays className={cn("h-5 w-5", (venue.bookingsEnabled ?? true) ? "text-emerald-600" : "text-zinc-400")} />
-            </div>
-            <div>
-              <p className="text-sm font-black text-zinc-900">
-                {(venue.bookingsEnabled ?? true) ? 'Online Κρατήσεις Ενεργές' : 'Online Κρατήσεις Ανενεργές'}
-              </p>
-              <p className="text-[10px] text-zinc-400 font-medium">
-                {(venue.bookingsEnabled ?? true)
-                  ? `yabalitsa.com/book/${venue.name?.toLowerCase().replace(/\s+/g, '')}`
-                  : 'Η σελίδα κρατήσεων και το QR code είναι απενεργοποιημένα'}
-              </p>
-            </div>
-          </div>
-          <div
-            onClick={async () => {
-              const newVal = !(venue.bookingsEnabled ?? true);
-              try {
-                // Optimistic update
-                setVenue(prev => prev ? { ...prev, bookingsEnabled: newVal } : prev);
-                setBookingsEnabled(newVal);
-                await venueService.update(venue.id, { bookingsEnabled: newVal });
-              } catch (err) {
-                // Revert on error
-                setVenue(prev => prev ? { ...prev, bookingsEnabled: !newVal } : prev);
-                setBookingsEnabled(!newVal);
-                console.error('Failed to toggle bookings:', err);
-              }
-            }}
-            className={cn(
-              "relative h-7 w-12 rounded-full transition-colors cursor-pointer flex-shrink-0",
-              (venue.bookingsEnabled ?? true) ? "bg-emerald-500" : "bg-zinc-300"
-            )}
-          >
-            <div className={cn(
-              "absolute top-0.5 left-0.5 h-6 w-6 rounded-full bg-white shadow transition-transform",
-              (venue.bookingsEnabled ?? true) && "translate-x-5"
-            )} />
-          </div>
-        </div>
-      )}
 
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6">
