@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { bookingService } from '@/lib/firebase-services';
 import { Booking, Pitch, Venue } from '@/types';
@@ -11,7 +10,6 @@ import {
   CalendarDays,
   Activity,
   AlertTriangle,
-  Phone,
   Plus,
   Loader2,
   Pencil,
@@ -31,6 +29,9 @@ import {
   ChevronUp,
   ClipboardList,
   Star,
+  CalendarCheck,
+  Radio,
+  UserSearch,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
@@ -1126,49 +1127,43 @@ function AdminDashboard() {
         {/* Quick Stats Grid - Bookings & Venues */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: 'ΚΡΑΤΗΣΕΙΣ', value: bookings.length, detail: '30 ΗΜΕΡΕΣ', color: 'bg-emerald-500', image: '/dashboard/bookings.png' },
-            { label: 'LIVE', value: getLiveBookings(), detail: 'ΤΩΡΑ', color: 'bg-blue-500', image: '/dashboard/live.png' },
-            { label: 'ΣΗΜΕΡΑ', value: getTodaysBookings().length, detail: 'MATCHES', color: 'bg-amber-500', image: '/dashboard/today.png' },
-            { label: 'ΠΕΛΑΤΕΣ', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, detail: 'DATABASE', color: 'bg-zinc-800', image: '/dashboard/customers.png' }
+            { label: 'ΚΡΑΤΗΣΕΙΣ', value: bookings.length, detail: '30 ΗΜΕΡΕΣ', icon: <CalendarCheck className="h-5 w-5 text-emerald-600" /> },
+            { label: 'LIVE', value: getLiveBookings(), detail: 'ΤΩΡΑ ΣΤΑ ΓΗΠΕΔΑ', icon: <Radio className="h-5 w-5 text-blue-600" /> },
+            { label: 'ΣΗΜΕΡΑ', value: getTodaysBookings().length, detail: 'MATCHES', icon: <FootballPitch className="h-5 w-5 text-emerald-600" /> },
+            { label: 'ΠΕΛΑΤΕΣ', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, detail: 'DATABASE', icon: <UserSearch className="h-5 w-5 text-zinc-600" /> }
           ].map((stat, i) => (
-            <Card key={i} className="rounded-2xl border-none shadow-sm overflow-hidden group transition-all duration-500 hover:shadow-md h-28 relative">
-              <div className="absolute inset-0 z-0">
-                <Image src={stat.image} alt="" fill className="object-cover opacity-60 group-hover:scale-110 transition-transform duration-700" />
-                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors" />
-              </div>
-              <CardContent className="p-4 relative z-10 h-full flex flex-col justify-center">
-                <p className="text-[9px] font-black text-white/70 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
-                <div className="flex items-baseline gap-1">
-                  <p className="text-2xl font-black text-white tracking-tighter leading-none">{stat.value}</p>
+            <Card key={i} className="rounded-2xl border border-zinc-200 shadow-sm overflow-hidden group transition-all duration-300 hover:shadow-md h-[100px] bg-white">
+              <CardContent className="p-5 h-full flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                  <p className="text-3xl font-black text-zinc-900 tracking-tighter leading-none">{stat.value}</p>
+                  <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-tight mt-1.5">{stat.detail}</p>
                 </div>
-                <p className="text-[8px] font-bold text-white/50 uppercase tracking-tight mt-1">{stat.detail}</p>
+                <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-colors">
+                  {stat.icon}
+                </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
         {/* Academy Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           {[
-            { label: 'ΣΥΝΟΛΟ ΤΜΗΜΑΤΩΝ', value: squads.length, detail: 'ΕΝΕΡΓΑ ΤΜΗΜΑΤΑ', icon: <Trophy className="h-5 w-5 text-emerald-600" />, color: 'bg-emerald-50 border-b-4 border-emerald-200/50' },
-            { label: 'ΣΥΝΟΛΟ ΑΘΛΗΤΩΝ', value: getTotalAthletes(), detail: 'ΕΝΕΡΓΟΙ ΑΘΛΗΤΕΣ', icon: <Users className="h-5 w-5 text-blue-600" />, color: 'bg-blue-50 border-b-4 border-blue-200/50' },
-            { label: 'ΠΡΟΠΟΝΗΣΕΙΣ', value: getTodaysTrainings().length, detail: 'ΣΗΜΕΡΑ', icon: <CalendarDays className="h-5 w-5 text-amber-600" />, color: 'bg-amber-50 border-b-4 border-amber-200/50' },
-            { label: 'ΙΑΤΡΙΚΑ', value: medicalAlerts.expired.length + medicalAlerts.expiringSoon.length, detail: 'ΕΚΚΡΕΜΟΤΗΤΕΣ', icon: <HeartPulse className="h-5 w-5 text-red-600" />, color: 'bg-red-50 border-b-4 border-red-200/50' }
+            { label: 'ΣΥΝΟΛΟ ΤΜΗΜΑΤΩΝ', value: squads.length, detail: 'ΕΝΕΡΓΑ ΤΜΗΜΑΤΑ', icon: <Trophy className="h-5 w-5 text-emerald-600" /> },
+            { label: 'ΣΥΝΟΛΟ ΑΘΛΗΤΩΝ', value: getTotalAthletes(), detail: 'ΕΝΕΡΓΟΙ ΑΘΛΗΤΕΣ', icon: <Users className="h-5 w-5 text-blue-600" /> },
+            { label: 'ΠΡΟΠΟΝΗΣΕΙΣ', value: getTodaysTrainings().length, detail: 'ΣΗΜΕΡΑ ΣΤΗΝ ΑΚΑΔΗΜΙΑ', icon: <CalendarDays className="h-5 w-5 text-amber-600" /> },
+            { label: 'ΙΑΤΡΙΚΑ', value: medicalAlerts.expired.length + medicalAlerts.expiringSoon.length, detail: 'ΕΚΚΡΕΜΟΤΗΤΕΣ', icon: <HeartPulse className="h-5 w-5 text-red-600" /> }
           ].map((stat, i) => (
-            <Card key={i} className={cn("rounded-[2rem] border-t border-x border-black/[0.02] shadow-xl shadow-zinc-200/50 transition-all hover:translate-y-[-2px] h-32 relative", stat.color)}>
-              <CardContent className="p-5 h-full flex flex-col justify-center">
-                <div className="flex justify-between items-start">
-                  <div className="space-y-1.5">
-                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
-                    <p className="text-3xl font-black text-zinc-900 tracking-tighter leading-none">{stat.value}</p>
-                    <div className="flex items-center gap-1.5 mt-2">
-                      <div className="h-1 w-1 rounded-full bg-zinc-300" />
-                      <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-tight">{stat.detail}</p>
-                    </div>
-                  </div>
-                  <div className="h-10 w-10 rounded-2xl bg-white shadow-sm border border-zinc-50 flex items-center justify-center shrink-0">
-                    {stat.icon}
-                  </div>
+            <Card key={i} className="rounded-2xl border border-zinc-200 shadow-sm transition-all hover:shadow-md h-[100px] bg-white group">
+              <CardContent className="p-5 h-full flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">{stat.label}</p>
+                  <p className="text-3xl font-black text-zinc-900 tracking-tighter leading-none">{stat.value}</p>
+                  <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-tight mt-1.5">{stat.detail}</p>
+                </div>
+                <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                  {stat.icon}
                 </div>
               </CardContent>
             </Card>
@@ -1197,88 +1192,48 @@ function AdminDashboard() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {getTodaysBookings().slice(0, 4).length === 0 ? (
-              <div className="col-span-full">
-                <Card className="rounded-[2.5rem] border-2 border-dashed border-zinc-100 bg-zinc-50/50 shadow-none flex flex-col items-center justify-center p-12 text-center group transition-all hover:bg-zinc-50">
-                  <div className="h-16 w-16 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center mb-4 transition-transform group-hover:scale-110 shadow-sm">
-                    <Smile className="h-8 w-8 text-emerald-400" />
-                  </div>
-                  <h3 className="text-zinc-900 font-black uppercase tracking-tight">{toGreekUpperCase('Δεν υπάρχουν κρατήσεις σήμερα')}</h3>
-                  <p className="text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-widest">{toGreekUpperCase('Ολα ετοιμα για το επομενο match')}</p>
-                </Card>
-              </div>
+          <div className="space-y-3">
+            {getTodaysBookings().slice(0, 6).length === 0 ? (
+              <Card className="rounded-2xl border-2 border-dashed border-zinc-100 bg-zinc-50/50 shadow-none flex flex-col items-center justify-center p-10 text-center">
+                <div className="h-12 w-12 rounded-xl bg-white border border-zinc-100 flex items-center justify-center mb-3">
+                  <Smile className="h-6 w-6 text-zinc-300" />
+                </div>
+                <h3 className="text-zinc-900 font-black text-xs uppercase tracking-tight">{toGreekUpperCase('Δεν υπάρχουν κρατήσεις σήμερα')}</h3>
+              </Card>
             ) : (
-              <>
-                {getTodaysBookings().slice(0, 4).map((booking: Booking) => {
-                  const pitch = pitches.find(p => p.id === booking.pitchId);
-                  return (
-                    <Card key={booking.id} className="rounded-[2.5rem] border border-black/[0.08] bg-white shadow-xl shadow-zinc-200/20 overflow-hidden group hover:shadow-2xl hover:shadow-emerald-900/5 transition-all duration-500">
-                      <CardContent className="p-8">
-                        <div className="flex flex-col gap-6">
-                          {/* User Info Row */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className="h-12 w-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden">
-                                <User className="h-6 w-6 text-emerald-600" />
-                              </div>
-                              <div className="space-y-0.5">
-                                <h4 className="text-sm font-black text-zinc-900 uppercase tracking-tight">
-                                  {toGreekUpperCase(booking.userName || 'Unknown ')}
-                                </h4>
-                                <div className="flex items-center gap-2">
-                                  <div className="h-1 w-1 rounded-full bg-emerald-500" />
-                                  <p className="text-[10px] font-bold text-zinc-400">REGISTERED</p>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-2xl font-black text-zinc-900 tracking-tighter">
-                                {new Date(booking.startTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit', hour12: false })}
-                              </p>
-                              <p className="text-[10px] font-black text-emerald-500 uppercase">STARTING</p>
-                            </div>
-                          </div>
-
-                          {/* Details Row */}
-                          <div className="flex items-center gap-4 py-3 border-y border-zinc-50">
-                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-100">
-                              <FootballPitch className="h-3 w-3 text-zinc-400" />
-                              <span className="text-[10px] font-black text-zinc-600 uppercase tracking-tight">{pitch ? toGreekUpperCase(pitch.name) : 'FIELD'}</span>
-                            </div>
-                            {booking.userPhone && (
-                              <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-100">
-                                <Phone className="h-3 w-3 text-zinc-400" />
-                                <span className="text-[10px] font-black text-zinc-600 tracking-tight">{booking.userPhone}</span>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Action Footer */}
-                          <div className="flex items-center gap-3">
-                            <div className="flex-1">
-                              {getStatusBadge(booking.status)}
-                            </div>
-                            <Button size="icon" variant="outline" className="h-10 w-10 rounded-2xl border-zinc-100 hover:bg-emerald-50 hover:border-emerald-200 text-zinc-400 transition-all" asChild>
-                              <Link href={`/management/bookings/${booking.id}`}>
-                                <Eye className="h-4 w-4" />
-                              </Link>
-                            </Button>
-                          </div>
+              getTodaysBookings().slice(0, 6).map((booking: Booking) => {
+                const pitch = pitches.find(p => p.id === booking.pitchId);
+                return (
+                  <div key={booking.id} className="group relative flex items-center justify-between p-4 rounded-2xl bg-white border border-zinc-200 hover:border-emerald-200 hover:shadow-md transition-all duration-300">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="h-10 w-10 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-colors shrink-0">
+                        <User className="h-5 w-5 text-zinc-400 group-hover:text-emerald-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight truncate">
+                          {toGreekUpperCase(booking.userName || 'Unknown ')}
+                        </h4>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[10px] font-bold text-zinc-400 uppercase">{pitch?.name || 'FIELD'}</span>
+                          <span className="text-zinc-300">•</span>
+                          <span className="text-[10px] font-bold text-emerald-600 uppercase">{new Date(booking.startTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit', hour12: false })} START</span>
                         </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-                {getTodaysBookings().slice(0, 4).length > 0 && getTodaysBookings().slice(0, 4).length < 2 && (
-                  <Card className="rounded-[2.5rem] border-2 border-dashed border-zinc-100 bg-zinc-50/50 shadow-none flex flex-col items-center justify-center p-8 text-center opacity-60">
-                    <div className="h-10 w-10 rounded-xl bg-white border border-zinc-100 flex items-center justify-center mb-3">
-                      <Smile className="h-5 w-5 text-emerald-300" />
+                      </div>
                     </div>
-                    <h3 className="text-zinc-500 font-bold text-xs uppercase tracking-tight">{toGreekUpperCase('Δεν υπάρχουν άλλες κρατήσεις')}</h3>
-                  </Card>
-                )}
-              </>
+                    
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="hidden sm:block">
+                        {getStatusBadge(booking.status)}
+                      </div>
+                      <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50" asChild>
+                        <Link href={`/management/bookings/${booking.id}`}>
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
@@ -1302,88 +1257,50 @@ function AdminDashboard() {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {getTodaysTrainings().slice(0, 4).length === 0 ? (
-              <div className="col-span-full">
-                <Card className="rounded-[2.5rem] border-2 border-dashed border-zinc-100 bg-zinc-50/50 shadow-none flex flex-col items-center justify-center p-12 text-center group transition-all hover:bg-zinc-50">
-                  <div className="h-16 w-16 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center mb-4 transition-transform group-hover:scale-110 shadow-sm">
-                    <Smile className="h-8 w-8 text-emerald-400" />
-                  </div>
-                  <h3 className="text-zinc-900 font-black uppercase tracking-tight">{toGreekUpperCase('Δεν υπάρχουν προπονήσεις σήμερα')}</h3>
-                  <p className="text-[10px] font-bold text-zinc-400 mt-1 uppercase tracking-widest">{toGreekUpperCase('Η ακαδημια εχει πρεσαρει αρκετα για σημερα')}</p>
-                </Card>
-              </div>
+          <div className="space-y-3">
+            {getTodaysTrainings().slice(0, 6).length === 0 ? (
+              <Card className="rounded-2xl border-2 border-dashed border-zinc-100 bg-zinc-50/50 shadow-none flex flex-col items-center justify-center p-10 text-center">
+                <div className="h-12 w-12 rounded-xl bg-white border border-zinc-100 flex items-center justify-center mb-3">
+                  <Smile className="h-6 w-6 text-zinc-300" />
+                </div>
+                <h3 className="text-zinc-900 font-black text-xs uppercase tracking-tight">{toGreekUpperCase('Δεν υπάρχουν προπονήσεις σήμερα')}</h3>
+              </Card>
             ) : (
-              <>
-                {getTodaysTrainings().slice(0, 4).map((training: TrainingSession) => {
-                  const squad = squads.find(s => s.id === training.squadId);
-                  return (
-                    <Card key={training.id} className="rounded-[2.5rem] border border-black/[0.08] bg-white shadow-xl shadow-zinc-200/20 overflow-hidden group hover:shadow-2xl hover:shadow-emerald-900/5 transition-all duration-500">
-                      <CardContent className="p-8">
-                        <div className="flex flex-col gap-6">
-                          {/* Session Info Row */}
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                              <div className="h-12 w-12 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden">
-                                <Activity className="h-6 w-6 text-emerald-600" />
-                              </div>
-                              <div className="space-y-0.5">
-                                <h4 className="text-sm font-black text-zinc-900 uppercase tracking-tight truncate max-w-[100px]">
-                                  {toGreekUpperCase(squad?.name || 'SQUAD')}
-                                </h4>
-                                <div className="flex items-center gap-2">
-                                  <div className="h-1 w-1 rounded-full bg-emerald-500" />
-                                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">{training.type}</p>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-2xl font-black text-zinc-900 tracking-tighter">
-                                {training.startTime}
-                              </p>
-                              <p className="text-[10px] font-black text-emerald-500 uppercase">START</p>
-                            </div>
-                          </div>
-
-                          {/* Details Row */}
-                          <div className="flex items-center gap-4 py-3 border-y border-zinc-50">
-                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-100">
-                              <User className="h-3 w-3 text-zinc-400" />
-                              <span className="text-[10px] font-black text-zinc-600 uppercase tracking-tight">{toGreekUpperCase(training.coachName || 'COACH')}</span>
-                            </div>
-                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-zinc-50 border border-zinc-100">
-                              <Clock className="h-3 w-3 text-zinc-400" />
-                              <span className="text-[10px] font-black text-zinc-600 tracking-tight">{training.endTime} END</span>
-                            </div>
-                          </div>
-
-                          {/* Action Footer */}
-                          <div className="flex items-center gap-3">
-                            <div className="flex-1">
-                              <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 uppercase font-black text-[9px] px-2 py-0">
-                                {toGreekUpperCase(training.status)}
-                              </Badge>
-                            </div>
-                            <Button size="icon" variant="outline" className="h-10 w-10 rounded-2xl border-zinc-100 hover:bg-emerald-50 hover:border-emerald-200 text-zinc-400 transition-all" asChild>
-                              <Link href={`/management/academy/training/${training.id}`}>
-                                <Eye className="h-4 w-4" />
-                              </Link>
-                            </Button>
-                          </div>
+              getTodaysTrainings().slice(0, 6).map((training: TrainingSession) => {
+                const squad = squads.find(s => s.id === training.squadId);
+                return (
+                  <div key={training.id} className="group relative flex items-center justify-between p-4 rounded-2xl bg-white border border-zinc-200 hover:border-emerald-200 hover:shadow-md transition-all duration-300">
+                    <div className="flex items-center gap-4 min-w-0">
+                      <div className="h-10 w-10 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-colors shrink-0">
+                        <Activity className="h-5 w-5 text-zinc-400 group-hover:text-emerald-600" />
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight truncate">
+                          {toGreekUpperCase(squad?.name || 'SQUAD')}
+                        </h4>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[10px] font-bold text-zinc-400 uppercase">{training.type}</span>
+                          <span className="text-zinc-300">•</span>
+                          <span className="text-[10px] font-bold text-emerald-600 uppercase">{training.startTime} - {training.endTime}</span>
                         </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-                {getTodaysTrainings().slice(0, 4).length > 0 && getTodaysTrainings().slice(0, 4).length < 2 && (
-                  <Card className="rounded-[2.5rem] border-2 border-dashed border-zinc-100 bg-zinc-50/50 shadow-none flex flex-col items-center justify-center p-8 text-center opacity-60">
-                    <div className="h-10 w-10 rounded-xl bg-white border border-zinc-100 flex items-center justify-center mb-3">
-                      <Smile className="h-5 w-5 text-emerald-300" />
+                      </div>
                     </div>
-                    <h3 className="text-zinc-500 font-bold text-xs uppercase tracking-tight">{toGreekUpperCase('Δεν υπάρχουν άλλες προπονήσεις')}</h3>
-                  </Card>
-                )}
-              </>
+                    
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="hidden sm:block">
+                        <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 uppercase font-black text-[9px] px-2 py-0">
+                          {toGreekUpperCase(training.status)}
+                        </Badge>
+                      </div>
+                      <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50" asChild>
+                        <Link href={`/management/academy/training/${training.id}`}>
+                          <Eye className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })
             )}
           </div>
         </div>
@@ -1395,30 +1312,30 @@ function AdminDashboard() {
 
           {/* Medical Alerts - Left */}
           {(medicalAlerts.expired.length > 0 || medicalAlerts.expiringSoon.length > 0) && (
-            <div className="rounded-3xl bg-white border-2 border-red-100 overflow-hidden shadow-lg shadow-red-50 h-fit">
+            <div className="rounded-2xl bg-white border border-zinc-200 overflow-hidden shadow-sm h-fit">
               {/* Header */}
               <div
-                className="bg-white border-b-2 border-red-100 px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-red-50 transition-colors"
+                className="bg-white border-b border-zinc-100 px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 transition-colors"
                 onClick={() => setIsMedicalExpanded(!isMedicalExpanded)}
               >
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-xl bg-red-100 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-xl bg-red-50 flex items-center justify-center">
                     <HeartPulse className="h-5 w-5 text-red-600" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-red-600 uppercase tracking-wider">Ιατρικά Πιστοποιητικά</h3>
-                    <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Απαιτείται άμεση ενέργεια</p>
+                    <h3 className="text-sm font-black text-zinc-900 uppercase tracking-tight">Ιατρικά Πιστοποιητικά</h3>
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">Απαιτείται άμεση ενέργεια</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2 hidden sm:flex">
                     {medicalAlerts.expired.length > 0 && (
-                      <div className="px-2.5 py-1 rounded-full bg-red-100 text-red-600 text-[10px] font-black">
+                      <div className="px-2.5 py-1 rounded-full bg-red-50 text-red-600 text-[10px] font-black">
                         {medicalAlerts.expired.length} ΛΗΞΑΝΤΑ
                       </div>
                     )}
                   </div>
-                  {isMedicalExpanded ? <ChevronUp className="h-5 w-5 text-red-500" /> : <ChevronDown className="h-5 w-5 text-red-500" />}
+                  {isMedicalExpanded ? <ChevronUp className="h-4 w-4 text-zinc-400" /> : <ChevronDown className="h-4 w-4 text-zinc-400" />}
                 </div>
               </div>
 
@@ -1477,26 +1394,26 @@ function AdminDashboard() {
 
           {/* Payment Alerts - Right */}
           {paymentAlerts.length > 0 && (
-            <div className="rounded-3xl bg-white border-2 border-orange-100 overflow-hidden shadow-lg shadow-orange-50 h-fit">
+            <div className="rounded-2xl bg-white border border-zinc-200 overflow-hidden shadow-sm h-fit">
               {/* Header */}
               <div
-                className="bg-white border-b-2 border-orange-100 px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-orange-50 transition-colors"
+                className="bg-white border-b border-zinc-100 px-6 py-4 flex items-center justify-between cursor-pointer hover:bg-zinc-50 transition-colors"
                 onClick={() => setIsPaymentsExpanded(!isPaymentsExpanded)}
               >
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-xl bg-orange-100 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center">
                     <BanknoteIcon className="h-5 w-5 text-orange-600" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-orange-600 uppercase tracking-wider">Ανεξόφλητες Συνδρομές</h3>
-                    <p className="text-[10px] font-bold text-orange-400 uppercase tracking-widest">Τρέχον έτος · {new Date().getFullYear()}</p>
+                    <h3 className="text-sm font-black text-zinc-900 uppercase tracking-tight">Ανεξόφλητες Συνδρομές</h3>
+                    <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">Τρέχον έτος · {new Date().getFullYear()}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="px-2.5 py-1 rounded-full bg-orange-100 text-orange-600 text-[10px] font-black hidden sm:block">
+                  <div className="px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 text-[10px] font-black hidden sm:block">
                     {paymentAlerts.length} ΑΘΛΗΤΕΣ
                   </div>
-                  {isPaymentsExpanded ? <ChevronUp className="h-5 w-5 text-orange-500" /> : <ChevronDown className="h-5 w-5 text-orange-500" />}
+                  {isPaymentsExpanded ? <ChevronUp className="h-4 w-4 text-zinc-400" /> : <ChevronDown className="h-4 w-4 text-zinc-400" />}
                 </div>
               </div>
 
@@ -1557,19 +1474,19 @@ function AdminDashboard() {
       )}
 
       {/* 50/50 Row for Academies and Pitches */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 pt-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
         {/* Academies List - Left Side */}
-        <div className="rounded-3xl bg-white border border-zinc-200/80 overflow-hidden shadow-xl shadow-zinc-200/20 h-fit">
+        <div className="rounded-2xl bg-white border border-zinc-200 overflow-hidden shadow-sm h-fit">
           <div
-            className="flex items-center justify-between cursor-pointer group/header px-6 py-5 bg-zinc-50/50 hover:bg-zinc-50 transition-colors border-b border-zinc-100"
+            className="flex items-center justify-between cursor-pointer group/header px-6 py-5 bg-white hover:bg-zinc-50 transition-colors border-b border-zinc-100"
             onClick={() => setIsSquadsExpanded(!isSquadsExpanded)}
           >
             <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 shadow-inner group-hover/header:bg-emerald-200 transition-colors shrink-0">
+              <div className="h-10 w-10 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-600 group-hover/header:bg-emerald-50 group-hover/header:text-emerald-600 group-hover/header:border-emerald-100 transition-all shrink-0">
                 <Trophy className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-sm font-black text-zinc-900 uppercase tracking-widest">
+                <h2 className="text-sm font-black text-zinc-900 uppercase tracking-tight">
                   {toGreekUpperCase('Ακαδημίες')}
                 </h2>
                 <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
@@ -1578,12 +1495,12 @@ function AdminDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button size="icon" variant="ghost" className="h-8 w-8 rounded-xl bg-white shadow-sm border border-zinc-200 hover:bg-zinc-100 text-zinc-600 shrink-0" asChild onClick={(e) => e.stopPropagation()}>
+              <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg bg-zinc-50 border border-zinc-100 hover:bg-zinc-900 hover:text-white transition-all shrink-0" asChild onClick={(e) => e.stopPropagation()}>
                 <Link href="/management/academy/squads">
                   <Plus className="h-4 w-4" />
                 </Link>
               </Button>
-              {isSquadsExpanded ? <ChevronUp className="h-5 w-5 text-zinc-400 shrink-0" /> : <ChevronDown className="h-5 w-5 text-zinc-400 shrink-0" />}
+              {isSquadsExpanded ? <ChevronUp className="h-4 w-4 text-zinc-400 shrink-0" /> : <ChevronDown className="h-4 w-4 text-zinc-400 shrink-0" />}
             </div>
           </div>
 
@@ -1603,26 +1520,22 @@ function AdminDashboard() {
                     </div>
                   ) : (
                     squads.slice(0, 5).map((squad) => (
-                      <Card key={squad.id} className="rounded-3xl border border-black/[0.08] bg-white shadow-md shadow-zinc-200/20 overflow-hidden group hover:shadow-lg transition-all duration-300">
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-4">
-                            <div className="h-14 w-14 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shrink-0 relative">
-                              <Trophy className="h-6 w-6 text-emerald-600 relative z-10" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h5 className="text-sm font-black text-zinc-900 uppercase tracking-tight truncate">{toGreekUpperCase(squad.name)}</h5>
-                              <p className="text-[11px] font-bold text-zinc-500 mt-1 uppercase tracking-wider">
-                                {toGreekUpperCase(squad.ageGroup)}
-                              </p>
-                            </div>
-                            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" asChild>
-                              <Link href={`/management/academy/squads`}>
-                                <Eye className="h-4 w-4" />
-                              </Link>
-                            </Button>
+                      <div key={squad.id} className="group flex items-center justify-between p-4 rounded-xl bg-zinc-50/50 border border-zinc-100 hover:border-emerald-200 hover:bg-white transition-all duration-300">
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className="h-10 w-10 rounded-lg bg-white border border-zinc-100 flex items-center justify-center shrink-0">
+                            <Trophy className="h-5 w-5 text-zinc-400 group-hover:text-emerald-500 transition-colors" />
                           </div>
-                        </CardContent>
-                      </Card>
+                          <div className="min-w-0">
+                            <h5 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight truncate">{toGreekUpperCase(squad.name)}</h5>
+                            <p className="text-[10px] font-bold text-zinc-400 mt-0.5 uppercase tracking-wider">{toGreekUpperCase(squad.ageGroup)}</p>
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-white" asChild>
+                          <Link href={`/management/academy/squads`}>
+                            <Eye className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </div>
                     ))
                   )}
                 </div>
@@ -1632,17 +1545,17 @@ function AdminDashboard() {
         </div>
 
         {/* Pitches List - Right Side */}
-        <div className="rounded-3xl bg-white border border-zinc-200/80 overflow-hidden shadow-xl shadow-zinc-200/20 h-fit">
+        <div className="rounded-2xl bg-white border border-zinc-200 overflow-hidden shadow-sm h-fit">
           <div
-            className="flex items-center justify-between cursor-pointer group/header px-6 py-5 bg-zinc-50/50 hover:bg-zinc-50 transition-colors border-b border-zinc-100"
+            className="flex items-center justify-between cursor-pointer group/header px-6 py-5 bg-white hover:bg-zinc-50 transition-colors border-b border-zinc-100"
             onClick={() => setIsPitchesExpanded(!isPitchesExpanded)}
           >
             <div className="flex items-center gap-4">
-              <div className="h-10 w-10 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600 shadow-inner group-hover/header:bg-emerald-200 transition-colors shrink-0">
+              <div className="h-10 w-10 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-600 group-hover/header:bg-emerald-50 group-hover/header:text-emerald-600 group-hover/header:border-emerald-100 transition-all shrink-0">
                 <FootballPitch className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-sm font-black text-zinc-900 uppercase tracking-widest">
+                <h2 className="text-sm font-black text-zinc-900 uppercase tracking-tight">
                   {toGreekUpperCase('Γήπεδα')}
                 </h2>
                 <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
@@ -1651,12 +1564,12 @@ function AdminDashboard() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <Button size="icon" variant="ghost" className="h-8 w-8 rounded-xl bg-white shadow-sm border border-zinc-200 hover:bg-zinc-100 text-zinc-600 shrink-0" asChild onClick={(e) => e.stopPropagation()}>
+              <Button size="icon" variant="ghost" className="h-8 w-8 rounded-lg bg-zinc-50 border border-zinc-100 hover:bg-zinc-900 hover:text-white transition-all shrink-0" asChild onClick={(e) => e.stopPropagation()}>
                 <Link href="/management/pitches/new">
                   <Plus className="h-4 w-4" />
                 </Link>
               </Button>
-              {isPitchesExpanded ? <ChevronUp className="h-5 w-5 text-zinc-400 shrink-0" /> : <ChevronDown className="h-5 w-5 text-zinc-400 shrink-0" />}
+              {isPitchesExpanded ? <ChevronUp className="h-4 w-4 text-zinc-400 shrink-0" /> : <ChevronDown className="h-4 w-4 text-zinc-400 shrink-0" />}
             </div>
           </div>
 
@@ -1676,27 +1589,26 @@ function AdminDashboard() {
                     </div>
                   ) : (
                     pitches.slice(0, 5).map((pitch) => (
-                      <Card key={pitch.id} className="rounded-3xl border border-black/[0.08] bg-white shadow-md shadow-zinc-200/10 overflow-hidden group hover:shadow-lg transition-all duration-300">
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-4">
-                            <div className="h-14 w-20 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shrink-0 relative">
-                              <FootballPitch className="h-10 w-16 text-emerald-600/20 absolute -right-2 -bottom-2 rotate-12" />
-                              <FootballPitch className="h-6 w-6 text-emerald-600 relative z-10" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <h5 className="text-sm font-black text-zinc-900 uppercase tracking-tight truncate">{toGreekUpperCase(pitch.name)} <span className="text-[10px] text-zinc-400 ml-1">{pitch.type}</span></h5>
-                              <p className="text-[11px] font-bold text-zinc-500 mt-1">
-                                €{pitch.pricePerSlot} <span className="text-zinc-300 mx-1">•</span> €{getPricePerPerson(pitch.pricePerSlot, pitch.type)}/άτομο
-                              </p>
-                            </div>
-                            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" asChild>
-                              <Link href={`/management/pitches/${pitch.id}`}>
-                                <Pencil className="h-4 w-4" />
-                              </Link>
-                            </Button>
+                      <div key={pitch.id} className="group flex items-center justify-between p-4 rounded-xl bg-zinc-50/50 border border-zinc-100 hover:border-emerald-200 hover:bg-white transition-all duration-300">
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className="h-10 w-14 rounded-lg bg-white border border-zinc-100 flex items-center justify-center overflow-hidden shrink-0 relative">
+                            <FootballPitch className="h-5 w-5 text-zinc-400 group-hover:text-emerald-500 transition-colors shrink-0" />
                           </div>
-                        </CardContent>
-                      </Card>
+                          <div className="min-w-0">
+                            <h5 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight truncate">
+                              {toGreekUpperCase(pitch.name)} <span className="text-[9px] text-zinc-400 ml-1 font-bold">{pitch.type}</span>
+                            </h5>
+                            <p className="text-[11px] font-bold text-zinc-400 mt-0.5">
+                              €{pitch.pricePerSlot} <span className="text-zinc-300 mx-1">•</span> €{getPricePerPerson(pitch.pricePerSlot, pitch.type)}/άτομο
+                            </p>
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-white" asChild>
+                          <Link href={`/management/pitches/${pitch.id}`}>
+                            <Pencil className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </div>
                     ))
                   )}
                 </div>
