@@ -15,6 +15,7 @@ interface AuthContextType {
   userRole: 'admin' | 'coach' | null;
   canViewAllSquads: boolean;  // true for admin, or coach with 'all_squads' mode
   bookingsEnabled: boolean;  // whether online bookings are active for this venue
+  setBookingsEnabled: (enabled: boolean) => void;  // optimistic update
   signOut: () => Promise<void>;
 }
 
@@ -154,6 +155,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     userRole: normalizedRole,
     canViewAllSquads: isAdmin || venueOwner?.coachViewMode === 'all_squads',
     bookingsEnabled,
+    setBookingsEnabled,
     signOut,
   };
 

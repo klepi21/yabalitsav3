@@ -162,8 +162,21 @@ function CoachDashboard() {
 
   if (authLoading || dataLoading) {
     return (
-      <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+      <div className="space-y-6 p-6 lg:pl-[280px] animate-pulse">
+        <div className="flex items-center gap-4 pb-4">
+          <div className="h-12 w-12 rounded-2xl bg-zinc-200" />
+          <div className="space-y-2">
+            <div className="h-5 w-48 bg-zinc-200 rounded" />
+            <div className="h-3 w-32 bg-zinc-100 rounded" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-24 rounded-2xl bg-zinc-100" />
+          ))}
+        </div>
+        <div className="h-48 rounded-2xl bg-zinc-100" />
+        <div className="h-48 rounded-2xl bg-zinc-100" />
       </div>
     );
   }
@@ -414,11 +427,53 @@ function CoachDashboard() {
   );
 }
 
+function DashboardSkeleton() {
+  return (
+    <div className="space-y-6 p-6 lg:pl-[280px] animate-pulse">
+      {/* Toggle skeleton */}
+      <div className="flex items-center justify-between p-4 rounded-2xl bg-zinc-50 border border-zinc-100">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-zinc-200" />
+          <div className="space-y-2">
+            <div className="h-4 w-48 bg-zinc-200 rounded" />
+            <div className="h-3 w-64 bg-zinc-100 rounded" />
+          </div>
+        </div>
+        <div className="h-7 w-12 bg-zinc-200 rounded-full" />
+      </div>
+      {/* Header skeleton */}
+      <div className="flex items-center gap-4 pb-6">
+        <div className="h-14 w-14 rounded-2xl bg-zinc-200" />
+        <div className="space-y-2">
+          <div className="h-6 w-56 bg-zinc-200 rounded" />
+          <div className="h-3 w-32 bg-zinc-100 rounded" />
+        </div>
+      </div>
+      {/* Stats skeleton */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-28 rounded-2xl bg-zinc-100" />
+        ))}
+      </div>
+      {/* Content skeleton */}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="h-64 rounded-2xl bg-zinc-100" />
+        <div className="h-64 rounded-2xl bg-zinc-100" />
+      </div>
+    </div>
+  );
+}
+
 export default function DashboardPage() {
   const { venueOwner, isLoading: authLoading, isCoach } = useAuth();
 
+  // Show skeleton while loading
+  if (authLoading) {
+    return <DashboardSkeleton />;
+  }
+
   // Coach gets a dedicated simplified dashboard
-  if (!authLoading && venueOwner && isCoach) {
+  if (venueOwner && isCoach) {
     return <CoachDashboard />;
   }
 
@@ -427,7 +482,7 @@ export default function DashboardPage() {
 }
 
 function AdminDashboard() {
-  const { user, venueOwner, isLoading: authLoading } = useAuth();
+  const { user, venueOwner, isLoading: authLoading, setBookingsEnabled } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -1027,9 +1082,14 @@ function AdminDashboard() {
             onClick={async () => {
               const newVal = !(venue.bookingsEnabled ?? true);
               try {
+                // Optimistic update
+                setVenue(prev => prev ? { ...prev, bookingsEnabled: newVal } : prev);
+                setBookingsEnabled(newVal);
                 await venueService.update(venue.id, { bookingsEnabled: newVal });
-                window.location.reload();
               } catch (err) {
+                // Revert on error
+                setVenue(prev => prev ? { ...prev, bookingsEnabled: !newVal } : prev);
+                setBookingsEnabled(!newVal);
                 console.error('Failed to toggle bookings:', err);
               }
             }}

@@ -93,10 +93,54 @@ function getFilteredNavigation(role: AppRole | null): NavItem[] {
     .filter((item): item is NavItem => item !== null);
 }
 
+function SidebarSkeleton() {
+  return (
+    <div className="flex h-full flex-col bg-white border-r border-zinc-100/80 animate-pulse">
+      <div className="flex h-20 items-center px-6 shrink-0 mb-2">
+        <div className="h-9 w-40 bg-zinc-100 rounded-lg" />
+      </div>
+      <nav className="flex-1 px-3 py-2">
+        <div className="space-y-4">
+          <div>
+            <div className="h-3 w-12 bg-zinc-100 rounded mx-4 mb-3" />
+            <div className="space-y-1">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+                  <div className="h-4 w-4 bg-zinc-100 rounded" />
+                  <div className="h-3.5 bg-zinc-100 rounded" style={{ width: `${60 + i * 15}px` }} />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <div className="h-3 w-16 bg-zinc-100 rounded mx-4 mb-3" />
+            <div className="space-y-1">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex items-center gap-3 px-4 py-2.5">
+                  <div className="h-4 w-4 bg-zinc-100 rounded" />
+                  <div className="h-3.5 bg-zinc-100 rounded" style={{ width: `${50 + i * 20}px` }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </nav>
+      <div className="p-4 space-y-4">
+        <div className="h-32 bg-zinc-100 rounded-2xl" />
+        <div className="h-10 bg-zinc-50 rounded-xl" />
+      </div>
+    </div>
+  );
+}
+
 function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const pathname = usePathname();
-  const { signOut, userRole, bookingsEnabled } = useAuth();
+  const { signOut, userRole, bookingsEnabled, isLoading } = useAuth();
+
+  // Show skeleton while auth is loading
+  if (isLoading) return <SidebarSkeleton />;
+
   const role = userRole || 'admin';
   const filteredNav = getFilteredNavigation(userRole);
   const perms = SIDEBAR_PERMISSIONS[role];
