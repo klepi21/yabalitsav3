@@ -162,24 +162,7 @@ function CoachDashboard() {
   }, [user, venueOwner, authLoading, router, pathname, venueId, canViewAll, coachSquadIds]);
 
   if (authLoading || dataLoading) {
-    return (
-      <div className="space-y-6 p-6 lg:pl-[280px] animate-pulse">
-        <div className="flex items-center gap-4 pb-4">
-          <div className="h-12 w-12 rounded-2xl bg-zinc-200" />
-          <div className="space-y-2">
-            <div className="h-5 w-48 bg-zinc-200 rounded" />
-            <div className="h-3 w-32 bg-zinc-100 rounded" />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-24 rounded-2xl bg-zinc-100" />
-          ))}
-        </div>
-        <div className="h-48 rounded-2xl bg-zinc-100" />
-        <div className="h-48 rounded-2xl bg-zinc-100" />
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   const today = new Date();
@@ -430,36 +413,22 @@ function CoachDashboard() {
 
 function DashboardSkeleton() {
   return (
-    <div className="space-y-6 p-6 lg:pl-[280px] animate-pulse">
-      {/* Toggle skeleton */}
-      <div className="flex items-center justify-between p-4 rounded-2xl bg-zinc-50 border border-zinc-100">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-zinc-200" />
-          <div className="space-y-2">
-            <div className="h-4 w-48 bg-zinc-200 rounded" />
-            <div className="h-3 w-64 bg-zinc-100 rounded" />
-          </div>
+    <div className="min-h-screen bg-zinc-50/50 flex flex-col items-center justify-center space-y-4">
+      <div className="relative">
+        <div className="h-16 w-16 rounded-2xl bg-white border border-zinc-200 shadow-xl flex items-center justify-center">
+          <Loader2 className="h-8 w-8 text-emerald-500 animate-spin" />
         </div>
-        <div className="h-7 w-12 bg-zinc-200 rounded-full" />
-      </div>
-      {/* Header skeleton */}
-      <div className="flex items-center gap-4 pb-6">
-        <div className="h-14 w-14 rounded-2xl bg-zinc-200" />
-        <div className="space-y-2">
-          <div className="h-6 w-56 bg-zinc-200 rounded" />
-          <div className="h-3 w-32 bg-zinc-100 rounded" />
+        <div className="absolute -bottom-2 -right-2 h-6 w-6 rounded-lg bg-emerald-500 flex items-center justify-center shadow-lg">
+          <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
         </div>
       </div>
-      {/* Stats skeleton */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-28 rounded-2xl bg-zinc-100" />
-        ))}
-      </div>
-      {/* Content skeleton */}
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="h-64 rounded-2xl bg-zinc-100" />
-        <div className="h-64 rounded-2xl bg-zinc-100" />
+      <div className="text-center space-y-1">
+        <p className="text-[11px] font-black text-zinc-900 uppercase tracking-widest animate-pulse">
+          {toGreekUpperCase('Yabalitsa Management')}
+        </p>
+        <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">
+          {toGreekUpperCase('Φορτωση δεδομενων...')}
+        </p>
       </div>
     </div>
   );
@@ -744,42 +713,7 @@ function AdminDashboard() {
 
   // Show loading while checking authentication or fetching initial data
   if (authLoading || (dataLoading && (bookings.length === 0 || pitches.length === 0))) {
-    return (
-      <div className="space-y-8 animate-pulse">
-        {/* Header skeleton */}
-        <div className="flex items-center gap-4">
-          <div className="h-14 w-14 rounded-2xl bg-zinc-200" />
-          <div className="space-y-2">
-            <div className="h-6 w-56 bg-zinc-200 rounded" />
-            <div className="h-3 w-36 bg-zinc-100 rounded" />
-          </div>
-        </div>
-        {/* Stats grid skeleton */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-28 rounded-2xl bg-zinc-100" />
-          ))}
-        </div>
-        {/* Bookings section skeleton */}
-        <div className="space-y-3">
-          <div className="h-5 w-40 bg-zinc-200 rounded" />
-          <div className="space-y-2">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-20 rounded-xl bg-zinc-100" />
-            ))}
-          </div>
-        </div>
-        {/* Academy section skeleton */}
-        <div className="space-y-3">
-          <div className="h-5 w-36 bg-zinc-200 rounded" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-24 rounded-xl bg-zinc-100" />
-            ))}
-          </div>
-        </div>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
 
   // Redirect if not authenticated
@@ -1022,6 +956,10 @@ function AdminDashboard() {
       console.error('Error updating booking status:', error);
     }
   };
+
+  if (dataLoading && (bookings.length === 0 || pitches.length === 0)) {
+    return <DashboardSkeleton />;
+  }
 
   if (!venueOwner) {
     return (
