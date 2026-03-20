@@ -1127,8 +1127,8 @@ function AdminDashboard() {
                     <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1">{stat.label}</p>
                     <p className="text-3xl font-black text-zinc-900 tracking-tighter leading-none">{stat.value}</p>
                     <div className="flex items-center gap-1.5 mt-2">
-                       <div className="h-1 w-1 rounded-full bg-zinc-300" />
-                       <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-tight">{stat.detail}</p>
+                      <div className="h-1 w-1 rounded-full bg-zinc-300" />
+                      <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-tight">{stat.detail}</p>
                     </div>
                   </div>
                   <div className="h-10 w-10 rounded-2xl bg-white shadow-sm border border-zinc-50 flex items-center justify-center shrink-0">
@@ -1189,7 +1189,7 @@ function AdminDashboard() {
                               </div>
                               <div className="space-y-0.5">
                                 <h4 className="text-sm font-black text-zinc-900 uppercase tracking-tight">
-                                  {toGreekUpperCase(booking.userName || 'Unknown')}
+                                  {toGreekUpperCase(booking.userName || 'Unknown ')}
                                 </h4>
                                 <div className="flex items-center gap-2">
                                   <div className="h-1 w-1 rounded-full bg-emerald-500" />
