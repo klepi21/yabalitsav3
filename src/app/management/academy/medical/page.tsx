@@ -212,8 +212,31 @@ export default function MedicalTrackingPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+      <div className="space-y-8 pb-20 animate-pulse">
+        {/* Header skeleton */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-14 w-14 rounded-2xl bg-zinc-200" />
+            <div className="space-y-2">
+              <div className="h-6 w-52 bg-zinc-200 rounded" />
+              <div className="h-3 w-64 bg-zinc-100 rounded" />
+            </div>
+          </div>
+        </div>
+        {/* Stats cards skeleton */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-28 rounded-2xl bg-zinc-100" />
+          ))}
+        </div>
+        {/* Search skeleton */}
+        <div className="h-11 w-full max-w-md rounded-xl bg-zinc-100" />
+        {/* List skeleton */}
+        <div className="space-y-2">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-zinc-100 h-16" />
+          ))}
+        </div>
       </div>
     );
   }

@@ -271,18 +271,37 @@ export default function SettingsPage() {
     }
   };
 
-  if (authLoading || !venueOwner) {
+  if (authLoading || !venueOwner || isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
-      </div>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+      <div className="space-y-6 animate-pulse">
+        {/* Header skeleton */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-4 border-b border-zinc-50">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-zinc-200" />
+            <div className="space-y-2">
+              <div className="h-6 w-36 bg-zinc-200 rounded" />
+              <div className="h-3 w-56 bg-zinc-100 rounded" />
+            </div>
+          </div>
+          <div className="h-10 w-44 rounded-2xl bg-zinc-100" />
+        </div>
+        {/* Two column layout skeleton */}
+        <div className="grid lg:grid-cols-2 gap-8">
+          <div className="space-y-8">
+            {/* Venue info card skeleton */}
+            <div className="rounded-2xl bg-zinc-100 h-80" />
+            {/* Coach management skeleton */}
+            <div className="rounded-2xl bg-zinc-100 h-20" />
+            {/* PIN section skeleton */}
+            <div className="rounded-2xl bg-zinc-100 h-48" />
+          </div>
+          <div className="space-y-8">
+            {/* Plan card skeleton */}
+            <div className="rounded-2xl bg-zinc-100 h-64" />
+            {/* Support card skeleton */}
+            <div className="rounded-2xl bg-zinc-100 h-48" />
+          </div>
+        </div>
       </div>
     );
   }

@@ -221,8 +221,23 @@ export default function BookingsPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+      <div className="space-y-6 animate-pulse">
+        {/* Header skeleton */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-zinc-200" />
+            <div className="space-y-2">
+              <div className="h-6 w-40 bg-zinc-200 rounded" />
+              <div className="h-3 w-56 bg-zinc-100 rounded" />
+            </div>
+          </div>
+          <div className="flex items-center gap-2.5">
+            <div className="h-10 w-48 rounded-xl bg-zinc-100" />
+            <div className="h-10 w-32 rounded-lg bg-zinc-200" />
+          </div>
+        </div>
+        {/* Calendar/content skeleton */}
+        <div className="rounded-2xl bg-zinc-100 h-[500px]" />
       </div>
     );
   }

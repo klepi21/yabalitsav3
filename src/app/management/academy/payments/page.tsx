@@ -336,8 +336,46 @@ export default function PaymentsDashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+      <div className="space-y-8 pb-20 animate-pulse">
+        {/* Header skeleton */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-14 w-14 rounded-2xl bg-zinc-200" />
+            <div className="space-y-2">
+              <div className="h-6 w-36 bg-zinc-200 rounded" />
+              <div className="h-3 w-52 bg-zinc-100 rounded" />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-10 w-10 rounded-xl bg-zinc-100" />
+            <div className="h-6 w-16 bg-zinc-200 rounded" />
+            <div className="h-10 w-10 rounded-xl bg-zinc-100" />
+          </div>
+        </div>
+        {/* Month grid skeleton */}
+        <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-2">
+          {[...Array(12)].map((_, i) => (
+            <div key={i} className="h-20 rounded-xl bg-zinc-100" />
+          ))}
+        </div>
+        {/* Search skeleton */}
+        <div className="h-11 w-full max-w-sm rounded-lg bg-zinc-100" />
+        {/* Table skeleton */}
+        <div className="rounded-2xl bg-white border border-zinc-100 overflow-hidden">
+          <div className="h-10 bg-zinc-50" />
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex items-center gap-3 px-3 py-3 border-b border-zinc-50">
+              <div className="h-8 w-8 rounded-lg bg-zinc-100" />
+              <div className="flex-1 space-y-1">
+                <div className="h-4 w-32 bg-zinc-100 rounded" />
+                <div className="h-3 w-48 bg-zinc-50 rounded" />
+              </div>
+              {[...Array(6)].map((_, j) => (
+                <div key={j} className="h-8 w-8 rounded-lg bg-zinc-50 hidden sm:block" />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

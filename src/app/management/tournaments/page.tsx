@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
-  Loader2,
   Trophy,
   Plus,
   Search,
@@ -83,8 +82,35 @@ export default function TournamentsPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+      <div className="space-y-10 pb-20 animate-pulse">
+        {/* Header skeleton */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-2">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-zinc-200" />
+            <div className="space-y-2">
+              <div className="h-6 w-36 bg-zinc-200 rounded" />
+              <div className="h-3 w-64 bg-zinc-100 rounded" />
+            </div>
+          </div>
+          <div className="h-10 w-36 rounded-xl bg-zinc-200" />
+        </div>
+        {/* Stats row skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-24 rounded-2xl bg-zinc-100" />
+          ))}
+        </div>
+        {/* Filters skeleton */}
+        <div className="flex flex-col xl:flex-row gap-3">
+          <div className="h-10 flex-1 rounded-lg bg-zinc-100" />
+          <div className="h-10 w-64 rounded-lg bg-zinc-100" />
+        </div>
+        {/* Cards grid skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="rounded-xl bg-zinc-100 h-44" />
+          ))}
+        </div>
       </div>
     );
   }

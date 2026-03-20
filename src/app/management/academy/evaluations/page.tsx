@@ -418,7 +418,32 @@ export default function EvaluationsPage() {
     }
   }
 
-  if (isLoading) return <div className="flex items-center justify-center min-h-[60vh]"><Loader2 className="h-6 w-6 animate-spin text-emerald-600" /></div>;
+  if (isLoading) return (
+    <div className="space-y-8 pb-20 animate-pulse">
+      {/* Header skeleton */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-zinc-50">
+        <div className="flex items-center gap-3.5">
+          <div className="h-12 w-12 rounded-xl bg-zinc-200" />
+          <div className="space-y-2">
+            <div className="h-6 w-40 bg-zinc-200 rounded" />
+            <div className="h-3 w-52 bg-zinc-100 rounded" />
+          </div>
+        </div>
+        <div className="h-9 w-28 rounded-lg bg-zinc-200" />
+      </div>
+      {/* Filters skeleton */}
+      <div className="flex items-center gap-3">
+        <div className="h-10 flex-1 rounded-lg bg-zinc-100" />
+        <div className="h-10 w-40 rounded-lg bg-zinc-100" />
+      </div>
+      {/* Athletes grid skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="rounded-2xl bg-zinc-100 h-44" />
+        ))}
+      </div>
+    </div>
+  );
 
   // Dialogs rendered in both views
   const renderDialogs = () => (

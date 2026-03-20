@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Loader2, Plus, Search, Users, Phone, Eye, Pencil, AlertCircle, MoreHorizontal } from 'lucide-react';
+import { Plus, Search, Users, Phone, Eye, Pencil, AlertCircle, MoreHorizontal } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { User } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -95,8 +95,38 @@ export default function CustomersPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+      <div className="space-y-6 animate-pulse">
+        {/* Header skeleton */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-2">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-zinc-200" />
+            <div className="space-y-2">
+              <div className="h-6 w-44 bg-zinc-200 rounded" />
+              <div className="h-3 w-56 bg-zinc-100 rounded" />
+            </div>
+          </div>
+          <div className="h-10 w-36 rounded-xl bg-zinc-200" />
+        </div>
+        {/* Stats + search skeleton */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="h-20 rounded-2xl bg-zinc-100" />
+          <div className="md:col-span-1 lg:col-span-3 h-14 rounded-2xl bg-zinc-100" />
+        </div>
+        {/* Table skeleton */}
+        <div className="rounded-2xl bg-white border border-zinc-100 overflow-hidden">
+          <div className="h-12 bg-zinc-50 border-b border-zinc-100" />
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="flex items-center gap-4 px-6 py-4 border-b border-zinc-50">
+              <div className="h-10 w-10 rounded-xl bg-zinc-100" />
+              <div className="flex-1 space-y-2">
+                <div className="h-4 w-36 bg-zinc-100 rounded" />
+                <div className="h-3 w-48 bg-zinc-50 rounded" />
+              </div>
+              <div className="h-4 w-24 bg-zinc-50 rounded hidden md:block" />
+              <div className="h-4 w-28 bg-zinc-50 rounded hidden sm:block" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

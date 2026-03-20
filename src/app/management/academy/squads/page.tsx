@@ -189,8 +189,30 @@ export default function SquadsPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+      <div className="space-y-10 pb-20 animate-pulse">
+        {/* Header skeleton */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-2">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-zinc-200" />
+            <div className="space-y-2">
+              <div className="h-6 w-32 bg-zinc-200 rounded" />
+              <div className="h-3 w-52 bg-zinc-100 rounded" />
+            </div>
+          </div>
+          <div className="h-10 w-32 rounded-xl bg-zinc-200" />
+        </div>
+        {/* Stats row skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="h-24 rounded-2xl bg-zinc-100" />
+          <div className="h-24 rounded-2xl bg-zinc-100" />
+          <div className="sm:col-span-2 lg:col-span-2 h-14 rounded-2xl bg-zinc-100" />
+        </div>
+        {/* Cards grid skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="rounded-2xl bg-zinc-100 h-56" />
+          ))}
+        </div>
       </div>
     );
   }

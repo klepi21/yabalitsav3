@@ -471,8 +471,24 @@ export default function ReportsPage() {
             </div>
           </div>
         ) : (
-          <div className="flex items-center justify-center min-h-[60vh]">
-            <Loader2 className="h-10 w-10 animate-spin text-emerald-600" />
+          <div className="space-y-10 pb-20 animate-pulse">
+            {/* Header skeleton */}
+            <div className="space-y-2">
+              <div className="h-6 w-52 bg-zinc-200 rounded" />
+              <div className="h-3 w-72 bg-zinc-100 rounded" />
+            </div>
+            {/* Metrics skeleton */}
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-24 rounded-xl bg-zinc-100" />
+              ))}
+            </div>
+            {/* Charts skeleton */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-72 rounded-xl bg-zinc-100" />
+              ))}
+            </div>
           </div>
         )}
       </div>

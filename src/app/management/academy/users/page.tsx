@@ -200,8 +200,41 @@ export default function AcademyUsersPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+      <div className="space-y-10 pb-20 animate-pulse">
+        {/* Header skeleton */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-2 border-b border-zinc-50">
+          <div className="flex items-center gap-3.5">
+            <div className="h-11 w-11 rounded-xl bg-zinc-200" />
+            <div className="space-y-2">
+              <div className="h-5 w-48 bg-zinc-200 rounded" />
+              <div className="h-3 w-64 bg-zinc-100 rounded" />
+            </div>
+          </div>
+          <div className="h-10 w-40 rounded-lg bg-zinc-200" />
+        </div>
+        {/* Stats cards skeleton */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="h-24 rounded-xl bg-zinc-100" />
+          ))}
+        </div>
+        {/* Search skeleton */}
+        <div className="h-10 w-full max-w-md rounded-lg bg-zinc-100" />
+        {/* Table skeleton */}
+        <div className="rounded-xl bg-white border border-zinc-100 overflow-hidden">
+          <div className="h-10 bg-zinc-50/50" />
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="flex items-center gap-4 px-4 py-3 border-t border-zinc-50">
+              <div className="flex-1 space-y-1.5">
+                <div className="h-4 w-36 bg-zinc-100 rounded" />
+                <div className="h-3 w-24 bg-zinc-50 rounded" />
+              </div>
+              <div className="h-5 w-16 bg-zinc-100 rounded-md" />
+              <div className="h-3 w-32 bg-zinc-50 rounded hidden lg:block" />
+              <div className="h-8 w-8 rounded-lg bg-zinc-50" />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }

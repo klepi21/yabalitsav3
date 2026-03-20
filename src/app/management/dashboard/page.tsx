@@ -744,11 +744,39 @@ function AdminDashboard() {
   // Show loading while checking authentication or fetching initial data
   if (authLoading || (dataLoading && (bookings.length === 0 || pitches.length === 0))) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh] flex-col gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-        <p className="text-xs font-black text-zinc-400 uppercase tracking-widest animate-pulse">
-          {toGreekUpperCase('Φορτωση δεδομενων...')}
-        </p>
+      <div className="space-y-8 animate-pulse">
+        {/* Header skeleton */}
+        <div className="flex items-center gap-4">
+          <div className="h-14 w-14 rounded-2xl bg-zinc-200" />
+          <div className="space-y-2">
+            <div className="h-6 w-56 bg-zinc-200 rounded" />
+            <div className="h-3 w-36 bg-zinc-100 rounded" />
+          </div>
+        </div>
+        {/* Stats grid skeleton */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="h-28 rounded-2xl bg-zinc-100" />
+          ))}
+        </div>
+        {/* Bookings section skeleton */}
+        <div className="space-y-3">
+          <div className="h-5 w-40 bg-zinc-200 rounded" />
+          <div className="space-y-2">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-20 rounded-xl bg-zinc-100" />
+            ))}
+          </div>
+        </div>
+        {/* Academy section skeleton */}
+        <div className="space-y-3">
+          <div className="h-5 w-36 bg-zinc-200 rounded" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-24 rounded-xl bg-zinc-100" />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

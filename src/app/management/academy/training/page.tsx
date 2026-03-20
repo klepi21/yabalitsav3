@@ -310,8 +310,36 @@ export default function TrainingListPage() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+      <div className="space-y-8 pb-20 animate-pulse">
+        {/* Header skeleton */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="h-12 w-12 rounded-xl bg-zinc-200" />
+            <div className="space-y-2">
+              <div className="h-6 w-40 bg-zinc-200 rounded" />
+              <div className="h-3 w-48 bg-zinc-100 rounded" />
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="h-10 w-28 rounded-xl bg-zinc-100" />
+            <div className="h-10 w-36 rounded-xl bg-zinc-200" />
+          </div>
+        </div>
+        {/* View toggle + nav skeleton */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-44 rounded-xl bg-zinc-100" />
+            <div className="h-10 w-64 rounded-xl bg-zinc-100" />
+            <div className="h-8 w-20 rounded-lg bg-zinc-100" />
+          </div>
+          <div className="flex items-center gap-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-6 w-16 rounded-md bg-zinc-100" />
+            ))}
+          </div>
+        </div>
+        {/* Calendar skeleton */}
+        <div className="rounded-2xl bg-zinc-100 h-[500px]" />
       </div>
     );
   }
