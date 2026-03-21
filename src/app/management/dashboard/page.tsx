@@ -182,7 +182,7 @@ function CoachDashboard() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-black text-zinc-900">
-            {toGreekUpperCase(`Γεια σου, ${venueOwner?.name?.split(' ')[0] || 'Προπονητή'}!`)}
+            {toGreekUpperCase(`Γεια σου, ${venueOwner?.name?.split(' ')[0] || 'Προπονητή '}!`)}
           </h1>
           <p className="text-sm text-zinc-500 mt-1">Πίνακας ελέγχου προπονητή</p>
         </div>
@@ -1178,7 +1178,7 @@ function AdminDashboard() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-3 shrink-0">
                       <div className="hidden sm:block">
                         {getStatusBadge(booking.status)}
@@ -1243,7 +1243,7 @@ function AdminDashboard() {
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center gap-3 shrink-0">
                       <div className="hidden sm:block">
                         <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 uppercase font-black text-[9px] px-2 py-0">
