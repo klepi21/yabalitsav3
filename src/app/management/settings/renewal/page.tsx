@@ -1,10 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Check, CreditCard, Loader2, Calendar, Sparkles, Shield } from 'lucide-react';
+import { ArrowLeft, Check, CreditCard, Loader2, Calendar, Sparkles, Shield, Lock, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { loadStripe } from '@stripe/stripe-js';
 import { pricingUtils } from '@/lib/pricing';
+
+const PLAN_HIERARCHY: Record<string, number> = {
+  basic: 1,
+  pro: 2,
+  enterprise: 3,
+};
 
 export default function SubscriptionRenewalPage() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
@@ -13,6 +19,7 @@ export default function SubscriptionRenewalPage() {
   const [currentDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [showUpgradeConfirm, setShowUpgradeConfirm] = useState(false);
 
   const DEV_EMAIL = process.env.NEXT_PUBLIC_DEV_EMAIL || '';
   const isDevUser = userEmail === DEV_EMAIL;
@@ -20,6 +27,18 @@ export default function SubscriptionRenewalPage() {
   const plans = pricingUtils.getAllPlans().map(plan =>
     isDevUser ? { ...plan, basePrice: 0.50 } : plan
   );
+
+  const hasActiveSubscription = venueData && (venueData.daysRemaining || 0) > 0 && venueData.plan === 'subscription';
+  const currentPlanId = venueData?.planType?.toLowerCase() || 'basic';
+  const currentPlanLevel = PLAN_HIERARCHY[currentPlanId] || 0;
+
+  const getPlanStatus = (planId: string) => {
+    if (!hasActiveSubscription) return 'available'; // Expired — all available
+    const planLevel = PLAN_HIERARCHY[planId] || 0;
+    if (planId === currentPlanId) return 'current';
+    if (planLevel < currentPlanLevel) return 'downgrade';
+    return 'upgrade';
+  };
 
   const planIcons: Record<string, React.ElementType> = {
     basic: Calendar,
@@ -61,8 +80,13 @@ export default function SubscriptionRenewalPage() {
   const calculateSubscriptionEndDate = () => {
     if (!selectedPlan || !venueData) return null;
     const baseDate = new Date(currentDate);
-    const remainingDays = venueData.daysRemaining || 0;
-    baseDate.setDate(baseDate.getDate() + remainingDays);
+    const planStatus = getPlanStatus(selectedPlan);
+    // Upgrade = starts fresh from today (old days lost)
+    // Available (expired) = starts from today
+    if (planStatus !== 'upgrade') {
+      const remainingDays = venueData.daysRemaining || 0;
+      baseDate.setDate(baseDate.getDate() + remainingDays);
+    }
     const duration = getSelectedDuration();
     baseDate.setMonth(baseDate.getMonth() + duration);
     return baseDate;
@@ -185,19 +209,31 @@ export default function SubscriptionRenewalPage() {
             const monthlyPrice = pricingUtils.calculateMonthlyPrice(plan.basePrice, duration as 1 | 6 | 12);
             const totalPrice = pricingUtils.calculateTotalPrice(plan.basePrice, duration as 1 | 6 | 12);
             const discount = pricingUtils.getDiscountPercentage(duration as 1 | 6 | 12);
+            const status = getPlanStatus(plan.id);
+            const isDisabled = status === 'current' || status === 'downgrade';
 
             return (
               <button
                 key={plan.id}
                 type="button"
-                onClick={() => setSelectedPlan(plan.id)}
+                onClick={() => !isDisabled && setSelectedPlan(plan.id)}
+                disabled={isDisabled}
                 className={`relative rounded-xl border-2 p-6 text-left transition-all duration-150 ${
-                  isSelected
+                  isDisabled
+                    ? 'border-zinc-100 bg-zinc-50/50 opacity-70 cursor-not-allowed'
+                    : isSelected
                     ? 'border-emerald-400 bg-emerald-50/30 shadow-sm'
                     : 'border-zinc-100 hover:border-zinc-200 hover:shadow-sm'
                 }`}
               >
-                {plan.popular && (
+                {status === 'current' && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-600 text-white">
+                      ΕΝΕΡΓΟ
+                    </span>
+                  </div>
+                )}
+                {plan.popular && status !== 'current' && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-600 text-white">
                       ΔΗΜΟΦΙΛΕΣ
@@ -208,19 +244,21 @@ export default function SubscriptionRenewalPage() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div className={`flex items-center justify-center w-10 h-10 rounded-xl ${
-                      isSelected ? 'bg-emerald-100 text-emerald-600' : 'bg-zinc-100 text-zinc-500'
+                      isDisabled
+                        ? 'bg-zinc-100 text-zinc-400'
+                        : isSelected ? 'bg-emerald-100 text-emerald-600' : 'bg-zinc-100 text-zinc-500'
                     }`}>
-                      <Icon className="h-5 w-5" />
+                      {isDisabled ? <Lock className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-zinc-900">{plan.name}</h3>
+                      <h3 className={`text-lg font-semibold ${isDisabled ? 'text-zinc-400' : 'text-zinc-900'}`}>{plan.name}</h3>
                       <p className="text-xs text-zinc-500">{duration} {duration === 1 ? 'μήνας' : 'μήνες'}</p>
                     </div>
                   </div>
 
                   <div>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-semibold tracking-tight text-zinc-900">
+                      <span className={`text-2xl font-semibold tracking-tight ${isDisabled ? 'text-zinc-400' : 'text-zinc-900'}`}>
                         {pricingUtils.formatPrice(totalPrice)}
                       </span>
                     </div>
@@ -228,7 +266,11 @@ export default function SubscriptionRenewalPage() {
                       {pricingUtils.formatPrice(monthlyPrice)}/μήνα με ΦΠΑ
                     </p>
                     {discount > 0 && (
-                      <span className="inline-flex items-center mt-2 px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className={`inline-flex items-center mt-2 px-2 py-0.5 rounded-md text-xs font-medium border ${
+                        isDisabled
+                          ? 'bg-zinc-50 text-zinc-400 border-zinc-200'
+                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      }`}>
                         Έκπτωση {discount}%
                       </span>
                     )}
@@ -236,12 +278,29 @@ export default function SubscriptionRenewalPage() {
 
                   <ul className="space-y-1.5">
                     {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm text-zinc-600">
-                        <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                      <li key={i} className={`flex items-center gap-2 text-sm ${isDisabled ? 'text-zinc-400' : 'text-zinc-600'}`}>
+                        <Check className={`h-3.5 w-3.5 shrink-0 ${isDisabled ? 'text-zinc-300' : 'text-emerald-500'}`} />
                         {feature}
                       </li>
                     ))}
                   </ul>
+
+                  {/* Status messages */}
+                  {status === 'current' && (
+                    <p className="text-xs text-emerald-600 font-medium text-center pt-2 border-t border-zinc-100">
+                      Το τρέχον πλάνο σας
+                    </p>
+                  )}
+                  {status === 'downgrade' && (
+                    <p className="text-xs text-zinc-400 font-medium text-center pt-2 border-t border-zinc-100">
+                      Διαθέσιμο μετά τη λήξη της συνδρομής
+                    </p>
+                  )}
+                  {status === 'upgrade' && (
+                    <p className="text-xs text-blue-600 font-medium text-center pt-2 border-t border-zinc-100">
+                      ⬆ Αναβάθμιση
+                    </p>
+                  )}
                 </div>
               </button>
             );
@@ -253,6 +312,22 @@ export default function SubscriptionRenewalPage() {
       {selectedPlan && selectedPlanData && (
         <div className="rounded-xl border border-zinc-100/60 bg-white p-6">
           <h3 className="text-base font-semibold tracking-tight text-zinc-900 mb-4">Σύνοψη Πληρωμής</h3>
+
+          {/* Upgrade warning */}
+          {hasActiveSubscription && getPlanStatus(selectedPlan) === 'upgrade' && (
+            <div className="mb-4 rounded-lg bg-amber-50 border border-amber-200 p-3.5">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
+                <div className="text-sm text-amber-800">
+                  <p className="font-medium">Αναβάθμιση πλάνου</p>
+                  <p className="mt-1">
+                    Σας απομένουν <strong>{venueData.daysRemaining} ημέρες</strong> στο τρέχον πλάνο ({venueData.planType || 'Basic'}).
+                    Με την αναβάθμιση ξεκινάτε νέα περίοδο στο {selectedPlanData.name}. Οι υπόλοιπες ημέρες δεν μεταφέρονται.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="space-y-3 text-sm">
             <div className="flex justify-between py-2 border-b border-zinc-100">
@@ -289,23 +364,59 @@ export default function SubscriptionRenewalPage() {
             </div>
           </div>
 
-          <button
-            onClick={(e) => { e.preventDefault(); handlePayment(); }}
-            disabled={!selectedPlan || isLoading}
-            className="w-full mt-6 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-200 disabled:text-zinc-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Επεξεργασία...
-              </>
-            ) : (
-              <>
-                <CreditCard className="h-4 w-4" />
-                Πληρωμή με Κάρτα
-              </>
-            )}
-          </button>
+          {/* Upgrade confirmation */}
+          {hasActiveSubscription && getPlanStatus(selectedPlan) === 'upgrade' && !showUpgradeConfirm ? (
+            <button
+              onClick={() => setShowUpgradeConfirm(true)}
+              className="w-full mt-6 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
+            >
+              <Sparkles className="h-4 w-4" />
+              Αναβάθμιση σε {selectedPlanData.name}
+            </button>
+          ) : hasActiveSubscription && getPlanStatus(selectedPlan) === 'upgrade' && showUpgradeConfirm ? (
+            <div className="mt-6 space-y-3">
+              <p className="text-sm text-center text-zinc-600 font-medium">
+                Είστε σίγουροι; Οι {venueData.daysRemaining} ημέρες που απομένουν δεν θα μεταφερθούν.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowUpgradeConfirm(false)}
+                  className="flex-1 px-4 py-3 border border-zinc-200 text-zinc-600 font-medium rounded-lg hover:bg-zinc-50 transition-colors"
+                >
+                  Ακύρωση
+                </button>
+                <button
+                  onClick={(e) => { e.preventDefault(); handlePayment(); }}
+                  disabled={isLoading}
+                  className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-200 disabled:text-zinc-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <><Loader2 className="h-4 w-4 animate-spin" /> Επεξεργασία...</>
+                  ) : (
+                    <><CreditCard className="h-4 w-4" /> Επιβεβαίωση</>
+                  )}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              onClick={(e) => { e.preventDefault(); handlePayment(); }}
+              disabled={!selectedPlan || isLoading}
+              className="w-full mt-6 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-200 disabled:text-zinc-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Επεξεργασία...
+                </>
+              ) : (
+                <>
+                  <CreditCard className="h-4 w-4" />
+                  Πληρωμή με Κάρτα
+                </>
+              )}
+            </button>
+          )}
           <p className="text-xs text-zinc-400 text-center mt-2">Ασφαλής πληρωμή μέσω Stripe</p>
         </div>
       )}

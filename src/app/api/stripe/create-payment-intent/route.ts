@@ -41,6 +41,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Block same/lower plan purchases when subscription is active
+    const PLAN_HIERARCHY: Record<string, number> = { basic: 1, pro: 2, enterprise: 3 };
+    const currentPlanId = (venue.planType || '').toLowerCase();
+    const daysRemaining = venue.daysRemaining || 0;
+    const hasActiveSub = daysRemaining > 0 && venue.plan === 'subscription';
+
+    if (hasActiveSub) {
+      const currentLevel = PLAN_HIERARCHY[currentPlanId] || 0;
+      const newLevel = PLAN_HIERARCHY[planId] || 0;
+      if (newLevel <= currentLevel) {
+        return NextResponse.json(
+          { error: `Δεν μπορείτε να αγοράσετε ίδιο ή κατώτερο πλάνο ενώ έχετε ενεργή συνδρομή (${currentPlanId}). Διαθέσιμο μετά τη λήξη.` },
+          { status: 400 }
+        );
+      }
+    }
+
     // Get Stripe Price ID
     const stripePriceId = pricingUtils.getStripePriceId(planId, duration as 1 | 6 | 12);
     if (!stripePriceId) {

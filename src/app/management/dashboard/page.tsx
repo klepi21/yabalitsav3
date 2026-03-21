@@ -1020,6 +1020,26 @@ function AdminDashboard() {
       )}
 
 
+      {/* Subscription Expiry Banner */}
+      {venue && venue.plan === 'subscription' && (venue.daysRemaining || 0) <= 7 && (venue.daysRemaining || 0) > 0 && (
+        <div className="rounded-2xl border-2 border-amber-200 bg-amber-50 p-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
+              <div>
+                <p className="font-bold text-amber-800">Η συνδρομή σας λήγει σε {venue.daysRemaining} {venue.daysRemaining === 1 ? 'ημέρα' : 'ημέρες'}</p>
+                <p className="text-sm text-amber-700 mt-0.5">Ανανεώστε τώρα για αδιάκοπη πρόσβαση</p>
+              </div>
+            </div>
+            <Link href="/management/settings/renewal">
+              <Button className="bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl">
+                Ανανέωση
+              </Button>
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6">
         <div className="flex items-center gap-4">
