@@ -71,6 +71,9 @@ export default function ReportsPage() {
   const [isPinVerified, setIsPinVerified] = useState(false);
   const [pinError, setPinError] = useState<string | null>(null);
   const [pinInput, setPinInput] = useState('');
+  const [forgotPinStep, setForgotPinStep] = useState<'none' | 'confirm' | 'sending' | 'code' | 'verifying'>('none');
+  const [resetCode, setResetCode] = useState('');
+  const [resetError, setResetError] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
   const [selectedPitch, setSelectedPitch] = useState<string>('all');
   const [downloadingInvoice, setDownloadingInvoice] = useState<string | null>(null);
@@ -91,6 +94,54 @@ export default function ReportsPage() {
     const hashBuffer = await crypto.subtle.digest('SHA-256', data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  };
+
+  const handleForgotPin = async () => {
+    if (!venueOwner?.email) return;
+    setForgotPinStep('sending');
+    setResetError(null);
+    try {
+      const res = await fetch('/api/verification/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: venueOwner.email, firstName: venueOwner.name || '' }),
+      });
+      if (!res.ok) throw new Error('Failed to send');
+      setForgotPinStep('code');
+    } catch {
+      setResetError('Αποτυχία αποστολής κωδικού. Δοκιμάστε ξανά.');
+      setForgotPinStep('none');
+    }
+  };
+
+  const handleVerifyResetCode = async () => {
+    if (!venueOwner?.email || !venueOwner?.venueId) return;
+    setForgotPinStep('verifying');
+    setResetError(null);
+    try {
+      const res = await fetch('/api/verification/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: venueOwner.email, code: resetCode }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        if (data.error === 'expired') setResetError('Ο κωδικός έληξε. Δοκιμάστε ξανά.');
+        else if (data.error === 'invalid_code') setResetError('Λάθος κωδικός.');
+        else setResetError('Σφάλμα επαλήθευσης.');
+        setForgotPinStep('code');
+        return;
+      }
+      // Clear the PIN from venue
+      await venueService.update(venueOwner.venueId, { managementPinHash: '' });
+      setIsPinVerified(true);
+      setForgotPinStep('none');
+      setResetCode('');
+      loadData();
+    } catch {
+      setResetError('Σφάλμα. Δοκιμάστε ξανά.');
+      setForgotPinStep('code');
+    }
   };
 
   const handleVerifyPin = async () => {
@@ -421,52 +472,153 @@ export default function ReportsPage() {
                   <TrendingUp className="h-6 w-6 text-emerald-600" />
                 </div>
                 <h2 className="text-xl font-black tracking-tight text-zinc-900 mb-0.5 uppercase">
-                  {toGreekUpperCase('Περιοχή Διαχειριστή')}
+                  {toGreekUpperCase(forgotPinStep === 'none' ? 'Περιοχή Διαχειριστή' : 'Επαναφορά PIN')}
                 </h2>
                 <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-tight">
-                  {toGreekUpperCase('Εισαγετε τον 4ψηφιο PIN')}
+                  {toGreekUpperCase(
+                    forgotPinStep === 'none' ? 'Εισαγετε τον 4ψηφιο PIN'
+                    : forgotPinStep === 'confirm' ? 'Αποστολή κωδικού μέσω email'
+                    : 'Επαλήθευση μέσω email'
+                  )}
                 </p>
               </div>
               
               <div className="space-y-6">
-                <div className="flex justify-center">
-                  <Input
-                    type="password"
-                    inputMode="numeric"
-                    pattern="\\d{4}"
-                    maxLength={4}
-                    className="text-center tracking-widest text-2xl w-full h-11 rounded-xl bg-zinc-50 border-none px-4 font-black focus:bg-white transition-all"
-                    value={pinInput}
-                    onChange={(e) => setPinInput(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleVerifyPin();
-                    }}
-                    autoFocus
-                  />
-                </div>
-                
-                {pinError && (
-                  <div className="flex items-center justify-center gap-2 text-red-500 font-bold animate-in fade-in zoom-in-95">
-                    <AlertCircle className="h-4 w-4" />
-                    {pinError}
+                {(forgotPinStep === 'none') && (
+                  <>
+                    <div className="flex justify-center">
+                      <Input
+                        type="password"
+                        inputMode="numeric"
+                        pattern="\\d{4}"
+                        maxLength={4}
+                        className="text-center tracking-widest text-2xl w-full h-11 rounded-xl bg-zinc-50 border-none px-4 font-black focus:bg-white transition-all"
+                        value={pinInput}
+                        onChange={(e) => setPinInput(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleVerifyPin();
+                        }}
+                        autoFocus
+                      />
+                    </div>
+
+                    {pinError && (
+                      <div className="flex items-center justify-center gap-2 text-red-500 font-bold animate-in fade-in zoom-in-95">
+                        <AlertCircle className="h-4 w-4" />
+                        {pinError}
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {forgotPinStep === 'none' ? (
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      onClick={handleVerifyPin}
+                      className="h-11 w-full rounded-xl bg-zinc-900 hover:bg-black font-bold text-white text-[13px] shadow-lg transition-all active:scale-95"
+                    >
+                      {toGreekUpperCase('Είσοδος')}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => setForgotPinStep('confirm')}
+                      className="h-10 font-bold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl text-[11px]"
+                    >
+                      {toGreekUpperCase('Ξέχασα το PIN')}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      asChild
+                      className="h-10 font-bold text-zinc-400 hover:text-zinc-600 rounded-xl text-[11px]"
+                    >
+                      <Link href="/management/dashboard">{toGreekUpperCase('Επιστροφή')}</Link>
+                    </Button>
+                  </div>
+                ) : forgotPinStep === 'confirm' ? (
+                  <div className="flex flex-col gap-3">
+                    <div className="text-center">
+                      <p className="text-xs text-zinc-500 font-bold mb-1">
+                        Θα σταλεί κωδικός επαναφοράς στο
+                      </p>
+                      <p className="text-xs text-emerald-600 font-black">
+                        {venueOwner?.email}
+                      </p>
+                    </div>
+                    <Button
+                      onClick={handleForgotPin}
+                      className="h-11 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white text-[13px] shadow-lg transition-all active:scale-95"
+                    >
+                      {toGreekUpperCase('Αποστολή κωδικού')}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => setForgotPinStep('none')}
+                      className="h-10 font-bold text-zinc-400 hover:text-zinc-600 rounded-xl text-[11px]"
+                    >
+                      {toGreekUpperCase('Πίσω')}
+                    </Button>
+                  </div>
+                ) : forgotPinStep === 'sending' ? (
+                  <div className="flex flex-col items-center gap-3">
+                    <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+                    <p className="text-xs text-zinc-400 font-bold">{toGreekUpperCase('Αποστολή κωδικού...')}</p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-3">
+                    <div className="text-center">
+                      <p className="text-xs text-zinc-500 font-bold mb-1">
+                        Κωδικός επαλήθευσης στο
+                      </p>
+                      <p className="text-xs text-emerald-600 font-black">
+                        {venueOwner?.email}
+                      </p>
+                    </div>
+                    <Input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      placeholder="000000"
+                      className="text-center tracking-[0.3em] text-xl w-full h-11 rounded-xl bg-zinc-50 border-none px-4 font-black focus:bg-white transition-all"
+                      value={resetCode}
+                      onChange={(e) => setResetCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && resetCode.length === 6) handleVerifyResetCode();
+                      }}
+                      autoFocus
+                    />
+                    {resetError && (
+                      <div className="flex items-center justify-center gap-2 text-red-500 text-xs font-bold animate-in fade-in zoom-in-95">
+                        <AlertCircle className="h-3 w-3" />
+                        {resetError}
+                      </div>
+                    )}
+                    <Button
+                      onClick={handleVerifyResetCode}
+                      disabled={resetCode.length !== 6 || forgotPinStep === 'verifying'}
+                      className="h-11 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white text-[13px] shadow-lg transition-all active:scale-95 disabled:opacity-50"
+                    >
+                      {forgotPinStep === 'verifying' ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        toGreekUpperCase('Επαλήθευση')
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={handleForgotPin}
+                      className="h-10 font-bold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl text-[11px]"
+                    >
+                      {toGreekUpperCase('Επαναποστολή κωδικού')}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      onClick={() => { setForgotPinStep('none'); setResetCode(''); setResetError(null); }}
+                      className="h-10 font-bold text-zinc-400 hover:text-zinc-600 rounded-xl text-[11px]"
+                    >
+                      {toGreekUpperCase('Πίσω')}
+                    </Button>
                   </div>
                 )}
-                
-                <div className="flex flex-col gap-2">
-                  <Button 
-                    onClick={handleVerifyPin} 
-                    className="h-11 w-full rounded-xl bg-zinc-900 hover:bg-black font-bold text-white text-[13px] shadow-lg transition-all active:scale-95"
-                  >
-                    {toGreekUpperCase('Είσοδος')}
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    asChild 
-                    className="h-10 font-bold text-zinc-400 hover:text-zinc-600 rounded-xl text-[11px]"
-                  >
-                    <Link href="/management/dashboard">{toGreekUpperCase('Επιστροφή')}</Link>
-                  </Button>
-                </div>
               </div>
             </div>
           </div>
