@@ -74,6 +74,11 @@ export default function ReportsPage() {
   const [forgotPinStep, setForgotPinStep] = useState<'none' | 'confirm' | 'sending' | 'code' | 'verifying'>('none');
   const [resetCode, setResetCode] = useState('');
   const [resetError, setResetError] = useState<string | null>(null);
+  const [needsSetPin, setNeedsSetPin] = useState(false);
+  const [newPin, setNewPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
+  const [newPinError, setNewPinError] = useState<string | null>(null);
+  const [settingPin, setSettingPin] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
   const [selectedPitch, setSelectedPitch] = useState<string>('all');
   const [downloadingInvoice, setDownloadingInvoice] = useState<string | null>(null);
@@ -132,15 +137,39 @@ export default function ReportsPage() {
         setForgotPinStep('code');
         return;
       }
-      // Clear the PIN from venue
+      // Clear the PIN from venue → force set new one
       await venueService.update(venueOwner.venueId, { managementPinHash: '' });
-      setIsPinVerified(true);
       setForgotPinStep('none');
       setResetCode('');
-      loadData();
+      setNeedsSetPin(true);
     } catch {
       setResetError('Σφάλμα. Δοκιμάστε ξανά.');
       setForgotPinStep('code');
+    }
+  };
+
+  const handleSetNewPin = async () => {
+    if (!venueOwner?.venueId) return;
+    setNewPinError(null);
+    if (!/^\d{4}$/.test(newPin)) {
+      setNewPinError('Ο PIN πρέπει να είναι 4ψήφιος.');
+      return;
+    }
+    if (newPin !== confirmPin) {
+      setNewPinError('Τα PIN δεν ταιριάζουν.');
+      return;
+    }
+    setSettingPin(true);
+    try {
+      const hash = await hashStringSHA256(newPin);
+      await venueService.update(venueOwner.venueId, { managementPinHash: hash });
+      setNeedsSetPin(false);
+      setIsPinVerified(true);
+      loadData();
+    } catch {
+      setNewPinError('Σφάλμα αποθήκευσης. Δοκιμάστε ξανά.');
+    } finally {
+      setSettingPin(false);
     }
   };
 
@@ -155,8 +184,7 @@ export default function ReportsPage() {
       const venue = await venueService.getById(venueOwner.venueId);
       const expectedHash = venue?.managementPinHash;
       if (!expectedHash) {
-        setIsPinVerified(true);
-        loadData();
+        setNeedsSetPin(true);
         return;
       }
       const enteredHash = await hashStringSHA256(pinInput);
@@ -472,11 +500,16 @@ export default function ReportsPage() {
                   <TrendingUp className="h-6 w-6 text-emerald-600" />
                 </div>
                 <h2 className="text-xl font-black tracking-tight text-zinc-900 mb-0.5 uppercase">
-                  {toGreekUpperCase(forgotPinStep === 'none' ? 'Περιοχή Διαχειριστή' : 'Επαναφορά PIN')}
+                  {toGreekUpperCase(
+                    needsSetPin ? 'Ορισμός PIN'
+                    : forgotPinStep === 'none' ? 'Περιοχή Διαχειριστή'
+                    : 'Επαναφορά PIN'
+                  )}
                 </h2>
                 <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-tight">
                   {toGreekUpperCase(
-                    forgotPinStep === 'none' ? 'Εισαγετε τον 4ψηφιο PIN'
+                    needsSetPin ? 'Ορίστε νέο 4ψήφιο PIN'
+                    : forgotPinStep === 'none' ? 'Εισαγετε τον 4ψηφιο PIN'
                     : forgotPinStep === 'confirm' ? 'Αποστολή κωδικού μέσω email'
                     : 'Επαλήθευση μέσω email'
                   )}
@@ -484,7 +517,66 @@ export default function ReportsPage() {
               </div>
               
               <div className="space-y-6">
-                {(forgotPinStep === 'none') && (
+                {needsSetPin ? (
+                  <div className="flex flex-col gap-3">
+                    <div>
+                      <p className="text-[10px] font-bold text-zinc-400 mb-1.5">{toGreekUpperCase('Νέο PIN')}</p>
+                      <Input
+                        type="password"
+                        inputMode="numeric"
+                        pattern="\\d{4}"
+                        maxLength={4}
+                        placeholder="••••"
+                        className="text-center tracking-widest text-xl w-full h-11 rounded-xl bg-zinc-50 border-none px-4 font-black focus:bg-white transition-all"
+                        value={newPin}
+                        onChange={(e) => setNewPin(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+                        autoFocus
+                      />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-zinc-400 mb-1.5">{toGreekUpperCase('Επιβεβαίωση PIN')}</p>
+                      <Input
+                        type="password"
+                        inputMode="numeric"
+                        pattern="\\d{4}"
+                        maxLength={4}
+                        placeholder="••••"
+                        className="text-center tracking-widest text-xl w-full h-11 rounded-xl bg-zinc-50 border-none px-4 font-black focus:bg-white transition-all"
+                        value={confirmPin}
+                        onChange={(e) => setConfirmPin(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && newPin.length === 4 && confirmPin.length === 4) handleSetNewPin();
+                        }}
+                      />
+                    </div>
+                    {newPinError && (
+                      <div className="flex items-center justify-center gap-2 text-red-500 text-xs font-bold animate-in fade-in zoom-in-95">
+                        <AlertCircle className="h-3 w-3" />
+                        {newPinError}
+                      </div>
+                    )}
+                    <Button
+                      onClick={handleSetNewPin}
+                      disabled={newPin.length !== 4 || confirmPin.length !== 4 || settingPin}
+                      className="h-11 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white text-[13px] shadow-lg transition-all active:scale-95 disabled:opacity-50"
+                    >
+                      {settingPin ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        toGreekUpperCase('Αποθήκευση & Είσοδος')
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      asChild
+                      className="h-10 font-bold text-zinc-400 hover:text-zinc-600 rounded-xl text-[11px]"
+                    >
+                      <Link href="/management/dashboard">{toGreekUpperCase('Επιστροφή')}</Link>
+                    </Button>
+                  </div>
+                ) : null}
+
+                {!needsSetPin && (forgotPinStep === 'none') && (
                   <>
                     <div className="flex justify-center">
                       <Input
@@ -511,7 +603,7 @@ export default function ReportsPage() {
                   </>
                 )}
 
-                {forgotPinStep === 'none' ? (
+                {needsSetPin ? null : forgotPinStep === 'none' ? (
                   <div className="flex flex-col gap-2">
                     <Button
                       onClick={handleVerifyPin}
