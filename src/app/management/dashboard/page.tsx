@@ -182,7 +182,7 @@ function CoachDashboard() {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-black text-zinc-900">
-            {toGreekUpperCase(`Γεια σου, ${venueOwner?.name?.split(' ')[0] || 'Προπονητή '}!`)}
+            {toGreekUpperCase(`Γεια σου, ${venueOwner?.name?.split(' ')[0] || 'Προπονητή'}!`)}
           </h1>
           <p className="text-sm text-zinc-500 mt-1">Πίνακας ελέγχου προπονητή</p>
         </div>
