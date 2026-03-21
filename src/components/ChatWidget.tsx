@@ -35,6 +35,71 @@ const PAGE_CONTEXT: Record<string, string> = {
   '/management/settings': 'Ρυθμίσεις',
 };
 
+function renderMarkdown(text: string) {
+  const lines = text.split('\n');
+  const elements: React.ReactNode[] = [];
+  let listItems: string[] = [];
+  let listKey = 0;
+
+  const flushList = () => {
+    if (listItems.length > 0) {
+      elements.push(
+        <ul key={`list-${listKey++}`} className="space-y-1 my-1.5 ml-1">
+          {listItems.map((item, i) => (
+            <li key={i} className="flex items-start gap-2">
+              <span className="text-emerald-500 mt-0.5 shrink-0">•</span>
+              <span>{renderInline(item)}</span>
+            </li>
+          ))}
+        </ul>
+      );
+      listItems = [];
+    }
+  };
+
+  const renderInline = (line: string): React.ReactNode => {
+    const parts = line.split(/(\*\*[^*]+\*\*)/g);
+    return parts.map((part, i) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <strong key={i} className="font-semibold">{part.slice(2, -2)}</strong>;
+      }
+      return <span key={i}>{part}</span>;
+    });
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+
+    if (line.startsWith('- ') || line.startsWith('• ')) {
+      listItems.push(line.slice(2));
+      continue;
+    }
+
+    flushList();
+
+    if (line.trim() === '') {
+      elements.push(<div key={`br-${i}`} className="h-2" />);
+    } else if (line.startsWith('### ')) {
+      elements.push(<p key={`h3-${i}`} className="font-bold text-zinc-900 mt-2 mb-1">{line.slice(4)}</p>);
+    } else if (line.startsWith('## ')) {
+      elements.push(<p key={`h2-${i}`} className="font-bold text-zinc-900 mt-2 mb-1">{line.slice(3)}</p>);
+    } else if (/^\d+\.\s/.test(line)) {
+      const num = line.match(/^(\d+)\.\s(.*)/)!;
+      elements.push(
+        <div key={`ol-${i}`} className="flex items-start gap-2 my-0.5">
+          <span className="text-emerald-600 font-bold shrink-0 min-w-[18px]">{num[1]}.</span>
+          <span>{renderInline(num[2])}</span>
+        </div>
+      );
+    } else {
+      elements.push(<p key={`p-${i}`} className="my-0.5">{renderInline(line)}</p>);
+    }
+  }
+
+  flushList();
+  return <div className="space-y-0.5">{elements}</div>;
+}
+
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -210,7 +275,11 @@ export default function ChatWidget() {
                         : 'bg-zinc-100 text-zinc-800 rounded-bl-md'
                     )}
                   >
-                    <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                    {message.role === 'assistant' ? (
+                      <div className="leading-relaxed">{renderMarkdown(message.content)}</div>
+                    ) : (
+                      <p className="whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                    )}
                   </div>
                 </div>
               ))
