@@ -514,6 +514,7 @@ export default function RootPage() {
           </div>
           <div className="flex items-center gap-6 text-sm text-zinc-500 font-medium">
             <Link href="/" className="hover:text-emerald-400 transition">Contact Us</Link>
+            <Link href="/blog" className="hover:text-emerald-400 transition">Blog / Άρθρα</Link>
             <Link href="/terms" className="hover:text-emerald-400 transition">Terms of Service</Link>
             <Link href="/privacy" className="hover:text-emerald-400 transition">Privacy Policy</Link>
           </div>
