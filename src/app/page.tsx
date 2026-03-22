@@ -96,18 +96,37 @@ export default function RootPage() {
             </div>
           </div>
 
-          {/* Floating Dashboard Screenshot */}
-          <div className="relative z-10 w-full max-w-[1050px] mx-auto rounded-t-xl sm:rounded-t-2xl shadow-[0_-30px_80px_-20px_rgba(52,211,153,0.3)] border-t border-l border-r border-white/20 bg-[#f8fafc] overflow-hidden">
-             <Image
-               src="/dashboard-preview.png"
-               alt="Yabalitsa Dashboard Preview"
-               width={1920}
-               height={1080}
-               quality={100}
-               sizes="(max-width: 1200px) 100vw, 1200px"
-               className="w-full h-auto object-contain block hover:scale-[1.02] transition-transform duration-700 ease-out origin-top"
-             />
-             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none opacity-50" />
+          {/* Laptop Mockup Wrapper */}
+          <div className="relative z-10 w-full max-w-[1050px] mx-auto group px-4 sm:px-0">
+            {/* Screen Bezel */}
+            <div className="relative rounded-t-[1.5rem] sm:rounded-t-[2.5rem] border-[6px] sm:border-[16px] border-b-0 border-[#121415] bg-[#121415] shadow-[0_-30px_100px_-20px_rgba(52,211,153,0.3)] overflow-hidden">
+              
+              {/* Camera / Notch */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 h-4 sm:h-6 w-20 sm:w-32 bg-[#121415] rounded-b-xl sm:rounded-b-2xl z-20 flex items-center justify-center">
+                <div className="h-1.5 w-1.5 sm:h-2 sm:w-2 rounded-full bg-[#202425] border border-black/50 shadow-inner" />
+              </div>
+              
+              {/* Screen Content */}
+              <div className="relative rounded-t-xl sm:rounded-t-2xl overflow-hidden bg-white ring-1 ring-white/10">
+                <Image
+                  src="/dashboard-preview.png"
+                  alt="Yabalitsa Dashboard Preview"
+                  width={1920}
+                  height={1080}
+                  quality={100}
+                  priority
+                  sizes="(max-width: 1200px) 100vw, 1200px"
+                  className="w-full h-auto object-contain block group-hover:scale-[1.03] transition-transform duration-[1500ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] origin-top"
+                />
+              </div>
+              
+              {/* Screen Glare & Bottom Fade */}
+              <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-white/10 pointer-events-none z-10 mix-blend-screen" />
+              <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/80 to-transparent pointer-events-none z-10" />
+            </div>
+            
+            {/* Base Lip (Optional bottom subtle edge) */}
+            <div className="h-2 w-[102%] -ml-[1%] bg-gradient-to-b from-[#1a1d1e] to-black rounded-t-sm" />
           </div>
         </main>
       </section>
