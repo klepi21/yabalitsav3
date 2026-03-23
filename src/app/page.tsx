@@ -89,7 +89,7 @@ export default function RootPage() {
             </Link>
 
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[11px] md:text-xs font-bold text-white/90 uppercase tracking-[0.2em] -mt-10 md:-mt-16 mb-24 md:mb-36 drop-shadow-lg">
-              <span className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-emerald-400" /> 14 Ημερες Δωρεαν Δοκιμη</span>
+              <span className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-emerald-400" /> 15 Ημερες Δωρεαν Δοκιμη</span>
               <span className="hidden sm:block w-1.5 h-1.5 bg-white/20 rounded-full" />
               <span className="flex items-center gap-2"><Zap className="w-3.5 h-3.5 text-emerald-400" /> Χωρις Πιστωτικη Καρτα</span>
               <span className="hidden sm:block w-1.5 h-1.5 bg-white/20 rounded-full" />
@@ -388,7 +388,7 @@ export default function RootPage() {
               Επιλέξτε τη συνδρομή που ταιριάζει στις ανάγκες της δικής σας επιχείρησης. Χωρίς κρυφές χρεώσεις, χωρίς περιορισμούς.
             </p>
             <div className="mt-8 flex flex-wrap justify-center items-center gap-6 text-[10px] md:text-xs font-bold text-zinc-500 uppercase tracking-widest">
-              <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 italic"><Zap className="w-3 h-3 text-emerald-500" /> Δωρεαν για 14 ημερες</span>
+              <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 italic"><Zap className="w-3 h-3 text-emerald-500" /> Δωρεαν για 15 ημερες</span>
               <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10"><Shield className="w-3 h-3 text-emerald-500" /> Ολες οι λειτουργιες</span>
               <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> Χωρις καρτα</span>
             </div>
@@ -482,7 +482,7 @@ export default function RootPage() {
             </Link>
             <p className="mt-6 text-zinc-500 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 opacity-80">
               <Zap className="w-3.5 h-3.5 text-emerald-500 fill-emerald-500" />
-              14 Ημερες Δωρεαν • Χωρις Πιστωτικη Καρτα
+              15 Ημερες Δωρεαν • Χωρις Πιστωτικη Καρτα
             </p>
           </div>
         </div>
