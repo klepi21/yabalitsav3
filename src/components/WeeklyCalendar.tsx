@@ -1,21 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Calendar, 
-  Clock, 
-  Trash2, 
-  Plus, 
-  Phone, 
-  Building2, 
-  CheckCircle, 
-  AlertCircle 
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  Clock,
+  Trash2,
+  Plus,
+  Phone,
+  Building2,
+  CheckCircle,
+  AlertCircle
 } from 'lucide-react';
 import { Booking, Pitch, BlockedDate } from '@/types';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface WeeklyCalendarProps {
   bookings: Booking[];
@@ -48,7 +49,10 @@ export default function WeeklyCalendar({
   updatingBookingId: _updatingBookingId
 }: WeeklyCalendarProps) {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState<'weekly' | 'daily'>('weekly');
+  const isMobile = useIsMobile();
+  const [viewMode, setViewMode] = useState<'weekly' | 'daily'>(isMobile ? 'daily' : 'weekly');
+
+  const effectiveViewMode = isMobile ? 'daily' : viewMode;
 
   const getWeekStart = (date: Date) => {
     const d = new Date(date);
@@ -116,52 +120,54 @@ export default function WeeklyCalendar({
   return (
     <div className="bg-white rounded-3xl shadow-2xl shadow-zinc-200/50 border border-zinc-100 overflow-hidden">
       {/* Premium Header */}
-      <div className="p-8 border-b border-zinc-100 bg-zinc-50/30">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center bg-white p-1.5 rounded-2xl border border-zinc-200 shadow-sm">
+      <div className="p-4 sm:p-8 border-b border-zinc-100 bg-zinc-50/30">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
+          <div className="flex items-center gap-3 sm:gap-6">
+            <div className="flex items-center bg-white p-1 sm:p-1.5 rounded-xl sm:rounded-2xl border border-zinc-200 shadow-sm flex-1 sm:flex-none">
               <button
-                onClick={viewMode === 'weekly' ? prevWeek : prevDay}
-                className="p-3 rounded-xl hover:bg-zinc-50 transition-all active:scale-95"
+                onClick={effectiveViewMode === 'weekly' ? prevWeek : prevDay}
+                className="p-2 sm:p-3 rounded-lg sm:rounded-xl hover:bg-zinc-50 transition-all active:scale-95"
               >
-                <ChevronLeft className="h-6 w-6 text-zinc-900" />
+                <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6 text-zinc-900" />
               </button>
-              
-              <div className="px-6 min-w-[240px] text-center">
-                <h2 className="text-xl font-black text-zinc-900 tracking-tight">
-                  {viewMode === 'weekly' ? (
+
+              <div className="px-2 sm:px-6 min-w-0 sm:min-w-[240px] text-center flex-1">
+                <h2 className="text-sm sm:text-xl font-black text-zinc-900 tracking-tight truncate">
+                  {effectiveViewMode === 'weekly' ? (
                     <>
                       <span className="lg:hidden">{shortWeekLabel}</span>
                       <span className="hidden lg:inline">{longWeekLabel}</span>
                     </>
                   ) : (
                     <>
-                      <span className="lg:hidden">{shortDayLabel}</span>
+                      <span className="sm:hidden">{shortDayLabel}</span>
+                      <span className="hidden sm:inline lg:hidden">{shortDayLabel}</span>
                       <span className="hidden lg:inline">{longDayLabel}</span>
                     </>
                   )}
                 </h2>
               </div>
-              
+
               <button
-                onClick={viewMode === 'weekly' ? nextWeek : nextDay}
-                className="p-3 rounded-xl hover:bg-zinc-50 transition-all active:scale-95"
+                onClick={effectiveViewMode === 'weekly' ? nextWeek : nextDay}
+                className="p-2 sm:p-3 rounded-lg sm:rounded-xl hover:bg-zinc-50 transition-all active:scale-95"
               >
-                <ChevronRight className="h-6 w-6 text-zinc-900" />
+                <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6 text-zinc-900" />
               </button>
             </div>
 
             {/* Today Button */}
             <Button
               variant="outline"
-              className="h-14 px-6 rounded-2xl border-zinc-200 font-bold hover:bg-zinc-50"
+              className="h-10 sm:h-14 px-4 sm:px-6 rounded-xl sm:rounded-2xl border-zinc-200 font-bold hover:bg-zinc-50 text-sm shrink-0"
               onClick={() => setCurrentDate(new Date())}
             >
               Σήμερα
             </Button>
           </div>
 
-          <div className="flex items-center gap-3 bg-white p-1.5 rounded-2xl border border-zinc-200 shadow-sm">
+          {/* View toggle - hidden on mobile (always daily) */}
+          <div className="hidden sm:flex items-center gap-3 bg-white p-1.5 rounded-2xl border border-zinc-200 shadow-sm">
             <button
               onClick={() => setViewMode('weekly')}
               className={cn(
@@ -191,8 +197,8 @@ export default function WeeklyCalendar({
       </div>
 
       {/* Calendar Grid */}
-      <div className="p-8">
-        {viewMode === 'weekly' ? (
+      <div className="p-3 sm:p-8">
+        {effectiveViewMode === 'weekly' ? (
           <div className="overflow-x-auto -mx-8 px-8">
             <div className="min-w-[1000px]">
               {/* Header Row */}
@@ -312,16 +318,16 @@ export default function WeeklyCalendar({
               
               return (
                 <div key={time} className={cn(
-                  "group flex items-stretch gap-6 p-6 rounded-3xl border-2 transition-all",
+                  "group flex items-stretch gap-3 sm:gap-6 p-3 sm:p-6 rounded-2xl sm:rounded-3xl border-2 transition-all",
                   isBlocked
                     ? "bg-zinc-50 border-zinc-100 opacity-60"
                     : "bg-white border-zinc-100 hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-50"
                 )}>
-                  <div className="w-24 shrink-0 flex items-center justify-center font-black text-xl text-zinc-300 group-hover:text-emerald-500 transition-colors">
+                  <div className="w-14 sm:w-24 shrink-0 flex items-center justify-center font-black text-base sm:text-xl text-zinc-300 group-hover:text-emerald-500 transition-colors">
                     {time}
                   </div>
-                  
-                  <div className="h-10 w-px bg-zinc-100" />
+
+                  <div className="h-auto w-px bg-zinc-100" />
 
                   <div className="flex-1">
                     {isBlocked ? (
@@ -335,12 +341,12 @@ export default function WeeklyCalendar({
                           <div
                             key={index}
                             onClick={() => onBookingClick?.(booking)}
-                            className="bg-zinc-50 rounded-2xl p-5 border border-zinc-200 hover:border-emerald-300 transition-all cursor-pointer relative group/item"
+                            className="bg-zinc-50 rounded-xl sm:rounded-2xl p-3 sm:p-5 border border-zinc-200 hover:border-emerald-300 transition-all cursor-pointer relative group/item"
                           >
-                            <div className="flex items-start justify-between gap-4">
-                              <div className="space-y-2">
+                            <div className="flex items-start justify-between gap-2 sm:gap-4">
+                              <div className="space-y-1.5 sm:space-y-2 min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <h4 className="text-lg font-black text-zinc-900">{booking.userName || 'Άγνωστος Πελάτης'}</h4>
+                                  <h4 className="text-sm sm:text-lg font-black text-zinc-900 truncate">{booking.userName || 'Άγνωστος Πελάτης'}</h4>
                                   <div className={cn(
                                     "h-2 w-2 rounded-full",
                                     booking.status === 'confirmed' ? "bg-emerald-500" :
@@ -348,39 +354,39 @@ export default function WeeklyCalendar({
                                     booking.status === 'completed' ? "bg-zinc-500" : "bg-red-500"
                                   )} />
                                 </div>
-                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm font-bold text-zinc-500">
-                                  <span className="flex items-center gap-1.5"><Phone className="h-3.5 w-3.5" />{booking.userPhone || '—'}</span>
-                                  <span className="flex items-center gap-1.5"><Building2 className="h-3.5 w-3.5" />
+                                <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs sm:text-sm font-bold text-zinc-500">
+                                  <span className="flex items-center gap-1"><Phone className="h-3 w-3 sm:h-3.5 sm:w-3.5" />{booking.userPhone || '—'}</span>
+                                  <span className="flex items-center gap-1"><Building2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                     {pitches.find(p => p.id === booking.pitchId)?.name || 'Άγνωστο'}
                                   </span>
-                                  <span className="flex items-center gap-1.5 text-zinc-900">&euro;{booking.price?.toFixed(2)}</span>
+                                  <span className="flex items-center gap-1 text-zinc-900">&euro;{booking.price?.toFixed(2)}</span>
                                 </div>
                               </div>
 
-                              <div className="flex items-center gap-2 opacity-0 group-hover/item:opacity-100 transition-opacity">
+                              <div className="flex items-center gap-1.5 sm:gap-2 sm:opacity-0 sm:group-hover/item:opacity-100 transition-opacity shrink-0">
                                 {booking.status !== 'completed' && onUpdateBookingStatus && (
                                   <Button
                                     size="icon"
                                     variant="outline"
-                                    className="h-10 w-10 rounded-xl border-emerald-200 text-emerald-600 hover:bg-emerald-50"
+                                    className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl border-emerald-200 text-emerald-600 hover:bg-emerald-50"
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       onUpdateBookingStatus(booking.id, 'completed');
                                     }}
                                   >
-                                    <CheckCircle className="h-5 w-5" />
+                                    <CheckCircle className="h-4 w-4 sm:h-5 sm:w-5" />
                                   </Button>
                                 )}
                                 <Button
                                   size="icon"
                                   variant="outline"
-                                  className="h-10 w-10 rounded-xl border-red-200 text-red-500 hover:bg-red-50"
+                                  className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl border-red-200 text-red-500 hover:bg-red-50"
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     onDeleteBooking?.(booking.id);
                                   }}
                                 >
-                                  <Trash2 className="h-5 w-5" />
+                                  <Trash2 className="h-4 w-4 sm:h-5 sm:w-5" />
                                 </Button>
                               </div>
                             </div>
@@ -388,14 +394,15 @@ export default function WeeklyCalendar({
                         ))}
                       </div>
                     ) : (
-                      <div 
-                        className="py-6 flex items-center justify-between group-hover:px-4 transition-all"
+                      <div
+                        className="py-3 sm:py-6 flex items-center justify-between group-hover:px-2 sm:group-hover:px-4 transition-all"
                         onClick={() => onSlotClick?.(currentDate, time)}
                       >
-                         <span className="text-zinc-300 font-bold italic">Κανένα άτομο</span>
-                         <Button variant="ghost" className="opacity-0 group-hover:opacity-100 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl font-bold">
-                           <Plus className="h-4 w-4 mr-2" />
-                           Νέα Κράτηση
+                         <span className="text-zinc-300 font-bold italic text-xs sm:text-base">Κενό</span>
+                         <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl font-bold text-xs sm:text-sm h-8 sm:h-9">
+                           <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                           <span className="hidden sm:inline">Νέα Κράτηση</span>
+                           <span className="sm:hidden">+</span>
                          </Button>
                       </div>
                     )}

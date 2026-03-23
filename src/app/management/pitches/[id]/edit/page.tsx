@@ -525,16 +525,17 @@ export default function EditPitchPage() {
             <Separator />
 
             {/* Blocked Dates Management */}
-            <div className="bg-muted rounded-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-foreground flex items-center gap-2">
-                  <Ban className="h-5 w-5 text-destructive" />
+            <div className="bg-muted rounded-lg p-4 sm:p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between mb-4">
+                <h3 className="text-base sm:text-lg font-medium text-foreground flex items-center gap-2">
+                  <Ban className="h-5 w-5 text-destructive shrink-0" />
                   Κλειστές Ημερομηνίες
                 </h3>
                 <Button
                   type="button"
                   variant="destructive"
                   size="sm"
+                  className="w-full sm:w-auto"
                   onClick={() => setShowAddBlockedDate(!showAddBlockedDate)}
                 >
                   {showAddBlockedDate ? 'Ακύρωση' : 'Προσθήκη Κλειστής Ημερομηνίας'}
@@ -602,10 +603,10 @@ export default function EditPitchPage() {
                 <div className="space-y-3">
                   {blockedDates.map((blockedDate) => (
                     <Card key={blockedDate.id} className="border-destructive/20">
-                      <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center space-x-4 text-sm">
+                      <CardContent className="p-3 sm:p-4">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 text-sm">
                               <span className="font-medium text-foreground">
                                 {new Date(blockedDate.startDate).toLocaleDateString('el-GR')}
                                 {blockedDate.startDate !== blockedDate.endDate &&
@@ -625,7 +626,7 @@ export default function EditPitchPage() {
                             variant="ghost"
                             size="icon-sm"
                             onClick={() => removeBlockedDate(blockedDate.id)}
-                            className="text-destructive hover:text-destructive"
+                            className="text-destructive hover:text-destructive shrink-0"
                             title="Διαγραφή"
                           >
                             <Trash2 className="h-3.5 w-3.5" />

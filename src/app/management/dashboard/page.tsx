@@ -37,6 +37,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon } from 'lucide-react';
 import { squadService, academyUserService, userGroupService } from '@/lib/academy-services';
 import { academyPaymentService } from '@/lib/academy-services';
 import { trainingService } from '@/lib/training-services';
@@ -1058,10 +1061,10 @@ function AdminDashboard() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
           <Button
             onClick={() => setShowQuickBooking(true)}
-            className="h-12 px-6 rounded-2xl bg-zinc-900 hover:bg-black text-white font-black text-[11px] shadow-lg shadow-zinc-900/10 transition-all active:scale-95 group uppercase tracking-widest"
+            className="h-12 px-6 rounded-2xl bg-zinc-900 hover:bg-black text-white font-black text-[11px] shadow-lg shadow-zinc-900/10 transition-all active:scale-95 group uppercase tracking-widest w-full sm:w-auto justify-center"
           >
             <Plus className="h-4 w-4 mr-2 text-emerald-400 group-hover:rotate-90 transition-transform duration-500" />
             {toGreekUpperCase('Γρήγορη Κράτηση')}
@@ -1073,7 +1076,7 @@ function AdminDashboard() {
               if (bookingPath) router.push(bookingPath);
             }}
             disabled={!bookingPath}
-            className="h-12 px-6 rounded-2xl border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-900 font-black text-[11px] transition-all active:scale-95 shadow-sm uppercase tracking-widest"
+            className="h-12 px-6 rounded-2xl border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-900 font-black text-[11px] transition-all active:scale-95 shadow-sm uppercase tracking-widest w-full sm:w-auto justify-center"
           >
             {toGreekUpperCase('Σελιδα Booking')}
           </Button>
@@ -1083,7 +1086,7 @@ function AdminDashboard() {
       {/* Stats Grids */}
       <div className="space-y-4">
         {/* Quick Stats Grid - Bookings & Venues */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { label: 'ΚΡΑΤΗΣΕΙΣ', value: bookings.length, detail: '30 ΗΜΕΡΕΣ', icon: <CalendarCheck className="h-5 w-5 text-emerald-600" /> },
             { label: 'LIVE', value: getLiveBookings(), detail: 'ΤΩΡΑ ΣΤΑ ΓΗΠΕΔΑ', icon: <Radio className="h-5 w-5 text-blue-600" /> },
@@ -1106,7 +1109,7 @@ function AdminDashboard() {
         </div>
 
         {/* Academy Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           {[
             { label: 'ΣΥΝΟΛΟ ΤΜΗΜΑΤΩΝ', value: squads.length, detail: 'ΕΝΕΡΓΑ ΤΜΗΜΑΤΑ', icon: <Trophy className="h-5 w-5 text-emerald-600" /> },
             { label: 'ΣΥΝΟΛΟ ΑΘΛΗΤΩΝ', value: getTotalAthletes(), detail: 'ΕΝΕΡΓΟΙ ΑΘΛΗΤΕΣ', icon: <Users className="h-5 w-5 text-blue-600" /> },
@@ -1134,20 +1137,18 @@ function AdminDashboard() {
         {/* Today's Bookings */}
         <div className="space-y-8">
           <div className="flex items-center justify-between pb-2">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg hover:border-emerald-200 transition-colors">
-                <Clock className="h-6 w-6 text-emerald-500" />
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg hover:border-emerald-200 transition-colors shrink-0">
+                <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-500" />
               </div>
               <div className="space-y-0.5">
-                <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Σημερινές Κρατήσεις')}</h2>
-                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Πρόγραμμα ημέρας')}</p>
+                <h2 className="text-base sm:text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Σημερινές Κρατήσεις')}</h2>
+                <p className="text-[9px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Πρόγραμμα ημέρας')}</p>
               </div>
             </div>
-            <Button variant="outline" className="h-10 px-5 rounded-2xl border-none bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-black text-[10px] uppercase tracking-widest transition-all" asChild>
-              <Link href="/management/bookings">
-                {toGreekUpperCase('Προβολη ολων')}
-              </Link>
-            </Button>
+            <Link href="/management/bookings" className="text-xs font-black text-emerald-600 hover:text-emerald-700 transition-colors shrink-0">
+              {toGreekUpperCase('Όλες →')}
+            </Link>
           </div>
 
           <div className="space-y-3">
@@ -1199,20 +1200,18 @@ function AdminDashboard() {
         {/* Today's Trainings */}
         <div className="space-y-8">
           <div className="flex items-center justify-between pb-2">
-            <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg hover:border-emerald-200 transition-colors">
-                <Trophy className="h-6 w-6 text-emerald-500" />
+            <div className="flex items-center gap-3 sm:gap-4">
+              <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg hover:border-emerald-200 transition-colors shrink-0">
+                <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-500" />
               </div>
               <div className="space-y-0.5">
-                <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Σημερινές Προπονήσεις')}</h2>
-                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Πρόγραμμα ακαδημίας')}</p>
+                <h2 className="text-base sm:text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Σημερινές Προπονήσεις')}</h2>
+                <p className="text-[9px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Πρόγραμμα ακαδημίας')}</p>
               </div>
             </div>
-            <Button variant="outline" className="h-10 px-5 rounded-2xl border-none bg-zinc-100 hover:bg-zinc-200 text-zinc-600 font-black text-[10px] uppercase tracking-widest transition-all" asChild>
-              <Link href="/management/academy/training">
-                {toGreekUpperCase('Προβολη ολων')}
-              </Link>
-            </Button>
+            <Link href="/management/academy/training" className="text-xs font-black text-emerald-600 hover:text-emerald-700 transition-colors shrink-0">
+              {toGreekUpperCase('Όλες →')}
+            </Link>
           </div>
 
           <div className="space-y-3">
@@ -1577,11 +1576,8 @@ function AdminDashboard() {
       </div>
 
       <Dialog open={showQuickBooking} onOpenChange={setShowQuickBooking}>
-        <DialogContent className="max-w-xl p-0 overflow-hidden rounded-3xl border-0 shadow-2xl animate-in fade-in zoom-in-95 duration-300">
-          <div className="bg-zinc-900 p-8 text-white relative">
-            <div className="absolute top-0 right-0 p-6 opacity-10">
-              <Plus className="h-20 w-20 rotate-12" />
-            </div>
+        <DialogContent className="max-w-xl w-[95vw] sm:w-full p-0 rounded-3xl border-0 shadow-2xl animate-in fade-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
+          <div className="bg-zinc-900 p-5 sm:p-8 text-white relative sticky top-0 z-10">
             <DialogHeader className="relative z-10 text-left">
               <DialogTitle className="text-2xl font-black flex items-center gap-4 uppercase tracking-tight">
                 <div className="h-10 w-10 rounded-xl bg-emerald-500 flex items-center justify-center text-zinc-900 shadow-lg shadow-emerald-500/20">
@@ -1595,7 +1591,7 @@ function AdminDashboard() {
             </DialogHeader>
           </div>
 
-          <form onSubmit={handleQuickBookingSubmit} className="p-8 space-y-6 bg-white">
+          <form onSubmit={handleQuickBookingSubmit} className="p-5 sm:p-8 space-y-5 sm:space-y-6 bg-white">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <Label htmlFor="userName" className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 ml-0.5">{toGreekUpperCase('Όνομα Πελάτη *')}</Label>
@@ -1641,15 +1637,36 @@ function AdminDashboard() {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="date" className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 ml-0.5">{toGreekUpperCase('Ημερομηνία *')}</Label>
-                <Input
-                  id="date"
-                  type="date"
-                  min={new Date().toISOString().split('T')[0]}
-                  value={quickBookingData.selectedDate}
-                  onChange={(e) => setQuickBookingData({ ...quickBookingData, selectedDate: e.target.value, selectedSlot: '' })}
-                  required
-                  className="h-11 px-4 rounded-xl bg-zinc-50 border-none font-bold text-sm focus:bg-white transition-all shadow-inner"
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full h-11 px-4 rounded-xl bg-zinc-50 border-none font-bold text-sm shadow-inner justify-start text-left",
+                        !quickBookingData.selectedDate && "text-zinc-400"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4 text-zinc-400" />
+                      {quickBookingData.selectedDate
+                        ? new Date(quickBookingData.selectedDate + 'T00:00:00').toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+                        : 'Επιλέξτε ημερομηνία'}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 rounded-2xl border-0 shadow-2xl" align="center" sideOffset={8}>
+                    <Calendar
+                      mode="single"
+                      selected={quickBookingData.selectedDate ? new Date(quickBookingData.selectedDate + 'T00:00:00') : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                          setQuickBookingData({ ...quickBookingData, selectedDate: dateStr, selectedSlot: '' });
+                        }
+                      }}
+                      disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                      className="rounded-2xl"
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 
@@ -1663,7 +1680,7 @@ function AdminDashboard() {
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                   {generateAvailableSlots(quickBookingData.selectedPitchId, quickBookingData.selectedDate).length === 0 ? (
                     <div className="col-span-full p-4 text-center bg-red-50 rounded-xl border border-red-100 text-red-600 text-[10px] font-bold uppercase tracking-widest">
                       {toGreekUpperCase('Δεν υπαρχουν διαθεσιμες ωρες')}

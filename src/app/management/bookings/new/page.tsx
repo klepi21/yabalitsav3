@@ -25,6 +25,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon } from 'lucide-react';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -430,18 +433,18 @@ export default function NewBookingPage() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <div className="p-2.5 rounded-xl bg-emerald-600 shadow-lg shadow-emerald-200">
+              <div className="p-2 sm:p-2.5 rounded-xl bg-emerald-600 shadow-lg shadow-emerald-200 shrink-0">
                 {isRecurring ? (
-                  <RefreshCw className="h-6 w-6 text-white" />
+                  <RefreshCw className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 ) : (
-                  <CalendarDays className="h-6 w-6 text-white" />
+                  <CalendarDays className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 )}
               </div>
-              <h1 className="text-3xl font-extrabold tracking-tight text-zinc-900 uppercase">
+              <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 uppercase">
                 {toGreekUpperCase(isRecurring ? 'Επαναλαμβανόμενη Κράτηση' : 'Νέα Κράτηση')}
               </h1>
             </div>
-            <p className="text-[16px] font-medium text-zinc-500 max-w-lg">
+            <p className="text-sm sm:text-[16px] font-medium text-zinc-500 max-w-lg hidden sm:block">
               {isRecurring
                 ? 'Δημιουργία επαναλαμβανόμενων προγραμματισμένων κρατήσεων για το γήπεδό σας.'
                 : 'Καταχωρήστε μια νέα κράτηση γρήγορα και εύκολα.'
@@ -476,15 +479,15 @@ export default function NewBookingPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
           <Card className="premium-card overflow-hidden border-0">
-            <CardContent className="p-8">
-              <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-10">
+            <CardContent className="p-4 sm:p-8">
+              <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-8 sm:space-y-10">
                 {/* 1. Customer Info */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center border border-zinc-100">
                       <Users className="h-5 w-5 text-zinc-400" />
                     </div>
-                    <h3 className="text-xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Στοιχεία Πελάτη')}</h3>
+                    <h3 className="text-base sm:text-xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Στοιχεία Πελάτη')}</h3>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -494,7 +497,7 @@ export default function NewBookingPage() {
                         id="customerName"
                         {...register('customerName')}
                         placeholder="π.χ. Γιάννης Παπαδόπουλος"
-                        className="h-14 px-5 rounded-2xl border-zinc-200 focus:ring-emerald-500 font-medium text-lg"
+                        className="h-11 sm:h-14 px-4 sm:px-5 rounded-2xl border-zinc-200 focus:ring-emerald-500 font-medium text-sm sm:text-lg"
                       />
                       {errors.customerName && (
                         <p className="text-sm font-bold text-red-500 ml-1">{errors.customerName.message}</p>
@@ -508,7 +511,7 @@ export default function NewBookingPage() {
                         id="customerPhone"
                         {...register('customerPhone')}
                         placeholder="π.χ. 6970000000"
-                        className="h-14 px-5 rounded-2xl border-zinc-200 focus:ring-emerald-500 font-medium text-lg"
+                        className="h-11 sm:h-14 px-4 sm:px-5 rounded-2xl border-zinc-200 focus:ring-emerald-500 font-medium text-sm sm:text-lg"
                       />
                       {errors.customerPhone && (
                         <p className="text-sm font-bold text-red-500 ml-1">{errors.customerPhone.message}</p>
@@ -525,7 +528,7 @@ export default function NewBookingPage() {
                     <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center border border-zinc-100">
                       <CalendarDays className="h-5 w-5 text-zinc-400" />
                     </div>
-                    <h3 className="text-xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Επιλογή Χώρου & Χρόνου')}</h3>
+                    <h3 className="text-base sm:text-xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Επιλογή Χώρου & Χρόνου')}</h3>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -535,7 +538,7 @@ export default function NewBookingPage() {
                         <select
                           id="pitchId"
                           {...register('pitchId')}
-                          className="flex h-14 w-full rounded-2xl border border-zinc-200 bg-white px-5 py-2 text-lg font-medium shadow-none outline-none appearance-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all cursor-pointer"
+                          className="flex h-11 sm:h-14 w-full rounded-2xl border border-zinc-200 bg-white px-4 sm:px-5 py-2 text-sm sm:text-lg font-medium shadow-none outline-none appearance-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all cursor-pointer"
                         >
                           <option value="">Επιλέξτε γήπεδο</option>
                           {pitches.map((pitch) => (
@@ -554,14 +557,37 @@ export default function NewBookingPage() {
                     </div>
 
                     <div className="space-y-2.5">
-                      <Label htmlFor="selectedDate" className="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">Ημερομηνία *</Label>
-                      <Input
-                        type="date"
-                        id="selectedDate"
-                        value={selectedDate}
-                        onChange={(e) => setSelectedDate(e.target.value)}
-                        className="h-14 px-5 rounded-2xl border-zinc-200 focus:ring-emerald-500 font-medium text-lg uppercase"
-                      />
+                      <Label className="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">Ημερομηνία *</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              "w-full h-11 sm:h-14 px-4 sm:px-5 rounded-2xl border-zinc-200 font-medium text-sm sm:text-lg justify-start text-left hover:bg-zinc-50",
+                              !selectedDate && "text-zinc-400"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4 text-zinc-400 shrink-0" />
+                            {selectedDate
+                              ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('el-GR', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })
+                              : 'Επιλέξτε ημερομηνία'}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0 rounded-2xl border-0 shadow-2xl" align="center" sideOffset={8}>
+                          <Calendar
+                            mode="single"
+                            selected={selectedDate ? new Date(selectedDate + 'T00:00:00') : undefined}
+                            onSelect={(date) => {
+                              if (date) {
+                                const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                                setSelectedDate(dateStr);
+                              }
+                            }}
+                            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                            className="rounded-2xl"
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   </div>
 
@@ -573,7 +599,7 @@ export default function NewBookingPage() {
                     </div>
                     
                     {availableSlots.length > 0 ? (
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2 sm:gap-3">
                         {availableSlots.map((slot) => {
                           const isSelected = watch('selectedSlot') === slot;
                           return (
@@ -582,7 +608,7 @@ export default function NewBookingPage() {
                               type="button"
                               onClick={() => setValue('selectedSlot', slot)}
                               className={cn(
-                                "h-12 flex items-center justify-center rounded-xl border-2 font-bold transition-all text-sm",
+                                "h-10 sm:h-12 flex items-center justify-center rounded-xl border-2 font-bold transition-all text-xs sm:text-sm",
                                 isSelected
                                   ? "bg-zinc-900 border-zinc-900 text-white shadow-lg active:scale-95 translate-y-[-2px]"
                                   : "bg-white border-zinc-100 text-zinc-600 hover:border-zinc-200 hover:bg-zinc-50"
@@ -618,28 +644,25 @@ export default function NewBookingPage() {
                       <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center border border-zinc-100">
                         <RefreshCw className="h-5 w-5 text-zinc-400" />
                       </div>
-                      <h3 className="text-xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Επαναλαμβανόμενη')}</h3>
+                      <h3 className="text-base sm:text-xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Επαναλαμβανόμενη')}</h3>
                     </div>
                     <div
-                      className={cn(
-                        "flex items-center gap-2 px-3 py-1.5 rounded-xl border cursor-pointer transition-all",
-                        isRecurring ? "bg-emerald-600 border-emerald-500 text-white shadow-md" : "bg-white border-zinc-200 grayscale opacity-60"
-                      )}
+                      className="relative h-6 w-11 cursor-pointer"
                       onClick={() => setIsRecurring(!isRecurring)}
                     >
-                      <input
-                        type="checkbox"
-                        className="hidden"
-                        checked={isRecurring}
-                        readOnly
-                      />
-                      <div className={cn("h-4 w-4 rounded-full border-2 transition-all", isRecurring ? "bg-white border-white" : "border-zinc-300")} />
-                      <span className="text-xs font-black uppercase tracking-widest">{isRecurring ? 'Ενεργή' : 'Ανενεργή'}</span>
+                      <div className={cn(
+                        "absolute inset-0 rounded-full transition-colors",
+                        isRecurring ? "bg-emerald-500" : "bg-zinc-200"
+                      )} />
+                      <div className={cn(
+                        "absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform",
+                        isRecurring ? "translate-x-5" : "translate-x-0.5"
+                      )} />
                     </div>
                   </div>
 
                   {isRecurring && (
-                    <div className="p-8 rounded-3xl bg-zinc-50 border-2 border-zinc-100 space-y-8 animate-in fade-in slide-in-from-top-4 duration-300">
+                    <div className="p-4 sm:p-8 rounded-3xl bg-zinc-50 border-2 border-zinc-100 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-top-4 duration-300">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
                           <Label className="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">Συχνότητα</Label>
@@ -762,17 +785,17 @@ export default function NewBookingPage() {
                 <div className="pt-4">
                   <Button
                     type="submit"
-                    className="w-full h-16 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl shadow-xl shadow-emerald-200 transition-all hover:translate-y-[-2px] active:translate-y-[1px]"
+                    className="w-full h-12 sm:h-16 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-base sm:text-xl shadow-xl shadow-emerald-200 transition-all hover:translate-y-[-2px] active:translate-y-[1px]"
                     disabled={isSaving}
                   >
                     {isSaving ? (
                       <div className="flex items-center gap-3">
-                        <Loader2 className="h-6 w-6 animate-spin" />
+                        <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 animate-spin" />
                         <span>Γίνεται καταχώρηση...</span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-3">
-                         <Plus className="h-6 w-6" />
+                         <Plus className="h-5 w-5 sm:h-6 sm:w-6" />
                          <span>{isRecurring ? 'Δημιουργία Κρατήσεων' : 'Ολοκλήρωση Κράτησης'}</span>
                       </div>
                     )}
@@ -787,7 +810,7 @@ export default function NewBookingPage() {
         <div className="space-y-8">
           {/* Price Summary */}
           <Card className="premium-card bg-emerald-600 border-0 overflow-hidden shadow-2xl shadow-emerald-200">
-            <CardContent className="p-8 text-white">
+            <CardContent className="p-5 sm:p-8 text-white">
               <div className="flex items-center justify-between mb-8">
                 <p className="text-xs font-black uppercase tracking-[3px] text-white/70">{toGreekUpperCase('Σύνοψη Πληρωμής')}</p>
                 <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">

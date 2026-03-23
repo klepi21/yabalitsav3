@@ -11,7 +11,6 @@ import {
   Pencil,
   Trash2,
   Ban,
-  ArrowRight,
   ArrowLeft,
   Euro,
   Timer,
@@ -153,39 +152,39 @@ export default function PitchDetailsPage() {
           Επιστροφή στα Γήπεδα
         </Link>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <div className="h-16 w-16 rounded-2xl bg-emerald-600 shadow-xl shadow-emerald-200 flex items-center justify-center shrink-0">
-              <Goal className="h-8 w-8 text-white" />
+        <div className="flex flex-col gap-5">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-2xl bg-emerald-600 shadow-xl shadow-emerald-200 flex items-center justify-center shrink-0">
+              <Goal className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
             </div>
-            <div>
-              <div className="flex items-center gap-3 mb-1">
-                <h1 className="text-3xl font-black tracking-tight text-zinc-900 uppercase">{toGreekUpperCase(pitch.name)}</h1>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <h1 className="text-xl sm:text-3xl font-black tracking-tight text-zinc-900 uppercase">{toGreekUpperCase(pitch.name)}</h1>
                 <Badge className="bg-emerald-50 text-emerald-700 border-none font-black text-[10px] uppercase tracking-wider px-3">
                   {pitch.type}
                 </Badge>
               </div>
-              <p className="text-lg font-medium text-zinc-500">Πλήρης διαχείριση και στατιστικά γηπέδου.</p>
+              <p className="text-sm sm:text-lg font-medium text-zinc-500 hidden sm:block">Πλήρης διαχείριση και στατιστικά γηπέδου.</p>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-3">
-            <Button 
-              variant="outline" 
-              asChild 
-              className="h-14 px-6 rounded-2xl border-zinc-200 font-bold hover:bg-zinc-50 active:scale-95 transition-all"
+            <Button
+              variant="outline"
+              asChild
+              className="h-11 sm:h-14 px-4 sm:px-6 rounded-2xl border-zinc-200 font-bold hover:bg-zinc-50 active:scale-95 transition-all flex-1 sm:flex-none"
             >
-              <Link href={`/management/pitches/${pitch.id}/edit`} className="flex items-center gap-2">
-                <Pencil className="h-5 w-5" />
+              <Link href={`/management/pitches/${pitch.id}/edit`} className="flex items-center justify-center gap-2">
+                <Pencil className="h-4 w-4 sm:h-5 sm:w-5" />
                 Επεξεργασία
               </Link>
             </Button>
 
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button 
-                  variant="outline" 
-                  className="h-14 w-14 rounded-2xl border-red-100 text-red-500 hover:bg-red-50 active:scale-95 transition-all p-0"
+                <Button
+                  variant="outline"
+                  className="h-11 w-11 sm:h-14 sm:w-14 rounded-2xl border-red-100 text-red-500 hover:bg-red-50 active:scale-95 transition-all p-0"
                 >
                   <Trash2 className="h-6 w-6" />
                 </Button>
@@ -220,7 +219,7 @@ export default function PitchDetailsPage() {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {[
           { label: 'Τιμή (Slot)', value: `\u20AC${pitch.pricePerSlot?.toFixed(2)}`, icon: Euro, color: 'emerald' },
           { label: 'Διάρκεια', value: `${pitch.slotDuration}\'`, icon: Timer, color: 'blue' },
@@ -228,7 +227,7 @@ export default function PitchDetailsPage() {
           { label: 'Τύπος', value: pitch.type, icon: Goal, color: 'amber' }
         ].map((stat, idx) => (
           <Card key={idx} className="premium-card border-0 hover:translate-y-[-2px] transition-all">
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center gap-4">
                 <div className={cn(
                   "h-12 w-12 rounded-2xl flex items-center justify-center shrink-0",
@@ -253,12 +252,12 @@ export default function PitchDetailsPage() {
         <div className="space-y-8 lg:col-span-1">
           {/* Opening Hours */}
           <Card className="premium-card border-0">
-             <CardContent className="p-8 space-y-6">
+             <CardContent className="p-5 sm:p-8 space-y-5 sm:space-y-6">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
                     <Clock className="h-5 w-5 text-blue-600" />
                   </div>
-                  <h3 className="text-xl font-black text-zinc-900">Ωράριο</h3>
+                  <h3 className="text-lg sm:text-xl font-black text-zinc-900">Ωράριο</h3>
                 </div>
 
                 <div className="space-y-4">
@@ -297,12 +296,12 @@ export default function PitchDetailsPage() {
 
           {/* Blocked Dates */}
           <Card className="premium-card border-0 overflow-hidden">
-            <CardContent className="p-8 space-y-6">
+            <CardContent className="p-5 sm:p-8 space-y-5 sm:space-y-6">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-red-50 flex items-center justify-center">
+                <div className="h-10 w-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
                   <Ban className="h-5 w-5 text-red-600" />
                 </div>
-                <h3 className="text-xl font-black text-zinc-900">Εξαιρέσεις</h3>
+                <h3 className="text-lg sm:text-xl font-black text-zinc-900">Εξαιρέσεις</h3>
               </div>
 
               {blockedDates.length > 0 ? (
@@ -336,20 +335,17 @@ export default function PitchDetailsPage() {
         {/* Recent Bookings - Main Area */}
         <div className="lg:col-span-2">
           <Card className="premium-card border-0 h-full">
-            <CardContent className="p-8">
-              <div className="flex items-center justify-between mb-8">
+            <CardContent className="p-5 sm:p-8">
+              <div className="flex items-center justify-between mb-6 sm:mb-8">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+                  <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
                     <Calendar className="h-5 w-5 text-emerald-600" />
                   </div>
-                  <h3 className="text-xl font-black text-zinc-900">Ιστορικό Κρατήσεων</h3>
+                  <h3 className="text-lg sm:text-xl font-black text-zinc-900">Ιστορικό Κρατήσεων</h3>
                 </div>
-                <Button variant="ghost" asChild className="text-emerald-600 font-bold hover:bg-emerald-50 rounded-xl">
-                   <Link href="/management/bookings" className="flex items-center gap-2">
-                     Όλες οι κρατήσεις
-                     <ArrowRight className="h-4 w-4" />
-                   </Link>
-                </Button>
+                <Link href="/management/bookings" className="text-xs font-black text-emerald-600 hover:text-emerald-700 transition-colors shrink-0">
+                  {toGreekUpperCase('Όλες →')}
+                </Link>
               </div>
 
               {bookings.length === 0 ? (
@@ -363,10 +359,10 @@ export default function PitchDetailsPage() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-zinc-100">
-                        <th className="pb-4 text-left text-xs font-black uppercase tracking-widest text-zinc-400 px-4">Πελάτης</th>
-                        <th className="pb-4 text-left text-xs font-black uppercase tracking-widest text-zinc-400 px-4">Ημερομηνία</th>
-                        <th className="pb-4 text-left text-xs font-black uppercase tracking-widest text-zinc-400 px-4">Ώρα</th>
-                        <th className="pb-4 text-right text-xs font-black uppercase tracking-widest text-zinc-400 px-4">Κατάσταση</th>
+                        <th className="pb-4 text-left text-xs font-black uppercase tracking-widest text-zinc-400 px-2 sm:px-4">Πελάτης</th>
+                        <th className="pb-4 text-left text-xs font-black uppercase tracking-widest text-zinc-400 px-2 sm:px-4 hidden sm:table-cell">Ημερομηνία</th>
+                        <th className="pb-4 text-left text-xs font-black uppercase tracking-widest text-zinc-400 px-2 sm:px-4">Ώρα</th>
+                        <th className="pb-4 text-right text-xs font-black uppercase tracking-widest text-zinc-400 px-2 sm:px-4">Κατάσταση</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-50">
@@ -374,16 +370,19 @@ export default function PitchDetailsPage() {
                         const status = statusConfig[booking.status as keyof typeof statusConfig] || statusConfig.confirmed;
                         return (
                           <tr key={booking.id} className="group hover:bg-zinc-50/50 transition-colors">
-                            <td className="py-5 px-4 font-bold text-zinc-900">
-                              {booking.userName || 'Άγνωστος'}
+                            <td className="py-4 sm:py-5 px-2 sm:px-4">
+                              <p className="font-bold text-zinc-900 text-sm">{booking.userName || 'Άγνωστος'}</p>
+                              <p className="text-xs text-zinc-400 sm:hidden">
+                                {new Date(booking.startTime).toLocaleDateString('el-GR', { day: 'numeric', month: 'short' })}
+                              </p>
                             </td>
-                            <td className="py-5 px-4 font-medium text-zinc-500">
+                            <td className="py-4 sm:py-5 px-2 sm:px-4 font-medium text-zinc-500 hidden sm:table-cell">
                                {new Date(booking.startTime).toLocaleDateString('el-GR', { day: 'numeric', month: 'short', year: 'numeric' })}
                             </td>
-                            <td className="py-5 px-4 font-black text-zinc-900 tabular-nums">
+                            <td className="py-4 sm:py-5 px-2 sm:px-4 font-black text-zinc-900 tabular-nums text-sm">
                                {new Date(booking.startTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })}
                             </td>
-                            <td className="py-5 px-4 text-right">
+                            <td className="py-4 sm:py-5 px-2 sm:px-4 text-right">
                                <Badge className={cn(
                                  "font-black text-[9px] uppercase tracking-wider px-2 py-0.5 border-none",
                                  status.className

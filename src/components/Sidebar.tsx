@@ -426,7 +426,7 @@ export default function Sidebar() {
   return (
     <>
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="left" className="w-[280px] p-0 border-0 bg-white">
+        <SheetContent side="left" showCloseButton={false} className="w-[280px] p-0 border-0 bg-white">
           <SheetTitle className="sr-only">Μενού πλοήγησης</SheetTitle>
           <NavContent onNavigate={() => setSidebarOpen(false)} />
         </SheetContent>

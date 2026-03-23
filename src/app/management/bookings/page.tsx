@@ -268,30 +268,30 @@ export default function BookingsPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-2">
-        <div className="flex items-center gap-4">
-           <div className="h-12 w-12 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shadow-zinc-200 shrink-0">
-             <CalendarDays className="h-6 w-6 text-emerald-400" />
+      <div className="flex flex-col gap-4 pb-2">
+        <div className="flex items-center gap-3">
+           <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shadow-zinc-200 shrink-0">
+             <CalendarDays className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-400" />
            </div>
            <div className="space-y-0.5">
-             <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
+             <h1 className="text-xl sm:text-2xl font-black tracking-tight text-zinc-900 uppercase">
                {toGreekUpperCase('Κρατήσεις')}
              </h1>
              <div className="flex items-center gap-2">
                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+               <p className="text-[9px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-widest hidden sm:block">
                  {toGreekUpperCase('Διαχειριση και προγραμματισμος')}
                </p>
              </div>
            </div>
         </div>
         
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="bg-zinc-100/80 p-1 rounded-xl border border-zinc-200/50 flex items-center shadow-inner backdrop-blur-sm">
+        <div className="flex items-center gap-2.5 overflow-x-auto">
+          <div className="bg-zinc-100/80 p-1 rounded-xl border border-zinc-200/50 flex items-center shadow-inner backdrop-blur-sm shrink-0">
             <button
               onClick={() => setViewMode('calendar')}
               className={cn(
-                "flex items-center gap-2 px-5 py-2 rounded-lg text-[11px] font-black transition-all active:scale-95",
+                "flex items-center gap-1.5 px-3 sm:px-5 py-2 rounded-lg text-[10px] sm:text-[11px] font-black transition-all active:scale-95",
                 viewMode === 'calendar'
                   ? "bg-white text-emerald-600 shadow-md shadow-emerald-900/5"
                   : "text-zinc-400 hover:text-zinc-600 hover:bg-white/50"
@@ -303,7 +303,7 @@ export default function BookingsPage() {
             <button
               onClick={() => setViewMode('list')}
               className={cn(
-                "flex items-center gap-2 px-5 py-2 rounded-lg text-[11px] font-black transition-all active:scale-95",
+                "flex items-center gap-1.5 px-3 sm:px-5 py-2 rounded-lg text-[10px] sm:text-[11px] font-black transition-all active:scale-95",
                 viewMode === 'list'
                   ? "bg-white text-emerald-600 shadow-md shadow-emerald-900/5"
                   : "text-zinc-400 hover:text-zinc-600 hover:bg-white/50"
@@ -315,10 +315,11 @@ export default function BookingsPage() {
           </div>
 
 
-          <Button asChild className="h-10 px-5 rounded-lg bg-zinc-900 hover:bg-black text-white font-bold text-[12px] shadow-md transition-all active:scale-95 group">
-            <Link href="/management/bookings/new" className="flex items-center gap-2">
+          <Button asChild className="h-10 px-3 sm:px-5 rounded-lg bg-zinc-900 hover:bg-black text-white font-bold text-[11px] sm:text-[12px] shadow-md transition-all active:scale-95 group shrink-0">
+            <Link href="/management/bookings/new" className="flex items-center gap-1.5 sm:gap-2">
               <Plus className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" />
-              {toGreekUpperCase('Νέα Κράτηση')}
+              <span className="hidden sm:inline">{toGreekUpperCase('Νέα Κράτηση')}</span>
+              <span className="sm:hidden">{toGreekUpperCase('Νέα')}</span>
             </Link></Button>
         </div>
       </div>
@@ -343,7 +344,7 @@ export default function BookingsPage() {
       ) : (
         <div className="space-y-8">
           {/* Stats row */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-6">
             {[
               { label: 'Σύνολο', value: bookings.length, icon: CalendarDays, color: 'zinc' },
               { label: 'Εκκρεμείς', value: pendingCount, icon: Clock, color: 'amber' },
@@ -351,19 +352,19 @@ export default function BookingsPage() {
               { label: 'Σήμερα', value: todayCount, icon: Flag, color: 'blue' },
               { label: 'Ακυρωμένες', value: cancelledCount, icon: XCircle, color: 'red' }
             ].map((stat, i) => (
-              <div key={i} className="flex flex-col items-center justify-center text-center p-6 bg-white rounded-2xl border border-zinc-100 shadow-sm group hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-500">
-                <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center mb-4 transition-all group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-110 shadow-inner text-zinc-400">
-                  <stat.icon className="h-5 w-5" />
+              <div key={i} className="flex flex-col items-center justify-center text-center p-3 sm:p-6 bg-white rounded-2xl border border-zinc-100 shadow-sm group hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-500">
+                <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-zinc-50 flex items-center justify-center mb-2 sm:mb-4 transition-all group-hover:bg-emerald-600 group-hover:text-white group-hover:scale-110 shadow-inner text-zinc-400">
+                  <stat.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
-                <p className="text-2xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{stat.value}</p>
-                <p className="text-[9px] font-black uppercase tracking-[0.1em] text-zinc-400 mt-1">{toGreekUpperCase(stat.label)}</p>
+                <p className="text-xl sm:text-2xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{stat.value}</p>
+                <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] text-zinc-400 mt-1">{toGreekUpperCase(stat.label)}</p>
               </div>
             ))}
           </div>
 
           <Card className="rounded-xl border border-zinc-100 bg-white overflow-hidden shadow-sm">
-            <CardHeader className="p-4 pb-2 border-b border-zinc-50">
-              <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+            <CardHeader className="p-3 sm:p-4 pb-2 border-b border-zinc-50">
+              <div className="flex flex-col gap-3">
                 <div className="relative flex-1 group">
                   <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-300 group-focus-within:text-emerald-500 transition-colors" />
                   <Input
@@ -424,19 +425,19 @@ export default function BookingsPage() {
                   <p className="text-zinc-500 mt-2 font-medium text-base">Δοκιμάστε να αλλάξετε τα φίλτρα ή την αναζήτηση σας.</p>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 gap-3 p-4">
+                <div className="grid grid-cols-1 gap-2 sm:gap-3 p-2 sm:p-4">
                   {filteredBookings.map((booking) => {
                     const pitch = pitches.find(p => p.id === booking.pitchId);
                     const startDate = new Date(booking.startTime);
                     const isToday = startDate.toDateString() === new Date().toDateString();
                     
                     return (
-                      <div key={booking.id} className="group p-4 bg-white rounded-xl border border-zinc-100 shadow-sm hover:shadow-md hover:border-emerald-100 transition-all duration-300">
-                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                          <div className="flex flex-col sm:flex-row sm:items-center gap-6 flex-1">
+                      <div key={booking.id} className="group p-3 sm:p-4 bg-white rounded-xl border border-zinc-100 shadow-sm hover:shadow-md hover:border-emerald-100 transition-all duration-300">
+                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
+                          <div className="flex items-start sm:items-center gap-3 sm:gap-6 flex-1">
                             {/* Date Block */}
                             <div className={cn(
-                              "shrink-0 w-14 h-16 flex flex-col items-center justify-center rounded-lg border-2 transition-all",
+                              "shrink-0 w-12 h-14 sm:w-14 sm:h-16 flex flex-col items-center justify-center rounded-lg border-2 transition-all",
                               isToday 
                                 ? "bg-zinc-900 border-zinc-900 text-white shadow-lg" 
                                 : "bg-zinc-50 border-zinc-50 text-zinc-900"
@@ -484,9 +485,9 @@ export default function BookingsPage() {
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between lg:justify-end gap-5 pt-2 lg:pt-0 border-t lg:border-none border-zinc-50">
+                          <div className="flex items-center justify-between lg:justify-end gap-4 sm:gap-5 pt-2 lg:pt-0 border-t lg:border-none border-zinc-50">
                             <div className="text-left lg:text-right">
-                              <p className="text-xl font-black text-zinc-900 tracking-tight">&euro;{booking.price?.toFixed(0) || '0'}</p>
+                              <p className="text-lg sm:text-xl font-black text-zinc-900 tracking-tight">&euro;{booking.price?.toFixed(0) || '0'}</p>
                               {pitch && (
                                 <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-wider">
                                   &euro;{(booking.price / parseInt(pitch.type.split('x')[0] || '10')).toFixed(0)} / ΑΤΟΜΟ
