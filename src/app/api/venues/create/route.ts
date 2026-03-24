@@ -83,10 +83,10 @@ export async function POST(request: NextRequest) {
         doy: venueDoy || '',
       },
       coupon: {
-        code: 'WELCOME50',
-        active: false,
+        code: 'WELCOME30',
+        active: true,
         discountType: 'percentage',
-        discountValue: 50,
+        discountValue: 30,
       },
       daysRemaining: 15,
       lastDecrementAt: FieldValue.serverTimestamp(),
