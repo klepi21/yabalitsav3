@@ -200,7 +200,7 @@ function CoachDashboard() {
                 </div>
                 <div>
                   <p className="text-2xl font-black text-zinc-900">{squads.length}</p>
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase">Τμήματα </p>
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase">Τμήματα</p>
                 </div>
               </div>
             </CardContent>
