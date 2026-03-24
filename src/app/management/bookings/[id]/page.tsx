@@ -381,10 +381,13 @@ function CollectionTracker({
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center gap-2 text-base">
-            <Banknote className="h-5 w-5 text-emerald-600" />
-            Είσπραξη
-          </CardTitle>
+          <div>
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Banknote className="h-5 w-5 text-emerald-600" />
+              Είσπραξη
+            </CardTitle>
+            <p className="text-[11px] text-zinc-400 mt-1 ml-7">Βοηθητικό εργαλείο — δεν επηρεάζει τα έσοδα στις αναφορές</p>
+          </div>
           <Badge
             variant="outline"
             className={cn(

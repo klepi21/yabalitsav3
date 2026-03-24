@@ -19,6 +19,10 @@ import {
   AlertCircle,
   CheckCircle,
   XCircle,
+  Info,
+  ChevronDown,
+  Shield,
+  Lock,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { venueService } from '@/lib/firebase-services';
@@ -82,6 +86,8 @@ export default function ReportsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState<'week' | 'month' | 'year'>('month');
   const [selectedPitch, setSelectedPitch] = useState<string>('all');
   const [downloadingInvoice, setDownloadingInvoice] = useState<string | null>(null);
+  const [showAllMonthly, setShowAllMonthly] = useState(false);
+  const [showAllSquads, setShowAllSquads] = useState(false);
 
   useEffect(() => {
     if (authLoading) return;
@@ -173,10 +179,11 @@ export default function ReportsPage() {
     }
   };
 
-  const handleVerifyPin = async () => {
+  const handleVerifyPin = async (pinOverride?: string) => {
     if (!venueOwner?.venueId) return;
+    const pin = pinOverride || pinInput;
     setPinError(null);
-    if (!/^\d{4}$/.test(pinInput)) {
+    if (!/^\d{4}$/.test(pin)) {
       setPinError('Ο PIN πρέπει να είναι 4ψήφιος.');
       return;
     }
@@ -187,7 +194,7 @@ export default function ReportsPage() {
         setNeedsSetPin(true);
         return;
       }
-      const enteredHash = await hashStringSHA256(pinInput);
+      const enteredHash = await hashStringSHA256(pin);
       if (enteredHash === expectedHash) {
         setIsPinVerified(true);
         loadData();
@@ -493,184 +500,234 @@ export default function ReportsPage() {
     return (
       <div className="relative min-h-[50vh] flex items-center justify-center">
         {!isPinVerified ? (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/40 backdrop-blur-sm animate-in fade-in duration-300">
-            <div className="w-full max-w-[280px] rounded-2xl border-none bg-white p-6 shadow-2xl animate-in zoom-in-95 duration-300">
-              <div className="text-center mb-6">
-                <div className="mx-auto h-12 w-12 rounded-xl bg-emerald-50 flex items-center justify-center mb-3 shadow-sm">
-                  <TrendingUp className="h-6 w-6 text-emerald-600" />
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/60 backdrop-blur-md animate-in fade-in duration-300">
+            <div className="w-full max-w-sm rounded-3xl bg-white p-8 shadow-2xl animate-in zoom-in-95 duration-300 border border-zinc-100">
+              {/* Header */}
+              <div className="text-center mb-8">
+                <div className="mx-auto h-16 w-16 rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 flex items-center justify-center mb-4 shadow-lg">
+                  <Shield className="h-8 w-8 text-white" />
                 </div>
-                <h2 className="text-xl font-black tracking-tight text-zinc-900 mb-0.5 uppercase">
-                  {toGreekUpperCase(
-                    needsSetPin ? 'Ορισμός PIN'
-                    : forgotPinStep === 'none' ? 'Περιοχή Διαχειριστή'
-                    : 'Επαναφορά PIN'
-                  )}
+                <h2 className="text-2xl font-black tracking-tight text-zinc-900 mb-1">
+                  {needsSetPin ? 'Ορισμός PIN'
+                    : forgotPinStep === 'none' ? 'Αναφορές & Οικονομικά'
+                    : 'Επαναφορά PIN'}
                 </h2>
-                <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-tight">
-                  {toGreekUpperCase(
-                    needsSetPin ? 'Ορίστε νέο 4ψήφιο PIN'
-                    : forgotPinStep === 'none' ? 'Εισαγετε τον 4ψηφιο PIN'
-                    : forgotPinStep === 'confirm' ? 'Αποστολή κωδικού μέσω email'
-                    : 'Επαλήθευση μέσω email'
-                  )}
+                <p className="text-sm text-zinc-400 font-medium">
+                  {needsSetPin ? 'Ορίστε νέο 4ψήφιο PIN πρόσβασης'
+                    : forgotPinStep === 'none' ? 'Εισάγετε το 4ψήφιο PIN για πρόσβαση'
+                    : forgotPinStep === 'confirm' ? 'Αποστολή κωδικού επαναφοράς'
+                    : 'Εισάγετε τον κωδικό από το email'}
                 </p>
               </div>
-              
-              <div className="space-y-6">
+
+              <div className="space-y-5">
+                {/* SET NEW PIN */}
                 {needsSetPin ? (
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-4">
                     <div>
-                      <p className="text-[10px] font-bold text-zinc-400 mb-1.5">{toGreekUpperCase('Νέο PIN')}</p>
-                      <Input
-                        type="password"
-                        inputMode="numeric"
-                        pattern="\\d{4}"
-                        maxLength={4}
-                        placeholder="••••"
-                        className="text-center tracking-widest text-xl w-full h-11 rounded-xl bg-zinc-50 border-none px-4 font-black focus:bg-white transition-all"
-                        value={newPin}
-                        onChange={(e) => setNewPin(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-                        autoFocus
-                      />
+                      <p className="text-xs font-semibold text-zinc-500 mb-2">Νέο PIN</p>
+                      <div className="flex gap-3 justify-center">
+                        {[0, 1, 2, 3].map((i) => (
+                          <input
+                            key={`new-${i}`}
+                            type="password"
+                            inputMode="numeric"
+                            maxLength={1}
+                            className="w-14 h-14 text-center text-2xl font-black rounded-xl bg-zinc-50 border-2 border-zinc-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
+                            value={newPin[i] || ''}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9]/g, '');
+                              if (val) {
+                                const updated = newPin.slice(0, i) + val + newPin.slice(i + 1);
+                                setNewPin(updated.slice(0, 4));
+                                const next = e.target.parentElement?.children[i + 1] as HTMLInputElement;
+                                if (next && i < 3) next.focus();
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Backspace' && !newPin[i]) {
+                                const prev = (e.target as HTMLElement).parentElement?.children[i - 1] as HTMLInputElement;
+                                if (prev && i > 0) { prev.focus(); setNewPin(newPin.slice(0, i - 1) + newPin.slice(i)); }
+                              }
+                            }}
+                            autoFocus={i === 0}
+                          />
+                        ))}
+                      </div>
                     </div>
                     <div>
-                      <p className="text-[10px] font-bold text-zinc-400 mb-1.5">{toGreekUpperCase('Επιβεβαίωση PIN')}</p>
-                      <Input
-                        type="password"
-                        inputMode="numeric"
-                        pattern="\\d{4}"
-                        maxLength={4}
-                        placeholder="••••"
-                        className="text-center tracking-widest text-xl w-full h-11 rounded-xl bg-zinc-50 border-none px-4 font-black focus:bg-white transition-all"
-                        value={confirmPin}
-                        onChange={(e) => setConfirmPin(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && newPin.length === 4 && confirmPin.length === 4) handleSetNewPin();
-                        }}
-                      />
+                      <p className="text-xs font-semibold text-zinc-500 mb-2">Επιβεβαίωση PIN</p>
+                      <div className="flex gap-3 justify-center">
+                        {[0, 1, 2, 3].map((i) => (
+                          <input
+                            key={`confirm-${i}`}
+                            type="password"
+                            inputMode="numeric"
+                            maxLength={1}
+                            className="w-14 h-14 text-center text-2xl font-black rounded-xl bg-zinc-50 border-2 border-zinc-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
+                            value={confirmPin[i] || ''}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9]/g, '');
+                              if (val) {
+                                const updated = confirmPin.slice(0, i) + val + confirmPin.slice(i + 1);
+                                setConfirmPin(updated.slice(0, 4));
+                                const next = e.target.parentElement?.children[i + 1] as HTMLInputElement;
+                                if (next && i < 3) next.focus();
+                                if (i === 3 && newPin.length === 4) handleSetNewPin();
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Backspace' && !confirmPin[i]) {
+                                const prev = (e.target as HTMLElement).parentElement?.children[i - 1] as HTMLInputElement;
+                                if (prev && i > 0) { prev.focus(); setConfirmPin(confirmPin.slice(0, i - 1) + confirmPin.slice(i)); }
+                              }
+                            }}
+                          />
+                        ))}
+                      </div>
                     </div>
                     {newPinError && (
-                      <div className="flex items-center justify-center gap-2 text-red-500 text-xs font-bold animate-in fade-in zoom-in-95">
-                        <AlertCircle className="h-3 w-3" />
+                      <div className="flex items-center justify-center gap-2 text-red-500 text-sm font-semibold animate-in fade-in zoom-in-95">
+                        <AlertCircle className="h-4 w-4" />
                         {newPinError}
                       </div>
                     )}
                     <Button
                       onClick={handleSetNewPin}
                       disabled={newPin.length !== 4 || confirmPin.length !== 4 || settingPin}
-                      className="h-11 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white text-[13px] shadow-lg transition-all active:scale-95 disabled:opacity-50"
+                      className="h-12 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white text-sm shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
                     >
                       {settingPin ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        toGreekUpperCase('Αποθήκευση & Είσοδος')
+                        'Αποθήκευση & Είσοδος'
                       )}
                     </Button>
-                    <Button
-                      variant="ghost"
-                      asChild
-                      className="h-10 font-bold text-zinc-400 hover:text-zinc-600 rounded-xl text-[11px]"
-                    >
-                      <Link href="/management/dashboard">{toGreekUpperCase('Επιστροφή')}</Link>
+                    <Button variant="ghost" asChild className="h-10 font-semibold text-zinc-400 hover:text-zinc-600 rounded-xl text-sm">
+                      <Link href="/management/dashboard">Επιστροφή</Link>
                     </Button>
                   </div>
                 ) : null}
 
-                {!needsSetPin && (forgotPinStep === 'none') && (
+                {/* ENTER PIN */}
+                {!needsSetPin && forgotPinStep === 'none' && (
                   <>
-                    <div className="flex justify-center">
-                      <Input
-                        type="password"
-                        inputMode="numeric"
-                        pattern="\\d{4}"
-                        maxLength={4}
-                        className="text-center tracking-widest text-2xl w-full h-11 rounded-xl bg-zinc-50 border-none px-4 font-black focus:bg-white transition-all"
-                        value={pinInput}
-                        onChange={(e) => setPinInput(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') handleVerifyPin();
-                        }}
-                        autoFocus
-                      />
+                    <div className="flex gap-3 justify-center">
+                      {[0, 1, 2, 3].map((i) => (
+                        <input
+                          key={`pin-${i}`}
+                          type="password"
+                          inputMode="numeric"
+                          maxLength={1}
+                          className={`w-14 h-14 text-center text-2xl font-black rounded-xl border-2 outline-none transition-all ${
+                            pinError
+                              ? 'bg-red-50 border-red-300 text-red-600 animate-shake'
+                              : 'bg-zinc-50 border-zinc-200 focus:border-zinc-900 focus:bg-white focus:ring-2 focus:ring-zinc-200'
+                          }`}
+                          value={pinInput[i] || ''}
+                          onChange={(e) => {
+                            const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 1);
+                            if (!val) return;
+                            const updated = (pinInput.slice(0, i) + val + pinInput.slice(i + 1)).slice(0, 4);
+                            setPinInput(updated);
+                            setPinError(null);
+                            if (i < 3) {
+                              const next = e.target.parentElement?.children[i + 1] as HTMLInputElement;
+                              if (next) next.focus();
+                            }
+                            if (updated.length === 4) {
+                              // Auto-submit with the final pin value
+                              setTimeout(() => handleVerifyPin(updated), 50);
+                            }
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Backspace') {
+                              if (pinInput[i]) {
+                                setPinInput(pinInput.slice(0, i) + pinInput.slice(i + 1));
+                              } else if (i > 0) {
+                                const prev = (e.target as HTMLElement).parentElement?.children[i - 1] as HTMLInputElement;
+                                if (prev) { prev.focus(); setPinInput(pinInput.slice(0, i - 1) + pinInput.slice(i)); }
+                              }
+                              e.preventDefault();
+                            }
+                            if (e.key === 'Enter' && pinInput.length === 4) handleVerifyPin();
+                          }}
+                          autoFocus={i === 0}
+                        />
+                      ))}
                     </div>
 
                     {pinError && (
-                      <div className="flex items-center justify-center gap-2 text-red-500 font-bold animate-in fade-in zoom-in-95">
+                      <div className="flex items-center justify-center gap-2 text-red-500 text-sm font-semibold animate-in fade-in zoom-in-95">
                         <AlertCircle className="h-4 w-4" />
                         {pinError}
                       </div>
                     )}
+
+                    <div className="flex flex-col gap-2 pt-1">
+                      <Button
+                        onClick={() => handleVerifyPin()}
+                        className="h-12 w-full rounded-xl bg-zinc-900 hover:bg-black font-bold text-white text-sm shadow-lg transition-all active:scale-[0.98]"
+                      >
+                        <Lock className="h-4 w-4 mr-2" />
+                        Είσοδος
+                      </Button>
+                      <div className="flex items-center justify-between pt-1">
+                        <Button
+                          variant="ghost"
+                          onClick={() => setForgotPinStep('confirm')}
+                          className="h-9 font-semibold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg text-xs px-3"
+                        >
+                          Ξέχασα το PIN
+                        </Button>
+                        <Button variant="ghost" asChild className="h-9 font-semibold text-zinc-400 hover:text-zinc-600 rounded-lg text-xs px-3">
+                          <Link href="/management/dashboard">Επιστροφή</Link>
+                        </Button>
+                      </div>
+                    </div>
                   </>
                 )}
 
-                {needsSetPin ? null : forgotPinStep === 'none' ? (
-                  <div className="flex flex-col gap-2">
-                    <Button
-                      onClick={handleVerifyPin}
-                      className="h-11 w-full rounded-xl bg-zinc-900 hover:bg-black font-bold text-white text-[13px] shadow-lg transition-all active:scale-95"
-                    >
-                      {toGreekUpperCase('Είσοδος')}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => setForgotPinStep('confirm')}
-                      className="h-10 font-bold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl text-[11px]"
-                    >
-                      {toGreekUpperCase('Ξέχασα το PIN')}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      asChild
-                      className="h-10 font-bold text-zinc-400 hover:text-zinc-600 rounded-xl text-[11px]"
-                    >
-                      <Link href="/management/dashboard">{toGreekUpperCase('Επιστροφή')}</Link>
-                    </Button>
-                  </div>
-                ) : forgotPinStep === 'confirm' ? (
-                  <div className="flex flex-col gap-3">
-                    <div className="text-center">
-                      <p className="text-xs text-zinc-500 font-bold mb-1">
-                        Θα σταλεί κωδικός επαναφοράς στο
-                      </p>
-                      <p className="text-xs text-emerald-600 font-black">
-                        {venueOwner?.email}
-                      </p>
+                {/* FORGOT PIN - CONFIRM */}
+                {!needsSetPin && forgotPinStep === 'confirm' && (
+                  <div className="flex flex-col gap-4">
+                    <div className="text-center rounded-xl bg-zinc-50 p-4">
+                      <p className="text-sm text-zinc-500 font-medium mb-1">Θα σταλεί κωδικός επαναφοράς στο</p>
+                      <p className="text-sm text-emerald-600 font-black">{venueOwner?.email}</p>
                     </div>
                     <Button
                       onClick={handleForgotPin}
-                      className="h-11 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white text-[13px] shadow-lg transition-all active:scale-95"
+                      className="h-12 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white text-sm shadow-lg transition-all active:scale-[0.98]"
                     >
-                      {toGreekUpperCase('Αποστολή κωδικού')}
+                      Αποστολή κωδικού
                     </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => setForgotPinStep('none')}
-                      className="h-10 font-bold text-zinc-400 hover:text-zinc-600 rounded-xl text-[11px]"
-                    >
-                      {toGreekUpperCase('Πίσω')}
+                    <Button variant="ghost" onClick={() => setForgotPinStep('none')} className="h-10 font-semibold text-zinc-400 hover:text-zinc-600 rounded-xl text-sm">
+                      Πίσω
                     </Button>
                   </div>
-                ) : forgotPinStep === 'sending' ? (
-                  <div className="flex flex-col items-center gap-3">
-                    <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
-                    <p className="text-xs text-zinc-400 font-bold">{toGreekUpperCase('Αποστολή κωδικού...')}</p>
+                )}
+
+                {/* FORGOT PIN - SENDING */}
+                {!needsSetPin && forgotPinStep === 'sending' && (
+                  <div className="flex flex-col items-center gap-4 py-4">
+                    <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
+                    <p className="text-sm text-zinc-400 font-medium">Αποστολή κωδικού...</p>
                   </div>
-                ) : (
-                  <div className="flex flex-col gap-3">
-                    <div className="text-center">
-                      <p className="text-xs text-zinc-500 font-bold mb-1">
-                        Κωδικός επαλήθευσης στο
-                      </p>
-                      <p className="text-xs text-emerald-600 font-black">
-                        {venueOwner?.email}
-                      </p>
+                )}
+
+                {/* FORGOT PIN - VERIFY CODE */}
+                {!needsSetPin && (forgotPinStep === 'code' || forgotPinStep === 'verifying') && (
+                  <div className="flex flex-col gap-4">
+                    <div className="text-center rounded-xl bg-zinc-50 p-4">
+                      <p className="text-sm text-zinc-500 font-medium mb-1">Κωδικός επαλήθευσης στάλθηκε στο</p>
+                      <p className="text-sm text-emerald-600 font-black">{venueOwner?.email}</p>
                     </div>
                     <Input
                       type="text"
                       inputMode="numeric"
                       maxLength={6}
                       placeholder="000000"
-                      className="text-center tracking-[0.3em] text-xl w-full h-11 rounded-xl bg-zinc-50 border-none px-4 font-black focus:bg-white transition-all"
+                      className="text-center tracking-[0.4em] text-2xl w-full h-14 rounded-xl bg-zinc-50 border-2 border-zinc-200 px-4 font-black focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
                       value={resetCode}
                       onChange={(e) => setResetCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
                       onKeyDown={(e) => {
@@ -679,36 +736,38 @@ export default function ReportsPage() {
                       autoFocus
                     />
                     {resetError && (
-                      <div className="flex items-center justify-center gap-2 text-red-500 text-xs font-bold animate-in fade-in zoom-in-95">
-                        <AlertCircle className="h-3 w-3" />
+                      <div className="flex items-center justify-center gap-2 text-red-500 text-sm font-semibold animate-in fade-in zoom-in-95">
+                        <AlertCircle className="h-4 w-4" />
                         {resetError}
                       </div>
                     )}
                     <Button
                       onClick={handleVerifyResetCode}
                       disabled={resetCode.length !== 6 || forgotPinStep === 'verifying'}
-                      className="h-11 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white text-[13px] shadow-lg transition-all active:scale-95 disabled:opacity-50"
+                      className="h-12 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white text-sm shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
                     >
                       {forgotPinStep === 'verifying' ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        toGreekUpperCase('Επαλήθευση')
+                        'Επαλήθευση'
                       )}
                     </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={handleForgotPin}
-                      className="h-10 font-bold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-xl text-[11px]"
-                    >
-                      {toGreekUpperCase('Επαναποστολή κωδικού')}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      onClick={() => { setForgotPinStep('none'); setResetCode(''); setResetError(null); }}
-                      className="h-10 font-bold text-zinc-400 hover:text-zinc-600 rounded-xl text-[11px]"
-                    >
-                      {toGreekUpperCase('Πίσω')}
-                    </Button>
+                    <div className="flex items-center justify-between">
+                      <Button
+                        variant="ghost"
+                        onClick={handleForgotPin}
+                        className="h-9 font-semibold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg text-xs px-3"
+                      >
+                        Επαναποστολή
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        onClick={() => { setForgotPinStep('none'); setResetCode(''); setResetError(null); }}
+                        className="h-9 font-semibold text-zinc-400 hover:text-zinc-600 rounded-lg text-xs px-3"
+                      >
+                        Πίσω
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -828,8 +887,8 @@ export default function ReportsPage() {
       {/* Key Metrics */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {[
-          { label: 'Συνολικά Έσοδα', value: `€${totalRevenue.toFixed(0)}`, icon: Euro, color: 'emerald' },
-          { label: 'Έσοδα Κρατήσεων', value: `€${bookingRevenue.toFixed(0)}`, icon: Calendar, color: 'blue' },
+          { label: 'Συνολικά Έσοδα', value: `€${totalRevenue.toFixed(0)}`, icon: Euro, color: 'emerald', hint: 'Βασίζεται στην τιμή κράτησης (όχι στην είσπραξη). Υπολογίζεται μόνο από ολοκληρωμένες κρατήσεις + ακαδημία.' },
+          { label: 'Έσοδα Κρατήσεων', value: `€${bookingRevenue.toFixed(0)}`, icon: Calendar, color: 'blue', hint: 'Άθροισμα τιμών ολοκληρωμένων κρατήσεων. Η είσπραξη είναι βοηθητικό εργαλείο και δεν επηρεάζει αυτό το ποσό.' },
           { label: 'Έσοδα Ακαδημίας', value: `€${academyRevenue.toFixed(0)}`, icon: Users, color: 'violet' },
           { label: 'Μέση Κράτηση', value: `€${averageBookingValue.toFixed(0)}`, icon: TrendingUp, color: 'cyan' },
           { label: 'Σε Αναμονή', value: pendingBookings.toString(), icon: Clock, color: 'amber' },
@@ -843,12 +902,20 @@ export default function ReportsPage() {
             amber: 'bg-amber-50 text-amber-600',
           };
           return (
-            <div key={metric.label} className="bg-white p-3.5 rounded-xl border border-zinc-100 shadow-sm group hover:shadow-md transition-all">
+            <div key={metric.label} className="bg-white p-3.5 rounded-xl border border-zinc-100 shadow-sm group hover:shadow-md transition-all relative">
               <div className={`h-8 w-8 rounded-lg ${colorStyles[metric.color]} flex items-center justify-center mb-3`}>
                 <Icon className="h-4 w-4" />
               </div>
               <p className="text-lg font-black text-zinc-900 mb-0.5">{metric.value}</p>
               <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase(metric.label)}</p>
+              {'hint' in metric && metric.hint && (
+                <div className="absolute top-2.5 right-2.5 group/hint">
+                  <Info className="h-3.5 w-3.5 text-zinc-300 hover:text-zinc-500 cursor-help transition-colors" />
+                  <div className="invisible group-hover/hint:visible absolute right-0 top-5 z-50 w-56 rounded-lg bg-zinc-900 text-white text-[11px] leading-relaxed p-3 shadow-lg">
+                    {metric.hint}
+                  </div>
+                </div>
+              )}
             </div>
           );
         })}
@@ -1006,7 +1073,7 @@ export default function ReportsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-50">
-                    {academyMonthlyBreakdown.map((row) => {
+                    {(showAllMonthly ? academyMonthlyBreakdown : academyMonthlyBreakdown.slice(0, 6)).map((row) => {
                       const [y, m] = row.month.split('-').map(Number);
                       const label = new Date(y, m - 1).toLocaleDateString('el-GR', { month: 'long', year: 'numeric' });
                       return (
@@ -1036,6 +1103,21 @@ export default function ReportsPage() {
                       );
                     })}
                   </tbody>
+                  {academyMonthlyBreakdown.length > 6 && (
+                    <tfoot>
+                      <tr>
+                        <td colSpan={4} className="py-2">
+                          <button
+                            onClick={() => setShowAllMonthly(!showAllMonthly)}
+                            className="w-full flex items-center justify-center gap-1.5 text-[11px] font-bold text-violet-600 hover:text-violet-700 transition-colors py-1"
+                          >
+                            {showAllMonthly ? 'Απόκρυψη' : `Εμφάνιση όλων (${academyMonthlyBreakdown.length})`}
+                            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showAllMonthly ? 'rotate-180' : ''}`} />
+                          </button>
+                        </td>
+                      </tr>
+                    </tfoot>
+                  )}
                 </table>
               </div>
             </div>
@@ -1059,7 +1141,7 @@ export default function ReportsPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-50">
-                    {academyBySquad.map((row) => (
+                    {(showAllSquads ? academyBySquad : academyBySquad.slice(0, 6)).map((row) => (
                       <tr key={row.squad} className="hover:bg-zinc-50/50 transition-colors">
                         <td className="py-2.5 px-4 text-[11px] font-bold text-zinc-900">{row.squad}</td>
                         <td className="py-2.5 px-4 text-center">
@@ -1082,6 +1164,21 @@ export default function ReportsPage() {
                       </tr>
                     ))}
                   </tbody>
+                  {academyBySquad.length > 6 && (
+                    <tfoot>
+                      <tr>
+                        <td colSpan={4} className="py-2">
+                          <button
+                            onClick={() => setShowAllSquads(!showAllSquads)}
+                            className="w-full flex items-center justify-center gap-1.5 text-[11px] font-bold text-blue-600 hover:text-blue-700 transition-colors py-1"
+                          >
+                            {showAllSquads ? 'Απόκρυψη' : `Εμφάνιση όλων (${academyBySquad.length})`}
+                            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showAllSquads ? 'rotate-180' : ''}`} />
+                          </button>
+                        </td>
+                      </tr>
+                    </tfoot>
+                  )}
                 </table>
               </div>
             </div>
