@@ -1,23 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuth } from 'firebase-admin/auth';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import path from 'path';
+import { FieldValue } from 'firebase-admin/firestore';
+import { db, verifyAuth, isAuthError } from '@/lib/api-auth';
 
-// Initialize Firebase Admin if not already done
-if (!getApps().length) {
-  initializeApp({
-    credential: cert(
-      path.join(process.cwd(), process.env.FIREBASE_ADMIN_KEY_PATH!)
-    ),
-  });
-}
-
-const db = getFirestore();
 const adminAuth = getAuth();
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify authentication
+    const authResult = await verifyAuth(request);
+    if (isAuthError(authResult)) return authResult.response;
+
     const body = await request.json();
     const {
       email,
@@ -31,6 +24,15 @@ export async function POST(request: NextRequest) {
 
     if (!email || !name || !venueId || !academyUserId) {
       return NextResponse.json({ error: 'Λείπουν υποχρεωτικά πεδία' }, { status: 400 });
+    }
+
+    // Verify user is owner of this venue (only admins can invite coaches)
+    const venueDoc = await db.collection('yabalitsa_venues').doc(venueId).get();
+    if (!venueDoc.exists || venueDoc.data()?.ownerId !== authResult.decodedToken.uid) {
+      return NextResponse.json(
+        { error: 'Unauthorized: only venue owners can invite coaches' },
+        { status: 403 }
+      );
     }
 
     // Check if a VenueOwner with this email already exists

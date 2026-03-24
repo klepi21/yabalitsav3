@@ -362,9 +362,10 @@ export default function EvaluationsPage() {
     setSendingEval(ev.id);
     try {
       const avgRating = (Object.values(ev.ratings).reduce((s, v) => s + v, 0) / Object.values(ev.ratings).length).toFixed(1);
+      const token = await user?.getIdToken();
       const res = await fetch('/api/academy/send-evaluation', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           parentEmail: contact.email,
           parentName: contact.name,
@@ -377,6 +378,7 @@ export default function EvaluationsPage() {
           coachName: ev.coachName,
           venueName: venueOwner?.name || '',
           avgRating,
+          venueId,
         }),
       });
       if (!res.ok) throw new Error('Failed');

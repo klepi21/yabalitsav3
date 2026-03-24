@@ -1,18 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/email-service';
+import { verifyAuth, verifyVenueAccess, isAuthError } from '@/lib/api-auth';
 
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await verifyAuth(request);
+    if (isAuthError(authResult)) return authResult.response;
+
     const body = await request.json();
     const {
       captainEmail, captainName, teamName,
       opponentName, matchDate, matchTime,
-      tournamentName, venueName, type,
+      tournamentName, venueName, type, venueId,
     } = body;
 
-    if (!captainEmail || !teamName) {
+    if (!captainEmail || !teamName || !venueId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
+
+    const accessError = await verifyVenueAccess(venueId, authResult.decodedToken);
+    if (accessError) return accessError;
 
     let subject = '';
     let html = '';

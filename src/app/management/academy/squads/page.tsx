@@ -153,14 +153,16 @@ export default function SquadsPage() {
 
     setBroadcastSending(true);
     try {
+      const token = await user?.getIdToken();
       const res = await fetch('/api/academy/broadcast', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           recipients,
           subject: broadcastSubject,
           message: broadcastMessage,
           venueName,
+          venueId,
         }),
       });
 

@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/email-service';
+import { verifyAuth, verifyVenueAccess, isAuthError } from '@/lib/api-auth';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { recipientEmail, recipientName, athleteName, expiryDate, status, venueName } = body;
+    const authResult = await verifyAuth(request);
+    if (isAuthError(authResult)) return authResult.response;
 
-    if (!recipientEmail || !athleteName) {
+    const body = await request.json();
+    const { recipientEmail, recipientName, athleteName, expiryDate, status, venueName, venueId } = body;
+
+    if (!recipientEmail || !athleteName || !venueId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
+
+    const accessError = await verifyVenueAccess(venueId, authResult.decodedToken);
+    if (accessError) return accessError;
 
     const formattedDate = expiryDate
       ? new Date(expiryDate).toLocaleDateString('el-GR', { day: '2-digit', month: 'long', year: 'numeric' })

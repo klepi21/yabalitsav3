@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import Anthropic from '@anthropic-ai/sdk';
 import { SYSTEM_PROMPT } from '@/lib/chat-knowledge';
+import { verifyAuth, isAuthError } from '@/lib/api-auth';
 
 const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -13,6 +14,9 @@ interface ChatMessage {
 
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await verifyAuth(request);
+    if (isAuthError(authResult)) return authResult.response;
+
     const { messages, currentPage } = await request.json() as {
       messages: ChatMessage[];
       currentPage?: string;

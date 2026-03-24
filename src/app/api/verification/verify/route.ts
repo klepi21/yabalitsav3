@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getVerificationCode, deleteVerificationCode, incrementAttempts } from '@/lib/verification-storage';
 
+const MAX_ATTEMPTS = 5;
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -10,10 +12,24 @@ export async function POST(request: Request) {
     const stored = await getVerificationCode(email);
     if (!stored) return NextResponse.json({ error: 'not_found' }, { status: 400 });
 
-    if (Date.now() > stored.expiresAt) return NextResponse.json({ error: 'expired' }, { status: 400 });
+    // Check if locked out due to too many attempts
+    if (stored.attempts >= MAX_ATTEMPTS) {
+      await deleteVerificationCode(email);
+      return NextResponse.json({ error: 'too_many_attempts' }, { status: 429 });
+    }
+
+    if (Date.now() > stored.expiresAt) {
+      await deleteVerificationCode(email);
+      return NextResponse.json({ error: 'expired' }, { status: 400 });
+    }
+
     if (String(stored.code) !== String(code)) {
       await incrementAttempts(email);
-      return NextResponse.json({ error: 'invalid_code' }, { status: 400 });
+      const remaining = MAX_ATTEMPTS - stored.attempts - 1;
+      return NextResponse.json(
+        { error: 'invalid_code', attemptsRemaining: remaining },
+        { status: 400 }
+      );
     }
 
     await deleteVerificationCode(email);

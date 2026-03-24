@@ -1,53 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import path from 'path';
-
-// Initialize Firebase Admin if not already done
-if (!getApps().length) {
-  initializeApp({
-    credential: cert(
-      path.join(process.cwd(), process.env.FIREBASE_ADMIN_KEY_PATH!)
-    ),
-  });
-}
-
-const db = getFirestore();
-const auth = getAuth();
+import { db, verifyAuth, verifyVenueAccess, isAuthError } from '@/lib/api-auth';
 
 export async function POST(request: NextRequest) {
   try {
-    // Get the token from the Authorization header
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Missing or invalid authorization header' },
-        { status: 401 }
-      );
-    }
+    const authResult = await verifyAuth(request);
+    if (isAuthError(authResult)) return authResult.response;
 
-    const token = authHeader.substring(7); // Remove 'Bearer '
-
-    // Verify the token
-    try {
-      await auth.verifyIdToken(token);
-    } catch {
-      return NextResponse.json(
-        { error: 'Invalid or expired token' },
-        { status: 401 }
-      );
-    }
-
-    const body = await request.json();
-    const { venueId } = body;
-
+    const { venueId } = await request.json();
     if (!venueId) {
-      return NextResponse.json(
-        { error: 'Missing venueId' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Missing venueId' }, { status: 400 });
     }
+
+    const accessError = await verifyVenueAccess(venueId, authResult.decodedToken);
+    if (accessError) return accessError;
 
     // Fetch pitches for this venue
     const pitchesSnapshot = await db
@@ -104,12 +69,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json(
-      {
-        success: true,
-        pitches,
-        bookings,
-        blockedDates,
-      },
+      { success: true, pitches, bookings, blockedDates },
       { status: 200 }
     );
   } catch (error: unknown) {
@@ -120,4 +80,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

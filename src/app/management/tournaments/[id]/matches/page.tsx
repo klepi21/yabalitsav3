@@ -344,10 +344,11 @@ export default function MatchesPage() {
         { email: away.captainEmail, name: away.captainName, team: away.name, opponent: home.name },
       ].filter((c) => c.email);
 
+      const token = await user?.getIdToken();
       for (const captain of captains) {
         await fetch('/api/tournament/notify-captain', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({
             captainEmail: captain.email,
             captainName: captain.name,
@@ -357,6 +358,7 @@ export default function MatchesPage() {
             matchTime: match.scheduledTime,
             tournamentName: tournament.name,
             venueName: venueOwner?.name || '',
+            venueId: venueOwner?.venueId,
             type: isCompleted ? 'result' : 'next_match',
             ...(isCompleted ? {
               homeScore: match.homeScore,

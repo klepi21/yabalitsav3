@@ -2,11 +2,17 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
     match /yabalitsa/{venueId}/users/{userId}/{allPaths=**} {
-      allow read: if request.auth != null;
+      // Read: authenticated user who is the venue owner
+      allow read: if request.auth != null &&
+        firestore.get(/databases/(default)/documents/yabalitsa_venues/$(venueId)).data.ownerId == request.auth.uid;
+      // Write: authenticated venue owner, PDF only, max 10MB
       allow create, update: if request.auth != null
+        && firestore.get(/databases/(default)/documents/yabalitsa_venues/$(venueId)).data.ownerId == request.auth.uid
         && request.resource.size < 10 * 1024 * 1024
         && request.resource.contentType == 'application/pdf';
-      allow delete: if request.auth != null;
+      // Delete: venue owner only
+      allow delete: if request.auth != null
+        && firestore.get(/databases/(default)/documents/yabalitsa_venues/$(venueId)).data.ownerId == request.auth.uid;
     }
   }
 }

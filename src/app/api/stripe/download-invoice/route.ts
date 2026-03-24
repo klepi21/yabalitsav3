@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { verifyAuth, isAuthError } from '@/lib/api-auth';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await verifyAuth(request);
+    if (isAuthError(authResult)) return authResult.response;
+
     const { paymentIntentId } = await request.json();
 
     if (!paymentIntentId) {
@@ -16,6 +20,12 @@ export async function POST(request: NextRequest) {
 
     if (!paymentIntent) {
       return NextResponse.json({ error: 'PaymentIntent not found' }, { status: 404 });
+    }
+
+    // Verify the authenticated user owns this payment
+    const paymentUserUid = paymentIntent.metadata?.user_uid;
+    if (paymentUserUid && paymentUserUid !== authResult.decodedToken.uid) {
+      return NextResponse.json({ error: 'Unauthorized: you do not own this payment' }, { status: 403 });
     }
 
     // Get the customer ID from the payment intent
@@ -80,6 +90,9 @@ export async function POST(request: NextRequest) {
 // Alternative method to get invoice PDF directly from Stripe
 export async function GET(request: NextRequest) {
   try {
+    const authResult = await verifyAuth(request);
+    if (isAuthError(authResult)) return authResult.response;
+
     const { searchParams } = new URL(request.url);
     const paymentIntentId = searchParams.get('payment_intent_id');
 

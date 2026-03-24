@@ -176,9 +176,10 @@ export default function MedicalTrackingPage() {
 
     setNotifying(athlete.user.id);
     try {
+      const token = await user?.getIdToken();
       const res = await fetch('/api/academy/notify-medical', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           recipientEmail: contact.email,
           recipientName: contact.name,
@@ -186,6 +187,7 @@ export default function MedicalTrackingPage() {
           expiryDate: athlete.expiryDate,
           status: athlete.status,
           venueName,
+          venueId,
         }),
       });
       if (!res.ok) throw new Error('Failed');

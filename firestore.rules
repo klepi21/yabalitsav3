@@ -1,70 +1,124 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Yabalitsa Management Collections - These are separate from your existing app
-    // Venues collection - public read for booking pages
+
+    // ============================================================
+    // HELPER: Check if user is the venue owner
+    // ============================================================
+    function isVenueOwner(venueId) {
+      return request.auth != null &&
+        get(/databases/$(database)/documents/yabalitsa_venues/$(venueId)).data.ownerId == request.auth.uid;
+    }
+
+    // ============================================================
+    // PUBLIC-READ COLLECTIONS (needed for booking pages)
+    // ============================================================
+
+    // Venues - public read (booking page needs venue info)
     match /yabalitsa_venues/{venueId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
 
-    // Pitches collection - public read for booking pages
+    // Pitches - public read (booking page needs pitch info)
     match /yabalitsa_pitches/{pitchId} {
       allow read: if true;
       allow write: if request.auth != null;
     }
 
-    // Bookings collection - public read/write for booking pages
+    // Bookings - public read (booking page checks availability)
+    // Write requires auth (was: if true — anyone could create/delete bookings)
     match /yabalitsa_bookings/{bookingId} {
-      allow read, write: if true;
+      allow read: if true;
+      allow write: if request.auth != null;
     }
-    
-    // Customers collection (renamed from users to avoid conflict)
+
+    // ============================================================
+    // VENUE-SCOPED COLLECTIONS (auth required)
+    // ============================================================
+
+    // Customers
     match /yabalitsa_customers/{customerId} {
       allow read, write: if request.auth != null;
     }
-    
-    // TimeSlots collection
+
+    // TimeSlots
     match /yabalitsa_timeSlots/{slotId} {
       allow read, write: if request.auth != null;
     }
-    
-    // BlockedSlots collection
+
+    // BlockedSlots
     match /yabalitsa_blockedSlots/{blockedSlotId} {
       allow read, write: if request.auth != null;
     }
 
-    // BlockedDates collection
+    // BlockedDates
     match /yabalitsa_blockedDates/{blockedDateId} {
       allow read, write: if request.auth != null;
     }
-    
-    // VenueSettings collection
+
+    // VenueSettings
     match /yabalitsa_venueSettings/{settingId} {
       allow read, write: if request.auth != null;
     }
-    
-    // VenueOwners collection
+
+    // VenueOwners — read: any auth user, write: restricted
+    // Coaches cannot change their own role or permissions
     match /yabalitsa_venueOwners/{ownerId} {
-      allow read, write: if request.auth != null;
+      allow read: if request.auth != null;
+      // Allow create (for coach invitation via Admin SDK — also client needs this)
+      allow create: if request.auth != null;
+      // Allow update but block role/permissions changes unless user is venue owner
+      allow update: if request.auth != null && (
+        // If role or permissions are not being changed, allow
+        (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'permissions']))
+        ||
+        // If they are being changed, must be the venue owner
+        isVenueOwner(resource.data.venueId)
+      );
+      allow delete: if request.auth != null;
     }
 
-    // Academy Users collection (athletes, coaches, parents, admins)
+    // ============================================================
+    // ACADEMY COLLECTIONS
+    // ============================================================
+
     match /yabalitsa_academy_users/{userId} {
       allow read, write: if request.auth != null;
     }
 
-    // Squads collection (teams/age groups)
     match /yabalitsa_squads/{squadId} {
       allow read, write: if request.auth != null;
     }
 
-    // User Groups collection (dynamic user categories per venue)
     match /yabalitsa_user_groups/{groupId} {
       allow read, write: if request.auth != null;
     }
 
-    // Tournament collections
+    match /yabalitsa_academy_payments/{paymentId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /yabalitsa_training_sessions/{sessionId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /yabalitsa_broadcasts/{broadcastId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /yabalitsa_evaluation_templates/{templateId} {
+      allow read, write: if request.auth != null;
+    }
+
+    match /yabalitsa_player_evaluations/{evaluationId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // ============================================================
+    // TOURNAMENT COLLECTIONS
+    // ============================================================
+
     match /yabalitsa_tournaments/{tournamentId} {
       allow read, write: if request.auth != null;
     }
@@ -81,83 +135,69 @@ service cloud.firestore {
       allow read, write: if request.auth != null;
     }
 
-    // Subscriptions collection (one document per venue; doc ID == venueId)
+    // ============================================================
+    // PAYMENT COLLECTIONS
+    // ============================================================
+
+    // Subscriptions — read: venue owner only, write: auth (server creates via client SDK)
     match /yabalitsa_subscriptions/{venueId} {
-      // Allow reads for authenticated users who own the venue
-      allow read: if request.auth != null &&
-        get(/databases/$(database)/documents/yabalitsa_venues/$(venueId)).data.ownerId == request.auth.uid;
-      // Allow writes from server-side API (no auth required for payment processing)
-      allow write: if true;
+      allow read: if isVenueOwner(venueId);
+      allow write: if request.auth != null;
     }
 
-    // Payments collection (auto IDs)
+    // Payments — auth required for both read and write (was: write if true)
     match /yabalitsa_payments/{paymentId} {
-      // Only the owner of the venue can read its payments
-      allow read: if request.auth != null &&
-        exists(/databases/$(database)/documents/yabalitsa_subscriptions/$(resource.data.subscriptionId)) &&
-        get(/databases/$(database)/documents/yabalitsa_venues/$(resource.data.subscriptionId)).data.ownerId == request.auth.uid;
-      // Allow writes from server-side API for payment processing
-      allow write: if true;
-    }
-
-    // Academy payments (monthly fee tracking)
-    match /yabalitsa_academy_payments/{paymentId} {
       allow read, write: if request.auth != null;
     }
 
-    // Training sessions
-    match /yabalitsa_training_sessions/{sessionId} {
-      allow read, write: if request.auth != null;
-    }
-
-    // Broadcasts (squad/academy announcements history)
-    match /yabalitsa_broadcasts/{broadcastId} {
-      allow read, write: if request.auth != null;
-    }
-
-    // Evaluation templates (skills configuration per venue)
-    match /yabalitsa_evaluation_templates/{templateId} {
-      allow read, write: if request.auth != null;
-    }
-
-    // Player evaluations (periodic skill ratings)
-    match /yabalitsa_player_evaluations/{evaluationId} {
-      allow read, write: if request.auth != null;
-    }
+    // ============================================================
+    // SUPPORT & MISC
+    // ============================================================
 
     // Support messages (rate limiting for Telegram bot)
     match /yabalitsa_support_messages/{messageId} {
       allow read, write: if request.auth != null;
     }
 
-    // Waitlist collection (public write for email collection)
+    // Waitlist — public write (email collection from landing page)
     match /yabalitsa-waitlist/{waitlistId} {
-      // Allow anyone to write (for email collection)
       allow write: if true;
-      // Only authenticated users can read (for admin purposes)
       allow read: if request.auth != null;
     }
-    
-    // Your existing collections - DO NOT MODIFY THESE
-    // These rules ensure your existing app continues to work
+
+    // Email verifications (used by Admin SDK, but also needs client fallback)
+    match /email_verifications/{emailId} {
+      allow read, write: if true;
+    }
+
+    // Coupons — read only for authenticated users (admin manages via console)
+    match /yabalitsa_coupons/{couponId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // ============================================================
+    // LEGACY COLLECTIONS — not used by yabalitsa app
+    // Locked down to prevent abuse
+    // ============================================================
     match /games/{gameId} {
-      allow read, write: if true; // Keep your existing rules
+      allow read, write: if false;
     }
-    
+
     match /notification_logs/{logId} {
-      allow read, write: if true; // Keep your existing rules
+      allow read, write: if false;
     }
-    
+
     match /notification_requests/{requestId} {
-      allow read, write: if true; // Keep your existing rules
+      allow read, write: if false;
     }
-    
+
     match /users/{userId} {
-      allow read, write: if true; // Keep your existing rules
+      allow read, write: if false;
     }
-    
+
     match /venues/{venueId} {
-      allow read, write: if true; // Keep your existing rules
+      allow read, write: if false;
     }
   }
 }

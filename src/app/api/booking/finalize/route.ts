@@ -1,22 +1,46 @@
 import { NextResponse } from 'next/server';
 import { sendEmail, emailTemplates } from '@/lib/email-service';
 
+// Simple in-memory rate limit: max 5 emails per IP per 10 minutes
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+const RATE_LIMIT_MAX = 5;
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+  if (!entry || now > entry.resetAt) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return false;
+  }
+  entry.count++;
+  return entry.count > RATE_LIMIT_MAX;
+}
+
 export async function POST(request: Request) {
   try {
+    // Rate limit by IP
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
+      || request.headers.get('x-real-ip')
+      || 'unknown';
+    if (isRateLimited(ip)) {
+      return NextResponse.json({ error: 'too_many_requests' }, { status: 429 });
+    }
+
     const body = await request.json();
-    const { 
-      firstName, 
-      lastName, 
-      email, 
-      phone, 
-      pitchName, 
-      venueName, 
+    const {
+      firstName,
+      lastName,
+      email,
+      phone,
+      pitchName,
+      venueName,
       venuePhone,
       venueEmail,
       venueAddress,
-      date, 
-      time, 
-      price 
+      date,
+      time,
+      price
     } = body as {
       firstName: string;
       lastName: string;
@@ -34,6 +58,11 @@ export async function POST(request: Request) {
 
     if (!firstName || !lastName || !email || !phone || !pitchName || !venueName || !date || !time || !price) {
       return NextResponse.json({ error: 'missing_required_fields' }, { status: 400 });
+    }
+
+    // Basic email format validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return NextResponse.json({ error: 'invalid_email' }, { status: 400 });
     }
 
     // Send confirmation email

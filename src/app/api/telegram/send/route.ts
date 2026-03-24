@@ -1,46 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore } from 'firebase-admin/firestore';
-import { getApps, initializeApp, cert } from 'firebase-admin/app';
-import path from 'path';
-
-if (!getApps().length) {
-  initializeApp({
-    credential: cert(
-      path.join(process.cwd(), process.env.FIREBASE_ADMIN_KEY_PATH!)
-    ),
-  });
-}
-
-const auth = getAuth();
-const db = getFirestore();
+import { db, verifyAuth, verifyVenueAccess, isAuthError } from '@/lib/api-auth';
 
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
 
 export async function POST(request: NextRequest) {
   try {
-    // Verify auth
-    const authHeader = request.headers.get('authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return NextResponse.json({ error: 'Missing auth' }, { status: 401 });
-    }
-
-    const token = authHeader.substring(7);
-    const decodedToken = await auth.verifyIdToken(token);
+    const authResult = await verifyAuth(request);
+    if (isAuthError(authResult)) return authResult.response;
+    const decodedToken = authResult.decodedToken;
 
     if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
       return NextResponse.json({ error: 'Telegram not configured' }, { status: 500 });
     }
 
-    const { message, category, venueId, rateLimitHours = 1 } = await request.json();
+    const { message, category, venueId } = await request.json();
 
     if (!message?.trim()) {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    // Rate limit per venue based on plan (enterprise=1h, pro=2h, trial=1h)
-    const limitMs = Math.max(1, Number(rateLimitHours) || 1) * 60 * 60 * 1000;
+    // Verify user has access to this venue
+    if (venueId) {
+      const accessError = await verifyVenueAccess(venueId, decodedToken);
+      if (accessError) return accessError;
+    }
+
+    // Rate limit: 1 message per hour per venue (server-controlled)
+    const RATE_LIMIT_HOURS = 1;
+    const limitMs = RATE_LIMIT_HOURS * 60 * 60 * 1000;
     if (venueId) {
       const cutoff = new Date(Date.now() - limitMs);
       const recentMessages = await db.collection('yabalitsa_support_messages')
@@ -50,9 +38,8 @@ export async function POST(request: NextRequest) {
         .get();
 
       if (!recentMessages.empty) {
-        const hours = Number(rateLimitHours) || 1;
         return NextResponse.json(
-          { error: `Μπορείτε να στείλετε 1 μήνυμα ανά ${hours === 1 ? 'ώρα' : `${hours} ώρες`}. Δοκιμάστε αργότερα.` },
+          { error: 'Μπορείτε να στείλετε 1 μήνυμα ανά ώρα. Δοκιμάστε αργότερα.' },
           { status: 429 }
         );
       }

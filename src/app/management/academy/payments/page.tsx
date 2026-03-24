@@ -245,9 +245,10 @@ export default function PaymentsDashboardPage() {
     try {
       const payment = await ensurePaymentRecord(athlete, month);
       const monthStr = `${selectedYear}-${String(month + 1).padStart(2, '0')}`;
+      const token = await user?.getIdToken();
       const res = await fetch('/api/academy/notify-parent', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           parentEmail: contact.email,
           parentName: contact.name,
@@ -255,6 +256,7 @@ export default function PaymentsDashboardPage() {
           month: monthStr,
           amount: payment.amount,
           venueName,
+          venueId,
         }),
       });
       if (!res.ok) throw new Error('Failed');

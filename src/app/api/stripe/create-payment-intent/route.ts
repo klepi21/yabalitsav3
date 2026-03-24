@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { venueService, paymentService } from '@/lib/firebase-services';
 import { pricingUtils } from '@/lib/pricing';
+import { verifyAuth, isAuthError } from '@/lib/api-auth';
 
 const DEV_EMAIL = process.env.DEV_EMAIL || '';
 const DEV_BASE_PRICE = 0.50;
@@ -10,7 +11,19 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify authentication
+    const authResult = await verifyAuth(request);
+    if (isAuthError(authResult)) return authResult.response;
+
     const { planId, duration, userUid, customerEmail, customerName, couponCode } = await request.json();
+
+    // Verify the token uid matches the claimed userUid
+    if (authResult.decodedToken.uid !== userUid) {
+      return NextResponse.json(
+        { error: 'Unauthorized: token does not match userUid' },
+        { status: 403 }
+      );
+    }
 
     console.log('Creating payment intent for:', { planId, duration, userUid, customerEmail, customerName });
 

@@ -1,19 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { sendEmail } from '@/lib/email-service';
+import { verifyAuth, verifyVenueAccess, isAuthError } from '@/lib/api-auth';
 
 export async function POST(request: NextRequest) {
   try {
+    const authResult = await verifyAuth(request);
+    if (isAuthError(authResult)) return authResult.response;
+
     const body = await request.json();
-    const { recipients, subject, message, venueName } = body as {
+    const { recipients, subject, message, venueName, venueId } = body as {
       recipients: { email: string; name: string }[];
       subject: string;
       message: string;
       venueName: string;
+      venueId: string;
     };
 
-    if (!recipients?.length || !subject || !message) {
+    if (!recipients?.length || !subject || !message || !venueId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
+
+    const accessError = await verifyVenueAccess(venueId, authResult.decodedToken);
+    if (accessError) return accessError;
 
     const html = `
       <div style="font-family: Inter, system-ui, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f8fafc;">

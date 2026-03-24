@@ -1,22 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-import { getApps, initializeApp, cert } from 'firebase-admin/app';
-import path from 'path';
+import { FieldValue } from 'firebase-admin/firestore';
+import { db, verifyAuth, isAuthError } from '@/lib/api-auth';
 
-if (!getApps().length) {
-  initializeApp({
-    credential: cert(
-      path.join(process.cwd(), process.env.FIREBASE_ADMIN_KEY_PATH!)
-    ),
-  });
-}
-
-const db = getFirestore();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify authentication
+    const authResult = await verifyAuth(request);
+    if (isAuthError(authResult)) return authResult.response;
+
     const { paymentIntentId } = await request.json();
 
     if (!paymentIntentId) {
@@ -46,6 +40,14 @@ export async function POST(request: NextRequest) {
         error: 'Missing required metadata in PaymentIntent',
         metadata: paymentIntent.metadata
       }, { status: 400 });
+    }
+
+    // Verify the authenticated user matches the payment owner
+    if (userUid && authResult.decodedToken.uid !== userUid) {
+      return NextResponse.json(
+        { error: 'Unauthorized: you do not own this payment' },
+        { status: 403 }
+      );
     }
 
     // Update payment record in Firebase (Admin SDK — bypasses rules)

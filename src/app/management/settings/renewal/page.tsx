@@ -159,10 +159,11 @@ export default function SubscriptionRenewalPage() {
       }
 
       const duration = getSelectedDuration();
+      const token = await auth.currentUser.getIdToken();
 
       const response = await fetch('/api/stripe/create-payment-intent', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({
           planId: selectedPlan,
           planName: selectedPlanData.name,
