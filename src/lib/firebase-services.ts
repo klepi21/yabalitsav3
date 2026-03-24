@@ -38,8 +38,15 @@ interface FirebaseVenueData {
   plan?: 'subscription' | 'pay-per-booking' | 'trial';
   planType?: 'Basic' | 'Pro' | 'Enterprise';
   active?: boolean;
+  bookingsEnabled?: boolean;
   managementPinHash?: string;
   subscriptionEndDate?: string;
+  coupon?: {
+    code: string;
+    active: boolean;
+    discountType: 'percentage' | 'fixed';
+    discountValue: number;
+  };
   createdAt?: { toDate(): Date };
   updatedAt?: { toDate(): Date };
 }
@@ -94,6 +101,7 @@ export const venueService = {
         managementPinHash: data.managementPinHash,
         active: data.active ?? true,
         bookingsEnabled: data.bookingsEnabled ?? true,
+        coupon: data.coupon,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date()
       } as Venue;
@@ -124,6 +132,7 @@ export const venueService = {
         managementPinHash: data.managementPinHash,
         active: data.active ?? true,
         bookingsEnabled: data.bookingsEnabled ?? true,
+        coupon: data.coupon,
         createdAt: data.createdAt?.toDate() || new Date(),
         updatedAt: data.updatedAt?.toDate() || new Date()
       } as Venue;
