@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { venueService, paymentService } from '@/lib/firebase-services';
 import { pricingUtils } from '@/lib/pricing';
 import { verifyAuth, isAuthError } from '@/lib/api-auth';
+import { getAdminDb } from '@/lib/firebase-admin';
 
 const DEV_EMAIL = process.env.DEV_EMAIL || '';
 const DEV_BASE_PRICE = 0.50;
@@ -43,16 +43,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get venue for this user
-    const venues = await venueService.getAll();
-    const venue = venues.find(v => v.ownerId === userUid);
-    
-    if (!venue) {
-      return NextResponse.json(
-        { error: 'No venue found for this user' },
-        { status: 404 }
-      );
+    // Get venue for this user via Admin SDK
+    const adminDb = getAdminDb();
+    if (!adminDb) {
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
     }
+    const venuesSnap = await adminDb.collection('yabalitsa_venues').where('ownerId', '==', userUid).get();
+    if (venuesSnap.empty) {
+      return NextResponse.json({ error: 'No venue found for this user' }, { status: 404 });
+    }
+    const venueDoc = venuesSnap.docs[0];
+    const venue = { id: venueDoc.id, ...venueDoc.data() } as Record<string, unknown> & { id: string; ownerId: string; name: string; planType?: string; daysRemaining?: number; plan?: string; stripeCustomerId?: string; coupon?: { code: string; active: boolean; discountType: 'percentage' | 'fixed'; discountValue: number } };
 
     // Block same/lower plan purchases when subscription is active
     const PLAN_HIERARCHY: Record<string, number> = { basic: 1, pro: 2, enterprise: 3 };
@@ -147,9 +148,9 @@ export async function POST(request: NextRequest) {
       stripeCustomerId = stripeCustomer.id;
       console.log('✅ Created new Stripe customer:', stripeCustomerId);
       
-      // Update venue with Stripe customer ID (non-blocking — may fail without auth context)
+      // Update venue with Stripe customer ID via Admin SDK
       try {
-        await venueService.update(venue.id, {
+        await adminDb.collection('yabalitsa_venues').doc(venue.id).update({
           stripeCustomerId: stripeCustomerId
         });
       } catch (e) {
@@ -179,8 +180,8 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ PaymentIntent created:', paymentIntent.id, paymentIntent.status);
 
-    // Store payment record in Firebase (payments collection has write: if true)
-    const paymentId = await paymentService.create({
+    // Store payment record in Firebase via Admin SDK
+    const paymentRef = await adminDb.collection('yabalitsa_payments').add({
       venueId: venue.id,
       stripePaymentIntentId: paymentIntent.id,
       stripeCustomerId: stripeCustomerId,
@@ -195,15 +196,12 @@ export async function POST(request: NextRequest) {
       updatedAt: new Date().toISOString()
     });
 
-    console.log('💾 Payment record stored in Firebase:', paymentId);
+    console.log('💾 Payment record stored in Firebase:', paymentRef.id);
 
-    // Deactivate coupon after use (one-time use)
+    // Deactivate coupon after use (one-time use) via Admin SDK
     if (appliedCouponCode && venue.coupon) {
       try {
-        const { doc, updateDoc } = await import('firebase/firestore');
-        const { db } = await import('@/lib/firebase');
-        const venueRef = doc(db, 'yabalitsa_venues', venue.id);
-        await updateDoc(venueRef, { 'coupon.active': false });
+        await adminDb.collection('yabalitsa_venues').doc(venue.id).update({ 'coupon.active': false });
         console.log('🎟️ Coupon deactivated for venue:', venue.id);
       } catch (e) {
         console.warn('Could not deactivate coupon (non-blocking):', e);
