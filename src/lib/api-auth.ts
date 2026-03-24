@@ -1,16 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getAuth, DecodedIdToken } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
+import { initializeApp, getApps, cert, ServiceAccount } from 'firebase-admin/app';
 import path from 'path';
 
 // Initialize Firebase Admin if not already done
 if (!getApps().length) {
-  initializeApp({
-    credential: cert(
-      path.join(process.cwd(), process.env.FIREBASE_ADMIN_KEY_PATH!)
-    ),
-  });
+  const raw = process.env.FIREBASE_SERVICE_ACCOUNT;
+  if (raw) {
+    // Production (Vercel): base64-encoded service account JSON
+    const json = JSON.parse(Buffer.from(raw, 'base64').toString('utf8')) as ServiceAccount;
+    initializeApp({ credential: cert(json) });
+  } else if (process.env.FIREBASE_ADMIN_KEY_PATH) {
+    // Local dev: JSON file on disk
+    initializeApp({
+      credential: cert(
+        path.join(process.cwd(), process.env.FIREBASE_ADMIN_KEY_PATH)
+      ),
+    });
+  } else {
+    throw new Error('No Firebase Admin credentials found. Set FIREBASE_SERVICE_ACCOUNT or FIREBASE_ADMIN_KEY_PATH.');
+  }
 }
 
 const db = getFirestore();
