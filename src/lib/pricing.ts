@@ -165,5 +165,19 @@ export const pricingUtils = {
     if (duration === 6) return Math.round(pricingConfig.discounts.sixMonths * 100);
     if (duration === 12) return Math.round(pricingConfig.discounts.twelveMonths * 100);
     return 0;
+  },
+
+  // Apply coupon discount to a total price
+  applyCouponDiscount(totalPrice: number, coupon: { discountType: 'percentage' | 'fixed'; discountValue: number }): { discountedPrice: number; discountAmount: number } {
+    let discountAmount = 0;
+    if (coupon.discountType === 'percentage') {
+      discountAmount = totalPrice * (coupon.discountValue / 100);
+    } else {
+      discountAmount = coupon.discountValue;
+    }
+    // Ensure minimum charge of €0.50 (Stripe minimum)
+    const discountedPrice = Math.max(0.50, totalPrice - discountAmount);
+    discountAmount = totalPrice - discountedPrice;
+    return { discountedPrice, discountAmount };
   }
 };

@@ -1,3 +1,10 @@
+export interface VenueCoupon {
+  code: string;              // The coupon keyword (e.g. "KALOKAIRINOS")
+  active: boolean;           // You toggle this in Firebase Console
+  discountType: 'percentage' | 'fixed'; // percentage or fixed EUR amount
+  discountValue: number;     // e.g. 50 for 50%, or 10 for €10 off
+}
+
 export interface Venue {
   id: string;
   name: string;
@@ -14,6 +21,7 @@ export interface Venue {
   active?: boolean;
   managementPinHash?: string; // SHA-256 hash of 4-digit PIN
   bookingsEnabled?: boolean; // whether online bookings are active (default true)
+  coupon?: VenueCoupon;      // Coupon set manually via Firebase Console
   contactDetails?: {
     email?: string;
     phone?: string;
@@ -190,6 +198,8 @@ export interface Payment {
   paymentType: 'one_time_plan_purchase' | 'subscription_payment' | 'booking_payment';
   planName?: 'Basic' | 'Pro' | 'Enterprise';
   durationMonths?: number;
+  couponCode?: string;       // The coupon code used
+  couponDiscount?: number;   // Discount amount in EUR
   createdAt: string; // ISO string
   updatedAt: string; // ISO string
 }

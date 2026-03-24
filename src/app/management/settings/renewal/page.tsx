@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Check, CreditCard, Loader2, Calendar, Sparkles, Shield, Lock, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Check, CreditCard, Loader2, Calendar, Sparkles, Shield, Lock, AlertTriangle, Tag, X } from 'lucide-react';
 import Link from 'next/link';
 import { loadStripe } from '@stripe/stripe-js';
 import { pricingUtils } from '@/lib/pricing';
@@ -20,6 +20,11 @@ export default function SubscriptionRenewalPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [showUpgradeConfirm, setShowUpgradeConfirm] = useState(false);
+  const [couponInput, setCouponInput] = useState('');
+  const [couponApplied, setCouponApplied] = useState(false);
+  const [couponError, setCouponError] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponDiscount, setCouponDiscount] = useState(0);
 
   const DEV_EMAIL = process.env.NEXT_PUBLIC_DEV_EMAIL || '';
   const isDevUser = userEmail === DEV_EMAIL;
@@ -101,6 +106,44 @@ export default function SubscriptionRenewalPage() {
     });
   };
 
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim() || !venueData) return;
+    setCouponLoading(true);
+    setCouponError('');
+    try {
+      const coupon = venueData.coupon;
+      if (!coupon || !coupon.active) {
+        setCouponError('Δεν υπάρχει ενεργό κουπόνι για το venue σας');
+        setCouponApplied(false);
+        return;
+      }
+      if (coupon.code.toUpperCase() !== couponInput.trim().toUpperCase()) {
+        setCouponError('Λάθος κωδικός κουπονιού');
+        setCouponApplied(false);
+        return;
+      }
+      // Calculate discount for display
+      if (selectedPlan) {
+        const selectedPlanInfo = plans.find(p => p.id === selectedPlan);
+        if (selectedPlanInfo) {
+          const total = pricingUtils.calculateTotalPrice(selectedPlanInfo.basePrice, getSelectedDuration());
+          const { discountAmount } = pricingUtils.applyCouponDiscount(total, coupon);
+          setCouponDiscount(discountAmount);
+        }
+      }
+      setCouponApplied(true);
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setCouponApplied(false);
+    setCouponInput('');
+    setCouponError('');
+    setCouponDiscount(0);
+  };
+
   const handlePayment = async () => {
     if (!selectedPlan || !venueData) return;
     setIsLoading(true);
@@ -128,6 +171,7 @@ export default function SubscriptionRenewalPage() {
           userUid: auth.currentUser.uid,
           customerEmail: auth.currentUser.email,
           amount: pricingUtils.getStripeAmount(selectedPlanData.basePrice, duration),
+          ...(couponApplied && { couponCode: couponInput.trim().toUpperCase() }),
         }),
       });
 
@@ -308,6 +352,51 @@ export default function SubscriptionRenewalPage() {
         </div>
       </div>
 
+      {/* Coupon — only visible when venue has an active coupon */}
+      {selectedPlan && venueData?.coupon?.active && (
+        <div className="rounded-xl border border-zinc-100/60 bg-white p-6">
+          <h3 className="text-base font-semibold tracking-tight text-zinc-900 mb-4 flex items-center gap-2">
+            <Tag className="h-4 w-4 text-emerald-600" />
+            Κουπόνι Έκπτωσης
+          </h3>
+          {couponApplied ? (
+            <div className="flex items-center justify-between rounded-lg bg-emerald-50 border border-emerald-200 p-3.5">
+              <div className="flex items-center gap-2">
+                <Check className="h-4 w-4 text-emerald-600" />
+                <span className="text-sm font-medium text-emerald-700">
+                  Κουπόνι <strong>{couponInput.toUpperCase()}</strong> εφαρμόστηκε — Έκπτωση {pricingUtils.formatPrice(couponDiscount)}
+                </span>
+              </div>
+              <button onClick={handleRemoveCoupon} className="text-emerald-600 hover:text-emerald-800 transition-colors">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponInput}
+                  onChange={(e) => { setCouponInput(e.target.value); setCouponError(''); }}
+                  placeholder="Εισάγετε κωδικό κουπονιού"
+                  className="flex-1 px-3 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                />
+                <button
+                  onClick={handleApplyCoupon}
+                  disabled={!couponInput.trim() || couponLoading}
+                  className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-200 disabled:text-zinc-400 text-white text-sm font-medium rounded-lg transition-colors disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {couponLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Εφαρμογή'}
+                </button>
+              </div>
+              {couponError && (
+                <p className="mt-2 text-sm text-red-600">{couponError}</p>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Payment Summary */}
       {selectedPlan && selectedPlanData && (
         <div className="rounded-xl border border-zinc-100/60 bg-white p-6">
@@ -344,10 +433,16 @@ export default function SubscriptionRenewalPage() {
             </div>
             {selectedDuration > 1 && (
               <div className="flex justify-between py-2 border-b border-zinc-100 text-emerald-600">
-                <span className="font-medium">Έκπτωση:</span>
+                <span className="font-medium">Έκπτωση διάρκειας:</span>
                 <span className="font-medium">
                   -€{(selectedPlanData.basePrice * selectedDuration * (pricingUtils.getDiscountPercentage(selectedDuration) / 100)).toFixed(2)}
                 </span>
+              </div>
+            )}
+            {couponApplied && couponDiscount > 0 && (
+              <div className="flex justify-between py-2 border-b border-zinc-100 text-emerald-600">
+                <span className="font-medium">Κουπόνι ({couponInput.toUpperCase()}):</span>
+                <span className="font-medium">-{pricingUtils.formatPrice(couponDiscount)}</span>
               </div>
             )}
             {calculateSubscriptionEndDate() && (
@@ -359,7 +454,10 @@ export default function SubscriptionRenewalPage() {
             <div className="flex justify-between pt-3">
               <span className="text-lg font-semibold text-zinc-900">Σύνολο:</span>
               <span className="text-lg font-semibold text-zinc-900">
-                {pricingUtils.formatPrice(pricingUtils.calculateTotalPrice(selectedPlanData.basePrice, selectedDuration))}
+                {couponApplied
+                  ? pricingUtils.formatPrice(pricingUtils.calculateTotalPrice(selectedPlanData.basePrice, selectedDuration) - couponDiscount)
+                  : pricingUtils.formatPrice(pricingUtils.calculateTotalPrice(selectedPlanData.basePrice, selectedDuration))
+                }
               </span>
             </div>
           </div>

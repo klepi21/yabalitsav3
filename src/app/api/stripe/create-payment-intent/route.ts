@@ -10,7 +10,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST(request: NextRequest) {
   try {
-    const { planId, duration, userUid, customerEmail, customerName } = await request.json();
+    const { planId, duration, userUid, customerEmail, customerName, couponCode } = await request.json();
 
     console.log('Creating payment intent for:', { planId, duration, userUid, customerEmail, customerName });
 
@@ -79,7 +79,32 @@ export async function POST(request: NextRequest) {
     const basePrice = customerEmail === DEV_EMAIL ? DEV_BASE_PRICE : plan.basePrice;
 
     // Calculate the amount
-    const totalPrice = pricingUtils.calculateTotalPrice(basePrice, duration as 1 | 6 | 12);
+    let totalPrice = pricingUtils.calculateTotalPrice(basePrice, duration as 1 | 6 | 12);
+    let couponDiscount = 0;
+    let appliedCouponCode: string | undefined;
+
+    // Validate and apply coupon if provided
+    if (couponCode) {
+      const venueCoupon = venue.coupon;
+      if (!venueCoupon || !venueCoupon.active) {
+        return NextResponse.json(
+          { error: 'Μη έγκυρο ή ανενεργό κουπόνι' },
+          { status: 400 }
+        );
+      }
+      if (venueCoupon.code.toUpperCase() !== couponCode.toUpperCase()) {
+        return NextResponse.json(
+          { error: 'Λάθος κωδικός κουπονιού' },
+          { status: 400 }
+        );
+      }
+      const { discountedPrice, discountAmount } = pricingUtils.applyCouponDiscount(totalPrice, venueCoupon);
+      totalPrice = discountedPrice;
+      couponDiscount = discountAmount;
+      appliedCouponCode = couponCode.toUpperCase();
+      console.log('🎟️ Coupon applied:', { code: appliedCouponCode, discount: couponDiscount, newTotal: totalPrice });
+    }
+
     const amountInCents = Math.round(totalPrice * 100);
 
     console.log('💰 Payment details:', {
@@ -133,7 +158,8 @@ export async function POST(request: NextRequest) {
         plan_name: plan.name as 'Basic' | 'Pro' | 'Enterprise',
         duration: duration.toString(),
         user_uid: userUid,
-        payment_type: 'one_time_plan_purchase'
+        payment_type: 'one_time_plan_purchase',
+        ...(appliedCouponCode && { coupon_code: appliedCouponCode, coupon_discount: couponDiscount.toFixed(2) })
       },
       payment_method_types: ['card']
     });
@@ -151,11 +177,25 @@ export async function POST(request: NextRequest) {
       planName: plan.name as 'Basic' | 'Pro' | 'Enterprise',
       durationMonths: duration,
       paymentType: 'one_time_plan_purchase',
+      ...(appliedCouponCode && { couponCode: appliedCouponCode, couponDiscount: couponDiscount }),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
 
     console.log('💾 Payment record stored in Firebase:', paymentId);
+
+    // Deactivate coupon after use (one-time use)
+    if (appliedCouponCode && venue.coupon) {
+      try {
+        const { doc, updateDoc } = await import('firebase/firestore');
+        const { db } = await import('@/lib/firebase');
+        const venueRef = doc(db, 'yabalitsa_venues', venue.id);
+        await updateDoc(venueRef, { 'coupon.active': false });
+        console.log('🎟️ Coupon deactivated for venue:', venue.id);
+      } catch (e) {
+        console.warn('Could not deactivate coupon (non-blocking):', e);
+      }
+    }
 
     // Return response
     const response = {

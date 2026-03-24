@@ -82,6 +82,12 @@ export async function POST(request: NextRequest) {
         afm: venueAfm,
         doy: venueDoy || '',
       },
+      coupon: {
+        code: 'WELCOME50',
+        active: false,
+        discountType: 'percentage',
+        discountValue: 50,
+      },
       daysRemaining: 15,
       lastDecrementAt: FieldValue.serverTimestamp(),
       createdAt: FieldValue.serverTimestamp(),
