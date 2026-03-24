@@ -8,7 +8,7 @@ import path from 'path';
 if (!getApps().length) {
   initializeApp({
     credential: cert(
-      path.join(process.cwd(), process.env.FIREBASE_ADMIN_KEY_PATH || 'yabalitsa-6f5e8-firebase-adminsdk-fbsvc-c8cc60c683.json')
+      path.join(process.cwd(), process.env.FIREBASE_ADMIN_KEY_PATH!)
     ),
   });
 }

@@ -13,7 +13,7 @@ import path from 'path';
 
 const app = initializeApp({
   credential: cert(
-    path.join(process.cwd(), 'yabalitsa-6f5e8-firebase-adminsdk-fbsvc-c8cc60c683.json')
+    path.join(process.cwd(), process.env.FIREBASE_ADMIN_KEY_PATH!)
   ),
 });
 

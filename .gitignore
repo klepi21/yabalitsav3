@@ -17,6 +17,9 @@ dist/
 .env.test.local
 .env.production.local
 
+# Firebase Admin SDK key
+*firebase-adminsdk*.json
+
 # Vercel
 .vercel
 
