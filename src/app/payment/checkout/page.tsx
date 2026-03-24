@@ -55,10 +55,16 @@ function CheckoutForm({ clientSecret }: { clientSecret: string }) {
       if (paymentIntent && paymentIntent.status === 'succeeded') {
         console.log('✅ Payment succeeded:', paymentIntent.id);
         
-        // Call our finalize endpoint
-        const { auth } = await import('@/lib/firebase');
-        const firebaseAuth = auth;
-        const token = await firebaseAuth.currentUser?.getIdToken();
+        // Call our finalize endpoint — wait for Firebase auth to be ready
+        const { auth: firebaseAuth } = await import('@/lib/firebase');
+        const { onAuthStateChanged } = await import('firebase/auth');
+        const user = await new Promise<import('firebase/auth').User | null>((resolve) => {
+          const unsubscribe = onAuthStateChanged(firebaseAuth, (u) => {
+            unsubscribe();
+            resolve(u);
+          });
+        });
+        const token = await user?.getIdToken();
         const response = await fetch('/api/stripe/finalize-one-time-payment', {
           method: 'POST',
           headers: {
