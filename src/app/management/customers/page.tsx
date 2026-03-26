@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { Plus, Search, Users, Phone, Eye, Pencil, AlertCircle, MoreHorizontal } from 'lucide-react';
+import { Plus, Search, Users, Phone, Eye, Pencil, AlertCircle, MoreHorizontal, Trash2, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { User } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,20 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { userService } from '@/lib/firebase-services';
 
 export default function CustomersPage() {
   const router = useRouter();
@@ -26,6 +38,8 @@ export default function CustomersPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const loadCustomers = useCallback(async () => {
     if (!venueOwner || !user) return;
@@ -73,6 +87,20 @@ export default function CustomersPage() {
       setIsLoading(false);
     }
   }, [venueOwner, user]);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    try {
+      await userService.delete(deleteTarget.id);
+      setCustomers(prev => prev.filter(c => c.id !== deleteTarget.id));
+      setDeleteTarget(null);
+    } catch (e) {
+      console.error('Error deleting customer:', e);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   // Check authentication
   useEffect(() => {
@@ -303,6 +331,14 @@ export default function CustomersPage() {
                                 Επεξεργασία
                               </Link>
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="rounded-xl h-11 font-bold text-red-600 focus:text-red-700 focus:bg-red-50 cursor-pointer"
+                              onClick={() => setDeleteTarget(customer)}
+                            >
+                              <Trash2 className="h-4 w-4 mr-3" />
+                              Διαγραφή
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </td>
@@ -314,6 +350,34 @@ export default function CustomersPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <AlertDialogContent className="rounded-3xl border-0 shadow-2xl p-0 overflow-hidden w-[95vw] sm:w-full">
+          <div className="p-6 sm:p-8">
+            <AlertDialogHeader>
+              <div className="h-12 w-12 rounded-2xl bg-red-50 flex items-center justify-center mb-4">
+                <Trash2 className="h-6 w-6 text-red-600" />
+              </div>
+              <AlertDialogTitle className="text-xl sm:text-2xl font-black text-zinc-900">Διαγραφή Πελάτη</AlertDialogTitle>
+              <AlertDialogDescription className="text-zinc-500 font-medium pt-2">
+                Είστε σίγουροι ότι θέλετε να διαγράψετε τον πελάτη <span className="text-zinc-900 font-black">&quot;{deleteTarget?.name}&quot;</span>;
+                Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-6 gap-3">
+              <AlertDialogCancel className="h-11 rounded-xl border-zinc-200 font-bold">Ακύρωση</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="h-11 rounded-xl bg-red-600 hover:bg-red-700 font-bold border-0"
+              >
+                {isDeleting ? <Loader2 className="h-5 w-5 animate-spin" /> : 'Οριστική Διαγραφή'}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
