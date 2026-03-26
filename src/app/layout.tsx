@@ -4,7 +4,6 @@ import { GoogleAnalytics } from '@next/third-parties/google';
 import './globals.css';
 
 import ConditionalWrapper from '@/components/ConditionalWrapper';
-import { ThemeProvider } from '@/components/ThemeProvider';
 
 const roboto = Roboto_Flex({ 
   subsets: ['latin', 'greek'],
@@ -112,11 +111,9 @@ export default function RootLayout({
         
       </head>
       <body className={roboto.className} suppressHydrationWarning={true}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <ConditionalWrapper>
-            {children}
-          </ConditionalWrapper>
-        </ThemeProvider>
+        <ConditionalWrapper>
+          {children}
+        </ConditionalWrapper>
         <GoogleAnalytics gaId="G-GWX4K2ZM6J" />
       </body>
     </html>
