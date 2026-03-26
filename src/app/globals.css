@@ -94,6 +94,7 @@
 }
 
 /* 3. Logo must be turned into our green (#5DC611) */
+.dark[data-theme-scope="management"] img[alt="Logo"],
 .dark[data-theme-scope="management"] img[alt="Yabalitsa"] {
     filter: brightness(0) invert(72%) sepia(61%) saturate(542%) hue-rotate(53deg) brightness(98%) contrast(92%) !important;
 }

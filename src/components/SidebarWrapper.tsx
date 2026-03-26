@@ -138,7 +138,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
       <div className="lg:pl-[260px]">
         <main className="min-h-screen">
           {/* Top bar - Modern Donezo Style */}
-          <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-xl border-b border-zinc-100/80">
+          <div className="sticky top-0 z-20 bg-white/90 dark:bg-[#181A1B]/90 backdrop-blur-xl border-b border-zinc-100/80 dark:border-zinc-800">
             <div className="px-6 py-4 flex items-center justify-end gap-8 mx-auto">
               
 
@@ -151,9 +151,9 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                 {mounted && (
                   <button
                     onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                    className="p-2.5 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all border border-transparent hover:border-zinc-100"
+                    className="p-2.5 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-white/10 transition-all border border-transparent hover:border-zinc-100 dark:hover:border-white/20"
                   >
-                    {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                    {theme === 'dark' ? <Sun className="h-5 w-5 text-[#5dc611]" /> : <Moon className="h-5 w-5" />}
                   </button>
                 )}
 
@@ -161,7 +161,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                 <div className="relative notification-bell">
                   <button
                     onClick={() => setShowNotifications(!showNotifications)}
-                    className="p-2.5 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all border border-transparent hover:border-zinc-100 relative"
+                    className="p-2.5 rounded-xl text-zinc-400 hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-white/10 transition-all border border-transparent hover:border-zinc-100 dark:hover:border-white/20 relative"
                   >
                     <Bell className="h-5 w-5" />
                     {pendingBookings.length > 0 && (
@@ -170,9 +170,9 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                   </button>
 
                   {showNotifications && (
-                    <div className="absolute right-0 top-14 w-80 bg-white border border-zinc-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
-                      <div className="px-5 py-4 border-b border-zinc-100 bg-zinc-50/50">
-                        <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ειδοποιήσεις')}</h3>
+                    <div className="absolute right-0 top-14 w-80 bg-white dark:bg-[#181A1B] border border-zinc-100 dark:border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
+                      <div className="px-5 py-4 border-b border-zinc-100 dark:border-white/10 bg-zinc-50/50 dark:bg-white/5">
+                        <h3 className="text-[13px] font-black text-zinc-900 dark:text-[#5dc611] uppercase tracking-tight">{toGreekUpperCase('Ειδοποιήσεις')}</h3>
                         <p className="text-[10px] font-bold text-zinc-400 mt-0.5">ΕΚΚΡΕΜΕΙΣ ΚΡΑΤΗΣΕΙΣ</p>
                       </div>
 
@@ -186,7 +186,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                           pendingBookings.map((booking) => (
                             <div
                               key={booking.id}
-                              className="px-5 py-3 border-b border-zinc-50 hover:bg-zinc-50 cursor-pointer transition-colors"
+                              className="px-5 py-3 border-b border-zinc-50 dark:border-white/5 hover:bg-zinc-50 dark:hover:bg-white/10 cursor-pointer transition-colors"
                               onClick={() => {
                                 setShowNotifications(false);
                                 router.push(`/management/bookings/${booking.id}`);
@@ -194,7 +194,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                             >
                               <div className="flex items-start justify-between gap-3">
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-[13px] font-bold text-zinc-900 truncate">
+                                  <p className="text-[13px] font-bold text-zinc-900 dark:text-white truncate">
                                     {booking.userName || 'Άγνωστος'}
                                   </p>
                                   <p className="text-[10px] text-zinc-400 font-bold mt-1 uppercase tracking-tight">
@@ -220,8 +220,8 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                     className={cn(
                       "hidden xl:flex items-center gap-2 px-3 py-2 rounded-xl border font-bold text-[11px] transition-all active:scale-95",
                       (venueData.daysRemaining ?? 0) <= 7 
-                        ? "bg-amber-50 border-amber-100 text-amber-600 shadow-sm shadow-amber-100" 
-                        : "bg-emerald-50 border-emerald-100 text-emerald-600 shadow-sm shadow-emerald-100"
+                        ? "bg-amber-50 dark:bg-amber-500/10 border-amber-100 dark:border-amber-500/20 text-amber-600 dark:text-amber-400 shadow-sm" 
+                        : "bg-emerald-50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20 text-emerald-600 dark:text-[#5dc611] shadow-sm"
                     )}
                   >
                     <Zap className={cn("h-3.5 w-3.5", (venueData.daysRemaining ?? 0) <= 7 ? "text-amber-500" : "text-emerald-500")} />
@@ -232,24 +232,24 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                 )}
 
                 {/* Vertical Divider */}
-                <div className="w-px h-8 bg-zinc-100 mx-2" />
+                <div className="w-px h-8 bg-zinc-100 dark:bg-white/10 mx-2" />
 
                 {/* User Profile Section */}
-                <div className="flex items-center gap-3 pl-2 group cursor-pointer hover:bg-zinc-50 p-1.5 rounded-2xl transition-all">
+                <div className="flex items-center gap-3 pl-2 group cursor-pointer hover:bg-zinc-50 dark:hover:bg-white/10 p-1.5 rounded-2xl transition-all">
                   <div className="flex flex-col text-right hidden sm:flex">
-                    <span className="text-[13px] font-black text-zinc-900 leading-none">
+                    <span className="text-[13px] font-black text-zinc-900 dark:text-white leading-none">
                       {venueOwner?.name || 'User'}
                     </span>
                     <span className="text-[10px] font-bold text-zinc-400 mt-1 truncate max-w-[120px]">
                       {user?.email}
                     </span>
                   </div>
-                  <div className="h-10 w-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
+                  <div className="h-10 w-10 rounded-2xl bg-emerald-50 dark:bg-[#5dc611]/20 border border-emerald-100 dark:border-[#5dc611]/30 flex items-center justify-center overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
                     {user?.photoURL ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={user.photoURL} alt="Avatar" className="h-full w-full object-cover" />
                     ) : (
-                      <User className="h-5 w-5 text-emerald-600" />
+                      <User className="h-5 w-5 text-emerald-600 dark:text-[#5dc611]" />
                     )}
                   </div>
                 </div>
