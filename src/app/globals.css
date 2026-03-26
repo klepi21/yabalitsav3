@@ -62,9 +62,28 @@
   --color-zinc-700: #479a0d;
   --color-zinc-800: #37750c;
   
-  --color-zinc-900: #5dc611; /* black titles/icons/bold become #5dc611 */
+  --color-zinc-900: #5dc611; /* titles/icons/bold become green */
   --color-zinc-950: #5dc611;
   --color-black: #5dc611;
+}
+
+/* Force dark backgrounds on components that have hardcoded white or bg-white */
+.dark[data-theme-scope="management"] .bg-white,
+.dark[data-theme-scope="management"] .premium-card,
+.dark[data-theme-scope="management"] .glass-card {
+    background-color: #181A1B !important;
+    border-color: #27272a !important;
+    color: #ffffff !important;
+}
+
+/* Ensure heavy texts/titles in these cards become green */
+.dark[data-theme-scope="management"] .premium-card .text-zinc-900,
+.dark[data-theme-scope="management"] .premium-card b,
+.dark[data-theme-scope="management"] .premium-card strong,
+.dark[data-theme-scope="management"] h1,
+.dark[data-theme-scope="management"] h2,
+.dark[data-theme-scope="management"] h3 {
+    color: #5dc611 !important;
 }
 
 /* 1. ALL ICONS IN ALL PAGES MUST HAVE THE GREEN BACKGROUND AND BLACK INSIDE THE ICON */
