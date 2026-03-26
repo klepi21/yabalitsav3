@@ -164,7 +164,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   };
 
   return (
-    <div className="flex h-full flex-col bg-white dark:bg-[#181A1B] border-r border-zinc-100/80 dark:border-zinc-800">
+    <div className="flex h-full flex-col bg-white border-r border-zinc-100/80">
       {/* Logo Area */}
       <div className="flex h-20 items-center px-6 shrink-0 mb-2">
         <Link href="/management/dashboard" className="flex items-center gap-3">
@@ -198,8 +198,8 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                     className={cn(
                       'group relative flex items-center gap-3 rounded-lg px-4 py-2 text-[12px] font-bold transition-all duration-300',
                       isActive
-                        ? 'bg-emerald-50 dark:bg-[#5dc611] text-emerald-700 dark:text-[#0A0A0A]'
-                        : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white'
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
                     )}
                   >
                     {isActive && (
@@ -255,8 +255,8 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                         className={cn(
                           'group relative flex w-full items-center justify-between rounded-lg px-4 py-2 text-[12px] font-bold transition-all duration-300',
                           isParentActive
-                            ? 'bg-emerald-50 dark:bg-[#5dc611] text-emerald-700 dark:text-[#0A0A0A]'
-                            : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white'
+                            ? 'bg-emerald-50 text-emerald-700'
+                            : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
                         )}
                       >
                         {isParentActive && (
@@ -284,8 +284,8 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                                 className={cn(
                                   'block py-1 text-[11px] font-bold transition-colors',
                                   isChildItemActive
-                                    ? 'text-emerald-600 dark:text-[#5dc611]'
-                                    : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-900 dark:hover:text-white'
+                                    ? 'text-emerald-600'
+                                    : 'text-zinc-400 hover:text-zinc-900'
                                 )}
                               >
                                 {toGreekUpperCase(child.name)}
@@ -306,8 +306,8 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                     className={cn(
                       'group relative flex items-center gap-3 rounded-lg px-4 py-2 text-[12px] font-bold transition-all duration-300',
                       isActive
-                        ? 'bg-emerald-50 dark:bg-[#5dc611] text-emerald-700 dark:text-[#0A0A0A]'
-                        : 'text-zinc-500 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white'
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
                     )}
                   >
                     {isActive && (
@@ -326,7 +326,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
       <div className="p-4 space-y-4">
         {/* Bookings Status Toggle (Admin Only) */}
         {perms.showBookingsToggle && (
-          <div className="px-4 py-3 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-100/50 dark:border-white/10 flex items-center justify-between gap-3 shadow-inner group">
+          <div className="px-4 py-3 rounded-2xl bg-zinc-50 border border-zinc-100/50 flex items-center justify-between gap-3 shadow-inner group">
             <div className="flex flex-col gap-0.5 min-w-0">
               <p className={cn(
                 "text-[10px] font-black uppercase tracking-widest transition-colors truncate",
@@ -360,8 +360,8 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
               className={cn(
                 "block relative overflow-hidden rounded-2xl p-5 group transition-all duration-500",
                 bookingsEnabled 
-                  ? "bg-zinc-900 dark:bg-[#0A0A0A] border-0 cursor-pointer hover:shadow-xl hover:shadow-emerald-900/10" 
-                  : "bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/10 cursor-not-allowed opacity-80"
+                  ? "bg-zinc-900 border-0 cursor-pointer hover:shadow-xl hover:shadow-emerald-900/10" 
+                  : "bg-zinc-100 border border-zinc-200 cursor-not-allowed opacity-80"
               )}
             >
                {/* Abstract Background Shapes */}
@@ -375,9 +375,9 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                <div className="relative z-10 flex flex-col gap-3">
                   <div className={cn(
                     "h-8 w-8 rounded-lg flex items-center justify-center backdrop-blur-md",
-                    bookingsEnabled ? "bg-white/10 dark:bg-emerald-500/20" : "bg-zinc-200 dark:bg-white/10"
+                    bookingsEnabled ? "bg-white/10" : "bg-zinc-200"
                   )}>
-                    <QrCode className={cn("h-4 w-4", bookingsEnabled ? "text-emerald-400 dark:text-[#5dc611]" : "text-zinc-400 dark:text-zinc-500")} />
+                    <QrCode className={cn("h-4 w-4", bookingsEnabled ? "text-emerald-400" : "text-zinc-400")} />
                   </div>
                   
                   <div>
@@ -410,7 +410,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
             signOut();
             onNavigate?.();
           }}
-          className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-[13px] font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-300"
+          className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-[13px] font-bold text-red-500 hover:bg-red-50 transition-all duration-300"
         >
           <LogOut className="h-5 w-5" />
           <span>{toGreekUpperCase('Αποσύνδεση')}</span>
