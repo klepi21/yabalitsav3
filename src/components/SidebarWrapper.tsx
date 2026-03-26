@@ -1,7 +1,8 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { Zap, Bell, User } from 'lucide-react';
+import { Zap, Bell, User, Moon, Sun } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import { useEffect, useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar from './Sidebar';
@@ -38,6 +39,8 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
   const [venueData, setVenueData] = useState<VenueData | null>(null);
   const [pendingBookings, setPendingBookings] = useState<PendingBooking[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   const isPublicPage =
     pathname === '/' ||
@@ -106,6 +109,10 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
     }
   }, [isPublicPage, fetchPendingBookings]);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Close notifications when clicking outside
   useEffect(() => {
     if (!showNotifications) return;
@@ -126,12 +133,12 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f1f4f8]">
+    <div className="min-h-screen bg-zinc-50 dark:bg-[#0A0A0A]">
       <Sidebar />
       <div className="lg:pl-[260px]">
         <main className="min-h-screen">
           {/* Top bar - Modern Donezo Style */}
-          <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-zinc-100/80">
+          <div className="sticky top-0 z-20 bg-white/80 dark:bg-[#181A1B]/90 backdrop-blur-xl border-b border-zinc-100/80">
             <div className="px-6 py-4 flex items-center justify-end gap-8 mx-auto">
               
 
@@ -139,6 +146,16 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
               {/* Right Side Actions */}
               <div className="flex items-center gap-2">
 
+
+                {/* Theme Toggle */}
+                {mounted && (
+                  <button
+                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                    className="p-2.5 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all border border-transparent hover:border-zinc-100"
+                  >
+                    {theme === 'dark' ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+                  </button>
+                )}
 
                 {/* Notifications */}
                 <div className="relative notification-bell">

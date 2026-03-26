@@ -39,6 +39,34 @@
   --sidebar: #1e293b;
 }
 
+.dark {
+  --background: #0A0A0A;
+  --foreground: #ffffff;
+  --card: #181A1B;
+  --card-foreground: #ffffff;
+  --popover: #181A1B;
+  --popover-foreground: #ffffff;
+  --border: #27272a;
+  --input: #3f4247;
+  
+  /* Semantic overrides for literal Tailwind utility colors used across pages */
+  --color-white: #181A1B;
+  --color-zinc-50: #121415;
+  --color-zinc-100: #1c1e20;
+  --color-zinc-200: #27292c;
+  --color-zinc-300: #3f4247;
+  
+  --color-zinc-400: #a1a1aa;
+  --color-zinc-500: #ffffff; /* gray texts go with white */
+  --color-zinc-600: #5dc611; /* softer dark grays become green accents */
+  --color-zinc-700: #479a0d;
+  --color-zinc-800: #37750c;
+  
+  --color-zinc-900: #5dc611; /* black titles/icons/bold become #5dc611 */
+  --color-zinc-950: #5dc611;
+  --color-black: #5dc611;
+}
+
 @theme inline {
   --color-emerald-50: #f4fdf0;
   --color-emerald-100: #e5fbdd;
