@@ -133,12 +133,12 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-[#0A0A0A]">
+    <div data-theme-scope="management" className="min-h-screen bg-zinc-50 dark:bg-[#0A0A0A]">
       <Sidebar />
       <div className="lg:pl-[260px]">
         <main className="min-h-screen">
           {/* Top bar - Modern Donezo Style */}
-          <div className="sticky top-0 z-20 bg-white/80 dark:bg-[#181A1B]/90 backdrop-blur-xl border-b border-zinc-100/80">
+          <div className="sticky top-0 z-20 bg-white/90 backdrop-blur-xl border-b border-zinc-100/80">
             <div className="px-6 py-4 flex items-center justify-end gap-8 mx-auto">
               
 

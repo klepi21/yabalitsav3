@@ -39,7 +39,7 @@
   --sidebar: #1e293b;
 }
 
-.dark {
+.dark[data-theme-scope="management"] {
   --background: #0A0A0A;
   --foreground: #ffffff;
   --card: #181A1B;
@@ -65,6 +65,37 @@
   --color-zinc-900: #5dc611; /* black titles/icons/bold become #5dc611 */
   --color-zinc-950: #5dc611;
   --color-black: #5dc611;
+}
+
+/* 1. ALL ICONS IN ALL PAGES MUST HAVE THE GREEN BACKGROUND AND BLACK INSIDE THE ICON */
+/* Targeting divs containing exactly one lucide icon (perfect match for typical UI icon boxes) */
+.dark[data-theme-scope="management"] div:has(> .lucide:only-child),
+.dark[data-theme-scope="management"] button:has(> .lucide:only-child) {
+    background-color: #5dc611 !important;
+    border-color: #5dc611 !important;
+    color: #0A0A0A !important;
+    box-shadow: 0 4px 14px 0 rgba(93, 198, 17, 0.39) !important;
+}
+.dark[data-theme-scope="management"] div:has(> .lucide:only-child) > .lucide,
+.dark[data-theme-scope="management"] button:has(> .lucide:only-child) > .lucide {
+    color: #0A0A0A !important;
+}
+
+/* 2. Active Sidebar Menu (and anything using the active background emerald-50) */
+.dark[data-theme-scope="management"] .bg-emerald-50,
+.dark[data-theme-scope="management"] .bg-emerald-100 {
+    background-color: #5dc611 !important;
+    color: #0A0A0A !important;
+    border-color: #5dc611 !important;
+}
+.dark[data-theme-scope="management"] .bg-emerald-50 *,
+.dark[data-theme-scope="management"] .bg-emerald-100 * {
+    color: #0A0A0A !important;
+}
+
+/* 3. Logo must be turned into our green (#5DC611) */
+.dark[data-theme-scope="management"] img[alt="Yabalitsa"] {
+    filter: brightness(0) invert(72%) sepia(61%) saturate(542%) hue-rotate(53deg) brightness(98%) contrast(92%) !important;
 }
 
 @theme inline {
