@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   description: 'Πολιτική απορρήτου και προστασίας προσωπικών δεδομένων. Μάθετε πώς το Yabalitsa προστατεύει τις πληροφορίες σας.',
   openGraph: {
     title: 'Πολιτική Απορρήτου - Yabalitsa',
-    description: 'Πολιτική απορρήτου και προστασίας προσωπικών δεδομένων.',
+    description: 'Πολιτική απορρήτου και προστασίας προσωπικών δεδομένων .',
     images: ['/prev.png'],
   },
   twitter: {
