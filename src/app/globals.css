@@ -76,10 +76,10 @@
     color: #ffffff !important;
 }
 
-/* Ensure heavy texts/titles in these cards become green */
-.dark[data-theme-scope="management"] .premium-card .text-zinc-900,
-.dark[data-theme-scope="management"] .premium-card b,
-.dark[data-theme-scope="management"] .premium-card strong,
+/* Ensure heavy texts/titles/bold in these cards become green */
+.dark[data-theme-scope="management"] .text-zinc-900,
+.dark[data-theme-scope="management"] b,
+.dark[data-theme-scope="management"] strong,
 .dark[data-theme-scope="management"] h1,
 .dark[data-theme-scope="management"] h2,
 .dark[data-theme-scope="management"] h3 {
@@ -87,7 +87,6 @@
 }
 
 /* 1. ALL ICONS IN ALL PAGES MUST HAVE THE GREEN BACKGROUND AND BLACK INSIDE THE ICON */
-/* Targeting divs containing exactly one lucide icon (perfect match for typical UI icon boxes) */
 .dark[data-theme-scope="management"] div:has(> .lucide:only-child),
 .dark[data-theme-scope="management"] button:has(> .lucide:only-child) {
     background-color: #5dc611 !important;
@@ -100,7 +99,7 @@
     color: #0A0A0A !important;
 }
 
-/* 2. Active Sidebar Menu (and anything using the active background emerald-50) */
+/* 2. Active Sidebar Menu */
 .dark[data-theme-scope="management"] .bg-emerald-50,
 .dark[data-theme-scope="management"] .bg-emerald-100 {
     background-color: #5dc611 !important;
