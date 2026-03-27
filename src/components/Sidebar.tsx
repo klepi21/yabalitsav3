@@ -23,6 +23,7 @@ import {
   Menu,
   QrCode,
   TrendingUp,
+  Shield,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
@@ -134,10 +135,12 @@ function SidebarSkeleton() {
   );
 }
 
+const SUPER_ADMIN_EMAIL = 'nikoskoukis99@gmail.com';
+
 function NavContent({ onNavigate }: { onNavigate?: () => void }) {
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const pathname = usePathname();
-  const { signOut, userRole, bookingsEnabled, setBookingsEnabled, isLoading } = useAuth();
+  const { signOut, userRole, bookingsEnabled, setBookingsEnabled, isLoading, user } = useAuth();
 
   // Show skeleton while auth is loading
   if (isLoading) return <SidebarSkeleton />;
@@ -321,6 +324,31 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
             </div>
           </div>
         </div>
+
+        {/* Super Admin Link */}
+        {user?.email === SUPER_ADMIN_EMAIL && (
+          <div className="mt-4">
+            <p className="px-4 text-[9px] font-black text-red-400 uppercase tracking-[0.2em] mb-2 font-mono">
+              SUPER ADMIN
+            </p>
+            <Link
+              href="/management/admin-panel"
+              onClick={onNavigate}
+              className={cn(
+                'group relative flex items-center gap-3 rounded-lg px-4 py-2 text-[12px] font-bold transition-all duration-300',
+                pathname === '/management/admin-panel'
+                  ? 'bg-red-50 text-red-700'
+                  : 'text-zinc-500 hover:bg-red-50/50 hover:text-red-600'
+              )}
+            >
+              {pathname === '/management/admin-panel' && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-red-600 rounded-r-full" />
+              )}
+              <Shield className={cn("h-4 w-4 transition-transform group-hover:scale-110", pathname === '/management/admin-panel' ? "text-red-600" : "text-zinc-400 group-hover:text-red-500")} />
+              <span>{toGreekUpperCase('Admin Panel')}</span>
+            </Link>
+          </div>
+        )}
       </nav>
 
       <div className="p-4 space-y-4">
