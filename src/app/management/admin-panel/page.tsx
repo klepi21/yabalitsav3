@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -38,6 +38,20 @@ interface VenueStats {
   lastBooking: string | null;
 }
 
+interface AcademyGroupUser {
+  id: string;
+  displayName: string;
+  createdAt: string | null;
+}
+
+interface AcademyGroup {
+  groupId: string;
+  groupName: string;
+  groupIcon: string;
+  groupColor: string;
+  users: AcademyGroupUser[];
+}
+
 interface VenueDetail {
   id: string;
   name: string;
@@ -54,6 +68,7 @@ interface VenueDetail {
   createdAt: string | null;
   updatedAt: string | null;
   stats: VenueStats;
+  academyGroups: AcademyGroup[];
 }
 
 interface KPIs {
@@ -173,16 +188,6 @@ export default function AdminPanelPage() {
     return new Date(iso).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric' });
   };
 
-  const timeAgo = (iso: string | null) => {
-    if (!iso) return 'Ποτέ';
-    const diff = Date.now() - new Date(iso).getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    if (days === 0) return 'Σήμερα';
-    if (days === 1) return 'Χθες';
-    if (days < 7) return `${days} μέρες πριν`;
-    if (days < 30) return `${Math.floor(days / 7)} εβδ. πριν`;
-    return `${Math.floor(days / 30)} μήνες πριν`;
-  };
 
   const getPlanBadge = (venue: VenueDetail) => {
     if (!venue.active) {
@@ -303,41 +308,70 @@ export default function AdminPanelPage() {
                     <SortableHeader label="Πελάτες" field="customers" current={sortField} asc={sortAsc} onToggle={toggleSort} className="text-center" />
                     <th className="px-4 py-3 text-center text-[10px] font-black text-zinc-400 uppercase tracking-wider">Academy</th>
                     <SortableHeader label="Έσοδα" field="revenue" current={sortField} asc={sortAsc} onToggle={toggleSort} className="text-right" />
-                    <th className="px-4 py-3 text-right text-[10px] font-black text-zinc-400 uppercase tracking-wider">Τελ. Activity</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
                   {filteredVenues.map(venue => (
-                    <tr
-                      key={venue.id}
-                      className="hover:bg-zinc-50/50 transition-colors cursor-pointer"
-                      onClick={() => setExpandedVenue(expandedVenue === venue.id ? null : venue.id)}
-                    >
-                      <td className="px-4 py-3">
-                        <div>
-                          <p className="font-bold text-zinc-900 text-[13px]">{venue.name}</p>
-                          <p className="text-[11px] text-zinc-400">{venue.email || venue.city}</p>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">{getPlanBadge(venue)}</td>
-                      <td className="px-4 py-3 text-[12px] text-zinc-500">{formatDate(venue.createdAt)}</td>
-                      <td className="px-4 py-3 text-center text-[13px] font-bold text-zinc-700">{venue.stats.pitches}</td>
-                      <td className="px-4 py-3 text-center text-[13px] font-bold text-zinc-700">{venue.stats.bookings}</td>
-                      <td className="px-4 py-3 text-center text-[13px] font-bold text-zinc-700">{venue.stats.customers}</td>
-                      <td className="px-4 py-3 text-center text-[13px] font-bold text-zinc-700">
-                        {venue.stats.academyUsers > 0 ? (
-                          <span className="text-emerald-600">{venue.stats.academyUsers}</span>
-                        ) : (
-                          <span className="text-zinc-300">-</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-right text-[13px] font-bold text-zinc-700">
-                        {venue.stats.revenue > 0 ? `€${venue.stats.revenue.toFixed(0)}` : '-'}
-                      </td>
-                      <td className="px-4 py-3 text-right text-[11px] text-zinc-400">
-                        {timeAgo(venue.stats.lastBooking)}
-                      </td>
-                    </tr>
+                    <React.Fragment key={venue.id}>
+                      <tr
+                        className="hover:bg-zinc-50/50 transition-colors cursor-pointer"
+                        onClick={() => setExpandedVenue(expandedVenue === venue.id ? null : venue.id)}
+                      >
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <div>
+                              <p className="font-bold text-zinc-900 text-[13px]">{venue.name}</p>
+                              <p className="text-[11px] text-zinc-400">{venue.email || venue.city}</p>
+                            </div>
+                            {expandedVenue === venue.id ? (
+                              <ChevronUp className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
+                            ) : (
+                              <ChevronDown className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-4 py-3">{getPlanBadge(venue)}</td>
+                        <td className="px-4 py-3 text-[12px] text-zinc-500">{formatDate(venue.createdAt)}</td>
+                        <td className="px-4 py-3 text-center text-[13px] font-bold text-zinc-700">{venue.stats.pitches}</td>
+                        <td className="px-4 py-3 text-center text-[13px] font-bold text-zinc-700">{venue.stats.bookings}</td>
+                        <td className="px-4 py-3 text-center text-[13px] font-bold text-zinc-700">{venue.stats.customers}</td>
+                        <td className="px-4 py-3 text-center text-[13px] font-bold text-zinc-700">
+                          {venue.stats.academyUsers > 0 ? (
+                            <span className="text-emerald-600">{venue.stats.academyUsers}</span>
+                          ) : (
+                            <span className="text-zinc-300">-</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right text-[13px] font-bold text-zinc-700">
+                          {venue.stats.revenue > 0 ? `€${venue.stats.revenue.toFixed(0)}` : '-'}
+                        </td>
+                      </tr>
+                      {expandedVenue === venue.id && (
+                        <tr>
+                          <td colSpan={8} className="bg-zinc-50/80 px-4 py-4">
+                            <div className="grid grid-cols-4 gap-3 mb-4">
+                              <DetailRow label="Plan" value={venue.planType || venue.plan} />
+                              <DetailRow label="Ημέρες" value={venue.daysRemaining !== null ? `${venue.daysRemaining}` : '-'} />
+                              <DetailRow label="Squads" value={`${venue.stats.squads}`} />
+                              <DetailRow label="Staff" value={`${venue.stats.staff}`} />
+                              <DetailRow label="Online Bookings" value={venue.bookingsEnabled ? 'ON' : 'OFF'} />
+                              <DetailRow label="Τηλέφωνο" value={venue.phone || '-'} />
+                              <DetailRow label="Έσοδα" value={venue.stats.revenue > 0 ? `€${venue.stats.revenue.toFixed(0)}` : '-'} />
+                            </div>
+                            {venue.academyGroups.length > 0 && (
+                              <div className="mt-3 pt-3 border-t border-zinc-200">
+                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-3">Academy Users ανά Group</p>
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                                  {venue.academyGroups.map(group => (
+                                    <AcademyGroupCard key={group.groupId} group={group} formatDate={formatDate} />
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      )}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>
@@ -394,10 +428,19 @@ export default function AdminPanelPage() {
                       <DetailRow label="Squads" value={`${venue.stats.squads}`} />
                       <DetailRow label="Staff" value={`${venue.stats.staff}`} />
                       <DetailRow label="Έσοδα" value={venue.stats.revenue > 0 ? `€${venue.stats.revenue.toFixed(0)}` : '-'} />
-                      <DetailRow label="Τελ. Booking" value={timeAgo(venue.stats.lastBooking)} />
                       <DetailRow label="Online Bookings" value={venue.bookingsEnabled ? 'ON' : 'OFF'} />
                       <DetailRow label="Τηλέφωνο" value={venue.phone || '-'} />
                     </div>
+                    {venue.academyGroups.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-zinc-100">
+                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-2">Academy Users ανά Group</p>
+                        <div className="space-y-2">
+                          {venue.academyGroups.map(group => (
+                            <AcademyGroupCard key={group.groupId} group={group} formatDate={formatDate} />
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>
@@ -499,6 +542,52 @@ function DetailRow({ label, value }: { label: string; value: string }) {
     <div>
       <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">{label}</p>
       <p className="text-[12px] font-bold text-zinc-700">{value}</p>
+    </div>
+  );
+}
+
+const GROUP_COLOR_MAP: Record<string, string> = {
+  green: 'bg-green-100 text-green-800 border-green-200',
+  blue: 'bg-blue-100 text-blue-800 border-blue-200',
+  amber: 'bg-amber-100 text-amber-800 border-amber-200',
+  purple: 'bg-purple-100 text-purple-800 border-purple-200',
+  red: 'bg-red-100 text-red-800 border-red-200',
+  pink: 'bg-pink-100 text-pink-800 border-pink-200',
+  indigo: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+  teal: 'bg-teal-100 text-teal-800 border-teal-200',
+  orange: 'bg-orange-100 text-orange-800 border-orange-200',
+  cyan: 'bg-cyan-100 text-cyan-800 border-cyan-200',
+  gray: 'bg-zinc-100 text-zinc-800 border-zinc-200',
+};
+
+function AcademyGroupCard({
+  group,
+  formatDate,
+}: {
+  group: AcademyGroup;
+  formatDate: (iso: string | null) => string;
+}) {
+  const colorClass = GROUP_COLOR_MAP[group.groupColor] || GROUP_COLOR_MAP.gray;
+
+  return (
+    <div className="rounded-lg border bg-white p-3">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <span className="text-sm">{group.groupIcon}</span>
+          <Badge className={cn('text-[9px] font-black', colorClass)}>
+            {group.groupName}
+          </Badge>
+        </div>
+        <span className="text-[11px] font-black text-zinc-500">{group.users.length}</span>
+      </div>
+      <div className="space-y-1 max-h-40 overflow-y-auto">
+        {group.users.map(user => (
+          <div key={user.id} className="flex items-center justify-between text-[11px]">
+            <span className="text-zinc-700 truncate mr-2">{user.displayName}</span>
+            <span className="text-zinc-400 shrink-0">{formatDate(user.createdAt)}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

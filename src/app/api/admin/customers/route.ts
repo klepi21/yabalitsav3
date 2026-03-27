@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
       squadsSnapshot,
       paymentsSnapshot,
       venueOwnersSnapshot,
+      userGroupsSnapshot,
     ] = await Promise.all([
       db.collection('yabalitsa_pitches').get(),
       db.collection('yabalitsa_bookings').get(),
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
       db.collection('yabalitsa_squads').get(),
       db.collection('yabalitsa_payments').get(),
       db.collection('yabalitsa_venueOwners').get(),
+      db.collection('yabalitsa_user_groups').get(),
     ]);
 
     // Group counts by venueId
@@ -84,6 +86,55 @@ export async function POST(request: NextRequest) {
 
     // Staff counts (venue owners/coaches per venue)
     const staffCounts = countByVenue(venueOwnersSnapshot.docs);
+
+    // Build group name lookup: groupId -> { name, icon, color }
+    const groupMap: Record<string, { name: string; icon: string; color: string }> = {};
+    for (const gDoc of userGroupsSnapshot.docs) {
+      const data = gDoc.data();
+      groupMap[gDoc.id] = {
+        name: data.name || 'Χωρίς Ομάδα',
+        icon: data.icon || '👤',
+        color: data.color || 'gray',
+      };
+    }
+
+    // Academy users per venue, grouped by group
+    const academyUsersByVenue: Record<string, {
+      groupId: string;
+      groupName: string;
+      groupIcon: string;
+      groupColor: string;
+      users: { id: string; displayName: string; createdAt: string | null }[];
+    }[]> = {};
+
+    for (const uDoc of academyUsersSnapshot.docs) {
+      const data = uDoc.data();
+      const vid = data.venueId;
+      if (!vid) continue;
+
+      if (!academyUsersByVenue[vid]) academyUsersByVenue[vid] = [];
+
+      const groupId = data.groupId || '';
+      const group = groupMap[groupId] || { name: 'Χωρίς Ομάδα', icon: '👤', color: 'gray' };
+
+      let groupEntry = academyUsersByVenue[vid].find(g => g.groupId === groupId);
+      if (!groupEntry) {
+        groupEntry = {
+          groupId,
+          groupName: group.name,
+          groupIcon: group.icon,
+          groupColor: group.color,
+          users: [],
+        };
+        academyUsersByVenue[vid].push(groupEntry);
+      }
+
+      groupEntry.users.push({
+        id: uDoc.id,
+        displayName: data.displayName || '',
+        createdAt: data.createdAt?.toDate?.().toISOString() || null,
+      });
+    }
 
     // Get last booking date per venue
     const lastBookingByVenue: Record<string, string> = {};
@@ -121,6 +172,7 @@ export async function POST(request: NextRequest) {
         revenue: revenueByVenue[venue.id] || 0,
         lastBooking: lastBookingByVenue[venue.id] || null,
       },
+      academyGroups: academyUsersByVenue[venue.id] || [],
     }));
 
     // Global KPIs
