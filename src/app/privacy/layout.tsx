@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Πολιτική Απορρήτου - Yabalitsa',
-    description: 'Πολιτική απορρήτου και προστασίας προσωπικών δεδομένων. ',
+    description: 'Πολιτική απορρήτου και προστασίας προσωπικών δεδομένων.',
     images: ['/prev.png'],
   },
 };
