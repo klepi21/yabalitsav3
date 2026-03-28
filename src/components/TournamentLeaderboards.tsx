@@ -50,7 +50,7 @@ export default function TournamentLeaderboards({ players, teams }: TournamentLea
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-3 text-[10px] font-black uppercase tracking-wider transition-all",
+                "flex-1 flex items-center justify-center gap-1.5 py-3 text-[12px] font-black uppercase tracking-wider transition-all",
                 activeTab === tab.id
                   ? "text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/30"
                   : "text-zinc-400 hover:text-zinc-600"
@@ -94,12 +94,12 @@ export default function TournamentLeaderboards({ players, teams }: TournamentLea
                   {/* Player info */}
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-bold text-zinc-900 truncate">{player.name}</p>
-                    <p className="text-[9px] text-zinc-400 truncate">{team?.name || '—'}</p>
+                    <p className="text-[11px] text-zinc-400 truncate">{team?.name || '—'}</p>
                   </div>
 
                   {/* Shirt number */}
                   {player.shirtNumber && (
-                    <span className="text-[9px] font-bold text-zinc-300">#{player.shirtNumber}</span>
+                    <span className="text-[11px] font-bold text-zinc-300">#{player.shirtNumber}</span>
                   )}
 
                   {/* Stat value */}

@@ -217,7 +217,7 @@ export default function CoachEvaluatePage() {
             </div>
             <div className="text-right">
               <span className="text-lg font-black text-emerald-600">{avgRating}</span>
-              <span className="text-[10px] text-zinc-400 font-bold">/5</span>
+              <span className="text-[12px] text-zinc-400 font-bold">/5</span>
             </div>
           </div>
         </div>
@@ -279,8 +279,8 @@ export default function CoachEvaluatePage() {
                 ))}
               </div>
               <div className="flex justify-between mt-2 px-1">
-                <span className="text-[9px] text-zinc-300 font-bold">ΑΡΧΑΡΙΟΣ</span>
-                <span className="text-[9px] text-zinc-300 font-bold">ΑΡΙΣΤΟΣ</span>
+                <span className="text-[11px] text-zinc-300 font-bold">ΑΡΧΑΡΙΟΣ</span>
+                <span className="text-[11px] text-zinc-300 font-bold">ΑΡΙΣΤΟΣ</span>
               </div>
             </div>
           );

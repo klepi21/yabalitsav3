@@ -441,7 +441,7 @@ export default function PaymentsDashboardPage() {
               }`}
               onClick={() => setFocusedMonth(i)}
             >
-              <p className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">{GREEK_MONTHS[i]}</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">{GREEK_MONTHS[i]}</p>
               {athletes.length > 0 ? (
                 <>
                   <p className="text-sm font-black text-emerald-600 mt-1">{stats.paid}</p>
@@ -451,7 +451,7 @@ export default function PaymentsDashboardPage() {
                   )}
                 </>
               ) : (
-                <p className="text-[9px] font-bold text-zinc-300 mt-2">—</p>
+                <p className="text-[11px] font-bold text-zinc-300 mt-2">—</p>
               )}
             </div>
           );
@@ -487,7 +487,7 @@ export default function PaymentsDashboardPage() {
             <table className="w-full min-w-[900px]">
               <thead>
                 <tr className="border-b border-zinc-100">
-                  <th className="text-left p-3 text-[9px] font-bold uppercase tracking-widest text-zinc-400 sticky left-0 bg-white z-10 min-w-[200px]">
+                  <th className="text-left p-3 text-[11px] font-bold uppercase tracking-widest text-zinc-400 sticky left-0 bg-white z-10 min-w-[200px]">
                     {toGreekUpperCase('Αθλητής')}
                   </th>
                   {Array.from({ length: 12 }, (_, i) => {
@@ -495,7 +495,7 @@ export default function PaymentsDashboardPage() {
                     return (
                       <th
                         key={i}
-                        className={`text-center p-2 text-[9px] font-bold uppercase tracking-wider ${
+                        className={`text-center p-2 text-[11px] font-bold uppercase tracking-wider ${
                           focusedMonth === i
                             ? 'text-emerald-700 bg-emerald-100/60'
                             : isCurrentMonth ? 'text-emerald-600 bg-emerald-50/50' : 'text-zinc-400'
@@ -515,13 +515,13 @@ export default function PaymentsDashboardPage() {
                       <td className="p-3 sticky left-0 bg-zinc-50 z-10" colSpan={1}>
                         <div className="flex items-center gap-2">
                           <span className="text-sm">📋</span>
-                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">
+                          <span className="text-[12px] font-black uppercase tracking-widest text-zinc-500">
                             {squad ? toGreekUpperCase(squad.name) : toGreekUpperCase('Χωρίς τμήμα')}
                           </span>
-                          <span className="text-[9px] font-bold text-zinc-300 ml-1">
+                          <span className="text-[11px] font-bold text-zinc-300 ml-1">
                             ({squadAthletes.length})
                           </span>
-                          <span className="text-[9px] font-bold text-emerald-500 ml-auto">
+                          <span className="text-[11px] font-bold text-emerald-500 ml-auto">
                             €{squad?.monthlyAmount || defaultAmount}/μήνα
                             {!squad?.monthlyAmount && <span className="text-zinc-300 ml-1"></span>}
                           </span>
@@ -546,7 +546,7 @@ export default function PaymentsDashboardPage() {
                               <div>
                                 <p className="text-sm font-bold text-zinc-900">{athlete.displayName}</p>
                                 {parent && (
-                                  <p className="text-[10px] text-zinc-400">
+                                  <p className="text-[12px] text-zinc-400">
                                     {parent.displayName}
                                     {parent.fields?.email && (
                                       <span className="ml-1 text-zinc-300">({parent.fields.email as string})</span>
@@ -654,19 +654,19 @@ export default function PaymentsDashboardPage() {
             return (
               <>
                 <div className="rounded-2xl border border-zinc-100 bg-white p-5">
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
                     {toGreekUpperCase('Εισπράξεις')} {selectedYear}
                   </p>
                   <p className="text-2xl font-black text-emerald-600">&euro;{totalPaid.toLocaleString()}</p>
                 </div>
                 <div className="rounded-2xl border border-zinc-100 bg-white p-5">
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
                     {toGreekUpperCase('Ανεξόφλητα')} {selectedYear}
                   </p>
                   <p className="text-2xl font-black text-red-500">&euro;{(totalUnpaid + virtualUnpaid).toLocaleString()}</p>
                 </div>
                 <div className="rounded-2xl border border-zinc-100 bg-white p-5">
-                  <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
+                  <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
                     {toGreekUpperCase('Σύνολο')} {selectedYear}
                   </p>
                   <p className="text-2xl font-black text-zinc-900">&euro;{(totalPaid + totalUnpaid + virtualUnpaid).toLocaleString()}</p>
@@ -715,7 +715,7 @@ export default function PaymentsDashboardPage() {
                     </div>
                   </div>
                   <div className="space-y-2.5">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-300">
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-300">
                       {toGreekUpperCase('Τρόπος Πληρωμής')}
                     </p>
                     <div className="grid grid-cols-2 gap-2">
@@ -793,7 +793,7 @@ export default function PaymentsDashboardPage() {
                     <div className="ml-auto text-right">
                       <span className="text-lg font-black text-emerald-600">&euro;{payment.amount}</span>
                       {payment.paymentMethod && (
-                        <p className="text-[10px] text-zinc-400">{PAYMENT_METHOD_LABELS[payment.paymentMethod]}</p>
+                        <p className="text-[12px] text-zinc-400">{PAYMENT_METHOD_LABELS[payment.paymentMethod]}</p>
                       )}
                     </div>
                   </div>
@@ -855,7 +855,7 @@ export default function PaymentsDashboardPage() {
                     </div>
                   </div>
                   <div className="space-y-2.5">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-300">{toGreekUpperCase('Παραλήπτης')}</p>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-300">{toGreekUpperCase('Παραλήπτης')}</p>
                     <div className="flex items-center gap-2.5">
                       <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
                         <Users className="h-3.5 w-3.5 text-blue-500" />

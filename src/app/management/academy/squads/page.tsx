@@ -255,7 +255,7 @@ export default function SquadsPage() {
              </h1>
              <div className="flex items-center gap-2">
                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+               <p className="text-[12px] font-black text-zinc-400 uppercase tracking-widest">
                  {toGreekUpperCase('Οργάνωση αθλητών σε ομάδες')}
                </p>
              </div>
@@ -277,7 +277,7 @@ export default function SquadsPage() {
           </div>
           <div className="space-y-1">
             <p className="text-3xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{squads.length}</p>
-            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Σύνολο Τμημάτων')}</p>
+            <p className="text-[12px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Σύνολο Τμημάτων')}</p>
           </div>
         </div>
         
@@ -289,7 +289,7 @@ export default function SquadsPage() {
             <p className="text-3xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">
               {users.filter(u => u.squad_id || (u.squad_ids && u.squad_ids.length > 0)).length}
             </p>
-            <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Σύνολο Αθλητών')}</p>
+            <p className="text-[12px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Σύνολο Αθλητών')}</p>
           </div>
         </div>
 
@@ -350,7 +350,7 @@ export default function SquadsPage() {
                     </div>
                     <div className="space-y-0.5">
                       <h4 className="text-base font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{toGreekUpperCase(squad.name)}</h4>
-                      <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-400">{toGreekUpperCase(squad.ageGroup)}</p>
+                      <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400">{toGreekUpperCase(squad.ageGroup)}</p>
                     </div>
                   </div>
                 </div>
@@ -372,12 +372,12 @@ export default function SquadsPage() {
                 </div>
 
                 <div className="flex gap-2 pt-6 border-t border-zinc-100 relative z-10">
-                  <Button variant="outline" className="flex-1 h-10 rounded-xl font-bold text-[9px] uppercase tracking-widest border-zinc-100 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 shadow-sm transition-all active:scale-95" asChild>
+                  <Button variant="outline" className="flex-1 h-10 rounded-xl font-bold text-[11px] uppercase tracking-widest border-zinc-100 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 shadow-sm transition-all active:scale-95" asChild>
                     <Link href={`/management/academy/squads/${squad.id}/edit`}>
                       {toGreekUpperCase('Επεξεργασία')}
                     </Link>
                   </Button>
-                  <Button variant="outline" className="flex-1 h-10 rounded-xl font-bold text-[9px] uppercase tracking-widest border-zinc-100 hover:bg-zinc-900 hover:text-white hover:border-zinc-900 shadow-sm transition-all active:scale-95" asChild>
+                  <Button variant="outline" className="flex-1 h-10 rounded-xl font-bold text-[11px] uppercase tracking-widest border-zinc-100 hover:bg-zinc-900 hover:text-white hover:border-zinc-900 shadow-sm transition-all active:scale-95" asChild>
                     <Link href={`/management/academy/users?squad=${squad.id}`}>
                       {toGreekUpperCase('Ρόστερ')}
                     </Link>
@@ -470,7 +470,7 @@ export default function SquadsPage() {
                 <div className="px-8 py-6 space-y-5">
                   {/* Templates */}
                   <div className="space-y-2">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Πρότυπα')}</p>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Πρότυπα')}</p>
                     <div className="flex flex-wrap gap-2">
                       {BROADCAST_TEMPLATES.map((tpl) => (
                         <button
@@ -487,7 +487,7 @@ export default function SquadsPage() {
 
                   {/* Subject */}
                   <div className="space-y-2">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Θέμα')}</p>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Θέμα')}</p>
                     <Input
                       value={broadcastSubject}
                       onChange={(e) => setBroadcastSubject(e.target.value)}
@@ -498,7 +498,7 @@ export default function SquadsPage() {
 
                   {/* Message */}
                   <div className="space-y-2">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Μήνυμα')}</p>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Μήνυμα')}</p>
                     <Textarea
                       value={broadcastMessage}
                       onChange={(e) => setBroadcastMessage(e.target.value)}
@@ -510,10 +510,10 @@ export default function SquadsPage() {
 
                   {/* Recipients preview */}
                   <div className="bg-zinc-50 rounded-xl p-3">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mb-2">{toGreekUpperCase('Παραλήπτες')}</p>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-2">{toGreekUpperCase('Παραλήπτες')}</p>
                     <div className="flex flex-wrap gap-1.5 max-h-20 overflow-y-auto">
                       {getSquadRecipients(broadcastSquad.id).map((r) => (
-                        <span key={r.email} className="text-[10px] font-bold text-zinc-500 bg-white px-2 py-1 rounded-md border border-zinc-100">
+                        <span key={r.email} className="text-[12px] font-bold text-zinc-500 bg-white px-2 py-1 rounded-md border border-zinc-100">
                           {r.name}
                         </span>
                       ))}

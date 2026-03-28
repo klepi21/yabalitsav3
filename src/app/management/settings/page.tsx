@@ -345,7 +345,7 @@ export default function SettingsPage() {
              </h1>
              <div className="flex items-center gap-2">
                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+               <p className="text-[12px] font-black text-zinc-400 uppercase tracking-widest">
                  {toGreekUpperCase('Διαμορφωση παραμετρων συστηματος')}
                </p>
              </div>
@@ -375,7 +375,7 @@ export default function SettingsPage() {
                   "bg-emerald-500"
                 )} />
                 <div className="flex flex-col">
-                  <span className="text-[9px] uppercase tracking-widest opacity-40 font-black">Πλάνο</span>
+                  <span className="text-[11px] uppercase tracking-widest opacity-40 font-black">Πλάνο</span>
                   <span className="text-xs font-black uppercase tracking-tight">{planName} • {daysRemaining} ημέρες</span>
                 </div>
               </div>
@@ -385,7 +385,7 @@ export default function SettingsPage() {
               <div className="flex items-center gap-4 px-5 py-3 rounded-2xl border border-zinc-100 bg-white text-zinc-400 shadow-sm font-bold">
                 <div className="h-2 w-2 rounded-full bg-zinc-200" />
                 <div className="flex flex-col">
-                  <span className="text-[9px] uppercase tracking-widest opacity-40 font-black">Πλάνο</span>
+                  <span className="text-[11px] uppercase tracking-widest opacity-40 font-black">Πλάνο</span>
                   <span className="text-xs font-black uppercase tracking-tight">{venue.plan === 'trial' ? 'Δωρεάν Trial' : 'Χωρίς Πλάνο'}</span>
                 </div>
               </div>
@@ -607,21 +607,21 @@ export default function SettingsPage() {
                     <span className="text-5xl font-black text-zinc-900 tracking-tighter">
                       {toGreekUpperCase(venue.planType || 'Basic')}
                     </span>
-                    <span className="text-zinc-400 font-black mb-2 text-[10px] uppercase tracking-widest">
+                    <span className="text-zinc-400 font-black mb-2 text-[12px] uppercase tracking-widest">
                       {toGreekUpperCase(venue.plan === 'subscription' ? 'Plan' : 'Free Trial')}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100/50">
-                      <p className="text-zinc-400 text-[9px] font-black uppercase tracking-widest mb-1">{toGreekUpperCase('Υπόλοιπο')}</p>
+                      <p className="text-zinc-400 text-[11px] font-black uppercase tracking-widest mb-1">{toGreekUpperCase('Υπόλοιπο')}</p>
                       <p className="text-2xl font-black text-zinc-900">
                         {calculateDaysRemaining(venue) ?? 0} <span className="text-xs font-bold text-zinc-400 uppercase tracking-tight">{toGreekUpperCase('ημέρες')}</span>
                       </p>
                     </div>
 
                     <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100/50">
-                      <p className="text-zinc-400 text-[9px] font-black uppercase tracking-widest mb-1">{toGreekUpperCase('Λήξη')}</p>
+                      <p className="text-zinc-400 text-[11px] font-black uppercase tracking-widest mb-1">{toGreekUpperCase('Λήξη')}</p>
                       <p className="text-sm font-black text-zinc-900 truncate">
                         {(() => {
                           const endDateInfo = getSubscriptionEndDate(venue, lastPayment);
@@ -657,7 +657,7 @@ export default function SettingsPage() {
                     {toGreekUpperCase('Τελευταία Πληρωμή')}
                   </div>
                   <Badge className={cn(
-                    "rounded-xl px-4 py-1 font-black text-[10px] uppercase tracking-widest",
+                    "rounded-xl px-4 py-1 font-black text-[12px] uppercase tracking-widest",
                     lastPayment.status === 'succeeded' ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
                   )}>
                     {lastPayment.status === 'succeeded' ? 'Ολοκληρωμένη' : 'Εκκρεμεί'}
@@ -913,7 +913,7 @@ function ChangePinForm({ onSubmit, isSaving }: { onSubmit: (oldPin: string, newA
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Τρέχων</Label>
+          <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-2">Τρέχων</Label>
           <Input
             type="password"
             inputMode="numeric"
@@ -926,7 +926,7 @@ function ChangePinForm({ onSubmit, isSaving }: { onSubmit: (oldPin: string, newA
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Νέος</Label>
+          <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-2">Νέος</Label>
           <Input
             type="password"
             inputMode="numeric"
@@ -939,7 +939,7 @@ function ChangePinForm({ onSubmit, isSaving }: { onSubmit: (oldPin: string, newA
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-2">Επιβεβαίωση</Label>
+          <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-2">Επιβεβαίωση</Label>
           <Input
             type="password"
             inputMode="numeric"

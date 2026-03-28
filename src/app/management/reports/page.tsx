@@ -816,7 +816,7 @@ export default function ReportsPage() {
               variant="outline" 
               size="sm" 
               onClick={() => { setError(null); loadData(); }} 
-              className="h-8 rounded-lg border-red-200 text-red-600 hover:bg-red-50 font-bold text-[10px]"
+              className="h-8 rounded-lg border-red-200 text-red-600 hover:bg-red-50 font-bold text-[12px]"
             >
               {toGreekUpperCase('Δοκιμάστε ξανά')}
             </Button>
@@ -846,7 +846,7 @@ export default function ReportsPage() {
               <button
                 key={opt.value}
                 onClick={() => setSelectedPeriod(opt.value as 'week' | 'month' | 'year')}
-                className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all ${
+                className={`px-3 py-1.5 rounded-md text-[12px] font-bold uppercase tracking-wider transition-all ${
                   selectedPeriod === opt.value
                     ? 'bg-white text-zinc-900 shadow-sm'
                     : 'text-zinc-400 hover:text-zinc-600'
@@ -863,7 +863,7 @@ export default function ReportsPage() {
           <div className="flex items-center p-0.5 bg-zinc-50 rounded-lg max-w-[240px] overflow-x-auto">
             <button
               onClick={() => setSelectedPitch('all')}
-              className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-md text-[12px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
                 selectedPitch === 'all' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-400 hover:text-zinc-600'
               }`}
             >
@@ -873,7 +873,7 @@ export default function ReportsPage() {
               <button
                 key={pitch.id}
                 onClick={() => setSelectedPitch(pitch.id)}
-                className={`px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
+                className={`px-3 py-1.5 rounded-md text-[12px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
                   selectedPitch === pitch.id ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-400 hover:text-zinc-600'
                 }`}
               >
@@ -907,7 +907,7 @@ export default function ReportsPage() {
                 <Icon className="h-4 w-4" />
               </div>
               <p className="text-lg font-black text-zinc-900 mb-0.5">{metric.value}</p>
-              <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase(metric.label)}</p>
+              <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase(metric.label)}</p>
               {'hint' in metric && metric.hint && (
                 <div className="absolute top-2.5 right-2.5 group/hint">
                   <Info className="h-3.5 w-3.5 text-zinc-300 hover:text-zinc-500 cursor-help transition-colors" />
@@ -1080,23 +1080,23 @@ export default function ReportsPage() {
                         <tr key={row.month} className="hover:bg-zinc-50/50 transition-colors">
                           <td className="py-2.5 px-4 text-[11px] font-bold text-zinc-900 capitalize">{label}</td>
                           <td className="py-2.5 px-4 text-center">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[12px] font-bold bg-emerald-50 text-emerald-700">
                               {row.paid}/{row.total}
                             </span>
                           </td>
                           <td className="py-2.5 px-4 text-center">
                             {row.unpaid > 0 ? (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-50 text-red-600">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[12px] font-bold bg-red-50 text-red-600">
                                 {row.unpaid}
                               </span>
                             ) : (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-600">✓</span>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[12px] font-bold bg-emerald-50 text-emerald-600">✓</span>
                             )}
                           </td>
                           <td className="py-2.5 px-4 text-right">
                             <span className="text-xs font-black text-zinc-900 tabular-nums">€{row.paidAmount.toFixed(0)}</span>
                             {row.totalAmount > row.paidAmount && (
-                              <span className="text-[9px] text-zinc-400 ml-1">/ €{row.totalAmount.toFixed(0)}</span>
+                              <span className="text-[11px] text-zinc-400 ml-1">/ €{row.totalAmount.toFixed(0)}</span>
                             )}
                           </td>
                         </tr>
@@ -1145,17 +1145,17 @@ export default function ReportsPage() {
                       <tr key={row.squad} className="hover:bg-zinc-50/50 transition-colors">
                         <td className="py-2.5 px-4 text-[11px] font-bold text-zinc-900">{row.squad}</td>
                         <td className="py-2.5 px-4 text-center">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[12px] font-bold bg-emerald-50 text-emerald-700">
                             {row.paid}/{row.total}
                           </span>
                         </td>
                         <td className="py-2.5 px-4 text-center">
                           {row.unpaid > 0 ? (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-red-50 text-red-600">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[12px] font-bold bg-red-50 text-red-600">
                               {row.unpaid}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-600">✓</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[12px] font-bold bg-emerald-50 text-emerald-600">✓</span>
                           )}
                         </td>
                         <td className="py-2.5 px-4 text-right">
@@ -1199,11 +1199,11 @@ export default function ReportsPage() {
                     <p className="text-2xl font-black text-zinc-900">{row.year}</p>
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Έσοδα')}</span>
+                        <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Έσοδα')}</span>
                         <span className="text-sm font-black text-emerald-600">€{row.paidAmount.toFixed(0)}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Αναμενόμενα')}</span>
+                        <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Αναμενόμενα')}</span>
                         <span className="text-sm font-black text-zinc-500">€{row.totalAmount.toFixed(0)}</span>
                       </div>
                       <div className="w-full bg-zinc-100 rounded-full h-2">
@@ -1212,7 +1212,7 @@ export default function ReportsPage() {
                           style={{ width: `${row.totalAmount > 0 ? (row.paidAmount / row.totalAmount) * 100 : 0}%` }}
                         />
                       </div>
-                      <p className="text-[9px] font-bold text-zinc-400 text-right">
+                      <p className="text-[11px] font-bold text-zinc-400 text-right">
                         {row.paid}/{row.total} {toGreekUpperCase('πληρωμές')}
                       </p>
                     </div>
@@ -1262,7 +1262,7 @@ export default function ReportsPage() {
                   <div key={stat.label} className={cn("p-3 rounded-lg flex items-center justify-between", colorStyles[stat.color])}>
                     <div className="flex items-center gap-2">
                       <Icon className="h-3.5 w-3.5" />
-                      <span className="font-bold text-[9px] uppercase tracking-widest">{toGreekUpperCase(stat.label)}</span>
+                      <span className="font-bold text-[11px] uppercase tracking-widest">{toGreekUpperCase(stat.label)}</span>
                     </div>
                     <span className="text-lg font-black">{stat.count}</span>
                   </div>
@@ -1335,7 +1335,7 @@ export default function ReportsPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-7 rounded-md border border-zinc-100 bg-white shadow-sm font-bold text-[9px] hover:bg-zinc-50 transition-all px-2.5"
+                            className="h-7 rounded-md border border-zinc-100 bg-white shadow-sm font-bold text-[11px] hover:bg-zinc-50 transition-all px-2.5"
                             onClick={() => handleDownloadInvoice(payment)}
                             disabled={downloadingInvoice === payment.id}
                           >

@@ -169,7 +169,7 @@ export default function NewTournamentPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="space-y-4 md:col-span-2 text-left">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Όνομα Τουρνουά *</Label>
+              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Όνομα Τουρνουά *</Label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -179,7 +179,7 @@ export default function NewTournamentPage() {
             </div>
 
             <div className="space-y-4 md:col-span-2 text-left">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Περιγραφή</Label>
+              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Περιγραφή</Label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -190,7 +190,7 @@ export default function NewTournamentPage() {
             </div>
 
             <div className="space-y-4 text-left">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Ημ. Έναρξης *</Label>
+              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Ημ. Έναρξης *</Label>
               <Input
                 type="date"
                 value={startDate}
@@ -199,7 +199,7 @@ export default function NewTournamentPage() {
               />
             </div>
             <div className="space-y-4 text-left">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Ημ. Λήξης *</Label>
+              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Ημ. Λήξης *</Label>
               <Input
                 type="date"
                 value={endDate}
@@ -267,7 +267,7 @@ export default function NewTournamentPage() {
 
           {type === 'league' && (
             <div className="space-y-6 pt-6 border-t border-zinc-50 text-left">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Αριθμός Γύρων (Φάση Πρωταθλήματος)</Label>
+              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Αριθμός Γύρων (Φάση Πρωταθλήματος)</Label>
               <div className="flex items-center gap-4">
                 {[
                   { value: 1, label: 'Μονός Γύρος (1×)' },
@@ -278,7 +278,7 @@ export default function NewTournamentPage() {
                     type="button"
                     onClick={() => setLegs(leg.value as 1 | 2)}
                     className={cn(
-                      "flex-1 h-14 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all border-2",
+                      "flex-1 h-14 rounded-2xl text-[12px] font-black uppercase tracking-widest transition-all border-2",
                       legs === leg.value
                         ? "bg-zinc-900 border-zinc-900 text-white shadow-lg"
                         : "bg-white border-zinc-100 text-zinc-400 hover:border-zinc-200"
@@ -302,7 +302,7 @@ export default function NewTournamentPage() {
           </div>
 
           <div className="space-y-6 text-left">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Τύπος Γηπέδου</Label>
+            <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Τύπος Γηπέδου</Label>
             <div className="flex items-center gap-2 flex-wrap">
               {pitchTypes.map((pt) => (
                 <button
@@ -310,7 +310,7 @@ export default function NewTournamentPage() {
                   type="button"
                   onClick={() => { setPitchType(pt); setPitchId(''); }}
                   className={cn(
-                    "px-6 h-12 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all",
+                    "px-6 h-12 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all",
                     pitchType === pt
                       ? "bg-zinc-900 text-white shadow-lg shadow-zinc-200"
                       : "bg-zinc-50 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600"
@@ -324,7 +324,7 @@ export default function NewTournamentPage() {
 
           {filteredPitches.length > 0 && (
             <div className="space-y-6 pt-6 border-t border-zinc-50 text-left">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Επιλογή Γηπέδου (Προαιρετικό)</Label>
+              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Επιλογή Γηπέδου (Προαιρετικό)</Label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {filteredPitches.map((p) => {
                   const isSelected = pitchId === p.id;
@@ -348,7 +348,7 @@ export default function NewTournamentPage() {
                           {p.name}
                         </p>
                         <p className={cn(
-                          "text-[10px] font-bold mt-0.5",
+                          "text-[12px] font-bold mt-0.5",
                           isSelected ? "text-emerald-600" : "text-zinc-400/60"
                         )}>
                           {p.slotDuration}&apos; / {p.pricePerSlot}€
@@ -368,7 +368,7 @@ export default function NewTournamentPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 pt-6 border-t border-zinc-50">
             <div className="space-y-4 text-left">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Μέγιστος Αριθμός Ομάδων *</Label>
+              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Μέγιστος Αριθμός Ομάδων *</Label>
               <Input
                 type="number"
                 min={2}
@@ -379,7 +379,7 @@ export default function NewTournamentPage() {
               />
             </div>
             <div className="space-y-4 text-left">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Διάρκεια Αγώνα (λεπτά)</Label>
+              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Διάρκεια Αγώνα (λεπτά)</Label>
               <Input
                 type="number"
                 min={10}
@@ -402,7 +402,7 @@ export default function NewTournamentPage() {
           </div>
 
           <div className="space-y-4 text-left">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Κανόνες Διοργάνωσης</Label>
+            <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Κανόνες Διοργάνωσης</Label>
             <textarea
               value={rules}
               onChange={(e) => setRules(e.target.value)}
@@ -413,7 +413,7 @@ export default function NewTournamentPage() {
           </div>
 
           <div className="space-y-4 text-left">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Έπαθλο & Βραβεία</Label>
+            <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Έπαθλο & Βραβεία</Label>
             <Input
               value={prizeDescription}
               onChange={(e) => setPrizeDescription(e.target.value)}

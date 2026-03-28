@@ -371,7 +371,7 @@ export default function AcademyUsersPage() {
             <Button
               variant="ghost"
               onClick={() => { setGroupFilter('all'); setSquadFilter(null); setSearchQuery(''); }}
-              className="h-10 px-4 text-zinc-400 hover:text-zinc-900 font-black rounded-lg hover:bg-zinc-100 touch-target uppercase text-[10px] tracking-[0.2em]"
+              className="h-10 px-4 text-zinc-400 hover:text-zinc-900 font-black rounded-lg hover:bg-zinc-100 touch-target uppercase text-[12px] tracking-[0.2em]"
             >
               {toGreekUpperCase('Καθαρισμός')}
             </Button>
@@ -476,13 +476,13 @@ export default function AcademyUsersPage() {
                     <div className="grid grid-cols-2 gap-3 pt-2 border-t border-zinc-50">
                         {u.fields.phone && (
                             <a href={`tel:${u.fields.phone}`} className="flex flex-col items-start gap-1 p-2 rounded-lg bg-zinc-50">
-                                <p className="text-[9px] font-black uppercase text-zinc-400">Τηλέφωνο</p>
+                                <p className="text-[11px] font-black uppercase text-zinc-400">Τηλέφωνο</p>
                                 <p className="text-xs font-bold text-zinc-900">{u.fields.phone}</p>
                             </a>
                         )}
                         {(u.squad_id || (u.squad_ids && u.squad_ids[0])) && (
                              <div className="flex flex-col items-start gap-1 p-2 rounded-lg bg-zinc-50">
-                                <p className="text-[9px] font-black uppercase text-zinc-400">Τμήμα</p>
+                                <p className="text-[11px] font-black uppercase text-zinc-400">Τμήμα</p>
                                 <p className="text-xs font-bold text-zinc-900 truncate w-full">{getSquadName(u.squad_id || u.squad_ids![0])}</p>
                              </div>
                         )}
@@ -537,12 +537,12 @@ export default function AcademyUsersPage() {
                         <TableCell className="px-4 py-3">
                           <div className="flex flex-wrap gap-1.5">
                             {u.fields.birth_year && (
-                                <span className="bg-zinc-50 text-zinc-500 font-bold text-[10px] px-2 py-0.5 rounded-md">
+                                <span className="bg-zinc-50 text-zinc-500 font-bold text-[12px] px-2 py-0.5 rounded-md">
                                     {u.fields.birth_year}
                                 </span>
                             )}
                             {(u.squad_ids || (u.squad_id ? [u.squad_id] : [])).map((sid) => (
-                              <span key={sid} className="bg-emerald-50 text-emerald-600 font-bold text-[10px] px-2 py-0.5 rounded-md border border-emerald-100">
+                              <span key={sid} className="bg-emerald-50 text-emerald-600 font-bold text-[12px] px-2 py-0.5 rounded-md border border-emerald-100">
                                 {getSquadName(sid)}
                               </span>
                             ))}
@@ -667,34 +667,34 @@ export default function AcademyUsersPage() {
                 <div className="px-8 py-6 space-y-6">
                   {/* Personal Info */}
                   <div className="space-y-3">
-                    <p className="text-[9px] font-black uppercase tracking-widest text-zinc-300">
+                    <p className="text-[11px] font-black uppercase tracking-widest text-zinc-300">
                       {toGreekUpperCase('Στοιχεία')}
                     </p>
                     <div className="grid grid-cols-2 gap-2">
                       {cardUser.fields?.birth_year && (
                         <div className="p-3 bg-zinc-50 rounded-xl">
-                          <p className="text-[9px] font-bold text-zinc-400 uppercase">Έτος Γέννησης</p>
+                          <p className="text-[11px] font-bold text-zinc-400 uppercase">Έτος Γέννησης</p>
                           <p className="text-sm font-black text-zinc-900 mt-0.5">{cardUser.fields.birth_year}</p>
                         </div>
                       )}
                       {cardUser.fields?.phone && (
                         <div className="p-3 bg-zinc-50 rounded-xl">
-                          <p className="text-[9px] font-bold text-zinc-400 uppercase">Τηλέφωνο</p>
+                          <p className="text-[11px] font-bold text-zinc-400 uppercase">Τηλέφωνο</p>
                           <p className="text-sm font-black text-zinc-900 mt-0.5">{cardUser.fields.phone}</p>
                         </div>
                       )}
                       {cardUser.fields?.email && (
                         <div className="p-3 bg-zinc-50 rounded-xl">
-                          <p className="text-[9px] font-bold text-zinc-400 uppercase">Email</p>
+                          <p className="text-[11px] font-bold text-zinc-400 uppercase">Email</p>
                           <p className="text-sm font-bold text-zinc-900 mt-0.5 truncate">{cardUser.fields.email}</p>
                         </div>
                       )}
                       {parent && (
                         <div className="p-3 bg-blue-50 rounded-xl">
-                          <p className="text-[9px] font-bold text-blue-400 uppercase">Γονέας</p>
+                          <p className="text-[11px] font-bold text-blue-400 uppercase">Γονέας</p>
                           <p className="text-sm font-black text-blue-900 mt-0.5">{parent.displayName}</p>
                           {parent.fields?.email && (
-                            <p className="text-[10px] text-blue-500 truncate">{parent.fields.email as string}</p>
+                            <p className="text-[12px] text-blue-500 truncate">{parent.fields.email as string}</p>
                           )}
                         </div>
                       )}
@@ -704,7 +704,7 @@ export default function AcademyUsersPage() {
                   {/* Medical Certificate */}
                   {group?.capabilities.includes('medical_tracking') && (
                     <div className="space-y-3">
-                      <p className="text-[9px] font-black uppercase tracking-widest text-zinc-300">
+                      <p className="text-[11px] font-black uppercase tracking-widest text-zinc-300">
                         {toGreekUpperCase('Ιατρικό Πιστοποιητικό')}
                       </p>
                       <div className={cn(
@@ -740,7 +740,7 @@ export default function AcademyUsersPage() {
                   {group?.capabilities.includes('monthly_payment') && (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-300">
+                        <p className="text-[11px] font-black uppercase tracking-widest text-zinc-300">
                           {toGreekUpperCase(`Πληρωμές ${currentYear}`)}
                         </p>
                         {cardLoading && <Loader2 className="h-3 w-3 animate-spin text-zinc-300" />}
@@ -806,7 +806,7 @@ export default function AcademyUsersPage() {
                   {group?.capabilities.includes('player_evaluation') && (
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-300">
+                        <p className="text-[11px] font-black uppercase tracking-widest text-zinc-300">
                           {toGreekUpperCase('Αξιολογήσεις')}
                         </p>
                         {cardLoading && <Loader2 className="h-3 w-3 animate-spin text-zinc-300" />}
@@ -820,20 +820,20 @@ export default function AcademyUsersPage() {
                                 {(Object.values(cardEvaluations[0].ratings).reduce((s, v) => s + v, 0) / Object.values(cardEvaluations[0].ratings).length).toFixed(1)}
                                 <span className="text-xs font-bold text-amber-400 ml-1">/ 5</span>
                               </p>
-                              <p className="text-[9px] text-amber-500 font-bold">{cardEvaluations[0].periodLabel}</p>
+                              <p className="text-[11px] text-amber-500 font-bold">{cardEvaluations[0].periodLabel}</p>
                             </div>
                             <div className="ml-auto text-right">
-                              <p className="text-[9px] font-bold text-amber-400">{cardEvaluations.length} αξιολ.</p>
+                              <p className="text-[11px] font-bold text-amber-400">{cardEvaluations.length} αξιολ.</p>
                             </div>
                           </div>
-                          <Button variant="outline" size="sm" asChild className="w-full h-8 rounded-lg text-[9px] font-bold uppercase border-zinc-200">
+                          <Button variant="outline" size="sm" asChild className="w-full h-8 rounded-lg text-[11px] font-bold uppercase border-zinc-200">
                             <Link href="/management/academy/evaluations">
                               <TrendingUp className="h-3 w-3 mr-1.5" />{toGreekUpperCase('Ιστορικό Αξιολογήσεων')}
                             </Link>
                           </Button>
                         </>
                       ) : !cardLoading ? (
-                        <p className="text-[10px] text-zinc-300 italic">Χωρίς αξιολόγηση</p>
+                        <p className="text-[12px] text-zinc-300 italic">Χωρίς αξιολόγηση</p>
                       ) : null}
                     </div>
                   )}

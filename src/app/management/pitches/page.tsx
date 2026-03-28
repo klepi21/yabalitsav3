@@ -173,7 +173,7 @@ export default function PitchesPage() {
               variant="outline"
               size="sm"
               onClick={() => { setError(null); loadPitches(); }}
-              className="h-8 rounded-lg border-red-200 text-red-600 hover:bg-red-50 font-bold text-[10px]"
+              className="h-8 rounded-lg border-red-200 text-red-600 hover:bg-red-50 font-bold text-[12px]"
             >
               {toGreekUpperCase('Δοκιμάστε ξανά')}
             </Button>
@@ -218,7 +218,7 @@ export default function PitchesPage() {
               <h3 className="text-xl font-black text-zinc-900 uppercase tracking-tight">
                 {searchTerm ? 'Δεν βρέθηκαν γήπεδα' : 'Δεν υπάρχουν γήπεδα'}
               </h3>
-              <p className="text-zinc-400 font-bold text-[10px] uppercase tracking-widest mt-1 mb-8">
+              <p className="text-zinc-400 font-bold text-[12px] uppercase tracking-widest mt-1 mb-8">
                 {searchTerm 
                   ? 'Δοκιμάστε μια διαφορετική αναζήτηση.' 
                   : 'Ξεκινήστε την οργάνωση του χώρου σας προσθέτοντας το πρώτο σας γήπεδο.'}
@@ -268,13 +268,13 @@ export default function PitchesPage() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">TIMH SLOT</p>
+                      <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">TIMH SLOT</p>
                       <p className="text-2xl font-black text-zinc-900 tracking-tighter">&euro;{pitch.pricePerSlot}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">ΔΙΑΡΚΕΙΑ</p>
+                      <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">ΔΙΑΡΚΕΙΑ</p>
                       <p className="text-2xl font-black text-zinc-900 tracking-tighter">
-                        {pitch.slotDuration}<span className="text-[10px] font-bold text-zinc-400 ml-1">MIN</span>
+                        {pitch.slotDuration}<span className="text-[12px] font-bold text-zinc-400 ml-1">MIN</span>
                       </p>
                     </div>
                   </div>
@@ -283,7 +283,7 @@ export default function PitchesPage() {
                   <div className="flex items-center gap-2 pt-5 border-t border-zinc-50">
                     <Button
                       asChild
-                      className="flex-1 h-11 rounded-xl bg-zinc-900 hover:bg-black text-white font-black text-[10px] tracking-widest transition-all uppercase"
+                      className="flex-1 h-11 rounded-xl bg-zinc-900 hover:bg-black text-white font-black text-[12px] tracking-widest transition-all uppercase"
                     >
                       <Link href={`/management/pitches/${pitch.id}/edit`} className="flex items-center justify-center gap-2">
                         <Pencil className="h-3.5 w-3.5" />

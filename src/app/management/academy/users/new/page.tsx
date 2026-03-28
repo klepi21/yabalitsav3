@@ -126,7 +126,7 @@ export default function NewAcademyUserPage() {
           <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
             {toGreekUpperCase('Νέος Χρήστης')}
           </h1>
-          <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+          <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest">
             {toGreekUpperCase('Δημιουργία νέου μέλους ακαδημίας')}
           </p>
         </div>

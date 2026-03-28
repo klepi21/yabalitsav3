@@ -296,7 +296,7 @@ export default function AcademyUserForm({
       {/* Group Selector — only show on create */}
       {!initialData && (
         <div className="space-y-4">
-          <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Κατηγορία *')}</Label>
+          <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Κατηγορία *')}</Label>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {groups.map((group) => (
               <button
@@ -314,7 +314,7 @@ export default function AcademyUserForm({
                 }`}>
                   {group.icon || '👤'}
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.2em]">{toGreekUpperCase(group.name)}</span>
+                <span className="text-[12px] font-black uppercase tracking-[0.2em]">{toGreekUpperCase(group.name)}</span>
               </button>
             ))}
           </div>
@@ -323,7 +323,7 @@ export default function AcademyUserForm({
 
       {/* Display Name */}
       <div className="space-y-4">
-        <Label htmlFor="displayName" className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Ονοματεπώνυμο *')}</Label>
+        <Label htmlFor="displayName" className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Ονοματεπώνυμο *')}</Label>
         <Input
           type="text"
           id="displayName"
@@ -376,7 +376,7 @@ export default function AcademyUserForm({
       {/* Squad Assignment (capability) */}
       {hasCapability('squad_assignment') && squads.length > 0 && (
         <div className="space-y-4 pt-6 border-t border-zinc-100">
-          <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τμήματα')}</Label>
+          <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τμήματα')}</Label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {squads.map((squad) => {
               const isSelected = squadIds.includes(squad.id);
@@ -400,7 +400,7 @@ export default function AcademyUserForm({
                     }}
                   />
                   <span className="text-[11px] font-black uppercase tracking-widest">{toGreekUpperCase(squad.name)}</span>
-                  <span className="text-[10px] font-bold opacity-60">{toGreekUpperCase(squad.ageGroup)}</span>
+                  <span className="text-[12px] font-bold opacity-60">{toGreekUpperCase(squad.ageGroup)}</span>
                 </label>
               );
             })}
@@ -411,7 +411,7 @@ export default function AcademyUserForm({
       {/* Coach Squad Assignment (capability) */}
       {hasCapability('coach_squads') && squads.length > 0 && (
         <div className="space-y-4 pt-6 border-t border-zinc-100">
-          <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Ανάθεση Τμημάτων')}</Label>
+          <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Ανάθεση Τμημάτων')}</Label>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {squads.map((squad) => {
               const isAssigned = assignedSquads.includes(squad.id);
@@ -435,7 +435,7 @@ export default function AcademyUserForm({
                     }}
                   />
                    <span className="text-[11px] font-black uppercase tracking-widest">{toGreekUpperCase(squad.name)}</span>
-                   <span className="text-[10px] font-bold opacity-60">{toGreekUpperCase(squad.ageGroup)}</span>
+                   <span className="text-[12px] font-bold opacity-60">{toGreekUpperCase(squad.ageGroup)}</span>
                 </label>
               );
             })}

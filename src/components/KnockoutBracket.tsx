@@ -52,7 +52,7 @@ export default function KnockoutBracket({ matches, teams }: KnockoutBracketProps
               {/* Round label */}
               <div className="mb-4 px-4">
                 <span className={cn(
-                  "text-[9px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border",
+                  "text-[11px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border",
                   isLast ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-zinc-50 text-zinc-500 border-zinc-200"
                 )}>
                   {isLast && <Trophy className="h-3 w-3 inline mr-1 -mt-0.5" />}
@@ -81,7 +81,7 @@ export default function KnockoutBracket({ matches, teams }: KnockoutBracketProps
                           "flex items-center gap-2 px-3 py-2.5 border-b border-zinc-100",
                           homeWon && "bg-emerald-50/50"
                         )}>
-                          <div className="h-6 w-6 rounded-md bg-zinc-100 flex items-center justify-center text-[9px] font-black text-zinc-400 shrink-0">
+                          <div className="h-6 w-6 rounded-md bg-zinc-100 flex items-center justify-center text-[11px] font-black text-zinc-400 shrink-0">
                             {homeTeam?.name.charAt(0) || '?'}
                           </div>
                           <span className={cn(
@@ -105,7 +105,7 @@ export default function KnockoutBracket({ matches, teams }: KnockoutBracketProps
                           "flex items-center gap-2 px-3 py-2.5",
                           awayWon && "bg-emerald-50/50"
                         )}>
-                          <div className="h-6 w-6 rounded-md bg-zinc-100 flex items-center justify-center text-[9px] font-black text-zinc-400 shrink-0">
+                          <div className="h-6 w-6 rounded-md bg-zinc-100 flex items-center justify-center text-[11px] font-black text-zinc-400 shrink-0">
                             {awayTeam?.name.charAt(0) || '?'}
                           </div>
                           <span className={cn(

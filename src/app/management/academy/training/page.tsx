@@ -378,7 +378,7 @@ export default function TrainingListPage() {
             <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
               {toGreekUpperCase('Προπονήσεις')}
             </h1>
-            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+            <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest">
               {toGreekUpperCase('Πρόγραμμα & Απουσιολόγιο')}
             </p>
           </div>
@@ -407,7 +407,7 @@ export default function TrainingListPage() {
             <button
               onClick={() => setViewMode('week')}
               className={cn(
-                "flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all",
+                "flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-black uppercase tracking-wider transition-all",
                 viewMode === 'week' ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-400 hover:text-zinc-600"
               )}
             >
@@ -417,7 +417,7 @@ export default function TrainingListPage() {
             <button
               onClick={() => setViewMode('list')}
               className={cn(
-                "flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all",
+                "flex-1 md:flex-none flex items-center justify-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-black uppercase tracking-wider transition-all",
                 viewMode === 'list' ? "bg-white text-zinc-900 shadow-sm" : "text-zinc-400 hover:text-zinc-600"
               )}
             >
@@ -450,7 +450,7 @@ export default function TrainingListPage() {
               variant="outline"
               size="sm"
               onClick={goToToday}
-              className="h-11 md:h-8 px-4 md:px-3 rounded-xl md:rounded-lg text-[10px] md:text-[9px] font-black uppercase tracking-widest border-zinc-200 shrink-0"
+              className="h-11 md:h-8 px-4 md:px-3 rounded-xl md:rounded-lg text-[12px] md:text-[11px] font-black uppercase tracking-widest border-zinc-200 shrink-0"
             >
               {toGreekUpperCase('Σήμερα')}
             </Button>
@@ -461,21 +461,21 @@ export default function TrainingListPage() {
         <div className="flex items-center gap-4 overflow-x-auto pb-1 md:pb-0 scrollbar-hide">
           <div className="flex items-center gap-1.5 shrink-0">
             <div className="h-6 w-6 rounded-md bg-zinc-900 flex items-center justify-center">
-              <span className="text-[10px] font-black text-white">{stats.total}</span>
+              <span className="text-[12px] font-black text-white">{stats.total}</span>
             </div>
-            <span className="text-[9px] font-bold text-zinc-400 uppercase">{toGreekUpperCase('Σύνολο')}</span>
+            <span className="text-[11px] font-bold text-zinc-400 uppercase">{toGreekUpperCase('Σύνολο')}</span>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             <div className="h-6 w-6 rounded-md bg-emerald-100 flex items-center justify-center">
-              <span className="text-[10px] font-black text-emerald-700">{stats.completed}</span>
+              <span className="text-[12px] font-black text-emerald-700">{stats.completed}</span>
             </div>
-            <span className="text-[9px] font-bold text-emerald-500 uppercase">{toGreekUpperCase('Ολοκλ.')}</span>
+            <span className="text-[11px] font-bold text-emerald-500 uppercase">{toGreekUpperCase('Ολοκλ.')}</span>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             <div className="h-6 w-6 rounded-md bg-blue-100 flex items-center justify-center">
-              <span className="text-[10px] font-black text-blue-700">{stats.scheduled}</span>
+              <span className="text-[12px] font-black text-blue-700">{stats.scheduled}</span>
             </div>
-            <span className="text-[9px] font-bold text-blue-500 uppercase">{toGreekUpperCase('Προγρ.')}</span>
+            <span className="text-[11px] font-bold text-blue-500 uppercase">{toGreekUpperCase('Προγρ.')}</span>
           </div>
         </div>
       </div>
@@ -531,7 +531,7 @@ export default function TrainingListPage() {
             <Button
               variant="ghost"
               onClick={() => { setSearchQuery(''); setSquadFilter('all'); setCoachFilter('all'); setStatusFilter('all'); }}
-              className="h-12 md:h-10 px-3 text-red-500 font-bold rounded-xl md:rounded-lg hover:bg-red-50 text-[10px] md:text-[9px] uppercase tracking-widest transition-all w-full lg:w-auto"
+              className="h-12 md:h-10 px-3 text-red-500 font-bold rounded-xl md:rounded-lg hover:bg-red-50 text-[12px] md:text-[11px] uppercase tracking-widest transition-all w-full lg:w-auto"
             >
               {toGreekUpperCase('Καθαρισμός')}
             </Button>
@@ -556,7 +556,7 @@ export default function TrainingListPage() {
                     isToday ? "bg-emerald-50/50" : ""
                   )}
                 >
-                  <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">
+                  <p className="text-[11px] font-black uppercase tracking-widest text-zinc-400">
                     {GREEK_DAYS[i]}
                   </p>
                   <p className={cn(
@@ -591,7 +591,7 @@ export default function TrainingListPage() {
                 >
                   {daySessions.length === 0 && (
                     <div className="h-full flex items-center justify-center">
-                      <span className="text-[9px] text-zinc-200 font-bold">—</span>
+                      <span className="text-[11px] text-zinc-200 font-bold">—</span>
                     </div>
                   )}
                   {daySessions.map((session) => {
@@ -620,11 +620,11 @@ export default function TrainingListPage() {
                         )}
                         <div className="flex items-center gap-1 mb-1">
                           <Clock className="h-2.5 w-2.5 text-zinc-400 shrink-0" />
-                          <span className="text-[9px] font-black text-zinc-500">
+                          <span className="text-[11px] font-black text-zinc-500">
                             {session.startTime}-{session.endTime}
                           </span>
                         </div>
-                        <p className="text-[10px] font-black text-zinc-900 leading-tight truncate">
+                        <p className="text-[12px] font-black text-zinc-900 leading-tight truncate">
                           {session.title}
                         </p>
                         <p className="text-[8px] font-bold text-zinc-400 truncate mt-0.5">
@@ -667,7 +667,7 @@ export default function TrainingListPage() {
                   key={squad.id}
                   onClick={() => setSquadFilter(squadFilter === squad.id ? 'all' : squad.id)}
                   className={cn(
-                    "flex items-center gap-1.5 px-2 py-1 rounded-md text-[9px] font-bold transition-all",
+                    "flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-bold transition-all",
                     squadFilter === squad.id
                       ? "bg-zinc-900 text-white"
                       : "bg-zinc-50 text-zinc-600 hover:bg-zinc-100"
@@ -744,7 +744,7 @@ export default function TrainingListPage() {
                                    <span className={cn("text-[7px] font-bold uppercase tracking-widest px-1.5 py-0.5 rounded border", typeColor.bg, typeColor.text, typeColor.border)}>
                                      {toGreekUpperCase(TRAINING_TYPE_LABELS[session.type])}
                                    </span>
-                                   <span className="text-[9px] font-bold text-zinc-400 flex items-center gap-1">
+                                   <span className="text-[11px] font-bold text-zinc-400 flex items-center gap-1">
                                      <Clock className="h-2.5 w-2.5" />
                                      {session.startTime} - {session.endTime}
                                    </span>
@@ -760,14 +760,14 @@ export default function TrainingListPage() {
                             <div className="space-y-0.5 min-w-0 flex-1">
                               <p className="text-[7px] font-bold uppercase tracking-wider text-zinc-400">{toGreekUpperCase('Τμήμα')}</p>
                               <p className="text-[11px] font-bold text-zinc-800 truncate uppercase">{toGreekUpperCase(getSquadName(session.squadId))}</p>
-                              <p className="text-[9px] font-bold text-zinc-400 truncate uppercase mt-0.5">{toGreekUpperCase(session.coachName)}</p>
+                              <p className="text-[11px] font-bold text-zinc-400 truncate uppercase mt-0.5">{toGreekUpperCase(session.coachName)}</p>
                             </div>
                             <div className="flex flex-col items-end justify-end shrink-0">
                               {totalCount > 0 && (
                                 <div className="text-right w-full max-w-[90px]">
                                   <div className="flex items-center justify-between mb-1 gap-4">
                                     <p className="text-[7px] font-bold uppercase tracking-wider text-zinc-400">{toGreekUpperCase('Παρουσίες')}</p>
-                                    <span className="text-[9px] font-black text-zinc-900 whitespace-nowrap">{presentCount}<span className="text-zinc-300 mx-0.5">/</span>{totalCount}</span>
+                                    <span className="text-[11px] font-black text-zinc-900 whitespace-nowrap">{presentCount}<span className="text-zinc-300 mx-0.5">/</span>{totalCount}</span>
                                   </div>
                                   <div className="w-full h-1 rounded-full bg-zinc-100 overflow-hidden">
                                     <div
@@ -816,7 +816,7 @@ export default function TrainingListPage() {
                         attendanceSession.attendance.forEach((a) => { edits[a.athleteId] = 'present'; });
                         setAttendanceEdits(edits);
                       }}
-                      className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[9px] font-black uppercase tracking-wider hover:bg-emerald-700 transition-all"
+                      className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-[11px] font-black uppercase tracking-wider hover:bg-emerald-700 transition-all"
                     >
                       Όλοι Παρόντες
                     </button>
@@ -826,7 +826,7 @@ export default function TrainingListPage() {
                         attendanceSession.attendance.forEach((a) => { edits[a.athleteId] = 'absent'; });
                         setAttendanceEdits(edits);
                       }}
-                      className="px-3 py-1.5 rounded-lg bg-red-600/80 text-white text-[9px] font-black uppercase tracking-wider hover:bg-red-700 transition-all"
+                      className="px-3 py-1.5 rounded-lg bg-red-600/80 text-white text-[11px] font-black uppercase tracking-wider hover:bg-red-700 transition-all"
                     >
                       Όλοι Απόντες
                     </button>

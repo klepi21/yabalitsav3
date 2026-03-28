@@ -156,7 +156,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                     <div className="absolute right-0 top-14 w-80 bg-white border border-zinc-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
                       <div className="px-5 py-4 border-b border-zinc-100 bg-zinc-50/50">
                         <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ειδοποιήσεις')}</h3>
-                        <p className="text-[10px] font-bold text-zinc-400 mt-0.5">ΕΚΚΡΕΜΕΙΣ ΚΡΑΤΗΣΕΙΣ</p>
+                        <p className="text-[12px] font-bold text-zinc-400 mt-0.5">ΕΚΚΡΕΜΕΙΣ ΚΡΑΤΗΣΕΙΣ</p>
                       </div>
 
                       <div className="max-h-96 overflow-y-auto">
@@ -180,11 +180,11 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                                   <p className="text-[13px] font-bold text-zinc-900 truncate">
                                     {booking.userName || 'Άγνωστος'}
                                   </p>
-                                  <p className="text-[10px] text-zinc-400 font-bold mt-1 uppercase tracking-tight">
+                                  <p className="text-[12px] text-zinc-400 font-bold mt-1 uppercase tracking-tight">
                                     {new Date(booking.startTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })}
                                   </p>
                                 </div>
-                                <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700 text-[9px] font-black uppercase">
+                                <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700 text-[11px] font-black uppercase">
                                   NEW
                                 </Badge>
                               </div>
@@ -223,7 +223,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                     <span className="text-[13px] font-black text-zinc-900 leading-none">
                       {venueOwner?.name || 'User'}
                     </span>
-                    <span className="text-[10px] font-bold text-zinc-400 mt-1 truncate max-w-[120px]">
+                    <span className="text-[12px] font-bold text-zinc-400 mt-1 truncate max-w-[120px]">
                       {user?.email}
                     </span>
                   </div>

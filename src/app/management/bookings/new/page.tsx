@@ -742,7 +742,7 @@ export default function NewBookingPage() {
                               return (
                                 <div key={date} className="bg-white p-4 rounded-2xl border-2 border-zinc-100 flex items-center justify-between shadow-sm">
                                   <div className="min-w-0">
-                                    <p className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter">
+                                    <p className="text-[12px] font-black text-zinc-400 uppercase tracking-tighter">
                                       {new Date(date).toLocaleDateString('el-GR', { weekday: 'long' })}
                                     </p>
                                     <p className="font-bold text-zinc-900 truncate">
@@ -750,7 +750,7 @@ export default function NewBookingPage() {
                                     </p>
                                   </div>
                                   <Badge className={cn(
-                                    "font-black text-[10px] px-2.5",
+                                    "font-black text-[12px] px-2.5",
                                     isAvailable ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-red-50 text-red-700 border-red-100"
                                   )}>
                                     {isAvailable ? 'ΟΚ' : 'ΚΡΑΤΗΜΕΝΟ'}
@@ -828,7 +828,7 @@ export default function NewBookingPage() {
                    <div className="flex items-end justify-between pt-4 border-t border-white/10">
                      <div>
                        <p className="text-sm font-bold text-white/90">Σύνολο ({recurringSettings.occurrences}):</p>
-                       <p className="text-[10px] uppercase font-black text-white/50 tracking-wider">Προσεγγιστικά</p>
+                       <p className="text-[12px] uppercase font-black text-white/50 tracking-wider">Προσεγγιστικά</p>
                      </div>
                      <p className="text-4xl font-black text-white">
                        &euro;{((pitches.find(p => p.id === watch('pitchId'))?.pricePerSlot || 0) * recurringSettings.occurrences).toFixed(2)}
@@ -854,7 +854,7 @@ export default function NewBookingPage() {
                    'Για μακροχρόνιες κρατήσεις, επιλέξτε την επαναλαμβανόμενη λειτουργία.'
                  ].map((tip, idx) => (
                    <li key={idx} className="flex gap-3 text-sm font-medium text-zinc-500">
-                     <span className="h-5 w-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 font-black text-[10px] border border-emerald-100">
+                     <span className="h-5 w-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 font-black text-[12px] border border-emerald-100">
                        {idx + 1}
                      </span>
                      {tip}

@@ -186,7 +186,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
         <div className="space-y-4">
           {/* Main Menu Group */}
           <div>
-            <p className="px-4 text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 font-mono">
+            <p className="px-4 text-[11px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 font-mono">
               {toGreekUpperCase('Μενού')}
             </p>
             <div className="space-y-0.5">
@@ -211,7 +211,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                     <Icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", isActive ? "text-emerald-600" : "text-zinc-400 group-hover:text-zinc-900")} />
                     <span>{toGreekUpperCase(item.name)}</span>
                     {item.name === 'Κρατήσεις' && (
-                      <span className="ml-auto bg-emerald-600 text-white text-[9px] px-1.5 py-0.5 rounded-md font-black">
+                      <span className="ml-auto bg-emerald-600 text-white text-[11px] px-1.5 py-0.5 rounded-md font-black">
                         NEW
                       </span>
                     )}
@@ -223,7 +223,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
           {/* Academy & More Group */}
           <div>
-            <p className="px-4 text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 font-mono">
+            <p className="px-4 text-[11px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 font-mono">
               {toGreekUpperCase('Διαχείριση')}
             </p>
             <div className="space-y-1">
@@ -328,7 +328,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
         {/* Super Admin Link */}
         {user?.email === SUPER_ADMIN_EMAIL && (
           <div className="mt-4">
-            <p className="px-4 text-[9px] font-black text-red-400 uppercase tracking-[0.2em] mb-2 font-mono">
+            <p className="px-4 text-[11px] font-black text-red-400 uppercase tracking-[0.2em] mb-2 font-mono">
               SUPER ADMIN
             </p>
             <Link
@@ -357,7 +357,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
           <div className="px-4 py-3 rounded-2xl bg-zinc-50 border border-zinc-100/50 flex items-center justify-between gap-3 shadow-inner group">
             <div className="flex flex-col gap-0.5 min-w-0">
               <p className={cn(
-                "text-[10px] font-black uppercase tracking-widest transition-colors truncate",
+                "text-[12px] font-black uppercase tracking-widest transition-colors truncate",
                 bookingsEnabled ? "text-emerald-600" : "text-zinc-400 group-hover:text-red-400"
               )}>
                 {bookingsEnabled ? toGreekUpperCase('Online Κρατήσεις') : toGreekUpperCase('Κρατήσεις Ανενεργές')}
@@ -416,7 +416,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                       {bookingsEnabled ? toGreekUpperCase('Δημιουργήστε το QR Code') : toGreekUpperCase('QR Code Ανενεργό')}
                     </p>
                     <p className={cn(
-                      "text-[10px] font-medium mt-0.5",
+                      "text-[12px] font-medium mt-0.5",
                       bookingsEnabled ? "text-emerald-400/80" : "text-zinc-400/60"
                     )}>
                       {bookingsEnabled ? 'ΓΙΑ ΤΗ ΣΕΛΙΔΑ BOOKING' : 'Online Κρατήσεις: OFF'}

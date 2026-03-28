@@ -212,7 +212,7 @@ export default function EditCustomerPage() {
 
             {/* System Info */}
             <div className="rounded-xl bg-zinc-50 p-4 space-y-2">
-              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">Πληροφορίες Συστήματος</p>
+              <p className="text-[12px] font-black uppercase tracking-widest text-zinc-400">Πληροφορίες Συστήματος</p>
               <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs font-bold text-zinc-500">
                 <span>Δημιουργία: {new Date(customer.createdAt).toLocaleDateString('el-GR')}</span>
                 <span>Ενημέρωση: {new Date(customer.updatedAt).toLocaleDateString('el-GR')}</span>

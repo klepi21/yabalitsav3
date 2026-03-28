@@ -214,7 +214,7 @@ export default function BookingsPage() {
       cancelled: { label: 'ΑΚΥΡΩΜΕΝΗ', className: 'border-none text-red-700 bg-red-100 shadow-sm' },
     };
     const { label, className } = config[status] || config.confirmed;
-    return <Badge variant="outline" className={cn("px-4 py-1.5 rounded-xl font-black text-[10px] tracking-widest", className)}>{toGreekUpperCase(label)}</Badge>;
+    return <Badge variant="outline" className={cn("px-4 py-1.5 rounded-xl font-black text-[12px] tracking-widest", className)}>{toGreekUpperCase(label)}</Badge>;
   };
 
   // Stats
@@ -279,7 +279,7 @@ export default function BookingsPage() {
              </h1>
              <div className="flex items-center gap-2">
                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-               <p className="text-[9px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-widest hidden sm:block">
+               <p className="text-[11px] sm:text-[12px] font-black text-zinc-400 uppercase tracking-widest hidden sm:block">
                  {toGreekUpperCase('Διαχειριση και προγραμματισμος')}
                </p>
              </div>
@@ -291,7 +291,7 @@ export default function BookingsPage() {
             <button
               onClick={() => setViewMode('calendar')}
               className={cn(
-                "flex items-center gap-1.5 px-3 sm:px-5 py-2 rounded-lg text-[10px] sm:text-[11px] font-black transition-all active:scale-95",
+                "flex items-center gap-1.5 px-3 sm:px-5 py-2 rounded-lg text-[12px] sm:text-[11px] font-black transition-all active:scale-95",
                 viewMode === 'calendar'
                   ? "bg-white text-emerald-600 shadow-md shadow-emerald-900/5"
                   : "text-zinc-400 hover:text-zinc-600 hover:bg-white/50"
@@ -303,7 +303,7 @@ export default function BookingsPage() {
             <button
               onClick={() => setViewMode('list')}
               className={cn(
-                "flex items-center gap-1.5 px-3 sm:px-5 py-2 rounded-lg text-[10px] sm:text-[11px] font-black transition-all active:scale-95",
+                "flex items-center gap-1.5 px-3 sm:px-5 py-2 rounded-lg text-[12px] sm:text-[11px] font-black transition-all active:scale-95",
                 viewMode === 'list'
                   ? "bg-white text-emerald-600 shadow-md shadow-emerald-900/5"
                   : "text-zinc-400 hover:text-zinc-600 hover:bg-white/50"
@@ -357,7 +357,7 @@ export default function BookingsPage() {
                   <stat.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
                 <p className="text-xl sm:text-2xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{stat.value}</p>
-                <p className="text-[8px] sm:text-[9px] font-black uppercase tracking-[0.1em] text-zinc-400 mt-1">{toGreekUpperCase(stat.label)}</p>
+                <p className="text-[8px] sm:text-[11px] font-black uppercase tracking-[0.1em] text-zinc-400 mt-1">{toGreekUpperCase(stat.label)}</p>
               </div>
             ))}
           </div>
@@ -386,7 +386,7 @@ export default function BookingsPage() {
                         key={opt.value}
                         onClick={() => setFilterStatus(opt.value)}
                         className={cn(
-                          "px-4 py-1.5 rounded-md text-[10px] font-black transition-all active:scale-95",
+                          "px-4 py-1.5 rounded-md text-[12px] font-black transition-all active:scale-95",
                           filterStatus === opt.value
                             ? 'bg-white text-zinc-900 shadow-sm'
                             : 'text-zinc-400 hover:text-zinc-600'
@@ -465,18 +465,18 @@ export default function BookingsPage() {
                               </div>
                               
                               <div className="flex flex-wrap items-center gap-2 text-zinc-500">
-                                <span className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-50 font-bold text-[9px] uppercase tracking-tight border border-zinc-100 group-hover:bg-white transition-colors">
+                                <span className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-50 font-bold text-[11px] uppercase tracking-tight border border-zinc-100 group-hover:bg-white transition-colors">
                                   <Clock className="h-3 w-3 text-emerald-500/50" />
                                   {startDate.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })} - {new Date(booking.endTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })}
                                 </span>
                                 {booking.userPhone && (
-                                  <a href={`tel:${booking.userPhone}`} className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-50 font-bold text-[9px] uppercase tracking-tight border border-zinc-100 hover:bg-white hover:text-emerald-600 transition-all">
+                                  <a href={`tel:${booking.userPhone}`} className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-50 font-bold text-[11px] uppercase tracking-tight border border-zinc-100 hover:bg-white hover:text-emerald-600 transition-all">
                                     <Phone className="h-3 w-3 text-emerald-500/50" />
                                     {booking.userPhone}
                                   </a>
                                 )}
                                 {pitch && (
-                                  <span className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-50 font-bold text-[9px] uppercase tracking-tight border border-zinc-100 group-hover:bg-white transition-colors">
+                                  <span className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-zinc-50 font-bold text-[11px] uppercase tracking-tight border border-zinc-100 group-hover:bg-white transition-colors">
                                     <Building2 className="h-3 w-3 text-emerald-500/50" />
                                     {toGreekUpperCase(pitch.name)}
                                   </span>
@@ -503,7 +503,7 @@ export default function BookingsPage() {
                               
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
-                                  <Button variant="outline" className="h-8 px-3 rounded-lg border-zinc-200 font-bold gap-1.5 text-[10px] shadow-sm hover:shadow-md transition-all">
+                                  <Button variant="outline" className="h-8 px-3 rounded-lg border-zinc-200 font-bold gap-1.5 text-[12px] shadow-sm hover:shadow-md transition-all">
                                     ΚΑΤΑΣΤΑΣΗ
                                     <ChevronDown className="h-3 w-3 text-zinc-400" />
                                   </Button></DropdownMenuTrigger>

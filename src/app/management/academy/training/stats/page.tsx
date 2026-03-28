@@ -248,7 +248,7 @@ export default function TrainingStatsPage() {
                 <button
                 key={period.value}
                 onClick={() => setPeriodFilter(period.value)}
-                className={`px-3 py-1.5 rounded-md text-[9px] font-black uppercase tracking-wider transition-all ${
+                className={`px-3 py-1.5 rounded-md text-[11px] font-black uppercase tracking-wider transition-all ${
                     periodFilter === period.value
                     ? 'bg-white text-zinc-900 shadow-sm'
                     : 'text-zinc-400 hover:text-zinc-600'
@@ -370,7 +370,7 @@ export default function TrainingStatsPage() {
                 </div>
                 <h3 className="text-base font-black text-zinc-900 tracking-tight">{toGreekUpperCase('Αναλυτικά ανά Αθλητή')}</h3>
             </div>
-            <div className="px-3 py-1 rounded-lg bg-zinc-50 text-[9px] font-black uppercase tracking-widest text-zinc-400">
+            <div className="px-3 py-1 rounded-lg bg-zinc-50 text-[11px] font-black uppercase tracking-widest text-zinc-400">
                 {athleteStats.length} {toGreekUpperCase('ΑΘΛΗΤΕΣ')}
             </div>
         </div>
@@ -387,14 +387,14 @@ export default function TrainingStatsPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-zinc-50/50">
-                  <th className="py-3 px-5 text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Αθλητής')}</th>
-                  <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Τμήμα')}</th>
-                  <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Προπ.')}</th>
-                  <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Παρών')}</th>
-                  <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Απών')}</th>
-                  <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Καθ.')}</th>
-                  <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Τραυμ.')}</th>
-                  <th className="py-3 px-5 text-[9px] font-black uppercase tracking-widest text-zinc-400 lg:min-w-[180px]">{toGreekUpperCase('Παρουσία')}</th>
+                  <th className="py-3 px-5 text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Αθλητής')}</th>
+                  <th className="py-3 px-4 text-[11px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Τμήμα')}</th>
+                  <th className="py-3 px-4 text-[11px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Προπ.')}</th>
+                  <th className="py-3 px-4 text-[11px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Παρών')}</th>
+                  <th className="py-3 px-4 text-[11px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Απών')}</th>
+                  <th className="py-3 px-4 text-[11px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Καθ.')}</th>
+                  <th className="py-3 px-4 text-[11px] font-black uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Τραυμ.')}</th>
+                  <th className="py-3 px-5 text-[11px] font-black uppercase tracking-widest text-zinc-400 lg:min-w-[180px]">{toGreekUpperCase('Παρουσία')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-50">
@@ -404,7 +404,7 @@ export default function TrainingStatsPage() {
                       <p className="text-xs font-black text-zinc-900 uppercase tracking-tight group-hover:text-violet-700 transition-colors">{athlete.name}</p>
                     </td>
                     <td className="py-3 px-4 text-center">
-                      <span className="text-[10px] font-bold text-zinc-500 whitespace-nowrap">
+                      <span className="text-[12px] font-bold text-zinc-500 whitespace-nowrap">
                         {athlete.squadIds.map((sid) => getSquadName(sid)).filter(Boolean).join(', ') || '—'}
                       </span>
                     </td>
@@ -432,7 +432,7 @@ export default function TrainingStatsPage() {
                           />
                         </div>
                         <span className={cn(
-                          "text-[10px] font-black min-w-[35px] text-right rounded-md px-1.5 py-0.5",
+                          "text-[12px] font-black min-w-[35px] text-right rounded-md px-1.5 py-0.5",
                           athlete.totalSessions === 0 ? "text-zinc-300" : rateColor(athlete.attendanceRate)
                         )}>
                           {athlete.totalSessions === 0 ? '—' : `${athlete.attendanceRate}%`}

@@ -137,7 +137,7 @@ export default function TournamentsPage() {
              </h1>
              <div className="flex items-center gap-2">
                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+               <p className="text-[12px] font-black text-zinc-400 uppercase tracking-widest">
                  {toGreekUpperCase('Διαχειριση πρωταθληματων και διοργανωσεων')}
                </p>
              </div>
@@ -165,7 +165,7 @@ export default function TournamentsPage() {
             </div>
             <div className="space-y-1">
               <p className="text-3xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{stat.value}</p>
-              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase(stat.label)}</p>
+              <p className="text-[12px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase(stat.label)}</p>
             </div>
           </div>
         ))}
@@ -188,7 +188,7 @@ export default function TournamentsPage() {
               key={f.value}
               onClick={() => setFilterStatus(f.value)}
               className={cn(
-                "px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider rounded-md transition-all",
+                "px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider rounded-md transition-all",
                 filterStatus === f.value
                   ? "bg-zinc-900 text-white shadow-sm"
                   : "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-50"
@@ -267,7 +267,7 @@ export default function TournamentsPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-zinc-400">
                       <Calendar className="h-3 w-3" />
-                      <span className="text-[10px] font-bold">
+                      <span className="text-[12px] font-bold">
                         {new Date(tournament.startDate).toLocaleDateString('el-GR')} - {new Date(tournament.endDate).toLocaleDateString('el-GR')}
                       </span>
                     </div>

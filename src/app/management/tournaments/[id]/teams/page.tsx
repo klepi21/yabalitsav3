@@ -193,7 +193,7 @@ export default function TeamsPage() {
           <Trophy className="h-10 w-10 text-zinc-300" />
         </div>
         <h3 className="text-2xl font-black text-zinc-900 mb-2 uppercase tracking-tight">Το τουρνουά δεν βρέθηκε</h3>
-        <Button asChild className="mt-6 h-12 px-8 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-black uppercase tracking-widest text-[10px]">
+        <Button asChild className="mt-6 h-12 px-8 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-black uppercase tracking-widest text-[12px]">
           <Link href="/management/tournaments">Επιστροφή</Link>
         </Button>
       </div>
@@ -260,7 +260,7 @@ export default function TeamsPage() {
 
           <form onSubmit={handleAddTeam} className="space-y-10">
             <div className="space-y-4 text-left">
-              <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Όνομα Ομάδας *</Label>
+              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Όνομα Ομάδας *</Label>
               <Input
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
@@ -271,7 +271,7 @@ export default function TeamsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
               <div className="space-y-4">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Υπεύθυνος / Αρχηγός *</Label>
+                <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Υπεύθυνος / Αρχηγός *</Label>
                 <Input
                   value={captainName}
                   onChange={(e) => setCaptainName(e.target.value)}
@@ -280,7 +280,7 @@ export default function TeamsPage() {
                 />
               </div>
               <div className="space-y-4">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Τηλέφωνο Επικοινωνίας *</Label>
+                <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Τηλέφωνο Επικοινωνίας *</Label>
                 <Input
                   value={captainPhone}
                   onChange={(e) => setCaptainPhone(e.target.value)}
@@ -289,7 +289,7 @@ export default function TeamsPage() {
                 />
               </div>
               <div className="space-y-4">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">E-mail (Προαιρετικά)</Label>
+                <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">E-mail (Προαιρετικά)</Label>
                 <Input
                   type="email"
                   value={captainEmail}
@@ -305,7 +305,7 @@ export default function TeamsPage() {
                 type="button" 
                 variant="ghost" 
                 onClick={() => setShowAddForm(false)} 
-                className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[10px] text-zinc-400 hover:text-zinc-600"
+                className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[12px] text-zinc-400 hover:text-zinc-600"
               >
                 Ακύρωση
               </Button>
@@ -368,7 +368,7 @@ export default function TeamsPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-left">
                     <div className="space-y-4 lg:col-span-1">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Όνομα Ομάδας</Label>
+                      <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Όνομα Ομάδας</Label>
                       <Input
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
@@ -376,7 +376,7 @@ export default function TeamsPage() {
                       />
                     </div>
                     <div className="space-y-4">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Υπεύθυνος</Label>
+                      <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Υπεύθυνος</Label>
                       <Input
                         value={editCaptainName}
                         onChange={(e) => setEditCaptainName(e.target.value)}
@@ -384,7 +384,7 @@ export default function TeamsPage() {
                       />
                     </div>
                     <div className="space-y-4">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Τηλέφωνο</Label>
+                      <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Τηλέφωνο</Label>
                       <Input
                         value={editCaptainPhone}
                         onChange={(e) => setEditCaptainPhone(e.target.value)}
@@ -392,7 +392,7 @@ export default function TeamsPage() {
                       />
                     </div>
                     <div className="space-y-4">
-                      <Label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Email</Label>
+                      <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Email</Label>
                       <Input
                         type="email"
                         value={editCaptainEmail}
@@ -406,14 +406,14 @@ export default function TeamsPage() {
                     <Button 
                       onClick={() => setEditingTeamId(null)} 
                       variant="ghost" 
-                      className="h-12 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-600"
+                      className="h-12 px-6 rounded-xl text-[12px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-600"
                     >
                       Ακύρωση
                     </Button>
                     <Button
                       onClick={handleSaveEdit}
                       disabled={isSavingEdit || !editName.trim() || !editCaptainName.trim() || !editCaptainPhone.trim()}
-                      className="h-12 px-10 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-amber-100"
+                      className="h-12 px-10 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-black uppercase tracking-widest text-[12px] shadow-lg shadow-amber-100"
                     >
                       {isSavingEdit ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
                       Ενημέρωση
@@ -442,16 +442,16 @@ export default function TeamsPage() {
                         {team.name}
                       </h3>
                       <div className="flex flex-wrap items-center gap-4">
-                        <Badge variant="outline" className="h-7 px-4 rounded-lg bg-zinc-50 border-none text-[10px] font-black uppercase tracking-widest text-zinc-400 group-hover:bg-violet-100 group-hover:text-violet-700">
+                        <Badge variant="outline" className="h-7 px-4 rounded-lg bg-zinc-50 border-none text-[12px] font-black uppercase tracking-widest text-zinc-400 group-hover:bg-violet-100 group-hover:text-violet-700">
                           <Users className="h-3 w-3 mr-2" />
                           {teamPlayers.length} παίκτες
                         </Badge>
-                        <Badge variant="outline" className="h-7 px-4 rounded-lg bg-zinc-50 border-none text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                        <Badge variant="outline" className="h-7 px-4 rounded-lg bg-zinc-50 border-none text-[12px] font-black uppercase tracking-widest text-zinc-400">
                           <Phone className="h-3 w-3 mr-2" />
                           {team.captainName}
                         </Badge>
                         {team.captainEmail && (
-                          <Badge variant="outline" className="h-7 px-4 rounded-lg bg-zinc-50 border-none text-[10px] font-black uppercase tracking-widest text-zinc-400 hidden xl:flex">
+                          <Badge variant="outline" className="h-7 px-4 rounded-lg bg-zinc-50 border-none text-[12px] font-black uppercase tracking-widest text-zinc-400 hidden xl:flex">
                             <Mail className="h-3 w-3 mr-2" />
                             {team.captainEmail}
                           </Badge>
@@ -463,7 +463,7 @@ export default function TeamsPage() {
                   <div className="flex items-center gap-4 pl-4 md:border-l md:border-zinc-50">
                     {(tournament.type === 'league' || tournament.type === 'group+knockout') && (
                       <div className="text-center px-6 py-3 bg-zinc-50 rounded-2xl group-hover:bg-violet-50 transition-colors mr-2">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-violet-400">Βαθμοί</p>
+                        <p className="text-[11px] font-black uppercase tracking-widest text-zinc-400 group-hover:text-violet-400">Βαθμοί</p>
                         <p className="text-2xl font-black text-zinc-900 group-hover:text-violet-700">{team.stats.points}</p>
                       </div>
                     )}
@@ -507,7 +507,7 @@ export default function TeamsPage() {
                       
                       <Link 
                         href={`/management/tournaments/${tournament.id}/teams/${team.id}`}
-                        className="h-10 px-4 rounded-xl bg-zinc-900 text-white flex items-center justify-between text-[9px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all"
+                        className="h-10 px-4 rounded-xl bg-zinc-900 text-white flex items-center justify-between text-[11px] font-black uppercase tracking-widest hover:bg-emerald-600 transition-all"
                       >
                         Ρόστερ
                         <ChevronRight className="h-3 w-3 ml-2" />

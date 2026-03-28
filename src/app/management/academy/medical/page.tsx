@@ -315,7 +315,7 @@ export default function MedicalTrackingPage() {
           >
             <stat.icon className={cn("h-5 w-5 mb-2", statusFilter === stat.key ? 'text-white' : stat.color)} />
             <p className={cn("text-2xl font-black", statusFilter === stat.key ? 'text-white' : 'text-zinc-900')}>{stat.count}</p>
-            <p className={cn("text-[9px] font-bold uppercase tracking-widest", statusFilter === stat.key ? 'text-zinc-400' : 'text-zinc-400')}>
+            <p className={cn("text-[11px] font-bold uppercase tracking-widest", statusFilter === stat.key ? 'text-zinc-400' : 'text-zinc-400')}>
               {toGreekUpperCase(stat.label)}
             </p>
           </button>
@@ -372,12 +372,12 @@ export default function MedicalTrackingPage() {
                   </p>
                   <div className="flex items-center gap-2 mt-0.5">
                     {athlete.squad && (
-                      <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                      <span className="text-[12px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
                         {athlete.squad.name}
                       </span>
                     )}
                     {athlete.user.fields?.birth_year && (
-                      <span className="text-[10px] font-bold text-zinc-400">
+                      <span className="text-[12px] font-bold text-zinc-400">
                         {athlete.user.fields.birth_year}
                       </span>
                     )}
@@ -391,7 +391,7 @@ export default function MedicalTrackingPage() {
                       <p className={cn("text-sm font-black", cfg.color)}>
                         {new Date(athlete.expiryDate).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                       </p>
-                      <p className={cn("text-[10px] font-bold", cfg.color)}>
+                      <p className={cn("text-[12px] font-bold", cfg.color)}>
                         {athlete.status === 'expired'
                           ? `Ληγμένο ${Math.abs(athlete.daysUntilExpiry!)} ημέρες`
                           : athlete.status === 'expiring_soon'
@@ -497,7 +497,7 @@ export default function MedicalTrackingPage() {
                   </div>
 
                   <div className="space-y-2.5">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-300">{toGreekUpperCase('Παραλήπτης')}</p>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-300">{toGreekUpperCase('Παραλήπτης')}</p>
                     <div className="flex items-center gap-2.5">
                       <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
                         <Users className="h-3.5 w-3.5 text-blue-500" />

@@ -393,7 +393,7 @@ export default function MatchesPage() {
           <Swords className="h-10 w-10 text-zinc-300" />
         </div>
         <h3 className="text-2xl font-black text-zinc-900 mb-2 uppercase tracking-tight">Το τουρνουά δεν βρέθηκε</h3>
-        <Button asChild className="mt-6 h-12 px-8 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-black uppercase tracking-widest text-[10px]">
+        <Button asChild className="mt-6 h-12 px-8 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-black uppercase tracking-widest text-[12px]">
           <Link href="/management/tournaments">Επιστροφή</Link>
         </Button>
       </div>
@@ -484,7 +484,7 @@ export default function MatchesPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 text-left">
             <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Γηπεδούχος Ομάδα</label>
+              <label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Γηπεδούχος Ομάδα</label>
               <select
                 value={newHomeTeam}
                 onChange={(e) => setNewHomeTeam(e.target.value)}
@@ -497,7 +497,7 @@ export default function MatchesPage() {
               </select>
             </div>
             <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Φιλοξενούμενη Ομάδα</label>
+              <label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Φιλοξενούμενη Ομάδα</label>
               <select
                 value={newAwayTeam}
                 onChange={(e) => setNewAwayTeam(e.target.value)}
@@ -513,7 +513,7 @@ export default function MatchesPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-left">
             <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Αγωνιστική</label>
+              <label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Αγωνιστική</label>
               <Input
                 type="number"
                 min={1}
@@ -523,7 +523,7 @@ export default function MatchesPage() {
               />
             </div>
             <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Ημερομηνία</label>
+              <label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Ημερομηνία</label>
               <Input
                 type="date"
                 value={newDate}
@@ -532,7 +532,7 @@ export default function MatchesPage() {
               />
             </div>
             <div className="space-y-4">
-              <label className="text-[10px] font-black uppercase tracking-widest text-zinc-400 ml-1">Ώρα</label>
+              <label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Ώρα</label>
               <Input
                 type="time"
                 value={newTime}
@@ -574,7 +574,7 @@ export default function MatchesPage() {
               <stat.icon className="h-8 w-8" />
             </div>
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-1">{stat.label}</p>
+              <p className="text-[12px] font-black uppercase tracking-widest text-zinc-400 mb-1">{stat.label}</p>
               <p className="text-3xl font-black text-zinc-900 tracking-tight">{stat.value}</p>
             </div>
           </div>
@@ -587,7 +587,7 @@ export default function MatchesPage() {
           <button
             onClick={() => setFilterRound('all')}
             className={cn(
-              "px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
+              "px-6 py-3 rounded-2xl text-[12px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
               filterRound === 'all' ? "bg-zinc-900 text-white shadow-lg" : "text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50"
             )}
           >
@@ -598,7 +598,7 @@ export default function MatchesPage() {
               key={r}
               onClick={() => setFilterRound(r)}
               className={cn(
-                "px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
+                "px-6 py-3 rounded-2xl text-[12px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
                 filterRound === r ? "bg-zinc-900 text-white shadow-lg" : "text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50"
               )}
             >
@@ -641,15 +641,15 @@ export default function MatchesPage() {
               >
                 {/* Match Card Header */}
                 <div className="px-10 py-6 border-b border-zinc-50 flex items-center justify-between bg-zinc-50/30">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                  <span className="text-[12px] font-black uppercase tracking-widest text-zinc-400">
                     {match.roundLabel || `Αγωνιστική ${match.round}`}
                   </span>
                   <div className="flex items-center gap-6">
-                    <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                    <div className="flex items-center gap-2 text-[12px] font-black uppercase tracking-widest text-zinc-400">
                       <Clock className="h-4 w-4 text-zinc-300" />
                       {new Date(match.scheduledDate).toLocaleDateString('el-GR')} &middot; {match.scheduledTime}
                     </div>
-                    <Badge className={cn("px-4 py-1.5 rounded-xl font-black text-[9px] uppercase tracking-widest", ms.className)}>
+                    <Badge className={cn("px-4 py-1.5 rounded-xl font-black text-[11px] uppercase tracking-widest", ms.className)}>
                       {ms.label}
                     </Badge>
                   </div>
@@ -726,14 +726,14 @@ export default function MatchesPage() {
                       <Button
                         onClick={() => setEditingMatch(null)}
                         variant="ghost"
-                        className="h-12 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900"
+                        className="h-12 px-6 rounded-xl text-[12px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900"
                       >
                         <X className="h-4 w-4 mr-2" /> Ακύρωση
                       </Button>
                       <Button
                         onClick={handleSaveScore}
                         disabled={isSaving}
-                        className="h-12 px-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg shadow-emerald-100"
+                        className="h-12 px-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black uppercase tracking-widest text-[12px] shadow-lg shadow-emerald-100"
                       >
                         {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
                         Αποθήκευση Σκορ
@@ -745,7 +745,7 @@ export default function MatchesPage() {
                         <Button
                           onClick={() => startEditing(match)}
                           className={cn(
-                            "h-12 px-6 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-sm transition-all",
+                            "h-12 px-6 rounded-xl font-black uppercase tracking-widest text-[12px] shadow-sm transition-all",
                             isCompleted 
                               ? "bg-white border border-zinc-100 text-zinc-600 hover:bg-zinc-50" 
                               : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-50"
@@ -766,7 +766,7 @@ export default function MatchesPage() {
                             onClick={() => setNotifyConfirm(match)}
                             disabled={notifyingMatch === match.id}
                             className={cn(
-                              "h-12 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm transition-all",
+                              "h-12 px-6 rounded-xl text-[12px] font-black uppercase tracking-widest shadow-sm transition-all",
                               notifySuccess === match.id
                                 ? "text-emerald-600 border-emerald-200 bg-emerald-50"
                                 : "text-zinc-500 border-zinc-200 hover:border-blue-200 hover:text-blue-600 hover:bg-blue-50"
@@ -787,7 +787,7 @@ export default function MatchesPage() {
                         <Button
                           variant="outline"
                           onClick={() => startEditingDetail(match)}
-                          className="h-12 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest text-zinc-500 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
+                          className="h-12 px-6 rounded-xl text-[12px] font-black uppercase tracking-widest text-zinc-500 border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50"
                         >
                           <Pencil className="h-4 w-4 mr-2" /> Επεξεργασία
                         </Button>
@@ -796,7 +796,7 @@ export default function MatchesPage() {
                         <Button
                           variant="ghost"
                           onClick={() => handleCancelMatch(match.id)}
-                          className="h-12 px-6 rounded-xl text-[10px] font-black uppercase tracking-widest text-red-400 hover:text-red-700 hover:bg-red-50"
+                          className="h-12 px-6 rounded-xl text-[12px] font-black uppercase tracking-widest text-red-400 hover:text-red-700 hover:bg-red-50"
                         >
                           <XCircle className="h-4 w-4 mr-2" /> Ακύρωση
                         </Button>
@@ -832,7 +832,7 @@ export default function MatchesPage() {
                 </div>
                 <div className="px-8 py-6 space-y-4">
                   <div className="space-y-2">
-                    <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Αγωνιστική</label>
+                    <label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">Αγωνιστική</label>
                     <Input
                       value={editRoundLabel}
                       onChange={(e) => setEditRoundLabel(e.target.value)}
@@ -842,7 +842,7 @@ export default function MatchesPage() {
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Ημερομηνία</label>
+                      <label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">Ημερομηνία</label>
                       <Input
                         type="date"
                         value={editDate}
@@ -851,7 +851,7 @@ export default function MatchesPage() {
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Ώρα</label>
+                      <label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">Ώρα</label>
                       <Input
                         type="time"
                         value={editTime}
@@ -914,7 +914,7 @@ export default function MatchesPage() {
 
                   {/* Date */}
                   <div className="text-center">
-                    <p className="text-[10px] text-zinc-400 font-bold">
+                    <p className="text-[12px] text-zinc-400 font-bold">
                       {new Date(notifyConfirm.scheduledDate).toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long' })}
                       {notifyConfirm.scheduledTime && ` • ${notifyConfirm.scheduledTime}`}
                     </p>
@@ -922,7 +922,7 @@ export default function MatchesPage() {
 
                   {/* Recipients */}
                   <div className="space-y-2">
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-300">Παραλήπτες ({recipients.length})</p>
+                    <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-300">Παραλήπτες ({recipients.length})</p>
                     {recipients.map((team) => (
                       <div key={team!.id} className="flex items-center gap-2.5 p-2.5 bg-zinc-50 rounded-lg">
                         <div className="h-7 w-7 rounded-md bg-blue-50 flex items-center justify-center">
@@ -930,7 +930,7 @@ export default function MatchesPage() {
                         </div>
                         <div>
                           <p className="text-xs font-bold text-zinc-900">{team!.captainName}</p>
-                          <p className="text-[10px] text-zinc-400">{team!.captainEmail} • {team!.name}</p>
+                          <p className="text-[12px] text-zinc-400">{team!.captainEmail} • {team!.name}</p>
                         </div>
                       </div>
                     ))}

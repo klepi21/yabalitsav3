@@ -234,7 +234,7 @@ export default function CustomerDetailsPage() {
                   <stat.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-zinc-400">{stat.label}</p>
+                  <p className="text-[11px] sm:text-[12px] font-black uppercase tracking-widest text-zinc-400">{stat.label}</p>
                   <p className="text-lg sm:text-xl font-black text-zinc-900 truncate">{stat.value}</p>
                 </div>
               </div>
@@ -336,7 +336,7 @@ export default function CustomerDetailsPage() {
                           {/* Details */}
                           <div className="flex-1 min-w-0 space-y-1.5">
                             <div className="flex flex-wrap items-center gap-2">
-                              <Badge className={cn("font-black text-[9px] uppercase tracking-wider px-2 py-0.5 border-none", status.className)}>
+                              <Badge className={cn("font-black text-[11px] uppercase tracking-wider px-2 py-0.5 border-none", status.className)}>
                                 {toGreekUpperCase(status.label)}
                               </Badge>
                               {isToday && (

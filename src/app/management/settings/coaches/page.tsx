@@ -178,7 +178,7 @@ export default function CoachManagementPage() {
                       <p className="text-xs text-zinc-400">{admin.email}</p>
                     </div>
                   </div>
-                  <Badge className={cn('text-[9px] font-black border-none', getRoleColor('admin'))}>
+                  <Badge className={cn('text-[11px] font-black border-none', getRoleColor('admin'))}>
                     {toGreekUpperCase(getRoleLabel('admin'))}
                   </Badge>
                 </CardContent>
@@ -223,11 +223,11 @@ export default function CoachManagementPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           {disabled ? (
-                            <Badge className="text-[9px] font-black border-none bg-red-100 text-red-600">
+                            <Badge className="text-[11px] font-black border-none bg-red-100 text-red-600">
                               {toGreekUpperCase('Ανενεργός')}
                             </Badge>
                           ) : (
-                            <Badge className={cn('text-[9px] font-black border-none', getRoleColor('coach'))}>
+                            <Badge className={cn('text-[11px] font-black border-none', getRoleColor('coach'))}>
                               {toGreekUpperCase(getRoleLabel('coach'))}
                             </Badge>
                           )}
@@ -336,14 +336,14 @@ export default function CoachManagementPage() {
                           )}
                         >
                           <div className={cn(
-                            'h-5 w-5 rounded-md flex items-center justify-center text-[10px] font-black',
+                            'h-5 w-5 rounded-md flex items-center justify-center text-[12px] font-black',
                             isSelected ? 'bg-emerald-600 text-white' : 'bg-zinc-100 text-zinc-300'
                           )}>
                             {isSelected ? '✓' : ''}
                           </div>
                           <div>
                             <p className="text-xs font-bold">{squad.name}</p>
-                            <p className="text-[10px] text-zinc-400">{squad.ageGroup}</p>
+                            <p className="text-[12px] text-zinc-400">{squad.ageGroup}</p>
                           </div>
                         </button>
                       );
@@ -368,7 +368,7 @@ export default function CoachManagementPage() {
                 <UserX className="h-4 w-4" />
                 Απενεργοποίηση λογαριασμού
               </button>
-              <p className="text-[10px] text-zinc-400 mt-1 ml-6">
+              <p className="text-[12px] text-zinc-400 mt-1 ml-6">
                 Ο προπονητής δεν θα μπορεί να συνδεθεί
               </p>
             </div>

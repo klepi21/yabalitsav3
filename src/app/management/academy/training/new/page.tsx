@@ -184,7 +184,7 @@ export default function NewTrainingPage() {
             <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
               {toGreekUpperCase('Νέα Προπόνηση')}
             </h1>
-            <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+            <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest">
               {toGreekUpperCase('Προγραμματίστε την επόμενη δραστηριότητα')}
             </p>
           </div>
@@ -222,7 +222,7 @@ export default function NewTrainingPage() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τίτλος Προπόνησης')} *</Label>
+                <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τίτλος Προπόνησης')} *</Label>
                 <Input
                   value={form.title}
                   onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
@@ -232,7 +232,7 @@ export default function NewTrainingPage() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τύπος Δραστηριότητας')} *</Label>
+                <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τύπος Δραστηριότητας')} *</Label>
                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                   {TRAINING_TYPES.map((type) => {
                     const colors = TRAINING_TYPE_COLORS[type];
@@ -243,7 +243,7 @@ export default function NewTrainingPage() {
                         type="button"
                         onClick={() => setForm((p) => ({ ...p, type }))}
                         className={cn(
-                          "h-10 px-3 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border",
+                          "h-10 px-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all border",
                           isSelected
                             ? `${colors.bg} ${colors.text} ${colors.border} shadow-md ring-2 ring-zinc-100`
                             : "bg-white text-zinc-400 border-zinc-100 hover:border-zinc-200"
@@ -258,7 +258,7 @@ export default function NewTrainingPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τμήμα')} *</Label>
+                  <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τμήμα')} *</Label>
                   <Select value={form.squadId} onValueChange={(val: string) => setForm((p) => ({ ...p, squadId: val }))}>
                     <SelectTrigger className="h-11 px-4 bg-zinc-50 border-none rounded-xl font-bold text-sm focus:ring-2 focus:ring-emerald-500/20 uppercase">
                       <SelectValue placeholder={toGreekUpperCase('Επιλέξτε τμήμα...')} />
@@ -272,7 +272,7 @@ export default function NewTrainingPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Προπονητής')} *</Label>
+                  <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Προπονητής')} *</Label>
                   <Select value={form.coachId} onValueChange={(val: string) => setForm((p) => ({ ...p, coachId: val }))}>
                     <SelectTrigger className="h-11 px-4 bg-zinc-50 border-none rounded-xl font-bold text-sm focus:ring-2 focus:ring-emerald-500/20 uppercase">
                       <SelectValue placeholder={toGreekUpperCase('Επιλέξτε προπονητή...')} />
@@ -289,7 +289,7 @@ export default function NewTrainingPage() {
               {/* Date & Time */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-2">
-                  <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Ημερομηνία')} *</Label>
+                  <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Ημερομηνία')} *</Label>
                   <Input
                     type="date"
                     value={form.date}
@@ -298,7 +298,7 @@ export default function NewTrainingPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Έναρξη')} *</Label>
+                  <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Έναρξη')} *</Label>
                   <Input
                     type="time"
                     value={form.startTime}
@@ -307,7 +307,7 @@ export default function NewTrainingPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Λήξη')} *</Label>
+                  <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Λήξη')} *</Label>
                   <Input
                     type="time"
                     value={form.endTime}
@@ -322,7 +322,7 @@ export default function NewTrainingPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Repeat className="h-4 w-4 text-zinc-400" />
-                    <Label className="text-[9px] font-black uppercase tracking-widest text-zinc-400">
+                    <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">
                       {toGreekUpperCase('Επαναλαμβανόμενη')}
                     </Label>
                   </div>
@@ -354,7 +354,7 @@ export default function NewTrainingPage() {
                             type="button"
                             onClick={() => toggleRecurringDay(i)}
                             className={cn(
-                              "h-9 rounded-lg text-[9px] font-black uppercase transition-all",
+                              "h-9 rounded-lg text-[11px] font-black uppercase transition-all",
                               recurringDays.includes(i)
                                 ? "bg-emerald-600 text-white shadow-sm"
                                 : "bg-white text-zinc-400 border border-zinc-200 hover:border-emerald-300"
@@ -392,7 +392,7 @@ export default function NewTrainingPage() {
                     {recurringDays.length > 0 && (
                       <div className="flex items-center gap-2 p-2.5 bg-white rounded-lg border border-emerald-100">
                         <CalendarDays className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                        <p className="text-[10px] font-bold text-emerald-700">
+                        <p className="text-[12px] font-bold text-emerald-700">
                           <span className="font-black">{getRecurringDates().length}</span> προπονήσεις
                           ({recurringDays.map((d) => DAYS[d]).join(', ')} x {recurringWeeks} εβδ.)
                         </p>
@@ -432,7 +432,7 @@ export default function NewTrainingPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <p className="text-sm font-bold text-zinc-900 truncate">{drill.name}</p>
-                          <span className="px-2 py-0.5 bg-violet-100 text-violet-700 rounded-md text-[9px] font-black shrink-0">{drill.duration} λ.</span>
+                          <span className="px-2 py-0.5 bg-violet-100 text-violet-700 rounded-md text-[11px] font-black shrink-0">{drill.duration} λ.</span>
                         </div>
                         {drill.description && <p className="text-[11px] text-zinc-400 truncate mt-0.5">{drill.description}</p>}
                       </div>

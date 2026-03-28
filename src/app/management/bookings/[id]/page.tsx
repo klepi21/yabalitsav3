@@ -405,15 +405,15 @@ function CollectionTracker({
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center p-3 rounded-xl bg-emerald-50">
             <p className="text-2xl font-black text-emerald-700">{'\u20AC'}{paidAmount.toFixed(0)}</p>
-            <p className="text-[10px] font-bold text-emerald-500 uppercase">Εισπράχθηκαν</p>
+            <p className="text-[12px] font-bold text-emerald-500 uppercase">Εισπράχθηκαν</p>
           </div>
           <div className="text-center p-3 rounded-xl bg-amber-50">
             <p className="text-2xl font-black text-amber-700">{'\u20AC'}{remainingAmount.toFixed(0)}</p>
-            <p className="text-[10px] font-bold text-amber-500 uppercase">Υπόλοιπο</p>
+            <p className="text-[12px] font-bold text-amber-500 uppercase">Υπόλοιπο</p>
           </div>
           <div className="text-center p-3 rounded-xl bg-zinc-50">
             <p className="text-2xl font-black text-zinc-700">{'\u20AC'}{pricePerPerson.toFixed(1)}</p>
-            <p className="text-[10px] font-bold text-zinc-400 uppercase">Ανά Άτομο</p>
+            <p className="text-[12px] font-bold text-zinc-400 uppercase">Ανά Άτομο</p>
           </div>
         </div>
 
@@ -498,7 +498,7 @@ function CollectionTracker({
               style={{ width: `${totalSlots > 0 ? (paidSlots / totalSlots) * 100 : 0}%` }}
             />
           </div>
-          <p className="text-[10px] text-zinc-400 text-right font-medium">
+          <p className="text-[12px] text-zinc-400 text-right font-medium">
             {totalSlots > 0 ? Math.round((paidSlots / totalSlots) * 100) : 0}% εισπράχθηκε
           </p>
         </div>

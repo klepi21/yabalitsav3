@@ -213,7 +213,7 @@ export default function TournamentDetailPage() {
               <h1 className="text-4xl font-black tracking-tight text-zinc-900 uppercase">
                 {tournament.name}
               </h1>
-              <Badge className={cn("rounded-xl px-4 py-1.5 font-black text-[10px] uppercase tracking-widest border-none shadow-sm", status.className)}>
+              <Badge className={cn("rounded-xl px-4 py-1.5 font-black text-[12px] uppercase tracking-widest border-none shadow-sm", status.className)}>
                 {status.label}
               </Badge>
             </div>
@@ -360,7 +360,7 @@ export default function TournamentDetailPage() {
                   </div>
                   <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Βαθμολογία</h2>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => setActiveTab('standings')} className="font-black text-[10px] uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
+                <Button variant="ghost" size="sm" onClick={() => setActiveTab('standings')} className="font-black text-[12px] uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
                   Πλήρης Πίνακας <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
@@ -369,11 +369,11 @@ export default function TournamentDetailPage() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-zinc-50/50">
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-400">#</th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-400">Ομάδα</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Αγ</th>
-                      <th className="px-4 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">ΔΤ</th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Βαθ</th>
+                      <th className="px-6 py-4 text-[12px] font-black uppercase tracking-widest text-zinc-400">#</th>
+                      <th className="px-6 py-4 text-[12px] font-black uppercase tracking-widest text-zinc-400">Ομάδα</th>
+                      <th className="px-4 py-4 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">Αγ</th>
+                      <th className="px-4 py-4 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">ΔΤ</th>
+                      <th className="px-6 py-4 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">Βαθ</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-50">
@@ -427,7 +427,7 @@ export default function TournamentDetailPage() {
                 </div>
                 <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Επόμενοι Αγώνες</h2>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setActiveTab('matches')} className="font-black text-[10px] uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
+              <Button variant="ghost" size="sm" onClick={() => setActiveTab('matches')} className="font-black text-[12px] uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
                 Πρόγραμμα <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
@@ -446,10 +446,10 @@ export default function TournamentDetailPage() {
                   return (
                     <div key={match.id} className="group p-6 rounded-3xl border border-zinc-50 bg-zinc-50/30 hover:bg-white hover:shadow-md hover:border-emerald-100 transition-all duration-300">
                       <div className="flex items-center justify-between mb-4">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                        <span className="text-[12px] font-black uppercase tracking-widest text-zinc-400">
                           {match.roundLabel || `Αγωνιστική ${match.round}`}
                         </span>
-                        <Badge className={cn("px-2.5 py-1 rounded-lg font-black text-[9px] uppercase tracking-widest border-none", ms.className)}>
+                        <Badge className={cn("px-2.5 py-1 rounded-lg font-black text-[11px] uppercase tracking-widest border-none", ms.className)}>
                           {ms.label}
                         </Badge>
                       </div>
@@ -457,12 +457,12 @@ export default function TournamentDetailPage() {
                         <span className="text-sm font-black text-zinc-900 uppercase truncate">{home?.name || '—'}</span>
                         <div className="flex flex-col items-center gap-1">
                           <span className="h-1px w-12 bg-zinc-200" />
-                          <span className="text-[10px] font-black text-zinc-300">VS</span>
+                          <span className="text-[12px] font-black text-zinc-300">VS</span>
                           <span className="h-1px w-12 bg-zinc-200" />
                         </div>
                         <span className="text-sm font-black text-zinc-900 uppercase truncate text-right">{away?.name || '—'}</span>
                       </div>
-                      <div className="mt-4 pt-4 border-t border-zinc-50 flex items-center justify-center gap-4 text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+                      <div className="mt-4 pt-4 border-t border-zinc-50 flex items-center justify-center gap-4 text-[12px] font-black text-zinc-400 uppercase tracking-widest">
                         <div className="flex items-center gap-1.5">
                           <Calendar className="h-3 w-3" />
                           {new Date(match.scheduledDate).toLocaleDateString('el-GR')}
@@ -495,7 +495,7 @@ export default function TournamentDetailPage() {
                   const awayWon = (match.awayScore ?? 0) > (match.homeScore ?? 0);
                   return (
                     <div key={match.id} className="p-6 rounded-3xl border border-zinc-100 hover:shadow-lg transition-all duration-300">
-                      <div className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-4 text-center">
+                      <div className="text-[11px] font-black uppercase tracking-widest text-zinc-400 mb-4 text-center">
                         {match.roundLabel || `Αγωνιστική ${match.round}`}
                       </div>
                       <div className="flex items-center justify-between gap-4">
@@ -555,16 +555,16 @@ export default function TournamentDetailPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-zinc-50/50">
-                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">#</th>
-                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400">Ομάδα</th>
-                    <th className="px-4 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">ΑΓ</th>
-                    <th className="px-4 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Ν</th>
-                    <th className="px-4 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Ι</th>
-                    <th className="px-4 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">Η</th>
-                    <th className="px-4 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">ΥΠ</th>
-                    <th className="px-4 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">ΚΑ</th>
-                    <th className="px-4 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">ΔΤ</th>
-                    <th className="px-6 py-5 text-[10px] font-black uppercase tracking-widest text-zinc-400 text-center">ΒΑΘ</th>
+                    <th className="px-6 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400">#</th>
+                    <th className="px-6 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400">Ομάδα</th>
+                    <th className="px-4 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">ΑΓ</th>
+                    <th className="px-4 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">Ν</th>
+                    <th className="px-4 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">Ι</th>
+                    <th className="px-4 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">Η</th>
+                    <th className="px-4 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">ΥΠ</th>
+                    <th className="px-4 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">ΚΑ</th>
+                    <th className="px-4 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">ΔΤ</th>
+                    <th className="px-6 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">ΒΑΘ</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-50">
@@ -591,7 +591,7 @@ export default function TournamentDetailPage() {
                             <span className="text-sm font-black text-zinc-900 uppercase group-hover:text-emerald-600 transition-colors">
                               {team.name}
                             </span>
-                            <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">
+                            <span className="text-[12px] font-bold text-zinc-400 uppercase tracking-tight">
                               {team.captainName}
                             </span>
                           </div>
@@ -604,7 +604,7 @@ export default function TournamentDetailPage() {
                         <td className="px-4 py-5 text-center text-sm font-bold text-zinc-500">{team.stats.goalsAgainst}</td>
                         <td className="px-4 py-5 text-center">
                           <Badge className={cn(
-                            "rounded-lg px-2 py-0.5 text-[10px] font-black border-none",
+                            "rounded-lg px-2 py-0.5 text-[12px] font-black border-none",
                             gd > 0 ? "bg-emerald-100 text-emerald-700" :
                             gd < 0 ? "bg-red-100 text-red-700" :
                             "bg-zinc-100 text-zinc-500"
@@ -637,7 +637,7 @@ export default function TournamentDetailPage() {
               </div>
               <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Πρόγραμμα Αγώνων</h2>
             </div>
-            <Button variant="ghost" size="sm" asChild className="font-black text-[10px] uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
+            <Button variant="ghost" size="sm" asChild className="font-black text-[12px] uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
               <Link href={`/management/tournaments/${tournament.id}/matches`}>
                 Διαχείριση <ChevronRight className="h-4 w-4 ml-1" />
               </Link>
@@ -663,14 +663,14 @@ export default function TournamentDetailPage() {
                   return (
                     <div key={match.id} className="group p-6 rounded-3xl border border-zinc-100 hover:bg-white hover:shadow-xl hover:border-emerald-100 transition-all duration-300">
                       <div className="flex items-center justify-between mb-6">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                        <span className="text-[12px] font-black uppercase tracking-widest text-zinc-400">
                           {match.roundLabel || `Αγωνιστική ${match.round}`}
                         </span>
                         <div className="flex items-center gap-4">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-zinc-300">
+                          <span className="text-[12px] font-black uppercase tracking-widest text-zinc-300">
                             {new Date(match.scheduledDate).toLocaleDateString('el-GR')} &middot; {match.scheduledTime}
                           </span>
-                          <Badge className={cn("px-2.5 py-1 rounded-lg font-black text-[9px] uppercase tracking-widest border-none", ms.className)}>
+                          <Badge className={cn("px-2.5 py-1 rounded-lg font-black text-[11px] uppercase tracking-widest border-none", ms.className)}>
                             {ms.label}
                           </Badge>
                         </div>
@@ -725,7 +725,7 @@ export default function TournamentDetailPage() {
               </div>
               <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Ομάδες Τουρνουά</h2>
             </div>
-            <Button variant="ghost" size="sm" asChild className="font-black text-[10px] uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
+            <Button variant="ghost" size="sm" asChild className="font-black text-[12px] uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
               <Link href={`/management/tournaments/${tournament.id}/teams`}>
                 <Plus className="h-4 w-4 mr-1" /> Διαχείριση
               </Link>
@@ -764,14 +764,14 @@ export default function TournamentDetailPage() {
                         <h3 className="text-lg font-black text-zinc-900 uppercase tracking-tight group-hover:text-emerald-700 transition-colors">
                           {team.name}
                         </h3>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400">
+                        <p className="text-[12px] font-black uppercase tracking-widest text-zinc-400">
                           {team.captainName}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between pt-6 border-t border-zinc-50">
                       <div className="space-y-1">
-                        <p className="text-[9px] font-black uppercase tracking-widest text-zinc-300">Ρόστερ</p>
+                        <p className="text-[11px] font-black uppercase tracking-widest text-zinc-300">Ρόστερ</p>
                         <p className="text-sm font-bold text-zinc-900">{teamPlayers.length} Καταχωρημένοι</p>
                       </div>
                       <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm">
@@ -792,7 +792,7 @@ export default function TournamentDetailPage() {
           {/* Knockout Bracket */}
           {tournament.type !== 'league' && matches.length > 0 && (
             <div className="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
-              <h3 className="text-[9px] font-black uppercase tracking-widest text-zinc-400 mb-4">Bracket</h3>
+              <h3 className="text-[11px] font-black uppercase tracking-widest text-zinc-400 mb-4">Bracket</h3>
               <KnockoutBracket matches={matches} teams={teams} />
             </div>
           )}
@@ -807,7 +807,7 @@ export default function TournamentDetailPage() {
               if (groupLabels.length === 0) return null;
               return (
                 <div className="space-y-4">
-                  <h3 className="text-[9px] font-black uppercase tracking-widest text-zinc-400">Όμιλοι</h3>
+                  <h3 className="text-[11px] font-black uppercase tracking-widest text-zinc-400">Όμιλοι</h3>
                   {groupLabels.map((label) => {
                     const groupTeams = teams
                       .filter((t) => t.groupLabel === label)
@@ -815,7 +815,7 @@ export default function TournamentDetailPage() {
                     return (
                       <div key={label} className="rounded-2xl border border-zinc-100 bg-white shadow-sm overflow-hidden">
                         <div className="px-4 py-2.5 bg-zinc-50 border-b border-zinc-100">
-                          <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Όμιλος {label}</span>
+                          <span className="text-[12px] font-black text-zinc-500 uppercase tracking-widest">Όμιλος {label}</span>
                         </div>
                         <table className="w-full">
                           <thead>

@@ -276,7 +276,7 @@ export default function WeeklyCalendar({
                                     <div className="flex items-start justify-between">
                                       <div className="min-w-0 flex-1">
                                         <div className="text-[11px] font-black truncate leading-tight">{booking.userName || 'Άγνωστος'}</div>
-                                        <div className="text-[9px] font-bold opacity-80 mt-0.5 truncate flex items-center gap-1">
+                                        <div className="text-[11px] font-bold opacity-80 mt-0.5 truncate flex items-center gap-1">
                                           <Phone className="h-2 w-2" />
                                           {booking.userPhone || '—'}
                                         </div>

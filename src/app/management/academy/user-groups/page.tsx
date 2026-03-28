@@ -122,7 +122,7 @@ export default function UserGroupsPage() {
         </div>
         <div className="space-y-0.5">
           <p className="text-2xl font-black text-zinc-900 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{groups.length}</p>
-          <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-zinc-400">{toGreekUpperCase('Σύνολο Κατηγοριών')}</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400">{toGreekUpperCase('Σύνολο Κατηγοριών')}</p>
         </div>
       </div>
 
@@ -165,7 +165,7 @@ export default function UserGroupsPage() {
                     <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-0.5">
                             <h3 className="text-lg font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{toGreekUpperCase(group.name)}</h3>
-                            <Badge variant="secondary" className={cn("rounded-md px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider bg-zinc-100 text-zinc-500 border-none shadow-sm", (GROUP_COLORS as Record<string, string>)[group.color] || '')}>
+                            <Badge variant="secondary" className={cn("rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider bg-zinc-100 text-zinc-500 border-none shadow-sm", (GROUP_COLORS as Record<string, string>)[group.color] || '')}>
                                 {toGreekUpperCase(group.namePlural)}
                             </Badge>
                         </div>
@@ -218,20 +218,20 @@ export default function UserGroupsPage() {
                 <div className="space-y-4">
                     {/* Fields Section */}
                     <div>
-                        <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mb-2.5">{toGreekUpperCase('Επιπλέον Πεδία')}</p>
+                        <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-2.5">{toGreekUpperCase('Επιπλέον Πεδία')}</p>
                         <div className="flex flex-wrap gap-1.5 text-zinc-400">
                             {group.fields.length > 0 ? (
                                 group.fields.map((field) => (
                                     <span
                                         key={field.key}
-                                        className="inline-flex items-center rounded-lg bg-zinc-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-tight text-zinc-600 border border-zinc-100 shadow-sm"
+                                        className="inline-flex items-center rounded-lg bg-zinc-50 px-3 py-1.5 text-[12px] font-bold uppercase tracking-tight text-zinc-600 border border-zinc-100 shadow-sm"
                                     >
                                         {toGreekUpperCase(field.label)}
                                         {field.required && <span className="text-red-500 ml-1 font-black">*</span>}
                                     </span>
                                 ))
                             ) : (
-                                <span className="text-[10px] font-bold text-zinc-300 uppercase tracking-widest">{toGreekUpperCase('Κανένα επιπλέον πεδίο')}</span>
+                                <span className="text-[12px] font-bold text-zinc-300 uppercase tracking-widest">{toGreekUpperCase('Κανένα επιπλέον πεδίο')}</span>
                             )}
                         </div>
                     </div>
@@ -239,34 +239,34 @@ export default function UserGroupsPage() {
                     {/* Capabilities Section */}
                     {group.capabilities.length > 0 && (
                         <div>
-                            <p className="text-[9px] font-bold uppercase tracking-widest text-zinc-400 mb-2.5">{toGreekUpperCase('Δυνατότητες')}</p>
+                            <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-2.5">{toGreekUpperCase('Δυνατότητες')}</p>
                             <div className="flex flex-wrap gap-1.5">
                                 {group.capabilities.includes('squad_assignment') && (
-                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-blue-600 border-none bg-blue-50/50">
+                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-blue-600 border-none bg-blue-50/50">
                                         <Shield className="h-3.5 w-3.5 mr-1.5" />
                                         {toGreekUpperCase('Ανάθεση σε τμήμα')}
                                     </Badge>
                                 )}
                                 {group.capabilities.includes('parent_linking') && (
-                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-amber-600 border-none bg-amber-50/50">
+                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-amber-600 border-none bg-amber-50/50">
                                         <Link2 className="h-3.5 w-3.5 mr-1.5" />
                                         {toGreekUpperCase('Σύνδεση γονέα')}
                                     </Badge>
                                 )}
                                 {group.capabilities.includes('coach_squads') && (
-                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-emerald-600 border-none bg-emerald-50/50">
+                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-600 border-none bg-emerald-50/50">
                                         <ClipboardList className="h-3.5 w-3.5 mr-1.5" />
                                         {toGreekUpperCase('Ανάθεση τμημάτων')}
                                     </Badge>
                                 )}
                                 {group.capabilities.includes('monthly_payment') && (
-                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-teal-600 border-none bg-teal-50/50">
+                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-teal-600 border-none bg-teal-50/50">
                                         <Euro className="h-3.5 w-3.5 mr-1.5" />
                                         {toGreekUpperCase('Μηνιαία πληρωμή')}
                                     </Badge>
                                 )}
                                 {group.capabilities.includes('medical_tracking') && (
-                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-red-600 border-none bg-red-50/50">
+                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-red-600 border-none bg-red-50/50">
                                         <HeartPulse className="h-3.5 w-3.5 mr-1.5" />
                                         {toGreekUpperCase('Ιατρικό πιστοποιητικό')}
                                     </Badge>

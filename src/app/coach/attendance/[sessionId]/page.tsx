@@ -208,12 +208,12 @@ export default function CoachAttendancePage() {
           </div>
           <div className="flex items-center gap-2 ml-auto">
             {stats.late > 0 && (
-              <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+              <span className="text-[12px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
                 {stats.late} αργ.
               </span>
             )}
             {stats.injured > 0 && (
-              <span className="text-[10px] font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-full">
+              <span className="text-[12px] font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-full">
                 {stats.injured} τραυμ.
               </span>
             )}

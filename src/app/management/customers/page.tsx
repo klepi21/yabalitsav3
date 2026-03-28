@@ -174,7 +174,7 @@ export default function CustomersPage() {
                </h1>
                <div className="flex items-center gap-2">
                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                 <p className="text-[9px] sm:text-[10px] font-black text-zinc-400 uppercase tracking-widest hidden sm:block">
+                 <p className="text-[11px] sm:text-[12px] font-black text-zinc-400 uppercase tracking-widest hidden sm:block">
                    {toGreekUpperCase('Διαχειριση πελατων και ιστορικο')}
                  </p>
                </div>
@@ -225,7 +225,7 @@ export default function CustomersPage() {
           </div>
           <div>
             <p className="text-2xl font-black text-zinc-900 tracking-tight">{customers.length}</p>
-            <p className="text-[9px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Πελάτες')}</p>
+            <p className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Πελάτες')}</p>
           </div>
         </div>
 
@@ -276,9 +276,9 @@ export default function CustomersPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-zinc-100">
-                    <th className="py-3 sm:py-4 px-3 sm:px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400">Πελάτης</th>
-                    <th className="py-3 sm:py-4 px-3 sm:px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 hidden md:table-cell">Email</th>
-                    <th className="py-3 sm:py-4 px-3 sm:px-6 text-[10px] font-black uppercase tracking-widest text-zinc-400 hidden sm:table-cell">Τηλέφωνο</th>
+                    <th className="py-3 sm:py-4 px-3 sm:px-6 text-[12px] font-black uppercase tracking-widest text-zinc-400">Πελάτης</th>
+                    <th className="py-3 sm:py-4 px-3 sm:px-6 text-[12px] font-black uppercase tracking-widest text-zinc-400 hidden md:table-cell">Email</th>
+                    <th className="py-3 sm:py-4 px-3 sm:px-6 text-[12px] font-black uppercase tracking-widest text-zinc-400 hidden sm:table-cell">Τηλέφωνο</th>
                     <th className="py-3 sm:py-4 px-2 sm:px-6 text-right w-[50px] sm:w-[80px]"></th>
                   </tr>
                 </thead>
@@ -294,7 +294,7 @@ export default function CustomersPage() {
                             <p className="text-xs sm:text-sm font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase truncate">
                               {customer.name}
                             </p>
-                            <p className="text-[10px] font-bold text-zinc-400 md:hidden truncate">{customer.phone || customer.email}</p>
+                            <p className="text-[12px] font-bold text-zinc-400 md:hidden truncate">{customer.phone || customer.email}</p>
                           </div>
                         </div>
                       </td>

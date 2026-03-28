@@ -160,7 +160,7 @@ export default function PitchDetailsPage() {
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-1">
                 <h1 className="text-xl sm:text-3xl font-black tracking-tight text-zinc-900 uppercase">{toGreekUpperCase(pitch.name)}</h1>
-                <Badge className="bg-emerald-50 text-emerald-700 border-none font-black text-[10px] uppercase tracking-wider px-3">
+                <Badge className="bg-emerald-50 text-emerald-700 border-none font-black text-[12px] uppercase tracking-wider px-3">
                   {pitch.type}
                 </Badge>
               </div>
@@ -238,7 +238,7 @@ export default function PitchDetailsPage() {
                   <stat.icon className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-zinc-400 mb-0.5">{stat.label}</p>
+                  <p className="text-[12px] font-black uppercase tracking-widest text-zinc-400 mb-0.5">{stat.label}</p>
                   <p className="text-xl font-black text-zinc-900">{stat.value}</p>
                 </div>
               </div>
@@ -284,7 +284,7 @@ export default function PitchDetailsPage() {
                                ))}
                              </div>
                            ) : (
-                             <Badge className="bg-zinc-100 text-zinc-400 border-none font-bold text-[10px]">ΚΛΕΙΣΤΟ</Badge>
+                             <Badge className="bg-zinc-100 text-zinc-400 border-none font-bold text-[12px]">ΚΛΕΙΣΤΟ</Badge>
                            )}
                          </div>
                       </div>
@@ -312,7 +312,7 @@ export default function PitchDetailsPage() {
                         <p className="text-sm font-black text-zinc-900">
                           {new Date(blockedDate.startDate).toLocaleDateString('el-GR', { day: 'numeric', month: 'short' })}
                         </p>
-                        <Badge className="bg-white text-red-600 border border-red-50 font-bold text-[9px] uppercase">
+                        <Badge className="bg-white text-red-600 border border-red-50 font-bold text-[11px] uppercase">
                           {blockedDate.isFullDay ? 'Full Day' : 'Partial'}
                         </Badge>
                       </div>
@@ -384,7 +384,7 @@ export default function PitchDetailsPage() {
                             </td>
                             <td className="py-4 sm:py-5 px-2 sm:px-4 text-right">
                                <Badge className={cn(
-                                 "font-black text-[9px] uppercase tracking-wider px-2 py-0.5 border-none",
+                                 "font-black text-[11px] uppercase tracking-wider px-2 py-0.5 border-none",
                                  status.className
                                )}>
                                  {status.label}

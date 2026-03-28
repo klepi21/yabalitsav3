@@ -153,7 +153,7 @@ export default function GuidesPage() {
              </h1>
              <div className="flex items-center gap-2">
                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-               <p className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">
+               <p className="text-[12px] font-black text-zinc-400 uppercase tracking-widest">
                  {toGreekUpperCase('Οδηγοι και υποστηριξη χρησης')}
                </p>
              </div>
@@ -163,43 +163,43 @@ export default function GuidesPage() {
 
       <Tabs defaultValue="getting-started">
         <TabsList className="flex flex-wrap h-auto gap-1 bg-zinc-100/80 p-1 rounded-xl">
-          <TabsTrigger value="getting-started" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="getting-started" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
             <Rocket className="h-3.5 w-3.5" />
             <span>{toGreekUpperCase('Ξεκινώντας')}</span>
           </TabsTrigger>
-          <TabsTrigger value="bookings" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="bookings" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
             <Calendar className="h-3.5 w-3.5" />
             <span>{toGreekUpperCase('Κρατήσεις')}</span>
           </TabsTrigger>
-          <TabsTrigger value="pitches" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="pitches" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
             <Goal className="h-3.5 w-3.5" />
             <span>{toGreekUpperCase('Γήπεδα')}</span>
           </TabsTrigger>
-          <TabsTrigger value="customers" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="customers" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
             <Users className="h-3.5 w-3.5" />
             <span>{toGreekUpperCase('Πελάτες')}</span>
           </TabsTrigger>
-          <TabsTrigger value="reports" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="reports" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
             <BarChart3 className="h-3.5 w-3.5" />
             <span>{toGreekUpperCase('Αναφορές')}</span>
           </TabsTrigger>
-          <TabsTrigger value="settings" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="settings" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
             <Settings className="h-3.5 w-3.5" />
             <span>{toGreekUpperCase('Ρυθμίσεις')}</span>
           </TabsTrigger>
-          <TabsTrigger value="academy" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="academy" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
             <GraduationCap className="h-3.5 w-3.5" />
             <span>{toGreekUpperCase('Ακαδημία')}</span>
           </TabsTrigger>
-          <TabsTrigger value="tournaments" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="tournaments" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
             <Trophy className="h-3.5 w-3.5" />
             <span>{toGreekUpperCase('Τουρνουά')}</span>
           </TabsTrigger>
-          <TabsTrigger value="training" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="training" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
             <Dumbbell className="h-3.5 w-3.5" />
             <span>{toGreekUpperCase('Προπονήσεις')}</span>
           </TabsTrigger>
-          <TabsTrigger value="fse" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="fse" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
             <Search className="h-3.5 w-3.5" />
             <span>{toGreekUpperCase('FSE')}</span>
           </TabsTrigger>
@@ -212,7 +212,7 @@ export default function GuidesPage() {
                 <h2 className="text-base font-black tracking-tight text-zinc-900 mb-0.5 uppercase">
                 {toGreekUpperCase('Ξεκινώντας')}
                 </h2>
-                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-tight">
+                <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-tight">
                 {toGreekUpperCase('Το Yabalitsa Management σάς βοηθά να διαχειριστείτε πλήρως τις εγκαταστάσεις σας.')}
                 </p>
             </div>

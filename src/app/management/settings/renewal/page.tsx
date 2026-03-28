@@ -273,14 +273,14 @@ export default function SubscriptionRenewalPage() {
               >
                 {status === 'current' && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-600 text-white">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[12px] font-semibold bg-emerald-600 text-white">
                       ΕΝΕΡΓΟ
                     </span>
                   </div>
                 )}
                 {plan.popular && status !== 'current' && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-600 text-white">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[12px] font-semibold bg-emerald-600 text-white">
                       ΔΗΜΟΦΙΛΕΣ
                     </span>
                   </div>

@@ -149,7 +149,7 @@ function VenueLoginContent() {
           <p className="text-zinc-500 text-xs font-medium">
             &copy; {new Date().getFullYear()} Yabalitsa SaaS
           </p>
-          <div className="flex gap-4 text-[10px] font-black tracking-widest text-emerald-500/80">
+          <div className="flex gap-4 text-[12px] font-black tracking-widest text-emerald-500/80">
             <span>SECURE ENCRYPTED</span>
             <span>GDPR COMPLIANT</span>
           </div>

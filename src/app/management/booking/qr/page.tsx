@@ -145,7 +145,7 @@ function QRInner() {
                     className="w-full max-w-[280px] h-auto rounded-xl print-qr"
                     unoptimized
                   />
-                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-zinc-900 text-white text-[10px] font-black rounded-full shadow-lg no-print">
+                  <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 px-4 py-1.5 bg-zinc-900 text-white text-[12px] font-black rounded-full shadow-lg no-print">
                     SCAN ME
                   </div>
                 </div>
@@ -154,7 +154,7 @@ function QRInner() {
                 <div className="w-full no-print">
                   <div className="flex items-center gap-2 p-4 bg-zinc-50 rounded-2xl border border-zinc-100 group/link">
                     <div className="flex-1 truncate">
-                      <p className="text-[10px] font-bold text-zinc-400 uppercase mb-0.5 tracking-widest">{toGreekUpperCase('Σύνδεσμος Κράτησης')}</p>
+                      <p className="text-[12px] font-bold text-zinc-400 uppercase mb-0.5 tracking-widest">{toGreekUpperCase('Σύνδεσμος Κράτησης')}</p>
                       <p className="text-xs font-black text-zinc-900 truncate">{fullUrl}</p>
                     </div>
                     <button
@@ -203,7 +203,7 @@ function QRInner() {
           </div>
         </div>
 
-        <p className="text-center text-[10px] font-bold text-zinc-400 no-print uppercase tracking-widest leading-relaxed">
+        <p className="text-center text-[12px] font-bold text-zinc-400 no-print uppercase tracking-widest leading-relaxed">
           {toGreekUpperCase('Τοποθετήστε τον κωδικό στην είσοδο του γηπέδου')}<br />
           {toGreekUpperCase('για να διευκολύνετε τις κρατήσεις των πελατών σας')}
         </p>

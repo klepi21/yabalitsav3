@@ -191,10 +191,10 @@ export default function AdminPanelPage() {
 
   const getPlanBadge = (venue: VenueDetail) => {
     if (!venue.active) {
-      return <Badge variant="destructive" className="text-[9px] font-black">EXPIRED</Badge>;
+      return <Badge variant="destructive" className="text-[11px] font-black">EXPIRED</Badge>;
     }
     if (venue.plan === 'trial') {
-      return <Badge className="bg-amber-100 text-amber-700 text-[9px] font-black hover:bg-amber-100">TRIAL</Badge>;
+      return <Badge className="bg-amber-100 text-amber-700 text-[11px] font-black hover:bg-amber-100">TRIAL</Badge>;
     }
     const colors: Record<string, string> = {
       Basic: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
@@ -202,7 +202,7 @@ export default function AdminPanelPage() {
       Enterprise: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100',
     };
     return (
-      <Badge className={cn('text-[9px] font-black', colors[venue.planType || 'Basic'] || colors.Basic)}>
+      <Badge className={cn('text-[11px] font-black', colors[venue.planType || 'Basic'] || colors.Basic)}>
         {venue.planType || 'ACTIVE'}
       </Badge>
     );
@@ -301,12 +301,12 @@ export default function AdminPanelPage() {
                 <thead>
                   <tr className="border-b bg-zinc-50/80">
                     <SortableHeader label="Venue" field="name" current={sortField} asc={sortAsc} onToggle={toggleSort} />
-                    <th className="px-4 py-3 text-left text-[10px] font-black text-zinc-400 uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-left text-[12px] font-black text-zinc-400 uppercase tracking-wider">Status</th>
                     <SortableHeader label="Εγγραφή" field="createdAt" current={sortField} asc={sortAsc} onToggle={toggleSort} />
-                    <th className="px-4 py-3 text-center text-[10px] font-black text-zinc-400 uppercase tracking-wider">Γήπεδα</th>
+                    <th className="px-4 py-3 text-center text-[12px] font-black text-zinc-400 uppercase tracking-wider">Γήπεδα</th>
                     <SortableHeader label="Bookings" field="bookings" current={sortField} asc={sortAsc} onToggle={toggleSort} className="text-center" />
                     <SortableHeader label="Πελάτες" field="customers" current={sortField} asc={sortAsc} onToggle={toggleSort} className="text-center" />
-                    <th className="px-4 py-3 text-center text-[10px] font-black text-zinc-400 uppercase tracking-wider">Academy</th>
+                    <th className="px-4 py-3 text-center text-[12px] font-black text-zinc-400 uppercase tracking-wider">Academy</th>
                     <SortableHeader label="Έσοδα" field="revenue" current={sortField} asc={sortAsc} onToggle={toggleSort} className="text-right" />
                   </tr>
                 </thead>
@@ -360,7 +360,7 @@ export default function AdminPanelPage() {
                             </div>
                             {venue.academyGroups.length > 0 && (
                               <div className="mt-3 pt-3 border-t border-zinc-200">
-                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-3">Academy Users ανά Group</p>
+                                <p className="text-[12px] font-black text-zinc-400 uppercase tracking-wider mb-3">Academy Users ανά Group</p>
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                                   {venue.academyGroups.map(group => (
                                     <AcademyGroupCard key={group.groupId} group={group} formatDate={formatDate} />
@@ -399,7 +399,7 @@ export default function AdminPanelPage() {
                       {getPlanBadge(venue)}
                     </div>
                     <p className="text-[11px] text-zinc-400 truncate">{venue.email} {venue.city ? `- ${venue.city}` : ''}</p>
-                    <p className="text-[10px] text-zinc-400 mt-0.5">
+                    <p className="text-[12px] text-zinc-400 mt-0.5">
                       <Clock className="inline h-3 w-3 mr-0.5 -mt-0.5" />
                       {formatDate(venue.createdAt)}
                     </p>
@@ -433,7 +433,7 @@ export default function AdminPanelPage() {
                     </div>
                     {venue.academyGroups.length > 0 && (
                       <div className="mt-3 pt-3 border-t border-zinc-100">
-                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-2">Academy Users ανά Group</p>
+                        <p className="text-[12px] font-black text-zinc-400 uppercase tracking-wider mb-2">Academy Users ανά Group</p>
                         <div className="space-y-2">
                           {venue.academyGroups.map(group => (
                             <AcademyGroupCard key={group.groupId} group={group} formatDate={formatDate} />
@@ -492,8 +492,8 @@ function KPICard({
           <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         </div>
         <p className="text-lg sm:text-xl font-black text-zinc-900">{value}</p>
-        <p className="text-[10px] sm:text-[11px] font-bold text-zinc-400 uppercase tracking-wider mt-0.5">{label}</p>
-        {sub && <p className="text-[9px] text-zinc-400 mt-0.5">{sub}</p>}
+        <p className="text-[12px] sm:text-[11px] font-bold text-zinc-400 uppercase tracking-wider mt-0.5">{label}</p>
+        {sub && <p className="text-[11px] text-zinc-400 mt-0.5">{sub}</p>}
       </CardContent>
     </Card>
   );
@@ -517,7 +517,7 @@ function SortableHeader({
   const active = current === field;
   return (
     <th
-      className={cn('px-4 py-3 text-[10px] font-black text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-600 transition-colors select-none', className)}
+      className={cn('px-4 py-3 text-[12px] font-black text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-600 transition-colors select-none', className)}
       onClick={() => onToggle(field)}
     >
       <span className="inline-flex items-center gap-1">
@@ -540,7 +540,7 @@ function MiniStat({ icon: _Icon, value, label }: { icon: React.ElementType; valu
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider">{label}</p>
+      <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">{label}</p>
       <p className="text-[12px] font-bold text-zinc-700">{value}</p>
     </div>
   );
@@ -574,7 +574,7 @@ function AcademyGroupCard({
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-sm">{group.groupIcon}</span>
-          <Badge className={cn('text-[9px] font-black', colorClass)}>
+          <Badge className={cn('text-[11px] font-black', colorClass)}>
             {group.groupName}
           </Badge>
         </div>
