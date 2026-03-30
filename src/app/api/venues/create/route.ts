@@ -3,6 +3,7 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import path from 'path';
+import { sendEmail, emailTemplates } from '@/lib/email-service';
 
 // Initialize Firebase Admin if not already done
 if (!getApps().length) {
@@ -129,6 +130,14 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text, parse_mode: 'Markdown' }),
       }).catch((err) => console.warn('Telegram notification failed:', err));
     }
+
+    // Send Welcome Email (non-blocking)
+    const welcomeEmail = emailTemplates.welcome(ownerName);
+    sendEmail({
+      to: ownerEmail,
+      subject: welcomeEmail.subject,
+      html: welcomeEmail.html
+    }).catch((err) => console.warn('Welcome email failed:', err));
 
     return NextResponse.json(
       {
