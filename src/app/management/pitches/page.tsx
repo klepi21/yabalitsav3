@@ -210,10 +210,10 @@ export default function PitchesPage() {
       {/* Pitch Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredPitches.length === 0 ? (
-          <Card className="col-span-full border-2 border-dashed border-zinc-100 bg-zinc-50/50 py-16 rounded-2xl shadow-none">
+          <Card className="col-span-full border border-zinc-200 bg-white py-16 rounded-2xl shadow-sm">
             <CardContent className="flex flex-col items-center justify-center text-center">
-              <div className="h-16 w-16 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center mb-6 shadow-sm">
-                <Building2 className="h-8 w-8 text-zinc-200" />
+              <div className="h-16 w-16 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center mb-6 shadow-inner">
+                <Building2 className="h-8 w-8 text-zinc-300" />
               </div>
               <h3 className="text-xl font-black text-zinc-900 uppercase tracking-tight">
                 {searchTerm ? 'Δεν βρέθηκαν γήπεδα' : 'Δεν υπάρχουν γήπεδα'}
