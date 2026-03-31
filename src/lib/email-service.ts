@@ -273,7 +273,7 @@ export const emailTemplates = {
     </div>
 
     <!-- Countdown bar -->
-    <div class="countdown">⏱ Η δωρεάν δοκιμή σου: 15 ημέρες — ξεκίνησε τώρα</div>
+    <div class="countdown">⏱ Η δωρεαν δοκιμη σου: 15 ημερες — ξεκινησε τωρα</div>
 
     <!-- Hero -->
     <div class="hero">
