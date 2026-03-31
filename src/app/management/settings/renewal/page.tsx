@@ -263,13 +263,12 @@ export default function SubscriptionRenewalPage() {
                 type="button"
                 onClick={() => !isDisabled && setSelectedPlan(plan.id)}
                 disabled={isDisabled}
-                className={`relative rounded-xl border-2 p-6 text-left transition-all duration-150 ${
-                  isDisabled
-                    ? 'border-zinc-100 bg-zinc-50/50 opacity-70 cursor-not-allowed'
-                    : isSelected
+                className={`relative rounded-xl border-2 p-6 text-left transition-all duration-150 ${isDisabled
+                  ? 'border-zinc-100 bg-zinc-50/50 opacity-70 cursor-not-allowed'
+                  : isSelected
                     ? 'border-emerald-400 bg-emerald-50/30 shadow-sm'
                     : 'border-zinc-100 hover:border-zinc-200 hover:shadow-sm'
-                }`}
+                  }`}
               >
                 {status === 'current' && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -288,11 +287,10 @@ export default function SubscriptionRenewalPage() {
 
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className={`flex items-center justify-center w-10 h-10 rounded-xl ${
-                      isDisabled
-                        ? 'bg-zinc-100 text-zinc-400'
-                        : isSelected ? 'bg-emerald-100 text-emerald-600' : 'bg-zinc-100 text-zinc-500'
-                    }`}>
+                    <div className={`flex items-center justify-center w-10 h-10 rounded-xl ${isDisabled
+                      ? 'bg-zinc-100 text-zinc-400'
+                      : isSelected ? 'bg-emerald-100 text-emerald-600' : 'bg-zinc-100 text-zinc-500'
+                      }`}>
                       {isDisabled ? <Lock className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
                     </div>
                     <div>
@@ -311,11 +309,10 @@ export default function SubscriptionRenewalPage() {
                       {pricingUtils.formatPrice(monthlyPrice)}/μήνα με ΦΠΑ
                     </p>
                     {discount > 0 && (
-                      <span className={`inline-flex items-center mt-2 px-2 py-0.5 rounded-md text-xs font-medium border ${
-                        isDisabled
-                          ? 'bg-zinc-50 text-zinc-400 border-zinc-200'
-                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      }`}>
+                      <span className={`inline-flex items-center mt-2 px-2 py-0.5 rounded-md text-xs font-medium border ${isDisabled
+                        ? 'bg-zinc-50 text-zinc-400 border-zinc-200'
+                        : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        }`}>
                         Έκπτωση {discount}%
                       </span>
                     )}
@@ -490,7 +487,7 @@ export default function SubscriptionRenewalPage() {
                   className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-200 disabled:text-zinc-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
-                    <><Loader2 className="h-4 w-4 animate-spin" /> Επεξεργασία...</>
+                    <><Loader2 className="h-4 w-4 animate-spin" />Επεξεργασία...</>
                   ) : (
                     <><CreditCard className="h-4 w-4" /> Επιβεβαίωση</>
                   )}
