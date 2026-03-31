@@ -38,6 +38,13 @@ interface VenueStats {
   lastBooking: string | null;
 }
 
+interface VenueSquad {
+  id: string;
+  name: string;
+  ageGroup: string;
+  athleteCount: number;
+}
+
 interface AcademyGroupUser {
   id: string;
   displayName: string;
@@ -69,6 +76,7 @@ interface VenueDetail {
   updatedAt: string | null;
   stats: VenueStats;
   academyGroups: AcademyGroup[];
+  squads: VenueSquad[];
 }
 
 interface KPIs {
@@ -358,9 +366,23 @@ export default function AdminPanelPage() {
                               <DetailRow label="Τηλέφωνο" value={venue.phone || '-'} />
                               <DetailRow label="Έσοδα" value={venue.stats.revenue > 0 ? `€${venue.stats.revenue.toFixed(0)}` : '-'} />
                             </div>
+                            {venue.squads.length > 0 && (
+                              <div className="mt-3 pt-3 border-t border-zinc-200">
+                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-3">Τμήματα ({venue.squads.length})</p>
+                                <div className="flex flex-wrap gap-2">
+                                  {venue.squads.map(squad => (
+                                    <div key={squad.id} className="flex items-center gap-1.5 rounded-lg bg-zinc-100 px-3 py-1.5">
+                                      <span className="text-[11px] font-bold text-zinc-700">{squad.name}</span>
+                                      {squad.ageGroup && <span className="text-[9px] text-zinc-400">({squad.ageGroup})</span>}
+                                      <Badge className="text-[8px] font-black bg-emerald-100 text-emerald-700 ml-1">{squad.athleteCount}</Badge>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                             {venue.academyGroups.length > 0 && (
                               <div className="mt-3 pt-3 border-t border-zinc-200">
-                                <p className="text-[12px] font-black text-zinc-400 uppercase tracking-wider mb-3">Academy Users ανά Group</p>
+                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-3">Academy Users ανά Group</p>
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                                   {venue.academyGroups.map(group => (
                                     <AcademyGroupCard key={group.groupId} group={group} formatDate={formatDate} />
@@ -431,9 +453,22 @@ export default function AdminPanelPage() {
                       <DetailRow label="Online Bookings" value={venue.bookingsEnabled ? 'ON' : 'OFF'} />
                       <DetailRow label="Τηλέφωνο" value={venue.phone || '-'} />
                     </div>
+                    {venue.squads.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-zinc-100">
+                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-2">Τμήματα ({venue.squads.length})</p>
+                        <div className="flex flex-wrap gap-2">
+                          {venue.squads.map(squad => (
+                            <div key={squad.id} className="flex items-center gap-1.5 rounded-lg bg-zinc-100 px-2.5 py-1">
+                              <span className="text-[10px] font-bold text-zinc-700">{squad.name}</span>
+                              <Badge className="text-[8px] font-black bg-emerald-100 text-emerald-700">{squad.athleteCount}</Badge>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     {venue.academyGroups.length > 0 && (
                       <div className="mt-3 pt-3 border-t border-zinc-100">
-                        <p className="text-[12px] font-black text-zinc-400 uppercase tracking-wider mb-2">Academy Users ανά Group</p>
+                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-2">Academy Users ανά Group</p>
                         <div className="space-y-2">
                           {venue.academyGroups.map(group => (
                             <AcademyGroupCard key={group.groupId} group={group} formatDate={formatDate} />

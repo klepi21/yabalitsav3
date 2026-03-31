@@ -136,6 +136,33 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Squads per venue with athlete count
+    const squadsByVenue: Record<string, { id: string; name: string; ageGroup: string; athleteCount: number }[]> = {};
+    for (const sDoc of squadsSnapshot.docs) {
+      const data = sDoc.data();
+      const vid = data.venueId;
+      if (!vid) continue;
+      if (!squadsByVenue[vid]) squadsByVenue[vid] = [];
+      squadsByVenue[vid].push({
+        id: sDoc.id,
+        name: data.name || '',
+        ageGroup: data.ageGroup || '',
+        athleteCount: 0,
+      });
+    }
+
+    // Count athletes per squad
+    for (const uDoc of academyUsersSnapshot.docs) {
+      const data = uDoc.data();
+      const vid = data.venueId;
+      const squadIds = data.squad_ids || (data.squad_id ? [data.squad_id] : []);
+      if (!vid || !squadsByVenue[vid]) continue;
+      for (const sid of squadIds) {
+        const squad = squadsByVenue[vid].find(s => s.id === sid);
+        if (squad) squad.athleteCount++;
+      }
+    }
+
     // Get last booking date per venue
     const lastBookingByVenue: Record<string, string> = {};
     for (const doc of bookingsSnapshot.docs) {
@@ -173,6 +200,7 @@ export async function POST(request: NextRequest) {
         lastBooking: lastBookingByVenue[venue.id] || null,
       },
       academyGroups: academyUsersByVenue[venue.id] || [],
+      squads: squadsByVenue[venue.id] || [],
     }));
 
     // Global KPIs
