@@ -2,7 +2,6 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Calendar, Users, BarChart3, CheckCircle2, ArrowRight, Smartphone, LayoutDashboard, Target } from 'lucide-react';
-import { ContactFooter } from '@/components/ui/contact-footer';
 
 export const metadata: Metadata = {
   title: 'Διαχείριση Γηπέδου 5x5 | Σύγχρονο Λογισμικό Yabalitsa',
@@ -17,18 +16,35 @@ export default function LogismikoGipedou5x5Page() {
     <div className="min-h-screen bg-white text-[#040D12] font-sans selection:bg-emerald-500/30">
       
       {/* HEADER */}
-      <header className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-zinc-100">
-        <div className="max-w-[1400px] mx-auto px-6 h-20 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <Image src="/yabalo.png" alt="Yabalitsa Logo" width={140} height={28} className="cursor-pointer" />
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link href="/venue-login" className="hidden sm:flex text-sm font-semibold text-zinc-600 hover:text-emerald-600 transition-colors">
-              Σύνδεση
+      <header className="fixed top-0 w-full z-50 bg-[#040D12] border-b border-white/5 flex items-center justify-between text-[13px] font-medium tracking-wide">
+        <div className="max-w-[1400px] mx-auto w-full px-6 py-5 flex items-center justify-between">
+          <div className="flex items-center gap-10">
+            <Link href="/">
+              <Image
+                src="/yabalo.png"
+                alt="Yabalitsa"
+                width={160}
+                height={32}
+                className="filter brightness-0 invert hover:opacity-80 transition cursor-pointer"
+              />
             </Link>
-            <Link href="/for-venues" className="px-5 py-2.5 rounded-xl bg-[#040D12] hover:bg-zinc-800 text-white font-bold text-sm transition-all shadow-lg shadow-zinc-200">
-              Ξεκινήστε Δωρεάν
-            </Link>
+            <nav className="hidden lg:flex items-center gap-8 text-zinc-300">
+              <Link href="/#features" className="hover:text-emerald-400 transition">Λειτουργίες</Link>
+              <Link href="/#academies" className="hover:text-emerald-400 transition">Ακαδημίες</Link>
+              <Link href="/#pitches" className="hover:text-emerald-400 transition">Γήπεδα</Link>
+              <Link href="/#reports" className="hover:text-emerald-400 transition">Αναφορές</Link>
+              <Link href="/blog" className="hover:text-emerald-400 transition">Blog</Link>
+            </nav>
+          </div>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <Link href="/venue-login" className="hidden sm:flex px-4 py-2 rounded border border-zinc-600 bg-white/5 hover:bg-white/10 text-white transition">
+                Σύνδεση
+              </Link>
+              <Link href="/for-venues" className="px-5 py-2 rounded bg-emerald-400 hover:bg-emerald-500 text-black font-bold transition">
+                Ξεκινήστε δωρεάν
+              </Link>
+            </div>
           </div>
         </div>
       </header>
@@ -230,7 +246,26 @@ export default function LogismikoGipedou5x5Page() {
         </div>
       </section>
 
-      <ContactFooter />
+      <footer className="border-t border-white/5 bg-[#010304] py-12 px-6 mt-0">
+        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-2">
+            <Image
+              src="/yabalo.png"
+              alt="Yabalitsa"
+              width={100}
+              height={20}
+              className="filter brightness-0 invert opacity-50 hover:opacity-100 transition"
+            />
+            <span className="text-zinc-600 text-sm">© 2026. All rights reserved.</span>
+          </div>
+          <div className="flex items-center gap-6 text-sm text-zinc-500 font-medium">
+            <Link href="/contact" className="hover:text-emerald-400 transition">Contact Us</Link>
+            <Link href="/blog" className="hover:text-emerald-400 transition">Blog / Άρθρα</Link>
+            <Link href="/terms" className="hover:text-emerald-400 transition">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-emerald-400 transition">Privacy Policy</Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
