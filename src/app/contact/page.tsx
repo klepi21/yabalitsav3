@@ -66,23 +66,23 @@ export default function ContactPage() {
 
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {/* Email Contact */}
-            <a href="mailto:hello@yabalitsa.com" className="group p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 hover:border-emerald-500/50 transition-all text-center flex flex-col items-center">
+            <a href="mailto:support@yabalitsa.com" className="group p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 hover:border-emerald-500/50 transition-all text-center flex flex-col items-center">
               <div className="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Mail className="w-6 h-6 text-emerald-400" />
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Email</h3>
               <p className="text-zinc-400 text-sm">Πείτε μας ένα γεια!</p>
-              <span className="mt-4 text-emerald-400 font-medium text-sm group-hover:text-emerald-300">hello@yabalitsa.com</span>
+              <span className="mt-4 text-emerald-400 font-medium text-sm group-hover:text-emerald-300">support@yabalitsa.com</span>
             </a>
 
             {/* Social Media - Instagram */}
-            <a href="https://instagram.com/yabalitsa.app" target="_blank" rel="noopener noreferrer" className="group p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 hover:border-emerald-500/50 transition-all text-center flex flex-col items-center">
+            <a href="https://instagram.com/yabalitsa" target="_blank" rel="noopener noreferrer" className="group p-8 rounded-3xl bg-zinc-900/50 border border-zinc-800 hover:border-emerald-500/50 transition-all text-center flex flex-col items-center">
               <div className="w-14 h-14 rounded-full bg-emerald-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Instagram className="w-6 h-6 text-emerald-400" />
               </div>
               <h3 className="text-lg font-bold text-white mb-2">Instagram</h3>
               <p className="text-zinc-400 text-sm">Ακολουθήστε τα νέα μας</p>
-              <span className="mt-4 text-emerald-400 font-medium text-sm group-hover:text-emerald-300">@yabalitsa.app</span>
+              <span className="mt-4 text-emerald-400 font-medium text-sm group-hover:text-emerald-300">@yabalitsa</span>
             </a>
 
             {/* Social Media - Facebook */}
