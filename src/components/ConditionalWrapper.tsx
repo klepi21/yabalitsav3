@@ -26,6 +26,7 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
     pathname === '/fse' ||
     pathname === '/venues' ||
     pathname === '/for-venues' ||
+    pathname === '/contact' ||
     pathname === '/logismiko-gipedou-5x5' ||
     pathname.startsWith('/book/') ||
     pathname === '/terms' ||
