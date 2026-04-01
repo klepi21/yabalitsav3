@@ -75,6 +75,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(),
       changeFrequency: 'monthly',
       priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog/pos-na-diaxeiristeite-to-gipedo-sas-psifiaka`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog/excel-vs-logismiko-diaxeirisis-gipedou`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/blog/odigos-akadimias-podosfairou`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
     }
   ]
 }
