@@ -502,7 +502,7 @@ export default function SubscriptionRenewalPage() {
                   {isLoading ? (
                     <><Loader2 className="h-4 w-4 animate-spin" />Επεξεργασία...</>
                   ) : (
-                    <><CreditCard className="h-4 w-4" /> Επιβεβαίωση</>
+                    <><CreditCard className="h-4 w-4" />Επιβεβαίωση</>
                   )}
                 </button>
               </div>
