@@ -83,12 +83,7 @@ export async function POST(request: NextRequest) {
         afm: venueAfm,
         doy: venueDoy || '',
       },
-      coupon: {
-        code: 'WELCOME30',
-        active: true,
-        discountType: 'percentage',
-        discountValue: 30,
-      },
+      coupons: [],
       daysRemaining: 15,
       lastDecrementAt: FieldValue.serverTimestamp(),
       createdAt: FieldValue.serverTimestamp(),

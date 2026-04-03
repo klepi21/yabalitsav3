@@ -15,7 +15,6 @@ import {
   LifeBuoy,
   MessageCircle,
   Send,
-  Clock,
   Zap,
   ArrowUpCircle,
   Sparkles,
@@ -702,14 +701,19 @@ export default function SettingsPage() {
             const rateLimitHours = isEnterprise ? 1 : isPro ? 2 : 1;
 
             return (
-              <Card className="premium-card border-none bg-emerald-600 text-white">
-                <CardHeader>
-                  <CardTitle className="text-xl font-black flex items-center gap-3">
-                    <MessageCircle className="h-6 w-6" />
-                    Άμεση Υποστήριξη
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+              <Card className="border-none shadow-lg overflow-hidden">
+                <div className="bg-gradient-to-br from-emerald-600 via-emerald-600 to-green-700 px-6 pt-6 pb-4">
+                  <div className="flex items-center gap-3 mb-1">
+                    <div className="h-10 w-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center">
+                      <MessageCircle className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-black text-white">{toGreekUpperCase('Άμεση Υποστήριξη')}</h3>
+                      <p className="text-[10px] font-bold text-emerald-200 uppercase tracking-wider">Στείλτε μας μήνυμα</p>
+                    </div>
+                  </div>
+                </div>
+                <CardContent className="p-6 bg-gradient-to-b from-emerald-600 to-emerald-700">
                   <TelegramSupportForm venueId={venueOwner?.venueId} rateLimitHours={rateLimitHours} />
                 </CardContent>
               </Card>
@@ -717,23 +721,27 @@ export default function SettingsPage() {
           })()}
 
           {/* Help & Support */}
-          <Card className="premium-card border-none shadow-sm bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100">
-            <CardContent className="pt-8">
-              <div className="flex flex-col items-center text-center">
-                <div className="h-16 w-16 rounded-[1.5rem] bg-white text-blue-600 flex items-center justify-center mb-6 shadow-sm">
-                  <LifeBuoy className="h-8 w-8" />
+          <Card className="border-none shadow-sm overflow-hidden">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="h-11 w-11 rounded-xl bg-white text-blue-600 flex items-center justify-center shadow-sm shrink-0">
+                  <LifeBuoy className="h-5 w-5" />
                 </div>
-                <h3 className="text-xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Χρειάζεστε βοήθεια;')}</h3>
-                <p className="text-zinc-500 font-medium mb-8">
-                  Η ομάδα μας είναι διαθέσιμη για να σας υποστηρίξει σε ό,τι χρειαστείτε.
-                </p>
-                <SupportEmail variant="highlighted" />
-                <div className="mt-6 flex items-center gap-2 text-xs font-black text-blue-500 uppercase tracking-widest">
-                  <div className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
-                  Απάντηση σε λιγότερο από 24 ώρες
+                <div>
+                  <h3 className="text-base font-black text-zinc-900 uppercase">{toGreekUpperCase('Χρειάζεστε βοήθεια;')}</h3>
+                  <p className="text-xs text-zinc-500 font-medium">
+                    Η ομάδα μας είναι διαθέσιμη για οποιαδήποτε απορία.
+                  </p>
                 </div>
               </div>
-            </CardContent>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <SupportEmail variant="highlighted" />
+                <div className="flex items-center gap-1.5 text-[10px] font-bold text-blue-500 uppercase tracking-wider">
+                  <div className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+                  Απάντηση σε &lt;24 ώρες
+                </div>
+              </div>
+            </div>
           </Card>
         </div>
       </div>
@@ -835,27 +843,22 @@ function TelegramSupportForm({ venueId, rateLimitHours = 1 }: { venueId?: string
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2 text-xs font-black bg-black/10 w-fit px-3 py-1.5 rounded-full uppercase tracking-wider">
-        <Clock className="h-3 w-3" />
-        1 μήνυμα ανά {rateLimitHours === 1 ? 'ώρα' : `${rateLimitHours} ώρες`}
-      </div>
-
+    <div className="space-y-4">
       {/* Category selector */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2">
+      <div className="flex flex-wrap gap-2">
         {categories.map((cat) => (
           <button
             key={cat.value}
             type="button"
             onClick={() => setCategory(cat.value)}
             className={cn(
-              "h-12 flex items-center justify-center gap-2 px-3 text-xs font-black rounded-xl border-2 transition-all",
+              "h-9 flex items-center gap-1.5 px-3 text-[11px] font-black rounded-lg transition-all",
               category === cat.value
-                ? "bg-white text-emerald-600 border-white shadow-lg"
-                : "bg-emerald-500 text-emerald-100 border-emerald-400/30 hover:bg-emerald-400/50"
+                ? "bg-white text-emerald-600 shadow-md"
+                : "bg-white/15 text-emerald-100 hover:bg-white/25"
             )}
           >
-            <span className="text-base">{cat.icon}</span>
+            <span className="text-sm">{cat.icon}</span>
             {cat.label}
           </button>
         ))}
@@ -866,37 +869,39 @@ function TelegramSupportForm({ venueId, rateLimitHours = 1 }: { venueId?: string
         value={message}
         onChange={(e) => setMessage(e.target.value)}
         placeholder="Περιγράψτε το αίτημά σας..."
-        rows={4}
-        className="w-full rounded-2xl border-2 border-emerald-400/30 bg-emerald-500/50 px-6 py-4 text-sm font-bold placeholder:text-emerald-200 text-white focus:outline-none focus:border-white transition-all resize-none"
+        rows={3}
+        className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium placeholder:text-emerald-200/60 text-white focus:outline-none focus:bg-white/15 focus:border-white/40 transition-all resize-none"
       />
 
-      {/* Send button */}
-      <div className="flex flex-col gap-4">
-        {sendSuccess && (
-          <div className="flex items-center gap-2 text-emerald-100 font-black text-sm animate-in fade-in zoom-in-95">
-            <Sparkles className="h-4 w-4" />
-            Το μήνυμα στάλθηκε επιτυχώς!
-          </div>
-        )}
-        {sendError && (
-          <div className="text-red-200 font-black text-sm bg-red-500/20 p-3 rounded-xl animate-in fade-in zoom-in-95">
-            {sendError}
-          </div>
-        )}
+      {/* Status & Send */}
+      {sendSuccess && (
+        <div className="flex items-center gap-2 text-emerald-100 font-bold text-xs bg-white/10 p-2.5 rounded-lg animate-in fade-in">
+          <Sparkles className="h-3.5 w-3.5" />
+          Στάλθηκε επιτυχώς!
+        </div>
+      )}
+      {sendError && (
+        <div className="text-red-200 font-bold text-xs bg-red-500/20 p-2.5 rounded-lg">
+          {sendError}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between">
+        <span className="text-[9px] font-bold text-emerald-200/60 uppercase tracking-wider">
+          1 μήνυμα / {rateLimitHours === 1 ? 'ώρα' : `${rateLimitHours} ώρες`}
+        </span>
         <Button
           onClick={handleSend}
           disabled={isSending || !message.trim()}
-          className="h-14 w-full rounded-2xl bg-white text-emerald-600 hover:bg-emerald-50 font-black shadow-xl"
+          size="sm"
+          className="h-9 px-5 rounded-lg bg-white text-emerald-600 hover:bg-emerald-50 font-black text-[11px] shadow-md disabled:opacity-40"
         >
           {isSending ? (
-            <>
-              <Loader2 className="h-5 w-5 mr-3 animate-spin" />
-              Αποστολή...
-            </>
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
             <>
-              <Send className="h-5 w-5 mr-3" />
-              Αποστολή Μηνύματος
+              <Send className="h-3.5 w-3.5 mr-1.5" />
+              Αποστολή
             </>
           )}
         </Button>

@@ -1,8 +1,11 @@
 export interface VenueCoupon {
   code: string;              // The coupon keyword (e.g. "KALOKAIRINOS")
-  active: boolean;           // You toggle this in Firebase Console
+  active: boolean;
   discountType: 'percentage' | 'fixed'; // percentage or fixed EUR amount
   discountValue: number;     // e.g. 50 for 50%, or 10 for €10 off
+  appliesTo: 'all' | 'basic' | 'pro' | 'enterprise'; // which plan(s)
+  expiresAt?: string;        // ISO date string, optional
+  description?: string;      // internal note (e.g. "Promo for first 3 months")
 }
 
 export interface Venue {
@@ -21,7 +24,8 @@ export interface Venue {
   active?: boolean;
   managementPinHash?: string; // SHA-256 hash of 4-digit PIN
   bookingsEnabled?: boolean; // whether online bookings are active (default true)
-  coupon?: VenueCoupon;      // Coupon set manually via Firebase Console
+  coupon?: VenueCoupon;      // Legacy single coupon (backward compat)
+  coupons?: VenueCoupon[];   // Multiple coupons — only one active at a time
   contactDetails?: {
     email?: string;
     phone?: string;

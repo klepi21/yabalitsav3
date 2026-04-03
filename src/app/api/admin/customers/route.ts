@@ -24,8 +24,8 @@ export async function POST(request: NextRequest) {
         id: doc.id,
         name: data.name || '',
         city: data.city || '',
-        email: data.email || '',
-        phone: data.phone || '',
+        email: '', // will be resolved from Firebase Auth below
+        phone: data.phone || data.contactDetails?.phone || '',
         ownerId: data.ownerId || '',
         plan: data.plan || 'trial',
         planType: data.planType || null,
@@ -33,10 +33,29 @@ export async function POST(request: NextRequest) {
         subscriptionEndDate: data.subscriptionEndDate || null,
         active: data.active !== false,
         bookingsEnabled: data.bookingsEnabled !== false,
+        coupon: data.coupon || null,
+        coupons: data.coupons || (data.coupon ? [data.coupon] : []),
         createdAt: data.createdAt?.toDate?.().toISOString() || null,
         updatedAt: data.updatedAt?.toDate?.().toISOString() || null,
       };
     });
+
+    // Resolve emails from Firebase Auth (priority: Auth > contactDetails > venue email)
+    const { getAuth } = await import('firebase-admin/auth');
+    const adminAuth = getAuth();
+    for (const venue of venues) {
+      if (venue.ownerId) {
+        try {
+          const authUser = await adminAuth.getUser(venue.ownerId);
+          venue.email = authUser.email || venue.email;
+        } catch {
+          // Fallback to Firestore data
+          const venueDoc = venuesSnapshot.docs.find(d => d.id === venue.id);
+          const data = venueDoc?.data();
+          venue.email = data?.email || data?.contactDetails?.email || '';
+        }
+      }
+    }
 
     // Fetch counts in parallel for all collections
     const [

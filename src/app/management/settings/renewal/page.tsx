@@ -122,6 +122,19 @@ export default function SubscriptionRenewalPage() {
         setCouponApplied(false);
         return;
       }
+      // Check expiration
+      if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
+        setCouponError('Αυτό το κουπόνι έχει λήξει');
+        setCouponApplied(false);
+        return;
+      }
+      // Check if applies to selected plan
+      if (coupon.appliesTo && coupon.appliesTo !== 'all' && selectedPlan && coupon.appliesTo !== selectedPlan) {
+        const planLabels: Record<string, string> = { basic: 'Basic', pro: 'Pro', enterprise: 'Enterprise' };
+        setCouponError(`Αυτό το κουπόνι ισχύει μόνο για το πλάνο ${planLabels[coupon.appliesTo] || coupon.appliesTo}`);
+        setCouponApplied(false);
+        return;
+      }
       // Calculate discount for display
       if (selectedPlan) {
         const selectedPlanInfo = plans.find(p => p.id === selectedPlan);

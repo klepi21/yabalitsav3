@@ -112,6 +112,21 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
+      // Check expiration
+      if (venueCoupon.expiresAt && new Date(venueCoupon.expiresAt) < new Date()) {
+        return NextResponse.json(
+          { error: 'Αυτό το κουπόνι έχει λήξει' },
+          { status: 400 }
+        );
+      }
+      // Check plan restriction
+      const couponAppliesTo = (venueCoupon as Record<string, unknown>).appliesTo as string | undefined;
+      if (couponAppliesTo && couponAppliesTo !== 'all' && couponAppliesTo !== planId) {
+        return NextResponse.json(
+          { error: `Αυτό το κουπόνι ισχύει μόνο για το πλάνο ${couponAppliesTo}` },
+          { status: 400 }
+        );
+      }
       const { discountedPrice, discountAmount } = pricingUtils.applyCouponDiscount(totalPrice, venueCoupon);
       totalPrice = discountedPrice;
       couponDiscount = discountAmount;
