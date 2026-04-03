@@ -64,7 +64,13 @@ export async function POST(request: NextRequest) {
     if (hasActiveSub) {
       const currentLevel = PLAN_HIERARCHY[currentPlanId] || 0;
       const newLevel = PLAN_HIERARCHY[planId] || 0;
-      if (newLevel <= currentLevel) {
+      const isNearExpiry = daysRemaining <= 7;
+      const isSamePlan = newLevel === currentLevel;
+
+      // Allow same plan renewal when ≤ 7 days remaining
+      if (isSamePlan && isNearExpiry) {
+        // OK — renewal allowed
+      } else if (newLevel <= currentLevel) {
         return NextResponse.json(
           { error: `Δεν μπορείτε να αγοράσετε ίδιο ή κατώτερο πλάνο ενώ έχετε ενεργή συνδρομή (${currentPlanId}). Διαθέσιμο μετά τη λήξη.` },
           { status: 400 }

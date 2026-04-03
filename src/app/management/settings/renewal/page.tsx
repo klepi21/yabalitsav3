@@ -33,13 +33,22 @@ export default function SubscriptionRenewalPage() {
     isDevUser ? { ...plan, basePrice: 0.50 } : plan
   );
 
-  const hasActiveSubscription = venueData && (venueData.daysRemaining || 0) > 0 && venueData.plan === 'subscription';
+  const daysRemaining = venueData?.daysRemaining || 0;
+  const hasActiveSubscription = venueData && daysRemaining > 0 && venueData.plan === 'subscription';
+  const isNearExpiry = hasActiveSubscription && daysRemaining <= 7;
   const currentPlanId = venueData?.planType?.toLowerCase() || 'basic';
   const currentPlanLevel = PLAN_HIERARCHY[currentPlanId] || 0;
 
   const getPlanStatus = (planId: string) => {
     if (!hasActiveSubscription) return 'available'; // Expired — all available
     const planLevel = PLAN_HIERARCHY[planId] || 0;
+    // Near expiry (≤7 days): allow same plan renewal + upgrades
+    if (isNearExpiry) {
+      if (planLevel < currentPlanLevel) return 'downgrade';
+      if (planId === currentPlanId) return 'renewal';
+      return 'upgrade';
+    }
+    // Active (>7 days): only upgrades
     if (planId === currentPlanId) return 'current';
     if (planLevel < currentPlanLevel) return 'downgrade';
     return 'upgrade';
@@ -89,9 +98,11 @@ export default function SubscriptionRenewalPage() {
     // Upgrade = starts fresh from today (old days lost)
     // Available (expired) = starts from today
     if (planStatus !== 'upgrade') {
+      // Renewal or expired: add remaining days
       const remainingDays = venueData.daysRemaining || 0;
       baseDate.setDate(baseDate.getDate() + remainingDays);
     }
+    // Upgrade: starts fresh from today (old days lost)
     const duration = getSelectedDuration();
     baseDate.setMonth(baseDate.getMonth() + duration);
     return baseDate;
@@ -269,6 +280,7 @@ export default function SubscriptionRenewalPage() {
             const discount = pricingUtils.getDiscountPercentage(duration as 1 | 6 | 12);
             const status = getPlanStatus(plan.id);
             const isDisabled = status === 'current' || status === 'downgrade';
+            const isRenewal = status === 'renewal';
 
             return (
               <button
@@ -287,6 +299,13 @@ export default function SubscriptionRenewalPage() {
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[12px] font-semibold bg-emerald-600 text-white">
                       ΕΝΕΡΓΟ
+                    </span>
+                  </div>
+                )}
+                {isRenewal && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[12px] font-semibold bg-amber-500 text-white">
+                      ΑΝΑΝΕΩΣΗ
                     </span>
                   </div>
                 )}
@@ -354,6 +373,11 @@ export default function SubscriptionRenewalPage() {
                   {status === 'upgrade' && (
                     <p className="text-xs text-blue-600 font-medium text-center pt-2 border-t border-zinc-100">
                       ⬆ Αναβάθμιση
+                    </p>
+                  )}
+                  {status === 'renewal' && (
+                    <p className="text-xs text-amber-600 font-medium text-center pt-2 border-t border-zinc-100">
+                      🔄 Ανανέωση ({daysRemaining} ημέρ{daysRemaining === 1 ? 'α' : 'ες'} + νέα περίοδος)
                     </p>
                   )}
                 </div>

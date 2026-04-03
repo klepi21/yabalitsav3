@@ -69,6 +69,12 @@ interface CouponData {
   description?: string;
 }
 
+interface EmailLog {
+  couponCode: string;
+  subject: string;
+  sentAt: string;
+}
+
 interface VenueSquad {
   id: string;
   name: string;
@@ -105,6 +111,7 @@ interface VenueDetail {
   bookingsEnabled: boolean;
   coupon: CouponData | null;
   coupons: CouponData[];
+  emailLogs: EmailLog[];
   createdAt: string | null;
   updatedAt: string | null;
   stats: VenueStats;
@@ -200,6 +207,8 @@ export default function AdminPanelPage() {
           recipientName: emailDialog.venue.name,
           subject: emailSubject,
           body: emailBody,
+          venueId: emailDialog.venue.id,
+          couponCode: emailDialog.coupon.code,
         }),
       });
       if (!res.ok) throw new Error('Failed');
@@ -608,6 +617,22 @@ export default function AdminPanelPage() {
                                 <p className="text-[11px] text-zinc-300">Κανένα κουπόνι</p>
                               )}
                             </div>
+                            {/* Email History */}
+                            {venue.emailLogs.length > 0 && (
+                              <div className="mt-3 pt-3 border-t border-zinc-200">
+                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-2">Ιστορικό Email ({venue.emailLogs.length})</p>
+                                <div className="space-y-1">
+                                  {venue.emailLogs.slice(0, 5).map((log, i) => (
+                                    <div key={i} className="flex items-center gap-2 text-[11px]">
+                                      <Mail className="h-3 w-3 text-zinc-300 shrink-0" />
+                                      <span className="text-zinc-600 truncate">{log.subject}</span>
+                                      {log.couponCode && <Badge className="text-[8px] bg-emerald-50 text-emerald-600 shrink-0">{log.couponCode}</Badge>}
+                                      <span className="text-zinc-400 shrink-0 ml-auto">{log.sentAt ? new Date(log.sentAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </td>
                         </tr>
                       )}

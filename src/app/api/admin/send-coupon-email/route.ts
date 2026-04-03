@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAuth, isAuthError } from '@/lib/api-auth';
+import { db, verifyAuth, isAuthError } from '@/lib/api-auth';
 import { sendEmail } from '@/lib/email-service';
 
 const SUPER_ADMIN_EMAIL = process.env.NEXT_PUBLIC_DEV_EMAIL || 'nikoskoukis99@gmail.com';
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    const { recipientEmail, recipientName, subject, body } = await request.json();
+    const { recipientEmail, recipientName, subject, body, venueId, couponCode } = await request.json();
 
     if (!recipientEmail || !subject || !body) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
@@ -45,6 +45,19 @@ export async function POST(request: NextRequest) {
     if (!result.success) {
       return NextResponse.json({ error: result.error || 'Failed to send' }, { status: 500 });
     }
+
+    // Log the email
+    const { FieldValue } = await import('firebase-admin/firestore');
+    await db.collection('yabalitsa_admin_email_logs').add({
+      type: 'coupon',
+      venueId: venueId || null,
+      venueName: recipientName || null,
+      recipientEmail,
+      couponCode: couponCode || null,
+      subject,
+      sentAt: FieldValue.serverTimestamp(),
+      sentBy: authResult.decodedToken.email,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

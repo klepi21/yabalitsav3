@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fetch counts in parallel for all collections
+    // Fetch counts in parallel for all collections (including email logs)
     const [
       pitchesSnapshot,
       bookingsSnapshot,
@@ -67,6 +67,7 @@ export async function POST(request: NextRequest) {
       paymentsSnapshot,
       venueOwnersSnapshot,
       userGroupsSnapshot,
+      emailLogsSnapshot,
     ] = await Promise.all([
       db.collection('yabalitsa_pitches').get(),
       db.collection('yabalitsa_bookings').get(),
@@ -76,6 +77,7 @@ export async function POST(request: NextRequest) {
       db.collection('yabalitsa_payments').get(),
       db.collection('yabalitsa_venueOwners').get(),
       db.collection('yabalitsa_user_groups').get(),
+      db.collection('yabalitsa_admin_email_logs').orderBy('sentAt', 'desc').limit(200).get(),
     ]);
 
     // Group counts by venueId
@@ -182,6 +184,20 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Email logs per venue
+    const emailLogsByVenue: Record<string, { couponCode: string; subject: string; sentAt: string }[]> = {};
+    for (const eDoc of emailLogsSnapshot.docs) {
+      const data = eDoc.data();
+      const vid = data.venueId;
+      if (!vid) continue;
+      if (!emailLogsByVenue[vid]) emailLogsByVenue[vid] = [];
+      emailLogsByVenue[vid].push({
+        couponCode: data.couponCode || '',
+        subject: data.subject || '',
+        sentAt: data.sentAt?.toDate?.().toISOString() || '',
+      });
+    }
+
     // Get last booking date per venue
     const lastBookingByVenue: Record<string, string> = {};
     for (const doc of bookingsSnapshot.docs) {
@@ -220,6 +236,7 @@ export async function POST(request: NextRequest) {
       },
       academyGroups: academyUsersByVenue[venue.id] || [],
       squads: squadsByVenue[venue.id] || [],
+      emailLogs: emailLogsByVenue[venue.id] || [],
     }));
 
     // Global KPIs
