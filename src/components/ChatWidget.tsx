@@ -150,9 +150,22 @@ export default function ChatWidget() {
         content: m.content,
       }));
 
+      // Get auth token for API
+      let token = '';
+      try {
+        const { getAuth } = await import('firebase/auth');
+        const auth = getAuth();
+        if (auth.currentUser) {
+          token = await auth.currentUser.getIdToken();
+        }
+      } catch { /* no auth available */ }
+
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+        },
         body: JSON.stringify({
           messages: chatHistory,
           currentPage: getCurrentPageLabel(),
