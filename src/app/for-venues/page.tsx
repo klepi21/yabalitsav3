@@ -52,6 +52,14 @@ export default function ForVenuesPage() {
   const [, setSuccess] = useState<string | null>(null);
   const [showCongrats, setShowCongrats] = useState(false);
 
+  // Email verification
+  const [verificationStep, setVerificationStep] = useState(false);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isSendingCode, setIsSendingCode] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
   const [form, setForm] = useState({
     ownerName: '',
     ownerEmail: '',
@@ -74,6 +82,18 @@ export default function ForVenuesPage() {
   const passHasSymbol = /[!@#$%^&*()_+\-={}\[\]:;"'`~<>,.?/\\]/.test(form.password);
   const passMatches = form.password.length > 0 && form.password === form.confirmPassword;
 
+  // Start resend cooldown timer
+  const startCooldown = () => {
+    setResendCooldown(60);
+    const interval = setInterval(() => {
+      setResendCooldown(prev => {
+        if (prev <= 1) { clearInterval(interval); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
+  // Step 1: Validate form and send verification code
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setIsSubmitting(true);
@@ -95,6 +115,82 @@ export default function ForVenuesPage() {
         throw new Error('Πρέπει να αποδεχθείς τους Όρους Χρήσης και την Πολιτική Απορρήτου.');
       }
 
+      // Send verification code to owner email
+      setIsSendingCode(true);
+      const sendRes = await fetch('/api/verification/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: form.ownerEmail, firstName: form.ownerName }),
+      });
+
+      if (!sendRes.ok) {
+        const data = await sendRes.json();
+        if (data.error === 'too_many_requests') throw new Error('Πολλές προσπάθειες. Δοκιμάστε σε λίγο.');
+        throw new Error('Αποτυχία αποστολής κωδικού. Δοκιμάστε ξανά.');
+      }
+
+      setVerificationStep(true);
+      setVerificationCode('');
+      setVerificationError(null);
+      startCooldown();
+    } catch (err: unknown) {
+      setError((err as Error)?.message || 'Κάτι πήγε στραβά.');
+    } finally {
+      setIsSubmitting(false);
+      setIsSendingCode(false);
+    }
+  }
+
+  // Resend verification code
+  async function handleResendCode() {
+    if (resendCooldown > 0) return;
+    setIsSendingCode(true);
+    setVerificationError(null);
+    try {
+      const res = await fetch('/api/verification/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: form.ownerEmail, firstName: form.ownerName }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        if (data.error === 'too_many_requests') { setVerificationError('Πολλές προσπάθειες. Περιμένετε λίγο.'); return; }
+        throw new Error('Αποτυχία');
+      }
+      startCooldown();
+    } catch {
+      setVerificationError('Αποτυχία αποστολής. Δοκιμάστε ξανά.');
+    } finally {
+      setIsSendingCode(false);
+    }
+  }
+
+  // Step 2: Verify code and create account
+  async function handleVerifyAndRegister() {
+    if (verificationCode.length !== 6) return;
+    setIsVerifying(true);
+    setVerificationError(null);
+
+    try {
+      // Verify the code
+      const verifyRes = await fetch('/api/verification/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: form.ownerEmail, code: verificationCode }),
+      });
+
+      if (!verifyRes.ok) {
+        const data = await verifyRes.json();
+        if (data.error === 'invalid_code') {
+          setVerificationError(`Λάθος κωδικός. ${data.attemptsRemaining > 0 ? `Απομένουν ${data.attemptsRemaining} προσπάθειες.` : ''}`);
+          return;
+        }
+        if (data.error === 'expired') { setVerificationError('Ο κωδικός έληξε. Πατήστε "Αποστολή ξανά".'); return; }
+        if (data.error === 'too_many_attempts') { setVerificationError('Πολλές λάθος προσπάθειες. Ζητήστε νέο κωδικό.'); return; }
+        throw new Error('Σφάλμα επαλήθευσης.');
+      }
+
+      // Code verified — now create the account
       const cred = await createUserWithEmailAndPassword(auth, form.ownerEmail, form.password);
       const idToken = await cred.user.getIdToken();
 
@@ -128,6 +224,7 @@ export default function ForVenuesPage() {
 
       setSuccess('ok');
       setShowCongrats(true);
+      setVerificationStep(false);
       setForm({
         ownerName: '', ownerEmail: '', ownerPhone: '', password: '', confirmPassword: '',
         venueName: '', venueAddress: '', venueCity: '', venueEmail: '', venuePhone: '', venueAfm: '', venueDoy: '',
@@ -144,9 +241,9 @@ export default function ForVenuesPage() {
         'auth/too-many-requests': 'Πολλές προσπάθειες. Δοκιμάστε ξανά σε λίγο.',
         'auth/network-request-failed': 'Πρόβλημα σύνδεσης. Ελέγξτε το internet σας.',
       };
-      setError(firebaseErrors[code] || (err as Error)?.message || 'Κάτι πήγε στραβά.');
+      setVerificationError(firebaseErrors[code] || (err as Error)?.message || 'Κάτι πήγε στραβά.');
     } finally {
-      setIsSubmitting(false);
+      setIsVerifying(false);
     }
   }
 
@@ -271,7 +368,76 @@ export default function ForVenuesPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Email Verification Screen */}
+          {verificationStep && (
+            <div className="flex flex-col items-center justify-center min-h-[400px] animate-in fade-in slide-in-from-bottom-4 duration-300">
+              <div className="w-full max-w-sm text-center space-y-6">
+                <div className="mx-auto h-16 w-16 rounded-2xl bg-emerald-50 flex items-center justify-center">
+                  <Mail className="h-8 w-8 text-emerald-600" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black text-zinc-900 mb-2">Επαλήθευση Email</h2>
+                  <p className="text-sm text-zinc-500">
+                    Στείλαμε έναν 6ψήφιο κωδικό στο{' '}
+                    <span className="font-bold text-zinc-900">{form.ownerEmail}</span>
+                  </p>
+                </div>
+
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  maxLength={6}
+                  placeholder="000000"
+                  className="text-center tracking-[0.4em] text-2xl font-black h-14 rounded-xl bg-zinc-50 border-zinc-200 focus:bg-white"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && verificationCode.length === 6) handleVerifyAndRegister();
+                  }}
+                  autoFocus
+                />
+
+                {verificationError && (
+                  <div className="flex items-center justify-center gap-2 text-red-600 text-sm font-bold animate-in fade-in">
+                    <CheckCircle2 className="h-4 w-4" />
+                    {verificationError}
+                  </div>
+                )}
+
+                <Button
+                  onClick={handleVerifyAndRegister}
+                  disabled={verificationCode.length !== 6 || isVerifying}
+                  className="w-full h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm"
+                >
+                  {isVerifying ? (
+                    <><Loader2 className="h-4 w-4 animate-spin mr-2" /> Δημιουργία λογαριασμού...</>
+                  ) : (
+                    'Επιβεβαίωση & Εγγραφή'
+                  )}
+                </Button>
+
+                <div className="flex items-center justify-between text-sm">
+                  <button
+                    type="button"
+                    onClick={handleResendCode}
+                    disabled={resendCooldown > 0 || isSendingCode}
+                    className="text-emerald-600 hover:text-emerald-700 font-bold disabled:text-zinc-300 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {isSendingCode ? 'Αποστολή...' : resendCooldown > 0 ? `Ξανά σε ${resendCooldown}s` : 'Αποστολή ξανά'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setVerificationStep(false); setVerificationError(null); }}
+                    className="text-zinc-400 hover:text-zinc-600 font-medium transition-colors"
+                  >
+                    Πίσω
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className={verificationStep ? 'hidden' : 'space-y-8'}>
             {error && (
               <Alert variant="destructive">
                 <AlertDescription>{error}</AlertDescription>
