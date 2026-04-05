@@ -377,7 +377,7 @@ export default function SubscriptionRenewalPage() {
                   )}
                   {status === 'renewal' && (
                     <p className="text-xs text-amber-600 font-medium text-center pt-2 border-t border-zinc-100">
-                      🔄 Ανανέωση ({daysRemaining} ημέρ{daysRemaining === 1 ? 'α' : 'ες'} + νέα περίοδος )
+                      🔄 Ανανέωση ({daysRemaining} ημέρ{daysRemaining === 1 ? 'α' : 'ες'} + νέα περίοδος)
                     </p>
                   )}
                 </div>
