@@ -16,6 +16,9 @@ export default function PricingSection() {
             </h2>
             <p className="text-zinc-400 text-lg md:text-xl font-light max-w-2xl mx-auto">
               Επιλέξτε τη συνδρομή που ταιριάζει στις ανάγκες της δικής σας επιχείρησης. Χωρίς κρυφές χρεώσεις, χωρίς περιορισμούς.
+              <span className="block mt-4 text-emerald-400/80 text-sm md:text-base font-medium">
+                Διεθνείς λύσεις κοστίζουν 3-6x περισσότερο χωρίς ελληνική υποστήριξη.
+              </span>
             </p>
             <div className="mt-8 flex flex-wrap justify-center items-center gap-6 text-[12px] md:text-xs font-bold text-zinc-500 uppercase tracking-widest">
               <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 italic"><Zap className="w-3 h-3 text-emerald-500" /> Δωρεαν για 15 ημερες</span>

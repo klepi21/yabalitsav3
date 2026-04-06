@@ -31,6 +31,11 @@ const FinalCTASection = dynamic(() => import('@/components/landing/FinalCTASecti
   ssr: true
 });
 
+const StatsSection = dynamic(() => import('@/components/landing/StatsSection'), {
+  loading: () => <div className="py-24 h-[100px]" />,
+  ssr: false
+});
+
 export default function RootPage() {
   return (
     <div className="w-full bg-[#040D12] text-white font-sans selection:bg-emerald-500/30">
@@ -114,18 +119,8 @@ export default function RootPage() {
         </main>
       </section>
 
-      {/* ================= LOGOS / TRUST SECTION ================= */}
-      <section className="border-t border-b border-white/5 bg-[#03090C] py-10 overflow-hidden">
-        <div className="max-w-[1400px] mx-auto px-6 text-center">
-          <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-6">Εμπιστευονται το οικοσυστημα μας κορυφαιες εγκαταστασεις</p>
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500">
-            <div className="text-xl font-black font-serif italic text-zinc-300">Arena FC</div>
-            <div className="text-xl font-black tracking-tighter text-zinc-300">CITY<span className="text-emerald-500">SPORTS</span></div>
-            <div className="text-lg font-bold uppercase tracking-widest text-zinc-300 border-2 border-zinc-300 px-2">KINGS</div>
-            <div className="text-xl font-medium tracking-tight text-zinc-300">Pro<span className="opacity-50">Academy</span></div>
-          </div>
-        </div>
-      </section>
+      {/* ================= STATISTICS SECTION ================= */}
+      <StatsSection />
 
       {/* ================= OFF-SCREEN SECTIONS (DYNAMICALLY LOADED) ================= */}
       <FeaturesSection />
