@@ -33,7 +33,7 @@ const FinalCTASection = dynamic(() => import('@/components/landing/FinalCTASecti
 
 const StatsSection = dynamic(() => import('@/components/landing/StatsSection'), {
   loading: () => <div className="py-24 h-[100px]" />,
-  ssr: false
+  ssr: true
 });
 
 export default function RootPage() {
