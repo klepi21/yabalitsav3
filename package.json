@@ -60,5 +60,11 @@
   },
   "lint-staged": {
     "*.{ts,tsx,js,jsx,mjs}": "eslint --max-warnings 0 --no-warn-ignored"
-  }
+  },
+  "browserslist": [
+    "last 3 versions",
+    "> 0.5%",
+    "not dead",
+    "not ie 11"
+  ]
 }

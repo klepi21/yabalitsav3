@@ -1,5 +1,5 @@
 'use client';
-
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 export default function HeroVideo() {
@@ -29,10 +29,17 @@ export default function HeroVideo() {
   // On mobile, just show the poster image or an optimized image instead of the video
   if (isMobile) {
     return (
-      <div 
-        className="absolute inset-0 w-full h-full bg-cover bg-center z-0 opacity-80"
-        style={{ backgroundImage: 'url(/stadium-931975_1920.jpg)' }}
-      />
+      <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
+        <Image 
+          src="/stadium-931975_1920.jpg"
+          alt="Stadium Background"
+          fill
+          priority
+          quality={65}
+          sizes="100vw"
+          className="object-cover object-center opacity-80"
+        />
+      </div>
     );
   }
 
