@@ -6,35 +6,35 @@ import HeroVideo from '@/components/HeroVideo';
 import AnimatedLaptop from '@/components/AnimatedLaptop';
 
 // Dynamic imports for off-screen components to improve PageSpeed
-const FeaturesSection = dynamic(() => import('@/components/landing/FeaturesSection'), { 
+const FeaturesSection = dynamic(() => import('@/components/landing/FeaturesSection'), {
   loading: () => <div className="py-32 h-[500px]" />,
-  ssr: true 
+  ssr: true
 });
-const AcademiesSection = dynamic(() => import('@/components/landing/AcademiesSection'), { 
+const AcademiesSection = dynamic(() => import('@/components/landing/AcademiesSection'), {
   loading: () => <div className="py-24 h-[500px]" />,
-  ssr: true 
+  ssr: true
 });
-const PitchesSection = dynamic(() => import('@/components/landing/PitchesSection'), { 
+const PitchesSection = dynamic(() => import('@/components/landing/PitchesSection'), {
   loading: () => <div className="py-24 h-[500px]" />,
-  ssr: true 
+  ssr: true
 });
-const ReportsSection = dynamic(() => import('@/components/landing/ReportsSection'), { 
+const ReportsSection = dynamic(() => import('@/components/landing/ReportsSection'), {
   loading: () => <div className="py-24 h-[500px]" />,
-  ssr: true 
+  ssr: true
 });
-const PricingSection = dynamic(() => import('@/components/landing/PricingSection'), { 
+const PricingSection = dynamic(() => import('@/components/landing/PricingSection'), {
   loading: () => <div className="py-32 h-[500px]" />,
-  ssr: true 
+  ssr: true
 });
-const FinalCTASection = dynamic(() => import('@/components/landing/FinalCTASection'), { 
+const FinalCTASection = dynamic(() => import('@/components/landing/FinalCTASection'), {
   loading: () => <div className="py-32 h-[300px]" />,
-  ssr: true 
+  ssr: true
 });
 
 export default function RootPage() {
   return (
     <div className="w-full bg-[#040D12] text-white font-sans selection:bg-emerald-500/30">
-      
+
       {/* ================= HERO SECTION ================= */}
       <section className="relative min-h-screen w-full flex flex-col overflow-hidden">
         {/* Background Video */}
@@ -83,19 +83,19 @@ export default function RootPage() {
           {/* Text Content Container (No large backgrounds) */}
           <div className="flex flex-col items-center text-center max-w-[1000px] w-full mx-auto relative z-10">
             <h1 className="text-[2.2rem] sm:text-[3.2rem] md:text-[4.2rem] lg:text-[4.8rem] font-bold leading-[1.1] tracking-tight mb-4 mt-6 max-w-[1100px]">
-              <span className="text-zinc-50 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Διαχειρίσου το γήπεδό σου 5x5</span><br />
+              <span className="text-zinc-50 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Διαχειρίσου το γήπεδό σου</span><br />
               <span className="text-white flex items-center justify-center gap-2 md:gap-4 flex-wrap mt-1 sm:mt-3 drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] uppercase">
-                και την ακαδημία σου 
+                και την ακαδημία σου
                 <span className="font-serif italic lowercase text-emerald-400 tracking-normal px-1 bg-emerald-500/10 rounded-lg">από ένα κινητό</span>
               </span>
             </h1>
-            
+
             <p className="text-emerald-400 text-lg md:text-2xl max-w-3xl mx-auto mb-10 font-bold leading-relaxed tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] px-4">
               Κρατήσεις, πληρωμές, αθλητές — <span className="text-white border-b-2 border-emerald-500">όλα σε ένα.</span>
             </p>
 
-            <Link 
-              href="/venue-login" 
+            <Link
+              href="/venue-login"
               className="group px-8 py-3.5 md:px-10 md:py-4 font-bold text-white bg-emerald-500 hover:bg-emerald-400 rounded-2xl transition-all duration-300 overflow-hidden shadow-[0_0_30px_-5px_rgba(52,211,153,0.4)] hover:shadow-[0_0_40px_-5px_rgba(52,211,153,0.6)] flex items-center gap-3 hover:scale-105 active:scale-95 text-sm md:text-base mb-16 md:mb-24"
             >
               <span>Μπείτε στη Νέα Εποχή</span>
@@ -119,10 +119,10 @@ export default function RootPage() {
         <div className="max-w-[1400px] mx-auto px-6 text-center">
           <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-widest mb-6">Εμπιστευονται το οικοσυστημα μας κορυφαιες εγκαταστασεις</p>
           <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-500">
-             <div className="text-xl font-black font-serif italic text-zinc-300">Arena FC</div>
-             <div className="text-xl font-black tracking-tighter text-zinc-300">CITY<span className="text-emerald-500">SPORTS</span></div>
-             <div className="text-lg font-bold uppercase tracking-widest text-zinc-300 border-2 border-zinc-300 px-2">KINGS</div>
-             <div className="text-xl font-medium tracking-tight text-zinc-300">Pro<span className="opacity-50">Academy</span></div>
+            <div className="text-xl font-black font-serif italic text-zinc-300">Arena FC</div>
+            <div className="text-xl font-black tracking-tighter text-zinc-300">CITY<span className="text-emerald-500">SPORTS</span></div>
+            <div className="text-lg font-bold uppercase tracking-widest text-zinc-300 border-2 border-zinc-300 px-2">KINGS</div>
+            <div className="text-xl font-medium tracking-tight text-zinc-300">Pro<span className="opacity-50">Academy</span></div>
           </div>
         </div>
       </section>
