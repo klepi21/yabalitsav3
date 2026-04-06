@@ -4,17 +4,36 @@ import { useEffect, useState } from 'react';
 
 export default function HeroVideo() {
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    // Only mount the video on the client to avoid blocking the initial SSR payload 
-    // and to defer the heavy download by a split second.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
+    const init = () => {
+      setMounted(true);
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    queueMicrotask(init);
+
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
   if (!mounted) {
-    // Return a placeholder or just null so the background stays dark initially
-    return null;
+    return <div className="absolute inset-0 bg-[#040D12] z-0" />;
+  }
+
+  // On mobile, just show the poster image or an optimized image instead of the video
+  if (isMobile) {
+    return (
+      <div 
+        className="absolute inset-0 w-full h-full bg-cover bg-center z-0 opacity-80"
+        style={{ backgroundImage: 'url(/stadium-931975_1920.jpg)' }}
+      />
+    );
   }
 
   return (
@@ -23,7 +42,8 @@ export default function HeroVideo() {
       loop
       muted
       playsInline
-      preload="none" // Hint browser not to aggressively block loading
+      preload="metadata"
+      poster="/stadium-931975_1920.jpg"
       className="absolute top-0 left-0 w-full h-full object-cover z-0 opacity-80"
     >
       <source src="/backvide.mp4" type="video/mp4" />

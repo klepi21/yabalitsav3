@@ -54,7 +54,7 @@ export default function AnimatedLaptop() {
               alt="Yabalitsa Dashboard Preview"
               width={1920}
               height={1080}
-              quality={100}
+              quality={75}
               priority
               sizes="(max-width: 1200px) 100vw, 1200px"
               className="w-full h-auto object-contain block group-hover:scale-[1.03] transition-transform duration-[1500ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] origin-top"
