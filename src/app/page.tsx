@@ -82,29 +82,16 @@ export default function RootPage() {
 
           {/* Text Content Container (No large backgrounds) */}
           <div className="flex flex-col items-center text-center max-w-[1000px] w-full mx-auto relative z-10">
-            <h1 className="text-[2.5rem] sm:text-[3.5rem] md:text-[4.5rem] lg:text-[5rem] font-medium leading-[1.1] tracking-tight mb-4 mt-6">
-              <span className="text-zinc-50 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Το μέλλον της διαχείρισης</span><br />
-              <span className="text-white flex items-center justify-center gap-2 md:gap-4 flex-wrap mt-1 sm:mt-3 drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">
-                έγινε <span className="font-serif italic lowercase text-white tracking-normal px-1">digital</span>
-                <span className="flex items-center gap-2 md:gap-3 font-black text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.4)] ml-1">
-                  +
-                  <Image 
-                    src="/yabalo.png" 
-                    alt="Yabalitsa Logo" 
-                    width={320} 
-                    height={64}
-                    priority
-                    fetchPriority="high"
-                    quality={60}
-                    sizes="(max-width: 768px) 200px, 320px"
-                    className="w-[160px] sm:w-[200px] md:w-[260px] lg:w-[290px] h-auto filter brightness-0 invert drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)] translate-y-[2px] md:translate-y-[4px]" 
-                  />
-                </span>
+            <h1 className="text-[2.2rem] sm:text-[3.2rem] md:text-[4.2rem] lg:text-[4.8rem] font-bold leading-[1.1] tracking-tight mb-4 mt-6 max-w-[1100px]">
+              <span className="text-zinc-50 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Διαχειρίσου το γήπεδό σου 5x5</span><br />
+              <span className="text-white flex items-center justify-center gap-2 md:gap-4 flex-wrap mt-1 sm:mt-3 drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] uppercase">
+                και την ακαδημία σου 
+                <span className="font-serif italic lowercase text-emerald-400 tracking-normal px-1 bg-emerald-500/10 rounded-lg">από ένα κινητό</span>
               </span>
             </h1>
             
-            <p className="text-zinc-200 text-sm md:text-base lg:text-lg max-w-2xl mx-auto mb-10 font-medium leading-relaxed tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] px-4">
-              Σας βοηθάμε να αυτοματοποιήσετε τις κρατήσεις σας, να ελέγχετε τις συνδρομές των ακαδημιών και να εξοικονομείτε χρόνο σε ένα σύγχρονο οικοσύστημα.
+            <p className="text-emerald-400 text-lg md:text-2xl max-w-3xl mx-auto mb-10 font-bold leading-relaxed tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] px-4">
+              Κρατήσεις, πληρωμές, αθλητές — <span className="text-white border-b-2 border-emerald-500">όλα σε ένα.</span>
             </p>
 
             <Link 
