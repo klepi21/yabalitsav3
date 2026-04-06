@@ -88,6 +88,92 @@ export default function PricingSection() {
               );
             })}
           </div>
+          
+          {/* ================= COMPARISON SECTION ================= */}
+          <div className="mt-32 max-w-[900px] mx-auto text-center">
+            <h3 className="text-2xl md:text-3xl font-bold mb-4">Γιατί να αλλάξω τον τρόπο που δουλεύω;</h3>
+            <p className="text-zinc-400 mb-12 max-w-xl mx-auto">Η παραμονή στο χαρτί και στο Excel δεν είναι δωρεάν. <span className="text-red-400">Σας κοστίζει σε χρόνο, λάθη και χαμένα έσοδα.</span></p>
+            
+            <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] overflow-hidden backdrop-blur-sm">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-white/5 text-[10px] uppercase tracking-widest font-bold text-zinc-500">
+                    <th className="px-6 py-5">Λειτουργία</th>
+                    <th className="px-6 py-5 text-center bg-red-500/5 text-red-400">Excel / Χαρτί</th>
+                    <th className="px-6 py-5 text-center bg-emerald-500/5 text-emerald-400">Yabalitsa</th>
+                  </tr>
+                </thead>
+                <tbody className="text-sm">
+                  <tr className="border-t border-white/5">
+                    <td className="px-6 py-5 font-medium">Έλεγχος Διαθεσιμότητας</td>
+                    <td className="px-6 py-5 text-center text-zinc-600">Χειροκίνητος & επιρρεπής σε λάθη</td>
+                    <td className="px-6 py-5 text-center text-emerald-400 font-bold">Αυτόματος & Αλάνθαστος</td>
+                  </tr>
+                  <tr className="border-t border-white/5">
+                    <td className="px-6 py-5 font-medium">Λήξη Ιατρικών Πιστοποιητικών</td>
+                    <td className="px-6 py-5 text-center text-zinc-600">Αδύνατο να ελεγχθεί έγκαιρα</td>
+                    <td className="px-6 py-5 text-center text-emerald-400 font-bold">Αυτόματες Ειδοποιήσεις</td>
+                  </tr>
+                  <tr className="border-t border-white/5">
+                    <td className="px-6 py-5 font-medium">Έλεγχος Χρεών & Πληρωμών</td>
+                    <td className="px-6 py-5 text-center text-zinc-600">&quot;Ποιος μας χρωστάει;&quot; (Χάος)</td>
+                    <td className="px-6 py-5 text-center text-emerald-400 font-bold">Zero-Debt Dashboard</td>
+                  </tr>
+                  <tr className="border-t border-white/5">
+                    <td className="px-6 py-5 font-medium">Πρόσβαση από παντού (Mobile)</td>
+                    <td className="px-6 py-5 text-center text-zinc-600">Πρέπει να είστε στο γραφείο</td>
+                    <td className="px-6 py-5 text-center text-emerald-400 font-bold">Παντού μαζί σας (Cloud)</td>
+                  </tr>
+                  <tr className="border-t border-white/5">
+                    <td className="px-6 py-5 font-medium">Αναφορές Εσόδων</td>
+                    <td className="px-6 py-5 text-center text-zinc-600">Ώρες υπολογισμών & άγχος</td>
+                    <td className="px-6 py-5 text-center text-emerald-400 font-bold">Real-time με 1 κλικ</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div className="mt-8 flex justify-center items-center gap-2 text-zinc-500 text-xs italic">
+              <Shield className="w-4 h-4 text-emerald-500" />
+              Μην αφήνετε την επιχείρησή σας στην τύχη. Αναβαθμίστε σήμερα.
+            </div>
+          </div>
+
+          {/* ================= FAQ SECTION ================= */}
+          <div className="mt-40 grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-12 max-w-[1000px] mx-auto text-left">
+            <div className="col-span-full mb-4">
+              <h3 className="text-3xl md:text-4xl font-bold mb-4">Συχνές Ερωτήσεις</h3>
+              <div className="h-1 w-20 bg-emerald-500 rounded-full" />
+            </div>
+            
+            <div>
+              <h4 className="text-lg font-bold text-white mb-3">Είναι δύσκολο στη χρήση;</h4>
+              <p className="text-zinc-400 text-sm leading-relaxed">
+                Σχεδιάσαμε το Yabalitsa με γνώμονα την απλότητα. Αν ξέρετε να στέλνετε ένα μήνυμα, μπορείτε να διαχειριστείτε το γήπεδό σας. Χρειάζονται λιγότερο από 10 λεπτά για να εξοικειωθείτε πλήρως.
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="text-lg font-bold text-white mb-3">Τι γίνεται αν σταματήσω τη συνδρομή;</h4>
+              <p className="text-zinc-400 text-sm leading-relaxed">
+                Τα δεδομένα σας ανήκουν σε εσάς. Αν αποφασίσετε να σταματήσετε, μπορείτε να κάνετε εξαγωγή όλων των στοιχείων (αθλητές, πελάτες, κρατήσεις) σε Excel. Καμία δέσμευση, καμία &quot;παγίδα&quot;.
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="text-lg font-bold text-white mb-3">Μπορούν να το χρησιμοποιούν οι υπάλληλοί μου;</h4>
+              <p className="text-zinc-400 text-sm leading-relaxed">
+                Φυσικά! Μπορείτε να προσκαλέσετε coaches και γραμματεία στην πλατφόρμα, ορίζοντας ακριβώς τι επιτρέπεται να βλέπουν και να αλλάζουν (π.χ. μόνο κρατήσεις, χωρίς πρόσβαση στα οικονομικά).
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="text-lg font-bold text-white mb-3">Χρειάζεται εγκατάσταση;</h4>
+              <p className="text-zinc-400 text-sm leading-relaxed">
+                Όχι, το Yabalitsa είναι Cloud Software. Λειτουργεί μέσω browser σε οποιαδήποτε συσκευή (PC, Mac, Tablet, Mobile) χωρίς να κατεβάσετε τίποτα. Τα δεδομένα σας συγχρονίζονται αυτόματα παντού.
+              </p>
+            </div>
+          </div>
         </div>
       </section>
   );
