@@ -11,7 +11,7 @@ export default function BookDemo() {
 
   return (
     <>
-      <section className="relative w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 py-20 sm:py-28 overflow-hidden">
+      <section id="book-demo" className="relative w-full bg-gradient-to-b from-zinc-950 via-zinc-900 to-zinc-950 py-20 sm:py-28 overflow-hidden">
         {/* Background decoration */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-emerald-500/5 blur-3xl" />

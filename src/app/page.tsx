@@ -100,12 +100,22 @@ export default function RootPage() {
               Κρατήσεις, πληρωμές, αθλητές — <span className="text-white border-b-2 border-emerald-500">όλα σε ένα.</span>
             </p>
 
-            <Link
-              href="/venue-login"
-              className="group px-8 py-3.5 md:px-10 md:py-4 font-bold text-white bg-emerald-500 hover:bg-emerald-400 rounded-2xl transition-all duration-300 overflow-hidden shadow-[0_0_30px_-5px_rgba(52,211,153,0.4)] hover:shadow-[0_0_40px_-5px_rgba(52,211,153,0.6)] flex items-center gap-3 hover:scale-105 active:scale-95 text-sm md:text-base mb-16 md:mb-24"
-            >
-              <span>Μπείτε στη Νέα Εποχή</span>
-            </Link>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 md:mb-24">
+              <Link
+                href="/venue-login"
+                className="group px-8 py-3.5 md:px-10 md:py-4 font-bold text-white bg-emerald-500 hover:bg-emerald-400 rounded-2xl transition-all duration-300 overflow-hidden shadow-[0_0_30px_-5px_rgba(52,211,153,0.4)] hover:shadow-[0_0_40px_-5px_rgba(52,211,153,0.6)] flex items-center gap-3 hover:scale-105 active:scale-95 text-sm md:text-base w-full sm:w-auto justify-center"
+              >
+                <span>Μπείτε στη Νέα Εποχή</span>
+              </Link>
+              
+              <Link
+                href="#book-demo"
+                className="group px-8 py-3.5 md:px-10 md:py-4 font-bold text-emerald-400 border border-emerald-500/30 bg-emerald-500/5 hover:bg-emerald-500/10 rounded-2xl transition-all duration-300 flex items-center gap-3 hover:scale-105 active:scale-95 text-sm md:text-base w-full sm:w-auto justify-center backdrop-blur-sm"
+              >
+                <Zap className="w-4 h-4" />
+                <span>Κλείστε Demo</span>
+              </Link>
+            </div>
 
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[11px] md:text-xs font-bold text-white/90 uppercase tracking-[0.2em] -mt-10 md:-mt-16 mb-24 md:mb-36 drop-shadow-lg">
               <span className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-emerald-400" /> 15 Ημερες Δωρεαν Δοκιμη</span>

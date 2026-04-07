@@ -1,21 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getAuth } from 'firebase-admin/auth';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import path from 'path';
+import { db, auth } from '@/lib/api-auth';
+import { FieldValue } from 'firebase-admin/firestore';
 import { sendEmail, emailTemplates } from '@/lib/email-service';
-
-// Initialize Firebase Admin if not already done
-if (!getApps().length) {
-  initializeApp({
-    credential: cert(
-      path.join(process.cwd(), process.env.FIREBASE_ADMIN_KEY_PATH!)
-    ),
-  });
-}
-
-const db = getFirestore();
-const auth = getAuth();
 
 export async function POST(request: NextRequest) {
   try {

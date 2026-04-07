@@ -19,6 +19,9 @@ dist/
 
 # Firebase Admin SDK key
 *firebase-adminsdk*.json
+yabalitsa-*.json
+service-account*.json
+*.key.json
 
 # Vercel
 .vercel
