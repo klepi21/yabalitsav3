@@ -67,7 +67,7 @@ export default function RootPage() {
               <Link href="#academies" className="hover:text-emerald-400 transition">Ακαδημίες</Link>
               <Link href="#pitches" className="hover:text-emerald-400 transition">Γήπεδα</Link>
               <Link href="#reports" className="hover:text-emerald-400 transition">Αναφορές</Link>
-              <Link href="/blog" className="hover:text-emerald-400 transition">Blog</Link>
+              <Link href="/blog" className="hover:text-emerald-400 transition">Blog </Link>
             </nav>
           </div>
           <div className="flex items-center gap-6">
