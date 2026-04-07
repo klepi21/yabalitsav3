@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { Zap, Shield, CheckCircle2 } from 'lucide-react';
 import HeroVideo from '@/components/HeroVideo';
 import AnimatedLaptop from '@/components/AnimatedLaptop';
+import BookDemo from '@/components/BookDemo';
 
 // Dynamic imports for off-screen components to improve PageSpeed
 const FeaturesSection = dynamic(() => import('@/components/landing/FeaturesSection'), {
@@ -127,6 +128,7 @@ export default function RootPage() {
       <AcademiesSection />
       <PitchesSection />
       <ReportsSection />
+      <BookDemo />
       <PricingSection />
       <FinalCTASection />
 
