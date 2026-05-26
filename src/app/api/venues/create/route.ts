@@ -88,10 +88,10 @@ export async function POST(request: NextRequest) {
       updatedAt: FieldValue.serverTimestamp(),
     });
 
-    // Send Telegram notification (non-blocking)
+    // Send Telegram notification (non-blocking, skip in development)
     const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
     const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
-    if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID) {
+    if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID && process.env.NODE_ENV !== 'development') {
       const text = [
         `\u{1F389} *Νέα Εγγραφή Venue!*`,
         '',

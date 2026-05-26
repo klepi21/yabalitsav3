@@ -809,7 +809,7 @@ export default function NewBookingPage() {
         {/* Info Sidebar */}
         <div className="space-y-8">
           {/* Price Summary */}
-          <Card className="premium-card bg-emerald-600 border-0 overflow-hidden shadow-2xl shadow-emerald-200">
+          <Card className="bg-emerald-600 border-0 overflow-hidden shadow-2xl shadow-emerald-200">
             <CardContent className="p-5 sm:p-8 text-white">
               <div className="flex items-center justify-between mb-8">
                 <p className="text-xs font-black uppercase tracking-[3px] text-white/70">{toGreekUpperCase('Σύνοψη Πληρωμής')}</p>
