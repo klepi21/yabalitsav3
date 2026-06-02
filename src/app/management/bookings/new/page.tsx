@@ -17,8 +17,8 @@ import {
   Building2,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { bookingService } from '@/lib/firebase-services';
-import { Pitch, Booking, BlockedDate, OpeningSlot, getOpeningSlots } from '@/types';
+import { bookingService, userService } from '@/lib/firebase-services';
+import { Pitch, Booking, BlockedDate, OpeningSlot, User, getOpeningSlots } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -27,6 +27,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { CalendarIcon } from 'lucide-react';
 import {
   Breadcrumb,
@@ -42,6 +49,7 @@ import { cn, toGreekUpperCase } from '@/lib/utils';
 const bookingCreateSchema = z.object({
   customerName: z.string().min(1, 'Το όνομα του πελάτη είναι υποχρεωτικό'),
   customerPhone: z.string().min(1, 'Ο αριθμός τηλεφώνου είναι υποχρεωτικός'),
+  customerEmail: z.string().email('Μη έγκυρη διεύθυνση email').optional().or(z.literal('')),
   pitchId: z.string().min(1, 'Η επιλογή γηπέδου είναι υποχρεωτική'),
   selectedSlot: z.string().min(1, 'Η επιλογή ώρας είναι υποχρεωτική'),
   notes: z.string().optional(),
@@ -57,6 +65,9 @@ export default function NewBookingPage() {
   const [pitches, setPitches] = useState<Pitch[]>([]);
   const [existingBookings, setExistingBookings] = useState<Booking[]>([]);
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
+  const [customers, setCustomers] = useState<User[]>([]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
+  const [customerSelectKey, setCustomerSelectKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -157,6 +168,24 @@ export default function NewBookingPage() {
       setPitches(convertedPitches);
       setExistingBookings(convertedBookings);
       setBlockedDates(convertedBlockedDates);
+
+      // Fetch customers for this venue (non-blocking — ignore errors silently)
+      try {
+        const customersRes = await fetch('/api/customers/get-by-venue', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({ venueId: venueOwner.venueId }),
+        });
+        if (customersRes.ok) {
+          const customersData = await customersRes.json();
+          setCustomers(customersData.customers || []);
+        }
+      } catch (e) {
+        console.warn('Failed to load customers for dropdown:', e);
+      }
     } catch (error) {
       console.error('Error loading data:', error);
       const errorMessage = error instanceof Error ? error.message : 'Αποτυχία φόρτωσης δεδομένων';
@@ -234,6 +263,51 @@ export default function NewBookingPage() {
         throw new Error('Το επιλεγμένο γήπεδο δεν βρέθηκε');
       }
 
+      // Resolve the customer in /customers list — match by phone (digits-only).
+      // If missing, create a new customer record for this venue.
+      // The resolved `customerId` is then attached to every booking as `userId`
+      // so the booking shows up in the customer's booking history page.
+      const normalize = (p: string) => p.replace(/\D/g, '');
+      const incomingPhone = normalize(data.customerPhone);
+      let customerId = '';
+      if (incomingPhone) {
+        const existing = customers.find(c => normalize(c.phone || '') === incomingPhone);
+        if (existing) {
+          customerId = existing.id;
+          // If the customer existed but isn't linked to this venue yet, link them.
+          if (!existing.venueIds?.includes(venueOwner.venueId)) {
+            try {
+              await userService.addVenueToCustomer(existing.id, venueOwner.venueId);
+            } catch (e) {
+              console.warn('Failed to attach venue to existing customer:', e);
+            }
+          }
+        } else {
+          try {
+            const newId = await userService.create({
+              name: data.customerName,
+              email: data.customerEmail || '',
+              phone: data.customerPhone,
+              venueIds: [venueOwner.venueId],
+            });
+            customerId = newId;
+            // Reflect locally so a second submit doesn't try to recreate
+            setCustomers(prev => [...prev, {
+              id: newId,
+              name: data.customerName,
+              email: data.customerEmail || '',
+              phone: data.customerPhone,
+              venueIds: [venueOwner.venueId],
+              createdAt: new Date(),
+              updatedAt: new Date(),
+            }]);
+          } catch (e) {
+            console.warn('Failed to add customer to /customers list:', e);
+            // Non-blocking — booking still proceeds (with empty userId).
+          }
+        }
+      }
+
       const [slotTime] = data.selectedSlot.split(' - ');
       const [hours, minutes] = slotTime.split(':').map(Number);
       const startDateTime = new Date(selectedDate);
@@ -265,9 +339,9 @@ export default function NewBookingPage() {
               venueId: venueOwner.venueId,
               pitchId: data.pitchId,
               slotId: '',
-              userId: '',
+              userId: customerId,
               userName: data.customerName,
-              userEmail: '',
+              userEmail: data.customerEmail || '',
               userPhone: data.customerPhone,
               startTime: currentStart,
               endTime: currentEnd,
@@ -299,9 +373,9 @@ export default function NewBookingPage() {
           venueId: venueOwner.venueId,
           pitchId: data.pitchId,
           slotId: '',
-          userId: '',
+          userId: customerId,
           userName: data.customerName,
-          userEmail: '',
+          userEmail: data.customerEmail || '',
           userPhone: data.customerPhone,
           startTime: startDateTime,
           endTime: endDateTime,
@@ -489,7 +563,64 @@ export default function NewBookingPage() {
                     </div>
                     <h3 className="text-base sm:text-xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Στοιχεία Πελάτη')}</h3>
                   </div>
-                  
+
+                  {customers.length > 0 && (
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between gap-3 ml-1">
+                        <Label htmlFor="customerSelect" className="text-xs font-black uppercase tracking-widest text-zinc-400">
+                          Επιλογή Υπάρχοντος Πελάτη
+                        </Label>
+                        {selectedCustomerId && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedCustomerId('');
+                              setCustomerSelectKey(k => k + 1);
+                              setValue('customerName', '', { shouldValidate: false });
+                              setValue('customerPhone', '', { shouldValidate: false });
+                              setValue('customerEmail', '', { shouldValidate: false });
+                            }}
+                            className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 hover:text-emerald-700 transition-colors"
+                          >
+                            ✕ Καθαρισμός
+                          </button>
+                        )}
+                      </div>
+                      <Select
+                        key={customerSelectKey}
+                        value={selectedCustomerId || undefined}
+                        onValueChange={(value) => {
+                          const c = customers.find(x => x.id === value);
+                          if (c) {
+                            setSelectedCustomerId(value);
+                            setValue('customerName', c.name, { shouldValidate: true });
+                            setValue('customerPhone', c.phone, { shouldValidate: true });
+                            setValue('customerEmail', c.email || '', { shouldValidate: true });
+                          }
+                          // Force re-mount so the SAME customer can be re-selected later to reset edits
+                          setCustomerSelectKey(k => k + 1);
+                        }}
+                      >
+                        <SelectTrigger
+                          id="customerSelect"
+                          className="h-11 sm:h-14 w-full px-4 sm:px-5 rounded-2xl border-zinc-200 focus:ring-emerald-500 font-medium text-sm sm:text-base"
+                        >
+                          <SelectValue placeholder="Επιλογή Πελάτη" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-72">
+                          {customers.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {c.name}{c.phone ? ` — ${c.phone}` : ''}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-[11px] font-medium text-zinc-400 ml-1">
+                        Ή συμπλήρωσε χειροκίνητα τα στοιχεία παρακάτω.
+                      </p>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2.5">
                       <Label htmlFor="customerName" className="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">Όνομα Πελάτη *</Label>
@@ -515,6 +646,20 @@ export default function NewBookingPage() {
                       />
                       {errors.customerPhone && (
                         <p className="text-sm font-bold text-red-500 ml-1">{errors.customerPhone.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2.5 md:col-span-2">
+                      <Label htmlFor="customerEmail" className="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">Email (προαιρετικό)</Label>
+                      <Input
+                        type="email"
+                        id="customerEmail"
+                        {...register('customerEmail')}
+                        placeholder="π.χ. customer@email.gr"
+                        className="h-11 sm:h-14 px-4 sm:px-5 rounded-2xl border-zinc-200 focus:ring-emerald-500 font-medium text-sm sm:text-lg"
+                      />
+                      {errors.customerEmail && (
+                        <p className="text-sm font-bold text-red-500 ml-1">{errors.customerEmail.message}</p>
                       )}
                     </div>
                   </div>
