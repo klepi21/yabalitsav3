@@ -113,3 +113,5 @@ The system is designed to be extensible for additional modules:
 
 This project is proprietary software for Yabalitsa management operations.
 
+
+<!-- rebuild: 2026-08-19 -->
