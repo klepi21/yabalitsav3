@@ -19,7 +19,9 @@ export interface Venue {
   stripeCustomerId?: string; // Stripe Customer ID for payments
   daysRemaining?: number;
   plan?: 'subscription' | 'pay-per-booking' | 'trial';
-  planType?: 'Basic' | 'Pro' | 'Enterprise';
+  /** Ζώνη μεγέθους: 'Starter' | 'Growth' | 'Scale'. Παλαιότερες
+   *  εγγραφές μπορεί να έχουν 'Basic' | 'Pro' | 'Enterprise'. */
+  planType?: string;
   subscriptionEndDate?: string; // ISO string for subscription end date
   active?: boolean;
   managementPinHash?: string; // SHA-256 hash of 4-digit PIN
@@ -199,8 +201,10 @@ export interface Payment {
   currency: string; // e.g., "eur"
   status: 'pending' | 'succeeded' | 'failed' | 'canceled';
   paymentDate?: string; // ISO string - when payment was completed
-  paymentType: 'one_time_plan_purchase' | 'subscription_payment' | 'booking_payment';
-  planName?: 'Basic' | 'Pro' | 'Enterprise';
+  paymentType: 'one_time_plan_purchase' | 'plan_upgrade' | 'subscription_payment' | 'booking_payment';
+  /** Ό,τι αγοράστηκε τη στιγμή της πληρωμής (ιστορική καταγραφή).
+   *  Νέες: «Growth + Ακαδημία (…)». Παλιές: 'Basic' | 'Pro' | 'Enterprise'. */
+  planName?: string;
   durationMonths?: number;
   couponCode?: string;       // The coupon code used
   couponDiscount?: number;   // Discount amount in EUR

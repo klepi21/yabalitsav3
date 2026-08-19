@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
-import { pricingUtils } from '@/lib/pricing';
+import {
+  pricingUtils, calculateSubscription, describeBreakdown,
+  calculateUpgrade, buildBilledSnapshot,
+} from '@/lib/pricing';
+import { getVenueUsage } from '@/lib/venue-usage';
 import { verifyAuth, isAuthError } from '@/lib/api-auth';
 import { getAdminDb } from '@/lib/firebase-admin';
 
@@ -15,7 +19,9 @@ export async function POST(request: NextRequest) {
     const authResult = await verifyAuth(request);
     if (isAuthError(authResult)) return authResult.response;
 
-    const { planId, duration, userUid, customerEmail, customerName, couponCode } = await request.json();
+    const { planId, duration, userUid, customerEmail, customerName, couponCode, mode } =
+      await request.json();
+    const isUpgrade = mode === 'upgrade';
 
     // Verify the token uid matches the claimed userUid
     if (authResult.decodedToken.uid !== userUid) {
@@ -27,20 +33,15 @@ export async function POST(request: NextRequest) {
 
     console.log('Creating payment intent for:', { planId, duration, userUid, customerEmail, customerName });
 
-    if (!planId || !duration || !userUid) {
+    if (!userUid || (!isUpgrade && !duration)) {
       return NextResponse.json(
-        { error: 'Missing required fields: planId, duration, userUid' },
+        { error: 'Missing required fields: duration, userUid' },
         { status: 400 }
       );
     }
 
-    // Get plan details
-    const plan = pricingUtils.getPlan(planId);
-    if (!plan) {
-      return NextResponse.json(
-        { error: 'Invalid plan ID' },
-        { status: 400 }
-      );
+    if (!isUpgrade && ![1, 6, 12].includes(Number(duration))) {
+      return NextResponse.json({ error: 'Μη έγκυρη διάρκεια συνδρομής' }, { status: 400 });
     }
 
     // Get venue for this user via Admin SDK
@@ -53,53 +54,54 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No venue found for this user' }, { status: 404 });
     }
     const venueDoc = venuesSnap.docs[0];
-    const venue = { id: venueDoc.id, ...venueDoc.data() } as Record<string, unknown> & { id: string; ownerId: string; name: string; planType?: string; daysRemaining?: number; plan?: string; stripeCustomerId?: string; coupon?: { code: string; active: boolean; discountType: 'percentage' | 'fixed'; discountValue: number } };
+    const venue = { id: venueDoc.id, ...venueDoc.data() } as Record<string, unknown> & { id: string; ownerId: string; name: string; planType?: string; daysRemaining?: number; plan?: string; stripeCustomerId?: string; coupon?: { code: string; active: boolean; discountType: 'percentage' | 'fixed'; discountValue: number; expiresAt?: string } };
 
-    // Block same/lower plan purchases when subscription is active
-    const PLAN_HIERARCHY: Record<string, number> = { basic: 1, pro: 2, enterprise: 3 };
-    const currentPlanId = (venue.planType || '').toLowerCase();
-    const daysRemaining = venue.daysRemaining || 0;
-    const hasActiveSub = daysRemaining > 0 && venue.plan === 'subscription';
+    /* Ο έλεγχος ιεραρχίας πλάνων αφαιρέθηκε: στο μοντέλο βάσει μεγέθους
+       ο πελάτης δεν επιλέγει πακέτο, άρα δεν υπάρχει «κατώτερο πλάνο» να
+       αποτραπεί. Οι ημέρες προστίθενται σωστά στο υπόλοιπο, οπότε μια
+       πρόωρη ανανέωση δεν χάνει τίποτα. */
 
-    if (hasActiveSub) {
-      const currentLevel = PLAN_HIERARCHY[currentPlanId] || 0;
-      const newLevel = PLAN_HIERARCHY[planId] || 0;
-      const isNearExpiry = daysRemaining <= 7;
-      const isSamePlan = newLevel === currentLevel;
 
-      // Allow same plan renewal when ≤ 7 days remaining
-      if (isSamePlan && isNearExpiry) {
-        // OK — renewal allowed
-      } else if (newLevel <= currentLevel) {
+    /* Η τιμή προκύπτει από το ΠΡΑΓΜΑΤΙΚΟ μέγεθος (γήπεδα + αθλητές),
+       όχι από πακέτο που δηλώνει ο πελάτης. */
+    const usage = await getVenueUsage(venueDoc.id);
+    const billed = (venue as Record<string, unknown>).billing as
+      | Parameters<typeof calculateUpgrade>[1]
+      | undefined;
+
+    // Στην αναβάθμιση κρατάμε τη διάρκεια που είχε αγοραστεί.
+    const effectiveDuration = (isUpgrade ? billed?.durationMonths ?? 1 : Number(duration)) as 1 | 6 | 12;
+    const breakdown = calculateSubscription(usage, effectiveDuration);
+
+    // Πάνω από το self-serve μέγεθος δεν υπάρχει αυτόματη τιμή να χρεωθεί.
+    if (breakdown.requiresContact) {
+      return NextResponse.json(
+        {
+          error:
+            'Το μέγεθος του κέντρου σας ξεπερνά το πλάνο που τιμολογείται αυτόματα. Επικοινωνήστε μαζί μας για να συμφωνήσουμε πλάνο.',
+          requiresContact: true,
+        },
+        { status: 409 }
+      );
+    }
+
+    let upgradeQuote = null;
+    if (isUpgrade) {
+      upgradeQuote = calculateUpgrade(usage, billed, (venue.daysRemaining as number) || 0);
+      if (!upgradeQuote.owed) {
         return NextResponse.json(
-          { error: `Δεν μπορείτε να αγοράσετε ίδιο ή κατώτερο πλάνο ενώ έχετε ενεργή συνδρομή (${currentPlanId}). Διαθέσιμο μετά τη λήξη.` },
-          { status: 400 }
+          { error: 'Δεν εκκρεμεί αναβάθμιση για τον λογαριασμό σας.' },
+          { status: 409 }
         );
       }
     }
 
-    // Get Stripe Price ID
-    const stripePriceId = pricingUtils.getStripePriceId(planId, duration as 1 | 6 | 12);
-    if (!stripePriceId) {
-      return NextResponse.json(
-        { 
-          error: 'Price configuration not found for this plan and duration',
-          planId,
-          duration,
-          availablePlans: ['basic', 'pro', 'enterprise'],
-          availableDurations: [1, 6, 12]
-        },
-        { status: 400 }
-      );
-    }
-
-    console.log('✅ Using Stripe Price ID:', stripePriceId);
-
-    // Check if dev email for testing pricing
-    const basePrice = customerEmail === DEV_EMAIL ? DEV_BASE_PRICE : plan.basePrice;
-
-    // Calculate the amount
-    let totalPrice = pricingUtils.calculateTotalPrice(basePrice, duration as 1 | 6 | 12);
+    let totalPrice =
+      customerEmail === DEV_EMAIL
+        ? pricingUtils.calculateTotalPrice(DEV_BASE_PRICE, effectiveDuration)
+        : isUpgrade
+          ? upgradeQuote!.amountWithVat
+          : breakdown.totalWithVat;
     let couponDiscount = 0;
     let appliedCouponCode: string | undefined;
 
@@ -125,11 +127,15 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      // Check plan restriction
+      /* Περιορισμός ανά ζώνη. Πριν συγκρινόταν με το `planId` που ο
+         πελάτης επέλεγε — πεδίο που δεν στέλνεται πλέον, οπότε κάθε
+         περιορισμένο κουπόνι θα αποτύγχανε. Συγκρίνεται με τη ζώνη που
+         προκύπτει από το μέγεθος. */
       const couponAppliesTo = (venueCoupon as Record<string, unknown>).appliesTo as string | undefined;
-      if (couponAppliesTo && couponAppliesTo !== 'all' && couponAppliesTo !== planId) {
+      const currentTierId = describeBreakdown(breakdown).planType.toLowerCase();
+      if (couponAppliesTo && couponAppliesTo !== 'all' && couponAppliesTo !== currentTierId) {
         return NextResponse.json(
-          { error: `Αυτό το κουπόνι ισχύει μόνο για το πλάνο ${couponAppliesTo}` },
+          { error: `Αυτό το κουπόνι ισχύει μόνο για τη ζώνη ${couponAppliesTo}` },
           { status: 400 }
         );
       }
@@ -141,12 +147,14 @@ export async function POST(request: NextRequest) {
     }
 
     const amountInCents = Math.round(totalPrice * 100);
+    const { planType, planName } = describeBreakdown(breakdown);
 
     console.log('💰 Payment details:', {
-      basePrice,
+      usage,
+      planType,
       duration,
       totalPrice,
-      amountInCents
+      amountInCents,
     });
 
     // Create or get Stripe customer
@@ -189,9 +197,16 @@ export async function POST(request: NextRequest) {
       confirm: false,
       metadata: {
         venue_id: venue.id,
-        plan_id: planId,
-        plan_name: plan.name as 'Basic' | 'Pro' | 'Enterprise',
-        duration: duration.toString(),
+        plan_id: planId || planType.toLowerCase(),
+        plan_name: planName,
+        plan_type: planType,
+        mode: isUpgrade ? 'upgrade' : 'purchase',
+        billed_snapshot: JSON.stringify(
+          buildBilledSnapshot(breakdown, new Date().toISOString())
+        ),
+        pitches: String(usage.pitches),
+        athletes: String(usage.athletes),
+        duration: String(effectiveDuration),
         user_uid: userUid,
         payment_type: 'one_time_plan_purchase',
         ...(appliedCouponCode && { coupon_code: appliedCouponCode, coupon_discount: couponDiscount.toFixed(2) })
@@ -209,9 +224,10 @@ export async function POST(request: NextRequest) {
       amount: totalPrice,
       currency: 'eur',
       status: 'pending',
-      planName: plan.name as 'Basic' | 'Pro' | 'Enterprise',
-      durationMonths: duration,
-      paymentType: 'one_time_plan_purchase',
+      planName,
+      planType,
+      durationMonths: effectiveDuration,
+      paymentType: isUpgrade ? 'plan_upgrade' : 'one_time_plan_purchase',
       ...(appliedCouponCode && { couponCode: appliedCouponCode, couponDiscount: couponDiscount }),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
@@ -236,7 +252,9 @@ export async function POST(request: NextRequest) {
       paymentIntentId: paymentIntent.id,
       amount: totalPrice,
       currency: 'eur',
-      planName: plan.name,
+      planName,
+      planType,
+      breakdown,
       duration: duration
     };
 

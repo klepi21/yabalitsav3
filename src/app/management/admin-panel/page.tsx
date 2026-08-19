@@ -64,7 +64,8 @@ interface CouponData {
   active: boolean;
   discountType: 'percentage' | 'fixed';
   discountValue: number;
-  appliesTo: 'all' | 'basic' | 'pro' | 'enterprise';
+  /** Νέες ζώνες· τα παλιά ονόματα παραμένουν για κουπόνια που υπάρχουν ήδη. */
+  appliesTo: 'all' | 'starter' | 'growth' | 'scale' | 'basic' | 'pro' | 'enterprise';
   expiresAt?: string;
   description?: string;
 }
@@ -155,7 +156,7 @@ export default function AdminPanelPage() {
     code: '',
     discountType: 'percentage' as 'percentage' | 'fixed',
     discountValue: 0,
-    appliesTo: 'all' as 'all' | 'basic' | 'pro' | 'enterprise',
+    appliesTo: 'all' as 'all' | 'starter' | 'growth' | 'scale' | 'basic' | 'pro' | 'enterprise',
     expiresAt: '',
     description: '',
   });
@@ -388,13 +389,20 @@ export default function AdminPanelPage() {
       return <Badge className="bg-amber-100 text-amber-700 text-2xs font-semibold hover:bg-amber-100">TRIAL</Badge>;
     }
     const colors: Record<string, string> = {
-      Basic: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
-      Pro: 'bg-purple-100 text-purple-700 hover:bg-purple-100',
-      Enterprise: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100',
+      // Νέες ζώνες μεγέθους
+      Starter: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
+      Growth: 'bg-violet-100 text-violet-700 hover:bg-violet-100',
+      Scale: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100',
+      Custom: 'bg-amber-100 text-amber-800 hover:bg-amber-100',
+      // Παλαιότερες εγγραφές, πριν τη μετάβαση
+      Basic: 'bg-zinc-100 text-zinc-600 hover:bg-zinc-100',
+      Pro: 'bg-zinc-100 text-zinc-600 hover:bg-zinc-100',
+      Enterprise: 'bg-zinc-100 text-zinc-600 hover:bg-zinc-100',
     };
+    const label = venue.planType || 'ACTIVE';
     return (
-      <Badge className={cn('text-2xs font-semibold', colors[venue.planType || 'Basic'] || colors.Basic)}>
-        {venue.planType || 'ACTIVE'}
+      <Badge className={cn('text-2xs font-semibold', colors[label] || 'bg-zinc-100 text-zinc-600 hover:bg-zinc-100')}>
+        {label}
       </Badge>
     );
   };
@@ -801,15 +809,15 @@ export default function AdminPanelPage() {
 
               <div className="space-y-1.5">
                 <Label className="text-2xs font-semibold text-zinc-500">Εφαρμογή σε</Label>
-                <Select value={couponForm.appliesTo} onValueChange={(v: 'all' | 'basic' | 'pro' | 'enterprise') => setCouponForm(p => ({ ...p, appliesTo: v }))}>
+                <Select value={couponForm.appliesTo} onValueChange={(v: 'all' | 'starter' | 'growth' | 'scale') => setCouponForm(p => ({ ...p, appliesTo: v }))}>
                   <SelectTrigger className="h-10 text-sm font-semibold">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">Όλα τα πλάνα</SelectItem>
-                    <SelectItem value="basic">Basic</SelectItem>
-                    <SelectItem value="pro">Pro</SelectItem>
-                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                    <SelectItem value="all">Όλες οι ζώνες</SelectItem>
+                    <SelectItem value="starter">Starter (έως 2 γήπεδα)</SelectItem>
+                    <SelectItem value="growth">Growth (3–6 γήπεδα)</SelectItem>
+                    <SelectItem value="scale">Scale (7–12 γήπεδα)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

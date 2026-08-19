@@ -1,7 +1,7 @@
 'use client';
-import { Zap, Shield, CheckCircle2, Check } from 'lucide-react';
+import { Zap, Shield, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
-import { pricingUtils } from '@/lib/pricing';
+import { platformTiers, academyTiers } from '@/lib/pricing';
 
 export default function PricingSection() {
   return (
@@ -27,71 +27,90 @@ export default function PricingSection() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center max-w-[1000px] mx-auto">
-            {pricingUtils.getAllPlans().map((plan) => {
-              const isPopular = plan.popular;
-              const duration = plan.durationMonths || 1;
-              const monthlyPrice = pricingUtils.calculateMonthlyPrice(plan.basePrice, duration as 1 | 6 | 12);
-              const totalPrice = pricingUtils.calculateTotalPrice(plan.basePrice, duration as 1 | 6 | 12);
-              
-              return (
-                <div 
-                  key={plan.id}
-                  className={`relative flex flex-col p-8 rounded-2xl border transition-all duration-300 ${
-                    isPopular 
-                      ? 'bg-[#0B151C] border-emerald-500/50 shadow-[0_0_50px_rgba(116,238,22,0.15)] md:-translate-y-4' 
-                      : 'bg-[#040D12]/80 border-white/10 hover:border-white/20'
+          {/* Πλατφόρμα */}
+          <div className="max-w-[1000px] mx-auto">
+            <p className="eyebrow text-zinc-400 mb-4">Πλατφόρμα · υποχρεωτικό</p>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {platformTiers.map((tier, i) => (
+                <div
+                  key={tier.id}
+                  className={`rounded-2xl border p-6 ${
+                    i === 1
+                      ? 'bg-[#0B151C] border-emerald-500/40'
+                      : 'bg-[#040D12]/80 border-white/10'
                   }`}
                 >
-                  {isPopular && (
-                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                      <span className="bg-emerald-500 text-black text-xs font-bold px-4 py-1.5 rounded-full tracking-wider uppercase">
-                        Πιο δημοφιλές
-                      </span>
-                    </div>
-                  )}
-
-                  <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
-                  <p className="text-zinc-400 text-sm mb-6">{plan.description}</p>
-                  
-                  <div className="mb-8">
-                    <div className="flex items-end gap-1">
-                      <span className="text-5xl font-bold text-white">{pricingUtils.formatPrice(totalPrice).replace('€', '')}</span>
-                      <span className="text-emerald-400 font-bold text-xl">€</span>
-                      <span className="text-zinc-400 mb-1 ml-1">{duration === 1 ? '/ μήνα' : 'συνολικά'}</span>
-                    </div>
-                    {duration > 1 && (
-                      <div className="inline-block mt-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1 rounded-lg text-sm font-semibold tracking-wide">
-                        Βγαίνει {pricingUtils.formatPrice(monthlyPrice).replace('€', '')}€ / μήνα
+                  <p className="text-sm font-medium text-zinc-300">{tier.label}</p>
+                  {tier.custom ? (
+                    <>
+                      <p className="text-2xl font-bold text-white mt-3">Κατόπιν συνεννόησης</p>
+                      <p className="text-xs text-zinc-400 mt-1">Επικοινωνήστε μαζί μας</p>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-end gap-1 mt-3">
+                        <span className="text-4xl font-bold text-white">
+                          {((tier.monthly ?? 0) * 1.24).toFixed(0)}
+                        </span>
+                        <span className="text-emerald-400 font-bold text-lg mb-0.5">€</span>
+                        <span className="text-zinc-400 text-sm mb-1 ml-1">/ μήνα</span>
                       </div>
-                    )}
-                    <p className={`text-xs text-zinc-400 font-medium ${duration > 1 ? 'mt-3' : 'mt-2'}`}>περιλαμβάνει ΦΠΑ 24%</p>
-                  </div>
-
-                  <ul className="space-y-4 mb-8 flex-1">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className="flex items-start gap-3">
-                        <Check className={`w-5 h-5 shrink-0 ${isPopular ? 'text-emerald-400' : 'text-zinc-400'}`} />
-                        <span className="text-zinc-300 text-sm leading-tight">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link 
-                    href="/for-venues"
-                    className={`w-full text-center py-4 rounded-xl font-bold transition-all ${
-                      isPopular 
-                        ? 'bg-emerald-400 hover:bg-emerald-300 text-black' 
-                        : 'bg-white/5 hover:bg-white/10 text-white border border-white/10'
-                    }`}
-                  >
-                    Ξεκινήστε τώρα
-                  </Link>
+                      <p className="text-xs text-zinc-400 mt-1">με ΦΠΑ 24%</p>
+                    </>
+                  )}
                 </div>
-              );
-            })}
+              ))}
+            </div>
+
+            {/* Ακαδημία */}
+            <p className="eyebrow text-zinc-400 mt-12 mb-4">
+              Ακαδημία · προαιρετικό, μόνο αν τη χρησιμοποιείτε
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+              {academyTiers.map((tier) => (
+                <div key={tier.id} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+                  <p className="text-xs font-medium text-zinc-300 leading-snug">{tier.label}</p>
+                  {tier.custom ? (
+                    <p className="text-base font-bold text-white mt-2 leading-snug">
+                      Κατόπιν
+                      <br />
+                      συνεννόησης
+                    </p>
+                  ) : (
+                    <>
+                      <div className="flex items-end gap-1 mt-2">
+                        <span className="text-2xl font-bold text-white">
+                          +{((tier.monthly ?? 0) * 1.24).toFixed(0)}
+                        </span>
+                        <span className="text-emerald-400 font-bold mb-0.5">€</span>
+                      </div>
+                      <p className="text-xs text-zinc-400 mt-0.5">/ μήνα</p>
+                    </>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-10 rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.04] p-6 text-center">
+              <p className="text-base text-zinc-200 leading-relaxed max-w-2xl mx-auto">
+                Πληρώνετε ανάλογα με το μέγεθός σας — και όσο μεγαλώνετε, το κόστος γίνεται
+                <strong className="text-emerald-400"> μικρότερο ποσοστό</strong> του τζίρου σας.
+                Δεν επιλέγετε πακέτο, δεν κλειδώνει τίποτα αν μεγαλώσετε.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                <Link
+                  href="/for-venues"
+                  className="px-6 py-3 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-zinc-950 font-bold transition-colors"
+                >
+                  Ξεκινήστε δωρεάν
+                </Link>
+                <span className="text-sm text-zinc-400">
+                  Εξάμηνη χρέωση −7% · Ετήσια −12%
+                </span>
+              </div>
+            </div>
           </div>
-          
+
           {/* ================= COMPARISON SECTION ================= */}
           <div className="mt-32 max-w-[900px] mx-auto text-center">
             <h3 className="text-2xl md:text-3xl font-bold mb-4">Γιατί να αλλάξω τον τρόπο που δουλεύω;</h3>

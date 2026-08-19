@@ -41,19 +41,41 @@ export const calculateDaysRemaining = (venue: VenueData | null) => {
   return venue.daysRemaining ?? 0;
 };
 
-// Get subscription end date - prioritize from yabalitsa_venues collection
+/**
+ * Ημερομηνία λήξης συνδρομής.
+ *
+ * Το `daysRemaining` έχει ΠΡΟΤΕΡΑΙΟΤΗΤΑ γιατί είναι το πεδίο που πραγματικά
+ * ελέγχει την πρόσβαση: το Cloud Function το μειώνει καθημερινά και στο 0
+ * απενεργοποιεί το venue.
+ *
+ * Το αποθηκευμένο `subscriptionEndDate` γράφεται μία φορά κατά την πληρωμή
+ * και μετά δεν συντηρείται, οπότε ξεφεύγει. Στο demo έδειχνε «363 ημέρες»
+ * δίπλα σε «Λήξη 10 Οκτ 2026» — δύο αντιφατικοί αριθμοί στην ίδια κάρτα.
+ * Χρησιμοποιείται πλέον μόνο ως εφεδρεία.
+ */
 export const getSubscriptionEndDate = (venue: VenueData | null, lastPayment?: PaymentData | null) => {
   if (!venue) return null;
-  
-  // First priority: use subscriptionEndDate from yabalitsa_venues collection
+
+  // Πρώτη προτεραιότητα: ο μετρητής που επιβάλλει την πρόσβαση.
+  if (typeof venue.daysRemaining === 'number' && venue.daysRemaining > 0) {
+    const calculatedEndDate = new Date();
+    calculatedEndDate.setHours(0, 0, 0, 0);
+    calculatedEndDate.setDate(calculatedEndDate.getDate() + venue.daysRemaining);
+    return {
+      date: calculatedEndDate.toISOString(),
+      source: 'daysRemaining' as const
+    };
+  }
+
+  // Εφεδρεία: ό,τι γράφτηκε κατά την πληρωμή.
   if (venue.subscriptionEndDate) {
     return {
       date: venue.subscriptionEndDate,
       source: 'yabalitsa_venues' as const
     };
   }
-  
-  // Second priority: calculate from last payment
+
+  // Τελευταία εφεδρεία: υπολογισμός από την τελευταία πληρωμή.
   if (lastPayment && lastPayment.paymentDate && lastPayment.durationMonths) {
     const paymentDate = new Date(lastPayment.paymentDate);
     const calculatedEndDate = new Date(paymentDate);
@@ -63,16 +85,6 @@ export const getSubscriptionEndDate = (venue: VenueData | null, lastPayment?: Pa
       source: 'payment' as const
     };
   }
-  
-  // Third priority: calculate from current date + days remaining
-  if (venue.daysRemaining && venue.daysRemaining > 0) {
-    const calculatedEndDate = new Date();
-    calculatedEndDate.setDate(calculatedEndDate.getDate() + venue.daysRemaining);
-    return {
-      date: calculatedEndDate.toISOString(),
-      source: 'daysRemaining' as const
-    };
-  }
-  
+
   return null;
 };

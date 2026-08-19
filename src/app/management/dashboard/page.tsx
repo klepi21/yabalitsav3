@@ -86,6 +86,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { useSubscriptionQuote } from '@/lib/queries';
+import UpgradeDueCard from '@/components/UpgradeDueCard';
 
 function CoachDashboard() {
   const { user, venueOwner, isLoading: authLoading } = useAuth();
@@ -472,6 +474,7 @@ function AdminDashboard() {
   const [isSquadsExpanded, setIsSquadsExpanded] = useState(false);
   const [isPitchesExpanded, setIsPitchesExpanded] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
+  const { upgrade: subQuote } = useSubscriptionQuote(venueOwner?.venueId);
   const [_isVenueInfoExpanded, _setIsVenueInfoExpanded] = useState(false);
   const [showQuickBooking, setShowQuickBooking] = useState(false);
   const [_showBookingMenu, _setShowBookingMenu] = useState(false);
@@ -1021,6 +1024,8 @@ function AdminDashboard() {
         </Alert>
       )}
 
+
+      {subQuote?.owed && <UpgradeDueCard upgrade={subQuote} />}
 
       {/* Banner λήξης — ισχύει και για trial και για συνδρομή.
           Πριν έλεγχε μόνο `plan === 'subscription'`, οπότε ο δοκιμαστικός

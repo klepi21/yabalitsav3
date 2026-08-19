@@ -9,6 +9,8 @@ import { academyUserService, userGroupService, squadService, academyPaymentServi
 import { AcademyUser, UserGroup, Squad } from '@/types/academy';
 import { Loader2, ArrowLeft, UserPlus, AlertCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useSubscriptionQuote } from '@/lib/queries';
+import PlanLimitNotice from '@/components/PlanLimitNotice';
 
 export default function NewAcademyUserPage() {
   const router = useRouter();
@@ -55,7 +57,10 @@ export default function NewAcademyUserPage() {
     [groups]
   );
 
+  const { atAthleteLimit, usage, limits } = useSubscriptionQuote(venueId);
+
   const handleSubmit = async (data: Omit<AcademyUser, 'id' | 'createdAt' | 'updatedAt'>) => {
+    if (atAthleteLimit) return;
     try {
       setIsLoading(true);
       setError(null);
@@ -105,6 +110,14 @@ export default function NewAcademyUserPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+      </div>
+    );
+  }
+
+  if (atAthleteLimit && usage && limits) {
+    return (
+      <div className="max-w-3xl mx-auto py-4">
+        <PlanLimitNotice kind="athletes" current={usage.athletes} limit={limits.athletes} />
       </div>
     );
   }

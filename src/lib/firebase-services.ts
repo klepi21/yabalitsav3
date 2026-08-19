@@ -38,7 +38,9 @@ interface FirebaseVenueData {
   ownerId: string;
   daysRemaining?: number;
   plan?: 'subscription' | 'pay-per-booking' | 'trial';
-  planType?: 'Basic' | 'Pro' | 'Enterprise';
+  /** Ζώνη μεγέθους: 'Starter' | 'Growth' | 'Scale'. Παλαιότερες
+   *  εγγραφές μπορεί να έχουν 'Basic' | 'Pro' | 'Enterprise'. */
+  planType?: string;
   active?: boolean;
   bookingsEnabled?: boolean;
   managementPinHash?: string;

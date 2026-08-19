@@ -22,6 +22,8 @@ export const keys = {
     venueId ? ['/api/dashboard/get-data', { venueId, ...(range ?? {}) }] : null,
   settings: (venueId?: string): CacheKey =>
     venueId ? ['/api/settings/get-data', { venueId }] : null,
+  quote: (venueId?: string): CacheKey =>
+    venueId ? ['/api/subscription/quote', { venueId }] : null,
 } as const;
 
 /* ------------------------------------------------------------------ *
@@ -89,6 +91,43 @@ export function useCustomers(venueId?: string) {
 export function usePitches(venueId?: string) {
   const { data, error, isLoading, mutate } = useSWR<{ pitches: Raw[] }>(keys.pitches(venueId));
   return { pitches: data?.pitches ?? [], error, isLoading, refresh: mutate };
+}
+
+export interface UpgradeQuote {
+  owed: boolean;
+  billedMonthlyBase: number;
+  currentMonthlyBase: number;
+  amountWithVat: number;
+  daysRemaining: number;
+  addedPlatform: boolean;
+  addedAcademy: boolean;
+}
+
+export interface SubscriptionQuote {
+  usage: { pitches: number; athletes: number; hasAcademy: boolean };
+  limits: { pitches: number; athletes: number };
+  atPitchLimit: boolean;
+  atAthleteLimit: boolean;
+  requiresContact: boolean;
+  upgrade: UpgradeQuote;
+}
+
+/**
+ * Μέγεθος και όρια self-serve. Χρησιμοποιείται και για την τιμολόγηση και
+ * για να μπλοκάρει η δημιουργία πάνω από το όριο.
+ */
+export function useSubscriptionQuote(venueId?: string) {
+  const { data, error, isLoading } = useSWR<SubscriptionQuote & Raw>(keys.quote(venueId));
+  return {
+    usage: data?.usage,
+    limits: data?.limits,
+    atPitchLimit: !!data?.atPitchLimit,
+    atAthleteLimit: !!data?.atAthleteLimit,
+    requiresContact: !!data?.requiresContact,
+    upgrade: data?.upgrade,
+    error,
+    isLoading,
+  };
 }
 
 export function usePendingBookings(venueId?: string) {

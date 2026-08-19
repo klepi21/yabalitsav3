@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { platformTiers, academyTiers, SELF_SERVE_LIMITS } from '@/lib/pricing';
 
 export default function TermsPage() {
   return (
@@ -168,23 +169,42 @@ export default function TermsPage() {
               <p className="text-zinc-400 mb-3">
                 Το Yabalitsa προσφέρει <strong>δωρεάν trial 30 ημερών</strong> για όλους τους νέους χρήστες. Μετά τη λήξη του trial, μπορείτε να επιλέξετε από τα εξής πλάνα:
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center p-3 bg-[#0B151C] rounded border">
-                  <h5 className="font-semibold text-zinc-100">Basic</h5>
-                  <p className="text-sm text-zinc-400">1 γήπεδο, απεριόριστες κρατήσεις</p>
-                  <p className="text-lg font-bold text-emerald-400">€25/μήνα</p>
-                </div>
-                <div className="text-center p-3 bg-[#0B151C] rounded border">
-                  <h5 className="font-semibold text-zinc-100">Pro</h5>
-                  <p className="text-sm text-zinc-400">2-3 γήπεδα, απεριόριστες κρατήσεις</p>
-                  <p className="text-lg font-bold text-emerald-400">€45/μήνα</p>
-                </div>
-                <div className="text-center p-3 bg-[#0B151C] rounded border">
-                  <h5 className="font-semibold text-zinc-100">Enterprise</h5>
-                  <p className="text-sm text-zinc-400">3+ γήπεδα, unique booking link</p>
-                  <p className="text-lg font-bold text-emerald-400">€75/μήνα</p>
-                </div>
+              <p className="text-zinc-400 mb-3">
+                Δεν επιλέγετε πακέτο: η συνδρομή προκύπτει από το μέγεθος του κέντρου σας και
+                αποτελείται από δύο σκέλη. Οι τιμές είναι προ ΦΠΑ 24%.
+              </p>
+
+              <p className="text-zinc-300 font-semibold text-sm mb-2">Πλατφόρμα — ανά ενεργά γήπεδα</p>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+                {platformTiers.map((t) => (
+                  <div key={t.id} className="text-center p-3 bg-[#0B151C] rounded border border-white/10">
+                    <h5 className="font-semibold text-zinc-100 text-sm">{t.label}</h5>
+                    <p className="text-lg font-bold text-emerald-400 mt-1">
+                      {t.monthly === null ? 'Κατόπιν συνεννόησης' : `€${t.monthly}/μήνα`}
+                    </p>
+                  </div>
+                ))}
               </div>
+
+              <p className="text-zinc-300 font-semibold text-sm mb-2">
+                Ακαδημία — ανά ενεργούς αθλητές, χρεώνεται μόνο εφόσον χρησιμοποιείται
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                {academyTiers.map((t) => (
+                  <div key={t.id} className="text-center p-3 bg-[#0B151C] rounded border border-white/10">
+                    <h5 className="font-semibold text-zinc-100 text-sm">{t.label}</h5>
+                    <p className="text-lg font-bold text-emerald-400 mt-1">
+                      {t.monthly === null ? 'Κατόπιν συνεννόησης' : `+€${t.monthly}/μήνα`}
+                    </p>
+                  </div>
+                ))}
+              </div>
+
+              <p className="text-zinc-400 text-sm mt-4">
+                Εκπτώσεις προπληρωμής: εξάμηνη −7%, ετήσια −12%. Πάνω από{' '}
+                {SELF_SERVE_LIMITS.pitches} γήπεδα ή {SELF_SERVE_LIMITS.athletes} αθλητές η
+                συνδρομή συμφωνείται κατόπιν επικοινωνίας.
+              </p>
             </div>
           </div>
 

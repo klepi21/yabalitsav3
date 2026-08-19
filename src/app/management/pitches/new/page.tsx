@@ -14,6 +14,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { useSubscriptionQuote } from '@/lib/queries';
+import PlanLimitNotice from '@/components/PlanLimitNotice';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -98,8 +100,13 @@ export default function NewPitchPage() {
     }
   });
 
+  const { atPitchLimit, usage, limits } = useSubscriptionQuote(venueOwner?.venueId);
+
   const handleFormSubmit = async (data: PitchFormData) => {
     if (!venueOwner) return;
+    // Δεύτερος έλεγχος: το κουμπί δεν φαίνεται καν στο όριο, αλλά η
+    // υποβολή μπορεί να γίνει και με πληκτρολόγιο.
+    if (atPitchLimit) return;
 
     setIsLoading(true);
     try {
@@ -121,6 +128,14 @@ export default function NewPitchPage() {
       setIsLoading(false);
     }
   };
+
+  if (atPitchLimit && usage && limits) {
+    return (
+      <div className="max-w-3xl mx-auto py-4">
+        <PlanLimitNotice kind="pitches" current={usage.pitches} limit={limits.pitches} />
+      </div>
+    );
+  }
 
   if (authLoading || !venueOwner) {
     return (

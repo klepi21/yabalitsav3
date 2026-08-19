@@ -202,11 +202,16 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                     )}
                   >
                     <Zap className={cn('h-3.5 w-3.5', isExpiring ? 'text-amber-600' : 'text-emerald-600')} />
+                    {/* Πριν έδειχνε το αποθηκευμένο planType, που είναι
+                        στιγμιότυπο τη στιγμή της αγοράς και ξεπερνιόταν
+                        σιωπηλά όταν άλλαζε το μέγεθος — με αποτέλεσμα να
+                        διαφωνεί με τη σελίδα συνδρομής. Η κατάσταση είναι
+                        και πιο χρήσιμη πληροφορία από το όνομα ζώνης. */}
                     {isExpiring
                       ? `Ανανέωση σε ${daysRemaining} ημ.`
                       : venueData.plan === 'trial'
                         ? `Δοκιμή • ${daysRemaining} ημ.`
-                        : venueData.planType || 'Basic'}
+                        : `Συνδρομή • ${daysRemaining} ημ.`}
                   </button>
                 )}
 

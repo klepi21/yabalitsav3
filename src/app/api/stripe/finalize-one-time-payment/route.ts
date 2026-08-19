@@ -80,23 +80,38 @@ export async function POST(request: NextRequest) {
     const planEndDate = new Date(currentDate);
     planEndDate.setDate(planEndDate.getDate() + daysRemaining);
 
-    // Convert planName to planType
-    const planTypeMap: Record<string, string> = {
-      'Basic': 'Basic',
-      'Pro': 'Pro',
-      'Enterprise': 'Enterprise',
-    };
-    const planType = planTypeMap[planName] || 'Basic';
+    /* Το planType έρχεται πλέον από το PaymentIntent metadata (ζώνη
+       μεγέθους). Κρατάμε fallback στα παλιά ονόματα για συνδρομές που
+       ξεκίνησαν πριν τη μετάβαση. */
+    const LEGACY_PLAN_NAMES = ['Basic', 'Pro', 'Enterprise', 'Legacy'];
+    const metadataPlanType = paymentIntent.metadata?.plan_type;
+    const planType =
+      metadataPlanType ||
+      (LEGACY_PLAN_NAMES.includes(planName) ? planName : 'Starter');
 
-    // Update venue with plan details (Admin SDK — bypasses rules)
-    await db.collection('yabalitsa_venues').doc(venueId).update({
+    /* Λειτουργία αναβάθμισης: ο πελάτης πλήρωσε τη ΔΙΑΦΟΡΑ για τις ημέρες
+       που ήδη έχει. Δεν προστίθενται ημέρες — ενημερώνεται μόνο το
+       στιγμιότυπο του τι πληρώνει, ώστε να μη ζητηθεί ξανά. */
+    const isUpgrade = paymentIntent.metadata?.mode === 'upgrade';
+
+    const billedSnapshot = paymentIntent.metadata?.billed_snapshot
+      ? JSON.parse(paymentIntent.metadata.billed_snapshot)
+      : null;
+
+    const venueUpdate: Record<string, unknown> = {
       plan: 'subscription',
       planType,
-      subscriptionEndDate: planEndDate.toISOString(),
-      daysRemaining: Math.max(0, daysRemaining),
       active: true,
       updatedAt: FieldValue.serverTimestamp(),
-    });
+      ...(billedSnapshot ? { billing: billedSnapshot } : {}),
+    };
+
+    if (!isUpgrade) {
+      venueUpdate.subscriptionEndDate = planEndDate.toISOString();
+      venueUpdate.daysRemaining = Math.max(0, daysRemaining);
+    }
+
+    await db.collection('yabalitsa_venues').doc(venueId).update(venueUpdate);
 
     console.log('✅ Updated venue with plan details:', {
       planType,

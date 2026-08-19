@@ -1,131 +1,113 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { ArrowLeft, Check, CreditCard, Loader2, Calendar, Sparkles, Shield, Lock, AlertTriangle, Tag, X } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import {
+  ArrowLeft, Check, CreditCard, Loader2, Lock, Tag, X,
+  Building2, Users, TrendingUp, Info,
+} from 'lucide-react';
 import Link from 'next/link';
 import { loadStripe } from '@stripe/stripe-js';
 import { pricingUtils } from '@/lib/pricing';
 import { toast } from '@/lib/toast';
+import { cn } from '@/lib/utils';
+import UpgradeDueCard from '@/components/UpgradeDueCard';
 
-const PLAN_HIERARCHY: Record<string, number> = {
-  basic: 1,
-  pro: 2,
-  enterprise: 3,
+interface Tier { id: string; label: string; upTo: number | null; monthly: number }
+interface Quote {
+  duration: 1 | 6 | 12;
+  platformTier: Tier;
+  academyTier: Tier | null;
+  monthlyBeforeDiscount: number;
+  monthlyWithVat: number;
+  totalWithVat: number;
+  discountPercent: number;
+  requiresContact: boolean;
+  planType: string;
+  planName: string;
+}
+interface QuoteResponse {
+  usage: { pitches: number; athletes: number; hasAcademy: boolean };
+  quotes: Quote[];
+  requiresContact?: boolean;
+  upgrade?: import('@/lib/queries').UpgradeQuote;
+  headroom: {
+    pitchesToNextTier: number | null;
+    athletesToNextTier: number | null;
+    platformTierLabel: string;
+    academyTierLabel: string | null;
+  };
+}
+
+const DURATION_LABEL: Record<number, string> = {
+  1: 'Μηνιαία',
+  6: 'Εξάμηνη',
+  12: 'Ετήσια',
 };
 
 export default function SubscriptionRenewalPage() {
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [venueData, setVenueData] = useState<any>(null);
-  const [currentDate] = useState(new Date());
+  const [venueData, setVenueData] = useState<Record<string, unknown> | null>(null);
+  const [quote, setQuote] = useState<QuoteResponse | null>(null);
+  const [duration, setDuration] = useState<1 | 6 | 12>(12);
   const [isLoading, setIsLoading] = useState(false);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [showUpgradeConfirm, setShowUpgradeConfirm] = useState(false);
+  const [isLoadingQuote, setIsLoadingQuote] = useState(true);
+
   const [couponInput, setCouponInput] = useState('');
   const [couponApplied, setCouponApplied] = useState(false);
   const [couponError, setCouponError] = useState('');
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponDiscount, setCouponDiscount] = useState(0);
 
-  const DEV_EMAIL = process.env.NEXT_PUBLIC_DEV_EMAIL || '';
-  const isDevUser = userEmail === DEV_EMAIL;
+  const daysRemaining = (venueData?.daysRemaining as number) || 0;
+  const isTrial = venueData?.plan === 'trial';
+  const selected = quote?.quotes.find((q) => q.duration === duration);
+  const requiresContact = !!quote?.requiresContact;
 
-  const plans = pricingUtils.getAllPlans().map(plan =>
-    isDevUser ? { ...plan, basePrice: 0.50 } : plan
-  );
+  const load = useCallback(async () => {
+    try {
+      const { collection, query, where, getDocs } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase');
+      const { getAuth } = await import('firebase/auth');
 
-  const daysRemaining = venueData?.daysRemaining || 0;
-  const hasActiveSubscription = venueData && daysRemaining > 0 && venueData.plan === 'subscription';
-  const isNearExpiry = hasActiveSubscription && daysRemaining <= 7;
-  const currentPlanId = venueData?.planType?.toLowerCase() || 'basic';
-  const currentPlanLevel = PLAN_HIERARCHY[currentPlanId] || 0;
+      const auth = getAuth();
+      if (!auth.currentUser?.uid) return;
 
-  const getPlanStatus = (planId: string) => {
-    if (!hasActiveSubscription) return 'available'; // Expired — all available
-    const planLevel = PLAN_HIERARCHY[planId] || 0;
-    // Near expiry (≤7 days): allow same plan renewal + upgrades
-    if (isNearExpiry) {
-      if (planLevel < currentPlanLevel) return 'downgrade';
-      if (planId === currentPlanId) return 'renewal';
-      return 'upgrade';
+      const snap = await getDocs(
+        query(collection(db, 'yabalitsa_venues'), where('ownerId', '==', auth.currentUser.uid))
+      );
+      if (snap.empty) return;
+
+      const venue = { id: snap.docs[0].id, ...snap.docs[0].data() } as Record<string, unknown>;
+      setVenueData(venue);
+
+      const token = await auth.currentUser.getIdToken();
+      const res = await fetch('/api/subscription/quote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ venueId: venue.id }),
+      });
+      if (res.ok) setQuote(await res.json());
+    } catch (error) {
+      console.error('Error loading renewal data:', error);
+    } finally {
+      setIsLoadingQuote(false);
     }
-    // Active (>7 days): only upgrades
-    if (planId === currentPlanId) return 'current';
-    if (planLevel < currentPlanLevel) return 'downgrade';
-    return 'upgrade';
-  };
-
-  const planIcons: Record<string, React.ElementType> = {
-    basic: Calendar,
-    pro: Sparkles,
-    enterprise: Shield,
-  };
-
-  useEffect(() => {
-    const fetchVenueData = async () => {
-      try {
-        const { collection, query, where, getDocs } = await import('firebase/firestore');
-        const { db } = await import('@/lib/firebase');
-        const { getAuth } = await import('firebase/auth');
-
-        const auth = getAuth();
-        if (auth.currentUser?.uid) {
-          setUserEmail(auth.currentUser.email || null);
-          const venuesRef = collection(db, 'yabalitsa_venues');
-          const q = query(venuesRef, where('ownerId', '==', auth.currentUser.uid));
-          const querySnapshot = await getDocs(q);
-
-          if (!querySnapshot.empty) {
-            const venueDoc = querySnapshot.docs[0];
-            setVenueData({ id: venueDoc.id, ...venueDoc.data() });
-          }
-        }
-      } catch (error) {
-        console.error('Error fetching venue data:', error);
-      }
-    };
-    fetchVenueData();
   }, []);
 
-  const getSelectedDuration = (): 1 | 6 | 12 => {
-    const plan = plans.find(p => p.id === selectedPlan);
-    return (plan?.durationMonths as 1 | 6 | 12) || 1;
-  };
-
-  const calculateSubscriptionEndDate = () => {
-    if (!selectedPlan || !venueData) return null;
-    const baseDate = new Date(currentDate);
-    const planStatus = getPlanStatus(selectedPlan);
-    // Upgrade = starts fresh from today (old days lost)
-    // Available (expired) = starts from today
-    if (planStatus !== 'upgrade') {
-      // Renewal or expired: add remaining days
-      const remainingDays = venueData.daysRemaining || 0;
-      baseDate.setDate(baseDate.getDate() + remainingDays);
-    }
-    // Upgrade: starts fresh from today (old days lost)
-    const duration = getSelectedDuration();
-    baseDate.setMonth(baseDate.getMonth() + duration);
-    return baseDate;
-  };
-
-  const formatGreekDate = (date: Date) => {
-    return date.toLocaleDateString('el-GR', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
+  useEffect(() => {
+    load();
+  }, [load]);
 
   const handleApplyCoupon = async () => {
-    if (!couponInput.trim() || !venueData) return;
+    if (!couponInput.trim() || !venueData || !selected) return;
     setCouponLoading(true);
     setCouponError('');
     try {
-      const coupon = venueData.coupon;
+      const coupon = venueData.coupon as
+        | { code: string; active: boolean; expiresAt?: string; discountType: 'percentage' | 'fixed'; discountValue: number }
+        | undefined;
+
       if (!coupon || !coupon.active) {
-        setCouponError('Δεν υπάρχει ενεργό κουπόνι για το venue σας');
+        setCouponError('Δεν υπάρχει ενεργό κουπόνι για τον λογαριασμό σας');
         setCouponApplied(false);
         return;
       }
@@ -134,48 +116,24 @@ export default function SubscriptionRenewalPage() {
         setCouponApplied(false);
         return;
       }
-      // Check expiration
       if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
         setCouponError('Αυτό το κουπόνι έχει λήξει');
         setCouponApplied(false);
         return;
       }
-      // Check if applies to selected plan
-      if (coupon.appliesTo && coupon.appliesTo !== 'all' && selectedPlan && coupon.appliesTo !== selectedPlan) {
-        const planLabels: Record<string, string> = { basic: 'Basic', pro: 'Pro', enterprise: 'Enterprise' };
-        setCouponError(`Αυτό το κουπόνι ισχύει μόνο για το πλάνο ${planLabels[coupon.appliesTo] || coupon.appliesTo}`);
-        setCouponApplied(false);
-        return;
-      }
-      // Calculate discount for display
-      if (selectedPlan) {
-        const selectedPlanInfo = plans.find(p => p.id === selectedPlan);
-        if (selectedPlanInfo) {
-          const total = pricingUtils.calculateTotalPrice(selectedPlanInfo.basePrice, getSelectedDuration());
-          const { discountAmount } = pricingUtils.applyCouponDiscount(total, coupon);
-          setCouponDiscount(discountAmount);
-        }
-      }
+
+      const { discountAmount } = pricingUtils.applyCouponDiscount(selected.totalWithVat, coupon);
+      setCouponDiscount(discountAmount);
       setCouponApplied(true);
     } finally {
       setCouponLoading(false);
     }
   };
 
-  const handleRemoveCoupon = () => {
-    setCouponApplied(false);
-    setCouponInput('');
-    setCouponError('');
-    setCouponDiscount(0);
-  };
-
   const handlePayment = async () => {
-    if (!selectedPlan || !venueData) return;
+    if (!venueData || !selected) return;
     setIsLoading(true);
     try {
-      const selectedPlanData = plans.find(p => p.id === selectedPlan);
-      if (!selectedPlanData) return;
-
       const { getAuth } = await import('firebase/auth');
       const auth = getAuth();
       if (!auth.currentUser?.uid) {
@@ -183,29 +141,29 @@ export default function SubscriptionRenewalPage() {
         return;
       }
 
-      const duration = getSelectedDuration();
       const token = await auth.currentUser.getIdToken();
-
       const response = await fetch('/api/stripe/create-payment-intent', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          planId: selectedPlan,
-          planName: selectedPlanData.name,
           duration,
-          basePrice: selectedPlanData.basePrice,
           userUid: auth.currentUser.uid,
           customerEmail: auth.currentUser.email,
-          amount: pricingUtils.getStripeAmount(selectedPlanData.basePrice, duration),
           ...(couponApplied && { couponCode: couponInput.trim().toUpperCase() }),
         }),
       });
 
       const { clientSecret, error } = await response.json();
-      if (error) { toast.error('Η πληρωμή δεν ολοκληρώθηκε', error); return; }
+      if (error) {
+        toast.error('Η πληρωμή δεν ολοκληρώθηκε', error);
+        return;
+      }
 
       const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-      if (!stripe) { toast.error('Πρόβλημα φόρτωσης πληρωμών', 'Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.'); return; }
+      if (!stripe) {
+        toast.error('Πρόβλημα φόρτωσης πληρωμών', 'Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.');
+        return;
+      }
 
       window.location.href = `/payment/checkout?payment_intent=${clientSecret}`;
     } catch (error) {
@@ -216,343 +174,308 @@ export default function SubscriptionRenewalPage() {
     }
   };
 
-  const selectedPlanData = plans.find(p => p.id === selectedPlan);
-  const selectedDuration = getSelectedDuration();
+  const finalTotal = selected ? Math.max(0.5, selected.totalWithVat - (couponApplied ? couponDiscount : 0)) : 0;
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Back */}
+    <div className="max-w-3xl mx-auto space-y-5">
       <Link
         href="/management/settings"
-        className="inline-flex items-center gap-1.5 text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
+        className="inline-flex items-center gap-1.5 text-sm text-zinc-600 hover:text-zinc-900 transition-colors"
       >
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft className="h-4 w-4" aria-hidden="true" />
         Ρυθμίσεις
       </Link>
 
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600">
-          <CreditCard className="h-5 w-5" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Ανανέωση Συνδρομής</h1>
-          <p className="text-sm text-zinc-500">Επιλέξτε τη διάρκεια που σας ταιριάζει — όλα τα χαρακτηριστικά περιλαμβάνονται</p>
-        </div>
+      <div>
+        <h1 className="text-xl font-semibold text-zinc-900">Συνδρομή</h1>
+        <p className="text-sm text-zinc-600 mt-1">
+          Η τιμή προκύπτει από το μέγεθος του κέντρου σας. Δεν χρειάζεται να επιλέξετε πακέτο.
+        </p>
       </div>
 
-      {/* Current Subscription Info */}
-      {venueData && (
-        <div className="rounded-xl border border-zinc-100/60 bg-white p-5">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="rounded-lg bg-zinc-50/50 p-4 text-center">
-              <p className="text-2xl font-semibold tracking-tight text-zinc-900">{venueData.daysRemaining || 0}</p>
-              <p className="text-xs text-zinc-500 mt-0.5">ημέρες που απομένουν</p>
-            </div>
-            <div className="rounded-lg bg-zinc-50/50 p-4 text-center">
-              <p className="text-base font-semibold text-zinc-900">
-                {venueData.plan === 'subscription' ? 'Ενεργή Συνδρομή' : 'Δωρεάν Trial'}
-              </p>
-              <p className="text-xs text-zinc-500 mt-0.5">τρέχον πλάνο</p>
+      {isLoadingQuote ? (
+        <div className="surface p-6 animate-pulse space-y-4">
+          <div className="h-5 w-40 bg-zinc-200 rounded" />
+          <div className="h-24 bg-zinc-100 rounded-xl" />
+          <div className="h-24 bg-zinc-100 rounded-xl" />
+        </div>
+      ) : !quote ? (
+        <div className="surface p-6 text-center">
+          <p className="text-sm text-zinc-600">Δεν ήταν δυνατή η φόρτωση των στοιχείων συνδρομής.</p>
+        </div>
+      ) : (
+        <>
+          {quote.upgrade?.owed && <UpgradeDueCard upgrade={quote.upgrade} />}
+
+          {/* ---------- Τρέχουσα κατάσταση ---------- */}
+          <div className="surface p-5">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-lg bg-zinc-50 p-4 text-center">
+                <p className="text-2xl font-semibold text-zinc-900 tabular-nums">{daysRemaining}</p>
+                <p className="text-xs text-zinc-600 mt-0.5">ημέρες που απομένουν</p>
+              </div>
+              <div className="rounded-lg bg-zinc-50 p-4 text-center">
+                <p className="text-base font-semibold text-zinc-900">
+                  {isTrial ? 'Δωρεάν δοκιμή' : 'Ενεργή συνδρομή'}
+                </p>
+                <p className="text-xs text-zinc-600 mt-0.5">τρέχον πλάνο</p>
+              </div>
             </div>
           </div>
-          {(!venueData.plan || venueData.plan !== 'subscription') && (
-            <div className="mt-4 rounded-lg bg-blue-50 border border-blue-100 p-3.5 text-center">
-              <p className="text-sm text-blue-700">
-                Είσαι στο <strong>δωρεάν trial</strong>! Μετά τις {venueData.daysRemaining || 0} ημέρες θα χρειαστεί να επιλέξεις πλάνο.
+
+          {/* ---------- Το μέγεθός σας ---------- */}
+          <div className="surface p-5 space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-zinc-900">Το μέγεθός σας</h2>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="rounded-xl border border-border p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Building2 className="h-4 w-4 text-zinc-500" aria-hidden="true" />
+                  <span className="text-xs font-medium text-zinc-600">Πλατφόρμα</span>
+                </div>
+                <p className="text-sm font-semibold text-zinc-900">
+                  {quote.usage.pitches} {quote.usage.pitches === 1 ? 'γήπεδο' : 'γήπεδα'}
+                </p>
+                <p className="text-xs text-zinc-600 mt-0.5">{quote.headroom.platformTierLabel}</p>
+                {quote.headroom.pitchesToNextTier !== null && (
+                  <p className="text-2xs text-zinc-500 mt-2">
+                    {quote.headroom.pitchesToNextTier > 0
+                      ? `Περιθώριο για ${quote.headroom.pitchesToNextTier} ακόμα στην ίδια τιμή`
+                      : 'Στο όριο της ζώνης — το επόμενο γήπεδο αλλάζει τιμή'}
+                  </p>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-border p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Users className="h-4 w-4 text-zinc-500" aria-hidden="true" />
+                  <span className="text-xs font-medium text-zinc-600">Ακαδημία</span>
+                </div>
+                {quote.usage.hasAcademy ? (
+                  <>
+                    <p className="text-sm font-semibold text-zinc-900">
+                      {quote.usage.athletes} {quote.usage.athletes === 1 ? 'αθλητής' : 'αθλητές'}
+                    </p>
+                    <p className="text-xs text-zinc-600 mt-0.5">{quote.headroom.academyTierLabel}</p>
+                    {quote.headroom.athletesToNextTier !== null && (
+                      <p className="text-2xs text-zinc-500 mt-2">
+                        {quote.headroom.athletesToNextTier > 0
+                          ? `Περιθώριο για ${quote.headroom.athletesToNextTier} ακόμα στην ίδια τιμή`
+                          : 'Στο όριο της ζώνης — ο επόμενος αθλητής αλλάζει τιμή'}
+                      </p>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-sm text-zinc-600">Δεν χρησιμοποιείται — δεν χρεώνεται</p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2 rounded-lg bg-blue-50 border border-blue-100 p-3">
+              <Info className="h-4 w-4 text-blue-700 shrink-0 mt-0.5" aria-hidden="true" />
+              <p className="text-xs text-blue-800 leading-relaxed">
+                Αν μεγαλώσετε πέρα από τη ζώνη σας, <strong>τίποτα δεν κλειδώνει</strong>. Η νέα
+                τιμή ισχύει από την επόμενη ανανέωση και τη βλέπετε πάντα από πριν.
               </p>
             </div>
-          )}
-        </div>
-      )}
+          </div>
 
-      {/* Plan Selection */}
-      <div className="rounded-xl border border-zinc-100/60 bg-white p-6">
-        <h2 className="text-base font-semibold tracking-tight text-zinc-900 mb-1 text-center">Επιλέξτε Διάρκεια</h2>
-        <p className="text-sm text-zinc-500 text-center mb-6">Όλα τα πλάνα περιλαμβάνουν πλήρη πρόσβαση σε όλα τα χαρακτηριστικά</p>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {plans.map((plan) => {
-            const isSelected = selectedPlan === plan.id;
-            const duration = plan.durationMonths || 1;
-            const Icon = planIcons[plan.id] || Calendar;
-            const monthlyPrice = pricingUtils.calculateMonthlyPrice(plan.basePrice, duration as 1 | 6 | 12);
-            const totalPrice = pricingUtils.calculateTotalPrice(plan.basePrice, duration as 1 | 6 | 12);
-            const discount = pricingUtils.getDiscountPercentage(duration as 1 | 6 | 12);
-            const status = getPlanStatus(plan.id);
-            const isDisabled = status === 'current' || status === 'downgrade';
-            const isRenewal = status === 'renewal';
-
-            return (
-              <button
-                key={plan.id}
-                type="button"
-                onClick={() => !isDisabled && setSelectedPlan(plan.id)}
-                disabled={isDisabled}
-                className={`relative rounded-xl border-2 p-6 text-left transition-all duration-150 ${isDisabled
-                  ? 'border-zinc-100 bg-zinc-50/50 opacity-70 cursor-not-allowed'
-                  : isSelected
-                    ? 'border-emerald-400 bg-emerald-50/30 shadow-sm'
-                    : 'border-zinc-100 hover:border-zinc-200 hover:shadow-sm'
-                  }`}
+          {requiresContact ? (
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6">
+              <h2 className="text-base font-semibold text-amber-900">Κατόπιν συνεννόησης</h2>
+              <p className="text-sm text-amber-900/90 mt-2 leading-relaxed">
+                Το μέγεθός σας ξεπερνά το πλάνο που τιμολογείται αυτόματα. Σε αυτή την κλίμακα
+                συμφωνούμε πλάνο μαζί σας — στείλτε μας μήνυμα και επανερχόμαστε με πρόταση.
+              </p>
+              <Link
+                href="/contact"
+                className="mt-4 inline-flex items-center justify-center h-11 px-6 rounded-xl bg-amber-800 text-white text-sm font-semibold hover:bg-amber-900 transition-colors"
               >
-                {status === 'current' && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-2xs font-semibold bg-emerald-600 text-white">
-                      Ενεργό
-                    </span>
-                  </div>
-                )}
-                {isRenewal && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-2xs font-semibold bg-amber-500 text-white">
-                      Ανανέωση
-                    </span>
-                  </div>
-                )}
-                {plan.popular && status !== 'current' && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-2xs font-semibold bg-emerald-600 text-white">
-                      Δημοφιλές
-                    </span>
-                  </div>
-                )}
+                Επικοινωνία
+              </Link>
+            </div>
+          ) : (
+          <>
+          {/* ---------- Διάρκεια ---------- */}
+          <div className="surface p-5 space-y-4">
+            <h2 className="text-sm font-semibold text-zinc-900">Διάρκεια χρέωσης</h2>
 
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <div className={`flex items-center justify-center w-10 h-10 rounded-xl ${isDisabled
-                      ? 'bg-zinc-100 text-zinc-500'
-                      : isSelected ? 'bg-emerald-100 text-emerald-600' : 'bg-zinc-100 text-zinc-500'
-                      }`}>
-                      {isDisabled ? <Lock className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
-                    </div>
-                    <div>
-                      <h3 className={`text-lg font-semibold ${isDisabled ? 'text-zinc-500' : 'text-zinc-900'}`}>{plan.name}</h3>
-                      <p className="text-xs text-zinc-500">{duration} {duration === 1 ? 'μήνας' : 'μήνες'}</p>
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex items-baseline gap-1">
-                      <span className={`text-2xl font-semibold tracking-tight ${isDisabled ? 'text-zinc-500' : 'text-zinc-900'}`}>
-                        {pricingUtils.formatPrice(totalPrice)}
-                      </span>
-                    </div>
-                    <p className="text-xs text-zinc-500 mt-0.5">
-                      {pricingUtils.formatPrice(monthlyPrice)}/μήνα με ΦΠΑ
-                    </p>
-                    {discount > 0 && (
-                      <span className={`inline-flex items-center mt-2 px-2 py-0.5 rounded-md text-xs font-medium border ${isDisabled
-                        ? 'bg-zinc-50 text-zinc-500 border-zinc-200'
-                        : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                        }`}>
-                        Έκπτωση {discount}%
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {quote.quotes.map((q) => {
+                const isSelected = q.duration === duration;
+                return (
+                  <button
+                    key={q.duration}
+                    type="button"
+                    onClick={() => {
+                      setDuration(q.duration);
+                      setCouponApplied(false);
+                      setCouponDiscount(0);
+                    }}
+                    aria-pressed={isSelected}
+                    className={cn(
+                      'relative rounded-xl border p-4 text-left transition-colors',
+                      isSelected
+                        ? 'border-zinc-900 bg-zinc-900 text-white'
+                        : 'border-border bg-white hover:border-zinc-300'
+                    )}
+                  >
+                    {q.discountPercent > 0 && (
+                      <span
+                        className={cn(
+                          'absolute top-3 right-3 text-2xs font-semibold rounded-full px-2 py-0.5',
+                          isSelected ? 'bg-emerald-400 text-zinc-950' : 'bg-emerald-50 text-emerald-700'
+                        )}
+                      >
+                        −{q.discountPercent}%
                       </span>
                     )}
-                  </div>
-
-                  <ul className="space-y-1.5">
-                    {plan.features.map((feature, i) => (
-                      <li key={i} className={`flex items-center gap-2 text-sm ${isDisabled ? 'text-zinc-500' : 'text-zinc-600'}`}>
-                        <Check className={`h-3.5 w-3.5 shrink-0 ${isDisabled ? 'text-zinc-400' : 'text-emerald-500'}`} />
-                        {feature}
-                      </li>
-                    ))}
-                  </ul>
-
-                  {/* Status messages */}
-                  {status === 'current' && (
-                    <p className="text-xs text-emerald-600 font-medium text-center pt-2 border-t border-zinc-100">
-                      Το τρέχον πλάνο σας
+                    <p className={cn('text-xs font-medium', isSelected ? 'text-zinc-400' : 'text-zinc-600')}>
+                      {DURATION_LABEL[q.duration]}
                     </p>
-                  )}
-                  {status === 'downgrade' && (
-                    <p className="text-xs text-zinc-500 font-medium text-center pt-2 border-t border-zinc-100">
-                      Διαθέσιμο μετά τη λήξη της συνδρομής
+                    <p className="text-xl font-semibold mt-1 tabular-nums">
+                      {pricingUtils.formatPrice(q.monthlyWithVat)}
                     </p>
-                  )}
-                  {status === 'upgrade' && (
-                    <p className="text-xs text-blue-600 font-medium text-center pt-2 border-t border-zinc-100">
-                      ⬆ Αναβάθμιση
+                    <p className={cn('text-2xs mt-0.5', isSelected ? 'text-zinc-400' : 'text-zinc-500')}>
+                      /μήνα με ΦΠΑ
                     </p>
-                  )}
-                  {status === 'renewal' && (
-                    <p className="text-xs text-amber-600 font-medium text-center pt-2 border-t border-zinc-100">
-                      🔄 Ανανέωση ({daysRemaining} ημέρ{daysRemaining === 1 ? 'α' : 'ες'} + νέα περίοδος )
-                    </p>
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Coupon — only visible when venue has an active coupon */}
-      {selectedPlan && venueData?.coupon?.active && (
-        <div className="rounded-xl border border-zinc-100/60 bg-white p-6">
-          <h3 className="text-base font-semibold tracking-tight text-zinc-900 mb-4 flex items-center gap-2">
-            <Tag className="h-4 w-4 text-emerald-600" />
-            Κουπόνι Έκπτωσης
-          </h3>
-          {couponApplied ? (
-            <div className="flex items-center justify-between rounded-lg bg-emerald-50 border border-emerald-200 p-3.5">
-              <div className="flex items-center gap-2">
-                <Check className="h-4 w-4 text-emerald-600" />
-                <span className="text-sm font-medium text-emerald-700">
-                  Κουπόνι <strong>{couponInput.toUpperCase()}</strong> εφαρμόστηκε — Έκπτωση {pricingUtils.formatPrice(couponDiscount)}
-                </span>
-              </div>
-              <button onClick={handleRemoveCoupon} className="text-emerald-600 hover:text-emerald-800 transition-colors">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={couponInput}
-                  onChange={(e) => { setCouponInput(e.target.value); setCouponError(''); }}
-                  placeholder="Εισάγετε κωδικό κουπονιού"
-                  className="flex-1 px-3 py-2.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-                />
-                <button
-                  onClick={handleApplyCoupon}
-                  disabled={!couponInput.trim() || couponLoading}
-                  className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-200 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  {couponLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Εφαρμογή'}
-                </button>
-              </div>
-              {couponError && (
-                <p className="mt-2 text-sm text-red-600">{couponError}</p>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Payment Summary */}
-      {selectedPlan && selectedPlanData && (
-        <div className="rounded-xl border border-zinc-100/60 bg-white p-6">
-          <h3 className="text-base font-semibold tracking-tight text-zinc-900 mb-4">Σύνοψη Πληρωμής</h3>
-
-          {/* Upgrade warning */}
-          {hasActiveSubscription && getPlanStatus(selectedPlan) === 'upgrade' && (
-            <div className="mb-4 rounded-lg bg-amber-50 border border-amber-200 p-3.5">
-              <div className="flex items-start gap-2">
-                <AlertTriangle className="h-4 w-4 text-amber-600 mt-0.5 shrink-0" />
-                <div className="text-sm text-amber-800">
-                  <p className="font-medium">Αναβάθμιση πλάνου</p>
-                  <p className="mt-1">
-                    Σας απομένουν <strong>{venueData.daysRemaining} ημέρες</strong> στο τρέχον πλάνο ({venueData.planType || 'Basic'}).
-                    Με την αναβάθμιση ξεκινάτε νέα περίοδο στο {selectedPlanData.name}. Οι υπόλοιπες ημέρες δεν μεταφέρονται.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="space-y-3 text-sm">
-            <div className="flex justify-between py-2 border-b border-zinc-100">
-              <span className="text-zinc-500">Πλάνο:</span>
-              <span className="font-medium text-zinc-900">{selectedPlanData.name} ({selectedDuration} {selectedDuration === 1 ? 'μήνας' : 'μήνες'})</span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-zinc-100">
-              <span className="text-zinc-500">Βασική τιμή:</span>
-              <span className="text-zinc-900">€{selectedPlanData.basePrice} × {selectedDuration} μήνες</span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-zinc-100">
-              <span className="text-zinc-500">ΦΠΑ (24%):</span>
-              <span className="text-zinc-900">€{(selectedPlanData.basePrice * selectedDuration * 0.24).toFixed(2)}</span>
-            </div>
-            {selectedDuration > 1 && (
-              <div className="flex justify-between py-2 border-b border-zinc-100 text-emerald-600">
-                <span className="font-medium">Έκπτωση διάρκειας:</span>
-                <span className="font-medium">
-                  -€{(selectedPlanData.basePrice * selectedDuration * (pricingUtils.getDiscountPercentage(selectedDuration) / 100)).toFixed(2)}
-                </span>
-              </div>
-            )}
-            {couponApplied && couponDiscount > 0 && (
-              <div className="flex justify-between py-2 border-b border-zinc-100 text-emerald-600">
-                <span className="font-medium">Κουπόνι ({couponInput.toUpperCase()}):</span>
-                <span className="font-medium">-{pricingUtils.formatPrice(couponDiscount)}</span>
-              </div>
-            )}
-            {calculateSubscriptionEndDate() && (
-              <div className="flex justify-between py-2 border-b border-zinc-100">
-                <span className="text-zinc-500">Ισχύει μέχρι:</span>
-                <span className="font-medium text-emerald-700">{formatGreekDate(calculateSubscriptionEndDate()!)}</span>
-              </div>
-            )}
-            <div className="flex justify-between pt-3">
-              <span className="text-lg font-semibold text-zinc-900">Σύνολο:</span>
-              <span className="text-lg font-semibold text-zinc-900">
-                {couponApplied
-                  ? pricingUtils.formatPrice(pricingUtils.calculateTotalPrice(selectedPlanData.basePrice, selectedDuration) - couponDiscount)
-                  : pricingUtils.formatPrice(pricingUtils.calculateTotalPrice(selectedPlanData.basePrice, selectedDuration))
-                }
-              </span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* Upgrade confirmation */}
-          {hasActiveSubscription && getPlanStatus(selectedPlan) === 'upgrade' && !showUpgradeConfirm ? (
-            <button
-              onClick={() => setShowUpgradeConfirm(true)}
-              className="w-full mt-6 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center gap-2"
-            >
-              <Sparkles className="h-4 w-4" />
-              Αναβάθμιση σε {selectedPlanData.name}
-            </button>
-          ) : hasActiveSubscription && getPlanStatus(selectedPlan) === 'upgrade' && showUpgradeConfirm ? (
-            <div className="mt-6 space-y-3">
-              <p className="text-sm text-center text-zinc-600 font-medium">
-                Είστε σίγουροι; Οι {venueData.daysRemaining} ημέρες που απομένουν δεν θα μεταφερθούν.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => setShowUpgradeConfirm(false)}
-                  className="flex-1 px-4 py-3 border border-zinc-200 text-zinc-600 font-medium rounded-lg hover:bg-zinc-50 transition-colors"
-                >
-                  Ακύρωση
-                </button>
-                <button
-                  onClick={(e) => { e.preventDefault(); handlePayment(); }}
-                  disabled={isLoading}
-                  className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-200 disabled:text-zinc-500 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
-                  {isLoading ? (
-                    <><Loader2 className="h-4 w-4 animate-spin" />Επεξεργασία...</>
-                  ) : (
-                    <><CreditCard className="h-4 w-4" />Επιβεβαίωση</>
-                  )}
-                </button>
+          {/* ---------- Ανάλυση & πληρωμή ---------- */}
+          {selected && (
+            <div className="surface p-5 space-y-4">
+              <h2 className="text-sm font-semibold text-zinc-900">Ανάλυση χρέωσης</h2>
+
+              <dl className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <dt className="text-zinc-600">Πλατφόρμα · {selected.platformTier.label}</dt>
+                  <dd className="text-zinc-900 tabular-nums">
+                    {pricingUtils.formatPrice(selected.platformTier.monthly)}/μήνα
+                  </dd>
+                </div>
+                {selected.academyTier && (
+                  <div className="flex justify-between">
+                    <dt className="text-zinc-600">Ακαδημία · {selected.academyTier.label}</dt>
+                    <dd className="text-zinc-900 tabular-nums">
+                      {pricingUtils.formatPrice(selected.academyTier.monthly)}/μήνα
+                    </dd>
+                  </div>
+                )}
+
+                {selected.discountPercent > 0 && (
+                  <div className="flex justify-between text-emerald-700">
+                    <dt>Έκπτωση {DURATION_LABEL[selected.duration].toLowerCase()}ς χρέωσης</dt>
+                    <dd className="tabular-nums">−{selected.discountPercent}%</dd>
+                  </div>
+                )}
+
+                {couponApplied && couponDiscount > 0 && (
+                  <div className="flex justify-between text-emerald-700">
+                    <dt>Κουπόνι {couponInput.toUpperCase()}</dt>
+                    <dd className="tabular-nums">−{pricingUtils.formatPrice(couponDiscount)}</dd>
+                  </div>
+                )}
+
+                <div className="flex justify-between pt-3 border-t border-border">
+                  <dt className="font-semibold text-zinc-900">
+                    Σύνολο για {selected.duration} {selected.duration === 1 ? 'μήνα' : 'μήνες'}
+                  </dt>
+                  <dd className="text-lg font-semibold text-zinc-900 tabular-nums">
+                    {pricingUtils.formatPrice(finalTotal)}
+                  </dd>
+                </div>
+                <p className="text-2xs text-zinc-500 text-right">περιλαμβάνει ΦΠΑ 24%</p>
+              </dl>
+
+              {/* Κουπόνι */}
+              <div className="pt-2">
+                {couponApplied ? (
+                  <div className="flex items-center justify-between rounded-lg bg-emerald-50 border border-emerald-100 px-3 py-2">
+                    <span className="inline-flex items-center gap-2 text-xs font-medium text-emerald-800">
+                      <Check className="h-3.5 w-3.5" aria-hidden="true" />
+                      Το κουπόνι εφαρμόστηκε
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCouponApplied(false);
+                        setCouponInput('');
+                        setCouponDiscount(0);
+                      }}
+                      aria-label="Αφαίρεση κουπονιού"
+                      className="text-emerald-700 hover:text-emerald-900"
+                    >
+                      <X className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Tag className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" aria-hidden="true" />
+                      <input
+                        value={couponInput}
+                        onChange={(e) => {
+                          setCouponInput(e.target.value);
+                          setCouponError('');
+                        }}
+                        placeholder="Κωδικός κουπονιού"
+                        aria-label="Κωδικός κουπονιού"
+                        className="w-full h-10 pl-9 pr-3 rounded-lg border border-border bg-white text-sm placeholder:text-zinc-400"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleApplyCoupon}
+                      disabled={!couponInput.trim() || couponLoading}
+                      className="h-10 px-4 rounded-lg border border-border bg-white text-sm font-semibold text-zinc-800 hover:bg-zinc-50 disabled:opacity-50 transition-colors"
+                    >
+                      {couponLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Εφαρμογή'}
+                    </button>
+                  </div>
+                )}
+                {couponError && <p className="text-xs text-red-600 mt-1.5">{couponError}</p>}
+              </div>
+
+              <button
+                type="button"
+                onClick={handlePayment}
+                disabled={isLoading}
+                className="w-full h-12 rounded-xl bg-zinc-900 text-white text-sm font-semibold hover:bg-zinc-800 disabled:opacity-60 transition-colors inline-flex items-center justify-center gap-2"
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                    Προετοιμασία πληρωμής…
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="h-4 w-4" aria-hidden="true" />
+                    Πληρωμή {pricingUtils.formatPrice(finalTotal)}
+                  </>
+                )}
+              </button>
+
+              <div className="flex items-center justify-center gap-4 text-2xs text-zinc-500">
+                <span className="inline-flex items-center gap-1.5">
+                  <Lock className="h-3 w-3" aria-hidden="true" />
+                  Ασφαλής πληρωμή μέσω Stripe
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <TrendingUp className="h-3 w-3" aria-hidden="true" />
+                  Οι ημέρες που απομένουν διατηρούνται
+                </span>
               </div>
             </div>
-          ) : (
-            <button
-              onClick={(e) => { e.preventDefault(); handlePayment(); }}
-              disabled={!selectedPlan || isLoading}
-              className="w-full mt-6 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-200 disabled:text-zinc-500 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Επεξεργασία...
-                </>
-              ) : (
-                <>
-                  <CreditCard className="h-4 w-4" />
-                  Πληρωμή με Κάρτα
-                </>
-              )}
-            </button>
           )}
-          <p className="text-xs text-zinc-500 text-center mt-2">Ασφαλής πληρωμή μέσω Stripe</p>
-        </div>
+          </>
+          )}
+        </>
       )}
     </div>
   );

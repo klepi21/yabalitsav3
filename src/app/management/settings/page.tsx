@@ -17,10 +17,14 @@ import {
   Send,
   Zap,
   ArrowUpCircle,
-  Sparkles,
   AlertCircle,
   BarChart3,
   Settings,
+  Bug,
+  Lightbulb,
+  HelpCircle,
+  AlertTriangle,
+  Check,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { venueService } from '@/lib/firebase-services';
@@ -34,6 +38,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
+import { useSubscriptionQuote } from '@/lib/queries';
+import { resolveTier, platformTiers } from '@/lib/pricing';
 
 // Form validation schema
 const venueSettingsSchema = z.object({
@@ -55,6 +61,11 @@ export default function SettingsPage() {
 
 
   const [venue, setVenue] = useState<Venue | null>(null);
+  // Το μέγεθος και η ζώνη έρχονται από την ίδια πηγή με τη σελίδα συνδρομής.
+  const { usage: subUsage } = useSubscriptionQuote(venueOwner?.venueId);
+  const currentTierLabel = subUsage
+    ? resolveTier(platformTiers, subUsage.pitches).id.replace(/^./, (c) => c.toUpperCase())
+    : null;
   const [lastPayment, setLastPayment] = useState<{
     id: string;
     venueId: string;
@@ -286,7 +297,7 @@ export default function SettingsPage() {
         </div>
         {/* Two column layout skeleton */}
         <div className="grid lg:grid-cols-2 gap-8">
-          <div className="space-y-8">
+          <div className="flex flex-col gap-8">
             {/* Venue info card skeleton */}
             <div className="rounded-2xl bg-zinc-100 h-80" />
             {/* Coach management skeleton */}
@@ -294,7 +305,7 @@ export default function SettingsPage() {
             {/* PIN section skeleton */}
             <div className="rounded-2xl bg-zinc-100 h-48" />
           </div>
-          <div className="space-y-8">
+          <div className="flex flex-col gap-8">
             {/* Plan card skeleton */}
             <div className="rounded-2xl bg-zinc-100 h-64" />
             {/* Support card skeleton */}
@@ -339,13 +350,13 @@ export default function SettingsPage() {
              <Settings className="h-6 w-6 text-emerald-400" />
            </div>
            <div className="space-y-0.5">
-             <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+             <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
                {'Ρυθμίσεις'}
              </h1>
              <div className="flex items-center gap-2">
                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                <p className="text-2xs font-semibold text-zinc-500">
-                 {'Διαμορφωση παραμετρων συστηματος'}
+                 {'Διαμόρφωση παραμέτρων συστήματος'}
                </p>
              </div>
            </div>
@@ -354,7 +365,10 @@ export default function SettingsPage() {
         {/* Subscription Status Badge */}
         {venue && (() => {
           const daysRemaining = calculateDaysRemaining(venue);
-          const planName = venue.planType || 'Basic';
+          /* Η ζώνη προκύπτει από το τρέχον μέγεθος, όχι από το
+             αποθηκευμένο planType — αλλιώς το badge εδώ και η σελίδα
+             συνδρομής δείχνουν διαφορετικά πράγματα. */
+          const planName = currentTierLabel ?? venue.planType ?? '—';
 
           if (venue.plan === 'subscription') {
             const isWarning = daysRemaining !== null && daysRemaining <= 7;
@@ -362,7 +376,7 @@ export default function SettingsPage() {
 
             return (
               <div className={cn(
-                "flex items-center gap-4 px-5 py-3 rounded-2xl border shadow-sm font-bold transition-all bg-white",
+                "flex items-center gap-4 px-5 py-3 rounded-xl border shadow-e1 transition-colors bg-white",
                 isExpired ? "border-red-100 text-red-600 shadow-red-900/5" :
                 isWarning ? "border-amber-100 text-amber-600 shadow-amber-900/5" :
                 "border-emerald-100 text-emerald-600 shadow-emerald-900/5"
@@ -386,7 +400,7 @@ export default function SettingsPage() {
 
             return (
               <div className={cn(
-                "flex items-center gap-4 px-5 py-3 rounded-2xl border bg-white shadow-sm font-bold",
+                "flex items-center gap-4 px-5 py-3 rounded-xl border bg-white shadow-e1",
                 trialWarning ? "border-amber-100 text-amber-600" : "border-zinc-100 text-zinc-600"
               )}>
                 <div className={cn(
@@ -412,14 +426,14 @@ export default function SettingsPage() {
         <div className="space-y-4">
           {(success || pinSuccess) && (
             <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
-              <Sparkles className="h-5 w-5 text-emerald-600" />
-              <p className="text-emerald-700 font-bold">{success || pinSuccess}</p>
+              <Check className="h-5 w-5 text-emerald-700 shrink-0" aria-hidden="true" />
+              <p className="text-sm text-emerald-800">{success || pinSuccess}</p>
             </div>
           )}
           {pinError && (
             <div className="bg-red-50 border border-red-100 rounded-2xl p-4 flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
-              <AlertCircle className="h-5 w-5 text-red-600" />
-              <p className="text-red-700 font-bold">{pinError}</p>
+              <AlertCircle className="h-5 w-5 text-red-700 shrink-0" aria-hidden="true" />
+              <p className="text-sm text-red-800">{pinError}</p>
             </div>
           )}
         </div>
@@ -430,12 +444,12 @@ export default function SettingsPage() {
       <div className="grid lg:grid-cols-2 gap-8">
 
         {/* Left Column: Venue Information */}
-        <div className="space-y-8">
-          <Card className="premium-card border-none">
+        <div className="flex flex-col gap-8">
+          <Card className="border border-border shadow-e2">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-semibold flex items-center gap-3 text-zinc-900">
-                <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center">
-                  <Building2 className="h-4 w-4 text-emerald-600" />
+              <CardTitle className="text-base font-semibold flex items-center gap-3 text-zinc-900">
+                <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center shrink-0">
+                  <Building2 className="h-4 w-4 text-zinc-700" aria-hidden="true" />
                 </div>
                 {'Πληροφορίες Γηπέδου'}
               </CardTitle>
@@ -531,7 +545,7 @@ export default function SettingsPage() {
                   <Button
                     type="submit"
                     disabled={isSaving}
-                    className="h-11 px-8 rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white shadow-lg shadow-emerald-200 transition-all active:scale-95"
+                    className="h-11 px-8 rounded-xl bg-zinc-900 hover:bg-zinc-800 font-semibold text-white transition-colors"
                   >
                     {isSaving ? (
                       <>
@@ -548,12 +562,12 @@ export default function SettingsPage() {
           </Card>
 
           {/* Coach Management Section */}
-          <Link href="/management/settings/coaches">
-            <Card className="premium-card border-none hover:shadow-lg transition-shadow cursor-pointer">
+          <Link href="/management/settings/coaches" className="block">
+            <Card className="border border-border shadow-e2 hover:shadow-e3 transition-shadow cursor-pointer">
               <CardContent className="p-6 flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                    <Settings className="h-5 w-5 text-blue-600" />
+                  <div className="h-10 w-10 rounded-xl bg-zinc-100 flex items-center justify-center shrink-0">
+                    <Settings className="h-5 w-5 text-zinc-700" aria-hidden="true" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-zinc-900">
@@ -570,11 +584,11 @@ export default function SettingsPage() {
           </Link>
 
           {/* Management PIN Section */}
-          <Card className="premium-card border-none">
+          <Card className="border border-border shadow-e2">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-semibold flex items-center gap-3 text-zinc-900">
-                <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                  <Lock className="h-4 w-4 text-blue-600" />
+              <CardTitle className="text-base font-semibold flex items-center gap-3 text-zinc-900">
+                <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center shrink-0">
+                  <Lock className="h-4 w-4 text-zinc-700" aria-hidden="true" />
                 </div>
                 {'PIN Διαχείρισης'}
               </CardTitle>
@@ -582,8 +596,8 @@ export default function SettingsPage() {
             <CardContent className="pt-6">
               {!venue?.managementPinHash ? (
                 <div className="space-y-6">
-                  <div className="bg-blue-50 rounded-2xl p-6">
-                    <p className="text-sm font-semibold text-blue-700 leading-relaxed">
+                  <div className="bg-zinc-50 border border-border rounded-xl p-5">
+                    <p className="text-sm text-zinc-700 leading-relaxed">
                       Ο PIN διαχείρισης απαιτείται για ευαίσθητες ενέργειες στον πίνακα ελέγχου. 
                       Ορίστε έναν 4ψήφιο κωδικό για την ασφάλειά σας.
                     </p>
@@ -604,38 +618,49 @@ export default function SettingsPage() {
         </div>
 
         {/* Right Column: Current Plan & Pricing Packages */}
-        <div className="space-y-8">
+        <div className="flex flex-col gap-8">
           {/* Current Plan Info */}
           {venue && (
-            <Card className="premium-card border-zinc-200 bg-white shadow-xl shadow-zinc-200/50 overflow-hidden group">
-              <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:scale-110 transition-transform pointer-events-none">
-                <Sparkles className="h-32 w-32 text-zinc-900" />
-              </div>
-              <CardHeader>
-                <CardTitle className="text-zinc-500 font-semibold text-xs">{'Τρέχον Πλάνο'}</CardTitle>
+            <Card className="border border-border bg-white shadow-e3 overflow-hidden">
+              <CardHeader className="pb-2">
+                <CardTitle className="eyebrow">Τρέχον πλάνο</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col gap-8 relative z-10">
-                  <div className="flex items-end gap-3">
-                    <span className="text-5xl font-bold text-zinc-900 tracking-tighter">
-                      {venue.planType || 'Basic'}
-                    </span>
-                    <span className="text-zinc-500 font-semibold mb-2 text-2xs">
-                      {venue.plan === 'subscription' ? 'Plan' : 'Free Trial'}
-                    </span>
+                <div className="flex flex-col gap-6">
+                  {/* Η ζώνη προκύπτει από το τρέχον μέγεθος, όπως και το
+                      badge πάνω και η σελίδα συνδρομής. Το αποθηκευμένο
+                      planType είναι στιγμιότυπο αγοράς και ξεπερνιέται. */}
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-baseline gap-2.5">
+                      <span className="text-4xl font-semibold text-zinc-900 tracking-tight">
+                        {venue.plan === 'subscription' ? (currentTierLabel ?? '—') : 'Δοκιμή'}
+                      </span>
+                      <span className="text-xs text-zinc-500">
+                        {venue.plan === 'subscription' ? 'βάσει μεγέθους' : 'δωρεάν περίοδος'}
+                      </span>
+                    </div>
+                    {subUsage && (
+                      <p className="text-xs text-zinc-500">
+                        {subUsage.pitches} {subUsage.pitches === 1 ? 'γήπεδο' : 'γήπεδα'}
+                        {subUsage.hasAcademy
+                          ? ` · ${subUsage.athletes} ${subUsage.athletes === 1 ? 'αθλητής' : 'αθλητές'}`
+                          : ''}
+                      </p>
+                    )}
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100/50">
-                      <p className="text-zinc-500 text-2xs font-semibold mb-1">{'Υπόλοιπο'}</p>
-                      <p className="text-2xl font-bold text-zinc-900">
-                        {calculateDaysRemaining(venue) ?? 0} <span className="text-xs font-medium text-zinc-500 tracking-tight">{'ημέρες'}</span>
+                    <div className="bg-zinc-50 rounded-xl p-4 border border-border">
+                      <p className="text-2xs text-zinc-500 mb-1">Υπόλοιπο</p>
+                      <p className="text-2xl font-semibold text-zinc-900 tabular-nums">
+                        {calculateDaysRemaining(venue) ?? 0}{' '}
+                        <span className="text-xs font-normal text-zinc-500">ημέρες</span>
                       </p>
                     </div>
 
-                    <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100/50">
-                      <p className="text-zinc-500 text-2xs font-semibold mb-1">{'Λήξη'}</p>
-                      <p className="text-sm font-semibold text-zinc-900 truncate">
+                    <div className="bg-zinc-50 rounded-xl p-4 border border-border">
+                      <p className="text-2xs text-zinc-500 mb-1">Λήξη</p>
+                      <p className="text-base font-semibold text-zinc-900 tabular-nums truncate">
                         {(() => {
                           const endDateInfo = getSubscriptionEndDate(venue, lastPayment);
                           return endDateInfo ? new Date(endDateInfo.date).toLocaleDateString('el-GR', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
@@ -646,11 +671,11 @@ export default function SettingsPage() {
 
                   <Button 
                     asChild
-                    className="h-12 w-full rounded-2xl bg-zinc-900 text-white hover:bg-black font-semibold text-2xs shadow-lg transition-all active:scale-95"
+                    className="h-11 w-full rounded-xl bg-zinc-900 text-white hover:bg-zinc-800 font-semibold text-sm transition-colors"
                   >
                     <Link href="/management/settings/renewal">
-                      <ArrowUpCircle className="h-4 w-4 mr-2 text-emerald-400" />
-                      {'Ανανέωση ή Αναβάθμιση'}
+                      <ArrowUpCircle className="h-4 w-4 mr-2" aria-hidden="true" />
+                      Ανανέωση ή αναβάθμιση
                     </Link>
                   </Button>
                 </div>
@@ -660,9 +685,9 @@ export default function SettingsPage() {
 
           {/* Last Payment Info */}
           {venue && venue.plan === 'subscription' && lastPayment && (
-            <Card className="premium-card border-none">
+            <Card className="border border-border shadow-e2">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xl font-bold flex items-center justify-between text-zinc-900">
+                <CardTitle className="text-base font-semibold flex items-center justify-between text-zinc-900">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center">
                       <CreditCard className="h-5 w-5 text-orange-600" />
@@ -681,7 +706,7 @@ export default function SettingsPage() {
                 <div className="bg-zinc-50 rounded-2xl p-6 space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-zinc-500">Ποσό</span>
-                    <span className="text-2xl font-bold text-zinc-900">
+                    <span className="text-2xl font-semibold text-zinc-900 tabular-nums">
                       €{typeof lastPayment.amount === 'number' ? lastPayment.amount.toFixed(2) : parseFloat(lastPayment.amount || '0').toFixed(2)}
                     </span>
                   </div>
@@ -694,7 +719,8 @@ export default function SettingsPage() {
                   <div className="h-px bg-zinc-200/50" />
                   <div className="flex items-center gap-3 text-xs font-medium text-zinc-500">
                     <BarChart3 className="h-4 w-4" />
-                    {lastPayment.planName || 'Basic'} Plan • {lastPayment.durationMonths || 1} μήνες
+                    {lastPayment.planName || 'Συνδρομή'} • {lastPayment.durationMonths || 1}{' '}
+                    {(lastPayment.durationMonths || 1) === 1 ? 'μήνας' : 'μήνες'}
                   </div>
                 </div>
               </CardContent>
@@ -705,29 +731,34 @@ export default function SettingsPage() {
           {venue && (() => {
             const isTrial = venue.plan !== 'subscription';
             const trialActive = isTrial && (calculateDaysRemaining(venue) ?? 0) > 0;
+            /* Πριν: η υποστήριξη ήταν κλειδωμένη σε planType 'pro'/'enterprise'.
+               Με τα νέα, βάσει μεγέθους tiers ('Starter'/'Growth'/'Scale') και
+               τα δύο θα γίνονταν false και ΚΑΘΕ συνδρομητής θα έχανε σιωπηλά
+               τη φόρμα. Πλέον είναι διαθέσιμη σε όλους όσους πληρώνουν· τα
+               μεγαλύτερα κέντρα απλώς έχουν πιο γρήγορο rate limit. */
             const planType = (venue.planType || '').toLowerCase();
-            const isPro = planType === 'pro';
-            const isEnterprise = planType === 'enterprise';
-            const showTelegram = trialActive || isPro || isEnterprise;
+            const isLargeTier = planType === 'scale' || planType === 'enterprise';
+            const isMidTier = planType === 'growth' || planType === 'pro';
+            const showTelegram = trialActive || venue.plan === 'subscription';
 
             if (!showTelegram) return null;
 
-            const rateLimitHours = isEnterprise ? 1 : isPro ? 2 : 1;
+            const rateLimitHours = isLargeTier ? 1 : isMidTier ? 2 : 3;
 
             return (
-              <Card className="border-none shadow-lg overflow-hidden">
-                <div className="bg-gradient-to-br from-emerald-600 via-emerald-600 to-green-700 px-6 pt-6 pb-4">
-                  <div className="flex items-center gap-3 mb-1">
-                    <div className="h-10 w-10 rounded-xl bg-white/15 backdrop-blur-sm flex items-center justify-center">
-                      <MessageCircle className="h-5 w-5 text-white" />
+              <Card className="border border-border shadow-e2 overflow-hidden">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-lg bg-zinc-100 flex items-center justify-center shrink-0">
+                      <MessageCircle className="h-4 w-4 text-zinc-700" aria-hidden="true" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-white">{'Άμεση Υποστήριξη'}</h3>
-                      <p className="text-2xs font-medium text-emerald-200">Στείλτε μας μήνυμα</p>
+                      <h3 className="text-sm font-semibold text-zinc-900">Άμεση υποστήριξη</h3>
+                      <p className="text-xs text-zinc-500 mt-0.5">Απαντάμε συνήθως εντός της ημέρας</p>
                     </div>
                   </div>
-                </div>
-                <CardContent className="p-6 bg-gradient-to-b from-emerald-600 to-emerald-700">
+                </CardHeader>
+                <CardContent className="pt-0">
                   <TelegramSupportForm venueId={venueOwner?.venueId} rateLimitHours={rateLimitHours} />
                 </CardContent>
               </Card>
@@ -736,9 +767,9 @@ export default function SettingsPage() {
 
           {/* Help & Support */}
           <Card className="border-none shadow-sm overflow-hidden">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-6">
+            <div className="bg-zinc-50 border-b border-border p-6">
               <div className="flex items-center gap-4 mb-4">
-                <div className="h-11 w-11 rounded-xl bg-white text-blue-600 flex items-center justify-center shadow-sm shrink-0">
+                <div className="h-11 w-11 rounded-xl bg-white border border-border text-zinc-700 flex items-center justify-center shrink-0">
                   <LifeBuoy className="h-5 w-5" />
                 </div>
                 <div>
@@ -751,7 +782,7 @@ export default function SettingsPage() {
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                 <SupportEmail variant="highlighted" />
                 <div className="flex items-center gap-1.5 text-2xs font-medium text-blue-500">
-                  <div className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                   Απάντηση σε &lt;24 ώρες
                 </div>
               </div>
@@ -777,7 +808,7 @@ function SetPinForm({ onSubmit, isSaving }: { onSubmit: (pinA: string, pinB: str
           placeholder="Νέος PIN"
           value={pinA}
           onChange={(e) => setPinA(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-          className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-6 font-bold focus:bg-white text-center text-2xl"
+          className="h-14 rounded-xl bg-zinc-50 border-border px-6 font-semibold tabular-nums focus:bg-white text-center text-2xl"
         />
         <Input
           type="password"
@@ -787,13 +818,13 @@ function SetPinForm({ onSubmit, isSaving }: { onSubmit: (pinA: string, pinB: str
           placeholder="Επιβεβαίωση"
           value={pinB}
           onChange={(e) => setPinB(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-          className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-6 font-bold focus:bg-white text-center text-2xl"
+          className="h-14 rounded-xl bg-zinc-50 border-border px-6 font-semibold tabular-nums focus:bg-white text-center text-2xl"
         />
       </div>
       <Button
         disabled={isSaving}
         onClick={() => onSubmit(pinA, pinB)}
-        className="h-14 w-full rounded-2xl bg-blue-600 hover:bg-blue-700 font-semibold text-white"
+        className="h-14 w-full rounded-xl bg-zinc-900 hover:bg-zinc-800 font-semibold text-white"
       >
         {isSaving ? (
           <>
@@ -817,11 +848,11 @@ function TelegramSupportForm({ venueId, rateLimitHours = 1 }: { venueId?: string
   const [sendError, setSendError] = useState<string | null>(null);
 
   const categories = [
-    { value: 'bug', label: 'Bug', icon: '🐛' },
-    { value: 'feature', label: 'Αίτημα', icon: '💡' },
-    { value: 'question', label: 'Ερώτηση', icon: '❓' },
-    { value: 'urgent', label: 'Επείγον', icon: '🚨' },
-    { value: 'other', label: 'Άλλο', icon: '💬' },
+    { value: 'bug', label: 'Πρόβλημα', Icon: Bug },
+    { value: 'feature', label: 'Αίτημα', Icon: Lightbulb },
+    { value: 'question', label: 'Ερώτηση', Icon: HelpCircle },
+    { value: 'urgent', label: 'Επείγον', Icon: AlertTriangle },
+    { value: 'other', label: 'Άλλο', Icon: MessageCircle },
   ];
 
   const handleSend = async () => {
@@ -866,13 +897,13 @@ function TelegramSupportForm({ venueId, rateLimitHours = 1 }: { venueId?: string
             type="button"
             onClick={() => setCategory(cat.value)}
             className={cn(
-              "h-9 flex items-center gap-1.5 px-3 text-2xs font-semibold rounded-lg transition-all",
+              'h-9 inline-flex items-center gap-1.5 px-3 text-xs font-medium rounded-lg border transition-colors',
               category === cat.value
-                ? "bg-white text-emerald-600 shadow-md"
-                : "bg-white/15 text-emerald-100 hover:bg-white/25"
+                ? 'border-zinc-900 bg-zinc-900 text-white'
+                : 'border-border bg-white text-zinc-700 hover:bg-zinc-50'
             )}
           >
-            <span className="text-sm">{cat.icon}</span>
+            <cat.Icon className="h-3.5 w-3.5" aria-hidden="true" />
             {cat.label}
           </button>
         ))}
@@ -884,31 +915,31 @@ function TelegramSupportForm({ venueId, rateLimitHours = 1 }: { venueId?: string
         onChange={(e) => setMessage(e.target.value)}
         placeholder="Περιγράψτε το αίτημά σας..."
         rows={3}
-        className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium placeholder:text-emerald-200/60 text-white focus:outline-none focus:bg-white/15 focus:border-white/40 transition-all resize-none"
+        className="w-full rounded-xl border border-border bg-white px-4 py-3 text-sm text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-zinc-400 transition-colors resize-none"
       />
 
       {/* Status & Send */}
       {sendSuccess && (
-        <div className="flex items-center gap-2 text-emerald-100 font-medium text-xs bg-white/10 p-2.5 rounded-lg animate-in fade-in">
-          <Sparkles className="h-3.5 w-3.5" />
-          Στάλθηκε επιτυχώς!
+        <div className="flex items-center gap-2 text-emerald-800 text-xs bg-emerald-50 border border-emerald-100 p-2.5 rounded-lg animate-in fade-in">
+          <Check className="h-3.5 w-3.5" aria-hidden="true" />
+          Το μήνυμα στάλθηκε.
         </div>
       )}
       {sendError && (
-        <div className="text-red-200 font-medium text-xs bg-red-500/20 p-2.5 rounded-lg">
+        <div className="text-red-700 text-xs bg-red-50 border border-red-100 p-2.5 rounded-lg">
           {sendError}
         </div>
       )}
 
       <div className="flex items-center justify-between">
-        <span className="text-2xs font-medium text-emerald-200/60">
-          1 μήνυμα / {rateLimitHours === 1 ? 'ώρα' : `${rateLimitHours} ώρες`}
+        <span className="text-2xs text-zinc-500">
+          1 μήνυμα ανά {rateLimitHours === 1 ? 'ώρα' : `${rateLimitHours} ώρες`}
         </span>
         <Button
           onClick={handleSend}
           disabled={isSending || !message.trim()}
           size="sm"
-          className="h-9 px-5 rounded-lg bg-white text-emerald-600 hover:bg-emerald-50 font-semibold text-2xs shadow-md disabled:opacity-40"
+          className="h-9 px-5 rounded-lg bg-zinc-900 text-white hover:bg-zinc-800 font-semibold text-xs disabled:opacity-40"
         >
           {isSending ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -941,7 +972,7 @@ function ChangePinForm({ onSubmit, isSaving }: { onSubmit: (oldPin: string, newA
             placeholder="— — — —"
             value={oldPin}
             onChange={(e) => setOldPin(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-            className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-4 font-bold focus:bg-white text-center text-xl"
+            className="h-14 rounded-xl bg-zinc-50 border-border px-4 font-semibold tabular-nums focus:bg-white text-center text-xl"
           />
         </div>
         <div className="space-y-2">
@@ -954,7 +985,7 @@ function ChangePinForm({ onSubmit, isSaving }: { onSubmit: (oldPin: string, newA
             placeholder="— — — —"
             value={newA}
             onChange={(e) => setNewA(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-            className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-4 font-bold focus:bg-white text-center text-xl"
+            className="h-14 rounded-xl bg-zinc-50 border-border px-4 font-semibold tabular-nums focus:bg-white text-center text-xl"
           />
         </div>
         <div className="space-y-2">
@@ -967,7 +998,7 @@ function ChangePinForm({ onSubmit, isSaving }: { onSubmit: (oldPin: string, newA
             placeholder="— — — —"
             value={newB}
             onChange={(e) => setNewB(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-            className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-4 font-bold focus:bg-white text-center text-xl"
+            className="h-14 rounded-xl bg-zinc-50 border-border px-4 font-semibold tabular-nums focus:bg-white text-center text-xl"
           />
         </div>
       </div>

@@ -14,21 +14,6 @@
  * venues κρατούν τον δικό τους αποθηκευμένο μετρητή.
  */
 export const TRIAL_DAYS = 30;
-export interface PricingPlan {
-  id: string;
-  name: string;
-  description: string;
-  basePrice: number; // Price in EUR (before VAT)
-  features: string[];
-  popular?: boolean;
-  maxPitches?: number;
-  durationMonths?: number;
-  stripePriceIds: {
-    monthly: string;
-    semiAnnual: string;
-    annual: string;
-  };
-}
 
 export interface PricingConfig {
   vatRate: number; // VAT rate (e.g., 0.24 for 24%)
@@ -37,13 +22,7 @@ export interface PricingConfig {
     twelveMonths: number; // e.g., 0.12 for 12%
   };
   currency: 'eur' | 'usd';
-  plans: PricingPlan[];
 }
-
-// Environment variable helpers with fallbacks
-const getEnvString = (key: string, fallback: string): string => {
-  return process.env[key] || fallback;
-};
 
 // Main pricing configuration
 export const pricingConfig: PricingConfig = {
@@ -53,101 +32,276 @@ export const pricingConfig: PricingConfig = {
     twelveMonths: 0.12, // 12% discount for 12 months
   },
   currency: 'eur',
-  plans: [
-    {
-      id: 'basic',
-      name: 'Basic',
-      description: '1 μήνας συνδρομής',
-      basePrice: 21,
-      maxPitches: 999,
-      durationMonths: 1,
-      features: [
-        'Απεριόριστα γήπεδα & κρατήσεις',
-        'Online booking σελίδα',
-        'Πλήρες διαχειριστικό',
-        'Τουρνουά & Ακαδημία',
-        'Email υποστήριξη',
-      ],
-      stripePriceIds: {
-        monthly: getEnvString('STRIPE_BASIC_MONTHLY_PRICE_ID', ''),
-        semiAnnual: getEnvString('STRIPE_BASIC_SEMI_ANNUAL_PRICE_ID', ''),
-        annual: getEnvString('STRIPE_BASIC_ANNUAL_PRICE_ID', '')
-      }
-    },
-    {
-      id: 'pro',
-      name: 'Pro',
-      description: '6 μήνες συνδρομής',
-      basePrice: 21,
-      maxPitches: 999,
-      durationMonths: 6,
-      features: [
-        'Όλα τα χαρακτηριστικά Basic',
-        'Έκπτωση 7%',
-        'Προτεραιότητα υποστήριξης',
-      ],
-      popular: true,
-      stripePriceIds: {
-        monthly: getEnvString('STRIPE_PRO_MONTHLY_PRICE_ID', ''),
-        semiAnnual: getEnvString('STRIPE_PRO_SEMI_ANNUAL_PRICE_ID', ''),
-        annual: getEnvString('STRIPE_PRO_ANNUAL_PRICE_ID', '')
-      }
-    },
-    {
-      id: 'enterprise',
-      name: 'Enterprise',
-      description: '12 μήνες συνδρομής',
-      basePrice: 21,
-      maxPitches: 999,
-      durationMonths: 12,
-      features: [
-        'Όλα τα χαρακτηριστικά Pro',
-        'Έκπτωση 12%',
-        'Dedicated υποστήριξη',
-      ],
-      stripePriceIds: {
-        monthly: getEnvString('STRIPE_ENTERPRISE_MONTHLY_PRICE_ID', ''),
-        semiAnnual: getEnvString('STRIPE_ENTERPRISE_SEMI_ANNUAL_PRICE_ID', ''),
-        annual: getEnvString('STRIPE_ENTERPRISE_ANNUAL_PRICE_ID', '')
-      }
-    }
-  ]
 };
 
-// Utility functions for price calculations
+/* ==================================================================== *
+ *  ΤΙΜΟΛΟΓΗΣΗ ΒΑΣΕΙ ΜΕΓΕΘΟΥΣ
+ *
+ *  Το παλιό μοντέλο χρέωνε €21/μήνα σε όλους: το ίδιο πλήρωνε ένα
+ *  γηπεδάκι με 2 σκάφη και μια ακαδημία 400 αθλητών. Επειδή το κόστος
+ *  εξυπηρέτησης μεγαλώνει με το μέγεθος αλλά τα έσοδα όχι, το περιθώριο
+ *  αντιστρεφόταν όσο μεγάλωναν οι πελάτες.
+ *
+ *  Αρχές σχεδιασμού — «να μεγαλώνουμε μαζί του χωρίς να του κακοφαίνεται»:
+ *
+ *  1. ΖΩΝΕΣ, ΟΧΙ ΜΕΤΡΗΤΗΣ. Χρέωση ανά μονάδα (π.χ. €0,40/αθλητή) μοιάζει
+ *     με ταξίμετρο και δημιουργεί άγχος. Οι ζώνες δίνουν σταθερό,
+ *     προβλέψιμο λογαριασμό.
+ *  2. ΦΘΙΝΟΝ ΠΟΣΟΣΤΟ. Όσο μεγαλώνει ο πελάτης, τόσο ΜΙΚΡΟΤΕΡΟ ποσοστό του
+ *     τζίρου του πληρώνει. Η ανάπτυξη ανταμείβεται, δεν φορολογείται.
+ *  3. ΧΑΜΗΛΟ ΚΑΤΩΦΛΙ. Ο μικρότερος πελάτης πληρώνει σχεδόν ό,τι και πριν.
+ *  4. ΠΟΤΕ HARD BLOCK. Αν ξεπεράσει τη ζώνη του, η πλατφόρμα ΣΥΝΕΧΙΖΕΙ να
+ *     δουλεύει. Ενημερώνεται ήρεμα, δεν κλειδώνεται.
+ *  5. ΔΙΑΦΑΝΕΙΑ ΠΡΙΝ ΤΟ ΟΡΙΟ. Βλέπει πού βρίσκεται πριν το φτάσει.
+ *  6. GRANDFATHERING. Οι υπάρχοντες πελάτες δεν αλλάζουν τιμή από κάτω
+ *     προς τα πάνω χωρίς προειδοποίηση.
+ * ==================================================================== */
+
+export interface PricingTier {
+  id: string;
+  label: string;
+  /** Ανώτατο όριο της ζώνης· `null` = πέρα από το self-serve. */
+  upTo: number | null;
+  /** Μηνιαία τιμή προ ΦΠΑ. `null` όταν η τιμή συμφωνείται. */
+  monthly: number | null;
+  /** Η ζώνη δεν έχει αυτόματη τιμή — απαιτεί επικοινωνία. */
+  custom?: true;
+}
+
+/**
+ * Πάνω από αυτά τα μεγέθη δεν υπάρχει αυτόματη τιμή.
+ *
+ * Δεν είναι τιμωρία — είναι το σημείο όπου το self-serve παύει να έχει
+ * νόημα: ένα κέντρο αυτού του μεγέθους θέλει συζήτηση και συμβόλαιο, όχι
+ * ταμείο. Η πλατφόρμα συνεχίζει να λειτουργεί πλήρως· απλώς δεν
+ * δημιουργούνται ΝΕΑ γήπεδα/αθλητές μέχρι να συμφωνηθεί πλάνο.
+ */
+export const SELF_SERVE_LIMITS = {
+  pitches: 12,
+  athletes: 500,
+} as const;
+
+/** Ζώνες πλατφόρμας — μονάδα μέτρησης: αριθμός γηπέδων. */
+export const platformTiers: PricingTier[] = [
+  { id: 'starter', label: 'Έως 2 γήπεδα', upTo: 2, monthly: 29 },
+  { id: 'growth', label: '3–6 γήπεδα', upTo: 6, monthly: 59 },
+  { id: 'scale', label: '7–12 γήπεδα', upTo: SELF_SERVE_LIMITS.pitches, monthly: 99 },
+  { id: 'platform_custom', label: 'Πάνω από 12 γήπεδα', upTo: null, monthly: null, custom: true },
+];
+
+/**
+ * Ζώνες ακαδημίας — μονάδα μέτρησης: ενεργοί αθλητές.
+ *
+ * Οι αθλητές είναι η σωστή μονάδα εδώ γιατί συνδέονται ΑΜΕΣΑ με τον τζίρο
+ * του πελάτη: χρεώνει μηνιαία συνδρομή τον καθένα. Όταν μεγαλώνει ο
+ * λογαριασμός μας, έχει ήδη μεγαλώσει ο δικός του.
+ */
+export const academyTiers: PricingTier[] = [
+  { id: 'academy_s', label: 'Έως 40 αθλητές', upTo: 40, monthly: 19 },
+  { id: 'academy_m', label: '41–120 αθλητές', upTo: 120, monthly: 49 },
+  { id: 'academy_l', label: '121–250 αθλητές', upTo: 250, monthly: 89 },
+  { id: 'academy_xl', label: '251–500 αθλητές', upTo: SELF_SERVE_LIMITS.athletes, monthly: 139 },
+  { id: 'academy_custom', label: 'Πάνω από 500 αθλητές', upTo: null, monthly: null, custom: true },
+];
+
+/** Βρίσκει τη ζώνη στην οποία πέφτει μια ποσότητα. */
+export function resolveTier(tiers: PricingTier[], quantity: number): PricingTier {
+  return tiers.find((t) => t.upTo === null || quantity <= t.upTo) ?? tiers[tiers.length - 1];
+}
+
+/** Πόσες μονάδες απομένουν μέχρι την επόμενη ζώνη· `null` στην τελευταία. */
+export function unitsToNextTier(tiers: PricingTier[], quantity: number): number | null {
+  const tier = resolveTier(tiers, quantity);
+  return tier.upTo === null ? null : tier.upTo - quantity;
+}
+
+/** Έχει ξεπεράσει το μέγεθος όπου υπάρχει αυτόματη τιμή; */
+export function exceedsSelfServe(usage: Pick<UsageSnapshot, 'pitches' | 'athletes' | 'hasAcademy'>): boolean {
+  if (usage.pitches > SELF_SERVE_LIMITS.pitches) return true;
+  if (usage.hasAcademy && usage.athletes > SELF_SERVE_LIMITS.athletes) return true;
+  return false;
+}
+
+export interface UsageSnapshot {
+  pitches: number;
+  athletes: number;
+  /** Αν το venue χρησιμοποιεί καθόλου το module ακαδημίας. */
+  hasAcademy: boolean;
+}
+
+export interface PriceBreakdown {
+  platformTier: PricingTier;
+  academyTier: PricingTier | null;
+  /** Μηνιαίο σύνολο προ ΦΠΑ, πριν την έκπτωση διάρκειας. */
+  monthlyBeforeDiscount: number;
+  /** Μηνιαίο με έκπτωση διάρκειας, με ΦΠΑ. */
+  monthlyWithVat: number;
+  /** Συνολική χρέωση για όλη τη διάρκεια, με ΦΠΑ. */
+  totalWithVat: number;
+  durationMonths: 1 | 6 | 12;
+  discountPercent: number;
+  /** Το μέγεθος ξεπερνά το self-serve — η τιμή συμφωνείται. */
+  requiresContact: boolean;
+}
+
+/**
+ * Υπολογίζει την τιμή από το ΠΡΑΓΜΑΤΙΚΟ μέγεθος του πελάτη.
+ *
+ * Ο πελάτης δεν επιλέγει «πλάνο» — επιλέγει μόνο διάρκεια πληρωμής.
+ * Έτσι δεν χρειάζεται ποτέ να «αναβαθμιστεί» χειροκίνητα, και δεν υπάρχει
+ * στιγμή όπου κάτι κλειδώνει επειδή ξέχασε να αλλάξει πακέτο.
+ */
+export function calculateSubscription(
+  usage: UsageSnapshot,
+  duration: 1 | 6 | 12
+): PriceBreakdown {
+  const discount =
+    duration === 6
+      ? pricingConfig.discounts.sixMonths
+      : duration === 12
+        ? pricingConfig.discounts.twelveMonths
+        : 0;
+
+  const platformTier = resolveTier(platformTiers, usage.pitches);
+  const academyTier = usage.hasAcademy ? resolveTier(academyTiers, usage.athletes) : null;
+  const requiresContact = !!platformTier.custom || !!academyTier?.custom;
+
+  const monthlyBeforeDiscount = requiresContact
+    ? 0
+    : (platformTier.monthly ?? 0) + (academyTier?.monthly ?? 0);
+
+  const discountedMonthly = monthlyBeforeDiscount * (1 - discount);
+  const vat = 1 + pricingConfig.vatRate;
+
+  return {
+    requiresContact,
+    platformTier,
+    academyTier,
+    monthlyBeforeDiscount,
+    monthlyWithVat: discountedMonthly * vat,
+    totalWithVat: discountedMonthly * duration * vat,
+    durationMonths: duration,
+    discountPercent: Math.round(discount * 100),
+  };
+}
+
+/* ==================================================================== *
+ *  ΑΝΑΒΑΘΜΙΣΗ ΜΕΣΑ ΣΤΗΝ ΠΕΡΙΟΔΟ
+ *
+ *  Πρόβλημα που λύνει: ένας πελάτης πλήρωνε ετήσια ως Starter (2 γήπεδα,
+ *  χωρίς ακαδημία) και την επομένη πρόσθετε 12 γήπεδα και 500 αθλητές.
+ *  Έπαιρνε υπηρεσία αξίας €3.116 έχοντας πληρώσει €379 — και η νέα τιμή
+ *  ίσχυε μόνο στην επόμενη ανανέωση.
+ *
+ *  Λύση: κρατάμε στιγμιότυπο του ΤΙ ΠΛΗΡΩΘΗΚΕ και, όταν η χρήση το
+ *  ξεπεράσει, ζητάμε τη διαφορά αναλογικά για τις ημέρες που απομένουν.
+ *  Η χρέωση είναι ρητή ενέργεια του πελάτη, όχι σιωπηλή έκπληξη.
+ * ==================================================================== */
+
+/** Τι πληρώθηκε τη στιγμή της αγοράς. Αποθηκεύεται πάνω στο venue. */
+export interface BilledSnapshot {
+  platformTierId: string;
+  academyTierId: string | null;
+  /** Μηνιαία βάση προ ΦΠΑ και προ έκπτωσης διάρκειας. */
+  monthlyBase: number;
+  durationMonths: 1 | 6 | 12;
+  /** Η έκπτωση που ίσχυσε, ώστε η αναβάθμιση να την τιμήσει κι αυτή. */
+  discountPercent: number;
+  chargedAt: string;
+}
+
+export interface UpgradeQuote {
+  /** Οφείλεται διαφορά; */
+  owed: boolean;
+  /** Μηνιαία βάση που πληρώθηκε / που ισχύει τώρα (προ ΦΠΑ). */
+  billedMonthlyBase: number;
+  currentMonthlyBase: number;
+  /** Ποσό προς πληρωμή, με ΦΠΑ, για τις ημέρες που απομένουν. */
+  amountWithVat: number;
+  daysRemaining: number;
+  /** Τι άλλαξε — για να το δείξουμε στον πελάτη. */
+  addedPlatform: boolean;
+  addedAcademy: boolean;
+}
+
+/**
+ * Υπολογίζει τη διαφορά που οφείλεται για τις υπόλοιπες ημέρες.
+ *
+ * Επιστρέφει `owed: false` όταν:
+ *  - δεν υπάρχει στιγμιότυπο πληρωμής (δοκιμή, ή συνδρομή πριν τη μετάβαση —
+ *    δεν χρεώνουμε αναδρομικά κάποιον που δεν ήξερε τον κανόνα),
+ *  - η χρήση δεν ξεπερνά ό,τι πληρώθηκε,
+ *  - δεν απομένουν ημέρες.
+ */
+export function calculateUpgrade(
+  usage: UsageSnapshot,
+  billed: BilledSnapshot | null | undefined,
+  daysRemaining: number
+): UpgradeQuote {
+  const current = calculateSubscription(usage, 1);
+  const currentMonthlyBase = current.monthlyBeforeDiscount;
+
+  const empty: UpgradeQuote = {
+    owed: false,
+    billedMonthlyBase: billed?.monthlyBase ?? currentMonthlyBase,
+    currentMonthlyBase,
+    amountWithVat: 0,
+    daysRemaining,
+    addedPlatform: false,
+    addedAcademy: false,
+  };
+
+  if (!billed || daysRemaining <= 0 || current.requiresContact) return empty;
+  if (currentMonthlyBase <= billed.monthlyBase) return empty;
+
+  const extraBase = currentMonthlyBase - billed.monthlyBase;
+  const discountMultiplier = 1 - billed.discountPercent / 100;
+  const months = daysRemaining / 30;
+
+  return {
+    ...empty,
+    owed: true,
+    amountWithVat: extraBase * discountMultiplier * months * (1 + pricingConfig.vatRate),
+    addedPlatform: current.platformTier.id !== billed.platformTierId,
+    addedAcademy: !!current.academyTier && current.academyTier.id !== billed.academyTierId,
+  };
+}
+
+/** Δημιουργεί το στιγμιότυπο που αποθηκεύεται μετά από επιτυχή πληρωμή. */
+export function buildBilledSnapshot(
+  breakdown: PriceBreakdown,
+  chargedAt: string
+): BilledSnapshot {
+  return {
+    platformTierId: breakdown.platformTier.id,
+    academyTierId: breakdown.academyTier?.id ?? null,
+    monthlyBase: breakdown.monthlyBeforeDiscount,
+    durationMonths: breakdown.durationMonths,
+    discountPercent: breakdown.discountPercent,
+    chargedAt,
+  };
+}
+
+/**
+ * Ετικέτες για αποθήκευση/εμφάνιση. Το παλιό μοντέλο αποθήκευε
+ * Basic/Pro/Enterprise, που στην πραγματικότητα ήταν διάρκειες πληρωμής.
+ * Τώρα το planType δηλώνει το ΜΕΓΕΘΟΣ του πελάτη.
+ */
+export function describeBreakdown(b: PriceBreakdown): { planType: string; planName: string } {
+  if (b.requiresContact) return { planType: 'Custom', planName: 'Κατόπιν συνεννόησης' };
+
+  const platform = b.platformTier;
+  const planType = platform.id.charAt(0).toUpperCase() + platform.id.slice(1);
+  const planName = b.academyTier
+    ? `${planType} + Ακαδημία (${b.academyTier.label})`
+    : planType;
+
+  return { planType, planName };
+}
+
+/** Βοηθήματα που χρησιμοποιούνται ακόμα. Ό,τι αφορούσε το παλιό,
+ *  επίπεδο μοντέλο (getPlan, getAllPlans, Stripe Price IDs) αφαιρέθηκε. */
 export const pricingUtils = {
-  // Get plan by ID
-  getPlan(planId: string): PricingPlan | undefined {
-    return pricingConfig.plans.find(plan => plan.id === planId);
-  },
-
-  // Get Stripe Price ID for a plan and duration
-  getStripePriceId(planId: string, duration: 1 | 6 | 12): string {
-    const plan = this.getPlan(planId);
-    if (!plan) return '';
-    
-    if (duration === 1) return plan.stripePriceIds.monthly;
-    if (duration === 6) return plan.stripePriceIds.semiAnnual;
-    if (duration === 12) return plan.stripePriceIds.annual;
-    
-    return '';
-  },
-
-  // Calculate price with VAT
-  calculateFinalPrice(basePrice: number): number {
-    return basePrice * (1 + pricingConfig.vatRate);
-  },
-
-  // Calculate monthly price with duration discount
-  calculateMonthlyPrice(basePrice: number, duration: 1 | 6 | 12): number {
-    let discount = 0;
-    if (duration === 6) discount = pricingConfig.discounts.sixMonths;
-    if (duration === 12) discount = pricingConfig.discounts.twelveMonths;
-    
-    const discountedPrice = basePrice * (1 - discount);
-    return discountedPrice * (1 + pricingConfig.vatRate);
-  },
-
   // Calculate total price for duration
   calculateTotalPrice(basePrice: number, duration: 1 | 6 | 12): number {
     let discount = 0;
@@ -159,27 +313,9 @@ export const pricingUtils = {
     return totalWithoutVAT * (1 + pricingConfig.vatRate);
   },
 
-  // Get amount in cents for Stripe
-  getStripeAmount(basePrice: number, duration: 1 | 6 | 12): number {
-    const totalPrice = this.calculateTotalPrice(basePrice, duration);
-    return Math.round(totalPrice * 100); // Convert to cents
-  },
-
   // Format price for display
   formatPrice(price: number): string {
     return `€${price.toFixed(2)}`;
-  },
-
-  // Get all plans
-  getAllPlans(): PricingPlan[] {
-    return pricingConfig.plans;
-  },
-
-  // Get discount percentage for display
-  getDiscountPercentage(duration: 1 | 6 | 12): number {
-    if (duration === 6) return Math.round(pricingConfig.discounts.sixMonths * 100);
-    if (duration === 12) return Math.round(pricingConfig.discounts.twelveMonths * 100);
-    return 0;
   },
 
   // Apply coupon discount to a total price
