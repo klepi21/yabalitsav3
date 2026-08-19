@@ -18,6 +18,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { usePagination } from '@/hooks/usePagination';
+import { Pagination } from '@/components/ui/pagination';
 
 
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -79,6 +81,8 @@ export default function TournamentsPage() {
     const matchesStatus = filterStatus === 'all' || t.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
+
+  const pagination = usePagination(filtered, 12);
 
   if (authLoading || isLoading) {
     return (
@@ -222,7 +226,7 @@ export default function TournamentsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filtered.map((tournament) => {
+          {pagination.items.map((tournament) => {
             const status = statusConfig[tournament.status] || statusConfig.draft;
             return (
               <Link
@@ -281,6 +285,7 @@ export default function TournamentsPage() {
           })}
         </div>
       )}
+      <Pagination state={pagination} label="τουρνουά" />
     </div>
   );
 }

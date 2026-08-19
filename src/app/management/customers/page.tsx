@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Plus, Search, Users, Phone, Eye, Pencil, AlertCircle, MoreHorizontal, Trash2, Loader2 } from 'lucide-react';
@@ -27,75 +27,45 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { userService } from '@/lib/firebase-services';
+import { usePagination } from '@/hooks/usePagination';
+import { Pagination } from '@/components/ui/pagination';
+import { useCustomers } from '@/lib/queries';
+import { toast } from '@/lib/toast';
 
 export default function CustomersPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
 
-  const [customers, setCustomers] = useState<User[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Κοινή cache — το ίδιο κλειδί χρησιμοποιεί και η «Νέα κράτηση».
+  const { customers: rawCustomers, error: loadError, isLoading, refresh } = useCustomers(
+    venueOwner?.venueId
+  );
+  const customers = useMemo<User[]>(
+    () =>
+      rawCustomers.map((c) => ({
+        ...(c as unknown as User),
+        createdAt: new Date(c.createdAt as string),
+        updatedAt: new Date(c.updatedAt as string),
+      })),
+    [rawCustomers]
+  );
+  const error = loadError ? (loadError as Error).message : null;
   const [searchTerm, setSearchTerm] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  const loadCustomers = useCallback(async () => {
-    if (!venueOwner || !user) return;
-
-    try {
-      setError(null);
-      // Get auth token
-      const token = await user.getIdToken();
-      if (!token) {
-        throw new Error('No auth token available');
-      }
-
-      // Use server-side API to fetch data with proper auth
-      const response = await fetch('/api/customers/get-by-venue', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          venueId: venueOwner.venueId,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch customers');
-      }
-
-      const data = await response.json();
-
-      // Convert ISO strings back to Date objects
-      const convertedCustomers = (data.customers || []).map((customer: Omit<User, 'createdAt' | 'updatedAt'> & { createdAt: string; updatedAt: string }) => ({
-        ...customer,
-        createdAt: new Date(customer.createdAt),
-        updatedAt: new Date(customer.updatedAt),
-      }));
-
-      setCustomers(convertedCustomers);
-    } catch (error) {
-      console.error('Error loading customers:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Αποτυχία φόρτωσης πελατών';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [venueOwner, user]);
 
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setIsDeleting(true);
     try {
       await userService.delete(deleteTarget.id);
-      setCustomers(prev => prev.filter(c => c.id !== deleteTarget.id));
+      await refresh();
       setDeleteTarget(null);
+      toast.success('Ο πελάτης διαγράφηκε');
     } catch (e) {
       console.error('Error deleting customer:', e);
+      toast.error('Αποτυχία διαγραφής', 'Ο πελάτης δεν διαγράφηκε.');
     } finally {
       setIsDeleting(false);
     }
@@ -107,11 +77,8 @@ export default function CustomersPage() {
 
     if (!user || !venueOwner) {
       router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`);
-      return;
     }
-
-    loadCustomers();
-  }, [user, venueOwner, authLoading, router, loadCustomers, pathname]);
+  }, [user, venueOwner, authLoading, router, pathname]);
 
   // Filter customers based on search term
   const filteredCustomers = customers.filter(customer =>
@@ -119,6 +86,8 @@ export default function CustomersPage() {
     customer.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     customer.phone?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const pagination = usePagination(filteredCustomers, 25);
 
   if (authLoading || isLoading) {
     return (
@@ -207,7 +176,7 @@ export default function CustomersPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => { setError(null); loadCustomers(); }}
+              onClick={() => refresh()}
               className="rounded-xl border-red-200 text-red-600 hover:bg-red-50 font-bold"
             >
               Δοκιμάστε ξανά
@@ -282,7 +251,7 @@ export default function CustomersPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-50">
-                  {filteredCustomers.map((customer) => (
+                  {pagination.items.map((customer) => (
                     <tr key={customer.id} className="group hover:bg-zinc-50/50 transition-colors">
                       <td className="py-3 sm:py-4 px-3 sm:px-6">
                         <div className="flex items-center gap-2 sm:gap-3">
@@ -345,6 +314,9 @@ export default function CustomersPage() {
                   ))}
                 </tbody>
               </table>
+              <div className="px-3 sm:px-6 pb-4">
+                <Pagination state={pagination} label="πελάτες" />
+              </div>
             </div>
           </CardContent>
         </Card>

@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 
+const SWRProvider = dynamic(() => import('./SWRProvider'), { ssr: false });
 const AuthProvider = dynamic(() => import('@/contexts/AuthContext').then(m => m.AuthProvider), { ssr: false });
 const SidebarWrapper = dynamic(() => import('./SidebarWrapper'), { ssr: false });
 const GoogleAnalytics = dynamic(() => import('./GoogleAnalytics'), { ssr: false });
@@ -98,6 +99,7 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
   if (isAuthPage || isFullscreenAuthPage || isAuthenticated) {
     return (
       <AuthProvider>
+        <SWRProvider>
         {isAuthPage ? (
           <>
             <CookieConsent />
@@ -120,6 +122,7 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
             {children}
           </SidebarWrapper>
         )}
+        </SWRProvider>
       </AuthProvider>
     );
   }

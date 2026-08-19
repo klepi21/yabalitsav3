@@ -18,6 +18,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { usePagination } from '@/hooks/usePagination';
+import { Pagination } from '@/components/ui/pagination';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -278,6 +280,8 @@ export default function EvaluationsPage() {
       return matchesSearch && matchesSquad;
     });
   }, [athletes, search, squadFilter]);
+
+  const pagination = usePagination(filteredAthletes, 24);
 
   const openEvalForm = (athlete: AcademyUser) => {
     setFormAthlete(athlete);
@@ -885,7 +889,7 @@ export default function EvaluationsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {filteredAthletes.map((athlete) => {
+          {pagination.items.map((athlete) => {
             const latest = getLatestEval(athlete.id);
             const evalCount = getAthleteEvals(athlete.id).length;
             const athleteSquadIds = athlete.squad_ids || (athlete.squad_id ? [athlete.squad_id] : []);
@@ -940,6 +944,7 @@ export default function EvaluationsPage() {
           })}
         </div>
       )}
+      <Pagination state={pagination} label="αθλητές" />
 
       {renderDialogs()}
     </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -51,19 +51,73 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, History } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useBookings } from '@/lib/queries';
+import { toast } from '@/lib/toast';
+import { usePagination } from '@/hooks/usePagination';
+import { Pagination } from '@/components/ui/pagination';
 
 export default function BookingsPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
 
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [pitches, setPitches] = useState<Pitch[]>([]);
-  const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Το API φέρνει τους τελευταίους 3 μήνες. Ο χρήστης μπορεί να ζητήσει
+  // ρητά όλο το ιστορικό — δεν το κατεβάζουμε «για καλό και για κακό».
+  const [showFullHistory, setShowFullHistory] = useState(false);
+  const historyRange = useMemo(
+    () => (showFullHistory ? { from: '2000-01-01T00:00:00.000Z', to: '' } : undefined),
+    [showFullHistory]
+  );
+
+  // Τα δεδομένα έρχονται από την κοινή cache: η σελίδα ζωγραφίζεται αμέσως
+  // αν έχει ξαναφορτωθεί, και το φρέσκο έρχεται από πίσω. Το ίδιο κλειδί
+  // μοιράζεται με το dashboard, οπότε δεν γίνεται διπλό request.
+  const {
+    bookings: rawBookings,
+    pitches: rawPitches,
+    blockedDates: rawBlockedDates,
+    hasMore: hasOlderBookings,
+    error: loadError,
+    isLoading,
+    refresh,
+  } = useBookings(venueOwner?.venueId, historyRange);
+
+  const bookings = useMemo<Booking[]>(
+    () =>
+      rawBookings.map((b) => ({
+        ...(b as unknown as Booking),
+        startTime: new Date(b.startTime as string),
+        endTime: new Date(b.endTime as string),
+        createdAt: new Date(b.createdAt as string),
+        updatedAt: new Date(b.updatedAt as string),
+      })),
+    [rawBookings]
+  );
+
+  const pitches = useMemo<Pitch[]>(
+    () =>
+      rawPitches.map((p) => ({
+        ...(p as unknown as Pitch),
+        createdAt: new Date(p.createdAt as string),
+        updatedAt: new Date(p.updatedAt as string),
+      })),
+    [rawPitches]
+  );
+
+  const blockedDates = useMemo<BlockedDate[]>(
+    () =>
+      rawBlockedDates.map((b) => ({
+        ...(b as unknown as BlockedDate),
+        date: new Date(b.date as string),
+        createdAt: new Date(b.createdAt as string),
+        updatedAt: new Date(b.updatedAt as string),
+      })),
+    [rawBlockedDates]
+  );
+
+  const error = loadError ? (loadError as Error).message : null;
   const [searchTerm, setSearchTerm] = useState('');
   const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<'list' | 'calendar'>('calendar');
@@ -80,80 +134,12 @@ export default function BookingsPage() {
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [statusConfirm, setStatusConfirm] = useState<{ id: string; status: 'pending' | 'confirmed' | 'completed' | 'cancelled' } | null>(null);
 
-  const loadBookings = useCallback(async () => {
-    if (!venueOwner || !user) return;
-
-    try {
-      setError(null);
-      const token = await user.getIdToken();
-      if (!token) {
-        throw new Error('No auth token available');
-      }
-
-      const response = await fetch('/api/bookings/get-by-venue', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          venueId: venueOwner.venueId,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch bookings');
-      }
-
-      const data = await response.json();
-
-      const convertedBookings = (data.bookings || []).map((booking: Record<string, unknown>) => ({
-        ...booking,
-        startTime: new Date(booking.startTime as string),
-        endTime: new Date(booking.endTime as string),
-        createdAt: new Date(booking.createdAt as string),
-        updatedAt: new Date(booking.updatedAt as string),
-      }));
-
-      const convertedPitches = (data.pitches || []).map((pitch: Record<string, unknown>) => ({
-        ...pitch,
-        createdAt: new Date(pitch.createdAt as string),
-        updatedAt: new Date(pitch.updatedAt as string),
-      }));
-
-      const convertedBlockedDates = (data.blockedDates || []).map((blocked: Record<string, unknown>) => ({
-        ...blocked,
-        date: new Date(blocked.date as string),
-        createdAt: new Date(blocked.createdAt as string),
-        updatedAt: new Date(blocked.updatedAt as string),
-      }));
-
-      setBookings(convertedBookings);
-      setPitches(convertedPitches);
-      setBlockedDates(convertedBlockedDates);
-    } catch (error) {
-      console.error('Error loading data:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to load bookings';
-      setError(errorMessage);
-      setBookings([]);
-      setPitches([]);
-      setBlockedDates([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [venueOwner, user]);
-
   useEffect(() => {
     if (authLoading) return;
-
     if (!user || !venueOwner) {
       router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`);
-      return;
     }
-
-    loadBookings();
-  }, [user, venueOwner, authLoading, router, loadBookings, pathname]);
+  }, [user, venueOwner, authLoading, router, pathname]);
 
   const filteredBookings = bookings
     .filter(booking => {
@@ -174,14 +160,19 @@ export default function BookingsPage() {
       return dateB.getTime() - dateA.getTime();
     });
 
+  // Σελιδοποίηση ΠΑΝΩ από τα φίλτρα: η αναζήτηση εξακολουθεί να καλύπτει
+  // όλο το φορτωμένο παράθυρο, αλλά το DOM κρατά μόνο μία σελίδα.
+  const pagination = usePagination(filteredBookings, 25);
+
   const handleDeleteBooking = async (bookingId: string) => {
     setDeletingBookingId(bookingId);
     try {
       await bookingService.delete(bookingId);
-      setBookings(bookings.filter(booking => booking.id !== bookingId));
+      await refresh();
+      toast.success('Η κράτηση διαγράφηκε');
     } catch (error) {
       console.error('Error deleting booking:', error);
-      setError('Αποτυχία διαγραφής κράτησης');
+      toast.error('Αποτυχία διαγραφής', 'Η κράτηση δεν διαγράφηκε.');
     } finally {
       setDeletingBookingId(null);
       setDeleteConfirm(null);
@@ -192,14 +183,11 @@ export default function BookingsPage() {
     setUpdatingBookingId(bookingId);
     try {
       await bookingService.update(bookingId, { status: newStatus });
-      setBookings(bookings.map(booking =>
-        booking.id === bookingId
-          ? { ...booking, status: newStatus }
-          : booking
-      ));
+      await refresh();
+      toast.success('Η κατάσταση ενημερώθηκε');
     } catch (error) {
       console.error('Error updating booking status:', error);
-      setError('Αποτυχία ενημέρωσης κατάστασης κράτησης');
+      toast.error('Αποτυχία ενημέρωσης', 'Η κατάσταση της κράτησης δεν άλλαξε.');
     } finally {
       setUpdatingBookingId(null);
       setStatusConfirm(null);
@@ -260,7 +248,7 @@ export default function BookingsPage() {
               <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
               <p className="text-sm text-destructive">{error}</p>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => { setError(null); loadBookings(); }} className="text-destructive/60 hover:text-destructive shrink-0">
+            <Button variant="ghost" size="sm" onClick={() => refresh()} className="text-destructive/60 hover:text-destructive shrink-0">
               Δοκιμάστε ξανά
             </Button>
           </div>
@@ -426,7 +414,7 @@ export default function BookingsPage() {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-2 sm:gap-3 p-2 sm:p-4">
-                  {filteredBookings.map((booking) => {
+                  {pagination.items.map((booking) => {
                     const pitch = pitches.find(p => p.id === booking.pitchId);
                     const startDate = new Date(booking.startTime);
                     const isToday = startDate.toDateString() === new Date().toDateString();
@@ -561,6 +549,26 @@ export default function BookingsPage() {
                       </div>
                     );
                   })}
+                  <Pagination state={pagination} label="κρατήσεις" />
+
+                  {/* Το API φέρνει τους τελευταίους 3 μήνες. Το παλαιότερο
+                      ιστορικό κατεβαίνει μόνο αν ζητηθεί ρητά. */}
+                  {hasOlderBookings && !showFullHistory && (
+                    <div className="flex flex-col items-center gap-2 pt-4 pb-2">
+                      <p className="text-xs text-zinc-600">
+                        Εμφανίζονται οι κρατήσεις των τελευταίων 3 μηνών.
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowFullHistory(true)}
+                        className="h-9 rounded-lg text-xs font-semibold"
+                      >
+                        <History className="h-3.5 w-3.5" />
+                        Φόρτωση πλήρους ιστορικού
+                      </Button>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>

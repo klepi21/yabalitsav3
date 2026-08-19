@@ -551,20 +551,22 @@ function AdminDashboard() {
       setPitches(convertedPitches);
       setVenue(convertedVenue);
 
-      // Fetch squads and trainings for academy list
+      // Πριν: τρεις σειριακοί κύκλοι (squads+trainings -> users+groups ->
+      // payments). Κάθε κύκλος περίμενε τον προηγούμενο χωρίς λόγο —
+      // καμία κλήση δεν εξαρτάται από τις άλλες. Τώρα ένας κύκλος.
       try {
-        const [squadsData, trainingsData] = await Promise.all([
+        const [squadsData, trainingsData, usersData, groupsData, paymentsData] = await Promise.all([
           squadService.getByVenue(venueOwner.venueId),
-          trainingService.getByVenue(venueOwner.venueId)
+          trainingService.getByVenue(venueOwner.venueId),
+          academyUserService.getByVenue(venueOwner.venueId),
+          userGroupService.getByVenue(venueOwner.venueId),
+          academyPaymentService.getByVenue(venueOwner.venueId).catch((err) => {
+            console.error('Error loading payments:', err);
+            return [] as AcademyPayment[];
+          }),
         ]);
         setSquads(squadsData);
         setTrainings(trainingsData);
-
-        // Medical alerts
-        const [usersData, groupsData] = await Promise.all([
-          academyUserService.getByVenue(venueOwner.venueId),
-          userGroupService.getByVenue(venueOwner.venueId),
-        ]);
         setAcademyUsers(usersData);
         setUserGroups(groupsData);
         const medicalGroupIds = new Set(
@@ -596,8 +598,7 @@ function AdminDashboard() {
         setMedicalAlerts({ expired, expiringSoon });
 
         // Payment alerts – show athletes with unpaid months in the current year
-        try {
-          const paymentsData: AcademyPayment[] = await academyPaymentService.getByVenue(venueOwner.venueId);
+        {
           const paymentGroupIds = new Set(
             groupsData.filter((g) => g.capabilities?.includes('monthly_payment')).map((g) => g.id)
           );
@@ -620,8 +621,6 @@ function AdminDashboard() {
             }
           }
           setPaymentAlerts(alerts);
-        } catch (err) {
-          console.error('Error loading payment alerts:', err);
         }
       } catch (err) {
         console.error('Error loading academy data:', err);

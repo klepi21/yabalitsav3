@@ -23,6 +23,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { usePagination } from '@/hooks/usePagination';
+import { Pagination } from '@/components/ui/pagination';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -145,6 +147,8 @@ export default function MedicalTrackingPage() {
       return matchesSearch && matchesStatus;
     });
   }, [athletes, search, statusFilter]);
+
+  const pagination = usePagination(filtered, 24);
 
   const stats = useMemo(() => ({
     total: athletes.length,
@@ -346,7 +350,7 @@ export default function MedicalTrackingPage() {
         </div>
       ) : (
         <div className="space-y-2">
-          {filtered.map((athlete) => {
+          {pagination.items.map((athlete) => {
             const cfg = STATUS_CONFIG[athlete.status];
             const StatusIcon = cfg.icon;
             return (
@@ -456,6 +460,7 @@ export default function MedicalTrackingPage() {
               <p className="text-zinc-500 font-bold">Δεν βρέθηκαν αθλητές</p>
             </div>
           )}
+          <Pagination state={pagination} label="αθλητές" />
         </div>
       )}
       {/* Notify Confirmation Dialog */}

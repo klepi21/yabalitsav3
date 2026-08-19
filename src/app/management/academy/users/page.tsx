@@ -18,6 +18,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from '@/lib/utils';
+import { usePagination } from '@/hooks/usePagination';
+import { Pagination } from '@/components/ui/pagination';
 import {
   Table,
   TableBody,
@@ -116,6 +118,8 @@ export default function AcademyUsersPage() {
       return matchesSearch && matchesGroup && matchesSquad;
     });
   }, [users, searchQuery, groupFilter, squadFilter]);
+
+  const pagination = usePagination(filteredUsers, 24);
 
   const userStats = useMemo(() => {
     const stats: Record<string, number> = { total: users.length };
@@ -396,8 +400,9 @@ export default function AcademyUsersPage() {
         ) : (
           <>
             {/* Mobile/Tablet Card Layout (hidden on Desktop) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 lg:hidden">
-              {filteredUsers.map((u) => {
+            <div className="lg:hidden">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {pagination.items.map((u) => {
                 const group = getGroup(u.groupId);
                 return (
                   <div key={u.id} className="bg-white rounded-2xl border border-zinc-100 p-5 space-y-4 shadow-sm active:bg-zinc-50 transition-all hover:shadow-md group">
@@ -491,6 +496,8 @@ export default function AcademyUsersPage() {
                 );
               })}
             </div>
+            <Pagination state={pagination} label="χρήστες" />
+            </div>
 
             <div className="hidden lg:block bg-white rounded-xl border border-zinc-100 shadow-sm overflow-hidden">
               <Table>
@@ -504,7 +511,7 @@ export default function AcademyUsersPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUsers.map((u) => {
+                  {pagination.items.map((u) => {
                     const group = getGroup(u.groupId);
                     return (
                       <TableRow key={u.id} className="group border-t border-zinc-50 hover:bg-zinc-50/50 transition-colors">
@@ -616,6 +623,9 @@ export default function AcademyUsersPage() {
                   })}
                 </TableBody>
               </Table>
+              <div className="px-4 pb-4">
+                <Pagination state={pagination} label="χρήστες" />
+              </div>
             </div>
           </>
         )}

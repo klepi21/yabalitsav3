@@ -1,6 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, verifyAuth, verifyVenueAccess, isAuthError } from '@/lib/api-auth';
 
+/**
+ * Το dashboard δείχνει μόνο «τρέχουσες», «σημερινές» και επερχόμενες
+ * κρατήσεις — καμία ιστορική άθροιση. Δεν υπάρχει λόγος να κατεβαίνει
+ * ολόκληρο το ιστορικό του γηπέδου σε κάθε φόρτωση.
+ */
+const LOOKBACK_DAYS = 7;
+
+function isMissingIndex(err: unknown): boolean {
+  const e = err as { code?: number | string; message?: string };
+  return e?.code === 9 || e?.code === 'failed-precondition' || !!e?.message?.includes('requires an index');
+}
+
 export async function POST(request: NextRequest) {
   try {
     const authResult = await verifyAuth(request);
@@ -14,11 +26,23 @@ export async function POST(request: NextRequest) {
     const accessError = await verifyVenueAccess(venueId, authResult.decodedToken);
     if (accessError) return accessError;
 
-    // Fetch bookings for this venue
-    const bookingsSnapshot = await db
-      .collection('yabalitsa_bookings')
-      .where('venueId', '==', venueId)
-      .get();
+    const since = new Date(Date.now() - LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
+
+    // Τα τρία queries έτρεχαν σειριακά — τώρα παράλληλα.
+    const [bookingsSnapshot, pitchesSnapshot, venueSnapshot] = await Promise.all([
+      db
+        .collection('yabalitsa_bookings')
+        .where('venueId', '==', venueId)
+        .where('startTime', '>=', since)
+        .get()
+        .catch(async (err) => {
+          if (!isMissingIndex(err)) throw err;
+          // Εφεδρεία όσο χτίζεται το composite index.
+          return db.collection('yabalitsa_bookings').where('venueId', '==', venueId).get();
+        }),
+      db.collection('yabalitsa_pitches').where('venueId', '==', venueId).get(),
+      db.collection('yabalitsa_venues').doc(venueId).get(),
+    ]);
 
     const bookings = bookingsSnapshot.docs.map(doc => {
       const data = doc.data();
@@ -32,12 +56,6 @@ export async function POST(request: NextRequest) {
       };
     });
 
-    // Fetch pitches for this venue
-    const pitchesSnapshot = await db
-      .collection('yabalitsa_pitches')
-      .where('venueId', '==', venueId)
-      .get();
-
     const pitches = pitchesSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
@@ -47,12 +65,6 @@ export async function POST(request: NextRequest) {
         updatedAt: data.updatedAt?.toDate?.().toISOString() || new Date().toISOString(),
       };
     });
-
-    // Fetch venue data
-    const venueSnapshot = await db
-      .collection('yabalitsa_venues')
-      .doc(venueId)
-      .get();
 
     const venue = venueSnapshot.exists ? {
       id: venueSnapshot.id,

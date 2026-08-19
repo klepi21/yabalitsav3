@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -20,83 +20,45 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { usePitches } from '@/lib/queries';
+import { toast } from '@/lib/toast';
 
 export default function PitchesPage() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, venueOwner, isLoading: authLoading } = useAuth();
 
-  const [pitches, setPitches] = useState<Pitch[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Κοινή cache: τα γήπεδα ζητούνται και από τις κρατήσεις — ένα request.
+  const { pitches: rawPitches, error: loadError, isLoading, refresh } = usePitches(
+    venueOwner?.venueId
+  );
+  const pitches = useMemo<Pitch[]>(
+    () =>
+      rawPitches.map((p) => ({
+        ...(p as unknown as Pitch),
+        createdAt: new Date(p.createdAt as string),
+        updatedAt: new Date(p.updatedAt as string),
+      })),
+    [rawPitches]
+  );
+  const error = loadError ? (loadError as Error).message : null;
   const [searchTerm, setSearchTerm] = useState('');
 
-  const loadPitches = useCallback(async () => {
-    if (!venueOwner || !user) return;
-
-    try {
-      setError(null);
-      // Get auth token
-      const token = await user.getIdToken();
-      if (!token) {
-        throw new Error('No auth token available');
-      }
-
-      // Use server-side API to fetch data with proper auth
-      const response = await fetch('/api/pitches/get-by-venue', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          venueId: venueOwner.venueId,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to fetch pitches');
-      }
-
-      const data = await response.json();
-
-      // Convert ISO strings back to Date objects
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const convertedPitches = (data.pitches || []).map((pitch: any) => ({
-        ...pitch,
-        createdAt: new Date(pitch.createdAt),
-        updatedAt: new Date(pitch.updatedAt),
-      }));
-
-      setPitches(convertedPitches);
-    } catch (error) {
-      console.error('Error loading pitches:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Αποτυχία φόρτωσης γηπέδων';
-      setError(errorMessage);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [venueOwner, user]);
-
-  // Check authentication
   useEffect(() => {
     if (authLoading) return;
-
     if (!user || !venueOwner) {
       router.push(`/venue-login?redirect=${encodeURIComponent(pathname)}`);
-      return;
     }
-
-    loadPitches();
-  }, [user, venueOwner, authLoading, router, loadPitches, pathname]);
+  }, [user, venueOwner, authLoading, router, pathname]);
 
   const togglePitchActive = async (pitchId: string, currentActive: boolean) => {
     try {
       await pitchService.update(pitchId, { active: !currentActive });
-      setPitches(prev => prev.map(p => p.id === pitchId ? { ...p, active: !currentActive } : p));
+      await refresh();
+      toast.success(currentActive ? 'Το γήπεδο απενεργοποιήθηκε' : 'Το γήπεδο ενεργοποιήθηκε');
     } catch (err) {
       console.error('Error toggling pitch active:', err);
+      toast.error('Αποτυχία ενημέρωσης', 'Η κατάσταση του γηπέδου δεν άλλαξε.');
     }
   };
 
@@ -172,7 +134,7 @@ export default function PitchesPage() {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => { setError(null); loadPitches(); }}
+              onClick={() => refresh()}
               className="h-8 rounded-lg border-red-200 text-red-600 hover:bg-red-50 font-medium text-2xs"
             >
               {'Δοκιμάστε ξανά'}

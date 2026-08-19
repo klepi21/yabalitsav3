@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { Zap, Bell, User, Menu, LogOut, Settings as SettingsIcon, ChevronRight } from 'lucide-react';
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar from './Sidebar';
@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { usePendingBookings } from '@/lib/queries';
 
 interface VenueData {
   id: string;
@@ -84,8 +85,12 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
   const router = useRouter();
   const { user, venueOwner, signOut } = useAuth();
   const [venueData, setVenueData] = useState<VenueData | null>(null);
-  const [pendingBookings, setPendingBookings] = useState<PendingBooking[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Στοχευμένο query: status=pending, limit 5 — αντί για ολόκληρη τη
+  // συλλογή. Το αποτέλεσμα είναι μοιρασμένο στην cache, οπότε η αλλαγή
+  // σελίδας δεν προκαλεί νέο request.
+  const { pending } = usePendingBookings(venueOwner?.venueId);
+  const pendingBookings = pending as unknown as PendingBooking[];
   const { title, isSubPage, parent, href } = useBreadcrumb(pathname);
 
   const isPublicPage =
@@ -121,39 +126,6 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
       fetchVenueData();
     }
   }, [user?.uid]);
-
-  // Fetch pending bookings for notifications
-  const fetchPendingBookings = useCallback(async () => {
-    if (!venueOwner?.venueId || !user) return;
-
-    try {
-      const token = await user.getIdToken();
-      const response = await fetch('/api/bookings/get-by-venue', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({ venueId: venueOwner.venueId }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const pending = (data.bookings || [])
-          .filter((b: PendingBooking) => b.status === 'pending')
-          .slice(0, 5);
-        setPendingBookings(pending);
-      }
-    } catch (error) {
-      console.error('Error fetching pending bookings:', error);
-    }
-  }, [venueOwner?.venueId, user]);
-
-  useEffect(() => {
-    if (!isPublicPage) {
-      fetchPendingBookings();
-    }
-  }, [isPublicPage, fetchPendingBookings]);
 
   if (isPublicPage) {
     return <>{children}</>;
