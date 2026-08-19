@@ -378,7 +378,7 @@ export default function TournamentDetailPage() {
                   </thead>
                   <tbody className="divide-y divide-zinc-50">
                     {standings.slice(0, 5).map((team, idx) => (
-                      <tr key={team.id} className="group hover:bg-zinc-50 transition-colors">
+                      <tr key={team.id} className="group even:bg-zinc-50/70 hover:bg-zinc-100/60 transition-colors">
                         <td className="px-6 py-4">
                           <span className={cn(
                             "inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs font-semibold shadow-sm",
@@ -572,8 +572,8 @@ export default function TournamentDetailPage() {
                     const gd = team.stats.goalsFor - team.stats.goalsAgainst;
                     return (
                       <tr key={team.id} className={cn(
-                        "group transition-all hover:bg-zinc-50/50",
-                        idx === 0 ? "bg-emerald-50/10" : ""
+                        "group transition-all even:bg-zinc-50/70 hover:bg-zinc-100/60",
+                        idx === 0 ? "bg-emerald-50/40 even:bg-emerald-50/40" : ""
                       )}>
                         <td className="px-6 py-5">
                           <span className={cn(

@@ -553,7 +553,7 @@ export default function TeamDetailPage() {
           <table className="w-full min-w-[640px]">
             <thead>
               <tr className="bg-zinc-50/50 border-b border-zinc-100">
-                <th className="py-6 px-8 text-left text-2xs font-semibold text-zinc-500">#</th>
+                <th scope="col" className="py-6 px-8 text-left text-2xs font-semibold text-zinc-500">Φαν.</th>
                 <th className="py-6 px-4 text-left text-2xs font-semibold text-zinc-500">Παίκτης</th>
                 <th className="py-6 px-4 text-center text-2xs font-semibold text-zinc-500">Θέση</th>
                 <th className="py-6 px-4 text-center text-2xs font-semibold text-zinc-500">Γκολ</th>
@@ -654,7 +654,7 @@ export default function TeamDetailPage() {
                 }
 
                 return (
-                  <tr key={player.id} className="group hover:bg-zinc-50/50 transition-colors">
+                  <tr key={player.id} className="group even:bg-zinc-50/70 hover:bg-violet-50/40 transition-colors">
                     <td className="py-6 px-8">
                       <div className="h-12 w-12 rounded-2xl bg-zinc-50 flex items-center justify-center text-lg font-semibold text-zinc-500 group-hover:bg-white group-hover:text-violet-600 group-hover:shadow-sm transition-all duration-300">
                         {player.shirtNumber ?? '—'}

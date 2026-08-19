@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db, auth } from '@/lib/api-auth';
 import { FieldValue } from 'firebase-admin/firestore';
 import { sendEmail, emailTemplates } from '@/lib/email-service';
+import { TRIAL_DAYS } from '@/lib/pricing';
 
 export async function POST(request: NextRequest) {
   try {
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
         doy: venueDoy || '',
       },
       coupons: [],
-      daysRemaining: 15,
+      daysRemaining: TRIAL_DAYS,
       lastDecrementAt: FieldValue.serverTimestamp(),
       createdAt: FieldValue.serverTimestamp(),
       updatedAt: FieldValue.serverTimestamp(),

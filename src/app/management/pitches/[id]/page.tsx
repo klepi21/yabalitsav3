@@ -359,6 +359,10 @@ export default function PitchDetailsPage() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-zinc-100">
+                        <th scope="col" className="px-4 py-3 w-12 text-left text-2xs font-semibold text-zinc-500">
+                          <span aria-hidden="true">#</span>
+                          <span className="sr-only">Αύξων αριθμός</span>
+                        </th>
                         <th className="pb-4 text-left text-xs font-semibold text-zinc-500 px-2 sm:px-4">Πελάτης</th>
                         <th className="pb-4 text-left text-xs font-semibold text-zinc-500 px-2 sm:px-4 hidden sm:table-cell">Ημερομηνία</th>
                         <th className="pb-4 text-left text-xs font-semibold text-zinc-500 px-2 sm:px-4">Ώρα</th>
@@ -366,10 +370,11 @@ export default function PitchDetailsPage() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-50">
-                      {[...bookings].sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()).slice(0, 8).map((booking) => {
+                      {[...bookings].sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime()).slice(0, 8).map((booking, i) => {
                         const status = statusConfig[booking.status as keyof typeof statusConfig] || statusConfig.confirmed;
                         return (
-                          <tr key={booking.id} className="group hover:bg-zinc-50/50 transition-colors">
+                          <tr key={booking.id} className="group even:bg-zinc-50/70 hover:bg-emerald-50/40 transition-colors">
+                            <td className="px-4 py-3 text-2xs font-medium text-zinc-500 tabular-nums">{i + 1}</td>
                             <td className="py-4 sm:py-5 px-2 sm:px-4">
                               <p className="font-semibold text-zinc-900 text-sm">{booking.userName || 'Άγνωστος'}</p>
                               <p className="text-xs text-zinc-500 sm:hidden">

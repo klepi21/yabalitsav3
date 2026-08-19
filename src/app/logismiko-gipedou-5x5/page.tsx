@@ -70,7 +70,7 @@ export default function LogismikoGipedou5x5Page() {
           </p>
 
           <Link href="/for-venues" className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-2xl transition-all shadow-xl shadow-emerald-500/20 hover:scale-105 active:scale-95 flex items-center gap-3">
-            Δοκιμάστε το Δωρεάν για 15 Ημέρες <ArrowRight className="w-5 h-5" />
+            Δοκιμάστε το Δωρεάν για 30 Ημέρες <ArrowRight className="w-5 h-5" />
           </Link>
           
           <div className="flex items-center gap-6 mt-8 text-sm font-semibold text-zinc-400">
@@ -217,7 +217,7 @@ export default function LogismikoGipedou5x5Page() {
                 <div className="pt-16 p-8 flex flex-col justify-center h-full gap-4 text-center">
                   <BarChart3 className="w-16 h-16 text-emerald-500/50 mx-auto" />
                   <h3 className="text-2xl font-bold text-white">Yabalitsa Dashboard</h3>
-                  <p className="text-zinc-400">Διαθέσιμο με 15 Ημέρες Δωρεάν Δοκιμή</p>
+                  <p className="text-zinc-400">Διαθέσιμο με 30 Ημέρες Δωρεάν Δοκιμή</p>
                 </div>
              </div>
           </div>
@@ -237,7 +237,7 @@ export default function LogismikoGipedou5x5Page() {
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/for-venues" className="px-10 py-5 bg-[#040D12] hover:bg-zinc-800 text-white font-bold rounded-2xl transition-all shadow-xl hover:scale-105 active:scale-95 w-full sm:w-auto">
-              Εγγραφή - 15 Ημέρες Δωρεάν
+              Εγγραφή - 30 Ημέρες Δωρεάν
             </Link>
             <Link href="/for-venues" className="px-10 py-5 bg-white border border-zinc-200 hover:border-zinc-300 text-[#040D12] font-bold rounded-2xl transition-all w-full sm:w-auto">
               Επικοινωνία μαζί μας

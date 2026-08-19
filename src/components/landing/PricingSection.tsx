@@ -21,7 +21,7 @@ export default function PricingSection() {
               </span>
             </p>
             <div className="mt-8 flex flex-wrap justify-center items-center gap-6 text-2xs md:text-xs font-bold text-zinc-400 uppercase tracking-widest">
-              <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 italic"><Zap className="w-3 h-3 text-emerald-500" /> Δωρεαν για 15 ημερες</span>
+              <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 italic"><Zap className="w-3 h-3 text-emerald-500" /> Δωρεαν για 30 ημερες</span>
               <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10"><Shield className="w-3 h-3 text-emerald-500" /> Ολες οι λειτουργιες</span>
               <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> Χωρις καρτα</span>
             </div>

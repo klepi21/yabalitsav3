@@ -202,7 +202,11 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
                     )}
                   >
                     <Zap className={cn('h-3.5 w-3.5', isExpiring ? 'text-amber-600' : 'text-emerald-600')} />
-                    {isExpiring ? `Ανανέωση σε ${daysRemaining} ημ.` : venueData.planType || 'Basic'}
+                    {isExpiring
+                      ? `Ανανέωση σε ${daysRemaining} ημ.`
+                      : venueData.plan === 'trial'
+                        ? `Δοκιμή • ${daysRemaining} ημ.`
+                        : venueData.planType || 'Basic'}
                   </button>
                 )}
 

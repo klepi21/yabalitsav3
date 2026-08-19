@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -486,7 +487,11 @@ export default function PaymentsDashboardPage() {
             <table className="w-full min-w-[900px]">
               <thead>
                 <tr className="border-b border-zinc-100">
-                  <th className="text-left p-3 text-2xs font-medium text-zinc-500 sticky left-0 bg-white z-10 min-w-[200px]">
+                  <th scope="col" className="text-left p-3 w-12 text-2xs font-medium text-zinc-500 sticky left-0 bg-white z-10">
+                    <span aria-hidden="true">#</span>
+                    <span className="sr-only">Αύξων αριθμός</span>
+                  </th>
+                  <th scope="col" className="text-left p-3 text-2xs font-medium text-zinc-500 sticky left-12 bg-white z-10 min-w-[200px]">
                     {'Αθλητής'}
                   </th>
                   {Array.from({ length: 12 }, (_, i) => {
@@ -507,11 +512,15 @@ export default function PaymentsDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {athletesBySquad.map(({ squad, athletes: squadAthletes }, groupIdx) => (
+                {athletesBySquad.map(({ squad, athletes: squadAthletes }, groupIdx) => {
+                  const rowOffset = athletesBySquad
+                    .slice(0, groupIdx)
+                    .reduce((n, g) => n + g.athletes.length, 0);
+                  return (
                   <React.Fragment key={squad?.id || `no-squad-${groupIdx}`}>
                     {/* Squad header row */}
                     <tr className={`${groupIdx > 0 ? 'border-t-2 border-zinc-200' : ''}`}>
-                      <td className="p-3 sticky left-0 bg-zinc-50 z-10" colSpan={1}>
+                      <td className="p-3 sticky left-0 bg-zinc-50 z-10" colSpan={2}>
                         <div className="flex items-center gap-2">
                           <span className="text-sm">📋</span>
                           <span className="text-2xs font-semibold text-zinc-500">
@@ -531,13 +540,24 @@ export default function PaymentsDashboardPage() {
                       ))}
                     </tr>
                     {/* Athletes in this squad */}
-                    {squadAthletes.map((athlete) => {
+                    {squadAthletes.map((athlete, athleteIdx) => {
                       const parent = findParent(athlete.id);
                       const group = groups.find((g) => g.id === athlete.groupId);
                       const expectedAmount = getExpectedAmount(athlete);
+                      const isOdd = athleteIdx % 2 === 1;
+                      const stickyBg = isOdd ? 'bg-zinc-50' : 'bg-white';
                       return (
-                        <tr key={athlete.id} className="border-b border-zinc-50 hover:bg-zinc-50/50 transition-colors">
-                          <td className="p-3 sticky left-0 bg-white z-10">
+                        <tr
+                          key={athlete.id}
+                          className={cn(
+                            'border-b border-zinc-50 transition-colors',
+                            isOdd && 'bg-zinc-50/70'
+                          )}
+                        >
+                          <td className={cn('p-3 sticky left-0 z-10 text-2xs font-medium text-zinc-500 tabular-nums', stickyBg)}>
+                            {rowOffset + athleteIdx + 1}
+                          </td>
+                          <td className={cn('p-3 sticky left-12 z-10', stickyBg)}>
                             <div className="flex items-center gap-3">
                               <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center text-sm">
                                 {group?.icon || '⚽'}
@@ -626,7 +646,8 @@ export default function PaymentsDashboardPage() {
                       );
                     })}
                   </React.Fragment>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

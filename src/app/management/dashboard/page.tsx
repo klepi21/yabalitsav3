@@ -1022,20 +1022,30 @@ function AdminDashboard() {
       )}
 
 
-      {/* Subscription Expiry Banner */}
-      {venue && venue.plan === 'subscription' && (venue.daysRemaining || 0) <= 7 && (venue.daysRemaining || 0) > 0 && (
+      {/* Banner λήξης — ισχύει και για trial και για συνδρομή.
+          Πριν έλεγχε μόνο `plan === 'subscription'`, οπότε ο δοκιμαστικός
+          χρήστης δεν έβλεπε ΚΑΜΙΑ προειδοποίηση και απλά κλειδωνόταν έξω
+          τη μέρα που μηδένιζε ο μετρητής. */}
+      {venue && (venue.daysRemaining || 0) <= 7 && (venue.daysRemaining || 0) > 0 && (
         <div className="rounded-2xl border-2 border-amber-200 bg-amber-50 p-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
               <div>
-                <p className="font-bold text-amber-800">Η συνδρομή σας λήγει σε {venue.daysRemaining} {venue.daysRemaining === 1 ? 'ημέρα' : 'ημέρες'}</p>
-                <p className="text-sm text-amber-700 mt-0.5">Ανανεώστε τώρα για αδιάκοπη πρόσβαση</p>
+                <p className="font-bold text-amber-800">
+                  {venue.plan === 'trial' ? 'Η δωρεάν δοκιμή σας λήγει' : 'Η συνδρομή σας λήγει'} σε{' '}
+                  {venue.daysRemaining} {venue.daysRemaining === 1 ? 'ημέρα' : 'ημέρες'}
+                </p>
+                <p className="text-sm text-amber-700 mt-0.5">
+                  {venue.plan === 'trial'
+                    ? 'Επιλέξτε πλάνο για να συνεχίσετε χωρίς διακοπή.'
+                    : 'Ανανεώστε τώρα για αδιάκοπη πρόσβαση.'}
+                </p>
               </div>
             </div>
             <Link href="/management/settings/renewal">
               <Button className="bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl">
-                Ανανέωση
+                {venue.plan === 'trial' ? 'Επιλογή πλάνου' : 'Ανανέωση'}
               </Button>
             </Link>
           </div>

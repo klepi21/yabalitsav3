@@ -491,6 +491,10 @@ export default function AdminPanelPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-zinc-50/80">
+                    <th scope="col" className="px-4 py-3 w-12 text-left text-2xs font-semibold text-zinc-500">
+                      <span aria-hidden="true">#</span>
+                      <span className="sr-only">Αύξων αριθμός</span>
+                    </th>
                     <SortableHeader label="Venue" field="name" current={sortField} asc={sortAsc} onToggle={toggleSort} />
                     <th className="px-4 py-3 text-left text-2xs font-semibold text-zinc-500">Status</th>
                     <SortableHeader label="Εγγραφή" field="createdAt" current={sortField} asc={sortAsc} onToggle={toggleSort} />
@@ -502,12 +506,16 @@ export default function AdminPanelPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-100">
-                  {filteredVenues.map(venue => (
+                  {filteredVenues.map((venue, i) => (
                     <React.Fragment key={venue.id}>
                       <tr
-                        className="hover:bg-zinc-50/50 transition-colors cursor-pointer"
+                        className={cn(
+                          'transition-colors cursor-pointer hover:bg-emerald-50/40',
+                          i % 2 === 1 && 'bg-zinc-50/70'
+                        )}
                         onClick={() => setExpandedVenue(expandedVenue === venue.id ? null : venue.id)}
                       >
+                        <td className="px-4 py-3 text-2xs font-medium text-zinc-500 tabular-nums">{i + 1}</td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <div>
@@ -539,7 +547,7 @@ export default function AdminPanelPage() {
                       </tr>
                       {expandedVenue === venue.id && (
                         <tr>
-                          <td colSpan={8} className="bg-zinc-50/80 px-4 py-4">
+                          <td colSpan={9} className="bg-zinc-50/80 px-4 py-4">
                             <div className="grid grid-cols-4 gap-3 mb-4">
                               <DetailRow label="Plan" value={venue.planType || venue.plan} />
                               <DetailRow label="Ημέρες" value={venue.daysRemaining !== null ? `${venue.daysRemaining}` : '-'} />

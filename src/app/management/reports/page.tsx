@@ -1066,18 +1066,23 @@ export default function ReportsPage() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-zinc-50/50">
-                      <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500">{'Μήνας'}</th>
+                      <th scope="col" className="py-2.5 px-4 w-12 text-2xs font-medium text-zinc-500">
+                        <span aria-hidden="true">#</span>
+                        <span className="sr-only">Αύξων αριθμός</span>
+                      </th>
+                      <th scope="col" className="py-2.5 px-4 text-2xs font-medium text-zinc-500">{'Μήνας'}</th>
                       <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500 text-center">{'Πληρωμένοι'}</th>
                       <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500 text-center">{'Ανεξόφλητοι'}</th>
                       <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500 text-right">{'Έσοδα'}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-50">
-                    {(showAllMonthly ? academyMonthlyBreakdown : academyMonthlyBreakdown.slice(0, 6)).map((row) => {
+                    {(showAllMonthly ? academyMonthlyBreakdown : academyMonthlyBreakdown.slice(0, 6)).map((row, i) => {
                       const [y, m] = row.month.split('-').map(Number);
                       const label = new Date(y, m - 1).toLocaleDateString('el-GR', { month: 'long', year: 'numeric' });
                       return (
-                        <tr key={row.month} className="hover:bg-zinc-50/50 transition-colors">
+                        <tr key={row.month} className="even:bg-zinc-50/70 hover:bg-emerald-50/40 transition-colors">
+                          <td className="py-2.5 px-4 text-2xs font-medium text-zinc-500 tabular-nums">{i + 1}</td>
                           <td className="py-2.5 px-4 text-2xs font-medium text-zinc-900 capitalize">{label}</td>
                           <td className="py-2.5 px-4 text-center">
                             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-2xs font-medium bg-emerald-50 text-emerald-700">
@@ -1106,7 +1111,7 @@ export default function ReportsPage() {
                   {academyMonthlyBreakdown.length > 6 && (
                     <tfoot>
                       <tr>
-                        <td colSpan={4} className="py-2">
+                        <td colSpan={5} className="py-2">
                           <button
                             onClick={() => setShowAllMonthly(!showAllMonthly)}
                             className="w-full flex items-center justify-center gap-1.5 text-2xs font-medium text-violet-600 hover:text-violet-700 transition-colors py-1"
@@ -1134,15 +1139,20 @@ export default function ReportsPage() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-zinc-50/50">
-                      <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500">{'Τμήμα'}</th>
+                      <th scope="col" className="py-2.5 px-4 w-12 text-2xs font-medium text-zinc-500">
+                        <span aria-hidden="true">#</span>
+                        <span className="sr-only">Αύξων αριθμός</span>
+                      </th>
+                      <th scope="col" className="py-2.5 px-4 text-2xs font-medium text-zinc-500">{'Τμήμα'}</th>
                       <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500 text-center">{'Πληρωμένοι'}</th>
                       <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500 text-center">{'Ανεξόφλητοι'}</th>
                       <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500 text-right">{'Έσοδα'}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-50">
-                    {(showAllSquads ? academyBySquad : academyBySquad.slice(0, 6)).map((row) => (
-                      <tr key={row.squad} className="hover:bg-zinc-50/50 transition-colors">
+                    {(showAllSquads ? academyBySquad : academyBySquad.slice(0, 6)).map((row, i) => (
+                      <tr key={row.squad} className="even:bg-zinc-50/70 hover:bg-emerald-50/40 transition-colors">
+                        <td className="py-2.5 px-4 text-2xs font-medium text-zinc-500 tabular-nums">{i + 1}</td>
                         <td className="py-2.5 px-4 text-2xs font-medium text-zinc-900">{row.squad}</td>
                         <td className="py-2.5 px-4 text-center">
                           <span className="inline-flex items-center px-2 py-0.5 rounded-md text-2xs font-medium bg-emerald-50 text-emerald-700">
@@ -1167,7 +1177,7 @@ export default function ReportsPage() {
                   {academyBySquad.length > 6 && (
                     <tfoot>
                       <tr>
-                        <td colSpan={4} className="py-2">
+                        <td colSpan={5} className="py-2">
                           <button
                             onClick={() => setShowAllSquads(!showAllSquads)}
                             className="w-full flex items-center justify-center gap-1.5 text-2xs font-medium text-blue-600 hover:text-blue-700 transition-colors py-1"
@@ -1275,7 +1285,11 @@ export default function ReportsPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-zinc-50/50">
-                    <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500">{'Ημερομηνία'}</th>
+                    <th scope="col" className="py-2.5 px-4 w-12 text-2xs font-medium text-zinc-500">
+                      <span aria-hidden="true">#</span>
+                      <span className="sr-only">Αύξων αριθμός</span>
+                    </th>
+                    <th scope="col" className="py-2.5 px-4 text-2xs font-medium text-zinc-500">{'Ημερομηνία'}</th>
                     <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500">{'Περιγραφή'}</th>
                     <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500">{'Διάρκεια'}</th>
                     <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500">{'Ποσό'}</th>
@@ -1286,8 +1300,9 @@ export default function ReportsPage() {
                 <tbody className="divide-y divide-zinc-50">
                   {payments
                     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-                    .map((payment) => (
-                    <tr key={payment.id} className="group hover:bg-zinc-50/50 transition-colors">
+                    .map((payment, i) => (
+                    <tr key={payment.id} className="group even:bg-zinc-50/70 hover:bg-emerald-50/40 transition-colors">
+                      <td className="py-2.5 px-4 text-2xs font-medium text-zinc-500 tabular-nums">{i + 1}</td>
                       <td className="py-2.5 px-4">
                         <span className="text-2xs font-medium text-zinc-900">
                           {(payment.paymentDate ? new Date(payment.paymentDate) : new Date(payment.createdAt)).toLocaleDateString('el-GR', {

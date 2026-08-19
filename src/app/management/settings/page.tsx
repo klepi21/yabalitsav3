@@ -380,12 +380,26 @@ export default function SettingsPage() {
               </div>
             );
           } else {
+            // Το trial έδειχνε μόνο «Δωρεάν Trial» χωρίς υπόλοιπο ημερών.
+            const isTrial = venue.plan === 'trial';
+            const trialWarning = isTrial && daysRemaining !== null && daysRemaining <= 7;
+
             return (
-              <div className="flex items-center gap-4 px-5 py-3 rounded-2xl border border-zinc-100 bg-white text-zinc-500 shadow-sm font-bold">
-                <div className="h-2 w-2 rounded-full bg-zinc-200" />
+              <div className={cn(
+                "flex items-center gap-4 px-5 py-3 rounded-2xl border bg-white shadow-sm font-bold",
+                trialWarning ? "border-amber-100 text-amber-600" : "border-zinc-100 text-zinc-600"
+              )}>
+                <div className={cn(
+                  "h-2 w-2 rounded-full",
+                  trialWarning ? "bg-amber-500 animate-pulse" : "bg-zinc-300"
+                )} />
                 <div className="flex flex-col">
                   <span className="text-2xs opacity-40 font-semibold">Πλάνο</span>
-                  <span className="text-xs font-semibold tracking-tight">{venue.plan === 'trial' ? 'Δωρεάν Trial' : 'Χωρίς Πλάνο'}</span>
+                  <span className="text-xs font-semibold tracking-tight">
+                    {isTrial
+                      ? `Δωρεάν δοκιμή • ${daysRemaining ?? 0} ${daysRemaining === 1 ? 'ημέρα' : 'ημέρες'}`
+                      : 'Χωρίς πλάνο'}
+                  </span>
                 </div>
               </div>
             );

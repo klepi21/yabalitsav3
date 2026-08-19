@@ -387,6 +387,10 @@ export default function TrainingStatsPage() {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-zinc-50/50">
+                  <th scope="col" className="px-4 py-3 w-12 text-left text-2xs font-semibold text-zinc-500">
+                    <span aria-hidden="true">#</span>
+                    <span className="sr-only">Αύξων αριθμός</span>
+                  </th>
                   <th className="py-3 px-5 text-2xs font-semibold text-zinc-500">{'Αθλητής'}</th>
                   <th className="py-3 px-4 text-2xs font-semibold text-zinc-500 text-center">{'Τμήμα'}</th>
                   <th className="py-3 px-4 text-2xs font-semibold text-zinc-500 text-center">{'Προπ.'}</th>
@@ -398,8 +402,9 @@ export default function TrainingStatsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-50">
-                {athleteStats.map((athlete) => (
-                  <tr key={athlete.id} className="group hover:bg-zinc-50/50 transition-colors">
+                {athleteStats.map((athlete, i) => (
+                  <tr key={athlete.id} className="group even:bg-zinc-50/70 hover:bg-emerald-50/40 transition-colors">
+                    <td className="px-4 py-3 text-2xs font-medium text-zinc-500 tabular-nums">{i + 1}</td>
                     <td className="py-3 px-5">
                       <p className="text-xs font-semibold text-zinc-900 tracking-tight group-hover:text-violet-700 transition-colors">{athlete.name}</p>
                     </td>

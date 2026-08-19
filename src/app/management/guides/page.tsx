@@ -969,7 +969,7 @@ export default function GuidesPage() {
                         <li>Προτεραιότητα υποστήριξης</li>
                       </ul>
                     </li>
-                    <li className="flex items-start gap-2"><ArrowRight className="h-4 w-4 mt-0.5 shrink-0" /> Δωρεάν δοκιμαστική περίοδος 15 ημερών</li>
+                    <li className="flex items-start gap-2"><ArrowRight className="h-4 w-4 mt-0.5 shrink-0" /> Δωρεάν δοκιμαστική περίοδος 30 ημερών</li>
                   </ul>
                 </StepBox>
               </div>

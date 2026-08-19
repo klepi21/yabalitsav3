@@ -24,7 +24,7 @@ export default function FinalCTASection() {
             </Link>
             <p className="mt-6 text-zinc-400 text-2xs md:text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 opacity-80">
               <Zap className="w-3.5 h-3.5 text-emerald-500 fill-emerald-500" />
-              15 Ημερες Δωρεαν • Χωρις Πιστωτικη Καρτα
+              30 Ημερες Δωρεαν • Χωρις Πιστωτικη Καρτα
             </p>
           </div>
         </div>

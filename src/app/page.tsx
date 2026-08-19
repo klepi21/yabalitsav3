@@ -92,7 +92,6 @@ export default function RootPage() {
               <span className="text-zinc-50 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Διαχειρίσου το γήπεδό σου</span><br />
               <span className="text-white flex items-center justify-center gap-2 md:gap-4 flex-wrap mt-1 sm:mt-3 drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] uppercase">
                 και την ακαδημία σου
-                <span className="font-serif italic lowercase text-emerald-400 tracking-normal px-1 bg-emerald-500/10 rounded-lg">από ένα κινητό</span>
               </span>
             </h1>
 
@@ -118,7 +117,7 @@ export default function RootPage() {
             </div>
 
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-2xs md:text-xs font-bold text-white/90 uppercase tracking-[0.2em] -mt-10 md:-mt-16 mb-24 md:mb-36 drop-shadow-lg">
-              <span className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-emerald-400" /> 15 Ημερες Δωρεαν Δοκιμη</span>
+              <span className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-emerald-400" /> 30 Ημερες Δωρεαν Δοκιμη</span>
               <span className="hidden sm:block w-1.5 h-1.5 bg-white/20 rounded-full" />
               <span className="flex items-center gap-2"><Zap className="w-3.5 h-3.5 text-emerald-400" /> Χωρις Πιστωτικη Καρτα</span>
               <span className="hidden sm:block w-1.5 h-1.5 bg-white/20 rounded-full" />

@@ -244,15 +244,22 @@ export default function CustomersPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-zinc-100">
-                    <th className="py-3 sm:py-4 px-3 sm:px-6 text-2xs font-semibold text-zinc-500">Πελάτης</th>
-                    <th className="py-3 sm:py-4 px-3 sm:px-6 text-2xs font-semibold text-zinc-500 hidden md:table-cell">Email</th>
-                    <th className="py-3 sm:py-4 px-3 sm:px-6 text-2xs font-semibold text-zinc-500 hidden sm:table-cell">Τηλέφωνο</th>
+                    <th scope="col" className="py-3 sm:py-4 px-3 sm:px-4 w-12 text-2xs font-semibold text-zinc-500">
+                      <span aria-hidden="true">#</span>
+                      <span className="sr-only">Αύξων αριθμός</span>
+                    </th>
+                    <th scope="col" className="py-3 sm:py-4 px-3 sm:px-6 text-2xs font-semibold text-zinc-500">Πελάτης</th>
+                    <th scope="col" className="py-3 sm:py-4 px-3 sm:px-6 text-2xs font-semibold text-zinc-500 hidden md:table-cell">Email</th>
+                    <th scope="col" className="py-3 sm:py-4 px-3 sm:px-6 text-2xs font-semibold text-zinc-500 hidden sm:table-cell">Τηλέφωνο</th>
                     <th className="py-3 sm:py-4 px-2 sm:px-6 text-right w-[50px] sm:w-[80px]"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-50">
-                  {pagination.items.map((customer) => (
-                    <tr key={customer.id} className="group hover:bg-zinc-50/50 transition-colors">
+                  {pagination.items.map((customer, i) => (
+                    <tr key={customer.id} className="group even:bg-zinc-50/70 hover:bg-emerald-50/40 transition-colors">
+                      <td className="py-3 sm:py-4 px-3 sm:px-4 text-2xs font-medium text-zinc-500 tabular-nums">
+                        {pagination.from + i}
+                      </td>
                       <td className="py-3 sm:py-4 px-3 sm:px-6">
                         <div className="flex items-center gap-2 sm:gap-3">
                           <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-zinc-100 flex items-center justify-center font-medium text-zinc-500 group-hover:bg-emerald-100 group-hover:text-emerald-600 transition-colors text-xs shrink-0">

@@ -21,6 +21,7 @@ import {
 } from 'firebase/auth';
 import { db, auth } from './firebase';
 import { Venue, Pitch, Booking, User, TimeSlot, VenueOwner, BlockedDate, Payment } from '../types';
+import { TRIAL_DAYS } from './pricing';
 
 // Firebase data structure interfaces
 interface FirebaseVenueData {
@@ -73,7 +74,7 @@ export const venueService = {
       ...firebaseData,
       active: (firebaseData.active as boolean) ?? true,
       bookingsEnabled: (firebaseData.bookingsEnabled as boolean) ?? true,
-      daysRemaining: (firebaseData.daysRemaining as number) ?? 15,
+      daysRemaining: (firebaseData.daysRemaining as number) ?? TRIAL_DAYS,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     });

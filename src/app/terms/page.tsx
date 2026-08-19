@@ -166,7 +166,7 @@ export default function TermsPage() {
             <h3 className="text-xl font-semibold text-zinc-100 mb-4">💳 Πλάνα Συνδρομής</h3>
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4">
               <p className="text-zinc-400 mb-3">
-                Το Yabalitsa προσφέρει <strong>δωρεάν trial 15 ημερών</strong> για όλους τους νέους χρήστες. Μετά τη λήξη του trial, μπορείτε να επιλέξετε από τα εξής πλάνα:
+                Το Yabalitsa προσφέρει <strong>δωρεάν trial 30 ημερών</strong> για όλους τους νέους χρήστες. Μετά τη λήξη του trial, μπορείτε να επιλέξετε από τα εξής πλάνα:
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div className="text-center p-3 bg-[#0B151C] rounded border">

@@ -27,6 +27,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableHeadIndex,
+  TableCellIndex,
 } from '@/components/ui/table';
 import {
   DropdownMenu,
@@ -503,6 +505,7 @@ export default function AcademyUsersPage() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-none hover:bg-transparent bg-zinc-50/50">
+                    <TableHeadIndex className="px-4" />
                     <TableHead className="h-10 px-4 text-2xs font-semibold text-zinc-500">{'Χρήστης'}</TableHead>
                     <TableHead className="h-10 px-4 text-2xs font-semibold text-zinc-500">{'Κατηγορία'}</TableHead>
                     <TableHead className="h-10 px-4 text-2xs font-semibold text-zinc-500">{'Επικοινωνία'}</TableHead>
@@ -511,10 +514,11 @@ export default function AcademyUsersPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pagination.items.map((u) => {
+                  {pagination.items.map((u, i) => {
                     const group = getGroup(u.groupId);
                     return (
                       <TableRow key={u.id} className="group border-t border-zinc-50 hover:bg-zinc-50/50 transition-colors">
+                        <TableCellIndex className="px-4" value={pagination.from + i} />
                         <TableCell className="px-4 py-3">
                             <p className="text-base font-bold text-zinc-900 group-hover:text-emerald-700 transition-colors tracking-tight">{u.displayName}</p>
                         </TableCell>

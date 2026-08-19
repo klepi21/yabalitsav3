@@ -1,4 +1,19 @@
 // Centralized pricing configuration
+
+/**
+ * Διάρκεια δωρεάν δοκιμής σε ημέρες.
+ *
+ * ΜΟΝΑΔΙΚΗ πηγή αλήθειας — πριν ήταν hardcoded «15» σε τρία διαφορετικά
+ * σημεία (δημιουργία venue, fallback στο firebase-services, test data),
+ * που σημαίνει ότι μια αλλαγή μπορούσε εύκολα να ξεχαστεί κάπου.
+ *
+ * Πώς δουλεύει: η τιμή γράφεται ως `daysRemaining` πάνω στο venue κατά τη
+ * δημιουργία. Ένα προγραμματισμένο Cloud Function (`decrementDaysRemaining`,
+ * καθημερινά στις 00:00) το μειώνει κατά 1 και στο 0 θέτει `active: false`.
+ * Άρα η αλλαγή αυτής της τιμής επηρεάζει ΜΟΝΟ νέες εγγραφές — τα υπάρχοντα
+ * venues κρατούν τον δικό τους αποθηκευμένο μετρητή.
+ */
+export const TRIAL_DAYS = 30;
 export interface PricingPlan {
   id: string;
   name: string;
