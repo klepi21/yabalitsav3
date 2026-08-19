@@ -109,7 +109,7 @@ export default function FSEPage() {
           </div>
 
           <div className="px-4">
-            <div className="bg-[#0B151C] backdrop-blur-md border border-white/10 rounded-[2rem] p-6 shadow-2xl">
+            <div className="bg-[#0B151C] backdrop-blur-md border border-white/10 rounded-2xl p-6 shadow-2xl">
               <div className="grid grid-cols-1 sm:grid-cols-5 gap-4 items-end">
                 {/* City Selection */}
                 <div className="sm:col-span-1">
@@ -248,7 +248,7 @@ export default function FSEPage() {
 
                 <div className="flex flex-col md:items-end w-full md:w-auto gap-4 border-t border-white/5 md:border-t-0 pt-6 md:pt-0">
                   <div className="flex items-end gap-1">
-                    <span className="text-4xl font-black text-white">{result.price}</span>
+                    <span className="text-4xl font-bold text-white">{result.price}</span>
                     <span className="text-[#74ee16] font-bold text-xl mb-1">€</span>
                   </div>
                   <Link 
@@ -269,7 +269,7 @@ export default function FSEPage() {
           <div className="max-w-3xl mx-auto px-4 w-full">
              <div className="bg-[#0B151C] border border-white/10 rounded-3xl p-12 text-center shadow-2xl">
                 <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <Search className="w-8 h-8 text-zinc-500" />
+                  <Search className="w-8 h-8 text-zinc-400" />
                 </div>
                 <h3 className="text-2xl font-bold text-white mb-3">Δεν βρέθηκαν γήπεδα</h3>
                 <p className="text-zinc-400 mb-8 max-w-md mx-auto">
@@ -293,11 +293,11 @@ export default function FSEPage() {
       <footer className="relative z-10 w-full py-8 border-t border-white/5 bg-[#0B151C]">
         <div className="max-w-5xl mx-auto px-4 text-center">
           <div className="flex flex-wrap justify-center gap-8 text-sm mb-6">
-            <Link href="/terms" className="text-zinc-500 hover:text-white transition-colors">Όροι Χρήσης</Link>
-            <Link href="/privacy" className="text-zinc-500 hover:text-white transition-colors">Πολιτική Απορρήτου</Link>
-            <Link href="/for-venues" className="text-zinc-500 hover:text-white transition-colors">Για Ιδιοκτήτες</Link>
+            <Link href="/terms" className="text-zinc-400 hover:text-white transition-colors">Όροι Χρήσης</Link>
+            <Link href="/privacy" className="text-zinc-400 hover:text-white transition-colors">Πολιτική Απορρήτου</Link>
+            <Link href="/for-venues" className="text-zinc-400 hover:text-white transition-colors">Για Ιδιοκτήτες</Link>
           </div>
-          <p className="text-zinc-600 text-xs">© {new Date().getFullYear()} Yabalitsa. Με επιφύλαξη παντός δικαιώματος.</p>
+          <p className="text-zinc-400 text-xs">© {new Date().getFullYear()} Yabalitsa. Με επιφύλαξη παντός δικαιώματος.</p>
         </div>
       </footer>
     </div>

@@ -149,7 +149,7 @@ export default function TournamentDetailPage() {
     return (
       <div className="text-center py-16">
         <div className="mx-auto h-12 w-12 bg-zinc-100 rounded-xl flex items-center justify-center mb-4">
-          <Trophy className="h-6 w-6 text-zinc-400" />
+          <Trophy className="h-6 w-6 text-zinc-500" />
         </div>
         <h3 className="text-lg font-semibold tracking-tight text-zinc-900">Το τουρνουά δεν βρέθηκε</h3>
         <Button asChild className="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white">
@@ -196,7 +196,7 @@ export default function TournamentDetailPage() {
       {/* Back */}
       <Link
         href="/management/tournaments"
-        className="group inline-flex items-center gap-2 text-sm font-black uppercase tracking-widest text-zinc-400 hover:text-emerald-600 transition-all"
+        className="group inline-flex items-center gap-2 text-sm font-semibold text-zinc-500 hover:text-emerald-600 transition-all"
       >
         <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
         Επιστροφή στα Τουρνουά
@@ -205,28 +205,28 @@ export default function TournamentDetailPage() {
       {/* Header */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-8">
         <div className="flex items-center gap-6">
-          <div className="h-20 w-20 rounded-[2rem] bg-amber-50 flex items-center justify-center text-amber-500 shadow-inner group-hover:scale-110 transition-transform">
+          <div className="h-20 w-20 rounded-2xl bg-amber-50 flex items-center justify-center text-amber-500 shadow-inner group-hover:scale-110 transition-transform">
             <Trophy className="h-10 w-10" />
           </div>
           <div>
             <div className="flex items-center gap-4 flex-wrap mb-2">
-              <h1 className="text-4xl font-black tracking-tight text-zinc-900 uppercase">
+              <h1 className="text-4xl font-bold tracking-tight text-zinc-900">
                 {tournament.name}
               </h1>
-              <Badge className={cn("rounded-xl px-4 py-1.5 font-black text-[12px] uppercase tracking-widest border-none shadow-sm", status.className)}>
+              <Badge className={cn("rounded-xl px-4 py-1.5 font-semibold text-2xs border-none shadow-sm", status.className)}>
                 {status.label}
               </Badge>
             </div>
             <div className="flex items-center gap-4 flex-wrap">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 rounded-xl text-xs font-black text-zinc-500 uppercase tracking-tight">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 rounded-xl text-xs font-semibold text-zinc-500 tracking-tight">
                 <Medal className="h-3.5 w-3.5" />
                 {typeLabels[tournament.type]}
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 rounded-xl text-xs font-black text-zinc-500 uppercase tracking-tight">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 rounded-xl text-xs font-semibold text-zinc-500 tracking-tight">
                 <Target className="h-3.5 w-3.5" />
                 {tournament.pitchType}
               </div>
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 rounded-xl text-xs font-black text-zinc-500 uppercase tracking-tight">
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-zinc-100 rounded-xl text-xs font-semibold text-zinc-500 tracking-tight">
                 <Calendar className="h-3.5 w-3.5" />
                 {new Date(tournament.startDate).toLocaleDateString('el-GR')} - {new Date(tournament.endDate).toLocaleDateString('el-GR')}
               </div>
@@ -238,7 +238,7 @@ export default function TournamentDetailPage() {
           {tournament.status === 'draft' && (
             <Button
               onClick={() => handleStatusChange('registration')}
-              className="h-14 px-8 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black shadow-lg shadow-blue-100 transition-all hover:translate-y-[-2px]"
+              className="h-14 px-8 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg shadow-blue-100 transition-all hover:translate-y-[-2px]"
             >
               Άνοιγμα Εγγραφών
             </Button>
@@ -246,19 +246,19 @@ export default function TournamentDetailPage() {
           {tournament.status === 'registration' && (
             <Button
               onClick={() => handleStatusChange('active')}
-              className="h-14 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black shadow-lg shadow-emerald-100 transition-all hover:translate-y-[-2px]"
+              className="h-14 px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-lg shadow-emerald-100 transition-all hover:translate-y-[-2px]"
             >
               Εκκίνηση Τουρνουά
             </Button>
           )}
           
           <div className="flex items-center gap-2 bg-white p-2 rounded-2xl border border-zinc-100 shadow-sm">
-            <Button variant="ghost" size="icon" asChild className="h-12 w-12 rounded-xl text-zinc-400 hover:bg-zinc-50 hover:text-zinc-900 transition-all" title="Επεξεργασία">
+            <Button variant="ghost" size="icon" asChild className="h-12 w-12 rounded-xl text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 transition-all" title="Επεξεργασία">
               <Link href={`/management/tournaments/${tournament.id}/edit`}>
                 <Pencil className="h-5 w-5" />
               </Link>
             </Button>
-            <Button variant="ghost" size="icon" asChild className="h-12 w-12 rounded-xl text-zinc-400 hover:bg-emerald-50 hover:text-emerald-600 transition-all" title="Ομάδες">
+            <Button variant="ghost" size="icon" asChild className="h-12 w-12 rounded-xl text-zinc-500 hover:bg-emerald-50 hover:text-emerald-600 transition-all" title="Ομάδες">
               <Link href={`/management/tournaments/${tournament.id}/teams`}>
                 <Users className="h-5 w-5" />
               </Link>
@@ -266,25 +266,25 @@ export default function TournamentDetailPage() {
             
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl text-zinc-300 hover:bg-red-50 hover:text-red-500 transition-all" title="Διαγραφή">
+                <Button variant="ghost" size="icon" className="h-12 w-12 rounded-xl text-zinc-400 hover:bg-red-50 hover:text-red-500 transition-all" title="Διαγραφή">
                   <Trash2 className="h-5 w-5" />
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent className="rounded-3xl border-none shadow-2xl p-10 max-w-md">
                 <div className="text-center">
-                  <div className="mx-auto h-20 w-20 bg-red-50 rounded-[1.5rem] flex items-center justify-center mb-6">
+                  <div className="mx-auto h-20 w-20 bg-red-50 rounded-xl flex items-center justify-center mb-6">
                     <Trash2 className="h-10 w-10 text-red-500" />
                   </div>
                   <AlertDialogHeader>
-                    <AlertDialogTitle className="text-2xl font-black text-zinc-900">Διαγραφή Τουρνουά</AlertDialogTitle>
+                    <AlertDialogTitle className="text-2xl font-bold text-zinc-900">Διαγραφή Τουρνουά</AlertDialogTitle>
                     <AlertDialogDescription className="text-lg font-medium text-zinc-500 mt-2">
                       Θα διαγραφούν όλες οι ομάδες, παίκτες και αγώνες. 
-                      <br /><span className="font-black text-red-600">Αυτή η ενέργεια δεν αναιρείται.</span>
+                      <br /><span className="font-semibold text-red-600">Αυτή η ενέργεια δεν αναιρείται.</span>
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter className="mt-10 flex flex-col gap-3 sm:flex-row">
                     <AlertDialogCancel className="h-14 rounded-2xl border-zinc-100 font-bold text-zinc-500 flex-1 m-0">Ακύρωση</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="h-14 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black flex-1 m-0">
+                    <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="h-14 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-semibold flex-1 m-0">
                       {isDeleting ? 'Διαγραφή...' : 'Διαγραφή'}
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -311,19 +311,19 @@ export default function TournamentDetailPage() {
             violet: 'bg-violet-50 text-violet-600 shadow-violet-100',
           };
           return (
-            <div key={stat.label} className="bg-white p-8 rounded-[2rem] border border-zinc-100 shadow-sm transition-all hover:shadow-xl group">
+            <div key={stat.label} className="bg-white p-8 rounded-2xl border border-zinc-100 shadow-sm transition-all hover:shadow-xl group">
               <div className={cn("h-14 w-14 rounded-2xl flex items-center justify-center mb-6 shadow-md transition-transform group-hover:scale-110", colorStyles[stat.color])}>
                 <Icon className="h-7 w-7" />
               </div>
-              <p className="text-3xl font-black text-zinc-900 leading-none mb-2">{stat.value}</p>
-              <p className="text-xs font-black uppercase tracking-widest text-zinc-400">{stat.label}</p>
+              <p className="text-3xl font-bold text-zinc-900 leading-none mb-2">{stat.value}</p>
+              <p className="text-xs font-semibold text-zinc-500">{stat.label}</p>
             </div>
           );
         })}
       </div>
 
       {/* Tabs Navigation */}
-      <div className="bg-white p-2 rounded-[2rem] border border-zinc-100 shadow-sm inline-flex items-center gap-2 max-w-full overflow-x-auto no-scrollbar">
+      <div className="bg-white p-2 rounded-2xl border border-zinc-100 shadow-sm inline-flex items-center gap-2 max-w-full overflow-x-auto no-scrollbar">
         {tabs.map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -332,13 +332,13 @@ export default function TournamentDetailPage() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex items-center gap-3 px-8 py-4 text-xs font-black uppercase tracking-widest rounded-[1.5rem] transition-all whitespace-nowrap",
+                "flex items-center gap-3 px-8 py-4 text-xs font-semibold rounded-xl transition-all whitespace-nowrap",
                 isActive
                   ? "bg-zinc-900 text-white shadow-xl shadow-zinc-200 scale-[1.02]"
-                  : "text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50"
+                  : "text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50"
               )}
             >
-              <Icon className={cn("h-4 w-4", isActive ? "text-emerald-400" : "text-zinc-300")} />
+              <Icon className={cn("h-4 w-4", isActive ? "text-emerald-400" : "text-zinc-400")} />
               {tab.label}
             </button>
           );
@@ -352,15 +352,15 @@ export default function TournamentDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
           {/* Mini Standings */}
           {(tournament.type === 'league' || tournament.type === 'group+knockout') && standings.length > 0 && (
-            <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-8 space-y-8">
+            <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-8 space-y-8">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
                   <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center">
                     <BarChart3 className="h-5 w-5 text-amber-600" />
                   </div>
-                  <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Βαθμολογία</h2>
+                  <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Βαθμολογία</h2>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => setActiveTab('standings')} className="font-black text-[12px] uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
+                <Button variant="ghost" size="sm" onClick={() => setActiveTab('standings')} className="font-semibold text-2xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
                   Πλήρης Πίνακας <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
               </div>
@@ -369,11 +369,11 @@ export default function TournamentDetailPage() {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-zinc-50/50">
-                      <th className="px-6 py-4 text-[12px] font-black uppercase tracking-widest text-zinc-400">#</th>
-                      <th className="px-6 py-4 text-[12px] font-black uppercase tracking-widest text-zinc-400">Ομάδα</th>
-                      <th className="px-4 py-4 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">Αγ</th>
-                      <th className="px-4 py-4 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">ΔΤ</th>
-                      <th className="px-6 py-4 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">Βαθ</th>
+                      <th className="px-6 py-4 text-2xs font-semibold text-zinc-500">#</th>
+                      <th className="px-6 py-4 text-2xs font-semibold text-zinc-500">Ομάδα</th>
+                      <th className="px-4 py-4 text-2xs font-semibold text-zinc-500 text-center">Αγ</th>
+                      <th className="px-4 py-4 text-2xs font-semibold text-zinc-500 text-center">ΔΤ</th>
+                      <th className="px-6 py-4 text-2xs font-semibold text-zinc-500 text-center">Βαθ</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-50">
@@ -381,34 +381,34 @@ export default function TournamentDetailPage() {
                       <tr key={team.id} className="group hover:bg-zinc-50 transition-colors">
                         <td className="px-6 py-4">
                           <span className={cn(
-                            "inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs font-black shadow-sm",
+                            "inline-flex items-center justify-center w-6 h-6 rounded-lg text-xs font-semibold shadow-sm",
                             idx === 0 ? "bg-amber-100 text-amber-600" :
                             idx === 1 ? "bg-zinc-100 text-zinc-500" :
                             idx === 2 ? "bg-orange-50 text-orange-600" :
-                            "bg-white text-zinc-300 border border-zinc-100"
+                            "bg-white text-zinc-400 border border-zinc-100"
                           )}>
                             {idx + 1}
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className="text-sm font-black text-zinc-900 uppercase group-hover:text-emerald-600 transition-colors">{team.name}</span>
+                          <span className="text-sm font-semibold text-zinc-900 group-hover:text-emerald-600 transition-colors">{team.name}</span>
                         </td>
                         <td className="px-4 py-4 text-center">
-                          <span className="text-sm font-bold text-zinc-500">{team.stats.played}</span>
+                          <span className="text-sm font-semibold text-zinc-500">{team.stats.played}</span>
                         </td>
                         <td className="px-4 py-4 text-center">
                           <span className={cn(
-                            "text-sm font-bold",
+                            "text-sm font-semibold",
                             (team.stats.goalsFor - team.stats.goalsAgainst) > 0 ? "text-emerald-600" :
                             (team.stats.goalsFor - team.stats.goalsAgainst) < 0 ? "text-red-600" :
-                            "text-zinc-400"
+                            "text-zinc-500"
                           )}>
                             {(team.stats.goalsFor - team.stats.goalsAgainst) > 0 ? '+' : ''}
                             {team.stats.goalsFor - team.stats.goalsAgainst}
                           </span>
                         </td>
                         <td className="px-6 py-4 text-center">
-                          <span className="text-sm font-black text-zinc-900">{team.stats.points}</span>
+                          <span className="text-sm font-semibold text-zinc-900">{team.stats.points}</span>
                         </td>
                       </tr>
                     ))}
@@ -419,23 +419,23 @@ export default function TournamentDetailPage() {
           )}
 
           {/* Upcoming Matches */}
-          <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-8 space-y-8">
+          <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-8 space-y-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
                   <Calendar className="h-5 w-5 text-blue-600" />
                 </div>
-                <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Επόμενοι Αγώνες</h2>
+                <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Επόμενοι Αγώνες</h2>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setActiveTab('matches')} className="font-black text-[12px] uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
+              <Button variant="ghost" size="sm" onClick={() => setActiveTab('matches')} className="font-semibold text-2xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
                 Πρόγραμμα <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
 
             {upcomingMatches.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center bg-zinc-50 rounded-3xl border-2 border-dashed border-zinc-100">
-                <Swords className="h-12 w-12 text-zinc-200 mb-4" />
-                <p className="text-sm font-bold text-zinc-400">Δεν υπάρχουν προγραμματισμένοι αγώνες</p>
+                <Swords className="h-12 w-12 text-zinc-400 mb-4" />
+                <p className="text-sm font-semibold text-zinc-500">Δεν υπάρχουν προγραμματισμένοι αγώνες</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -446,23 +446,23 @@ export default function TournamentDetailPage() {
                   return (
                     <div key={match.id} className="group p-6 rounded-3xl border border-zinc-50 bg-zinc-50/30 hover:bg-white hover:shadow-md hover:border-emerald-100 transition-all duration-300">
                       <div className="flex items-center justify-between mb-4">
-                        <span className="text-[12px] font-black uppercase tracking-widest text-zinc-400">
+                        <span className="text-2xs font-semibold text-zinc-500">
                           {match.roundLabel || `Αγωνιστική ${match.round}`}
                         </span>
-                        <Badge className={cn("px-2.5 py-1 rounded-lg font-black text-[11px] uppercase tracking-widest border-none", ms.className)}>
+                        <Badge className={cn("px-2.5 py-1 rounded-lg font-semibold text-2xs border-none", ms.className)}>
                           {ms.label}
                         </Badge>
                       </div>
                       <div className="grid grid-cols-3 items-center gap-4">
-                        <span className="text-sm font-black text-zinc-900 uppercase truncate">{home?.name || '—'}</span>
+                        <span className="text-sm font-semibold text-zinc-900 truncate">{home?.name || '—'}</span>
                         <div className="flex flex-col items-center gap-1">
                           <span className="h-1px w-12 bg-zinc-200" />
-                          <span className="text-[12px] font-black text-zinc-300">VS</span>
+                          <span className="text-2xs font-semibold text-zinc-500">VS</span>
                           <span className="h-1px w-12 bg-zinc-200" />
                         </div>
-                        <span className="text-sm font-black text-zinc-900 uppercase truncate text-right">{away?.name || '—'}</span>
+                        <span className="text-sm font-semibold text-zinc-900 truncate text-right">{away?.name || '—'}</span>
                       </div>
-                      <div className="mt-4 pt-4 border-t border-zinc-50 flex items-center justify-center gap-4 text-[12px] font-black text-zinc-400 uppercase tracking-widest">
+                      <div className="mt-4 pt-4 border-t border-zinc-50 flex items-center justify-center gap-4 text-2xs font-semibold text-zinc-500">
                         <div className="flex items-center gap-1.5">
                           <Calendar className="h-3 w-3" />
                           {new Date(match.scheduledDate).toLocaleDateString('el-GR')}
@@ -479,12 +479,12 @@ export default function TournamentDetailPage() {
 
           {/* Recent Results */}
           {recentMatches.length > 0 && (
-            <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-8 space-y-8 lg:col-span-2">
+            <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-8 space-y-8 lg:col-span-2">
               <div className="flex items-center gap-4">
                 <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
                   <Swords className="h-5 w-5 text-emerald-600" />
                 </div>
-                <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Πρόσφατα Αποτελέσματα</h2>
+                <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Πρόσφατα Αποτελέσματα</h2>
               </div>
 
               <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -495,30 +495,30 @@ export default function TournamentDetailPage() {
                   const awayWon = (match.awayScore ?? 0) > (match.homeScore ?? 0);
                   return (
                     <div key={match.id} className="p-6 rounded-3xl border border-zinc-100 hover:shadow-lg transition-all duration-300">
-                      <div className="text-[11px] font-black uppercase tracking-widest text-zinc-400 mb-4 text-center">
+                      <div className="text-2xs font-semibold text-zinc-500 mb-4 text-center">
                         {match.roundLabel || `Αγωνιστική ${match.round}`}
                       </div>
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex-1 flex flex-col items-center gap-2 overflow-hidden">
                           <span className={cn(
-                            "text-sm font-black uppercase truncate w-full text-center transition-colors",
+                            "text-sm font-semibold truncate w-full text-center transition-colors",
                             homeWon ? "text-emerald-700" : "text-zinc-500"
                           )}>
                             {home?.name || '—'}
                           </span>
                         </div>
                         <div className="flex items-center gap-3 bg-zinc-50 px-4 py-2 rounded-2xl">
-                          <span className={cn("text-2xl font-black", homeWon ? "text-emerald-600" : "text-zinc-900")}>
+                          <span className={cn("text-2xl font-bold", homeWon ? "text-emerald-600" : "text-zinc-900")}>
                             {match.homeScore ?? 0}
                           </span>
-                          <span className="text-zinc-200 font-black">-</span>
-                          <span className={cn("text-2xl font-black", awayWon ? "text-emerald-600" : "text-zinc-900")}>
+                          <span className="text-zinc-400 font-semibold">-</span>
+                          <span className={cn("text-2xl font-bold", awayWon ? "text-emerald-600" : "text-zinc-900")}>
                             {match.awayScore ?? 0}
                           </span>
                         </div>
                         <div className="flex-1 flex flex-col items-center gap-2 overflow-hidden">
                           <span className={cn(
-                            "text-sm font-black uppercase truncate w-full text-center transition-colors",
+                            "text-sm font-semibold truncate w-full text-center transition-colors",
                             awayWon ? "text-emerald-700" : "text-zinc-500"
                           )}>
                             {away?.name || '—'}
@@ -536,35 +536,35 @@ export default function TournamentDetailPage() {
 
       {/* ─── STANDINGS ─── */}
       {activeTab === 'standings' && (
-        <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-8 space-y-8">
+        <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-8 space-y-8">
           <div className="flex items-center gap-4">
             <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center">
               <BarChart3 className="h-5 w-5 text-amber-600" />
             </div>
-            <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Πλήρης Βαθμολογία</h2>
+            <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Πλήρης Βαθμολογία</h2>
           </div>
 
           {standings.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center bg-zinc-50 rounded-[2.5rem] border-2 border-dashed border-zinc-100">
-              <BarChart3 className="h-16 w-16 text-zinc-200 mb-6" />
-              <h3 className="text-2xl font-black text-zinc-900 mb-2">Δεν υπάρχουν ακόμα δεδομένα</h3>
-              <p className="text-lg font-medium text-zinc-400">Προσθέστε ομάδες και καταχωρήστε αγώνες για να δείτε τη βαθμολογία.</p>
+            <div className="flex flex-col items-center justify-center py-20 text-center bg-zinc-50 rounded-2xl border-2 border-dashed border-zinc-100">
+              <BarChart3 className="h-16 w-16 text-zinc-400 mb-6" />
+              <h3 className="text-2xl font-bold text-zinc-900 mb-2">Δεν υπάρχουν ακόμα δεδομένα</h3>
+              <p className="text-lg font-medium text-zinc-500">Προσθέστε ομάδες και καταχωρήστε αγώνες για να δείτε τη βαθμολογία.</p>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-[2rem] border border-zinc-100">
+            <div className="overflow-x-auto rounded-2xl border border-zinc-100">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-zinc-50/50">
-                    <th className="px-6 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400">#</th>
-                    <th className="px-6 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400">Ομάδα</th>
-                    <th className="px-4 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">ΑΓ</th>
-                    <th className="px-4 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">Ν</th>
-                    <th className="px-4 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">Ι</th>
-                    <th className="px-4 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">Η</th>
-                    <th className="px-4 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">ΥΠ</th>
-                    <th className="px-4 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">ΚΑ</th>
-                    <th className="px-4 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">ΔΤ</th>
-                    <th className="px-6 py-5 text-[12px] font-black uppercase tracking-widest text-zinc-400 text-center">ΒΑΘ</th>
+                    <th className="px-6 py-5 text-2xs font-semibold text-zinc-500">#</th>
+                    <th className="px-6 py-5 text-2xs font-semibold text-zinc-500">Ομάδα</th>
+                    <th className="px-4 py-5 text-2xs font-semibold text-zinc-500 text-center">ΑΓ</th>
+                    <th className="px-4 py-5 text-2xs font-semibold text-zinc-500 text-center">Ν</th>
+                    <th className="px-4 py-5 text-2xs font-semibold text-zinc-500 text-center">Ι</th>
+                    <th className="px-4 py-5 text-2xs font-semibold text-zinc-500 text-center">Η</th>
+                    <th className="px-4 py-5 text-2xs font-semibold text-zinc-500 text-center">ΥΠ</th>
+                    <th className="px-4 py-5 text-2xs font-semibold text-zinc-500 text-center">ΚΑ</th>
+                    <th className="px-4 py-5 text-2xs font-semibold text-zinc-500 text-center">ΔΤ</th>
+                    <th className="px-6 py-5 text-2xs font-semibold text-zinc-500 text-center">ΒΑΘ</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-zinc-50">
@@ -577,34 +577,34 @@ export default function TournamentDetailPage() {
                       )}>
                         <td className="px-6 py-5">
                           <span className={cn(
-                            "inline-flex items-center justify-center w-8 h-8 rounded-xl text-sm font-black shadow-sm",
+                            "inline-flex items-center justify-center w-8 h-8 rounded-xl text-sm font-semibold shadow-sm",
                             idx === 0 ? "bg-amber-100 text-amber-600 shadow-amber-100" :
                             idx === 1 ? "bg-zinc-100 text-zinc-500 shadow-zinc-100" :
                             idx === 2 ? "bg-orange-50 text-orange-600 shadow-orange-100" :
-                            "bg-white text-zinc-300 border border-zinc-100"
+                            "bg-white text-zinc-400 border border-zinc-100"
                           )}>
                             {idx + 1}
                           </span>
                         </td>
                         <td className="px-6 py-5">
                           <div className="flex flex-col">
-                            <span className="text-sm font-black text-zinc-900 uppercase group-hover:text-emerald-600 transition-colors">
+                            <span className="text-sm font-semibold text-zinc-900 group-hover:text-emerald-600 transition-colors">
                               {team.name}
                             </span>
-                            <span className="text-[12px] font-bold text-zinc-400 uppercase tracking-tight">
+                            <span className="text-2xs font-medium text-zinc-500 tracking-tight">
                               {team.captainName}
                             </span>
                           </div>
                         </td>
-                        <td className="px-4 py-5 text-center text-sm font-bold text-zinc-500">{team.stats.played}</td>
-                        <td className="px-4 py-5 text-center text-sm font-black text-emerald-600">{team.stats.won}</td>
-                        <td className="px-4 py-5 text-center text-sm font-bold text-zinc-400">{team.stats.drawn}</td>
-                        <td className="px-4 py-5 text-center text-sm font-black text-red-500">{team.stats.lost}</td>
-                        <td className="px-4 py-5 text-center text-sm font-bold text-zinc-500">{team.stats.goalsFor}</td>
-                        <td className="px-4 py-5 text-center text-sm font-bold text-zinc-500">{team.stats.goalsAgainst}</td>
+                        <td className="px-4 py-5 text-center text-sm font-semibold text-zinc-500">{team.stats.played}</td>
+                        <td className="px-4 py-5 text-center text-sm font-semibold text-emerald-600">{team.stats.won}</td>
+                        <td className="px-4 py-5 text-center text-sm font-semibold text-zinc-500">{team.stats.drawn}</td>
+                        <td className="px-4 py-5 text-center text-sm font-semibold text-red-500">{team.stats.lost}</td>
+                        <td className="px-4 py-5 text-center text-sm font-semibold text-zinc-500">{team.stats.goalsFor}</td>
+                        <td className="px-4 py-5 text-center text-sm font-semibold text-zinc-500">{team.stats.goalsAgainst}</td>
                         <td className="px-4 py-5 text-center">
                           <Badge className={cn(
-                            "rounded-lg px-2 py-0.5 text-[12px] font-black border-none",
+                            "rounded-lg px-2 py-0.5 text-2xs font-semibold border-none",
                             gd > 0 ? "bg-emerald-100 text-emerald-700" :
                             gd < 0 ? "bg-red-100 text-red-700" :
                             "bg-zinc-100 text-zinc-500"
@@ -613,7 +613,7 @@ export default function TournamentDetailPage() {
                           </Badge>
                         </td>
                         <td className="px-6 py-5 text-center">
-                          <span className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-zinc-900 text-white text-lg font-black shadow-lg shadow-zinc-200">
+                          <span className="inline-flex items-center justify-center w-10 h-10 rounded-2xl bg-zinc-900 text-white text-lg font-semibold shadow-lg shadow-zinc-200">
                             {team.stats.points}
                           </span>
                         </td>
@@ -629,15 +629,15 @@ export default function TournamentDetailPage() {
 
       {/* ─── MATCHES ─── */}
       {activeTab === 'matches' && (
-        <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-8 space-y-8">
+        <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-8 space-y-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
                 <Swords className="h-5 w-5 text-blue-600" />
               </div>
-              <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Πρόγραμμα Αγώνων</h2>
+              <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Πρόγραμμα Αγώνων</h2>
             </div>
-            <Button variant="ghost" size="sm" asChild className="font-black text-[12px] uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
+            <Button variant="ghost" size="sm" asChild className="font-semibold text-2xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
               <Link href={`/management/tournaments/${tournament.id}/matches`}>
                 Διαχείριση <ChevronRight className="h-4 w-4 ml-1" />
               </Link>
@@ -645,10 +645,10 @@ export default function TournamentDetailPage() {
           </div>
 
           {matches.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center bg-zinc-50 rounded-[2.5rem] border-2 border-dashed border-zinc-100">
-              <Swords className="h-16 w-16 text-zinc-200 mb-6" />
-              <h3 className="text-2xl font-black text-zinc-900 mb-2">Δεν υπάρχουν αγώνες</h3>
-              <p className="text-lg font-medium text-zinc-400">Οι αγώνες θα δημιουργηθούν αυτόματα μόλις ξεκινήσει το τουρνουά.</p>
+            <div className="flex flex-col items-center justify-center py-20 text-center bg-zinc-50 rounded-2xl border-2 border-dashed border-zinc-100">
+              <Swords className="h-16 w-16 text-zinc-400 mb-6" />
+              <h3 className="text-2xl font-bold text-zinc-900 mb-2">Δεν υπάρχουν αγώνες</h3>
+              <p className="text-lg font-medium text-zinc-500">Οι αγώνες θα δημιουργηθούν αυτόματα μόλις ξεκινήσει το τουρνουά.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -663,14 +663,14 @@ export default function TournamentDetailPage() {
                   return (
                     <div key={match.id} className="group p-6 rounded-3xl border border-zinc-100 hover:bg-white hover:shadow-xl hover:border-emerald-100 transition-all duration-300">
                       <div className="flex items-center justify-between mb-6">
-                        <span className="text-[12px] font-black uppercase tracking-widest text-zinc-400">
+                        <span className="text-2xs font-semibold text-zinc-500">
                           {match.roundLabel || `Αγωνιστική ${match.round}`}
                         </span>
                         <div className="flex items-center gap-4">
-                          <span className="text-[12px] font-black uppercase tracking-widest text-zinc-300">
+                          <span className="text-2xs font-semibold text-zinc-500">
                             {new Date(match.scheduledDate).toLocaleDateString('el-GR')} &middot; {match.scheduledTime}
                           </span>
-                          <Badge className={cn("px-2.5 py-1 rounded-lg font-black text-[11px] uppercase tracking-widest border-none", ms.className)}>
+                          <Badge className={cn("px-2.5 py-1 rounded-lg font-semibold text-2xs border-none", ms.className)}>
                             {ms.label}
                           </Badge>
                         </div>
@@ -679,28 +679,28 @@ export default function TournamentDetailPage() {
                       <div className="flex items-center justify-between gap-8">
                         <div className="flex-1 text-right">
                           <span className={cn(
-                            "text-lg font-black uppercase transition-colors",
+                            "text-lg font-semibold transition-colors",
                             isCompleted && (match.homeScore ?? 0) > (match.awayScore ?? 0) ? "text-emerald-700" : "text-zinc-900"
                           )}>
                             {home?.name || '—'}
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-4 bg-zinc-50 px-8 py-4 rounded-[1.5rem] min-w-[160px] justify-center shadow-inner group-hover:bg-emerald-50 transition-colors">
+                        <div className="flex items-center gap-4 bg-zinc-50 px-8 py-4 rounded-xl min-w-[160px] justify-center shadow-inner group-hover:bg-emerald-50 transition-colors">
                           {isCompleted ? (
                             <>
-                              <span className="text-3xl font-black text-zinc-900">{match.homeScore}</span>
-                              <span className="text-zinc-300 font-black">-</span>
-                              <span className="text-3xl font-black text-zinc-900">{match.awayScore}</span>
+                              <span className="text-3xl font-bold text-zinc-900">{match.homeScore}</span>
+                              <span className="text-zinc-400 font-semibold">-</span>
+                              <span className="text-3xl font-bold text-zinc-900">{match.awayScore}</span>
                             </>
                           ) : (
-                            <span className="text-sm font-black text-zinc-300 uppercase tracking-widest">VS</span>
+                            <span className="text-sm font-semibold text-zinc-500">VS</span>
                           )}
                         </div>
 
                         <div className="flex-1 text-left">
                           <span className={cn(
-                            "text-lg font-black uppercase transition-colors",
+                            "text-lg font-semibold transition-colors",
                             isCompleted && (match.awayScore ?? 0) > (match.homeScore ?? 0) ? "text-emerald-700" : "text-zinc-900"
                           )}>
                             {away?.name || '—'}
@@ -717,15 +717,15 @@ export default function TournamentDetailPage() {
 
       {/* ─── TEAMS ─── */}
       {activeTab === 'teams' && (
-        <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-8 space-y-8">
+        <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-8 space-y-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="h-10 w-10 rounded-xl bg-violet-50 flex items-center justify-center">
                 <Shield className="h-5 w-5 text-violet-600" />
               </div>
-              <h2 className="text-xl font-black text-zinc-900 tracking-tight uppercase">Ομάδες Τουρνουά</h2>
+              <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Ομάδες Τουρνουά</h2>
             </div>
-            <Button variant="ghost" size="sm" asChild className="font-black text-[12px] uppercase tracking-widest text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
+            <Button variant="ghost" size="sm" asChild className="font-semibold text-2xs text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
               <Link href={`/management/tournaments/${tournament.id}/teams`}>
                 <Plus className="h-4 w-4 mr-1" /> Διαχείριση
               </Link>
@@ -733,11 +733,11 @@ export default function TournamentDetailPage() {
           </div>
 
           {teams.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20 text-center bg-zinc-50 rounded-[2.5rem] border-2 border-dashed border-zinc-100">
-              <Shield className="h-16 w-16 text-zinc-200 mb-6" />
-              <h3 className="text-2xl font-black text-zinc-900 mb-2">Δεν υπάρχουν ομάδες</h3>
-              <p className="text-lg font-medium text-zinc-400 mb-8">Ξεκινήστε προσθέτοντας τις συμμετέχουσες ομάδες.</p>
-              <Button asChild className="h-14 px-10 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black shadow-lg shadow-emerald-100">
+            <div className="flex flex-col items-center justify-center py-20 text-center bg-zinc-50 rounded-2xl border-2 border-dashed border-zinc-100">
+              <Shield className="h-16 w-16 text-zinc-400 mb-6" />
+              <h3 className="text-2xl font-bold text-zinc-900 mb-2">Δεν υπάρχουν ομάδες</h3>
+              <p className="text-lg font-medium text-zinc-500 mb-8">Ξεκινήστε προσθέτοντας τις συμμετέχουσες ομάδες.</p>
+              <Button asChild className="h-14 px-10 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-lg shadow-emerald-100">
                 <Link href={`/management/tournaments/${tournament.id}/teams`}>
                   <Plus className="h-5 w-5 mr-2" /> Προσθήκη Ομάδων
                 </Link>
@@ -757,24 +757,24 @@ export default function TournamentDetailPage() {
                       <ChevronRight className="h-5 w-5 text-emerald-500" />
                     </div>
                     <div className="flex items-center gap-4 mb-6">
-                      <div className="h-14 w-14 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-violet-50 group-hover:text-violet-600 transition-all">
+                      <div className="h-14 w-14 rounded-2xl bg-zinc-50 flex items-center justify-center text-zinc-500 group-hover:bg-violet-50 group-hover:text-violet-600 transition-all">
                         <Shield className="h-8 w-8" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-black text-zinc-900 uppercase tracking-tight group-hover:text-emerald-700 transition-colors">
+                        <h3 className="text-lg font-semibold text-zinc-900 tracking-tight group-hover:text-emerald-700 transition-colors">
                           {team.name}
                         </h3>
-                        <p className="text-[12px] font-black uppercase tracking-widest text-zinc-400">
+                        <p className="text-2xs font-semibold text-zinc-500">
                           {team.captainName}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center justify-between pt-6 border-t border-zinc-50">
                       <div className="space-y-1">
-                        <p className="text-[11px] font-black uppercase tracking-widest text-zinc-300">Ρόστερ</p>
-                        <p className="text-sm font-bold text-zinc-900">{teamPlayers.length} Καταχωρημένοι</p>
+                        <p className="text-2xs font-semibold text-zinc-500">Ρόστερ</p>
+                        <p className="text-sm font-semibold text-zinc-900">{teamPlayers.length} Καταχωρημένοι</p>
                       </div>
-                      <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm">
+                      <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-500 group-hover:bg-emerald-600 group-hover:text-white transition-all shadow-sm">
                         <Users className="h-5 w-5" />
                       </div>
                     </div>
@@ -792,7 +792,7 @@ export default function TournamentDetailPage() {
           {/* Knockout Bracket */}
           {tournament.type !== 'league' && matches.length > 0 && (
             <div className="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
-              <h3 className="text-[11px] font-black uppercase tracking-widest text-zinc-400 mb-4">Bracket</h3>
+              <h3 className="text-2xs font-semibold text-zinc-500 mb-4">Bracket</h3>
               <KnockoutBracket matches={matches} teams={teams} />
             </div>
           )}
@@ -807,7 +807,7 @@ export default function TournamentDetailPage() {
               if (groupLabels.length === 0) return null;
               return (
                 <div className="space-y-4">
-                  <h3 className="text-[11px] font-black uppercase tracking-widest text-zinc-400">Όμιλοι</h3>
+                  <h3 className="text-2xs font-semibold text-zinc-500">Όμιλοι</h3>
                   {groupLabels.map((label) => {
                     const groupTeams = teams
                       .filter((t) => t.groupLabel === label)
@@ -815,32 +815,32 @@ export default function TournamentDetailPage() {
                     return (
                       <div key={label} className="rounded-2xl border border-zinc-100 bg-white shadow-sm overflow-hidden">
                         <div className="px-4 py-2.5 bg-zinc-50 border-b border-zinc-100">
-                          <span className="text-[12px] font-black text-zinc-500 uppercase tracking-widest">Όμιλος {label}</span>
+                          <span className="text-2xs font-semibold text-zinc-500">Όμιλος {label}</span>
                         </div>
                         <table className="w-full">
                           <thead>
                             <tr className="border-b border-zinc-50">
-                              <th className="px-3 py-2 text-left text-[8px] font-black uppercase tracking-wider text-zinc-400">#</th>
-                              <th className="px-3 py-2 text-left text-[8px] font-black uppercase tracking-wider text-zinc-400">Ομάδα</th>
-                              <th className="px-3 py-2 text-center text-[8px] font-black uppercase tracking-wider text-zinc-400">ΑΓ</th>
-                              <th className="px-3 py-2 text-center text-[8px] font-black uppercase tracking-wider text-zinc-400">Ν</th>
-                              <th className="px-3 py-2 text-center text-[8px] font-black uppercase tracking-wider text-zinc-400">Ι</th>
-                              <th className="px-3 py-2 text-center text-[8px] font-black uppercase tracking-wider text-zinc-400">Η</th>
-                              <th className="px-3 py-2 text-center text-[8px] font-black uppercase tracking-wider text-zinc-400">ΔΓ</th>
-                              <th className="px-3 py-2 text-center text-[8px] font-black uppercase tracking-wider text-zinc-400 font-black">Β</th>
+                              <th className="px-3 py-2 text-left text-2xs font-semibold text-zinc-500">#</th>
+                              <th className="px-3 py-2 text-left text-2xs font-semibold text-zinc-500">Ομάδα</th>
+                              <th className="px-3 py-2 text-center text-2xs font-semibold text-zinc-500">ΑΓ</th>
+                              <th className="px-3 py-2 text-center text-2xs font-semibold text-zinc-500">Ν</th>
+                              <th className="px-3 py-2 text-center text-2xs font-semibold text-zinc-500">Ι</th>
+                              <th className="px-3 py-2 text-center text-2xs font-semibold text-zinc-500">Η</th>
+                              <th className="px-3 py-2 text-center text-2xs font-semibold text-zinc-500">ΔΓ</th>
+                              <th className="px-3 py-2 text-center text-2xs font-semibold text-zinc-500 font-semibold">Β</th>
                             </tr>
                           </thead>
                           <tbody>
                             {groupTeams.map((team, idx) => (
                               <tr key={team.id} className={cn("border-b border-zinc-50 hover:bg-zinc-50/50", idx < 2 && "bg-emerald-50/30")}>
-                                <td className="px-3 py-2 text-xs font-black text-zinc-400">{idx + 1}</td>
-                                <td className="px-3 py-2 text-xs font-bold text-zinc-900">{team.name}</td>
+                                <td className="px-3 py-2 text-xs font-semibold text-zinc-500">{idx + 1}</td>
+                                <td className="px-3 py-2 text-xs font-medium text-zinc-900">{team.name}</td>
                                 <td className="px-3 py-2 text-center text-xs text-zinc-500">{team.stats.played}</td>
-                                <td className="px-3 py-2 text-center text-xs text-emerald-600 font-bold">{team.stats.won}</td>
+                                <td className="px-3 py-2 text-center text-xs text-emerald-600 font-medium">{team.stats.won}</td>
                                 <td className="px-3 py-2 text-center text-xs text-zinc-500">{team.stats.drawn}</td>
                                 <td className="px-3 py-2 text-center text-xs text-red-500">{team.stats.lost}</td>
                                 <td className="px-3 py-2 text-center text-xs text-zinc-500">{team.stats.goalsFor - team.stats.goalsAgainst}</td>
-                                <td className="px-3 py-2 text-center text-sm font-black text-zinc-900">{team.stats.points}</td>
+                                <td className="px-3 py-2 text-center text-sm font-semibold text-zinc-900">{team.stats.points}</td>
                               </tr>
                             ))}
                           </tbody>

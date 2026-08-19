@@ -132,7 +132,7 @@ export default function WeeklyCalendar({
               </button>
 
               <div className="px-2 sm:px-6 min-w-0 sm:min-w-[240px] text-center flex-1">
-                <h2 className="text-sm sm:text-xl font-black text-zinc-900 tracking-tight truncate">
+                <h2 className="text-sm sm:text-xl font-bold text-zinc-900 tracking-tight truncate">
                   {effectiveViewMode === 'weekly' ? (
                     <>
                       <span className="lg:hidden">{shortWeekLabel}</span>
@@ -159,7 +159,7 @@ export default function WeeklyCalendar({
             {/* Today Button */}
             <Button
               variant="outline"
-              className="h-10 sm:h-14 px-4 sm:px-6 rounded-xl sm:rounded-2xl border-zinc-200 font-bold hover:bg-zinc-50 text-sm shrink-0"
+              className="h-10 sm:h-14 px-4 sm:px-6 rounded-xl sm:rounded-2xl border-zinc-200 font-semibold hover:bg-zinc-50 text-sm shrink-0"
               onClick={() => setCurrentDate(new Date())}
             >
               Σήμερα
@@ -171,7 +171,7 @@ export default function WeeklyCalendar({
             <button
               onClick={() => setViewMode('weekly')}
               className={cn(
-                "flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all",
+                "flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all",
                 viewMode === 'weekly'
                   ? "bg-zinc-900 text-white shadow-lg"
                   : "text-zinc-500 hover:text-zinc-700"
@@ -183,7 +183,7 @@ export default function WeeklyCalendar({
             <button
               onClick={() => setViewMode('daily')}
               className={cn(
-                "flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all",
+                "flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold transition-all",
                 viewMode === 'daily'
                   ? "bg-zinc-900 text-white shadow-lg"
                   : "text-zinc-500 hover:text-zinc-700"
@@ -204,7 +204,7 @@ export default function WeeklyCalendar({
               {/* Header Row */}
               <div className="grid grid-cols-[80px_repeat(7,1fr)] gap-4 mb-6">
                 <div className="h-16 flex items-center justify-center">
-                  <Clock className="h-6 w-6 text-zinc-300" />
+                  <Clock className="h-6 w-6 text-zinc-400" />
                 </div>
                 {weekDays.map((day, index) => {
                   const isToday = day.toDateString() === new Date().toDateString();
@@ -215,10 +215,10 @@ export default function WeeklyCalendar({
                         ? "bg-emerald-600 border-emerald-500 text-white shadow-xl shadow-emerald-100" 
                         : "bg-zinc-50 border-zinc-100 text-zinc-900"
                     )}>
-                      <div className={cn("text-xs font-black uppercase tracking-widest", isToday ? "text-emerald-100" : "text-zinc-400")}>
+                      <div className={cn("text-xs font-semibold", isToday ? "text-emerald-100" : "text-zinc-500")}>
                         {greekDaysShort[index]}
                       </div>
-                      <div className="text-2xl font-black mt-1">{day.getDate()}</div>
+                      <div className="text-2xl font-bold mt-1">{day.getDate()}</div>
                     </div>
                   );
                 })}
@@ -228,7 +228,7 @@ export default function WeeklyCalendar({
               <div className="space-y-4">
                 {timeSlots.map((time) => (
                   <div key={time} className="grid grid-cols-[80px_repeat(7,1fr)] gap-4">
-                    <div className="h-32 flex items-center justify-center text-sm font-black text-zinc-400 bg-zinc-50 rounded-2xl border border-zinc-100">
+                    <div className="h-32 flex items-center justify-center text-sm font-semibold text-zinc-500 bg-zinc-50 rounded-2xl border border-zinc-100">
                       {time}
                     </div>
                     {weekDays.map((day, dayIndex) => {
@@ -248,7 +248,7 @@ export default function WeeklyCalendar({
                         >
                           {isBlocked ? (
                             <div className="absolute inset-0 flex items-center justify-center opacity-20 rotate-[-15deg]">
-                              <span className="text-xs font-black text-zinc-400 uppercase tracking-tighter">Μη Διαθέσιμο</span>
+                              <span className="text-xs font-semibold text-zinc-500 tracking-tighter">Μη Διαθέσιμο</span>
                             </div>
                           ) : (
                             <div className="h-full space-y-2 overflow-y-auto custom-scrollbar">
@@ -275,8 +275,8 @@ export default function WeeklyCalendar({
                                   >
                                     <div className="flex items-start justify-between">
                                       <div className="min-w-0 flex-1">
-                                        <div className="text-[11px] font-black truncate leading-tight">{booking.userName || 'Άγνωστος'}</div>
-                                        <div className="text-[11px] font-bold opacity-80 mt-0.5 truncate flex items-center gap-1">
+                                        <div className="text-2xs font-semibold truncate leading-tight">{booking.userName || 'Άγνωστος'}</div>
+                                        <div className="text-2xs font-medium opacity-80 mt-0.5 truncate flex items-center gap-1">
                                           <Phone className="h-2 w-2" />
                                           {booking.userPhone || '—'}
                                         </div>
@@ -323,7 +323,7 @@ export default function WeeklyCalendar({
                     ? "bg-zinc-50 border-zinc-100 opacity-60"
                     : "bg-white border-zinc-100 hover:border-emerald-200 hover:shadow-xl hover:shadow-emerald-50"
                 )}>
-                  <div className="w-14 sm:w-24 shrink-0 flex items-center justify-center font-black text-base sm:text-xl text-zinc-300 group-hover:text-emerald-500 transition-colors">
+                  <div className="w-14 sm:w-24 shrink-0 flex items-center justify-center font-bold text-base sm:text-xl text-zinc-400 group-hover:text-emerald-500 transition-colors">
                     {time}
                   </div>
 
@@ -346,7 +346,7 @@ export default function WeeklyCalendar({
                             <div className="flex items-start justify-between gap-2 sm:gap-4">
                               <div className="space-y-1.5 sm:space-y-2 min-w-0">
                                 <div className="flex items-center gap-2">
-                                  <h4 className="text-sm sm:text-lg font-black text-zinc-900 truncate">{booking.userName || 'Άγνωστος Πελάτης'}</h4>
+                                  <h4 className="text-sm sm:text-lg font-semibold text-zinc-900 truncate">{booking.userName || 'Άγνωστος Πελάτης'}</h4>
                                   <div className={cn(
                                     "h-2 w-2 rounded-full",
                                     booking.status === 'confirmed' ? "bg-emerald-500" :
@@ -354,7 +354,7 @@ export default function WeeklyCalendar({
                                     booking.status === 'completed' ? "bg-zinc-500" : "bg-red-500"
                                   )} />
                                 </div>
-                                <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs sm:text-sm font-bold text-zinc-500">
+                                <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs sm:text-sm font-medium text-zinc-500">
                                   <span className="flex items-center gap-1"><Phone className="h-3 w-3 sm:h-3.5 sm:w-3.5" />{booking.userPhone || '—'}</span>
                                   <span className="flex items-center gap-1"><Building2 className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                                     {pitches.find(p => p.id === booking.pitchId)?.name || 'Άγνωστο'}
@@ -398,8 +398,8 @@ export default function WeeklyCalendar({
                         className="py-3 sm:py-6 flex items-center justify-between group-hover:px-2 sm:group-hover:px-4 transition-all"
                         onClick={() => onSlotClick?.(currentDate, time)}
                       >
-                         <span className="text-zinc-300 font-bold italic text-xs sm:text-base">Κενό</span>
-                         <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl font-bold text-xs sm:text-sm h-8 sm:h-9">
+                         <span className="text-zinc-400 font-medium italic text-xs sm:text-base">Κενό</span>
+                         <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 hover:bg-emerald-50 hover:text-emerald-600 rounded-xl font-medium text-xs sm:text-sm h-8 sm:h-9">
                            <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
                            <span className="hidden sm:inline">Νέα Κράτηση</span>
                            <span className="sm:hidden">+</span>

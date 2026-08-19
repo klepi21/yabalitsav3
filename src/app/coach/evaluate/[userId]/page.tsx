@@ -158,7 +158,7 @@ export default function CoachEvaluatePage() {
   if (!athlete) {
     return (
       <div className="flex items-center justify-center h-screen bg-zinc-50">
-        <p className="text-zinc-400">Ο αθλητής δεν βρέθηκε</p>
+        <p className="text-zinc-500">Ο αθλητής δεν βρέθηκε</p>
       </div>
     );
   }
@@ -169,14 +169,14 @@ export default function CoachEvaluatePage() {
         <div className="h-20 w-20 rounded-full bg-emerald-100 flex items-center justify-center mb-6">
           <Check className="h-10 w-10 text-emerald-600" />
         </div>
-        <h2 className="text-xl font-black text-zinc-900 text-center">Η αξιολόγηση αποθηκεύτηκε!</h2>
-        <p className="text-sm text-zinc-400 mt-2 text-center">
+        <h2 className="text-xl font-bold text-zinc-900 text-center">Η αξιολόγηση αποθηκεύτηκε!</h2>
+        <p className="text-sm text-zinc-500 mt-2 text-center">
           {athlete.displayName} · {currentPeriodLabel} · {avgRating}/5
         </p>
         <div className="flex gap-3 mt-8">
           <button
             onClick={() => router.back()}
-            className="px-6 py-3 rounded-xl bg-zinc-100 text-zinc-600 font-bold text-sm active:scale-95 transition-all"
+            className="px-6 py-3 rounded-xl bg-zinc-100 text-zinc-600 font-semibold text-sm active:scale-95 transition-all"
           >
             Πίσω
           </button>
@@ -188,7 +188,7 @@ export default function CoachEvaluatePage() {
               setRatings(initRatings);
               setNotes('');
             }}
-            className="px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm active:scale-95 transition-all"
+            className="px-6 py-3 rounded-xl bg-emerald-600 text-white font-semibold text-sm active:scale-95 transition-all"
           >
             Νέα Αξιολόγηση
           </button>
@@ -205,19 +205,19 @@ export default function CoachEvaluatePage() {
           <div className="flex items-center justify-between">
             <button
               onClick={() => router.back()}
-              className="flex items-center gap-1 text-zinc-400 active:text-zinc-600 -ml-1 p-1"
+              className="flex items-center gap-1 text-zinc-500 active:text-zinc-600 -ml-1 p-1"
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
             <div className="text-center flex-1 px-2">
-              <p className="text-sm font-black text-zinc-900 truncate">{athlete.displayName}</p>
-              <p className="text-[11px] text-zinc-400 font-medium">
+              <p className="text-sm font-semibold text-zinc-900 truncate">{athlete.displayName}</p>
+              <p className="text-2xs text-zinc-500 font-medium">
                 {squad ? `${squad.name} (${squad.ageGroup})` : 'Αξιολόγηση'}
               </p>
             </div>
             <div className="text-right">
-              <span className="text-lg font-black text-emerald-600">{avgRating}</span>
-              <span className="text-[12px] text-zinc-400 font-bold">/5</span>
+              <span className="text-lg font-semibold text-emerald-600">{avgRating}</span>
+              <span className="text-2xs text-zinc-500 font-medium">/5</span>
             </div>
           </div>
         </div>
@@ -229,8 +229,8 @@ export default function CoachEvaluatePage() {
           onClick={() => setShowPeriodPicker(!showPeriodPicker)}
           className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-white border border-zinc-100 shadow-sm active:bg-zinc-50"
         >
-          <span className="text-sm font-bold text-zinc-900">{currentPeriodLabel}</span>
-          <ChevronDown className={cn("h-4 w-4 text-zinc-400 transition-transform", showPeriodPicker && "rotate-180")} />
+          <span className="text-sm font-semibold text-zinc-900">{currentPeriodLabel}</span>
+          <ChevronDown className={cn("h-4 w-4 text-zinc-500 transition-transform", showPeriodPicker && "rotate-180")} />
         </button>
         {showPeriodPicker && (
           <div className="mt-2 bg-white rounded-xl border border-zinc-100 shadow-lg overflow-hidden">
@@ -256,7 +256,7 @@ export default function CoachEvaluatePage() {
           const rating = ratings[skill.key] || 0;
           return (
             <div key={skill.key} className="bg-white rounded-2xl p-4 shadow-sm">
-              <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">{skill.label}</p>
+              <p className="text-xs font-medium text-zinc-500 mb-3">{skill.label}</p>
               <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map(value => (
                   <button
@@ -272,15 +272,15 @@ export default function CoachEvaluatePage() {
                     )}>
                       <Star className={cn(
                         "h-6 w-6",
-                        value <= rating ? "text-white fill-white" : "text-zinc-300"
+                        value <= rating ? "text-white fill-white" : "text-zinc-400"
                       )} />
                     </div>
                   </button>
                 ))}
               </div>
               <div className="flex justify-between mt-2 px-1">
-                <span className="text-[11px] text-zinc-300 font-bold">ΑΡΧΑΡΙΟΣ</span>
-                <span className="text-[11px] text-zinc-300 font-bold">ΑΡΙΣΤΟΣ</span>
+                <span className="text-2xs text-zinc-500 font-medium">Αρχάριος</span>
+                <span className="text-2xs text-zinc-500 font-medium">Άριστος</span>
               </div>
             </div>
           );
@@ -288,7 +288,7 @@ export default function CoachEvaluatePage() {
 
         {/* Notes */}
         <div className="bg-white rounded-2xl p-4 shadow-sm">
-          <p className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-3">Σχόλια Προπονητή</p>
+          <p className="text-xs font-medium text-zinc-500 mb-3">Σχόλια Προπονητή</p>
           <textarea
             value={notes}
             onChange={e => { setNotes(e.target.value); setSavedSuccess(false); }}
@@ -303,14 +303,14 @@ export default function CoachEvaluatePage() {
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-t border-zinc-100">
         <div className="px-4 py-3 flex items-center gap-3">
           <div className="flex-1">
-            <p className="text-xs text-zinc-400 font-medium">
+            <p className="text-xs text-zinc-500 font-medium">
               {skills.length} δεξιότητες · Μ.Ο. {avgRating}/5
             </p>
           </div>
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-lg shadow-emerald-200 active:scale-95 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-semibold text-sm shadow-lg shadow-emerald-200 active:scale-95 transition-all disabled:opacity-50"
           >
             {isSaving ? (
               <Loader2 className="h-4 w-4 animate-spin" />

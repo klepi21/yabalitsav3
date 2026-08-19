@@ -20,7 +20,6 @@ import {
   LogOut,
   ChevronDown,
   ChevronRight,
-  Menu,
   QrCode,
   TrendingUp,
   Shield,
@@ -28,7 +27,7 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 import { SIDEBAR_PERMISSIONS, type AppRole } from '@/config/roles';
 
@@ -49,7 +48,7 @@ interface NavItem {
 }
 
 const navigation: NavItem[] = [
-  { name: toGreekUpperCase('Πίνακας Ελέγχου'), href: '/management/dashboard', icon: LayoutDashboard },
+  { name: 'Πίνακας Ελέγχου', href: '/management/dashboard', icon: LayoutDashboard },
   { name: 'Γήπεδα', href: '/management/pitches', icon: Building2 },
   { name: 'Κρατήσεις', href: '/management/bookings', icon: CalendarDays },
   { name: 'Πελάτες', href: '/management/customers', icon: Users },
@@ -186,9 +185,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
         <div className="space-y-4">
           {/* Main Menu Group */}
           <div>
-            <p className="px-4 text-[11px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 font-mono">
-              {toGreekUpperCase('Μενού')}
-            </p>
+            <p className="eyebrow px-4 mb-2">Μενού</p>
             <div className="space-y-0.5">
               {menuItems.map((item) => {
                 const isActive = item.href ? pathname === item.href || pathname.startsWith(item.href + '/') : false;
@@ -199,22 +196,17 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                     href={item.href!}
                     onClick={onNavigate}
                     className={cn(
-                      'group relative flex items-center gap-3 rounded-lg px-4 py-2 text-[12px] font-bold transition-all duration-300',
+                      'group relative flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm transition-colors duration-150',
                       isActive
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                        ? 'bg-emerald-50 text-emerald-700 font-semibold'
+                        : 'text-zinc-600 font-medium hover:bg-zinc-50 hover:text-zinc-900'
                     )}
                   >
                     {isActive && (
                       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-emerald-600 rounded-r-full" />
                     )}
-                    <Icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", isActive ? "text-emerald-600" : "text-zinc-400 group-hover:text-zinc-900")} />
-                    <span>{toGreekUpperCase(item.name)}</span>
-                    {item.name === 'Κρατήσεις' && (
-                      <span className="ml-auto bg-emerald-600 text-white text-[11px] px-1.5 py-0.5 rounded-md font-black">
-                        NEW
-                      </span>
-                    )}
+                    <Icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", isActive ? "text-emerald-600" : "text-zinc-500 group-hover:text-zinc-900")} />
+                    <span>{item.name}</span>
                   </Link>
                 );
               })}
@@ -223,9 +215,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
 
           {/* Academy & More Group */}
           <div>
-            <p className="px-4 text-[11px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-2 font-mono">
-              {toGreekUpperCase('Διαχείριση')}
-            </p>
+            <p className="eyebrow px-4 mb-2">Διαχείριση</p>
             <div className="space-y-1">
               {managementItems.map((item) => {
                 const isActive = item.href ? pathname === item.href || pathname.startsWith(item.href + '/') : false;
@@ -237,12 +227,12 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                   return (
                     <div
                       key={item.name}
-                      className="group relative flex items-center gap-3 rounded-lg px-4 py-2 text-[12px] font-bold text-zinc-300 cursor-not-allowed"
+                      className="group relative flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium text-zinc-400 cursor-not-allowed"
                     >
-                      <Icon className="h-4 w-4 text-zinc-200" />
-                      <span>{toGreekUpperCase(item.name)}</span>
+                      <Icon className="h-4 w-4 text-zinc-400" />
+                      <span>{item.name}</span>
                       {item.badge && (
-                        <span className="ml-auto bg-zinc-100 text-zinc-400 text-[8px] px-1.5 py-0.5 rounded-md font-black uppercase tracking-wider">
+                        <span className="ml-auto bg-zinc-100 text-zinc-500 text-2xs px-1.5 py-0.5 rounded-md font-semibold">
                           {item.badge}
                         </span>
                       )}
@@ -256,18 +246,18 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                       <button
                         onClick={() => toggleMenu(item.name)}
                         className={cn(
-                          'group relative flex w-full items-center justify-between rounded-lg px-4 py-2 text-[12px] font-bold transition-all duration-300',
+                          'group relative flex w-full items-center justify-between rounded-lg px-4 py-2.5 text-sm transition-colors duration-150',
                           isParentActive
-                            ? 'bg-emerald-50 text-emerald-700'
-                            : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                            ? 'bg-emerald-50 text-emerald-700 font-semibold'
+                            : 'text-zinc-600 font-medium hover:bg-zinc-50 hover:text-zinc-900'
                         )}
                       >
                         {isParentActive && (
                           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-emerald-600 rounded-r-full" />
                         )}
                         <div className="flex items-center gap-3">
-                          <Icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", isParentActive ? "text-emerald-600" : "text-zinc-400 group-hover:text-zinc-900")} />
-                          <span>{toGreekUpperCase(item.name)}</span>
+                          <Icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", isParentActive ? "text-emerald-600" : "text-zinc-500 group-hover:text-zinc-900")} />
+                          <span>{item.name}</span>
                         </div>
                         {isExpanded ? (
                           <ChevronDown className="h-3 w-3 opacity-40" />
@@ -285,13 +275,13 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                                 href={child.href}
                                 onClick={onNavigate}
                                 className={cn(
-                                  'block py-1 text-[11px] font-bold transition-colors',
+                                  'block rounded-md py-1.5 text-xs transition-colors',
                                   isChildItemActive
-                                    ? 'text-emerald-600'
-                                    : 'text-zinc-400 hover:text-zinc-900'
+                                    ? 'text-emerald-700 font-semibold'
+                                    : 'text-zinc-600 font-medium hover:text-zinc-900'
                                 )}
                               >
-                                {toGreekUpperCase(child.name)}
+                                {child.name}
                               </Link>
                             );
                           })}
@@ -307,17 +297,17 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                     href={item.href!}
                     onClick={onNavigate}
                     className={cn(
-                      'group relative flex items-center gap-3 rounded-lg px-4 py-2 text-[12px] font-bold transition-all duration-300',
+                      'group relative flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm transition-colors duration-150',
                       isActive
-                        ? 'bg-emerald-50 text-emerald-700'
-                        : 'text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900'
+                        ? 'bg-emerald-50 text-emerald-700 font-semibold'
+                        : 'text-zinc-600 font-medium hover:bg-zinc-50 hover:text-zinc-900'
                     )}
                   >
                     {isActive && (
                       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-emerald-600 rounded-r-full" />
                     )}
-                    <Icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", isActive ? "text-emerald-600" : "text-zinc-400 group-hover:text-zinc-900")} />
-                    <span>{toGreekUpperCase(item.name)}</span>
+                    <Icon className={cn("h-4 w-4 transition-transform group-hover:scale-110", isActive ? "text-emerald-600" : "text-zinc-500 group-hover:text-zinc-900")} />
+                    <span>{item.name}</span>
                   </Link>
                 );
               })}
@@ -328,24 +318,22 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
         {/* Super Admin Link */}
         {user?.email === SUPER_ADMIN_EMAIL && (
           <div className="mt-4">
-            <p className="px-4 text-[11px] font-black text-red-400 uppercase tracking-[0.2em] mb-2 font-mono">
-              SUPER ADMIN
-            </p>
+            <p className="eyebrow px-4 mb-2 text-red-600">Super admin</p>
             <Link
               href="/management/admin-panel"
               onClick={onNavigate}
               className={cn(
-                'group relative flex items-center gap-3 rounded-lg px-4 py-2 text-[12px] font-bold transition-all duration-300',
+                'group relative flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm transition-colors duration-150',
                 pathname === '/management/admin-panel'
-                  ? 'bg-red-50 text-red-700'
-                  : 'text-zinc-500 hover:bg-red-50/50 hover:text-red-600'
+                  ? 'bg-red-50 text-red-700 font-semibold'
+                  : 'text-zinc-600 font-medium hover:bg-red-50/50 hover:text-red-700'
               )}
             >
               {pathname === '/management/admin-panel' && (
                 <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-red-600 rounded-r-full" />
               )}
-              <Shield className={cn("h-4 w-4 transition-transform group-hover:scale-110", pathname === '/management/admin-panel' ? "text-red-600" : "text-zinc-400 group-hover:text-red-500")} />
-              <span>{toGreekUpperCase('Admin Panel')}</span>
+              <Shield className={cn("h-4 w-4 transition-transform group-hover:scale-110", pathname === '/management/admin-panel' ? "text-red-600" : "text-zinc-500 group-hover:text-red-500")} />
+              <span>{'Admin Panel'}</span>
             </Link>
           </div>
         )}
@@ -357,14 +345,14 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
           <div className="px-4 py-3 rounded-2xl bg-zinc-50 border border-zinc-100/50 flex items-center justify-between gap-3 shadow-inner group">
             <div className="flex flex-col gap-0.5 min-w-0">
               <p className={cn(
-                "text-[12px] font-black uppercase tracking-widest transition-colors truncate",
-                bookingsEnabled ? "text-emerald-600" : "text-zinc-400 group-hover:text-red-400"
+                "text-sm font-semibold transition-colors truncate",
+                bookingsEnabled ? "text-emerald-600" : "text-zinc-500 group-hover:text-red-400"
               )}>
-                {bookingsEnabled ? toGreekUpperCase('Online Κρατήσεις') : toGreekUpperCase('Κρατήσεις Ανενεργές')}
+                {bookingsEnabled ? 'Online Κρατήσεις' : 'Κρατήσεις Ανενεργές'}
               </p>
               {!bookingsEnabled && (
-                <p className="text-[7px] font-bold text-red-400/70 uppercase leading-none tracking-tighter">
-                  {toGreekUpperCase('Σελίδα & QR Ανενεργά')}
+                <p className="text-2xs font-medium text-red-600 leading-tight mt-0.5">
+                  {'Σελίδα & QR Ανενεργά'}
                 </p>
               )}
             </div>
@@ -405,27 +393,27 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                     "h-8 w-8 rounded-lg flex items-center justify-center backdrop-blur-md",
                     bookingsEnabled ? "bg-white/10" : "bg-zinc-200"
                   )}>
-                    <QrCode className={cn("h-4 w-4", bookingsEnabled ? "text-emerald-400" : "text-zinc-400")} />
+                    <QrCode className={cn("h-4 w-4", bookingsEnabled ? "text-emerald-400" : "text-zinc-500")} />
                   </div>
                   
                   <div>
                     <p className={cn(
-                      "text-sm font-bold tracking-tight",
-                      bookingsEnabled ? "text-white" : "text-zinc-400"
+                      "text-sm font-semibold tracking-tight",
+                      bookingsEnabled ? "text-white" : "text-zinc-500"
                     )}>
-                      {bookingsEnabled ? toGreekUpperCase('Δημιουργήστε το QR Code') : toGreekUpperCase('QR Code Ανενεργό')}
+                      {bookingsEnabled ? 'Δημιουργήστε το QR Code' : 'QR Code Ανενεργό'}
                     </p>
                     <p className={cn(
-                      "text-[12px] font-medium mt-0.5",
+                      "text-2xs font-medium mt-0.5",
                       bookingsEnabled ? "text-emerald-400/80" : "text-zinc-400/60"
                     )}>
-                      {bookingsEnabled ? 'ΓΙΑ ΤΗ ΣΕΛΙΔΑ BOOKING' : 'Online Κρατήσεις: OFF'}
+                      {bookingsEnabled ? 'για τη σελίδα BOOKING' : 'Online Κρατήσεις: OFF'}
                     </p>
                   </div>
                   {bookingsEnabled && (
-                    <div className="flex items-center justify-center gap-2 w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-[11px] font-black transition-all active:scale-95 shadow-lg shadow-emerald-900/20 uppercase">
+                    <div className="flex items-center justify-center gap-2 w-full py-2 bg-emerald-400 group-hover:bg-emerald-300 text-zinc-950 rounded-lg text-xs font-semibold transition-colors">
                       <QrCode className="h-3 w-3 mr-1" />
-                      ΦΤΙΑΞΕ QR
+                      Φτιάξε QR
                     </div>
                   )}
                </div>
@@ -438,18 +426,25 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
             signOut();
             onNavigate?.();
           }}
-          className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-[13px] font-bold text-red-500 hover:bg-red-50 transition-all duration-300"
+          className="flex w-full items-center gap-3 rounded-xl px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
         >
           <LogOut className="h-5 w-5" />
-          <span>{toGreekUpperCase('Αποσύνδεση')}</span>
+          <span>{'Αποσύνδεση'}</span>
         </button>
       </div>
     </div>
   );
 }
 
-export default function Sidebar() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+export default function Sidebar({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
+  const sidebarOpen = open;
+  const setSidebarOpen = onOpenChange;
 
   return (
     <>
@@ -460,21 +455,12 @@ export default function Sidebar() {
         </SheetContent>
       </Sheet>
 
-      <div className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-[260px] lg:flex-col">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:z-30 lg:flex lg:w-[260px] lg:flex-col">
         <div className="flex flex-col flex-grow">
           <NavContent />
         </div>
       </div>
 
-      <div className="lg:hidden fixed top-4 left-4 z-40">
-        <button
-          type="button"
-          className="inline-flex items-center justify-center rounded-xl p-3 bg-white shadow-2xl border border-zinc-100 text-zinc-900 hover:bg-zinc-50 transition-all active:scale-90 ring-4 ring-black/5"
-          onClick={() => setSidebarOpen(true)}
-        >
-          <Menu className="h-6 w-6" />
-        </button>
-      </div>
     </>
   );
 }

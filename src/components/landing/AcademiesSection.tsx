@@ -21,7 +21,7 @@ export default function AcademiesSection() {
                   </div>
                   <div>
                     <h4 className="text-white font-bold">Player Passport</h4>
-                    <p className="text-[12px] text-zinc-400 uppercase tracking-widest">Μητρωο Αθλητων</p>
+                    <p className="text-2xs text-zinc-400 uppercase tracking-widest">Μητρωο Αθλητων</p>
                   </div>
                 </div>
                 <div className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-bold border border-emerald-500/30">
@@ -39,9 +39,9 @@ export default function AcademiesSection() {
                         <div className="h-2.5 w-16 bg-white/10 rounded" />
                       </div>
                     </div>
-                    {i === 1 && <div className="text-[12px] uppercase font-bold text-red-500 bg-red-500/10 px-2 py-1 rounded border border-red-500/20">Ιατρικο Έληξε</div>}
-                    {i === 2 && <div className="text-[12px] uppercase font-bold text-orange-500 bg-orange-500/10 px-2 py-1 rounded border border-orange-500/20">Οφειλες 2 Μηνων</div>}
-                    {i > 2 && <div className="text-[12px] uppercase font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">Ενεργος</div>}
+                    {i === 1 && <div className="text-2xs uppercase font-bold text-red-500 bg-red-500/10 px-2 py-1 rounded border border-red-500/20">Ιατρικο Έληξε</div>}
+                    {i === 2 && <div className="text-2xs uppercase font-bold text-orange-500 bg-orange-500/10 px-2 py-1 rounded border border-orange-500/20">Οφειλες 2 Μηνων</div>}
+                    {i > 2 && <div className="text-2xs uppercase font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">Ενεργος</div>}
                   </div>
                 ))}
               </div>

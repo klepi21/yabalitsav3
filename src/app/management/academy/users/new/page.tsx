@@ -9,7 +9,6 @@ import { academyUserService, userGroupService, squadService, academyPaymentServi
 import { AcademyUser, UserGroup, Squad } from '@/types/academy';
 import { Loader2, ArrowLeft, UserPlus, AlertCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { toGreekUpperCase } from '@/lib/utils';
 
 export default function NewAcademyUserPage() {
   const router = useRouter();
@@ -116,18 +115,18 @@ export default function NewAcademyUserPage() {
       <div className="flex items-center gap-3.5 pb-2 border-b border-zinc-50">
         <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-zinc-200 shrink-0" asChild>
           <Link href="/management/academy/users">
-            <ArrowLeft className="h-4 w-4 text-zinc-400" />
+            <ArrowLeft className="h-4 w-4 text-zinc-500" />
           </Link>
         </Button>
         <div className="h-12 w-12 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shadow-zinc-200 shrink-0">
           <UserPlus className="h-6 w-6 text-emerald-400" />
         </div>
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
-            {toGreekUpperCase('Νέος Χρήστης')}
+          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+            {'Νέος Χρήστης'}
           </h1>
-          <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest">
-            {toGreekUpperCase('Δημιουργία νέου μέλους ακαδημίας')}
+          <p className="text-2xs font-medium text-zinc-500">
+            {'Δημιουργία νέου μέλους ακαδημίας'}
           </p>
         </div>
       </div>
@@ -138,7 +137,7 @@ export default function NewAcademyUserPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <AlertCircle className="h-5 w-5 text-red-500" />
-              <p className="text-sm font-bold text-red-700">{error}</p>
+              <p className="text-sm font-semibold text-red-700">{error}</p>
             </div>
             <Button variant="ghost" size="sm" onClick={() => setError(null)} className="text-red-400 hover:text-red-600">
               <X className="h-4 w-4" />

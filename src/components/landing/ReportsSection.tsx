@@ -26,8 +26,8 @@ export default function ReportsSection() {
                 ))}
              </div>
              <div className="flex justify-between items-center relative z-10 text-sm">
-                <span className="text-zinc-500 font-bold uppercase tracking-widest">Εσοδα Μηνα</span>
-                <span className="text-2xl font-black text-white">€12,450</span>
+                <span className="text-zinc-400 font-bold uppercase tracking-widest">Εσοδα Μηνα</span>
+                <span className="text-2xl font-bold text-white">€12,450</span>
              </div>
              <div className="absolute inset-0 bg-gradient-to-t from-[#0B151C] via-transparent to-transparent pointer-events-none" />
           </div>

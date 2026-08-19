@@ -43,7 +43,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 const SUPER_ADMIN_EMAIL = 'nikoskoukis99@gmail.com';
 
@@ -382,10 +382,10 @@ export default function AdminPanelPage() {
 
   const getPlanBadge = (venue: VenueDetail) => {
     if (!venue.active) {
-      return <Badge variant="destructive" className="text-[11px] font-black">EXPIRED</Badge>;
+      return <Badge variant="destructive" className="text-2xs font-semibold">EXPIRED</Badge>;
     }
     if (venue.plan === 'trial') {
-      return <Badge className="bg-amber-100 text-amber-700 text-[11px] font-black hover:bg-amber-100">TRIAL</Badge>;
+      return <Badge className="bg-amber-100 text-amber-700 text-2xs font-semibold hover:bg-amber-100">TRIAL</Badge>;
     }
     const colors: Record<string, string> = {
       Basic: 'bg-blue-100 text-blue-700 hover:bg-blue-100',
@@ -393,7 +393,7 @@ export default function AdminPanelPage() {
       Enterprise: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100',
     };
     return (
-      <Badge className={cn('text-[11px] font-black', colors[venue.planType || 'Basic'] || colors.Basic)}>
+      <Badge className={cn('text-2xs font-semibold', colors[venue.planType || 'Basic'] || colors.Basic)}>
         {venue.planType || 'ACTIVE'}
       </Badge>
     );
@@ -428,8 +428,8 @@ export default function AdminPanelPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-xl sm:text-2xl font-black text-zinc-900 tracking-tight">
-            {toGreekUpperCase('Admin Panel')}
+          <h1 className="text-xl sm:text-2xl font-bold text-zinc-900 tracking-tight">
+            {'Admin Panel'}
           </h1>
           <p className="text-xs sm:text-sm text-zinc-500 mt-1">
             Στατιστικά πελατών & venues πλατφόρμας
@@ -453,7 +453,7 @@ export default function AdminPanelPage() {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-3 mb-4 sm:mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
             <Input
               placeholder="Αναζήτηση venue, email, πόλη..."
               value={searchTerm}
@@ -469,7 +469,7 @@ export default function AdminPanelPage() {
                 size="sm"
                 onClick={() => setFilterStatus(f)}
                 className={cn(
-                  'text-[11px] font-bold',
+                  'text-2xs font-medium',
                   filterStatus === f && 'bg-zinc-900 text-white'
                 )}
               >
@@ -492,12 +492,12 @@ export default function AdminPanelPage() {
                 <thead>
                   <tr className="border-b bg-zinc-50/80">
                     <SortableHeader label="Venue" field="name" current={sortField} asc={sortAsc} onToggle={toggleSort} />
-                    <th className="px-4 py-3 text-left text-[12px] font-black text-zinc-400 uppercase tracking-wider">Status</th>
+                    <th className="px-4 py-3 text-left text-2xs font-semibold text-zinc-500">Status</th>
                     <SortableHeader label="Εγγραφή" field="createdAt" current={sortField} asc={sortAsc} onToggle={toggleSort} />
-                    <th className="px-4 py-3 text-center text-[12px] font-black text-zinc-400 uppercase tracking-wider">Γήπεδα</th>
+                    <th className="px-4 py-3 text-center text-2xs font-semibold text-zinc-500">Γήπεδα</th>
                     <SortableHeader label="Bookings" field="bookings" current={sortField} asc={sortAsc} onToggle={toggleSort} className="text-center" />
                     <SortableHeader label="Πελάτες" field="customers" current={sortField} asc={sortAsc} onToggle={toggleSort} className="text-center" />
-                    <th className="px-4 py-3 text-center text-[12px] font-black text-zinc-400 uppercase tracking-wider">Academy</th>
+                    <th className="px-4 py-3 text-center text-2xs font-semibold text-zinc-500">Academy</th>
                     <SortableHeader label="Έσοδα" field="revenue" current={sortField} asc={sortAsc} onToggle={toggleSort} className="text-right" />
                   </tr>
                 </thead>
@@ -511,29 +511,29 @@ export default function AdminPanelPage() {
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
                             <div>
-                              <p className="font-bold text-zinc-900 text-[13px]">{venue.name}</p>
-                              <p className="text-[11px] text-zinc-400">{venue.email || venue.city}</p>
+                              <p className="font-medium text-zinc-900 text-xs">{venue.name}</p>
+                              <p className="text-2xs text-zinc-500">{venue.email || venue.city}</p>
                             </div>
                             {expandedVenue === venue.id ? (
-                              <ChevronUp className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
+                              <ChevronUp className="h-3.5 w-3.5 text-zinc-500 shrink-0" />
                             ) : (
-                              <ChevronDown className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
+                              <ChevronDown className="h-3.5 w-3.5 text-zinc-500 shrink-0" />
                             )}
                           </div>
                         </td>
                         <td className="px-4 py-3">{getPlanBadge(venue)}</td>
-                        <td className="px-4 py-3 text-[12px] text-zinc-500">{formatDate(venue.createdAt)}</td>
-                        <td className="px-4 py-3 text-center text-[13px] font-bold text-zinc-700">{venue.stats.pitches}</td>
-                        <td className="px-4 py-3 text-center text-[13px] font-bold text-zinc-700">{venue.stats.bookings}</td>
-                        <td className="px-4 py-3 text-center text-[13px] font-bold text-zinc-700">{venue.stats.customers}</td>
-                        <td className="px-4 py-3 text-center text-[13px] font-bold text-zinc-700">
+                        <td className="px-4 py-3 text-2xs text-zinc-500">{formatDate(venue.createdAt)}</td>
+                        <td className="px-4 py-3 text-center text-xs font-medium text-zinc-700">{venue.stats.pitches}</td>
+                        <td className="px-4 py-3 text-center text-xs font-medium text-zinc-700">{venue.stats.bookings}</td>
+                        <td className="px-4 py-3 text-center text-xs font-medium text-zinc-700">{venue.stats.customers}</td>
+                        <td className="px-4 py-3 text-center text-xs font-medium text-zinc-700">
                           {venue.stats.academyUsers > 0 ? (
                             <span className="text-emerald-600">{venue.stats.academyUsers}</span>
                           ) : (
-                            <span className="text-zinc-300">-</span>
+                            <span className="text-zinc-400">-</span>
                           )}
                         </td>
-                        <td className="px-4 py-3 text-right text-[13px] font-bold text-zinc-700">
+                        <td className="px-4 py-3 text-right text-xs font-medium text-zinc-700">
                           {venue.stats.revenue > 0 ? `€${venue.stats.revenue.toFixed(0)}` : '-'}
                         </td>
                       </tr>
@@ -551,13 +551,13 @@ export default function AdminPanelPage() {
                             </div>
                             {venue.squads.length > 0 && (
                               <div className="mt-3 pt-3 border-t border-zinc-200">
-                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-3">Τμήματα ({venue.squads.length})</p>
+                                <p className="text-2xs font-semibold text-zinc-500 mb-3">Τμήματα ({venue.squads.length})</p>
                                 <div className="flex flex-wrap gap-2">
                                   {venue.squads.map(squad => (
                                     <div key={squad.id} className="flex items-center gap-1.5 rounded-lg bg-zinc-100 px-3 py-1.5">
-                                      <span className="text-[11px] font-bold text-zinc-700">{squad.name}</span>
-                                      {squad.ageGroup && <span className="text-[9px] text-zinc-400">({squad.ageGroup})</span>}
-                                      <Badge className="text-[8px] font-black bg-emerald-100 text-emerald-700 ml-1">{squad.athleteCount}</Badge>
+                                      <span className="text-2xs font-medium text-zinc-700">{squad.name}</span>
+                                      {squad.ageGroup && <span className="text-2xs text-zinc-500">({squad.ageGroup})</span>}
+                                      <Badge className="text-2xs font-semibold bg-emerald-100 text-emerald-700 ml-1">{squad.athleteCount}</Badge>
                                     </div>
                                   ))}
                                 </div>
@@ -565,7 +565,7 @@ export default function AdminPanelPage() {
                             )}
                             {venue.academyGroups.length > 0 && (
                               <div className="mt-3 pt-3 border-t border-zinc-200">
-                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-3">Academy Users ανά Group</p>
+                                <p className="text-2xs font-semibold text-zinc-500 mb-3">Academy Users ανά Group</p>
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                                   {venue.academyGroups.map(group => (
                                     <AcademyGroupCard key={group.groupId} group={group} formatDate={formatDate} />
@@ -576,8 +576,8 @@ export default function AdminPanelPage() {
                             {/* Coupons Section */}
                             <div className="mt-3 pt-3 border-t border-zinc-200">
                               <div className="flex items-center justify-between mb-2">
-                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider">Κουπόνια ({venue.coupons.length})</p>
-                                <Button size="sm" variant="outline" className="h-7 text-[10px] font-bold rounded-lg" onClick={(e) => { e.stopPropagation(); openCouponDialog(venue); }}>
+                                <p className="text-2xs font-semibold text-zinc-500">Κουπόνια ({venue.coupons.length})</p>
+                                <Button size="sm" variant="outline" className="h-7 text-2xs font-medium rounded-lg" onClick={(e) => { e.stopPropagation(); openCouponDialog(venue); }}>
                                   <Plus className="h-3 w-3 mr-1" />
                                   Νέο Κουπόνι
                                 </Button>
@@ -586,10 +586,10 @@ export default function AdminPanelPage() {
                                 <div className="space-y-1.5">
                                   {venue.coupons.map(c => (
                                     <div key={c.code} className={cn("flex items-center gap-2 p-2 rounded-lg border", c.active ? "bg-emerald-50/50 border-emerald-100" : "bg-zinc-50 border-zinc-100")}>
-                                      <Badge className={cn('text-[9px] font-black shrink-0', c.active ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-200 text-zinc-500')}>
+                                      <Badge className={cn('text-2xs font-semibold shrink-0', c.active ? 'bg-emerald-100 text-emerald-700' : 'bg-zinc-200 text-zinc-500')}>
                                         {c.code}
                                       </Badge>
-                                      <span className="text-[10px] font-bold text-zinc-500 truncate">
+                                      <span className="text-2xs font-medium text-zinc-500 truncate">
                                         {c.discountType === 'percentage' ? `${c.discountValue}%` : `€${c.discountValue}`}
                                         {c.appliesTo !== 'all' && ` (${c.appliesTo})`}
                                       </span>
@@ -600,13 +600,13 @@ export default function AdminPanelPage() {
                                         >
                                           <div className={cn("absolute top-0.5 h-3 w-3 rounded-full bg-white shadow-sm transition-all", c.active ? "left-[13px]" : "left-0.5")} />
                                         </button>
-                                        <button onClick={(e) => { e.stopPropagation(); openEmailDialog(venue, c); }} className="h-5 w-5 flex items-center justify-center text-zinc-400 hover:text-amber-500" title="Αποστολή email">
+                                        <button onClick={(e) => { e.stopPropagation(); openEmailDialog(venue, c); }} className="h-5 w-5 flex items-center justify-center text-zinc-500 hover:text-amber-500" title="Αποστολή email">
                                           <Mail className="h-2.5 w-2.5" />
                                         </button>
-                                        <button onClick={(e) => { e.stopPropagation(); openCouponDialog(venue, c.code); }} className="h-5 w-5 flex items-center justify-center text-zinc-400 hover:text-blue-500" title="Επεξεργασία">
+                                        <button onClick={(e) => { e.stopPropagation(); openCouponDialog(venue, c.code); }} className="h-5 w-5 flex items-center justify-center text-zinc-500 hover:text-blue-500" title="Επεξεργασία">
                                           <Tag className="h-2.5 w-2.5" />
                                         </button>
-                                        <button onClick={(e) => { e.stopPropagation(); setDeleteCoupon({ venueId: venue.id, code: c.code }); }} className="h-5 w-5 flex items-center justify-center text-zinc-400 hover:text-red-500" title="Διαγραφή">
+                                        <button onClick={(e) => { e.stopPropagation(); setDeleteCoupon({ venueId: venue.id, code: c.code }); }} className="h-5 w-5 flex items-center justify-center text-zinc-500 hover:text-red-500" title="Διαγραφή">
                                           <Trash2 className="h-2.5 w-2.5" />
                                         </button>
                                       </div>
@@ -614,20 +614,20 @@ export default function AdminPanelPage() {
                                   ))}
                                 </div>
                               ) : (
-                                <p className="text-[11px] text-zinc-300">Κανένα κουπόνι</p>
+                                <p className="text-2xs text-zinc-500">Κανένα κουπόνι</p>
                               )}
                             </div>
                             {/* Email History */}
                             {venue.emailLogs.length > 0 && (
                               <div className="mt-3 pt-3 border-t border-zinc-200">
-                                <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-2">Ιστορικό Email ({venue.emailLogs.length})</p>
+                                <p className="text-2xs font-semibold text-zinc-500 mb-2">Ιστορικό Email ({venue.emailLogs.length})</p>
                                 <div className="space-y-1">
                                   {venue.emailLogs.slice(0, 5).map((log, i) => (
-                                    <div key={i} className="flex items-center gap-2 text-[11px]">
-                                      <Mail className="h-3 w-3 text-zinc-300 shrink-0" />
+                                    <div key={i} className="flex items-center gap-2 text-2xs">
+                                      <Mail className="h-3 w-3 text-zinc-400 shrink-0" />
                                       <span className="text-zinc-600 truncate">{log.subject}</span>
-                                      {log.couponCode && <Badge className="text-[8px] bg-emerald-50 text-emerald-600 shrink-0">{log.couponCode}</Badge>}
-                                      <span className="text-zinc-400 shrink-0 ml-auto">{log.sentAt ? new Date(log.sentAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</span>
+                                      {log.couponCode && <Badge className="text-2xs bg-emerald-50 text-emerald-600 shrink-0">{log.couponCode}</Badge>}
+                                      <span className="text-zinc-500 shrink-0 ml-auto">{log.sentAt ? new Date(log.sentAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: '2-digit' }) : ''}</span>
                                     </div>
                                   ))}
                                 </div>
@@ -642,7 +642,7 @@ export default function AdminPanelPage() {
               </table>
             </div>
             {filteredVenues.length === 0 && (
-              <div className="py-12 text-center text-sm text-zinc-400">
+              <div className="py-12 text-center text-sm text-zinc-500">
                 Δεν βρέθηκαν venues
               </div>
             )}
@@ -660,19 +660,19 @@ export default function AdminPanelPage() {
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <p className="font-bold text-zinc-900 text-[13px] truncate">{venue.name}</p>
+                      <p className="font-medium text-zinc-900 text-xs truncate">{venue.name}</p>
                       {getPlanBadge(venue)}
                     </div>
-                    <p className="text-[11px] text-zinc-400 truncate">{venue.email} {venue.city ? `- ${venue.city}` : ''}</p>
-                    <p className="text-[12px] text-zinc-400 mt-0.5">
+                    <p className="text-2xs text-zinc-500 truncate">{venue.email} {venue.city ? `- ${venue.city}` : ''}</p>
+                    <p className="text-2xs text-zinc-500 mt-0.5">
                       <Clock className="inline h-3 w-3 mr-0.5 -mt-0.5" />
                       {formatDate(venue.createdAt)}
                     </p>
                   </div>
                   {expandedVenue === venue.id ? (
-                    <ChevronUp className="h-4 w-4 text-zinc-400 shrink-0 ml-2" />
+                    <ChevronUp className="h-4 w-4 text-zinc-500 shrink-0 ml-2" />
                   ) : (
-                    <ChevronDown className="h-4 w-4 text-zinc-400 shrink-0 ml-2" />
+                    <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0 ml-2" />
                   )}
                 </div>
 
@@ -698,12 +698,12 @@ export default function AdminPanelPage() {
                     </div>
                     {venue.squads.length > 0 && (
                       <div className="mt-3 pt-3 border-t border-zinc-100">
-                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-2">Τμήματα ({venue.squads.length})</p>
+                        <p className="text-2xs font-semibold text-zinc-500 mb-2">Τμήματα ({venue.squads.length})</p>
                         <div className="flex flex-wrap gap-2">
                           {venue.squads.map(squad => (
                             <div key={squad.id} className="flex items-center gap-1.5 rounded-lg bg-zinc-100 px-2.5 py-1">
-                              <span className="text-[10px] font-bold text-zinc-700">{squad.name}</span>
-                              <Badge className="text-[8px] font-black bg-emerald-100 text-emerald-700">{squad.athleteCount}</Badge>
+                              <span className="text-2xs font-medium text-zinc-700">{squad.name}</span>
+                              <Badge className="text-2xs font-semibold bg-emerald-100 text-emerald-700">{squad.athleteCount}</Badge>
                             </div>
                           ))}
                         </div>
@@ -711,7 +711,7 @@ export default function AdminPanelPage() {
                     )}
                     {venue.academyGroups.length > 0 && (
                       <div className="mt-3 pt-3 border-t border-zinc-100">
-                        <p className="text-[10px] font-black text-zinc-400 uppercase tracking-wider mb-2">Academy Users ανά Group</p>
+                        <p className="text-2xs font-semibold text-zinc-500 mb-2">Academy Users ανά Group</p>
                         <div className="space-y-2">
                           {venue.academyGroups.map(group => (
                             <AcademyGroupCard key={group.groupId} group={group} formatDate={formatDate} />
@@ -725,14 +725,14 @@ export default function AdminPanelPage() {
             </Card>
           ))}
           {filteredVenues.length === 0 && (
-            <div className="py-12 text-center text-sm text-zinc-400">
+            <div className="py-12 text-center text-sm text-zinc-500">
               Δεν βρέθηκαν venues
             </div>
           )}
         </div>
 
         {/* Footer count */}
-        <p className="text-[11px] text-zinc-400 mt-4 text-center">
+        <p className="text-2xs text-zinc-500 mt-4 text-center">
           {filteredVenues.length} από {venues.length} venues
         </p>
       </div>
@@ -742,7 +742,7 @@ export default function AdminPanelPage() {
         <AlertDialogContent className="rounded-2xl border-none shadow-2xl p-0 max-w-md overflow-hidden">
           <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 px-6 pt-6 pb-4">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-lg font-black text-white flex items-center gap-2">
+              <AlertDialogTitle className="text-lg font-semibold text-white flex items-center gap-2">
                 {editingCouponCode ? <Tag className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
                 {editingCouponCode ? 'Επεξεργασία Κουπονιού' : 'Νέο Κουπόνι'}
               </AlertDialogTitle>
@@ -755,19 +755,19 @@ export default function AdminPanelPage() {
           <div className="p-6 space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div className="col-span-2 space-y-1.5">
-                <Label className="text-[10px] font-black text-zinc-400 uppercase">Κωδικός *</Label>
+                <Label className="text-2xs font-semibold text-zinc-500">Κωδικός *</Label>
                 <Input
                   value={couponForm.code}
                   onChange={(e) => setCouponForm(p => ({ ...p, code: e.target.value.toUpperCase() }))}
                   placeholder="π.χ. SPORT2026"
-                  className="h-10 font-bold uppercase tracking-wider"
+                  className="h-10 font-bold"
                 />
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-black text-zinc-400 uppercase">Τύπος</Label>
+                <Label className="text-2xs font-semibold text-zinc-500">Τύπος</Label>
                 <Select value={couponForm.discountType} onValueChange={(v: 'percentage' | 'fixed') => setCouponForm(p => ({ ...p, discountType: v }))}>
-                  <SelectTrigger className="h-10 text-sm font-bold">
+                  <SelectTrigger className="h-10 text-sm font-semibold">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -778,7 +778,7 @@ export default function AdminPanelPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-black text-zinc-400 uppercase">
+                <Label className="text-2xs font-semibold text-zinc-500">
                   Τιμή {couponForm.discountType === 'percentage' ? '(%)' : '(€)'}
                 </Label>
                 <Input
@@ -792,9 +792,9 @@ export default function AdminPanelPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-black text-zinc-400 uppercase">Εφαρμογή σε</Label>
+                <Label className="text-2xs font-semibold text-zinc-500">Εφαρμογή σε</Label>
                 <Select value={couponForm.appliesTo} onValueChange={(v: 'all' | 'basic' | 'pro' | 'enterprise') => setCouponForm(p => ({ ...p, appliesTo: v }))}>
-                  <SelectTrigger className="h-10 text-sm font-bold">
+                  <SelectTrigger className="h-10 text-sm font-semibold">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -807,7 +807,7 @@ export default function AdminPanelPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-black text-zinc-400 uppercase">Λήξη (προαιρ.)</Label>
+                <Label className="text-2xs font-semibold text-zinc-500">Λήξη (προαιρ.)</Label>
                 <Input
                   type="date"
                   value={couponForm.expiresAt}
@@ -817,7 +817,7 @@ export default function AdminPanelPage() {
               </div>
 
               <div className="col-span-2 space-y-1.5">
-                <Label className="text-[10px] font-black text-zinc-400 uppercase">Σημείωση (προαιρ.)</Label>
+                <Label className="text-2xs font-semibold text-zinc-500">Σημείωση (προαιρ.)</Label>
                 <Input
                   value={couponForm.description}
                   onChange={(e) => setCouponForm(p => ({ ...p, description: e.target.value }))}
@@ -830,8 +830,8 @@ export default function AdminPanelPage() {
             {/* Preview */}
             {couponForm.code && couponForm.discountValue > 0 && (
               <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
-                <p className="text-[11px] font-bold text-emerald-700">
-                  Κωδικός <span className="font-black">{couponForm.code.toUpperCase()}</span> →{' '}
+                <p className="text-2xs font-medium text-emerald-700">
+                  Κωδικός <span className="font-semibold">{couponForm.code.toUpperCase()}</span> →{' '}
                   {couponForm.discountType === 'percentage' ? `${couponForm.discountValue}% έκπτωση` : `€${couponForm.discountValue} έκπτωση`}
                   {couponForm.appliesTo !== 'all' && ` στο ${couponForm.appliesTo}`}
                   {couponForm.expiresAt && ` (μέχρι ${new Date(couponForm.expiresAt).toLocaleDateString('el-GR')})`}
@@ -841,7 +841,7 @@ export default function AdminPanelPage() {
           </div>
 
           <div className="px-6 pb-6 flex gap-2">
-            <Button variant="ghost" className="flex-1 h-10 font-bold text-zinc-400" onClick={() => setCouponVenue(null)}>
+            <Button variant="ghost" className="flex-1 h-10 font-bold text-zinc-500" onClick={() => setCouponVenue(null)}>
               <X className="h-4 w-4 mr-1" />
               Ακύρωση
             </Button>
@@ -865,7 +865,7 @@ export default function AdminPanelPage() {
               <Trash2 className="h-5 w-5 text-white" />
             </div>
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-lg font-black text-white">
+              <AlertDialogTitle className="text-lg font-semibold text-white">
                 Διαγραφή Κουπονιού
               </AlertDialogTitle>
               <AlertDialogDescription className="text-red-100 text-sm mt-1">
@@ -874,7 +874,7 @@ export default function AdminPanelPage() {
             </AlertDialogHeader>
           </div>
           <div className="px-6 py-5 flex gap-2">
-            <Button variant="ghost" className="flex-1 h-10 font-bold text-zinc-400" onClick={() => setDeleteCoupon(null)}>
+            <Button variant="ghost" className="flex-1 h-10 font-bold text-zinc-500" onClick={() => setDeleteCoupon(null)}>
               Ακύρωση
             </Button>
             <Button
@@ -898,7 +898,7 @@ export default function AdminPanelPage() {
         <AlertDialogContent className="rounded-2xl border-none shadow-2xl p-0 max-w-lg overflow-hidden">
           <div className="bg-gradient-to-br from-amber-400 via-amber-500 to-orange-500 px-6 pt-6 pb-4">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-lg font-black text-white flex items-center gap-2">
+              <AlertDialogTitle className="text-lg font-semibold text-white flex items-center gap-2">
                 <Send className="h-5 w-5" />
                 Αποστολή Κουπονιού
               </AlertDialogTitle>
@@ -912,8 +912,8 @@ export default function AdminPanelPage() {
             <div className="p-6 space-y-4">
               {/* Coupon preview */}
               <div className="flex items-center gap-2 p-3 bg-emerald-50 rounded-xl border border-emerald-100">
-                <Badge className="text-[10px] font-black bg-emerald-200 text-emerald-800">{emailDialog.coupon.code}</Badge>
-                <span className="text-sm font-bold text-emerald-700">
+                <Badge className="text-2xs font-semibold bg-emerald-200 text-emerald-800">{emailDialog.coupon.code}</Badge>
+                <span className="text-sm font-semibold text-emerald-700">
                   {emailDialog.coupon.discountType === 'percentage' ? `${emailDialog.coupon.discountValue}%` : `€${emailDialog.coupon.discountValue}`}
                   {emailDialog.coupon.appliesTo !== 'all' && ` (${emailDialog.coupon.appliesTo})`}
                 </span>
@@ -921,31 +921,31 @@ export default function AdminPanelPage() {
 
               {/* Recipient */}
               <div className="flex items-center gap-2 p-3 bg-zinc-50 rounded-xl">
-                <Mail className="h-4 w-4 text-zinc-400" />
-                <span className="text-sm font-bold text-zinc-700">{emailDialog.venue.email || 'Δεν υπάρχει email'}</span>
+                <Mail className="h-4 w-4 text-zinc-500" />
+                <span className="text-sm font-semibold text-zinc-700">{emailDialog.venue.email || 'Δεν υπάρχει email'}</span>
               </div>
 
               {/* Subject */}
               <div className="space-y-1.5">
-                <Label className="text-[10px] font-black text-zinc-400 uppercase">Θέμα</Label>
+                <Label className="text-2xs font-semibold text-zinc-500">Θέμα</Label>
                 <Input
                   value={emailSubject}
                   onChange={(e) => setEmailSubject(e.target.value)}
-                  className="h-10 font-bold text-sm"
+                  className="h-10 font-semibold text-sm"
                 />
               </div>
 
               {/* Body - editable */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label className="text-[10px] font-black text-zinc-400 uppercase">Κείμενο Email</Label>
+                  <Label className="text-2xs font-semibold text-zinc-500">Κείμενο Email</Label>
                   <button
                     onClick={() => {
                       const template = getCouponEmailTemplate(emailDialog.venue, emailDialog.coupon);
                       setEmailSubject(template.subject);
                       setEmailBody(template.body);
                     }}
-                    className="text-[9px] font-bold text-blue-500 hover:text-blue-700"
+                    className="text-2xs font-medium text-blue-500 hover:text-blue-700"
                   >
                     Επαναφορά αρχικού
                   </button>
@@ -961,7 +961,7 @@ export default function AdminPanelPage() {
           )}
 
           <div className="px-6 pb-6 flex gap-2">
-            <Button variant="ghost" className="flex-1 h-10 font-bold text-zinc-400" onClick={() => setEmailDialog(null)}>
+            <Button variant="ghost" className="flex-1 h-10 font-bold text-zinc-500" onClick={() => setEmailDialog(null)}>
               Ακύρωση
             </Button>
             <Button
@@ -1008,9 +1008,9 @@ function KPICard({
         <div className={cn('h-7 w-7 sm:h-8 sm:w-8 rounded-lg flex items-center justify-center mb-2', bg[color])}>
           <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         </div>
-        <p className="text-lg sm:text-xl font-black text-zinc-900">{value}</p>
-        <p className="text-[12px] sm:text-[11px] font-bold text-zinc-400 uppercase tracking-wider mt-0.5">{label}</p>
-        {sub && <p className="text-[11px] text-zinc-400 mt-0.5">{sub}</p>}
+        <p className="text-lg sm:text-xl font-bold text-zinc-900">{value}</p>
+        <p className="text-2xs sm:text-2xs font-medium text-zinc-500 mt-0.5">{label}</p>
+        {sub && <p className="text-2xs text-zinc-500 mt-0.5">{sub}</p>}
       </CardContent>
     </Card>
   );
@@ -1034,7 +1034,7 @@ function SortableHeader({
   const active = current === field;
   return (
     <th
-      className={cn('px-4 py-3 text-[12px] font-black text-zinc-400 uppercase tracking-wider cursor-pointer hover:text-zinc-600 transition-colors select-none', className)}
+      className={cn('px-4 py-3 text-2xs font-semibold text-zinc-500 cursor-pointer hover:text-zinc-600 transition-colors select-none', className)}
       onClick={() => onToggle(field)}
     >
       <span className="inline-flex items-center gap-1">
@@ -1048,8 +1048,8 @@ function SortableHeader({
 function MiniStat({ icon: _Icon, value, label }: { icon: React.ElementType; value: number; label: string }) {
   return (
     <div className="text-center">
-      <p className="text-[15px] font-black text-zinc-900">{value}</p>
-      <p className="text-[8px] font-bold text-zinc-400 uppercase tracking-wider">{label}</p>
+      <p className="text-base font-semibold text-zinc-900">{value}</p>
+      <p className="text-2xs font-medium text-zinc-500">{label}</p>
     </div>
   );
 }
@@ -1057,8 +1057,8 @@ function MiniStat({ icon: _Icon, value, label }: { icon: React.ElementType; valu
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">{label}</p>
-      <p className="text-[12px] font-bold text-zinc-700">{value}</p>
+      <p className="text-2xs font-medium text-zinc-500">{label}</p>
+      <p className="text-2xs font-medium text-zinc-700">{value}</p>
     </div>
   );
 }
@@ -1091,17 +1091,17 @@ function AcademyGroupCard({
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           <span className="text-sm">{group.groupIcon}</span>
-          <Badge className={cn('text-[11px] font-black', colorClass)}>
+          <Badge className={cn('text-2xs font-semibold', colorClass)}>
             {group.groupName}
           </Badge>
         </div>
-        <span className="text-[11px] font-black text-zinc-500">{group.users.length}</span>
+        <span className="text-2xs font-semibold text-zinc-500">{group.users.length}</span>
       </div>
       <div className="space-y-1 max-h-40 overflow-y-auto">
         {group.users.map(user => (
-          <div key={user.id} className="flex items-center justify-between text-[11px]">
+          <div key={user.id} className="flex items-center justify-between text-2xs">
             <span className="text-zinc-700 truncate mr-2">{user.displayName}</span>
-            <span className="text-zinc-400 shrink-0">{formatDate(user.createdAt)}</span>
+            <span className="text-zinc-500 shrink-0">{formatDate(user.createdAt)}</span>
           </div>
         ))}
       </div>

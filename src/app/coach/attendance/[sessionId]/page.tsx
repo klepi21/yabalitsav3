@@ -22,7 +22,7 @@ import type { TrainingSession, TrainingAttendance, AttendanceStatus } from '@/ty
 import type { AcademyUser } from '@/types/academy';
 
 const STATUS_CONFIG: Record<AttendanceStatus, { icon: typeof Check; color: string; bgActive: string; label: string }> = {
-  present: { icon: Check, color: 'text-emerald-600', bgActive: 'bg-emerald-500 text-white shadow-emerald-200', label: 'Παρών' },
+  present: { icon: Check, color: 'text-emerald-600', bgActive: 'bg-emerald-500 text-zinc-950 shadow-emerald-200', label: 'Παρών' },
   absent: { icon: X, color: 'text-red-600', bgActive: 'bg-red-500 text-white shadow-red-200', label: 'Απών' },
   late: { icon: Clock, color: 'text-amber-600', bgActive: 'bg-amber-500 text-white shadow-amber-200', label: 'Αργοπορία' },
   injured: { icon: AlertTriangle, color: 'text-zinc-500', bgActive: 'bg-zinc-500 text-white shadow-zinc-200', label: 'Τραυματίας' },
@@ -148,7 +148,7 @@ export default function CoachAttendancePage() {
   if (!session) {
     return (
       <div className="flex items-center justify-center h-screen bg-zinc-50">
-        <p className="text-zinc-400">Η προπόνηση δεν βρέθηκε</p>
+        <p className="text-zinc-500">Η προπόνηση δεν βρέθηκε</p>
       </div>
     );
   }
@@ -167,13 +167,13 @@ export default function CoachAttendancePage() {
           <div className="flex items-center justify-between">
             <button
               onClick={() => router.back()}
-              className="flex items-center gap-1 text-zinc-400 active:text-zinc-600 -ml-1 p-1"
+              className="flex items-center gap-1 text-zinc-500 active:text-zinc-600 -ml-1 p-1"
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
             <div className="text-center flex-1 px-2">
-              <p className="text-sm font-black text-zinc-900 truncate">{session.title}</p>
-              <p className="text-[11px] text-zinc-400 font-medium">
+              <p className="text-sm font-semibold text-zinc-900 truncate">{session.title}</p>
+              <p className="text-2xs text-zinc-500 font-medium">
                 {dateStr} • {session.startTime} - {session.endTime}
               </p>
             </div>
@@ -185,14 +185,14 @@ export default function CoachAttendancePage() {
         <div className="px-4 pb-3 flex items-center gap-2">
           <button
             onClick={() => markAll('present')}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-emerald-50 text-emerald-600 font-bold text-xs active:bg-emerald-100 transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-emerald-50 text-emerald-600 font-medium text-xs active:bg-emerald-100 transition-colors"
           >
             <CheckCheck className="h-3.5 w-3.5" />
             Όλοι Παρόντες
           </button>
           <button
             onClick={() => markAll('absent')}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-red-50 text-red-600 font-bold text-xs active:bg-red-100 transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-red-50 text-red-600 font-medium text-xs active:bg-red-100 transition-colors"
           >
             <XCircle className="h-3.5 w-3.5" />
             Όλοι Απόντες
@@ -202,18 +202,18 @@ export default function CoachAttendancePage() {
         {/* Stats Bar */}
         <div className="px-4 pb-3 flex items-center gap-3">
           <div className="flex items-center gap-1.5 text-xs">
-            <Users className="h-3.5 w-3.5 text-zinc-400" />
-            <span className="font-black text-zinc-900">{presentTotal}/{stats.total}</span>
-            <span className="text-zinc-400">Παρόντες</span>
+            <Users className="h-3.5 w-3.5 text-zinc-500" />
+            <span className="font-semibold text-zinc-900">{presentTotal}/{stats.total}</span>
+            <span className="text-zinc-500">Παρόντες</span>
           </div>
           <div className="flex items-center gap-2 ml-auto">
             {stats.late > 0 && (
-              <span className="text-[12px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+              <span className="text-2xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
                 {stats.late} αργ.
               </span>
             )}
             {stats.injured > 0 && (
-              <span className="text-[12px] font-bold text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-full">
+              <span className="text-2xs font-medium text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-full">
                 {stats.injured} τραυμ.
               </span>
             )}
@@ -252,8 +252,8 @@ export default function CoachAttendancePage() {
 
                 {/* Name */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-zinc-900 truncate">{record.athleteName}</p>
-                  <p className={cn("text-[11px] font-semibold", config.color)}>{config.label}</p>
+                  <p className="text-sm font-semibold text-zinc-900 truncate">{record.athleteName}</p>
+                  <p className={cn("text-2xs font-semibold", config.color)}>{config.label}</p>
                 </div>
 
                 {/* Status buttons */}
@@ -268,7 +268,7 @@ export default function CoachAttendancePage() {
                         onClick={() => updateStatus(record.athleteId, status)}
                         className={cn(
                           "h-8 w-8 rounded-lg flex items-center justify-center transition-all active:scale-90",
-                          isActive ? sc.bgActive : "bg-zinc-50 text-zinc-300 hover:bg-zinc-100",
+                          isActive ? sc.bgActive : "bg-zinc-50 text-zinc-400 hover:bg-zinc-100",
                         )}
                       >
                         <Icon className="h-4 w-4" />
@@ -296,7 +296,7 @@ export default function CoachAttendancePage() {
                 Μη αποθηκευμένες αλλαγές
               </p>
             ) : (
-              <p className="text-xs text-zinc-400 font-medium">
+              <p className="text-xs text-zinc-500 font-medium">
                 {presentTotal}/{stats.total} Παρόντες
               </p>
             )}
@@ -305,10 +305,10 @@ export default function CoachAttendancePage() {
             onClick={handleSave}
             disabled={isSaving || !hasChanges}
             className={cn(
-              "flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all active:scale-95",
+              "flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all active:scale-95",
               hasChanges
                 ? "bg-emerald-600 text-white shadow-lg shadow-emerald-200"
-                : "bg-zinc-100 text-zinc-400",
+                : "bg-zinc-100 text-zinc-500",
             )}
           >
             {isSaving ? (

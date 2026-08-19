@@ -43,7 +43,8 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { cn } from '@/lib/utils';
+import { toast } from '@/lib/toast';
 
 // Form validation schema
 const bookingCreateSchema = z.object({
@@ -363,7 +364,10 @@ export default function NewBookingPage() {
         }
 
         if (createdBookings > 0) {
-          alert(`Δημιουργήθηκαν ${createdBookings} κρατήσεις${failedBookings > 0 ? ` (${failedBookings} απέτυχαν)` : ''}`);
+          toast.success(
+            `Δημιουργήθηκαν ${createdBookings} κρατήσεις`,
+            failedBookings > 0 ? `${failedBookings} κρατήσεις δεν ήταν δυνατό να δημιουργηθούν.` : undefined
+          );
           router.push('/management/bookings');
         } else {
           setError('Δεν ήταν δυνατή η δημιουργία καμίας κράτησης');
@@ -491,11 +495,11 @@ export default function NewBookingPage() {
             <BreadcrumbItem>
               <BreadcrumbLink href="/management/dashboard" className="text-zinc-500 font-medium hover:text-emerald-600 transition-colors">Πίνακας Ελέγχου</BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator className="text-zinc-300" />
+            <BreadcrumbSeparator className="text-zinc-400" />
             <BreadcrumbItem>
               <BreadcrumbLink href="/management/bookings" className="text-zinc-500 font-medium hover:text-emerald-600 transition-colors">Κρατήσεις</BreadcrumbLink>
             </BreadcrumbItem>
-            <BreadcrumbSeparator className="text-zinc-300" />
+            <BreadcrumbSeparator className="text-zinc-400" />
             <BreadcrumbItem>
               <BreadcrumbPage className="text-zinc-900 font-bold">
                 {isRecurring ? 'Επαναλαμβανόμενη Κράτηση' : 'Νέα Κράτηση'}
@@ -514,11 +518,11 @@ export default function NewBookingPage() {
                   <CalendarDays className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                 )}
               </div>
-              <h1 className="text-xl sm:text-3xl font-extrabold tracking-tight text-zinc-900 uppercase">
-                {toGreekUpperCase(isRecurring ? 'Επαναλαμβανόμενη Κράτηση' : 'Νέα Κράτηση')}
+              <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-zinc-900">
+                {isRecurring ? 'Επαναλαμβανόμενη Κράτηση' : 'Νέα Κράτηση'}
               </h1>
             </div>
-            <p className="text-sm sm:text-[16px] font-medium text-zinc-500 max-w-lg hidden sm:block">
+            <p className="text-sm sm:text-base font-medium text-zinc-500 max-w-lg hidden sm:block">
               {isRecurring
                 ? 'Δημιουργία επαναλαμβανόμενων προγραμματισμένων κρατήσεων για το γήπεδό σας.'
                 : 'Καταχωρήστε μια νέα κράτηση γρήγορα και εύκολα.'
@@ -535,7 +539,7 @@ export default function NewBookingPage() {
               <Ban className="h-5 w-5 text-red-600" />
             </div>
             <div className="flex-1">
-              <h3 className="text-sm font-black text-red-900 uppercase tracking-wider">Σφάλμα</h3>
+              <h3 className="text-sm font-semibold text-red-900">Σφάλμα</h3>
               <p className="text-red-700 mt-1 font-medium">{error}</p>
               <Button
                 variant="link"
@@ -559,15 +563,15 @@ export default function NewBookingPage() {
                 <div className="space-y-6">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center border border-zinc-100">
-                      <Users className="h-5 w-5 text-zinc-400" />
+                      <Users className="h-5 w-5 text-zinc-500" />
                     </div>
-                    <h3 className="text-base sm:text-xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Στοιχεία Πελάτη')}</h3>
+                    <h3 className="text-base sm:text-xl font-bold text-zinc-900">{'Στοιχεία Πελάτη'}</h3>
                   </div>
 
                   {customers.length > 0 && (
                     <div className="space-y-2.5">
                       <div className="flex items-center justify-between gap-3 ml-1">
-                        <Label htmlFor="customerSelect" className="text-xs font-black uppercase tracking-widest text-zinc-400">
+                        <Label htmlFor="customerSelect" className="text-xs font-semibold text-zinc-500">
                           Επιλογή Υπάρχοντος Πελάτη
                         </Label>
                         {selectedCustomerId && (
@@ -580,7 +584,7 @@ export default function NewBookingPage() {
                               setValue('customerPhone', '', { shouldValidate: false });
                               setValue('customerEmail', '', { shouldValidate: false });
                             }}
-                            className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 hover:text-emerald-700 transition-colors"
+                            className="text-2xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
                           >
                             ✕ Καθαρισμός
                           </button>
@@ -615,7 +619,7 @@ export default function NewBookingPage() {
                           ))}
                         </SelectContent>
                       </Select>
-                      <p className="text-[11px] font-medium text-zinc-400 ml-1">
+                      <p className="text-2xs font-medium text-zinc-500 ml-1">
                         Ή συμπλήρωσε χειροκίνητα τα στοιχεία παρακάτω.
                       </p>
                     </div>
@@ -623,7 +627,7 @@ export default function NewBookingPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2.5">
-                      <Label htmlFor="customerName" className="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">Όνομα Πελάτη *</Label>
+                      <Label htmlFor="customerName" className="text-xs font-semibold text-zinc-500 ml-1">Όνομα Πελάτη *</Label>
                       <Input
                         id="customerName"
                         {...register('customerName')}
@@ -631,12 +635,12 @@ export default function NewBookingPage() {
                         className="h-11 sm:h-14 px-4 sm:px-5 rounded-2xl border-zinc-200 focus:ring-emerald-500 font-medium text-sm sm:text-lg"
                       />
                       {errors.customerName && (
-                        <p className="text-sm font-bold text-red-500 ml-1">{errors.customerName.message}</p>
+                        <p className="text-sm font-semibold text-red-500 ml-1">{errors.customerName.message}</p>
                       )}
                     </div>
 
                     <div className="space-y-2.5">
-                      <Label htmlFor="customerPhone" className="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">Τηλέφωνο *</Label>
+                      <Label htmlFor="customerPhone" className="text-xs font-semibold text-zinc-500 ml-1">Τηλέφωνο *</Label>
                       <Input
                         type="tel"
                         id="customerPhone"
@@ -645,12 +649,12 @@ export default function NewBookingPage() {
                         className="h-11 sm:h-14 px-4 sm:px-5 rounded-2xl border-zinc-200 focus:ring-emerald-500 font-medium text-sm sm:text-lg"
                       />
                       {errors.customerPhone && (
-                        <p className="text-sm font-bold text-red-500 ml-1">{errors.customerPhone.message}</p>
+                        <p className="text-sm font-semibold text-red-500 ml-1">{errors.customerPhone.message}</p>
                       )}
                     </div>
 
                     <div className="space-y-2.5 md:col-span-2">
-                      <Label htmlFor="customerEmail" className="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">Email (προαιρετικό)</Label>
+                      <Label htmlFor="customerEmail" className="text-xs font-semibold text-zinc-500 ml-1">Email (προαιρετικό)</Label>
                       <Input
                         type="email"
                         id="customerEmail"
@@ -659,7 +663,7 @@ export default function NewBookingPage() {
                         className="h-11 sm:h-14 px-4 sm:px-5 rounded-2xl border-zinc-200 focus:ring-emerald-500 font-medium text-sm sm:text-lg"
                       />
                       {errors.customerEmail && (
-                        <p className="text-sm font-bold text-red-500 ml-1">{errors.customerEmail.message}</p>
+                        <p className="text-sm font-semibold text-red-500 ml-1">{errors.customerEmail.message}</p>
                       )}
                     </div>
                   </div>
@@ -671,14 +675,14 @@ export default function NewBookingPage() {
                 <div className="space-y-6">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center border border-zinc-100">
-                      <CalendarDays className="h-5 w-5 text-zinc-400" />
+                      <CalendarDays className="h-5 w-5 text-zinc-500" />
                     </div>
-                    <h3 className="text-base sm:text-xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Επιλογή Χώρου & Χρόνου')}</h3>
+                    <h3 className="text-base sm:text-xl font-bold text-zinc-900">{'Επιλογή Χώρου & Χρόνου'}</h3>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2.5">
-                      <Label htmlFor="pitchId" className="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">Γήπεδο *</Label>
+                      <Label htmlFor="pitchId" className="text-xs font-semibold text-zinc-500 ml-1">Γήπεδο *</Label>
                       <div className="relative">
                         <select
                           id="pitchId"
@@ -693,26 +697,26 @@ export default function NewBookingPage() {
                           ))}
                         </select>
                         <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none">
-                          <Building2 className="h-5 w-5 text-zinc-300" />
+                          <Building2 className="h-5 w-5 text-zinc-400" />
                         </div>
                       </div>
                       {errors.pitchId && (
-                        <p className="text-sm font-bold text-red-500 ml-1">{errors.pitchId.message}</p>
+                        <p className="text-sm font-semibold text-red-500 ml-1">{errors.pitchId.message}</p>
                       )}
                     </div>
 
                     <div className="space-y-2.5">
-                      <Label className="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">Ημερομηνία *</Label>
+                      <Label className="text-xs font-semibold text-zinc-500 ml-1">Ημερομηνία *</Label>
                       <Popover>
                         <PopoverTrigger asChild>
                           <Button
                             variant="outline"
                             className={cn(
                               "w-full h-11 sm:h-14 px-4 sm:px-5 rounded-2xl border-zinc-200 font-medium text-sm sm:text-lg justify-start text-left hover:bg-zinc-50",
-                              !selectedDate && "text-zinc-400"
+                              !selectedDate && "text-zinc-500"
                             )}
                           >
-                            <CalendarIcon className="mr-2 h-4 w-4 text-zinc-400 shrink-0" />
+                            <CalendarIcon className="mr-2 h-4 w-4 text-zinc-500 shrink-0" />
                             {selectedDate
                               ? new Date(selectedDate + 'T00:00:00').toLocaleDateString('el-GR', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })
                               : 'Επιλέξτε ημερομηνία'}
@@ -739,7 +743,7 @@ export default function NewBookingPage() {
                   {/* Available Slots */}
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <Label className="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">Διαθέσιμες Ώρες</Label>
+                      <Label className="text-xs font-semibold text-zinc-500 ml-1">Διαθέσιμες Ώρες</Label>
                       {availableSlots.length > 0 && <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 font-bold px-3">{availableSlots.length} Διαθέσιμα</Badge>}
                     </div>
                     
@@ -753,7 +757,7 @@ export default function NewBookingPage() {
                               type="button"
                               onClick={() => setValue('selectedSlot', slot)}
                               className={cn(
-                                "h-10 sm:h-12 flex items-center justify-center rounded-xl border-2 font-bold transition-all text-xs sm:text-sm",
+                                "h-10 sm:h-12 flex items-center justify-center rounded-xl border-2 font-medium transition-all text-xs sm:text-sm",
                                 isSelected
                                   ? "bg-zinc-900 border-zinc-900 text-white shadow-lg active:scale-95 translate-y-[-2px]"
                                   : "bg-white border-zinc-100 text-zinc-600 hover:border-zinc-200 hover:bg-zinc-50"
@@ -766,7 +770,7 @@ export default function NewBookingPage() {
                       </div>
                     ) : (
                       <div className="p-10 border-2 border-dashed border-zinc-100 rounded-3xl text-center bg-zinc-50/50">
-                        <Clock className="h-10 w-10 text-zinc-200 mx-auto mb-4" />
+                        <Clock className="h-10 w-10 text-zinc-400 mx-auto mb-4" />
                         <p className="text-zinc-500 font-bold max-w-xs mx-auto">
                           {selectedDate && watch('pitchId') 
                             ? 'Δεν υπάρχουν διαθέσιμες ώρες για αυτή την ημερομηνία.' 
@@ -775,7 +779,7 @@ export default function NewBookingPage() {
                       </div>
                     )}
                     {errors.selectedSlot && (
-                      <p className="text-sm font-bold text-red-500 ml-1">{errors.selectedSlot.message}</p>
+                      <p className="text-sm font-semibold text-red-500 ml-1">{errors.selectedSlot.message}</p>
                     )}
                   </div>
                 </div>
@@ -787,9 +791,9 @@ export default function NewBookingPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center border border-zinc-100">
-                        <RefreshCw className="h-5 w-5 text-zinc-400" />
+                        <RefreshCw className="h-5 w-5 text-zinc-500" />
                       </div>
-                      <h3 className="text-base sm:text-xl font-black text-zinc-900 uppercase">{toGreekUpperCase('Επαναλαμβανόμενη')}</h3>
+                      <h3 className="text-base sm:text-xl font-bold text-zinc-900">{'Επαναλαμβανόμενη'}</h3>
                     </div>
                     <div
                       className="relative h-6 w-11 cursor-pointer"
@@ -810,13 +814,13 @@ export default function NewBookingPage() {
                     <div className="p-4 sm:p-8 rounded-3xl bg-zinc-50 border-2 border-zinc-100 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-top-4 duration-300">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-3">
-                          <Label className="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">Συχνότητα</Label>
+                          <Label className="text-xs font-semibold text-zinc-500 ml-1">Συχνότητα</Label>
                           <div className="flex bg-white p-1 rounded-2xl border border-zinc-200 shadow-sm">
                             <button
                               type="button"
                               onClick={() => setRecurringSettings({...recurringSettings, frequency: 'weekly'})}
                               className={cn(
-                                "flex-1 h-12 rounded-xl text-sm font-bold transition-all",
+                                "flex-1 h-12 rounded-xl text-sm font-semibold transition-all",
                                 recurringSettings.frequency === 'weekly' ? "bg-zinc-900 text-white shadow-md" : "text-zinc-500 hover:bg-zinc-50"
                               )}
                             >
@@ -826,7 +830,7 @@ export default function NewBookingPage() {
                               type="button"
                               onClick={() => setRecurringSettings({...recurringSettings, frequency: 'daily'})}
                               className={cn(
-                                "flex-1 h-12 rounded-xl text-sm font-bold transition-all",
+                                "flex-1 h-12 rounded-xl text-sm font-semibold transition-all",
                                 recurringSettings.frequency === 'daily' ? "bg-zinc-900 text-white shadow-md" : "text-zinc-500 hover:bg-zinc-50"
                               )}
                             >
@@ -836,7 +840,7 @@ export default function NewBookingPage() {
                         </div>
 
                         <div className="space-y-3">
-                          <Label className="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">Επανάληψη ανά (βδομάδες/μέρες)</Label>
+                          <Label className="text-xs font-semibold text-zinc-500 ml-1">Επανάληψη ανά (βδομάδες/μέρες)</Label>
                           <select
                             value={recurringSettings.interval}
                             onChange={(e) => setRecurringSettings({...recurringSettings, interval: parseInt(e.target.value)})}
@@ -849,7 +853,7 @@ export default function NewBookingPage() {
                         </div>
 
                         <div className="space-y-3">
-                          <Label className="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">Συνολικές Κρατήσεις</Label>
+                          <Label className="text-xs font-semibold text-zinc-500 ml-1">Συνολικές Κρατήσεις</Label>
                           <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-zinc-200 shadow-sm">
                              <Button
                                type="button"
@@ -859,7 +863,7 @@ export default function NewBookingPage() {
                              >
                                -
                              </Button>
-                             <div className="flex-1 text-center text-xl font-black">{recurringSettings.occurrences}</div>
+                             <div className="flex-1 text-center text-xl font-bold">{recurringSettings.occurrences}</div>
                              <Button
                                type="button"
                                variant="ghost"
@@ -875,7 +879,7 @@ export default function NewBookingPage() {
                       {/* Dates Preview */}
                       {selectedDate && watchedPitchId && (
                         <div className="space-y-4">
-                          <Label className="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">Προεπισκόπηση Ημερομηνιών</Label>
+                          <Label className="text-xs font-semibold text-zinc-500 ml-1">Προεπισκόπηση Ημερομηνιών</Label>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             {generateRecurringDates(
                               selectedDate,
@@ -887,7 +891,7 @@ export default function NewBookingPage() {
                               return (
                                 <div key={date} className="bg-white p-4 rounded-2xl border-2 border-zinc-100 flex items-center justify-between shadow-sm">
                                   <div className="min-w-0">
-                                    <p className="text-[12px] font-black text-zinc-400 uppercase tracking-tighter">
+                                    <p className="text-2xs font-semibold text-zinc-500 tracking-tighter">
                                       {new Date(date).toLocaleDateString('el-GR', { weekday: 'long' })}
                                     </p>
                                     <p className="font-bold text-zinc-900 truncate">
@@ -895,17 +899,17 @@ export default function NewBookingPage() {
                                     </p>
                                   </div>
                                   <Badge className={cn(
-                                    "font-black text-[12px] px-2.5",
+                                    "font-semibold text-2xs px-2.5",
                                     isAvailable ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-red-50 text-red-700 border-red-100"
                                   )}>
-                                    {isAvailable ? 'ΟΚ' : 'ΚΡΑΤΗΜΕΝΟ'}
+                                    {isAvailable ? 'ΟΚ' : 'Κρατημένο'}
                                   </Badge>
                                 </div>
                               );
                             })}
                           </div>
                           {recurringSettings.occurrences > 6 && (
-                            <p className="text-center text-xs font-bold text-zinc-400 italic">... και ακόμα {recurringSettings.occurrences - 6} κρατήσεις</p>
+                            <p className="text-center text-xs font-medium text-zinc-500 italic">... και ακόμα {recurringSettings.occurrences - 6} κρατήσεις</p>
                           )}
                         </div>
                       )}
@@ -917,7 +921,7 @@ export default function NewBookingPage() {
 
                 {/* 4. Notes */}
                 <div className="space-y-4">
-                  <Label htmlFor="notes" className="text-xs font-black uppercase tracking-widest text-zinc-400 ml-1">Σημειώσεις (Προαιρετικά)</Label>
+                  <Label htmlFor="notes" className="text-xs font-semibold text-zinc-500 ml-1">Σημειώσεις (Προαιρετικά)</Label>
                   <Textarea
                     id="notes"
                     {...register('notes')}
@@ -930,7 +934,7 @@ export default function NewBookingPage() {
                 <div className="pt-4">
                   <Button
                     type="submit"
-                    className="w-full h-12 sm:h-16 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-base sm:text-xl shadow-xl shadow-emerald-200 transition-all hover:translate-y-[-2px] active:translate-y-[1px]"
+                    className="w-full h-12 sm:h-16 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-base sm:text-xl shadow-xl shadow-emerald-200 transition-all hover:translate-y-[-2px] active:translate-y-[1px]"
                     disabled={isSaving}
                   >
                     {isSaving ? (
@@ -957,7 +961,7 @@ export default function NewBookingPage() {
           <Card className="bg-emerald-600 border-0 overflow-hidden shadow-2xl shadow-emerald-200">
             <CardContent className="p-5 sm:p-8 text-white">
               <div className="flex items-center justify-between mb-8">
-                <p className="text-xs font-black uppercase tracking-[3px] text-white/70">{toGreekUpperCase('Σύνοψη Πληρωμής')}</p>
+                <p className="text-xs font-semibold tracking-[3px] text-white/70">{'Σύνοψη Πληρωμής'}</p>
                 <div className="h-10 w-10 rounded-xl bg-white/10 flex items-center justify-center backdrop-blur-md">
                   <Euro className="h-5 w-5 text-white" />
                 </div>
@@ -965,17 +969,17 @@ export default function NewBookingPage() {
               
               <div className="space-y-6">
                  <div className="flex items-end justify-between">
-                   <p className="text-sm font-bold text-white/90">Τιμή ανά γήπεδο:</p>
-                   <p className="text-2xl font-black text-white">&euro;{pitches.find(p => p.id === watch('pitchId'))?.pricePerSlot?.toFixed(2) || '0.00'}</p>
+                   <p className="text-sm font-semibold text-white/90">Τιμή ανά γήπεδο:</p>
+                   <p className="text-2xl font-bold text-white">&euro;{pitches.find(p => p.id === watch('pitchId'))?.pricePerSlot?.toFixed(2) || '0.00'}</p>
                  </div>
                  
                  {isRecurring && recurringSettings.occurrences > 1 && (
                    <div className="flex items-end justify-between pt-4 border-t border-white/10">
                      <div>
-                       <p className="text-sm font-bold text-white/90">Σύνολο ({recurringSettings.occurrences}):</p>
-                       <p className="text-[12px] uppercase font-black text-white/50 tracking-wider">Προσεγγιστικά</p>
+                       <p className="text-sm font-semibold text-white/90">Σύνολο ({recurringSettings.occurrences}):</p>
+                       <p className="text-2xs font-semibold text-white/50">Προσεγγιστικά</p>
                      </div>
-                     <p className="text-4xl font-black text-white">
+                     <p className="text-4xl font-bold text-white">
                        &euro;{((pitches.find(p => p.id === watch('pitchId'))?.pricePerSlot || 0) * recurringSettings.occurrences).toFixed(2)}
                      </p>
                    </div>
@@ -983,7 +987,7 @@ export default function NewBookingPage() {
               </div>
 
               <div className="mt-8 p-4 bg-emerald-700/50 rounded-2xl border border-white/10">
-                <p className="text-xs font-bold leading-relaxed text-white">Η πληρωμή θα πραγματοποιηθεί με την άφιξη του πελάτη στον χώρο.</p>
+                <p className="text-xs font-medium leading-relaxed text-white">Η πληρωμή θα πραγματοποιηθεί με την άφιξη του πελάτη στον χώρο.</p>
               </div>
             </CardContent>
           </Card>
@@ -991,7 +995,7 @@ export default function NewBookingPage() {
           {/* Tips Card */}
           <Card className="premium-card">
             <CardContent className="p-8">
-               <h4 className="text-sm font-black uppercase tracking-wider text-zinc-900 mb-4">Χρήσιμες Συμβουλές</h4>
+               <h4 className="text-sm font-semibold text-zinc-900 mb-4">Χρήσιμες Συμβουλές</h4>
                <ul className="space-y-4">
                  {[
                    'Βεβαιωθείτε ότι το τηλέφωνο είναι σωστό για αποστολή ενημέρωσης.',
@@ -999,7 +1003,7 @@ export default function NewBookingPage() {
                    'Για μακροχρόνιες κρατήσεις, επιλέξτε την επαναλαμβανόμενη λειτουργία.'
                  ].map((tip, idx) => (
                    <li key={idx} className="flex gap-3 text-sm font-medium text-zinc-500">
-                     <span className="h-5 w-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 font-black text-[12px] border border-emerald-100">
+                     <span className="h-5 w-5 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 font-semibold text-2xs border border-emerald-100">
                        {idx + 1}
                      </span>
                      {tip}

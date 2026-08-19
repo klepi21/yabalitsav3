@@ -26,7 +26,7 @@ export default function BookDemo() {
           </div>
 
           {/* Heading */}
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight leading-tight mb-5">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight leading-tight mb-5">
             Δείτε το Yabalitsa
             <br />
             <span className="text-emerald-400">σε δράση</span>
@@ -42,7 +42,7 @@ export default function BookDemo() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={() => setShowEmbed(true)}
-              className="group flex items-center gap-3 px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-base rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/20 active:scale-[0.98]"
+              className="group flex items-center gap-3 px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-base rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/20 active:scale-[0.98]"
             >
               <Calendar className="h-5 w-5" />
               Κλείστε Demo
@@ -61,7 +61,7 @@ export default function BookDemo() {
           </div>
 
           {/* Trust signals */}
-          <div className="flex flex-wrap items-center justify-center gap-6 mt-12 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
+          <div className="flex flex-wrap items-center justify-center gap-6 mt-12 text-2xs font-bold text-zinc-500 uppercase tracking-wider">
             <span className="flex items-center gap-1.5">
               <svg className="h-3.5 w-3.5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
               30 λεπτά

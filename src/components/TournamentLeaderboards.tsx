@@ -50,10 +50,10 @@ export default function TournamentLeaderboards({ players, teams }: TournamentLea
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                "flex-1 flex items-center justify-center gap-1.5 py-3 text-[12px] font-black uppercase tracking-wider transition-all",
+                "flex-1 flex items-center justify-center gap-1.5 py-3 text-2xs font-semibold transition-all",
                 activeTab === tab.id
                   ? "text-emerald-600 border-b-2 border-emerald-500 bg-emerald-50/30"
-                  : "text-zinc-400 hover:text-zinc-600"
+                  : "text-zinc-500 hover:text-zinc-600"
               )}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -66,7 +66,7 @@ export default function TournamentLeaderboards({ players, teams }: TournamentLea
       {/* Content */}
       <div className="p-4">
         {activeData.length === 0 ? (
-          <p className="text-center text-sm text-zinc-300 py-8 font-bold">Δεν υπάρχουν δεδομένα</p>
+          <p className="text-center text-sm text-zinc-400 py-8 font-semibold">Δεν υπάρχουν δεδομένα</p>
         ) : (
           <div className="space-y-1">
             {activeData.map((player, idx) => {
@@ -82,37 +82,37 @@ export default function TournamentLeaderboards({ players, teams }: TournamentLea
                 >
                   {/* Position */}
                   <div className={cn(
-                    "h-7 w-7 rounded-lg flex items-center justify-center text-xs font-black shrink-0",
+                    "h-7 w-7 rounded-lg flex items-center justify-center text-xs font-semibold shrink-0",
                     idx === 0 ? "bg-amber-100 text-amber-700" :
                     idx === 1 ? "bg-zinc-200 text-zinc-600" :
                     idx === 2 ? "bg-orange-100 text-orange-700" :
-                    "bg-transparent text-zinc-400"
+                    "bg-transparent text-zinc-500"
                   )}>
                     {idx + 1}
                   </div>
 
                   {/* Player info */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-zinc-900 truncate">{player.name}</p>
-                    <p className="text-[11px] text-zinc-400 truncate">{team?.name || '—'}</p>
+                    <p className="text-xs font-medium text-zinc-900 truncate">{player.name}</p>
+                    <p className="text-2xs text-zinc-500 truncate">{team?.name || '—'}</p>
                   </div>
 
                   {/* Shirt number */}
                   {player.shirtNumber && (
-                    <span className="text-[11px] font-bold text-zinc-300">#{player.shirtNumber}</span>
+                    <span className="text-2xs font-medium text-zinc-400">#{player.shirtNumber}</span>
                   )}
 
                   {/* Stat value */}
                   {activeTab === 'goals' && (
                     <div className="text-right">
-                      <span className="text-sm font-black text-zinc-900">{player.stats.goals}</span>
-                      <span className="text-[8px] font-bold text-zinc-300 ml-0.5">γκολ</span>
+                      <span className="text-sm font-semibold text-zinc-900">{player.stats.goals}</span>
+                      <span className="text-2xs font-medium text-zinc-400 ml-0.5">γκολ</span>
                     </div>
                   )}
                   {activeTab === 'assists' && (
                     <div className="text-right">
-                      <span className="text-sm font-black text-zinc-900">{player.stats.assists}</span>
-                      <span className="text-[8px] font-bold text-zinc-300 ml-0.5">ασίστ</span>
+                      <span className="text-sm font-semibold text-zinc-900">{player.stats.assists}</span>
+                      <span className="text-2xs font-medium text-zinc-400 ml-0.5">ασίστ</span>
                     </div>
                   )}
                   {activeTab === 'cards' && (
@@ -120,13 +120,13 @@ export default function TournamentLeaderboards({ players, teams }: TournamentLea
                       {player.stats.yellowCards > 0 && (
                         <div className="flex items-center gap-0.5">
                           <div className="h-3.5 w-2.5 rounded-sm bg-amber-400" />
-                          <span className="text-xs font-black text-zinc-700">{player.stats.yellowCards}</span>
+                          <span className="text-xs font-semibold text-zinc-700">{player.stats.yellowCards}</span>
                         </div>
                       )}
                       {player.stats.redCards > 0 && (
                         <div className="flex items-center gap-0.5">
                           <div className="h-3.5 w-2.5 rounded-sm bg-red-500" />
-                          <span className="text-xs font-black text-zinc-700">{player.stats.redCards}</span>
+                          <span className="text-xs font-semibold text-zinc-700">{player.stats.redCards}</span>
                         </div>
                       )}
                     </div>

@@ -123,10 +123,10 @@ export default function EditAcademyUserPage({ params }: PageProps) {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <div className="mx-auto h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center mb-4">
-            <Users className="h-6 w-6 text-zinc-400" />
+            <Users className="h-6 w-6 text-zinc-500" />
           </div>
           <h2 className="text-lg font-semibold text-zinc-900 mb-1">Ο χρήστης δεν βρέθηκε</h2>
-          <p className="text-sm text-zinc-400 mb-5">Ο χρήστης που αναζητάτε δεν υπάρχει.</p>
+          <p className="text-sm text-zinc-500 mb-5">Ο χρήστης που αναζητάτε δεν υπάρχει.</p>
           <Button asChild>
             <Link href="/management/academy/users">Πίσω στους Χρήστες</Link>
           </Button>

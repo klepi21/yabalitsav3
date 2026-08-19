@@ -5,6 +5,7 @@ import { Zap, Shield, CheckCircle2 } from 'lucide-react';
 import HeroVideo from '@/components/HeroVideo';
 import AnimatedLaptop from '@/components/AnimatedLaptop';
 import BookDemo from '@/components/BookDemo';
+import MobileNav from '@/components/landing/MobileNav';
 
 // Dynamic imports for off-screen components to improve PageSpeed
 const FeaturesSection = dynamic(() => import('@/components/landing/FeaturesSection'), {
@@ -51,7 +52,7 @@ export default function RootPage() {
         </div>
 
         {/* Header */}
-        <header className="relative z-50 w-full max-w-[1400px] mx-auto px-6 py-5 flex items-center justify-between text-[13px] font-medium tracking-wide">
+        <header className="relative z-50 w-full max-w-[1400px] mx-auto px-6 py-5 flex items-center justify-between text-xs font-medium tracking-wide">
           <div className="flex items-center gap-10">
             <Link href="/">
               <Image
@@ -70,15 +71,14 @@ export default function RootPage() {
               <Link href="/blog" className="hover:text-emerald-400 transition">Blog </Link>
             </nav>
           </div>
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-3">
-              <Link href="/venue-login" className="hidden sm:flex px-4 py-2 rounded border border-zinc-600 bg-white/5 hover:bg-white/10 text-white transition">
-                Σύνδεση
-              </Link>
-              <Link href="https://www.yabalitsa.com/for-venues" className="px-5 py-2 rounded bg-emerald-400 hover:bg-emerald-500 text-black font-bold transition">
-                Ξεκινήστε δωρεάν
-              </Link>
-            </div>
+          <div className="flex items-center gap-3">
+            <Link href="/venue-login" className="hidden sm:flex px-4 py-2 rounded-lg border border-white/20 bg-white/5 hover:bg-white/10 text-white transition-colors">
+              Σύνδεση
+            </Link>
+            <Link href="/for-venues" className="hidden sm:flex px-5 py-2 rounded-lg bg-emerald-400 hover:bg-emerald-300 text-zinc-950 font-bold transition-colors">
+              Ξεκινήστε δωρεάν
+            </Link>
+            <MobileNav />
           </div>
         </header>
 
@@ -103,7 +103,7 @@ export default function RootPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 md:mb-24">
               <Link
                 href="/venue-login"
-                className="group px-8 py-3.5 md:px-10 md:py-4 font-bold text-white bg-emerald-500 hover:bg-emerald-400 rounded-2xl transition-all duration-300 overflow-hidden shadow-[0_0_30px_-5px_rgba(52,211,153,0.4)] hover:shadow-[0_0_40px_-5px_rgba(52,211,153,0.6)] flex items-center gap-3 hover:scale-105 active:scale-95 text-sm md:text-base w-full sm:w-auto justify-center"
+                className="group px-8 py-3.5 md:px-10 md:py-4 font-bold text-white bg-emerald-500 hover:bg-emerald-400 rounded-2xl transition-all duration-300 overflow-hidden shadow-[0_0_30px_-5px_rgba(116,238,22,0.4)] hover:shadow-[0_0_40px_-5px_rgba(116,238,22,0.6)] flex items-center gap-3 hover:scale-105 active:scale-95 text-sm md:text-base w-full sm:w-auto justify-center"
               >
                 <span>Μπείτε στη Νέα Εποχή</span>
               </Link>
@@ -117,7 +117,7 @@ export default function RootPage() {
               </Link>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-[11px] md:text-xs font-bold text-white/90 uppercase tracking-[0.2em] -mt-10 md:-mt-16 mb-24 md:mb-36 drop-shadow-lg">
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-2xs md:text-xs font-bold text-white/90 uppercase tracking-[0.2em] -mt-10 md:-mt-16 mb-24 md:mb-36 drop-shadow-lg">
               <span className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-emerald-400" /> 15 Ημερες Δωρεαν Δοκιμη</span>
               <span className="hidden sm:block w-1.5 h-1.5 bg-white/20 rounded-full" />
               <span className="flex items-center gap-2"><Zap className="w-3.5 h-3.5 text-emerald-400" /> Χωρις Πιστωτικη Καρτα</span>
@@ -153,13 +153,13 @@ export default function RootPage() {
               height={20}
               className="filter brightness-0 invert opacity-50 hover:opacity-100 transition"
             />
-            <span className="text-zinc-600 text-sm">© 2026. All rights reserved.</span>
+            <span className="text-zinc-400 text-sm">© 2026 Yabalitsa. Με επιφύλαξη παντός δικαιώματος.</span>
           </div>
-          <div className="flex items-center gap-6 text-sm text-zinc-500 font-medium">
-            <Link href="/" className="hover:text-emerald-400 transition">Contact Us</Link>
-            <Link href="/blog" className="hover:text-emerald-400 transition">Blog / Άρθρα</Link>
-            <Link href="/terms" className="hover:text-emerald-400 transition">Terms of Service</Link>
-            <Link href="/privacy" className="hover:text-emerald-400 transition">Privacy Policy</Link>
+          <div className="flex items-center gap-6 text-sm text-zinc-400 font-medium">
+            <Link href="/contact" className="hover:text-emerald-400 transition">Επικοινωνία</Link>
+            <Link href="/blog" className="hover:text-emerald-400 transition">Άρθρα</Link>
+            <Link href="/terms" className="hover:text-emerald-400 transition">Όροι χρήσης</Link>
+            <Link href="/privacy" className="hover:text-emerald-400 transition">Απόρρητο</Link>
           </div>
         </div>
       </footer>

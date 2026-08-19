@@ -33,7 +33,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 // Form validation schema
 const venueSettingsSchema = z.object({
@@ -339,13 +339,13 @@ export default function SettingsPage() {
              <Settings className="h-6 w-6 text-emerald-400" />
            </div>
            <div className="space-y-0.5">
-             <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
-               {toGreekUpperCase('Ρυθμίσεις')}
+             <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+               {'Ρυθμίσεις'}
              </h1>
              <div className="flex items-center gap-2">
                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-               <p className="text-[12px] font-black text-zinc-400 uppercase tracking-widest">
-                 {toGreekUpperCase('Διαμορφωση παραμετρων συστηματος')}
+               <p className="text-2xs font-semibold text-zinc-500">
+                 {'Διαμορφωση παραμετρων συστηματος'}
                </p>
              </div>
            </div>
@@ -374,18 +374,18 @@ export default function SettingsPage() {
                   "bg-emerald-500"
                 )} />
                 <div className="flex flex-col">
-                  <span className="text-[11px] uppercase tracking-widest opacity-40 font-black">Πλάνο</span>
-                  <span className="text-xs font-black uppercase tracking-tight">{planName} • {daysRemaining} ημέρες</span>
+                  <span className="text-2xs opacity-40 font-semibold">Πλάνο</span>
+                  <span className="text-xs font-semibold tracking-tight">{planName} • {daysRemaining} ημέρες</span>
                 </div>
               </div>
             );
           } else {
             return (
-              <div className="flex items-center gap-4 px-5 py-3 rounded-2xl border border-zinc-100 bg-white text-zinc-400 shadow-sm font-bold">
+              <div className="flex items-center gap-4 px-5 py-3 rounded-2xl border border-zinc-100 bg-white text-zinc-500 shadow-sm font-bold">
                 <div className="h-2 w-2 rounded-full bg-zinc-200" />
                 <div className="flex flex-col">
-                  <span className="text-[11px] uppercase tracking-widest opacity-40 font-black">Πλάνο</span>
-                  <span className="text-xs font-black uppercase tracking-tight">{venue.plan === 'trial' ? 'Δωρεάν Trial' : 'Χωρίς Πλάνο'}</span>
+                  <span className="text-2xs opacity-40 font-semibold">Πλάνο</span>
+                  <span className="text-xs font-semibold tracking-tight">{venue.plan === 'trial' ? 'Δωρεάν Trial' : 'Χωρίς Πλάνο'}</span>
                 </div>
               </div>
             );
@@ -419,11 +419,11 @@ export default function SettingsPage() {
         <div className="space-y-8">
           <Card className="premium-card border-none">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-black flex items-center gap-3 text-zinc-900 uppercase">
+              <CardTitle className="text-lg font-semibold flex items-center gap-3 text-zinc-900">
                 <div className="h-8 w-8 rounded-lg bg-emerald-50 flex items-center justify-center">
                   <Building2 className="h-4 w-4 text-emerald-600" />
                 </div>
-                {toGreekUpperCase('Πληροφορίες Γηπέδου')}
+                {'Πληροφορίες Γηπέδου'}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
@@ -431,48 +431,48 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-1 gap-8">
                   {/* Venue Name */}
                   <div className="space-y-3">
-                    <Label htmlFor="name" className="text-xs font-black uppercase tracking-widest text-zinc-400">Όνομα Γηπέδου</Label>
+                    <Label htmlFor="name" className="text-xs font-semibold text-zinc-500">Όνομα Γηπέδου</Label>
                     <Input
                       type="text"
                       id="name"
                       {...register('name')}
                       placeholder="π.χ. Arena 5x5 Central"
-                      className="h-11 rounded-xl bg-zinc-50 border-zinc-100 px-5 font-bold focus:bg-white transition-all uppercase text-sm"
+                      className="h-11 rounded-xl bg-zinc-50 border-zinc-100 px-5 font-semibold focus:bg-white transition-all text-sm"
                     />
                     {errors.name && (
-                      <p className="text-xs font-bold text-red-500 pl-2">{errors.name.message}</p>
+                      <p className="text-xs font-medium text-red-500 pl-2">{errors.name.message}</p>
                     )}
                   </div>
 
                   {/* Address */}
                   <div className="space-y-3">
-                    <Label htmlFor="address" className="text-xs font-black uppercase tracking-widest text-zinc-400">Διεύθυνση</Label>
+                    <Label htmlFor="address" className="text-xs font-semibold text-zinc-500">Διεύθυνση</Label>
                     <Input
                       type="text"
                       id="address"
                       {...register('address')}
                       placeholder="Οδός και αριθμός"
-                      className="h-11 rounded-xl bg-zinc-50 border-zinc-100 px-5 font-bold focus:bg-white transition-all uppercase text-sm"
+                      className="h-11 rounded-xl bg-zinc-50 border-zinc-100 px-5 font-semibold focus:bg-white transition-all text-sm"
                     />
                     {errors.address && (
-                      <p className="text-xs font-bold text-red-500 pl-2">{errors.address.message}</p>
+                      <p className="text-xs font-medium text-red-500 pl-2">{errors.address.message}</p>
                     )}
                   </div>
 
                   {/* City */}
                   <div className="space-y-3">
-                    <Label htmlFor="city" className="text-xs font-black uppercase tracking-widest text-zinc-400">Πόλη</Label>
+                    <Label htmlFor="city" className="text-xs font-semibold text-zinc-500">Πόλη</Label>
                     <div className="relative">
                       <select
                         id="city"
                         {...register('city')}
-                        className="w-full h-11 rounded-xl bg-zinc-50 border border-zinc-100 px-5 font-bold appearance-none focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
+                        className="w-full h-11 rounded-xl bg-zinc-50 border border-zinc-100 px-5 font-semibold appearance-none focus:bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500/20 transition-all text-sm"
                       >
                         <option value="Αθήνα">Αθήνα</option>
                         <option value="Θεσσαλονίκη">Θεσσαλονίκη</option>
                         <option value="Πάτρα">Πάτρα</option>
                       </select>
-                      <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-400">
+                      <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-zinc-500">
                         <ArrowLeft className="h-4 w-4 rotate-[-90deg]" />
                       </div>
                     </div>
@@ -484,30 +484,30 @@ export default function SettingsPage() {
                 {/* Contact Information */}
                 <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
                   <div className="space-y-3">
-                    <Label htmlFor="email" className="text-xs font-black uppercase tracking-widest text-zinc-400">Email Επικοινωνίας</Label>
+                    <Label htmlFor="email" className="text-xs font-semibold text-zinc-500">Email Επικοινωνίας</Label>
                     <Input
                       type="email"
                       id="email"
                       {...register('contactDetails.email')}
                       placeholder="info@example.com"
-                      className="h-11 rounded-xl bg-zinc-50 border-zinc-100 px-5 font-bold focus:bg-white transition-all text-sm"
+                      className="h-11 rounded-xl bg-zinc-50 border-zinc-100 px-5 font-semibold focus:bg-white transition-all text-sm"
                     />
                     {errors.contactDetails?.email && (
-                      <p className="text-xs font-bold text-red-500 pl-2">{errors.contactDetails.email.message}</p>
+                      <p className="text-xs font-medium text-red-500 pl-2">{errors.contactDetails.email.message}</p>
                     )}
                   </div>
 
                   <div className="space-y-3">
-                    <Label htmlFor="phone" className="text-xs font-black uppercase tracking-widest text-zinc-400">Τηλέφωνο</Label>
+                    <Label htmlFor="phone" className="text-xs font-semibold text-zinc-500">Τηλέφωνο</Label>
                     <Input
                       type="tel"
                       id="phone"
                       {...register('contactDetails.phone')}
                       placeholder="210..."
-                      className="h-11 rounded-xl bg-zinc-50 border-zinc-100 px-5 font-bold focus:bg-white transition-all text-sm"
+                      className="h-11 rounded-xl bg-zinc-50 border-zinc-100 px-5 font-semibold focus:bg-white transition-all text-sm"
                     />
                     {errors.contactDetails?.phone && (
-                      <p className="text-xs font-bold text-red-500 pl-2">{errors.contactDetails.phone.message}</p>
+                      <p className="text-xs font-medium text-red-500 pl-2">{errors.contactDetails.phone.message}</p>
                     )}
                   </div>
                 </div>
@@ -542,15 +542,15 @@ export default function SettingsPage() {
                     <Settings className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm font-black text-zinc-900 uppercase">
-                      {toGreekUpperCase('Διαχείριση Χρηστών')}
+                    <p className="text-sm font-semibold text-zinc-900">
+                      {'Διαχείριση Χρηστών'}
                     </p>
-                    <p className="text-xs text-zinc-400 mt-0.5">
+                    <p className="text-xs text-zinc-500 mt-0.5">
                       Προπονητές, δικαιώματα, ορατότητα τμημάτων
                     </p>
                   </div>
                 </div>
-                <ArrowUpCircle className="h-5 w-5 text-zinc-300 rotate-90" />
+                <ArrowUpCircle className="h-5 w-5 text-zinc-400 rotate-90" />
               </CardContent>
             </Card>
           </Link>
@@ -558,18 +558,18 @@ export default function SettingsPage() {
           {/* Management PIN Section */}
           <Card className="premium-card border-none">
             <CardHeader className="pb-2">
-              <CardTitle className="text-lg font-black flex items-center gap-3 text-zinc-900 uppercase">
+              <CardTitle className="text-lg font-semibold flex items-center gap-3 text-zinc-900">
                 <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
                   <Lock className="h-4 w-4 text-blue-600" />
                 </div>
-                {toGreekUpperCase('PIN Διαχείρισης')}
+                {'PIN Διαχείρισης'}
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-6">
               {!venue?.managementPinHash ? (
                 <div className="space-y-6">
                   <div className="bg-blue-50 rounded-2xl p-6">
-                    <p className="text-sm font-bold text-blue-700 leading-relaxed">
+                    <p className="text-sm font-semibold text-blue-700 leading-relaxed">
                       Ο PIN διαχείρισης απαιτείται για ευαίσθητες ενέργειες στον πίνακα ελέγχου. 
                       Ορίστε έναν 4ψήφιο κωδικό για την ασφάλειά σας.
                     </p>
@@ -578,7 +578,7 @@ export default function SettingsPage() {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  <div className="flex items-center gap-4 text-emerald-600 mb-6 font-black text-sm">
+                  <div className="flex items-center gap-4 text-emerald-600 mb-6 font-semibold text-sm">
                     <Zap className="h-5 w-5 fill-emerald-600" />
                     Ο PIN είναι ενεργοποιημένος
                   </div>
@@ -598,30 +598,30 @@ export default function SettingsPage() {
                 <Sparkles className="h-32 w-32 text-zinc-900" />
               </div>
               <CardHeader>
-                <CardTitle className="text-zinc-400 font-black text-xs uppercase tracking-widest">{toGreekUpperCase('Τρέχον Πλάνο')}</CardTitle>
+                <CardTitle className="text-zinc-500 font-semibold text-xs">{'Τρέχον Πλάνο'}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex flex-col gap-8 relative z-10">
                   <div className="flex items-end gap-3">
-                    <span className="text-5xl font-black text-zinc-900 tracking-tighter">
-                      {toGreekUpperCase(venue.planType || 'Basic')}
+                    <span className="text-5xl font-bold text-zinc-900 tracking-tighter">
+                      {venue.planType || 'Basic'}
                     </span>
-                    <span className="text-zinc-400 font-black mb-2 text-[12px] uppercase tracking-widest">
-                      {toGreekUpperCase(venue.plan === 'subscription' ? 'Plan' : 'Free Trial')}
+                    <span className="text-zinc-500 font-semibold mb-2 text-2xs">
+                      {venue.plan === 'subscription' ? 'Plan' : 'Free Trial'}
                     </span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100/50">
-                      <p className="text-zinc-400 text-[11px] font-black uppercase tracking-widest mb-1">{toGreekUpperCase('Υπόλοιπο')}</p>
-                      <p className="text-2xl font-black text-zinc-900">
-                        {calculateDaysRemaining(venue) ?? 0} <span className="text-xs font-bold text-zinc-400 uppercase tracking-tight">{toGreekUpperCase('ημέρες')}</span>
+                      <p className="text-zinc-500 text-2xs font-semibold mb-1">{'Υπόλοιπο'}</p>
+                      <p className="text-2xl font-bold text-zinc-900">
+                        {calculateDaysRemaining(venue) ?? 0} <span className="text-xs font-medium text-zinc-500 tracking-tight">{'ημέρες'}</span>
                       </p>
                     </div>
 
                     <div className="bg-zinc-50 rounded-2xl p-6 border border-zinc-100/50">
-                      <p className="text-zinc-400 text-[11px] font-black uppercase tracking-widest mb-1">{toGreekUpperCase('Λήξη')}</p>
-                      <p className="text-sm font-black text-zinc-900 truncate">
+                      <p className="text-zinc-500 text-2xs font-semibold mb-1">{'Λήξη'}</p>
+                      <p className="text-sm font-semibold text-zinc-900 truncate">
                         {(() => {
                           const endDateInfo = getSubscriptionEndDate(venue, lastPayment);
                           return endDateInfo ? new Date(endDateInfo.date).toLocaleDateString('el-GR', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
@@ -632,11 +632,11 @@ export default function SettingsPage() {
 
                   <Button 
                     asChild
-                    className="h-12 w-full rounded-2xl bg-zinc-900 text-white hover:bg-black font-black text-[11px] shadow-lg transition-all active:scale-95 uppercase tracking-widest"
+                    className="h-12 w-full rounded-2xl bg-zinc-900 text-white hover:bg-black font-semibold text-2xs shadow-lg transition-all active:scale-95"
                   >
                     <Link href="/management/settings/renewal">
                       <ArrowUpCircle className="h-4 w-4 mr-2 text-emerald-400" />
-                      {toGreekUpperCase('Ανανέωση ή Αναβάθμιση')}
+                      {'Ανανέωση ή Αναβάθμιση'}
                     </Link>
                   </Button>
                 </div>
@@ -648,15 +648,15 @@ export default function SettingsPage() {
           {venue && venue.plan === 'subscription' && lastPayment && (
             <Card className="premium-card border-none">
               <CardHeader className="pb-2">
-                <CardTitle className="text-xl font-black flex items-center justify-between text-zinc-900">
+                <CardTitle className="text-xl font-bold flex items-center justify-between text-zinc-900">
                   <div className="flex items-center gap-3">
                     <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center">
                       <CreditCard className="h-5 w-5 text-orange-600" />
                     </div>
-                    {toGreekUpperCase('Τελευταία Πληρωμή')}
+                    {'Τελευταία Πληρωμή'}
                   </div>
                   <Badge className={cn(
-                    "rounded-xl px-4 py-1 font-black text-[12px] uppercase tracking-widest",
+                    "rounded-xl px-4 py-1 font-semibold text-2xs",
                     lastPayment.status === 'succeeded' ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
                   )}>
                     {lastPayment.status === 'succeeded' ? 'Ολοκληρωμένη' : 'Εκκρεμεί'}
@@ -666,19 +666,19 @@ export default function SettingsPage() {
               <CardContent className="pt-6">
                 <div className="bg-zinc-50 rounded-2xl p-6 space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-zinc-400">Ποσό</span>
-                    <span className="text-2xl font-black text-zinc-900">
+                    <span className="text-sm font-semibold text-zinc-500">Ποσό</span>
+                    <span className="text-2xl font-bold text-zinc-900">
                       €{typeof lastPayment.amount === 'number' ? lastPayment.amount.toFixed(2) : parseFloat(lastPayment.amount || '0').toFixed(2)}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-zinc-400">Ημερομηνία</span>
-                    <span className="text-sm font-black text-zinc-700">
+                    <span className="text-sm font-semibold text-zinc-500">Ημερομηνία</span>
+                    <span className="text-sm font-semibold text-zinc-700">
                       {lastPayment.paymentDate ? new Date(lastPayment.paymentDate).toLocaleDateString('el-GR', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'}
                     </span>
                   </div>
                   <div className="h-px bg-zinc-200/50" />
-                  <div className="flex items-center gap-3 text-xs font-bold text-zinc-500">
+                  <div className="flex items-center gap-3 text-xs font-medium text-zinc-500">
                     <BarChart3 className="h-4 w-4" />
                     {lastPayment.planName || 'Basic'} Plan • {lastPayment.durationMonths || 1} μήνες
                   </div>
@@ -708,8 +708,8 @@ export default function SettingsPage() {
                       <MessageCircle className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-black text-white">{toGreekUpperCase('Άμεση Υποστήριξη')}</h3>
-                      <p className="text-[10px] font-bold text-emerald-200 uppercase tracking-wider">Στείλτε μας μήνυμα</p>
+                      <h3 className="text-lg font-semibold text-white">{'Άμεση Υποστήριξη'}</h3>
+                      <p className="text-2xs font-medium text-emerald-200">Στείλτε μας μήνυμα</p>
                     </div>
                   </div>
                 </div>
@@ -728,7 +728,7 @@ export default function SettingsPage() {
                   <LifeBuoy className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-black text-zinc-900 uppercase">{toGreekUpperCase('Χρειάζεστε βοήθεια;')}</h3>
+                  <h3 className="text-base font-semibold text-zinc-900">{'Χρειάζεστε βοήθεια;'}</h3>
                   <p className="text-xs text-zinc-500 font-medium">
                     Η ομάδα μας είναι διαθέσιμη για οποιαδήποτε απορία.
                   </p>
@@ -736,7 +736,7 @@ export default function SettingsPage() {
               </div>
               <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
                 <SupportEmail variant="highlighted" />
-                <div className="flex items-center gap-1.5 text-[10px] font-bold text-blue-500 uppercase tracking-wider">
+                <div className="flex items-center gap-1.5 text-2xs font-medium text-blue-500">
                   <div className="h-1.5 w-1.5 rounded-full bg-blue-500 animate-pulse" />
                   Απάντηση σε &lt;24 ώρες
                 </div>
@@ -763,7 +763,7 @@ function SetPinForm({ onSubmit, isSaving }: { onSubmit: (pinA: string, pinB: str
           placeholder="Νέος PIN"
           value={pinA}
           onChange={(e) => setPinA(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-          className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-6 font-bold focus:bg-white text-center text-2xl tracking-[1em]"
+          className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-6 font-bold focus:bg-white text-center text-2xl"
         />
         <Input
           type="password"
@@ -773,13 +773,13 @@ function SetPinForm({ onSubmit, isSaving }: { onSubmit: (pinA: string, pinB: str
           placeholder="Επιβεβαίωση"
           value={pinB}
           onChange={(e) => setPinB(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-          className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-6 font-bold focus:bg-white text-center text-2xl tracking-[1em]"
+          className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-6 font-bold focus:bg-white text-center text-2xl"
         />
       </div>
       <Button
         disabled={isSaving}
         onClick={() => onSubmit(pinA, pinB)}
-        className="h-14 w-full rounded-2xl bg-blue-600 hover:bg-blue-700 font-black text-white"
+        className="h-14 w-full rounded-2xl bg-blue-600 hover:bg-blue-700 font-semibold text-white"
       >
         {isSaving ? (
           <>
@@ -852,7 +852,7 @@ function TelegramSupportForm({ venueId, rateLimitHours = 1 }: { venueId?: string
             type="button"
             onClick={() => setCategory(cat.value)}
             className={cn(
-              "h-9 flex items-center gap-1.5 px-3 text-[11px] font-black rounded-lg transition-all",
+              "h-9 flex items-center gap-1.5 px-3 text-2xs font-semibold rounded-lg transition-all",
               category === cat.value
                 ? "bg-white text-emerald-600 shadow-md"
                 : "bg-white/15 text-emerald-100 hover:bg-white/25"
@@ -875,26 +875,26 @@ function TelegramSupportForm({ venueId, rateLimitHours = 1 }: { venueId?: string
 
       {/* Status & Send */}
       {sendSuccess && (
-        <div className="flex items-center gap-2 text-emerald-100 font-bold text-xs bg-white/10 p-2.5 rounded-lg animate-in fade-in">
+        <div className="flex items-center gap-2 text-emerald-100 font-medium text-xs bg-white/10 p-2.5 rounded-lg animate-in fade-in">
           <Sparkles className="h-3.5 w-3.5" />
           Στάλθηκε επιτυχώς!
         </div>
       )}
       {sendError && (
-        <div className="text-red-200 font-bold text-xs bg-red-500/20 p-2.5 rounded-lg">
+        <div className="text-red-200 font-medium text-xs bg-red-500/20 p-2.5 rounded-lg">
           {sendError}
         </div>
       )}
 
       <div className="flex items-center justify-between">
-        <span className="text-[9px] font-bold text-emerald-200/60 uppercase tracking-wider">
+        <span className="text-2xs font-medium text-emerald-200/60">
           1 μήνυμα / {rateLimitHours === 1 ? 'ώρα' : `${rateLimitHours} ώρες`}
         </span>
         <Button
           onClick={handleSend}
           disabled={isSending || !message.trim()}
           size="sm"
-          className="h-9 px-5 rounded-lg bg-white text-emerald-600 hover:bg-emerald-50 font-black text-[11px] shadow-md disabled:opacity-40"
+          className="h-9 px-5 rounded-lg bg-white text-emerald-600 hover:bg-emerald-50 font-semibold text-2xs shadow-md disabled:opacity-40"
         >
           {isSending ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -918,7 +918,7 @@ function ChangePinForm({ onSubmit, isSaving }: { onSubmit: (oldPin: string, newA
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-2">Τρέχων</Label>
+          <Label className="text-2xs font-semibold text-zinc-500 ml-2">Τρέχων</Label>
           <Input
             type="password"
             inputMode="numeric"
@@ -927,11 +927,11 @@ function ChangePinForm({ onSubmit, isSaving }: { onSubmit: (oldPin: string, newA
             placeholder="— — — —"
             value={oldPin}
             onChange={(e) => setOldPin(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-            className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-4 font-bold focus:bg-white text-center text-xl tracking-[0.5em]"
+            className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-4 font-bold focus:bg-white text-center text-xl"
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-2">Νέος</Label>
+          <Label className="text-2xs font-semibold text-zinc-500 ml-2">Νέος</Label>
           <Input
             type="password"
             inputMode="numeric"
@@ -940,11 +940,11 @@ function ChangePinForm({ onSubmit, isSaving }: { onSubmit: (oldPin: string, newA
             placeholder="— — — —"
             value={newA}
             onChange={(e) => setNewA(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-            className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-4 font-bold focus:bg-white text-center text-xl tracking-[0.5em]"
+            className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-4 font-bold focus:bg-white text-center text-xl"
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-2">Επιβεβαίωση</Label>
+          <Label className="text-2xs font-semibold text-zinc-500 ml-2">Επιβεβαίωση</Label>
           <Input
             type="password"
             inputMode="numeric"
@@ -953,14 +953,14 @@ function ChangePinForm({ onSubmit, isSaving }: { onSubmit: (oldPin: string, newA
             placeholder="— — — —"
             value={newB}
             onChange={(e) => setNewB(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-            className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-4 font-bold focus:bg-white text-center text-xl tracking-[0.5em]"
+            className="h-14 rounded-2xl bg-zinc-50 border-zinc-100 px-4 font-bold focus:bg-white text-center text-xl"
           />
         </div>
       </div>
       <Button
         disabled={isSaving}
         onClick={() => onSubmit(oldPin, newA, newB)}
-        className="h-14 w-full rounded-2xl bg-zinc-900 hover:bg-zinc-800 font-black text-white"
+        className="h-14 w-full rounded-2xl bg-zinc-900 hover:bg-zinc-800 font-semibold text-white"
       >
         {isSaving ? (
           <>

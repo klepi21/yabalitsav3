@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { toGreekUpperCase, cn } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 export default function PitchesPage() {
   const router = useRouter();
@@ -137,22 +137,22 @@ export default function PitchesPage() {
             <Building2 className="h-7 w-7 text-emerald-500" />
           </div>
           <div className="space-y-0.5">
-            <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
-              {toGreekUpperCase('Τα Γήπεδά σας')}
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+              {'Τα Γήπεδά σας'}
             </h1>
-            <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest leading-none">
-              {toGreekUpperCase('Διαχειριση εγκαταστασεων')}
+            <p className="text-2xs font-medium text-zinc-500 leading-none">
+              {'Διαχειριση εγκαταστασεων'}
             </p>
           </div>
         </div>
         
         <Button 
           asChild 
-          className="h-12 px-6 rounded-2xl bg-zinc-900 hover:bg-black text-white font-black text-[11px] shadow-lg shadow-zinc-900/10 transition-all active:scale-95 group uppercase tracking-widest"
+          className="h-12 px-6 rounded-2xl bg-zinc-900 hover:bg-black text-white font-semibold text-2xs shadow-lg shadow-zinc-900/10 transition-all active:scale-95 group"
         >
           <Link href="/management/pitches/new" className="flex items-center gap-2">
             <Plus className="h-4 w-4 text-emerald-400 group-hover:rotate-90 transition-transform duration-500" />
-            {toGreekUpperCase('Προσθήκη Γηπέδου')}
+            {'Προσθήκη Γηπέδου'}
           </Link>
         </Button>
       </div>
@@ -165,17 +165,17 @@ export default function PitchesPage() {
                 <Ban className="h-4 w-4 text-red-600" />
               </div>
               <div>
-                <p className="text-xs font-black text-red-900 uppercase tracking-wider">{toGreekUpperCase('Σφάλμα')}</p>
-                <p className="text-xs text-red-700 font-bold">{error}</p>
+                <p className="text-xs font-semibold text-red-900">{'Σφάλμα'}</p>
+                <p className="text-xs text-red-700 font-medium">{error}</p>
               </div>
             </div>
             <Button
               variant="outline"
               size="sm"
               onClick={() => { setError(null); loadPitches(); }}
-              className="h-8 rounded-lg border-red-200 text-red-600 hover:bg-red-50 font-bold text-[12px]"
+              className="h-8 rounded-lg border-red-200 text-red-600 hover:bg-red-50 font-medium text-2xs"
             >
-              {toGreekUpperCase('Δοκιμάστε ξανά')}
+              {'Δοκιμάστε ξανά'}
             </Button>
           </div>
         </div>
@@ -186,22 +186,22 @@ export default function PitchesPage() {
         <div className="flex items-center gap-4 bg-white p-2 rounded-2xl border border-zinc-200 shadow-sm flex-1">
           <div className="flex items-center gap-3 px-4 border-r border-zinc-100">
             <div className="h-8 w-8 rounded-xl bg-zinc-50 flex items-center justify-center">
-              <Building2 className="h-4 w-4 text-zinc-400" />
+              <Building2 className="h-4 w-4 text-zinc-500" />
             </div>
             <div>
-              <p className="text-xl font-black text-zinc-900 leading-none">{pitches.length}</p>
-              <p className="text-[8px] font-bold text-zinc-400 uppercase mt-0.5 tracking-wider">ΣYNOLO</p>
+              <p className="text-xl font-bold text-zinc-900 leading-none">{pitches.length}</p>
+              <p className="text-2xs font-medium text-zinc-500 mt-0.5">ΣYNOLO</p>
             </div>
           </div>
           
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-300" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
             <Input
               type="text"
-              placeholder={toGreekUpperCase('Αναζήτηση γηπέδων...')}
+              placeholder={'Αναζήτηση γηπέδων...'}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="h-10 pl-10 border-0 bg-transparent focus:ring-0 text-zinc-900 font-bold text-sm placeholder:text-zinc-300 uppercase tracking-tight"
+              className="h-10 pl-10 border-0 bg-transparent focus:ring-0 text-zinc-900 font-semibold text-sm placeholder:text-zinc-500 tracking-tight"
             />
           </div>
         </div>
@@ -213,12 +213,12 @@ export default function PitchesPage() {
           <Card className="col-span-full border border-zinc-200 bg-white py-16 rounded-2xl shadow-sm">
             <CardContent className="flex flex-col items-center justify-center text-center">
               <div className="h-16 w-16 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center mb-6 shadow-inner">
-                <Building2 className="h-8 w-8 text-zinc-300" />
+                <Building2 className="h-8 w-8 text-zinc-400" />
               </div>
-              <h3 className="text-xl font-black text-zinc-900 uppercase tracking-tight">
+              <h3 className="text-xl font-bold text-zinc-900 tracking-tight">
                 {searchTerm ? 'Δεν βρέθηκαν γήπεδα' : 'Δεν υπάρχουν γήπεδα'}
               </h3>
-              <p className="text-zinc-400 font-bold text-[12px] uppercase tracking-widest mt-1 mb-8">
+              <p className="text-zinc-500 font-medium text-2xs mt-1 mb-8">
                 {searchTerm 
                   ? 'Δοκιμάστε μια διαφορετική αναζήτηση.' 
                   : 'Ξεκινήστε την οργάνωση του χώρου σας προσθέτοντας το πρώτο σας γήπεδο.'}
@@ -226,10 +226,10 @@ export default function PitchesPage() {
               {!searchTerm && (
                 <Button 
                   asChild 
-                  className="h-12 px-8 rounded-xl bg-zinc-900 hover:bg-black font-black text-white uppercase text-[11px] tracking-widest shadow-xl shadow-zinc-200"
+                  className="h-12 px-8 rounded-xl bg-zinc-900 hover:bg-black font-semibold text-white text-2xs shadow-xl shadow-zinc-200"
                 >
                   <Link href="/management/pitches/new">
-                    {toGreekUpperCase('Προσθήκη Γηπέδου')}
+                    {'Προσθήκη Γηπέδου'}
                   </Link>
                 </Button>
               )}
@@ -248,33 +248,33 @@ export default function PitchesPage() {
                   <div className="flex items-center justify-between">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
-                        <Badge variant="outline" className="h-5 border-emerald-100 bg-emerald-50 text-emerald-600 font-black text-[8px] uppercase px-1.5 py-0">
-                          {toGreekUpperCase(pitch.type)}
+                        <Badge variant="outline" className="h-5 border-emerald-100 bg-emerald-50 text-emerald-600 font-semibold text-2xs px-1.5 py-0">
+                          {pitch.type}
                         </Badge>
                         {!pitch.active && (
-                          <Badge variant="outline" className="h-5 border-red-100 bg-red-50 text-red-500 font-black text-[8px] uppercase px-1.5 py-0">
+                          <Badge variant="outline" className="h-5 border-red-100 bg-red-50 text-red-500 font-semibold text-2xs px-1.5 py-0">
                             OFF
                           </Badge>
                         )}
                       </div>
-                      <h3 className="text-[17px] font-black tracking-tight text-zinc-900 uppercase">
-                        {toGreekUpperCase(pitch.name)}
+                      <h3 className="text-base font-semibold tracking-tight text-zinc-900">
+                        {pitch.name}
                       </h3>
                     </div>
                     <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-colors">
-                      <Building2 className="h-5 w-5 text-zinc-400 group-hover:text-emerald-500 transition-colors" />
+                      <Building2 className="h-5 w-5 text-zinc-500 group-hover:text-emerald-500 transition-colors" />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
-                      <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">TIMH SLOT</p>
-                      <p className="text-2xl font-black text-zinc-900 tracking-tighter">&euro;{pitch.pricePerSlot}</p>
+                      <p className="text-2xs font-medium text-zinc-500">Τιμή ώρας</p>
+                      <p className="text-2xl font-bold text-zinc-900 tracking-tighter">&euro;{pitch.pricePerSlot}</p>
                     </div>
                     <div className="space-y-1">
-                      <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest">ΔΙΑΡΚΕΙΑ</p>
-                      <p className="text-2xl font-black text-zinc-900 tracking-tighter">
-                        {pitch.slotDuration}<span className="text-[12px] font-bold text-zinc-400 ml-1">MIN</span>
+                      <p className="text-2xs font-medium text-zinc-500">Διάρκεια</p>
+                      <p className="text-2xl font-bold text-zinc-900 tracking-tighter">
+                        {pitch.slotDuration}<span className="text-2xs font-medium text-zinc-500 ml-1">λεπτά</span>
                       </p>
                     </div>
                   </div>
@@ -283,11 +283,11 @@ export default function PitchesPage() {
                   <div className="flex items-center gap-2 pt-5 border-t border-zinc-50">
                     <Button
                       asChild
-                      className="flex-1 h-11 rounded-xl bg-zinc-900 hover:bg-black text-white font-black text-[12px] tracking-widest transition-all uppercase"
+                      className="flex-1 h-11 rounded-xl bg-zinc-900 hover:bg-black text-white font-semibold text-2xs transition-all"
                     >
                       <Link href={`/management/pitches/${pitch.id}/edit`} className="flex items-center justify-center gap-2">
                         <Pencil className="h-3.5 w-3.5" />
-                        {toGreekUpperCase('Επεξεργασία')}
+                        {'Επεξεργασία'}
                       </Link>
                     </Button>
                     <div className="flex items-center gap-2">

@@ -12,7 +12,8 @@ import {
   serverTimestamp 
 } from 'firebase/firestore';
 import { 
-  signInWithEmailAndPassword, 
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail, 
   createUserWithEmailAndPassword,
   signOut,
   onAuthStateChanged,
@@ -587,6 +588,12 @@ export const authService = {
   // Get current user
   getCurrentUser(): FirebaseUser | null {
     return auth.currentUser;
+  },
+
+  // Στείλε email επαναφοράς κωδικού.
+  // Δεν αποκαλύπτουμε αν το email υπάρχει — αποτρέπει απαρίθμηση λογαριασμών.
+  async sendPasswordReset(email: string): Promise<void> {
+    await sendPasswordResetEmail(auth, email);
   },
 
   // Listen to auth state changes

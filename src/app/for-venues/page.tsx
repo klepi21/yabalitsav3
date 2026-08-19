@@ -270,7 +270,7 @@ export default function ForVenuesPage() {
         </div>
 
         <div className="relative z-10 mb-8 mt-auto">
-          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1 inline-flex items-center gap-2 mb-6 shadow-[0_0_15px_-3px_rgba(52,211,153,0.3)]">
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1 inline-flex items-center gap-2 mb-6 shadow-[0_0_15px_-3px_rgba(116,238,22,0.3)]">
             <Sparkles className="h-4 w-4 text-emerald-400" />
             <span className="text-xs font-semibold text-emerald-400">15 ημέρες δωρεάν δοκιμή</span>
           </div>
@@ -282,7 +282,7 @@ export default function ForVenuesPage() {
 
           <div className="space-y-8">
             <div className="flex items-start gap-5">
-              <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-2xl text-emerald-400 mt-1 shadow-[0_0_15px_-3px_rgba(52,211,153,0.3)]">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-2xl text-emerald-400 mt-1 shadow-[0_0_15px_-3px_rgba(116,238,22,0.3)]">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>
@@ -317,7 +317,7 @@ export default function ForVenuesPage() {
           <p className="text-zinc-500 text-xs font-medium">
             &copy; {new Date().getFullYear()} Yabalitsa SaaS
           </p>
-          <div className="flex gap-4 text-[12px] font-black tracking-widest text-emerald-500/80">
+          <div className="flex gap-4 text-2xs font-bold tracking-widest text-emerald-500/80">
             <span>SECURE ENCRYPTED</span>
             <span>GDPR COMPLIANT</span>
           </div>
@@ -376,7 +376,7 @@ export default function ForVenuesPage() {
                   <Mail className="h-8 w-8 text-emerald-600" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-black text-zinc-900 mb-2">Επαλήθευση Email</h2>
+                  <h2 className="text-2xl font-bold text-zinc-900 mb-2">Επαλήθευση Email</h2>
                   <p className="text-sm text-zinc-500">
                     Στείλαμε έναν 6ψήφιο κωδικό στο{' '}
                     <span className="font-bold text-zinc-900">{form.ownerEmail}</span>
@@ -388,7 +388,7 @@ export default function ForVenuesPage() {
                   inputMode="numeric"
                   maxLength={6}
                   placeholder="000000"
-                  className="text-center tracking-[0.4em] text-2xl font-black h-14 rounded-xl bg-zinc-50 border-zinc-200 focus:bg-white"
+                  className="text-center tracking-[0.4em] text-2xl font-bold h-14 rounded-xl bg-zinc-50 border-zinc-200 focus:bg-white"
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
                   onKeyDown={(e) => {
@@ -662,7 +662,7 @@ export default function ForVenuesPage() {
                   onCheckedChange={(checked: boolean | "indeterminate") => setForm({ ...form, acceptTerms: checked === true })}
                   className="mt-0.5"
                 />
-                <label htmlFor="acceptTerms" className="text-[13px] text-zinc-500 leading-relaxed select-none cursor-pointer">
+                <label htmlFor="acceptTerms" className="text-xs text-zinc-500 leading-relaxed select-none cursor-pointer">
                   Αποδέχομαι τους{' '}
                   <Link href="/terms" className="font-medium text-emerald-600 hover:text-emerald-700 underline-offset-2 hover:underline">
                     Όρους Χρήσης
@@ -677,7 +677,7 @@ export default function ForVenuesPage() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white text-[15px]"
+                className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white text-base"
               >
                 {isSubmitting ? (
                   <>
@@ -692,7 +692,7 @@ export default function ForVenuesPage() {
                 )}
               </Button>
 
-              <p className="text-center text-[13px] text-zinc-500">
+              <p className="text-center text-xs text-zinc-500">
                 Έχετε ήδη λογαριασμό;{' '}
                 <Link href="/venue-login" className="font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
                   Σύνδεση

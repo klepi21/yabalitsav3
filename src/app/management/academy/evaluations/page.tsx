@@ -17,7 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -167,7 +167,7 @@ function RadarChart({ skills, ratings, previousRatings, size = 200 }: {
             key={i}
             x={labelPoint.x} y={labelPoint.y}
             textAnchor="middle" dominantBaseline="middle"
-            className="fill-zinc-500 text-[11px] font-bold uppercase"
+            className="fill-zinc-500 text-2xs font-medium"
           >
             {skill.label}
           </text>
@@ -457,33 +457,33 @@ export default function EvaluationsPage() {
             <>
               <div className="bg-gradient-to-br from-zinc-800 via-zinc-900 to-black px-6 pt-6 pb-4">
                 <AlertDialogHeader>
-                  <AlertDialogTitle className="text-base font-black text-white tracking-tight text-left">
-                    {toGreekUpperCase('Αξιολόγηση')}: {formAthlete.displayName}
+                  <AlertDialogTitle className="text-base font-semibold text-white tracking-tight text-left">
+                    {'Αξιολόγηση'}: {formAthlete.displayName}
                   </AlertDialogTitle>
-                  <AlertDialogDescription className="text-zinc-400 text-xs text-left">
-                    {toGreekUpperCase('Βαθμολογήστε τις δεξιότητες 1-5')}
+                  <AlertDialogDescription className="text-zinc-500 text-xs text-left">
+                    {'Βαθμολογήστε τις δεξιότητες 1-5'}
                   </AlertDialogDescription>
                 </AlertDialogHeader>
               </div>
               <div className="px-6 py-5 space-y-5">
                 <div className="space-y-2">
-                  <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Περίοδος')}</Label>
+                  <Label className="text-2xs font-semibold text-zinc-500">{'Περίοδος'}</Label>
                   <Select value={formPeriod} onValueChange={setFormPeriod}>
-                    <SelectTrigger className="h-10 rounded-lg bg-zinc-50 border-none font-bold text-sm"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="h-10 rounded-lg bg-zinc-50 border-none font-semibold text-sm"><SelectValue /></SelectTrigger>
                     <SelectContent className="rounded-xl">
-                      {periodOptions.map((p) => (<SelectItem key={p.value} value={p.value} className="font-bold text-sm">{p.label}</SelectItem>))}
+                      {periodOptions.map((p) => (<SelectItem key={p.value} value={p.value} className="font-semibold text-sm">{p.label}</SelectItem>))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-3">
-                  <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Δεξιότητες')}</Label>
+                  <Label className="text-2xs font-semibold text-zinc-500">{'Δεξιότητες'}</Label>
                   {skills.map((skill) => (
                     <div key={skill.key} className="flex items-center justify-between p-3 rounded-xl bg-zinc-50">
-                      <span className="text-xs font-bold text-zinc-700">{skill.label}</span>
+                      <span className="text-xs font-medium text-zinc-700">{skill.label}</span>
                       <div className="flex gap-1">
                         {[1, 2, 3, 4, 5].map((v) => (
                           <button key={v} type="button" onClick={() => setFormRatings((prev) => ({ ...prev, [skill.key]: v }))} className="p-0.5 transition-all">
-                            <Star className={cn("h-5 w-5 transition-colors", v <= (formRatings[skill.key] || 0) ? "text-amber-400 fill-amber-400" : "text-zinc-200")} />
+                            <Star className={cn("h-5 w-5 transition-colors", v <= (formRatings[skill.key] || 0) ? "text-amber-400 fill-amber-400" : "text-zinc-400")} />
                           </button>
                         ))}
                       </div>
@@ -491,21 +491,21 @@ export default function EvaluationsPage() {
                   ))}
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Σχόλια Προπονητή')}</Label>
+                  <Label className="text-2xs font-semibold text-zinc-500">{'Σχόλια Προπονητή'}</Label>
                   <textarea value={formNotes} onChange={(e) => setFormNotes(e.target.value)} rows={3}
-                    className="w-full rounded-xl bg-zinc-50 border-none p-3 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 placeholder:text-zinc-300 resize-none"
+                    className="w-full rounded-xl bg-zinc-50 border-none p-3 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 placeholder:text-zinc-500 resize-none"
                     placeholder="Σχόλια, παρατηρήσεις, στόχοι..." />
                 </div>
               </div>
               <div className="px-6 pb-6">
                 <AlertDialogFooter className="flex flex-col gap-2 sm:flex-col">
                   <AlertDialogAction onClick={handleSaveEval} disabled={isSaving}
-                    className="h-11 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg m-0">
+                    className="h-11 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-lg m-0">
                     {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-                    {toGreekUpperCase('Αποθήκευση')}
+                    {'Αποθήκευση'}
                   </AlertDialogAction>
-                  <AlertDialogCancel className="h-9 w-full rounded-xl border-none bg-transparent text-zinc-400 font-bold text-sm m-0">
-                    {toGreekUpperCase('Ακύρωση')}
+                  <AlertDialogCancel className="h-9 w-full rounded-xl border-none bg-transparent text-zinc-500 font-semibold text-sm m-0">
+                    {'Ακύρωση'}
                   </AlertDialogCancel>
                 </AlertDialogFooter>
               </div>
@@ -516,7 +516,7 @@ export default function EvaluationsPage() {
 
       {/* Send Evaluation Confirmation Dialog */}
       <AlertDialog open={sendConfirm !== null} onOpenChange={(open) => !open && setSendConfirm(null)}>
-        <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl p-0 max-w-sm overflow-hidden">
+        <AlertDialogContent className="rounded-2xl border-none shadow-2xl p-0 max-w-sm overflow-hidden">
           {sendConfirm && (() => {
             const { eval_, athlete } = sendConfirm;
             const contact = getNotificationEmail(athlete);
@@ -530,11 +530,11 @@ export default function EvaluationsPage() {
                     <Send className="h-6 w-6 text-white" />
                   </div>
                   <AlertDialogHeader>
-                    <AlertDialogTitle className="text-lg font-black text-white tracking-tight">
-                      {toGreekUpperCase('Player Passport')}
+                    <AlertDialogTitle className="text-lg font-semibold text-white tracking-tight">
+                      {'Player Passport'}
                     </AlertDialogTitle>
                     <AlertDialogDescription className="text-amber-100 text-sm mt-1">
-                      {toGreekUpperCase('Προεπισκόπηση, λήψη ή αποστολή')}
+                      {'Προεπισκόπηση, λήψη ή αποστολή'}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                 </div>
@@ -542,35 +542,35 @@ export default function EvaluationsPage() {
                   <div className="flex items-center gap-3 p-3 bg-zinc-50 rounded-xl">
                     <div className="h-10 w-10 rounded-xl bg-white border border-zinc-100 flex items-center justify-center text-lg shadow-sm">⚽</div>
                     <div className="flex-1">
-                      <p className="text-sm font-black text-zinc-900">{eval_.athleteName}</p>
-                      <p className="text-[11px] text-zinc-400 font-medium">{eval_.periodLabel} • {eval_.squadName}</p>
+                      <p className="text-sm font-semibold text-zinc-900">{eval_.athleteName}</p>
+                      <p className="text-2xs text-zinc-500 font-medium">{eval_.periodLabel} • {eval_.squadName}</p>
                     </div>
                     <div className="flex items-center gap-1 px-2 py-1 bg-amber-50 rounded-lg">
                       <Star className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
-                      <span className="text-sm font-black text-amber-700">{avgR}</span>
+                      <span className="text-sm font-semibold text-amber-700">{avgR}</span>
                     </div>
                   </div>
                   {contact ? (
                     <div className="space-y-2">
-                      <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-300">{toGreekUpperCase('Παραλήπτης')}</p>
+                      <p className="text-2xs font-medium text-zinc-500">{'Παραλήπτης'}</p>
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center"><Send className="h-3.5 w-3.5 text-blue-500" /></div>
                         <div>
-                          <p className="text-sm font-bold text-zinc-900">{contact.name}</p>
-                          <p className="text-[11px] text-zinc-400 font-medium">{contact.email}</p>
+                          <p className="text-sm font-semibold text-zinc-900">{contact.name}</p>
+                          <p className="text-2xs text-zinc-500 font-medium">{contact.email}</p>
                         </div>
                       </div>
                     </div>
                   ) : (
                     <div className="p-3 bg-red-50 rounded-xl border border-red-100">
                       <AlertCircle className="h-4 w-4 text-red-400 inline mr-2" />
-                      <span className="text-xs font-bold text-red-600">{toGreekUpperCase('Δεν βρέθηκε email γονέα ή αθλητή. Προσθέστε email για αποστολή.')}</span>
+                      <span className="text-xs font-medium text-red-600">{'Δεν βρέθηκε email γονέα ή αθλητή. Προσθέστε email για αποστολή.'}</span>
                     </div>
                   )}
                   {eval_.sentAt && (
                     <div className="flex items-center gap-2 p-2.5 bg-emerald-50 rounded-lg">
                       <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-                      <p className="text-[11px] text-emerald-700 font-medium">
+                      <p className="text-2xs text-emerald-700 font-medium">
                         Τελευταία αποστολή: {new Date(eval_.sentAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
@@ -580,12 +580,12 @@ export default function EvaluationsPage() {
                   <AlertDialogFooter className="flex flex-col gap-2 sm:flex-col">
                     {contact ? (
                       <AlertDialogAction onClick={() => { handleSendEval(eval_, athlete); setSendConfirm(null); }}
-                        className="h-12 w-full rounded-xl bg-zinc-900 hover:bg-black text-white font-bold text-sm shadow-lg transition-all active:scale-[0.98] m-0">
-                        <Send className="h-4 w-4 mr-2" />{toGreekUpperCase('Αποστολή Email')}
+                        className="h-12 w-full rounded-xl bg-zinc-900 hover:bg-black text-white font-semibold text-sm shadow-lg transition-all active:scale-[0.98] m-0">
+                        <Send className="h-4 w-4 mr-2" />{'Αποστολή Email'}
                       </AlertDialogAction>
                     ) : null}
-                    <AlertDialogCancel className="h-10 w-full rounded-xl border-none bg-transparent text-zinc-400 hover:text-zinc-600 font-bold text-sm m-0">
-                      {toGreekUpperCase('Κλείσιμο')}
+                    <AlertDialogCancel className="h-10 w-full rounded-xl border-none bg-transparent text-zinc-500 hover:text-zinc-600 font-semibold text-sm m-0">
+                      {'Κλείσιμο'}
                     </AlertDialogCancel>
                   </AlertDialogFooter>
                 </div>
@@ -600,10 +600,10 @@ export default function EvaluationsPage() {
         <AlertDialogContent className="rounded-2xl border-none shadow-2xl p-0 w-[95vw] max-w-4xl overflow-hidden" style={{ maxHeight: '95vh' }}>
           <div className="flex items-center justify-between px-6 py-3 border-b border-zinc-100 bg-white">
             <AlertDialogHeader className="p-0 space-y-0">
-              <AlertDialogTitle className="text-sm font-black text-zinc-900 uppercase">{toGreekUpperCase('Player Passport — Προεπισκόπηση')}</AlertDialogTitle>
+              <AlertDialogTitle className="text-sm font-semibold text-zinc-900">{'Player Passport — Προεπισκόπηση'}</AlertDialogTitle>
               <AlertDialogDescription className="sr-only">Προεπισκόπηση PDF αξιολόγησης</AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogCancel className="h-8 w-8 rounded-lg border-none p-0 flex items-center justify-center text-zinc-400 hover:text-zinc-600 m-0">
+            <AlertDialogCancel className="h-8 w-8 rounded-lg border-none p-0 flex items-center justify-center text-zinc-500 hover:text-zinc-600 m-0">
               <X className="h-4 w-4" />
             </AlertDialogCancel>
           </div>
@@ -618,23 +618,23 @@ export default function EvaluationsPage() {
         <AlertDialogContent className="rounded-2xl border-none shadow-2xl p-0 max-w-md overflow-hidden">
           <div className="bg-gradient-to-br from-zinc-800 via-zinc-900 to-black px-6 pt-6 pb-4">
             <AlertDialogHeader>
-              <AlertDialogTitle className="text-base font-black text-white tracking-tight text-left">{toGreekUpperCase('Ρυθμίσεις Αξιολόγησης')}</AlertDialogTitle>
-              <AlertDialogDescription className="text-zinc-400 text-xs text-left">{toGreekUpperCase('Ορίστε τις δεξιότητες που αξιολογούνται')}</AlertDialogDescription>
+              <AlertDialogTitle className="text-base font-semibold text-white tracking-tight text-left">{'Ρυθμίσεις Αξιολόγησης'}</AlertDialogTitle>
+              <AlertDialogDescription className="text-zinc-500 text-xs text-left">{'Ορίστε τις δεξιότητες που αξιολογούνται'}</AlertDialogDescription>
             </AlertDialogHeader>
           </div>
           <div className="px-6 py-5 space-y-4">
             <div className="space-y-2">
               {templateSkills.map((skill, i) => (
                 <div key={i} className="flex items-center gap-2 p-2.5 rounded-xl bg-zinc-50">
-                  <span className="text-xs font-bold text-zinc-700 flex-1">{skill.label}</span>
-                  <button onClick={() => setTemplateSkills((prev) => prev.filter((_, idx) => idx !== i))} className="h-6 w-6 rounded-md flex items-center justify-center text-zinc-300 hover:text-red-500 hover:bg-red-50 transition-all">
+                  <span className="text-xs font-medium text-zinc-700 flex-1">{skill.label}</span>
+                  <button onClick={() => setTemplateSkills((prev) => prev.filter((_, idx) => idx !== i))} className="h-6 w-6 rounded-md flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all">
                     <X className="h-3 w-3" />
                   </button>
                 </div>
               ))}
             </div>
             <div className="flex gap-2">
-              <Input placeholder="Νέα δεξιότητα..." value={newSkillLabel} onChange={(e) => setNewSkillLabel(e.target.value)} className="h-10 flex-1 bg-zinc-50 border-none rounded-lg font-bold text-sm"
+              <Input placeholder="Νέα δεξιότητα..." value={newSkillLabel} onChange={(e) => setNewSkillLabel(e.target.value)} className="h-10 flex-1 bg-zinc-50 border-none rounded-lg font-semibold text-sm"
                 onKeyDown={(e) => { if (e.key === 'Enter' && newSkillLabel.trim()) { setTemplateSkills((prev) => [...prev, { key: newSkillLabel.trim().toLowerCase().replace(/\s+/g, '_'), label: newSkillLabel.trim() }]); setNewSkillLabel(''); } }} />
               <Button variant="outline" size="sm" disabled={!newSkillLabel.trim()} className="h-10 px-3 rounded-lg"
                 onClick={() => { if (newSkillLabel.trim()) { setTemplateSkills((prev) => [...prev, { key: newSkillLabel.trim().toLowerCase().replace(/\s+/g, '_'), label: newSkillLabel.trim() }]); setNewSkillLabel(''); } }}>
@@ -644,10 +644,10 @@ export default function EvaluationsPage() {
           </div>
           <div className="px-6 pb-6">
             <AlertDialogFooter className="flex flex-col gap-2 sm:flex-col">
-              <AlertDialogAction onClick={handleSaveTemplate} className="h-11 w-full rounded-xl bg-zinc-900 hover:bg-black text-white font-bold text-sm shadow-lg m-0">
-                <Save className="h-4 w-4 mr-2" />{toGreekUpperCase('Αποθήκευση')}
+              <AlertDialogAction onClick={handleSaveTemplate} className="h-11 w-full rounded-xl bg-zinc-900 hover:bg-black text-white font-semibold text-sm shadow-lg m-0">
+                <Save className="h-4 w-4 mr-2" />{'Αποθήκευση'}
               </AlertDialogAction>
-              <AlertDialogCancel className="h-9 w-full rounded-xl border-none bg-transparent text-zinc-400 font-bold text-sm m-0">{toGreekUpperCase('Ακύρωση')}</AlertDialogCancel>
+              <AlertDialogCancel className="h-9 w-full rounded-xl border-none bg-transparent text-zinc-500 font-semibold text-sm m-0">{'Ακύρωση'}</AlertDialogCancel>
             </AlertDialogFooter>
           </div>
         </AlertDialogContent>
@@ -669,18 +669,18 @@ export default function EvaluationsPage() {
       <><div className="space-y-8 pb-20">
         <div className="flex items-center gap-3.5 pb-2 border-b border-zinc-50">
           <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-zinc-200 shrink-0" onClick={() => setDetailAthlete(null)}>
-            <X className="h-4 w-4 text-zinc-400" />
+            <X className="h-4 w-4 text-zinc-500" />
           </Button>
           <div className="h-12 w-12 rounded-xl bg-zinc-900 flex items-center justify-center text-white shadow-lg shrink-0">
             <TrendingUp className="h-6 w-6 text-emerald-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">{toGreekUpperCase(detailAthlete.displayName)}</h1>
-            <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Ιστορικό Αξιολογήσεων')}</p>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900">{detailAthlete.displayName}</h1>
+            <p className="text-2xs font-medium text-zinc-500">{'Ιστορικό Αξιολογήσεων'}</p>
           </div>
           <div className="ml-auto">
-            <Button size="sm" onClick={() => openEvalForm(detailAthlete)} className="h-9 px-4 rounded-lg bg-zinc-900 hover:bg-black text-white font-bold text-[12px] uppercase">
-              <Plus className="h-3.5 w-3.5 mr-1.5 text-emerald-400" />{toGreekUpperCase('Νέα Αξιολόγηση')}
+            <Button size="sm" onClick={() => openEvalForm(detailAthlete)} className="h-9 px-4 rounded-lg bg-zinc-900 hover:bg-black text-white font-medium text-2xs">
+              <Plus className="h-3.5 w-3.5 mr-1.5 text-emerald-400" />{'Νέα Αξιολόγηση'}
             </Button>
           </div>
         </div>
@@ -689,9 +689,9 @@ export default function EvaluationsPage() {
         {latest && (
           <div className="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τελευταία Αξιολόγηση')} — {latest.periodLabel}</h3>
+              <h3 className="text-2xs font-semibold text-zinc-500">{'Τελευταία Αξιολόγηση'} — {latest.periodLabel}</h3>
               {previous && (
-                <div className="flex items-center gap-3 text-[11px] font-bold">
+                <div className="flex items-center gap-3 text-2xs font-medium">
                   <span className="flex items-center gap-1"><span className="h-2 w-6 rounded-full bg-emerald-500 inline-block" /> {latest.periodLabel}</span>
                   <span className="flex items-center gap-1"><span className="h-0.5 w-6 border-t-2 border-dashed border-violet-400 inline-block" /> {previous.periodLabel}</span>
                 </div>
@@ -700,12 +700,12 @@ export default function EvaluationsPage() {
             <RadarChart skills={skills} ratings={latest.ratings} previousRatings={previous?.ratings} size={280} />
             <div className="flex items-center justify-center gap-2 mt-4">
               <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
-              <span className="text-lg font-black text-zinc-900">{getAvgRating(latest).toFixed(1)}</span>
-              <span className="text-xs font-bold text-zinc-400">/ 5</span>
+              <span className="text-lg font-semibold text-zinc-900">{getAvgRating(latest).toFixed(1)}</span>
+              <span className="text-xs font-medium text-zinc-500">/ 5</span>
             </div>
             {latest.notes && (
               <div className="mt-4 p-3 bg-zinc-50 rounded-xl">
-                <p className="text-[11px] font-black text-zinc-400 uppercase tracking-widest mb-1">{toGreekUpperCase('Σχόλια Προπονητή')}</p>
+                <p className="text-2xs font-semibold text-zinc-500 mb-1">{'Σχόλια Προπονητή'}</p>
                 <p className="text-sm text-zinc-600">{latest.notes}</p>
               </div>
             )}
@@ -717,7 +717,7 @@ export default function EvaluationsPage() {
                 onClick={() => detailAthlete && setSendConfirm({ eval_: latest, athlete: detailAthlete })}
                 disabled={sendingEval === latest.id}
                 className={cn(
-                  "flex-1 h-9 rounded-lg font-bold text-[12px] uppercase",
+                  "flex-1 h-9 rounded-lg font-medium text-2xs",
                   latest.sentAt ? "border-emerald-200 text-emerald-600" : "border-zinc-200"
                 )}
               >
@@ -728,21 +728,21 @@ export default function EvaluationsPage() {
                 ) : (
                   <Send className="h-3.5 w-3.5 mr-1.5" />
                 )}
-                {latest.sentAt ? toGreekUpperCase('Επαναποστολή') : toGreekUpperCase('Αποστολή στον Γονέα')}
+                {latest.sentAt ? 'Επαναποστολή' : 'Αποστολή στον Γονέα'}
               </Button>
               {latest.sentAt && (
-                <span className="text-[11px] text-emerald-500 font-bold">
+                <span className="text-2xs text-emerald-500 font-medium">
                   Στάλθηκε {new Date(latest.sentAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit' })}
                 </span>
               )}
             </div>
             {/* Preview & Download */}
             <div className="grid grid-cols-2 gap-2 mt-3">
-              <Button variant="outline" size="sm" onClick={() => handlePreviewPDF(latest)} className="h-9 rounded-lg font-bold text-[12px] uppercase border-zinc-200">
-                <Eye className="h-3.5 w-3.5 mr-1.5" />{toGreekUpperCase('Προεπισκόπηση')}
+              <Button variant="outline" size="sm" onClick={() => handlePreviewPDF(latest)} className="h-9 rounded-lg font-medium text-2xs border-zinc-200">
+                <Eye className="h-3.5 w-3.5 mr-1.5" />{'Προεπισκόπηση'}
               </Button>
-              <Button variant="outline" size="sm" onClick={() => handleDownloadPDF(latest)} className="h-9 rounded-lg font-bold text-[12px] uppercase border-zinc-200">
-                <Download className="h-3.5 w-3.5 mr-1.5" />{toGreekUpperCase('Εκτύπωση / PDF')}
+              <Button variant="outline" size="sm" onClick={() => handleDownloadPDF(latest)} className="h-9 rounded-lg font-medium text-2xs border-zinc-200">
+                <Download className="h-3.5 w-3.5 mr-1.5" />{'Εκτύπωση / PDF'}
               </Button>
             </div>
           </div>
@@ -750,11 +750,11 @@ export default function EvaluationsPage() {
 
         {/* All evaluations timeline */}
         <div className="space-y-3">
-          <h3 className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Ιστορικό')}</h3>
+          <h3 className="text-2xs font-semibold text-zinc-500">{'Ιστορικό'}</h3>
           {athleteEvals.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-zinc-200 bg-white p-12 text-center">
-              <ClipboardList className="h-8 w-8 text-zinc-200 mx-auto mb-3" />
-              <p className="text-sm font-bold text-zinc-400">{toGreekUpperCase('Δεν υπάρχουν αξιολογήσεις')}</p>
+              <ClipboardList className="h-8 w-8 text-zinc-400 mx-auto mb-3" />
+              <p className="text-sm font-semibold text-zinc-500">{'Δεν υπάρχουν αξιολογήσεις'}</p>
             </div>
           ) : (
             athleteEvals.map((ev) => (
@@ -763,19 +763,19 @@ export default function EvaluationsPage() {
                   <Star className="h-4 w-4 text-emerald-600" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-zinc-900">{ev.periodLabel}</p>
-                  <p className="text-[12px] text-zinc-400">{ev.coachName}</p>
+                  <p className="text-sm font-semibold text-zinc-900">{ev.periodLabel}</p>
+                  <p className="text-2xs text-zinc-500">{ev.coachName}</p>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-1">
                     <Star className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
-                    <span className="text-sm font-black text-zinc-900">{getAvgRating(ev).toFixed(1)}</span>
+                    <span className="text-sm font-semibold text-zinc-900">{getAvgRating(ev).toFixed(1)}</span>
                   </div>
                   <div className="grid grid-cols-4 gap-1">
                     {skills.slice(0, 4).map((s) => (
                       <div key={s.key} className="text-center">
-                        <p className="text-[7px] font-bold text-zinc-300">{s.label.slice(0, 3)}</p>
-                        <p className="text-[12px] font-black text-zinc-600">{ev.ratings[s.key] || '—'}</p>
+                        <p className="text-2xs font-medium text-zinc-500">{s.label.slice(0, 3)}</p>
+                        <p className="text-2xs font-semibold text-zinc-600">{ev.ratings[s.key] || '—'}</p>
                       </div>
                     ))}
                   </div>
@@ -783,14 +783,14 @@ export default function EvaluationsPage() {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => handlePreviewPDF(ev)}
-                      className="h-7 w-7 rounded-lg flex items-center justify-center bg-zinc-50 text-zinc-400 hover:bg-blue-50 hover:text-blue-500 transition-all"
+                      className="h-7 w-7 rounded-lg flex items-center justify-center bg-zinc-50 text-zinc-500 hover:bg-blue-50 hover:text-blue-500 transition-all"
                       title="Προεπισκόπηση"
                     >
                       <Eye className="h-3 w-3" />
                     </button>
                     <button
                       onClick={() => handleDownloadPDF(ev)}
-                      className="h-7 w-7 rounded-lg flex items-center justify-center bg-zinc-50 text-zinc-400 hover:bg-violet-50 hover:text-violet-500 transition-all"
+                      className="h-7 w-7 rounded-lg flex items-center justify-center bg-zinc-50 text-zinc-500 hover:bg-violet-50 hover:text-violet-500 transition-all"
                       title="Εκτύπωση / PDF"
                     >
                       <Download className="h-3 w-3" />
@@ -802,7 +802,7 @@ export default function EvaluationsPage() {
                         "h-7 w-7 rounded-lg flex items-center justify-center transition-all",
                         ev.sentAt
                           ? "bg-emerald-50 text-emerald-500 hover:bg-emerald-100"
-                          : "bg-zinc-50 text-zinc-400 hover:bg-amber-50 hover:text-amber-500"
+                          : "bg-zinc-50 text-zinc-500 hover:bg-amber-50 hover:text-amber-500"
                       )}
                       title={ev.sentAt
                         ? `Στάλθηκε: ${new Date(ev.sentAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
@@ -834,7 +834,7 @@ export default function EvaluationsPage() {
       {error && (
         <div className="bg-red-50 border border-red-100 rounded-2xl p-4 animate-in fade-in">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3"><AlertCircle className="h-5 w-5 text-red-500" /><p className="text-sm font-bold text-red-700">{error}</p></div>
+            <div className="flex items-center gap-3"><AlertCircle className="h-5 w-5 text-red-500" /><p className="text-sm font-semibold text-red-700">{error}</p></div>
             <Button variant="ghost" size="sm" onClick={() => setError(null)} className="text-red-400 hover:text-red-600"><X className="h-4 w-4" /></Button>
           </div>
         </div>
@@ -847,13 +847,13 @@ export default function EvaluationsPage() {
             <TrendingUp className="h-6 w-6 text-emerald-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">{toGreekUpperCase('Αξιολογήσεις')}</h1>
-            <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Κάρτα προόδου αθλητών')}</p>
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900">{'Αξιολογήσεις'}</h1>
+            <p className="text-2xs font-medium text-zinc-500">{'Κάρτα προόδου αθλητών'}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShowSettings(true)} className="h-9 px-4 rounded-lg border-zinc-200 font-bold text-[12px] uppercase">
-            <Settings2 className="h-3.5 w-3.5 mr-1.5" />{toGreekUpperCase('Ρυθμίσεις')}
+          <Button variant="outline" size="sm" onClick={() => setShowSettings(true)} className="h-9 px-4 rounded-lg border-zinc-200 font-medium text-2xs">
+            <Settings2 className="h-3.5 w-3.5 mr-1.5" />{'Ρυθμίσεις'}
           </Button>
         </div>
       </div>
@@ -861,17 +861,17 @@ export default function EvaluationsPage() {
       {/* Filters */}
       <div className="flex items-center gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-          <Input placeholder={toGreekUpperCase('Αναζήτηση αθλητή...')} value={search} onChange={(e) => setSearch(e.target.value)}
-            className="h-10 pl-10 bg-white rounded-lg border-zinc-100 shadow-sm font-bold text-xs uppercase" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+          <Input placeholder={'Αναζήτηση αθλητή...'} value={search} onChange={(e) => setSearch(e.target.value)}
+            className="h-10 pl-10 bg-white rounded-lg border-zinc-100 shadow-sm font-medium text-xs" />
         </div>
         <Select value={squadFilter} onValueChange={setSquadFilter}>
-          <SelectTrigger className="h-10 px-4 rounded-lg bg-white border-zinc-100 shadow-sm font-bold text-xs min-w-[160px] uppercase">
-            <SelectValue placeholder={toGreekUpperCase('Τμήμα')} />
+          <SelectTrigger className="h-10 px-4 rounded-lg bg-white border-zinc-100 shadow-sm font-medium text-xs min-w-[160px]">
+            <SelectValue placeholder={'Τμήμα'} />
           </SelectTrigger>
           <SelectContent className="rounded-xl">
-            <SelectItem value="all" className="font-bold text-sm">{toGreekUpperCase('Όλα')}</SelectItem>
-            {squads.map((s) => (<SelectItem key={s.id} value={s.id} className="font-bold text-sm">{toGreekUpperCase(s.name)}</SelectItem>))}
+            <SelectItem value="all" className="font-semibold text-sm">{'Όλα'}</SelectItem>
+            {squads.map((s) => (<SelectItem key={s.id} value={s.id} className="font-semibold text-sm">{s.name}</SelectItem>))}
           </SelectContent>
         </Select>
       </div>
@@ -879,9 +879,9 @@ export default function EvaluationsPage() {
       {/* Athletes Grid */}
       {athletes.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-zinc-100 bg-white p-16 text-center">
-          <ClipboardList className="h-10 w-10 text-zinc-200 mx-auto mb-4" />
-          <h3 className="text-lg font-black text-zinc-900 mb-2">{toGreekUpperCase('Δεν υπάρχουν αθλητές')}</h3>
-          <p className="text-sm text-zinc-400">Ενεργοποιήστε τη δυνατότητα &quot;Αξιολόγηση αθλητή&quot; σε κάποια κατηγορία χρηστών.</p>
+          <ClipboardList className="h-10 w-10 text-zinc-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-zinc-900 mb-2">{'Δεν υπάρχουν αθλητές'}</h3>
+          <p className="text-sm text-zinc-500">Ενεργοποιήστε τη δυνατότητα &quot;Αξιολόγηση αθλητή&quot; σε κάποια κατηγορία χρηστών.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -895,18 +895,18 @@ export default function EvaluationsPage() {
               <div key={athlete.id} className="rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm hover:shadow-md transition-all group">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-lg bg-zinc-100 flex items-center justify-center text-sm font-black text-zinc-400">
+                    <div className="h-10 w-10 rounded-lg bg-zinc-100 flex items-center justify-center text-sm font-semibold text-zinc-500">
                       {athlete.displayName.charAt(0)}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-zinc-900 uppercase group-hover:text-emerald-700 transition-colors">{toGreekUpperCase(athlete.displayName)}</p>
-                      {squad && <p className="text-[12px] text-zinc-400">{squad.name}</p>}
+                      <p className="text-sm font-semibold text-zinc-900 group-hover:text-emerald-700 transition-colors">{athlete.displayName}</p>
+                      {squad && <p className="text-2xs text-zinc-500">{squad.name}</p>}
                     </div>
                   </div>
                   {latest && (
                     <div className="flex items-center gap-1 px-2 py-1 bg-amber-50 rounded-lg">
                       <Star className="h-3 w-3 text-amber-400 fill-amber-400" />
-                      <span className="text-xs font-black text-amber-700">{getAvgRating(latest).toFixed(1)}</span>
+                      <span className="text-xs font-semibold text-amber-700">{getAvgRating(latest).toFixed(1)}</span>
                     </div>
                   )}
                 </div>
@@ -916,23 +916,23 @@ export default function EvaluationsPage() {
                     <div className="grid grid-cols-4 gap-1.5">
                       {skills.slice(0, 4).map((s) => (
                         <div key={s.key} className="text-center p-1.5 bg-zinc-50 rounded-lg">
-                          <p className="text-[7px] font-bold text-zinc-400 uppercase">{s.label.slice(0, 4)}</p>
-                          <p className="text-xs font-black text-zinc-700">{latest.ratings[s.key] || '—'}</p>
+                          <p className="text-2xs font-medium text-zinc-500">{s.label.slice(0, 4)}</p>
+                          <p className="text-xs font-semibold text-zinc-700">{latest.ratings[s.key] || '—'}</p>
                         </div>
                       ))}
                     </div>
-                    <p className="text-[11px] text-zinc-300 mt-1.5">{latest.periodLabel} • {evalCount} αξιολ.</p>
+                    <p className="text-2xs text-zinc-500 mt-1.5">{latest.periodLabel} • {evalCount} αξιολ.</p>
                   </div>
                 ) : (
-                  <p className="text-[12px] text-zinc-300 mb-3 italic">Χωρίς αξιολόγηση</p>
+                  <p className="text-2xs text-zinc-500 mb-3 italic">Χωρίς αξιολόγηση</p>
                 )}
 
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={() => setDetailAthlete(athlete)} className="flex-1 h-8 rounded-lg text-[11px] font-bold uppercase border-zinc-200">
-                    <TrendingUp className="h-3 w-3 mr-1" />{toGreekUpperCase('Ιστορικό')}
+                  <Button variant="outline" size="sm" onClick={() => setDetailAthlete(athlete)} className="flex-1 h-8 rounded-lg text-2xs font-medium border-zinc-200">
+                    <TrendingUp className="h-3 w-3 mr-1" />{'Ιστορικό'}
                   </Button>
-                  <Button size="sm" onClick={() => openEvalForm(athlete)} className="flex-1 h-8 rounded-lg text-[11px] font-bold uppercase bg-emerald-600 hover:bg-emerald-700 text-white">
-                    <Plus className="h-3 w-3 mr-1" />{toGreekUpperCase('Αξιολόγηση')}
+                  <Button size="sm" onClick={() => openEvalForm(athlete)} className="flex-1 h-8 rounded-lg text-2xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white">
+                    <Plus className="h-3 w-3 mr-1" />{'Αξιολόγηση'}
                   </Button>
                 </div>
               </div>

@@ -1,12 +1,22 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { Zap, Bell, User } from 'lucide-react';
-import { useEffect, useState, useCallback } from 'react';
+import { Zap, Bell, User, Menu, LogOut, Settings as SettingsIcon, ChevronRight } from 'lucide-react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar from './Sidebar';
 import { Badge } from '@/components/ui/badge';
-import { toGreekUpperCase, cn } from '@/lib/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 interface VenueData {
   id: string;
@@ -31,13 +41,52 @@ interface SidebarWrapperProps {
   children: React.ReactNode;
 }
 
+/* Χάρτης διαδρομής -> τίτλος. Το top bar έδειχνε ΤΙΠΟΤΑ πριν:
+   ο χρήστης δεν είχε καμία ένδειξη «πού βρίσκομαι». */
+const ROUTE_TITLES: Array<[string, string]> = [
+  ['/management/dashboard', 'Πίνακας ελέγχου'],
+  ['/management/pitches', 'Γήπεδα'],
+  ['/management/bookings', 'Κρατήσεις'],
+  ['/management/booking/qr', 'QR Code'],
+  ['/management/customers', 'Πελάτες'],
+  ['/management/academy/users', 'Χρήστες ακαδημίας'],
+  ['/management/academy/squads', 'Τμήματα'],
+  ['/management/academy/user-groups', 'Κατηγορίες χρηστών'],
+  ['/management/academy/training', 'Προπονήσεις'],
+  ['/management/academy/payments', 'Πληρωμές ακαδημίας'],
+  ['/management/academy/medical', 'Ιατρικά'],
+  ['/management/academy/evaluations', 'Αξιολογήσεις'],
+  ['/management/academy', 'Ακαδημία'],
+  ['/management/tournaments', 'Τουρνουά'],
+  ['/management/reports', 'Αναφορές'],
+  ['/management/settings', 'Ρυθμίσεις'],
+  ['/management/guides', 'Οδηγοί'],
+  ['/management/admin-panel', 'Admin panel'],
+];
+
+const SECTION_PARENTS: Array<[string, { label: string; href: string }]> = [
+  ['/management/academy/', { label: 'Ακαδημία', href: '/management/academy/users' }],
+  ['/management/booking/', { label: 'Κρατήσεις', href: '/management/bookings' }],
+];
+
+function useBreadcrumb(pathname: string) {
+  return useMemo(() => {
+    const match = ROUTE_TITLES.find(([href]) => pathname === href || pathname.startsWith(href + '/'));
+    const title = match ? match[1] : 'Διαχείριση';
+    const isSubPage = match ? pathname !== match[0] : false;
+    const parent = SECTION_PARENTS.find(([prefix]) => pathname.startsWith(prefix))?.[1] ?? null;
+    return { title, isSubPage, parent, href: match?.[0] ?? '/management/dashboard' };
+  }, [pathname]);
+}
+
 export default function SidebarWrapper({ children }: SidebarWrapperProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, venueOwner } = useAuth();
+  const { user, venueOwner, signOut } = useAuth();
   const [venueData, setVenueData] = useState<VenueData | null>(null);
   const [pendingBookings, setPendingBookings] = useState<PendingBooking[]>([]);
-  const [showNotifications, setShowNotifications] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { title, isSubPage, parent, href } = useBreadcrumb(pathname);
 
   const isPublicPage =
     pathname === '/' ||
@@ -106,143 +155,210 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
     }
   }, [isPublicPage, fetchPendingBookings]);
 
-  // Close notifications when clicking outside
-  useEffect(() => {
-    if (!showNotifications) return;
-
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      if (!target.closest('.notification-bell')) {
-        setShowNotifications(false);
-      }
-    };
-
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
-  }, [showNotifications]);
-
   if (isPublicPage) {
     return <>{children}</>;
   }
 
+  const initials = (venueOwner?.name || user?.email || 'U')
+    .split(/[\s@.]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase())
+    .join('');
+
+  const daysRemaining = venueData?.daysRemaining ?? 0;
+  const isExpiring = daysRemaining <= 7;
+
   return (
-    <div className="min-h-screen bg-[#f1f4f8]">
-      <Sidebar />
+    <div className="min-h-screen bg-background">
+      <Sidebar open={sidebarOpen} onOpenChange={setSidebarOpen} />
       <div className="lg:pl-[260px]">
         <main className="min-h-screen">
-          {/* Top bar - Modern Donezo Style */}
-          <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-xl border-b border-zinc-100/80">
-            <div className="px-6 py-4 flex items-center justify-end gap-8 mx-auto">
-              
+          <header className="sticky top-0 z-20 bg-white/85 backdrop-blur-xl border-b border-border">
+            <div className="h-16 px-4 sm:px-6 flex items-center gap-3">
+              {/* Το κουμπί μενού ζει ΜΕΣΑ στο header, δεν επιπλέει από πάνω του. */}
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(true)}
+                aria-label="Άνοιγμα μενού πλοήγησης"
+                className="lg:hidden -ml-1 inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-700 hover:bg-zinc-100 transition-colors"
+              >
+                <Menu className="h-5 w-5" />
+              </button>
 
-
-              {/* Right Side Actions */}
-              <div className="flex items-center gap-2">
-
-
-                {/* Notifications */}
-                <div className="relative notification-bell">
-                  <button
-                    onClick={() => setShowNotifications(!showNotifications)}
-                    className="p-2.5 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all border border-transparent hover:border-zinc-100 relative"
-                  >
-                    <Bell className="h-5 w-5" />
-                    {pendingBookings.length > 0 && (
-                      <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white" />
-                    )}
-                  </button>
-
-                  {showNotifications && (
-                    <div className="absolute right-0 top-14 w-80 bg-white border border-zinc-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in duration-200">
-                      <div className="px-5 py-4 border-b border-zinc-100 bg-zinc-50/50">
-                        <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ειδοποιήσεις')}</h3>
-                        <p className="text-[12px] font-bold text-zinc-400 mt-0.5">ΕΚΚΡΕΜΕΙΣ ΚΡΑΤΗΣΕΙΣ</p>
-                      </div>
-
-                      <div className="max-h-96 overflow-y-auto">
-                        {pendingBookings.length === 0 ? (
-                          <div className="p-8 text-center text-zinc-300">
-                            <Bell className="h-8 w-8 mx-auto mb-2 opacity-20" />
-                            <p className="text-xs font-bold uppercase tracking-tight">ΟΛΑ ΕΝΤΑΞΕΙ!</p>
-                          </div>
-                        ) : (
-                          pendingBookings.map((booking) => (
-                            <div
-                              key={booking.id}
-                              className="px-5 py-3 border-b border-zinc-50 hover:bg-zinc-50 cursor-pointer transition-colors"
-                              onClick={() => {
-                                setShowNotifications(false);
-                                router.push(`/management/bookings/${booking.id}`);
-                              }}
-                            >
-                              <div className="flex items-start justify-between gap-3">
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-[13px] font-bold text-zinc-900 truncate">
-                                    {booking.userName || 'Άγνωστος'}
-                                  </p>
-                                  <p className="text-[12px] text-zinc-400 font-bold mt-1 uppercase tracking-tight">
-                                    {new Date(booking.startTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })}
-                                  </p>
-                                </div>
-                                <Badge variant="outline" className="border-amber-200 bg-amber-50 text-amber-700 text-[11px] font-black uppercase">
-                                  NEW
-                                </Badge>
-                              </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
+              {/* Πού βρίσκομαι */}
+              <div className="min-w-0 flex-1">
+                <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 min-w-0">
+                  {parent && (
+                    <>
+                      <Link
+                        href={parent.href}
+                        className="hidden sm:block text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-colors shrink-0"
+                      >
+                        {parent.label}
+                      </Link>
+                      <ChevronRight className="hidden sm:block h-3.5 w-3.5 text-zinc-400 shrink-0" aria-hidden="true" />
+                    </>
                   )}
-                </div>
+                  {isSubPage ? (
+                    <>
+                      <Link
+                        href={href}
+                        className="text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-colors shrink-0"
+                      >
+                        {title}
+                      </Link>
+                      <ChevronRight className="h-3.5 w-3.5 text-zinc-400 shrink-0" aria-hidden="true" />
+                      <span className="text-sm font-semibold text-zinc-900 truncate">Λεπτομέρειες</span>
+                    </>
+                  ) : (
+                    <h1 className="text-base font-semibold text-zinc-900 truncate">{title}</h1>
+                  )}
+                </nav>
+              </div>
 
-                {/* Plan Indicator */}
+              <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+                {/* Πλάνο συνδρομής */}
                 {venueData && (
-                  <button 
+                  <button
                     onClick={() => router.push('/management/settings')}
                     className={cn(
-                      "hidden xl:flex items-center gap-2 px-3 py-2 rounded-xl border font-bold text-[11px] transition-all active:scale-95",
-                      (venueData.daysRemaining ?? 0) <= 7 
-                        ? "bg-amber-50 border-amber-100 text-amber-600 shadow-sm shadow-amber-100" 
-                        : "bg-emerald-50 border-emerald-100 text-emerald-600 shadow-sm shadow-emerald-100"
+                      'hidden md:inline-flex items-center gap-1.5 h-9 px-3 rounded-lg border text-xs font-semibold transition-colors',
+                      isExpiring
+                        ? 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100'
+                        : 'bg-zinc-50 border-border text-zinc-700 hover:bg-zinc-100'
                     )}
                   >
-                    <Zap className={cn("h-3.5 w-3.5", (venueData.daysRemaining ?? 0) <= 7 ? "text-amber-500" : "text-emerald-500")} />
-                    <span className="uppercase tracking-tight">
-                      {(venueData.daysRemaining ?? 0) <= 7 ? toGreekUpperCase('Ανανέωση') : `${venueData.planType || 'BASIC'}`}
-                    </span>
+                    <Zap className={cn('h-3.5 w-3.5', isExpiring ? 'text-amber-600' : 'text-emerald-600')} />
+                    {isExpiring ? `Ανανέωση σε ${daysRemaining} ημ.` : venueData.planType || 'Basic'}
                   </button>
                 )}
 
-                {/* Vertical Divider */}
-                <div className="w-px h-8 bg-zinc-100 mx-2" />
-
-                {/* User Profile Section */}
-                <div className="flex items-center gap-3 pl-2 group cursor-pointer hover:bg-zinc-50 p-1.5 rounded-2xl transition-all">
-                  <div className="flex flex-col text-right hidden sm:flex">
-                    <span className="text-[13px] font-black text-zinc-900 leading-none">
-                      {venueOwner?.name || 'User'}
-                    </span>
-                    <span className="text-[12px] font-bold text-zinc-400 mt-1 truncate max-w-[120px]">
-                      {user?.email}
-                    </span>
-                  </div>
-                  <div className="h-10 w-10 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center overflow-hidden shadow-sm group-hover:scale-105 transition-transform">
-                    {user?.photoURL ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={user.photoURL} alt="Avatar" className="h-full w-full object-cover" />
-                    ) : (
-                      <User className="h-5 w-5 text-emerald-600" />
+                {/* Ειδοποιήσεις — Radix popover: κλείνει με Esc, σωστό aria, focus trap */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      aria-label={
+                        pendingBookings.length > 0
+                          ? `Ειδοποιήσεις, ${pendingBookings.length} εκκρεμείς κρατήσεις`
+                          : 'Ειδοποιήσεις'
+                      }
+                      className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg text-zinc-600 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
+                    >
+                      <Bell className="h-5 w-5" />
+                      {pendingBookings.length > 0 && (
+                        <span className="absolute top-1.5 right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-600 px-1 text-2xs font-bold text-white ring-2 ring-white">
+                          {pendingBookings.length}
+                        </span>
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent align="end" className="w-80 p-0 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-border">
+                      <p className="text-sm font-semibold text-zinc-900">Ειδοποιήσεις</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">Εκκρεμείς κρατήσεις προς έγκριση</p>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {pendingBookings.length === 0 ? (
+                        <div className="px-4 py-10 text-center">
+                          <Bell className="h-7 w-7 mx-auto mb-3 text-zinc-300" aria-hidden="true" />
+                          <p className="text-sm font-medium text-zinc-700">Καμία εκκρεμότητα</p>
+                          <p className="text-xs text-zinc-500 mt-1">Θα ειδοποιηθείτε μόλις έρθει νέα κράτηση.</p>
+                        </div>
+                      ) : (
+                        pendingBookings.map((booking) => (
+                          <button
+                            key={booking.id}
+                            onClick={() => router.push(`/management/bookings/${booking.id}`)}
+                            className="w-full text-left px-4 py-3 border-b border-border last:border-0 hover:bg-zinc-50 transition-colors"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-zinc-900 truncate">
+                                  {booking.userName || 'Άγνωστος πελάτης'}
+                                </p>
+                                <p className="text-xs text-zinc-500 mt-0.5">
+                                  {new Date(booking.startTime).toLocaleString('el-GR', {
+                                    day: '2-digit',
+                                    month: 'short',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </p>
+                              </div>
+                              <Badge
+                                variant="outline"
+                                className="border-amber-200 bg-amber-50 text-amber-800 text-2xs font-semibold shrink-0"
+                              >
+                                Εκκρεμεί
+                              </Badge>
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                    {pendingBookings.length > 0 && (
+                      <Link
+                        href="/management/bookings"
+                        className="block px-4 py-3 text-center text-xs font-semibold text-emerald-700 hover:bg-zinc-50 border-t border-border transition-colors"
+                      >
+                        Όλες οι κρατήσεις
+                      </Link>
                     )}
-                  </div>
-                </div>
+                  </PopoverContent>
+                </Popover>
+
+                <div className="hidden sm:block w-px h-6 bg-border mx-1" />
+
+                {/* Λογαριασμός — πριν έδειχνε κλικαρίσιμο αλλά δεν έκανε τίποτα. */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button
+                      aria-label="Μενού λογαριασμού"
+                      className="flex items-center gap-2.5 h-10 pl-1 pr-1.5 sm:pr-2 rounded-lg hover:bg-zinc-100 transition-colors"
+                    >
+                      <span className="hidden md:flex flex-col items-end leading-tight">
+                        <span className="text-sm font-medium text-zinc-900 max-w-[140px] truncate">
+                          {venueOwner?.name || 'Λογαριασμός'}
+                        </span>
+                        <span className="text-2xs text-zinc-500 max-w-[140px] truncate">{user?.email}</span>
+                      </span>
+                      <span className="h-8 w-8 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center overflow-hidden shrink-0">
+                        {user?.photoURL ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={user.photoURL} alt="" className="h-full w-full object-cover" />
+                        ) : initials ? (
+                          <span className="text-xs font-semibold">{initials}</span>
+                        ) : (
+                          <User className="h-4 w-4" aria-hidden="true" />
+                        )}
+                      </span>
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-60">
+                    <DropdownMenuLabel className="font-normal">
+                      <p className="text-sm font-semibold text-zinc-900 truncate">
+                        {venueOwner?.name || 'Λογαριασμός'}
+                      </p>
+                      <p className="text-xs text-zinc-500 truncate mt-0.5">{user?.email}</p>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => router.push('/management/settings')}>
+                      <SettingsIcon className="h-4 w-4" aria-hidden="true" />
+                      Ρυθμίσεις
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem variant="destructive" onClick={() => signOut()}>
+                      <LogOut className="h-4 w-4" aria-hidden="true" />
+                      Αποσύνδεση
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
-          </div>
+          </header>
 
-          <div className="max-w-[1600px] mx-auto p-4 sm:p-6">
-            {children}
-          </div>
+          <div className="max-w-[1600px] mx-auto p-4 sm:p-6">{children}</div>
         </main>
       </div>
     </div>

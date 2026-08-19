@@ -20,7 +20,7 @@ export default function PricingSection() {
                 Διεθνείς λύσεις κοστίζουν 3-6x περισσότερο χωρίς ελληνική υποστήριξη.
               </span>
             </p>
-            <div className="mt-8 flex flex-wrap justify-center items-center gap-6 text-[12px] md:text-xs font-bold text-zinc-500 uppercase tracking-widest">
+            <div className="mt-8 flex flex-wrap justify-center items-center gap-6 text-2xs md:text-xs font-bold text-zinc-400 uppercase tracking-widest">
               <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 italic"><Zap className="w-3 h-3 text-emerald-500" /> Δωρεαν για 15 ημερες</span>
               <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10"><Shield className="w-3 h-3 text-emerald-500" /> Ολες οι λειτουργιες</span>
               <span className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10"><CheckCircle2 className="w-3 h-3 text-emerald-500" /> Χωρις καρτα</span>
@@ -37,16 +37,16 @@ export default function PricingSection() {
               return (
                 <div 
                   key={plan.id}
-                  className={`relative flex flex-col p-8 rounded-[2rem] border transition-all duration-300 ${
+                  className={`relative flex flex-col p-8 rounded-2xl border transition-all duration-300 ${
                     isPopular 
-                      ? 'bg-[#0B151C] border-emerald-500/50 shadow-[0_0_50px_rgba(52,211,153,0.15)] md:-translate-y-4' 
+                      ? 'bg-[#0B151C] border-emerald-500/50 shadow-[0_0_50px_rgba(116,238,22,0.15)] md:-translate-y-4' 
                       : 'bg-[#040D12]/80 border-white/10 hover:border-white/20'
                   }`}
                 >
                   {isPopular && (
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                       <span className="bg-emerald-500 text-black text-xs font-bold px-4 py-1.5 rounded-full tracking-wider uppercase">
-                        ΠΙΟ ΔΗΜΟΦΙΛΕΣ
+                        Πιο δημοφιλές
                       </span>
                     </div>
                   )}
@@ -56,29 +56,29 @@ export default function PricingSection() {
                   
                   <div className="mb-8">
                     <div className="flex items-end gap-1">
-                      <span className="text-5xl font-black text-white">{pricingUtils.formatPrice(totalPrice).replace('€', '')}</span>
+                      <span className="text-5xl font-bold text-white">{pricingUtils.formatPrice(totalPrice).replace('€', '')}</span>
                       <span className="text-emerald-400 font-bold text-xl">€</span>
-                      <span className="text-zinc-500 mb-1 ml-1">{duration === 1 ? '/ μήνα' : 'συνολικά'}</span>
+                      <span className="text-zinc-400 mb-1 ml-1">{duration === 1 ? '/ μήνα' : 'συνολικά'}</span>
                     </div>
                     {duration > 1 && (
                       <div className="inline-block mt-3 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3 py-1 rounded-lg text-sm font-semibold tracking-wide">
                         Βγαίνει {pricingUtils.formatPrice(monthlyPrice).replace('€', '')}€ / μήνα
                       </div>
                     )}
-                    <p className={`text-xs text-zinc-500 font-medium ${duration > 1 ? 'mt-3' : 'mt-2'}`}>περιλαμβάνει ΦΠΑ 24%</p>
+                    <p className={`text-xs text-zinc-400 font-medium ${duration > 1 ? 'mt-3' : 'mt-2'}`}>περιλαμβάνει ΦΠΑ 24%</p>
                   </div>
 
                   <ul className="space-y-4 mb-8 flex-1">
                     {plan.features.map((feature, i) => (
                       <li key={i} className="flex items-start gap-3">
-                        <Check className={`w-5 h-5 shrink-0 ${isPopular ? 'text-emerald-400' : 'text-zinc-500'}`} />
+                        <Check className={`w-5 h-5 shrink-0 ${isPopular ? 'text-emerald-400' : 'text-zinc-400'}`} />
                         <span className="text-zinc-300 text-sm leading-tight">{feature}</span>
                       </li>
                     ))}
                   </ul>
 
                   <Link 
-                    href="https://www.yabalitsa.com/for-venues"
+                    href="/for-venues"
                     className={`w-full text-center py-4 rounded-xl font-bold transition-all ${
                       isPopular 
                         ? 'bg-emerald-400 hover:bg-emerald-300 text-black' 
@@ -97,10 +97,11 @@ export default function PricingSection() {
             <h3 className="text-2xl md:text-3xl font-bold mb-4">Γιατί να αλλάξω τον τρόπο που δουλεύω;</h3>
             <p className="text-zinc-400 mb-12 max-w-xl mx-auto">Η παραμονή στο χαρτί και στο Excel δεν είναι δωρεάν. <span className="text-red-400">Σας κοστίζει σε χρόνο, λάθη και χαμένα έσοδα.</span></p>
             
-            <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] overflow-hidden backdrop-blur-sm">
-              <table className="w-full text-left border-collapse">
+            <div className="bg-white/[0.02] border border-white/5 rounded-2xl overflow-hidden backdrop-blur-sm">
+              <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse min-w-[560px]">
                 <thead>
-                  <tr className="bg-white/5 text-[10px] uppercase tracking-widest font-bold text-zinc-500">
+                  <tr className="bg-white/5 text-2xs uppercase tracking-widest font-bold text-zinc-400">
                     <th className="px-6 py-5">Λειτουργία</th>
                     <th className="px-6 py-5 text-center bg-red-500/5 text-red-400">Excel / Χαρτί</th>
                     <th className="px-6 py-5 text-center bg-emerald-500/5 text-emerald-400">Yabalitsa</th>
@@ -109,34 +110,35 @@ export default function PricingSection() {
                 <tbody className="text-sm">
                   <tr className="border-t border-white/5">
                     <td className="px-6 py-5 font-medium">Έλεγχος Διαθεσιμότητας</td>
-                    <td className="px-6 py-5 text-center text-zinc-600">Χειροκίνητος & επιρρεπής σε λάθη</td>
+                    <td className="px-6 py-5 text-center text-zinc-400">Χειροκίνητος & επιρρεπής σε λάθη</td>
                     <td className="px-6 py-5 text-center text-emerald-400 font-bold">Αυτόματος & Αλάνθαστος</td>
                   </tr>
                   <tr className="border-t border-white/5">
                     <td className="px-6 py-5 font-medium">Λήξη Ιατρικών Πιστοποιητικών</td>
-                    <td className="px-6 py-5 text-center text-zinc-600">Αδύνατο να ελεγχθεί έγκαιρα</td>
+                    <td className="px-6 py-5 text-center text-zinc-400">Αδύνατο να ελεγχθεί έγκαιρα</td>
                     <td className="px-6 py-5 text-center text-emerald-400 font-bold">Αυτόματες Ειδοποιήσεις</td>
                   </tr>
                   <tr className="border-t border-white/5">
                     <td className="px-6 py-5 font-medium">Έλεγχος Χρεών & Πληρωμών</td>
-                    <td className="px-6 py-5 text-center text-zinc-600">&quot;Ποιος μας χρωστάει;&quot; (Χάος)</td>
+                    <td className="px-6 py-5 text-center text-zinc-400">&quot;Ποιος μας χρωστάει;&quot; (Χάος)</td>
                     <td className="px-6 py-5 text-center text-emerald-400 font-bold">Zero-Debt Dashboard</td>
                   </tr>
                   <tr className="border-t border-white/5">
                     <td className="px-6 py-5 font-medium">Πρόσβαση από παντού (Mobile)</td>
-                    <td className="px-6 py-5 text-center text-zinc-600">Πρέπει να είστε στο γραφείο</td>
+                    <td className="px-6 py-5 text-center text-zinc-400">Πρέπει να είστε στο γραφείο</td>
                     <td className="px-6 py-5 text-center text-emerald-400 font-bold">Παντού μαζί σας (Cloud)</td>
                   </tr>
                   <tr className="border-t border-white/5">
                     <td className="px-6 py-5 font-medium">Αναφορές Εσόδων</td>
-                    <td className="px-6 py-5 text-center text-zinc-600">Ώρες υπολογισμών & άγχος</td>
+                    <td className="px-6 py-5 text-center text-zinc-400">Ώρες υπολογισμών & άγχος</td>
                     <td className="px-6 py-5 text-center text-emerald-400 font-bold">Real-time με 1 κλικ</td>
                   </tr>
                 </tbody>
               </table>
+              </div>
             </div>
             
-            <div className="mt-8 flex justify-center items-center gap-2 text-zinc-500 text-xs italic">
+            <div className="mt-8 flex justify-center items-center gap-2 text-zinc-400 text-xs italic">
               <Shield className="w-4 h-4 text-emerald-500" />
               Μην αφήνετε την επιχείρησή σας στην τύχη. Αναβαθμίστε σήμερα.
             </div>

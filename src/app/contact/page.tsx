@@ -16,7 +16,7 @@ export default function ContactPage() {
     <div className="min-h-screen bg-[#040D12] text-white font-sans selection:bg-emerald-500/30">
       
       {/* HEADER exactly like homepage */}
-      <header className="fixed top-0 w-full z-50 bg-[#040D12] border-b border-white/5 flex items-center justify-between text-[13px] font-medium tracking-wide">
+      <header className="fixed top-0 w-full z-50 bg-[#040D12] border-b border-white/5 flex items-center justify-between text-xs font-medium tracking-wide">
         <div className="max-w-[1400px] mx-auto w-full px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-10">
             <Link href="/">
@@ -55,7 +55,7 @@ export default function ContactPage() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-emerald-500/10 blur-[150px] rounded-full pointer-events-none" />
 
         <div className="max-w-4xl mx-auto w-full relative z-10 text-center">
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-black mb-6 tracking-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 tracking-tight">
             Είμαστε εδώ <br className="hidden sm:block" />
             <span className="text-emerald-500">για εσάς</span>
           </h1>
@@ -109,9 +109,9 @@ export default function ContactPage() {
               height={20}
               className="filter brightness-0 invert opacity-50 hover:opacity-100 transition"
             />
-            <span className="text-zinc-600 text-sm">© 2026. All rights reserved.</span>
+            <span className="text-zinc-400 text-sm">© 2026 Yabalitsa. Με επιφύλαξη παντός δικαιώματος.</span>
           </div>
-          <div className="flex items-center gap-6 text-sm text-zinc-500 font-medium">
+          <div className="flex items-center gap-6 text-sm text-zinc-400 font-medium">
             <Link href="/contact" className="hover:text-emerald-400 transition">Contact Us</Link>
             <Link href="/blog" className="hover:text-emerald-400 transition">Blog / Άρθρα</Link>
             <Link href="/terms" className="hover:text-emerald-400 transition">Terms of Service</Link>

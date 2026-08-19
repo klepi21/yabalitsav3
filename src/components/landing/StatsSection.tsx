@@ -60,31 +60,31 @@ export default function StatsSection() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-y-12 gap-x-8 md:gap-16">
           {/* Stat 1 */}
           <div className="flex flex-col items-center text-center group">
-            <div className="text-emerald-400 font-black text-3xl md:text-5xl mb-2 tracking-tighter tabular-nums">
+            <div className="text-emerald-400 font-bold text-3xl md:text-5xl mb-2 tracking-tighter tabular-nums">
               {loading ? '...' : formatNumber(stats.venues)}
             </div>
-            <div className="text-zinc-500 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em]">Ενεργες Εγκαταστασεις</div>
+            <div className="text-zinc-400 text-2xs md:text-xs font-bold uppercase tracking-[0.2em]">Ενεργες Εγκαταστασεις</div>
           </div>
           {/* Stat 2 */}
           <div className="flex flex-col items-center text-center">
-            <div className="text-emerald-400 font-black text-3xl md:text-5xl mb-2 tracking-tighter tabular-nums">
+            <div className="text-emerald-400 font-bold text-3xl md:text-5xl mb-2 tracking-tighter tabular-nums">
               {loading ? '...' : formatNumber(stats.customers)}
             </div>
-            <div className="text-zinc-500 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em]">Εγγεγραμμενοι Πελατες</div>
+            <div className="text-zinc-400 text-2xs md:text-xs font-bold uppercase tracking-[0.2em]">Εγγεγραμμενοι Πελατες</div>
           </div>
           {/* Stat 3 */}
           <div className="flex flex-col items-center text-center">
-            <div className="text-emerald-400 font-black text-3xl md:text-5xl mb-2 tracking-tighter tabular-nums">
+            <div className="text-emerald-400 font-bold text-3xl md:text-5xl mb-2 tracking-tighter tabular-nums">
               {loading ? '...' : formatNumber(stats.bookings)}
             </div>
-            <div className="text-zinc-500 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em]">Ολοκληρωμενα Bookings</div>
+            <div className="text-zinc-400 text-2xs md:text-xs font-bold uppercase tracking-[0.2em]">Ολοκληρωμενα Bookings</div>
           </div>
           {/* Stat 4 */}
           <div className="flex flex-col items-center text-center">
-            <div className="text-emerald-400 font-black text-3xl md:text-5xl mb-2 tracking-tighter tabular-nums">
+            <div className="text-emerald-400 font-bold text-3xl md:text-5xl mb-2 tracking-tighter tabular-nums">
               {loading ? '...' : formatNumber(stats.athletes)}
             </div>
-            <div className="text-zinc-500 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em]">Αθλητες Ακαδημιων</div>
+            <div className="text-zinc-400 text-2xs md:text-xs font-bold uppercase tracking-[0.2em]">Αθλητες Ακαδημιων</div>
           </div>
         </div>
       </div>

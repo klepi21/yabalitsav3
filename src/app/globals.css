@@ -2,68 +2,96 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================================
+   DESIGN TOKENS
+   Ένα σύστημα. Μην προσθέτεις αυθαίρετα px/hex στα components —
+   πρόσθεσε token εδώ.
+   ============================================================ */
+
 :root {
-  --background: #f1f4f8;
-  --foreground: #0f172a;
+  /* --- Surfaces --- */
+  --background: #f6f7f9;
+  --foreground: #18181b;
   --card: #ffffff;
-  --card-foreground: #0f172a;
+  --card-foreground: #18181b;
   --popover: #ffffff;
-  --popover-foreground: #0f172a;
+  --popover-foreground: #18181b;
+
+  /* --- Brand --- */
   --primary: #74ee16;
-  --primary-foreground: #000000;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #475569;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
-  --destructive: #ef4444;
-  --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
+  --primary-foreground: #0a0a0a;
   --ring: #74ee16;
+
+  /* --- Neutrals (zinc = η ΜΟΝΗ ουδέτερη ράμπα) --- */
+  --secondary: #f4f4f5;
+  --secondary-foreground: #3f3f46;
+  --muted: #f4f4f5;
+  --muted-foreground: #52525b;
+  --accent: #f4f4f5;
+  --accent-foreground: #18181b;
+  --border: #e4e4e7;
+  --input: #e4e4e7;
+
+  /* --- Semantic (AA-safe ως κείμενο σε λευκό) --- */
+  --success: #3a820a;
+  --success-surface: #f5fee9;
+  --warning: #b45309;
+  --warning-surface: #fffbeb;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --destructive-surface: #fef2f2;
+  --info: #1d4ed8;
+  --info-surface: #eff6ff;
+
+  /* --- Elevation --- */
+  --elevation-1: 0 1px 2px 0 rgb(24 24 27 / 0.05);
+  --elevation-2: 0 1px 3px 0 rgb(24 24 27 / 0.07), 0 1px 2px -1px rgb(24 24 27 / 0.04);
+  --elevation-3: 0 4px 12px -2px rgb(24 24 27 / 0.08), 0 2px 4px -2px rgb(24 24 27 / 0.04);
+  --elevation-4: 0 12px 28px -8px rgb(24 24 27 / 0.12), 0 4px 10px -4px rgb(24 24 27 / 0.05);
+
+  /* --- Radius --- */
   --radius: 0.75rem;
-  --chart-1: #74ee16;
-  --chart-2: #5dc611;
-  --chart-3: #9ef087;
-  --chart-4: #c8f7b7;
-  --chart-5: #e5fbdd;
-  --sidebar-bg: #1e293b;
-  --sidebar-foreground: #94a3b8;
-  --sidebar-primary: #74ee16;
-  --sidebar-primary-foreground: #000000;
-  --sidebar-accent: rgba(255, 255, 255, 0.05);
-  --sidebar-accent-foreground: #f8fafc;
-  --sidebar-border: rgba(255, 255, 255, 0.06);
-  --sidebar-ring: #74ee16;
-  --sidebar: #1e293b;
+
+  /* --- Charts: μία σειρά, διακριτή σε τόνο ΚΑΙ σε φωτεινότητα --- */
+  --chart-1: #3a820a;
+  --chart-2: #1d4ed8;
+  --chart-3: #b45309;
+  --chart-4: #7c3aed;
+  --chart-5: #0e7490;
 }
 
 @theme inline {
-  --color-emerald-50: #f4fdf0;
-  --color-emerald-100: #e5fbdd;
-  --color-emerald-200: #c8f7b7;
-  --color-emerald-300: #9ef087;
-  --color-emerald-400: #74ee16; 
-  --color-emerald-500: #5dc611;
-  --color-emerald-600: #479a0d;
-  --color-emerald-700: #37750c;
-  --color-emerald-800: #2c5d0c;
-  --color-emerald-900: #254d0d;
-  --color-emerald-950: #112a04;
-  
-  --color-green-50: #f4fdf0;
-  --color-green-100: #e5fbdd;
-  --color-green-200: #c8f7b7;
-  --color-green-300: #9ef087;
-  --color-green-400: #74ee16; 
-  --color-green-500: #5dc611;
-  --color-green-600: #479a0d;
-  --color-green-700: #37750c;
-  --color-green-800: #2c5d0c;
-  --color-green-900: #254d0d;
-  --color-green-950: #112a04;
+  /* ---------- Brand ramp ----------
+     400 = #74ee16 είναι το brand χρώμα (μην το αλλάξεις).
+     600/700 είναι σκουρόχρωμα επίτηδες: είναι τα ΜΟΝΑ που
+     περνούν WCAG AA ως κείμενο πάνω σε λευκό.
+     Κανόνας: 400/500 = ΦΟΝΤΟ με ΜΑΥΡΟ κείμενο.
+               600/700 = ΚΕΙΜΕΝΟ πάνω σε λευκό.        */
+  --color-emerald-50: #f5fee9;
+  --color-emerald-100: #e8fccb;
+  --color-emerald-200: #d3f99e;
+  --color-emerald-300: #b4f266;
+  --color-emerald-400: #74ee16;
+  --color-emerald-500: #63d10a;
+  --color-emerald-600: #3a820a;
+  --color-emerald-700: #2f6b09;
+  --color-emerald-800: #285709;
+  --color-emerald-900: #23480c;
+  --color-emerald-950: #102603;
 
+  --color-green-50: #f5fee9;
+  --color-green-100: #e8fccb;
+  --color-green-200: #d3f99e;
+  --color-green-300: #b4f266;
+  --color-green-400: #74ee16;
+  --color-green-500: #63d10a;
+  --color-green-600: #3a820a;
+  --color-green-700: #2f6b09;
+  --color-green-800: #285709;
+  --color-green-900: #23480c;
+  --color-green-950: #102603;
+
+  /* ---------- Semantic aliases ---------- */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -83,58 +111,88 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: var(--font-geist-mono);
+
+  /* ---------- Radius ---------- */
+  --radius-sm: calc(var(--radius) - 4px);   /* 8px  */
+  --radius-md: calc(var(--radius) - 2px);   /* 10px */
+  --radius-lg: var(--radius);               /* 12px */
+  --radius-xl: calc(var(--radius) + 4px);   /* 16px */
+  --radius-2xl: calc(var(--radius) + 8px);  /* 20px */
+
+  /* ---------- Elevation ---------- */
+  --shadow-e1: var(--elevation-1);
+  --shadow-e2: var(--elevation-2);
+  --shadow-e3: var(--elevation-3);
+  --shadow-e4: var(--elevation-4);
+
+  /* ---------- Type scale ----------
+     Δεν υπάρχει τίποτα κάτω από 12px. Ποτέ.        */
+  --text-2xs: 0.75rem;      /* 12px — micro labels  */
+  --text-2xs--line-height: 1rem;
+  --text-xs: 0.8125rem;     /* 13px — metadata      */
+  --text-xs--line-height: 1.125rem;
+  --text-sm: 0.875rem;      /* 14px — UI default    */
+  --text-sm--line-height: 1.25rem;
+  --text-base: 0.9375rem;   /* 15px — body          */
+  --text-base--line-height: 1.5rem;
+
+  --font-sans: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
 }
+
+/* ============================================================
+   BASE
+   ============================================================ */
 
 * {
   -webkit-font-smoothing: antialiased;
-  -moz-osx-osx-font-smoothing: grayscale;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
-  letter-spacing: -0.011em;
-  font-size: 16px;
-  line-height: 1.6;
+  font-family: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
+  letter-spacing: -0.006em;
+  font-size: 15px;
+  line-height: 1.55;
 }
 
-@media (min-width: 768px) {
-  body {
-    font-size: 17px;
-  }
+/* Οι επικεφαλίδες είναι το ΜΟΝΟ σημείο όπου σφίγγουμε το tracking. */
+h1, h2, h3, h4 {
+  letter-spacing: -0.02em;
 }
 
-/* Premium selection color */
 ::selection {
-  background: rgba(116, 238, 22, 0.15);
-  color: var(--primary);
+  background: rgba(116, 238, 22, 0.22);
+  color: #1a2e05;
 }
 
-/* Refined scrollbar */
+/* ============================================================
+   FOCUS — ορατό παντού, χωρίς εξαιρέσεις.
+   ============================================================ */
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* ============================================================
+   SCROLLBARS
+   ============================================================ */
+
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -142,65 +200,91 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
+  background: rgb(212 212 216);
   border-radius: 10px;
-  border: 2px solid var(--background);
+  border: 3px solid transparent;
+  background-clip: content-box;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgb(161 161 170);
+  background-clip: content-box;
 }
 
-/* Force 24-hour format for time inputs */
+/* Χρησιμοποιείται στο sidebar nav. Πριν ήταν αδήλωτη κλάση. */
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+
 input[type="time"] {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
 }
 
-/* Accessible utility for large clickable areas */
-.touch-target {
-  min-height: 48px;
+/* Ελάχιστη επιφάνεια αφής — WCAG 2.5.5 */
+@utility touch-target {
+  min-height: 44px;
   min-width: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.chunky-button {
-  height: 3.5rem !important; /* 56px */
-  border-radius: 1rem !important;
-  font-weight: 800 !important;
-  font-size: 1.125rem !important; /* text-lg */
+/* Η τυπική κάρτα του dashboard. Μία εμφάνιση, ένα σημείο αλλαγής. */
+@utility surface {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-2);
 }
 
-.high-legibility {
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  letter-spacing: -0.01em;
+@utility surface-interactive {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-2);
+  transition: box-shadow 180ms cubic-bezier(0.4, 0, 0.2, 1),
+              border-color 180ms cubic-bezier(0.4, 0, 0.2, 1);
+  &:hover {
+    box-shadow: var(--elevation-3);
+    border-color: rgb(212 212 216);
+  }
 }
 
-/* Better card shadow for depth - optimized for older eyes to see boundaries */
-.glass-card {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
-  border: 2px solid var(--border);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+/* Το μικρό κεφαλαίο "eyebrow" πάνω από ενότητες.
+   Είναι το ΜΟΝΟ σημείο όπου επιτρέπονται κεφαλαία + tracking. */
+@utility eyebrow {
+  font-size: 0.6875rem;
+  line-height: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted-foreground);
 }
 
 .premium-card {
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 20px -5px rgba(0, 0, 0, 0.08), 0 2px 8px -2px rgba(0, 0, 0, 0.04);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--elevation-2);
+  transition: box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1),
+              transform 200ms cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  background-color: #ffffff !important;
+  background-color: var(--card);
 }
 
 .premium-card:hover {
-  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.12), 0 10px 15px -5px rgba(0, 0, 0, 0.06);
-  transform: translateY(-2px);
+  box-shadow: var(--elevation-4);
+  transform: translateY(-1px);
 }
-
 
 @keyframes bounce-slow {
   0%, 100% {
@@ -215,4 +299,13 @@ input[type="time"] {
 
 .animate-bounce-slow {
   animation: bounce-slow 3s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

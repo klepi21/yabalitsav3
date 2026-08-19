@@ -126,7 +126,7 @@ export default function NewTournamentPage() {
       {/* Back Button */}
       <Link
         href="/management/tournaments"
-        className="group inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-emerald-600 transition-colors"
+        className="group inline-flex items-center gap-2 text-xs font-semibold text-zinc-500 hover:text-emerald-600 transition-colors"
       >
         <div className="h-8 w-8 rounded-lg bg-zinc-50 flex items-center justify-center group-hover:bg-emerald-50 transition-colors">
           <ArrowLeft className="h-4 w-4" />
@@ -137,14 +137,14 @@ export default function NewTournamentPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8 border-b border-zinc-100">
         <div className="flex items-center gap-6">
-          <div className="h-20 w-20 rounded-[1.75rem] bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-sm">
+          <div className="h-20 w-20 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 shadow-sm">
             <Trophy className="h-10 w-10" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-4xl font-black text-zinc-900 tracking-tight uppercase leading-none">
+            <h1 className="text-4xl font-bold text-zinc-900 tracking-tight leading-none">
               Νέο Τουρνουά
             </h1>
-            <p className="text-sm font-bold text-zinc-400 uppercase tracking-widest">
+            <p className="text-sm font-semibold text-zinc-500">
               Δημιουργία νέας διοργάνωσης
             </p>
           </div>
@@ -153,44 +153,44 @@ export default function NewTournamentPage() {
 
       <form onSubmit={handleSubmit} className="space-y-10">
         {error && (
-          <div className="rounded-2xl border-2 border-red-100 bg-red-50 p-6 text-sm font-bold text-red-700 animate-in fade-in slide-in-from-top-2">
+          <div className="rounded-2xl border-2 border-red-100 bg-red-50 p-6 text-sm font-semibold text-red-700 animate-in fade-in slide-in-from-top-2">
             {error}
           </div>
         )}
 
         {/* Basic Info Section */}
-        <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-10 space-y-10">
+        <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-10 space-y-10">
           <div className="flex items-center gap-4">
             <div className="h-10 w-10 rounded-xl bg-violet-50 flex items-center justify-center">
               <Trophy className="h-5 w-5 text-violet-600" />
             </div>
-            <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">Βασικά Στοιχεία</h2>
+            <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Βασικά Στοιχεία</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
             <div className="space-y-4 md:col-span-2 text-left">
-              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Όνομα Τουρνουά *</Label>
+              <Label className="text-2xs font-semibold text-zinc-500 ml-1">Όνομα Τουρνουά *</Label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="π.χ. Ανοιξιάτικο Πρωτάθλημα 2026"
-                className="h-14 bg-zinc-50 border-none rounded-2xl px-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-emerald-500/20"
+                className="h-14 bg-zinc-50 border-none rounded-2xl px-6 text-sm font-semibold text-zinc-900 focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
 
             <div className="space-y-4 md:col-span-2 text-left">
-              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Περιγραφή</Label>
+              <Label className="text-2xs font-semibold text-zinc-500 ml-1">Περιγραφή</Label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Περιγράψτε το τουρνουά σας (προαιρετικά)..."
                 rows={4}
-                className="w-full bg-zinc-50 border-none rounded-[2rem] px-6 py-4 text-sm font-bold text-zinc-900 placeholder:text-zinc-300 focus:ring-2 focus:ring-emerald-500/20"
+                className="w-full bg-zinc-50 border-none rounded-2xl px-6 py-4 text-sm font-semibold text-zinc-900 placeholder:text-zinc-500 focus:ring-2 focus:ring-emerald-500/20"
               />
             </div>
 
             <div className="space-y-4 text-left">
-              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Ημ. Έναρξης *</Label>
+              <Label className="text-2xs font-semibold text-zinc-500 ml-1">Ημ. Έναρξης *</Label>
               <Input
                 type="date"
                 value={startDate}
@@ -199,7 +199,7 @@ export default function NewTournamentPage() {
               />
             </div>
             <div className="space-y-4 text-left">
-              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Ημ. Λήξης *</Label>
+              <Label className="text-2xs font-semibold text-zinc-500 ml-1">Ημ. Λήξης *</Label>
               <Input
                 type="date"
                 value={endDate}
@@ -211,12 +211,12 @@ export default function NewTournamentPage() {
         </div>
 
         {/* Tournament Type Section */}
-        <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-10 space-y-10">
+        <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-10 space-y-10">
           <div className="flex items-center gap-4">
             <div className="h-10 w-10 rounded-xl bg-violet-50 flex items-center justify-center">
               <GitBranch className="h-5 w-5 text-violet-600" />
             </div>
-            <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">Τύπος Διοργάνωσης</h2>
+            <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Τύπος Διοργάνωσης</h2>
           </div>
 
           <div className="grid gap-6">
@@ -229,27 +229,27 @@ export default function NewTournamentPage() {
                   type="button"
                   onClick={() => setType(opt.value)}
                   className={cn(
-                    "flex items-center gap-6 rounded-[2rem] border-2 p-6 text-left transition-all duration-300",
+                    "flex items-center gap-6 rounded-2xl border-2 p-6 text-left transition-all duration-300",
                     isSelected
                       ? "border-emerald-500 bg-emerald-50/30 shadow-lg shadow-emerald-50/50"
-                      : "border-zinc-50 bg-zinc-50 text-zinc-400 hover:border-zinc-100 hover:bg-zinc-100/50"
+                      : "border-zinc-50 bg-zinc-50 text-zinc-500 hover:border-zinc-100 hover:bg-zinc-100/50"
                   )}
                 >
                   <div className={cn(
                     "h-14 w-14 rounded-2xl flex items-center justify-center transition-all",
-                    isSelected ? "bg-emerald-600 text-white" : "bg-white text-zinc-300"
+                    isSelected ? "bg-emerald-600 text-white" : "bg-white text-zinc-400"
                   )}>
                     <Icon className="h-6 w-6" />
                   </div>
                   <div className="flex-1">
                     <p className={cn(
-                      "text-lg font-black uppercase tracking-tight leading-tight",
-                      isSelected ? "text-emerald-900" : "text-zinc-400"
+                      "text-lg font-semibold tracking-tight leading-tight",
+                      isSelected ? "text-emerald-900" : "text-zinc-500"
                     )}>
                       {opt.label}
                     </p>
                     <p className={cn(
-                      "text-xs font-bold mt-0.5",
+                      "text-xs font-medium mt-0.5",
                       isSelected ? "text-emerald-600" : "text-zinc-400/60"
                     )}>
                       {opt.description}
@@ -267,7 +267,7 @@ export default function NewTournamentPage() {
 
           {type === 'league' && (
             <div className="space-y-6 pt-6 border-t border-zinc-50 text-left">
-              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Αριθμός Γύρων (Φάση Πρωταθλήματος)</Label>
+              <Label className="text-2xs font-semibold text-zinc-500 ml-1">Αριθμός Γύρων (Φάση Πρωταθλήματος)</Label>
               <div className="flex items-center gap-4">
                 {[
                   { value: 1, label: 'Μονός Γύρος (1×)' },
@@ -278,10 +278,10 @@ export default function NewTournamentPage() {
                     type="button"
                     onClick={() => setLegs(leg.value as 1 | 2)}
                     className={cn(
-                      "flex-1 h-14 rounded-2xl text-[12px] font-black uppercase tracking-widest transition-all border-2",
+                      "flex-1 h-14 rounded-2xl text-2xs font-semibold transition-all border-2",
                       legs === leg.value
                         ? "bg-zinc-900 border-zinc-900 text-white shadow-lg"
-                        : "bg-white border-zinc-100 text-zinc-400 hover:border-zinc-200"
+                        : "bg-white border-zinc-100 text-zinc-500 hover:border-zinc-200"
                     )}
                   >
                     {leg.label}
@@ -293,16 +293,16 @@ export default function NewTournamentPage() {
         </div>
 
         {/* Pitch & Settings Section */}
-        <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-10 space-y-10">
+        <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-10 space-y-10">
           <div className="flex items-center gap-4">
             <div className="h-10 w-10 rounded-xl bg-orange-50 flex items-center justify-center">
               <Layers className="h-5 w-5 text-orange-600" />
             </div>
-            <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">Γήπεδο & Ρυθμίσεις</h2>
+            <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Γήπεδο & Ρυθμίσεις</h2>
           </div>
 
           <div className="space-y-6 text-left">
-            <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Τύπος Γηπέδου</Label>
+            <Label className="text-2xs font-semibold text-zinc-500 ml-1">Τύπος Γηπέδου</Label>
             <div className="flex items-center gap-2 flex-wrap">
               {pitchTypes.map((pt) => (
                 <button
@@ -310,10 +310,10 @@ export default function NewTournamentPage() {
                   type="button"
                   onClick={() => { setPitchType(pt); setPitchId(''); }}
                   className={cn(
-                    "px-6 h-12 rounded-xl text-[12px] font-black uppercase tracking-widest transition-all",
+                    "px-6 h-12 rounded-xl text-2xs font-semibold transition-all",
                     pitchType === pt
                       ? "bg-zinc-900 text-white shadow-lg shadow-zinc-200"
-                      : "bg-zinc-50 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600"
+                      : "bg-zinc-50 text-zinc-500 hover:bg-zinc-100 hover:text-zinc-600"
                   )}
                 >
                   {pt}
@@ -324,7 +324,7 @@ export default function NewTournamentPage() {
 
           {filteredPitches.length > 0 && (
             <div className="space-y-6 pt-6 border-t border-zinc-50 text-left">
-              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Επιλογή Γηπέδου (Προαιρετικό)</Label>
+              <Label className="text-2xs font-semibold text-zinc-500 ml-1">Επιλογή Γηπέδου (Προαιρετικό)</Label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {filteredPitches.map((p) => {
                   const isSelected = pitchId === p.id;
@@ -334,21 +334,21 @@ export default function NewTournamentPage() {
                       type="button"
                       onClick={() => setPitchId(pitchId === p.id ? '' : p.id)}
                       className={cn(
-                        "flex items-center justify-between rounded-[1.5rem] border-2 p-5 text-left transition-all duration-300",
+                        "flex items-center justify-between rounded-xl border-2 p-5 text-left transition-all duration-300",
                         isSelected
                           ? "border-emerald-500 bg-emerald-50/30 shadow-md shadow-emerald-50/50"
-                          : "border-zinc-50 bg-zinc-50 text-zinc-400 hover:border-zinc-100 hover:bg-zinc-100/50"
+                          : "border-zinc-50 bg-zinc-50 text-zinc-500 hover:border-zinc-100 hover:bg-zinc-100/50"
                       )}
                     >
                       <div>
                         <p className={cn(
-                          "text-sm font-black uppercase tracking-tight",
+                          "text-sm font-semibold tracking-tight",
                           isSelected ? "text-emerald-900" : "text-zinc-500"
                         )}>
                           {p.name}
                         </p>
                         <p className={cn(
-                          "text-[12px] font-bold mt-0.5",
+                          "text-2xs font-medium mt-0.5",
                           isSelected ? "text-emerald-600" : "text-zinc-400/60"
                         )}>
                           {p.slotDuration}&apos; / {p.pricePerSlot}€
@@ -368,7 +368,7 @@ export default function NewTournamentPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 pt-6 border-t border-zinc-50">
             <div className="space-y-4 text-left">
-              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Μέγιστος Αριθμός Ομάδων *</Label>
+              <Label className="text-2xs font-semibold text-zinc-500 ml-1">Μέγιστος Αριθμός Ομάδων *</Label>
               <Input
                 type="number"
                 min={2}
@@ -379,7 +379,7 @@ export default function NewTournamentPage() {
               />
             </div>
             <div className="space-y-4 text-left">
-              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Διάρκεια Αγώνα (λεπτά)</Label>
+              <Label className="text-2xs font-semibold text-zinc-500 ml-1">Διάρκεια Αγώνα (λεπτά)</Label>
               <Input
                 type="number"
                 min={10}
@@ -393,27 +393,27 @@ export default function NewTournamentPage() {
         </div>
 
         {/* Extra Info Section */}
-        <div className="bg-white rounded-[2.5rem] border border-zinc-100 shadow-sm p-10 space-y-10">
+        <div className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-10 space-y-10">
           <div className="flex items-center gap-4">
             <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center">
               <Layers className="h-5 w-5 text-blue-600" />
             </div>
-            <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">Πρόσθετα Στοιχεία</h2>
+            <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Πρόσθετα Στοιχεία</h2>
           </div>
 
           <div className="space-y-4 text-left">
-            <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Κανόνες Διοργάνωσης</Label>
+            <Label className="text-2xs font-semibold text-zinc-500 ml-1">Κανόνες Διοργάνωσης</Label>
             <textarea
               value={rules}
               onChange={(e) => setRules(e.target.value)}
               placeholder="Ειδικοί κανόνες, μορφότυπο, κλπ..."
               rows={4}
-              className="w-full bg-zinc-50 border-none rounded-[2rem] px-6 py-4 text-sm font-bold text-zinc-900 placeholder:text-zinc-300 focus:ring-2 focus:ring-emerald-500/20"
+              className="w-full bg-zinc-50 border-none rounded-2xl px-6 py-4 text-sm font-semibold text-zinc-900 placeholder:text-zinc-500 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
 
           <div className="space-y-4 text-left">
-            <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Έπαθλο & Βραβεία</Label>
+            <Label className="text-2xs font-semibold text-zinc-500 ml-1">Έπαθλο & Βραβεία</Label>
             <Input
               value={prizeDescription}
               onChange={(e) => setPrizeDescription(e.target.value)}
@@ -429,14 +429,14 @@ export default function NewTournamentPage() {
             type="button" 
             variant="ghost" 
             asChild 
-            className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[11px] text-zinc-400 hover:text-zinc-600"
+            className="h-14 px-8 rounded-2xl font-semibold text-2xs text-zinc-500 hover:text-zinc-600"
           >
             <Link href="/management/tournaments">Ακύρωση</Link>
           </Button>
           <Button
             type="submit"
             disabled={isSubmitting}
-            className="h-14 px-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-lg shadow-emerald-100 min-w-[200px]"
+            className="h-14 px-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-semibold text-2xs shadow-lg shadow-emerald-100 min-w-[200px]"
           >
             {isSubmitting ? (
               <>

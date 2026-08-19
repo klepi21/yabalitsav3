@@ -268,11 +268,11 @@ export default function EditSquadPage() {
                         <div className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${
                           isSelected ? 'bg-emerald-100' : 'bg-zinc-100'
                         }`}>
-                          <Trophy className={`h-4 w-4 ${isSelected ? 'text-emerald-600' : 'text-zinc-400'}`} />
+                          <Trophy className={`h-4 w-4 ${isSelected ? 'text-emerald-600' : 'text-zinc-500'}`} />
                         </div>
                         <div>
                           <p className="text-sm font-medium text-zinc-900">{coach.displayName}</p>
-                          <p className="text-xs text-zinc-400">{coach.fields.specialization}</p>
+                          <p className="text-xs text-zinc-500">{coach.fields.specialization}</p>
                         </div>
                       </div>
                     </label>
@@ -298,8 +298,8 @@ export default function EditSquadPage() {
                 )} />
               </div>
               <div>
-                <p className="text-sm font-bold text-zinc-900">Ενεργοποίηση μηνιαίων πληρωμών</p>
-                <p className="text-xs text-zinc-400">Αν ενεργοποιηθεί, το τμήμα θα εμφανίζεται στη σελίδα πληρωμών</p>
+                <p className="text-sm font-semibold text-zinc-900">Ενεργοποίηση μηνιαίων πληρωμών</p>
+                <p className="text-xs text-zinc-500">Αν ενεργοποιηθεί, το τμήμα θα εμφανίζεται στη σελίδα πληρωμών</p>
               </div>
             </label>
 
@@ -322,7 +322,7 @@ export default function EditSquadPage() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label className="text-zinc-700">Αθλητές στο Τμήμα</Label>
-              <span className="text-xs text-zinc-400">{squadAthletes.length} αθλητές</span>
+              <span className="text-xs text-zinc-500">{squadAthletes.length} αθλητές</span>
             </div>
 
             {/* Current athletes */}
@@ -340,14 +340,14 @@ export default function EditSquadPage() {
                       <div>
                         <p className="text-sm font-medium text-zinc-900">{athlete.displayName}</p>
                         {athlete.fields.birth_year && (
-                          <p className="text-xs text-zinc-400">Γέννηση: {athlete.fields.birth_year}</p>
+                          <p className="text-xs text-zinc-500">Γέννηση: {athlete.fields.birth_year}</p>
                         )}
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => removeAthleteFromSquad(athlete.id)}
-                      className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                      className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-500 hover:text-red-600 hover:bg-red-50 transition-colors"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -363,7 +363,7 @@ export default function EditSquadPage() {
                 <span className="font-medium">Προσθήκη αθλητή</span>
               </div>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                 <Input
                   type="text"
                   placeholder="Αναζήτηση αθλητή..."
@@ -375,7 +375,7 @@ export default function EditSquadPage() {
               {athleteSearch && (
                 <div className="max-h-48 overflow-y-auto rounded-lg border border-zinc-200 bg-white divide-y divide-zinc-100">
                   {availableAthletes.length === 0 ? (
-                    <div className="p-3 text-center text-sm text-zinc-400">Δεν βρέθηκαν αθλητές</div>
+                    <div className="p-3 text-center text-sm text-zinc-500">Δεν βρέθηκαν αθλητές</div>
                   ) : (
                     availableAthletes.map((athlete) => (
                       <button
@@ -385,12 +385,12 @@ export default function EditSquadPage() {
                         className="w-full flex items-center gap-3 p-3 hover:bg-zinc-50 transition-colors text-left"
                       >
                         <div className="h-8 w-8 rounded-lg bg-zinc-100 flex items-center justify-center shrink-0">
-                          <Users className="h-4 w-4 text-zinc-400" />
+                          <Users className="h-4 w-4 text-zinc-500" />
                         </div>
                         <div>
                           <p className="text-sm font-medium text-zinc-900">{athlete.displayName}</p>
                           {athlete.fields.birth_year && (
-                            <p className="text-xs text-zinc-400">Γέννηση: {athlete.fields.birth_year}</p>
+                            <p className="text-xs text-zinc-500">Γέννηση: {athlete.fields.birth_year}</p>
                           )}
                         </div>
                       </button>

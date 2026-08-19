@@ -236,7 +236,7 @@ export default function ChatWidget() {
               <Bot className="h-5 w-5 text-white" />
             </div>
             <div className="flex-1">
-              <h3 className="text-white font-bold text-sm">Yabalitsa Assistant</h3>
+              <h3 className="text-white font-semibold text-sm">Yabalitsa Assistant</h3>
               <p className="text-emerald-100 text-xs">Ρωτήστε ό,τι θέλετε για την πλατφόρμα</p>
             </div>
             {messages.length > 0 && (
@@ -256,8 +256,8 @@ export default function ChatWidget() {
                 <div className="h-16 w-16 rounded-2xl bg-emerald-50 flex items-center justify-center mb-4">
                   <Sparkles className="h-8 w-8 text-emerald-500" />
                 </div>
-                <h4 className="text-sm font-bold text-zinc-900 mb-1">Πώς μπορώ να βοηθήσω;</h4>
-                <p className="text-xs text-zinc-400 mb-6">Ρωτήστε με οτιδήποτε σχετικό με την πλατφόρμα</p>
+                <h4 className="text-sm font-semibold text-zinc-900 mb-1">Πώς μπορώ να βοηθήσω;</h4>
+                <p className="text-xs text-zinc-500 mb-6">Ρωτήστε με οτιδήποτε σχετικό με την πλατφόρμα</p>
 
                 <div className="grid grid-cols-2 gap-2 w-full">
                   {QUICK_PROMPTS.map((qp, i) => (
@@ -302,7 +302,7 @@ export default function ChatWidget() {
                 <div className="bg-zinc-100 rounded-2xl rounded-bl-md px-4 py-3">
                   <div className="flex items-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin text-emerald-600" />
-                    <span className="text-xs text-zinc-400">Σκέφτομαι...</span>
+                    <span className="text-xs text-zinc-500">Σκέφτομαι...</span>
                   </div>
                 </div>
               </div>
@@ -320,7 +320,7 @@ export default function ChatWidget() {
                 onKeyDown={handleKeyDown}
                 placeholder="Γράψτε ένα μήνυμα..."
                 rows={1}
-                className="flex-1 resize-none rounded-xl border border-zinc-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent placeholder:text-zinc-400 max-h-20"
+                className="flex-1 resize-none rounded-xl border border-zinc-200 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent placeholder:text-zinc-500 max-h-20"
                 style={{ minHeight: '40px' }}
               />
               <button

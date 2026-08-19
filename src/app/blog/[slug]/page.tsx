@@ -76,13 +76,13 @@ export default async function BlogPostPage({ params }: Props) {
 
       {/* Main Content */}
       <main className="max-w-[800px] mx-auto px-6 py-32">
-        <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-zinc-500 mb-8 uppercase tracking-widest">
+        <div className="flex flex-wrap items-center gap-4 text-xs font-bold text-zinc-400 mb-8 uppercase tracking-widest">
           <span className="flex items-center gap-2"><Calendar className="w-4 h-4 text-[#74ee16]" /> {post.date}</span>
           <span>•</span>
           <span className="flex items-center gap-2"><Clock className="w-4 h-4 text-[#74ee16]" /> {post.readTime}</span>
         </div>
 
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-[1.15] drop-shadow-lg text-white">
+        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 leading-[1.15] drop-shadow-lg text-white">
           {post.title}
         </h1>
 
@@ -111,7 +111,7 @@ export default async function BlogPostPage({ params }: Props) {
           <h3 className="text-2xl font-bold mb-4 text-white">Είστε ιδιοκτήτης αθλητικού κέντρου;</h3>
           <p className="text-zinc-400 mb-8">Η κορυφαία πλατφόρμα διαχείρισης γηπέδων 5x5 και ακαδημιών στην Ελλάδα σας δίνει τον έλεγχο.</p>
           <Link 
-            href="https://www.yabalitsa.com/for-venues"
+            href="/for-venues"
             target="_blank"
             className="inline-flex px-8 py-4 font-bold text-black bg-[#74ee16] hover:bg-[#5dc611] rounded-2xl transition-all shadow-lg hover:-translate-y-1 items-center justify-center mx-auto"
           >

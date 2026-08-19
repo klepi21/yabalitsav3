@@ -50,7 +50,7 @@ export default function BlogIndexPage() {
                 />
               </div>
               <div className="p-8 flex flex-col flex-1">
-                <div className="flex items-center gap-4 text-xs font-bold text-zinc-500 mb-4 uppercase tracking-wider">
+                <div className="flex items-center gap-4 text-xs font-bold text-zinc-400 mb-4 uppercase tracking-wider">
                   <span className="flex items-center gap-1"><Calendar className="w-4 h-4" /> {post.date}</span>
                   <span className="flex items-center gap-1"><Clock className="w-4 h-4" /> {post.readTime}</span>
                 </div>

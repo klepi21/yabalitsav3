@@ -36,7 +36,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 export default function CustomerDetailsPage() {
   const router = useRouter();
@@ -101,9 +101,9 @@ export default function CustomerDetailsPage() {
     return (
       <div className="text-center py-16">
         <div className="mx-auto h-12 w-12 bg-zinc-100 rounded-xl flex items-center justify-center mb-4">
-          <AlertCircle className="h-6 w-6 text-zinc-400" />
+          <AlertCircle className="h-6 w-6 text-zinc-500" />
         </div>
-        <h3 className="text-lg font-black tracking-tight text-zinc-900">{error || 'Ο πελάτης δεν βρέθηκε'}</h3>
+        <h3 className="text-lg font-semibold tracking-tight text-zinc-900">{error || 'Ο πελάτης δεν βρέθηκε'}</h3>
         <Button asChild className="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl">
           <Link href="/management/customers">Επιστροφή στους Πελάτες</Link>
         </Button>
@@ -112,10 +112,10 @@ export default function CustomerDetailsPage() {
   }
 
   const statusConfig: Record<string, { label: string; className: string }> = {
-    confirmed: { label: 'ΕΠΙΒΕΒΑΙΩΜΕΝΗ', className: 'bg-emerald-100 text-emerald-700' },
-    pending: { label: 'ΕΚΚΡΕΜΕΙ', className: 'bg-amber-100 text-amber-700' },
-    completed: { label: 'ΟΛΟΚΛΗΡΩΜΕΝΗ', className: 'bg-zinc-100 text-zinc-600' },
-    cancelled: { label: 'ΑΚΥΡΩΜΕΝΗ', className: 'bg-red-100 text-red-700' },
+    confirmed: { label: 'Επιβεβαιωμένη', className: 'bg-emerald-100 text-emerald-700' },
+    pending: { label: 'Εκκρεμεί', className: 'bg-amber-100 text-amber-700' },
+    completed: { label: 'Ολοκληρωμένη', className: 'bg-zinc-100 text-zinc-600' },
+    cancelled: { label: 'Ακυρωμένη', className: 'bg-red-100 text-red-700' },
   };
 
   const handleDelete = async () => {
@@ -140,7 +140,7 @@ export default function CustomerDetailsPage() {
       <div className="space-y-5">
         <Link
           href="/management/customers"
-          className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-widest text-zinc-400 hover:text-emerald-600 transition-all group"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-500 hover:text-emerald-600 transition-all group"
         >
           <div className="h-8 w-8 rounded-xl bg-white border border-zinc-100 flex items-center justify-center group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-all">
             <ArrowLeft className="h-4 w-4" />
@@ -155,8 +155,8 @@ export default function CustomerDetailsPage() {
               <User className="h-6 w-6 sm:h-8 sm:w-8 text-white" />
             </div>
             <div className="min-w-0">
-              <h1 className="text-xl sm:text-3xl font-black tracking-tight text-zinc-900 uppercase truncate">
-                {toGreekUpperCase(customer.name)}
+              <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-zinc-900 truncate">
+                {customer.name}
               </h1>
               <p className="text-xs sm:text-sm font-medium text-zinc-500">
                 Πελάτης από {new Date(customer.createdAt).toLocaleDateString('el-GR', { month: 'long', year: 'numeric' })}
@@ -191,9 +191,9 @@ export default function CustomerDetailsPage() {
                     <div className="h-12 w-12 rounded-2xl bg-red-50 flex items-center justify-center mb-4">
                       <Trash2 className="h-6 w-6 text-red-600" />
                     </div>
-                    <AlertDialogTitle className="text-xl sm:text-2xl font-black text-zinc-900">Διαγραφή Πελάτη</AlertDialogTitle>
+                    <AlertDialogTitle className="text-xl sm:text-2xl font-bold text-zinc-900">Διαγραφή Πελάτη</AlertDialogTitle>
                     <AlertDialogDescription className="text-zinc-500 font-medium pt-2">
-                      Είστε σίγουροι ότι θέλετε να διαγράψετε τον πελάτη <span className="text-zinc-900 font-black">&quot;{customer.name}&quot;</span>;
+                      Είστε σίγουροι ότι θέλετε να διαγράψετε τον πελάτη <span className="text-zinc-900 font-semibold">&quot;{customer.name}&quot;</span>;
                       Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
@@ -234,8 +234,8 @@ export default function CustomerDetailsPage() {
                   <stat.icon className="h-4 w-4 sm:h-5 sm:w-5" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[11px] sm:text-[12px] font-black uppercase tracking-widest text-zinc-400">{stat.label}</p>
-                  <p className="text-lg sm:text-xl font-black text-zinc-900 truncate">{stat.value}</p>
+                  <p className="text-2xs sm:text-2xs font-semibold text-zinc-500">{stat.label}</p>
+                  <p className="text-lg sm:text-xl font-bold text-zinc-900 truncate">{stat.value}</p>
                 </div>
               </div>
             </CardContent>
@@ -252,27 +252,27 @@ export default function CustomerDetailsPage() {
                 <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
                   <User className="h-5 w-5 text-blue-600" />
                 </div>
-                <h3 className="text-lg sm:text-xl font-black text-zinc-900">Στοιχεία</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-zinc-900">Στοιχεία</h3>
               </div>
 
               <div className="space-y-4">
                 {customer.phone && (
                   <a href={`tel:${customer.phone}`} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 hover:bg-emerald-50 transition-colors group">
-                    <Phone className="h-4 w-4 text-zinc-400 group-hover:text-emerald-500" />
-                    <span className="text-sm font-bold text-zinc-700">{customer.phone}</span>
+                    <Phone className="h-4 w-4 text-zinc-500 group-hover:text-emerald-500" />
+                    <span className="text-sm font-semibold text-zinc-700">{customer.phone}</span>
                   </a>
                 )}
 
                 {customer.email && (
                   <a href={`mailto:${customer.email}`} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 hover:bg-emerald-50 transition-colors group">
-                    <Mail className="h-4 w-4 text-zinc-400 group-hover:text-emerald-500" />
-                    <span className="text-sm font-bold text-zinc-700 truncate">{customer.email}</span>
+                    <Mail className="h-4 w-4 text-zinc-500 group-hover:text-emerald-500" />
+                    <span className="text-sm font-semibold text-zinc-700 truncate">{customer.email}</span>
                   </a>
                 )}
 
                 <div className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50">
-                  <Calendar className="h-4 w-4 text-zinc-400" />
-                  <span className="text-sm font-bold text-zinc-700">
+                  <Calendar className="h-4 w-4 text-zinc-500" />
+                  <span className="text-sm font-semibold text-zinc-700">
                     Πελάτης από {new Date(customer.createdAt).toLocaleDateString('el-GR', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </span>
                 </div>
@@ -290,17 +290,17 @@ export default function CustomerDetailsPage() {
                   <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
                     <CalendarDays className="h-5 w-5 text-emerald-600" />
                   </div>
-                  <h3 className="text-lg sm:text-xl font-black text-zinc-900">Ιστορικό Κρατήσεων</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-zinc-900">Ιστορικό Κρατήσεων</h3>
                 </div>
-                <Badge className="bg-zinc-100 text-zinc-600 border-none font-black text-xs px-3">
+                <Badge className="bg-zinc-100 text-zinc-600 border-none font-semibold text-xs px-3">
                   {customerBookings.length}
                 </Badge>
               </div>
 
               {customerBookings.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 sm:py-20 text-center bg-zinc-50/50 rounded-2xl border-2 border-dashed border-zinc-100">
-                  <Smile className="h-10 w-10 sm:h-12 sm:w-12 text-zinc-200 mb-4" />
-                  <h4 className="text-base sm:text-lg font-black text-zinc-900">Χωρίς κρατήσεις ακόμα</h4>
+                  <Smile className="h-10 w-10 sm:h-12 sm:w-12 text-zinc-400 mb-4" />
+                  <h4 className="text-base sm:text-lg font-semibold text-zinc-900">Χωρίς κρατήσεις ακόμα</h4>
                   <p className="text-zinc-500 font-medium text-sm max-w-xs mt-1">Αυτός ο πελάτης δεν έχει κάνει κρατήσεις.</p>
                 </div>
               ) : (
@@ -324,31 +324,31 @@ export default function CustomerDetailsPage() {
                               ? "bg-zinc-900 border-zinc-900 text-white"
                               : "bg-zinc-50 border-zinc-50 text-zinc-900"
                           )}>
-                            <p className={cn("text-[7px] font-black uppercase tracking-wider", isToday ? "text-emerald-400" : "text-zinc-400")}>
-                              {toGreekUpperCase(startDate.toLocaleDateString('el-GR', { weekday: 'short' }))}
+                            <p className={cn("text-2xs font-semibold", isToday ? "text-emerald-400" : "text-zinc-500")}>
+                              {startDate.toLocaleDateString('el-GR', { weekday: 'short' })}
                             </p>
-                            <p className="text-lg font-black leading-none">{startDate.getDate()}</p>
-                            <p className={cn("text-[7px] font-black uppercase tracking-wider", isToday ? "text-emerald-400" : "text-zinc-500")}>
-                              {toGreekUpperCase(startDate.toLocaleDateString('el-GR', { month: 'short' }))}
+                            <p className="text-lg font-semibold leading-none">{startDate.getDate()}</p>
+                            <p className={cn("text-2xs font-semibold", isToday ? "text-emerald-400" : "text-zinc-500")}>
+                              {startDate.toLocaleDateString('el-GR', { month: 'short' })}
                             </p>
                           </div>
 
                           {/* Details */}
                           <div className="flex-1 min-w-0 space-y-1.5">
                             <div className="flex flex-wrap items-center gap-2">
-                              <Badge className={cn("font-black text-[11px] uppercase tracking-wider px-2 py-0.5 border-none", status.className)}>
-                                {toGreekUpperCase(status.label)}
+                              <Badge className={cn("font-semibold text-2xs px-2 py-0.5 border-none", status.className)}>
+                                {status.label}
                               </Badge>
                               {isToday && (
-                                <Badge className="bg-emerald-600 text-white font-black text-[8px] px-2 py-0.5 border-none">ΣΗΜΕΡΑ</Badge>
+                                <Badge className="bg-emerald-600 text-white font-semibold text-2xs px-2 py-0.5 border-none">Σήμερα</Badge>
                               )}
                             </div>
-                            <div className="flex flex-wrap items-center gap-2 text-xs font-bold text-zinc-500">
+                            <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-zinc-500">
                               <span className="flex items-center gap-1">
                                 <Clock className="h-3 w-3 text-emerald-500/50" />
                                 {startDate.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })} - {new Date(booking.endTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })}
                               </span>
-                              <span className="flex items-center gap-1 text-zinc-900 font-black">
+                              <span className="flex items-center gap-1 text-zinc-900 font-semibold">
                                 <Euro className="h-3 w-3 text-emerald-500/50" />
                                 €{booking.price?.toFixed(0) || '0'}
                               </span>
@@ -359,7 +359,7 @@ export default function CustomerDetailsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg text-zinc-400 hover:text-emerald-600 hover:bg-emerald-50 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
+                            className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg text-zinc-500 hover:text-emerald-600 hover:bg-emerald-50 shrink-0 sm:opacity-0 sm:group-hover:opacity-100 transition-all"
                             onClick={(e) => {
                               e.stopPropagation();
                               router.push(`/management/bookings/${booking.id}`);

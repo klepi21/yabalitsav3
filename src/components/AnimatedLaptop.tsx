@@ -40,7 +40,7 @@ export default function AnimatedLaptop() {
         className="relative"
       >
         {/* Screen Bezel */}
-        <div className="relative rounded-t-[1.5rem] sm:rounded-t-[2.5rem] border-[6px] sm:border-[16px] border-b-0 border-[#121415] bg-[#121415] shadow-[0_-30px_100px_-20px_rgba(52,211,153,0.3)] overflow-hidden">
+        <div className="relative rounded-t-[1.5rem] sm:rounded-t-[2.5rem] border-[6px] sm:border-[16px] border-b-0 border-[#121415] bg-[#121415] shadow-[0_-30px_100px_-20px_rgba(116,238,22,0.3)] overflow-hidden">
           
           {/* Camera / Notch */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 h-4 sm:h-6 w-20 sm:w-32 bg-[#121415] rounded-b-xl sm:rounded-b-2xl z-20 flex items-center justify-center">

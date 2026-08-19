@@ -1,13 +1,18 @@
 import type { Metadata } from 'next';
-import { Roboto_Flex } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import { GoogleAnalytics } from '@next/third-parties/google';
 import './globals.css';
 
 import ConditionalWrapper from '@/components/ConditionalWrapper';
 
-const roboto = Roboto_Flex({ 
-  subsets: ['latin', 'greek'],
+// Μία γραμματοσειρά για ΟΛΟ το προϊόν (marketing + app).
+// Πριν: το layout φόρτωνε Roboto Flex ενώ τα tokens ζητούσαν Inter
+// (που δεν φορτωνόταν ποτέ) — οι public σελίδες έπεφταν σε system-ui,
+// άρα διαφορετική εμφάνιση ανά λειτουργικό σύστημα.
+const inter = Inter({
+  subsets: ['latin', 'latin-ext', 'greek'],
   display: 'swap',
+  variable: '--font-inter',
 });
 
 export const metadata: Metadata = {
@@ -105,7 +110,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/fav.png" />
         
       </head>
-      <body className={roboto.className} suppressHydrationWarning={true}>
+      <body className={`${inter.variable} ${inter.className}`} suppressHydrationWarning={true}>
         <ConditionalWrapper>
           {children}
         </ConditionalWrapper>

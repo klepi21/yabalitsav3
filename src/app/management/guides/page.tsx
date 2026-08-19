@@ -3,7 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { toGreekUpperCase } from '@/lib/utils';
 import Image from 'next/image';
 import {
   Loader2,
@@ -59,9 +58,9 @@ function StepBox({ color, icon: Icon, title, children }: { color: 'blue' | 'ambe
         <div className={`flex items-center justify-center w-6 h-6 rounded-md ${c.icon}`}>
           <Icon className="h-3 w-3" />
         </div>
-        <h4 className={`text-xs font-black uppercase tracking-tight ${c.title}`}>{toGreekUpperCase(title)}</h4>
+        <h4 className={`text-xs font-semibold tracking-tight ${c.title}`}>{title}</h4>
       </div>
-      <div className={`text-[11px] leading-relaxed font-medium ${c.text}`}>{children}</div>
+      <div className={`text-2xs leading-relaxed font-medium ${c.text}`}>{children}</div>
     </div>
   );
 }
@@ -69,8 +68,8 @@ function StepBox({ color, icon: Icon, title, children }: { color: 'blue' | 'ambe
 function InfoCard({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-lg border border-zinc-100/50 bg-zinc-50/30 p-4">
-      <h4 className="text-xs font-black text-zinc-900 mb-2 uppercase tracking-tight">{toGreekUpperCase(title)}</h4>
-      <div className="text-[11px] leading-relaxed text-zinc-500 font-medium">{children}</div>
+      <h4 className="text-xs font-semibold text-zinc-900 mb-2 tracking-tight">{title}</h4>
+      <div className="text-2xs leading-relaxed text-zinc-500 font-medium">{children}</div>
     </div>
   );
 }
@@ -88,7 +87,7 @@ function SectionHeading({ icon: Icon, title, color = 'emerald' }: { icon: React.
       <div className={`flex items-center justify-center w-7 h-7 rounded-lg ${colorMap[color] || colorMap.emerald}`}>
         <Icon className="h-3.5 w-3.5" />
       </div>
-      <h3 className="text-sm font-black tracking-tight text-zinc-900 uppercase">{toGreekUpperCase(title)}</h3>
+      <h3 className="text-sm font-semibold tracking-tight text-zinc-900">{title}</h3>
     </div>
   );
 }
@@ -98,8 +97,8 @@ function BulletList({ items }: { items: string[] }) {
     <ul className="space-y-1.5 text-zinc-500">
       {items.map((item, i) => (
         <li key={i} className="flex items-start gap-2">
-          <ArrowRight className="h-3 w-3 mt-1 shrink-0 text-zinc-400" />
-          <span className="text-[11px] leading-tight">{item}</span>
+          <ArrowRight className="h-3 w-3 mt-1 shrink-0 text-zinc-500" />
+          <span className="text-2xs leading-tight">{item}</span>
         </li>
       ))}
     </ul>
@@ -113,7 +112,7 @@ function TipsList({ items }: { items: string[] }) {
         {items.map((item, i) => (
           <li key={i} className="flex items-start gap-2 text-zinc-700">
             <CheckCircle2 className="h-3.5 w-3.5 mt-0.5 shrink-0 text-emerald-600" />
-            <span className="text-[11px] font-bold leading-tight">{item}</span>
+            <span className="text-2xs font-medium leading-tight">{item}</span>
           </li>
         ))}
       </ul>
@@ -148,13 +147,13 @@ export default function GuidesPage() {
              <BookOpen className="h-6 w-6 text-emerald-400" />
            </div>
            <div className="space-y-0.5">
-             <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
-               {toGreekUpperCase('Οδηγίες Χρήσης')}
+             <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+               {'Οδηγίες Χρήσης'}
              </h1>
              <div className="flex items-center gap-2">
                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-               <p className="text-[12px] font-black text-zinc-400 uppercase tracking-widest">
-                 {toGreekUpperCase('Οδηγοι και υποστηριξη χρησης')}
+               <p className="text-2xs font-semibold text-zinc-500">
+                 {'Οδηγοι και υποστηριξη χρησης'}
                </p>
              </div>
            </div>
@@ -163,45 +162,45 @@ export default function GuidesPage() {
 
       <Tabs defaultValue="getting-started">
         <TabsList className="flex flex-wrap h-auto gap-1 bg-zinc-100/80 p-1 rounded-xl">
-          <TabsTrigger value="getting-started" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="getting-started" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-2xs font-medium">
             <Rocket className="h-3.5 w-3.5" />
-            <span>{toGreekUpperCase('Ξεκινώντας')}</span>
+            <span>{'Ξεκινώντας'}</span>
           </TabsTrigger>
-          <TabsTrigger value="bookings" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="bookings" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-2xs font-medium">
             <Calendar className="h-3.5 w-3.5" />
-            <span>{toGreekUpperCase('Κρατήσεις')}</span>
+            <span>{'Κρατήσεις'}</span>
           </TabsTrigger>
-          <TabsTrigger value="pitches" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="pitches" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-2xs font-medium">
             <Goal className="h-3.5 w-3.5" />
-            <span>{toGreekUpperCase('Γήπεδα')}</span>
+            <span>{'Γήπεδα'}</span>
           </TabsTrigger>
-          <TabsTrigger value="customers" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="customers" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-2xs font-medium">
             <Users className="h-3.5 w-3.5" />
-            <span>{toGreekUpperCase('Πελάτες')}</span>
+            <span>{'Πελάτες'}</span>
           </TabsTrigger>
-          <TabsTrigger value="reports" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="reports" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-2xs font-medium">
             <BarChart3 className="h-3.5 w-3.5" />
-            <span>{toGreekUpperCase('Αναφορές')}</span>
+            <span>{'Αναφορές'}</span>
           </TabsTrigger>
-          <TabsTrigger value="settings" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="settings" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-2xs font-medium">
             <Settings className="h-3.5 w-3.5" />
-            <span>{toGreekUpperCase('Ρυθμίσεις')}</span>
+            <span>{'Ρυθμίσεις'}</span>
           </TabsTrigger>
-          <TabsTrigger value="academy" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="academy" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-2xs font-medium">
             <GraduationCap className="h-3.5 w-3.5" />
-            <span>{toGreekUpperCase('Ακαδημία')}</span>
+            <span>{'Ακαδημία'}</span>
           </TabsTrigger>
-          <TabsTrigger value="tournaments" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="tournaments" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-2xs font-medium">
             <Trophy className="h-3.5 w-3.5" />
-            <span>{toGreekUpperCase('Τουρνουά')}</span>
+            <span>{'Τουρνουά'}</span>
           </TabsTrigger>
-          <TabsTrigger value="training" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="training" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-2xs font-medium">
             <Dumbbell className="h-3.5 w-3.5" />
-            <span>{toGreekUpperCase('Προπονήσεις')}</span>
+            <span>{'Προπονήσεις'}</span>
           </TabsTrigger>
-          <TabsTrigger value="fse" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-[12px] font-bold uppercase tracking-wider">
+          <TabsTrigger value="fse" className="gap-1.5 rounded-lg data-[state=active]:bg-white data-[state=active]:shadow-sm px-3 py-1.5 text-2xs font-medium">
             <Search className="h-3.5 w-3.5" />
-            <span>{toGreekUpperCase('FSE')}</span>
+            <span>{'FSE'}</span>
           </TabsTrigger>
         </TabsList>
 
@@ -209,11 +208,11 @@ export default function GuidesPage() {
         <TabsContent value="getting-started">
           <SectionCard>
             <div className="mb-5 pb-5 border-b border-zinc-50">
-                <h2 className="text-base font-black tracking-tight text-zinc-900 mb-0.5 uppercase">
-                {toGreekUpperCase('Ξεκινώντας')}
+                <h2 className="text-base font-semibold tracking-tight text-zinc-900 mb-0.5">
+                {'Ξεκινώντας'}
                 </h2>
-                <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-tight">
-                {toGreekUpperCase('Το Yabalitsa Management σάς βοηθά να διαχειριστείτε πλήρως τις εγκαταστάσεις σας.')}
+                <p className="text-2xs font-medium text-zinc-500 tracking-tight">
+                {'Το Yabalitsa Management σάς βοηθά να διαχειριστείτε πλήρως τις εγκαταστάσεις σας.'}
                 </p>
             </div>
 

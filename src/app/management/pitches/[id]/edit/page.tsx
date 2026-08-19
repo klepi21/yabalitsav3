@@ -294,7 +294,7 @@ export default function EditPitchPage() {
         <div className="mx-auto h-12 w-12 bg-muted rounded-full flex items-center justify-center mb-4">
           <Building2 className="h-6 w-6 text-muted-foreground" />
         </div>
-        <h3 className="text-lg font-medium text-foreground">Pitch not found</h3>
+        <h3 className="text-lg font-medium text-foreground">Το γήπεδο δεν βρέθηκε</h3>
         <p className="mt-1 text-sm text-muted-foreground">The pitch you&apos;re looking for doesn&apos;t exist.</p>
         <Button asChild className="mt-4">
           <Link href="/management/pitches">

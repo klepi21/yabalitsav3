@@ -198,8 +198,8 @@ export default function EditUserGroupPage() {
         {/* Basic Info */}
         <div className="rounded-xl border border-zinc-100/60 bg-white p-6 sm:p-8 space-y-6">
           <div>
-            <h2 className="text-[15px] font-semibold text-zinc-900 mb-1">Βασικά Στοιχεία</h2>
-            <p className="text-[13px] text-zinc-400">Όνομα, εικονίδιο και χρώμα κατηγορίας</p>
+            <h2 className="text-base font-semibold text-zinc-900 mb-1">Βασικά Στοιχεία</h2>
+            <p className="text-xs text-zinc-500">Όνομα, εικονίδιο και χρώμα κατηγορίας</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -257,8 +257,8 @@ export default function EditUserGroupPage() {
         {/* Capabilities */}
         <div className="rounded-xl border border-zinc-100/60 bg-white p-6 sm:p-8 space-y-6">
           <div>
-            <h2 className="text-[15px] font-semibold text-zinc-900 mb-1">Δυνατότητες</h2>
-            <p className="text-[13px] text-zinc-400">Ενεργοποιήστε τις λειτουργίες που θέλετε για αυτή την κατηγορία</p>
+            <h2 className="text-base font-semibold text-zinc-900 mb-1">Δυνατότητες</h2>
+            <p className="text-xs text-zinc-500">Ενεργοποιήστε τις λειτουργίες που θέλετε για αυτή την κατηγορία</p>
           </div>
           <div className="space-y-3">
             {ALL_CAPABILITIES.map((cap) => {
@@ -279,7 +279,7 @@ export default function EditUserGroupPage() {
                   />
                   <div>
                     <p className="text-sm font-medium text-zinc-900">{info.label}</p>
-                    <p className="text-xs text-zinc-400">{info.description}</p>
+                    <p className="text-xs text-zinc-500">{info.description}</p>
                   </div>
                 </label>
               );
@@ -289,7 +289,7 @@ export default function EditUserGroupPage() {
           {/* Monthly amount - shown when monthly_payment is enabled */}
           {capabilities.includes('monthly_payment') && (
             <div className="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-              <Label className="text-sm font-bold text-emerald-800 mb-2 block">
+              <Label className="text-sm font-semibold text-emerald-800 mb-2 block">
                 Μηνιαίο Ποσό Συνδρομής (€)
               </Label>
               <p className="text-xs text-emerald-600 mb-3">
@@ -310,8 +310,8 @@ export default function EditUserGroupPage() {
         {/* Fields */}
         <div className="rounded-xl border border-zinc-100/60 bg-white p-6 sm:p-8 space-y-6">
           <div>
-            <h2 className="text-[15px] font-semibold text-zinc-900 mb-1">Πεδία Φόρμας</h2>
-            <p className="text-[13px] text-zinc-400">Ορίστε τα πεδία που θα συμπληρώνονται για χρήστες αυτής της κατηγορίας</p>
+            <h2 className="text-base font-semibold text-zinc-900 mb-1">Πεδία Φόρμας</h2>
+            <p className="text-xs text-zinc-500">Ορίστε τα πεδία που θα συμπληρώνονται για χρήστες αυτής της κατηγορίας</p>
           </div>
 
           {fields.length > 0 && (
@@ -320,10 +320,10 @@ export default function EditUserGroupPage() {
                 <div key={index} className="flex items-center justify-between p-3 bg-zinc-50 rounded-xl border border-zinc-100">
                   <div>
                     <span className="font-medium text-zinc-900 text-sm">{field.label}</span>
-                    <span className="ml-2 text-xs text-zinc-400">({FIELD_TYPE_LABELS[field.type]})</span>
+                    <span className="ml-2 text-xs text-zinc-500">({FIELD_TYPE_LABELS[field.type]})</span>
                     {field.required && <span className="ml-1 text-xs text-red-400">*</span>}
                     {field.type === 'select' && field.options && field.options.length > 0 && (
-                      <span className="ml-2 text-xs text-zinc-400">[{field.options.join(', ')}]</span>
+                      <span className="ml-2 text-xs text-zinc-500">[{field.options.join(', ')}]</span>
                     )}
                   </div>
                   <Button type="button" variant="ghost" size="sm" onClick={() => removeField(index)} className="h-7 w-7 p-0 text-red-400 hover:text-red-600 hover:bg-red-50">
@@ -338,11 +338,11 @@ export default function EditUserGroupPage() {
             <p className="text-sm font-medium text-zinc-700">Προσθήκη Πεδίου</p>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label className="text-xs text-zinc-400">Ετικέτα *</Label>
+                <Label className="text-xs text-zinc-500">Ετικέτα *</Label>
                 <Input type="text" value={newField.label} onChange={(e) => setNewField((prev) => ({ ...prev, label: e.target.value }))} placeholder="π.χ. ΑΜΚΑ" className="h-11 bg-white" />
               </div>
               <div className="space-y-2">
-                <Label className="text-xs text-zinc-400">Τύπος</Label>
+                <Label className="text-xs text-zinc-500">Τύπος</Label>
                 <select
                   value={newField.type}
                   onChange={(e) => setNewField((prev) => ({ ...prev, type: e.target.value as UserGroupFieldType, options: [] }))}
@@ -363,14 +363,14 @@ export default function EditUserGroupPage() {
 
             {newField.type !== 'select' && (
               <div className="space-y-2">
-                <Label className="text-xs text-zinc-400">Placeholder</Label>
+                <Label className="text-xs text-zinc-500">Placeholder</Label>
                 <Input type="text" value={newField.placeholder || ''} onChange={(e) => setNewField((prev) => ({ ...prev, placeholder: e.target.value }))} placeholder="Κείμενο βοήθειας..." className="h-11 bg-white" />
               </div>
             )}
 
             {newField.type === 'select' && (
               <div className="space-y-3">
-                <Label className="text-xs text-zinc-400">Επιλογές</Label>
+                <Label className="text-xs text-zinc-500">Επιλογές</Label>
                 <div className="flex gap-2">
                   <Input type="text" value={newOption} onChange={(e) => setNewOption(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addOption(); } }} placeholder="Προσθήκη επιλογής..." className="h-11 bg-white" />
                   <Button type="button" variant="outline" onClick={addOption} className="h-11 border-zinc-200">
@@ -401,7 +401,7 @@ export default function EditUserGroupPage() {
 
         {/* Preview */}
         <div className="rounded-xl border border-zinc-100/60 bg-white p-6 sm:p-8 space-y-4">
-          <h2 className="text-[15px] font-semibold text-zinc-900">Προεπισκόπηση</h2>
+          <h2 className="text-base font-semibold text-zinc-900">Προεπισκόπηση</h2>
           <div className="flex items-center gap-3 p-4 bg-zinc-50 rounded-xl">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-2xl border border-zinc-100">
               {icon}
@@ -413,7 +413,7 @@ export default function EditUserGroupPage() {
                   {namePlural || 'Πληθυντικός'}
                 </Badge>
               </div>
-              <p className="text-xs text-zinc-400 mt-1">
+              <p className="text-xs text-zinc-500 mt-1">
                 {fields.length} πεδί{fields.length === 1 ? 'ο' : 'α'}
               </p>
             </div>

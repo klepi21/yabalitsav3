@@ -42,7 +42,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 const positionLabels: Record<string, { label: string; className: string }> = {
   GK: { label: 'GK', className: 'bg-amber-50 text-amber-700 border-none' },
@@ -234,11 +234,11 @@ export default function TeamDetailPage() {
   if (!tournament || !team) {
     return (
       <div className="flex flex-col items-center justify-center py-32 text-center">
-        <div className="h-20 w-20 bg-zinc-50 rounded-[2rem] flex items-center justify-center mb-6">
-          <Shield className="h-10 w-10 text-zinc-300" />
+        <div className="h-20 w-20 bg-zinc-50 rounded-2xl flex items-center justify-center mb-6">
+          <Shield className="h-10 w-10 text-zinc-400" />
         </div>
-        <h3 className="text-2xl font-black text-zinc-900 mb-2 uppercase tracking-tight">Η ομάδα δεν βρέθηκε</h3>
-        <Button asChild className="mt-6 h-12 px-8 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-black uppercase tracking-widest text-[12px]">
+        <h3 className="text-2xl font-bold text-zinc-900 mb-2 tracking-tight">Η ομάδα δεν βρέθηκε</h3>
+        <Button asChild className="mt-6 h-12 px-8 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white font-semibold text-2xs">
           <Link href="/management/tournaments">Επιστροφή</Link>
         </Button>
       </div>
@@ -256,7 +256,7 @@ export default function TeamDetailPage() {
       {/* Back Button */}
       <Link
         href={`/management/tournaments/${tournament.id}/teams`}
-        className="group inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-zinc-400 hover:text-emerald-600 transition-colors"
+        className="group inline-flex items-center gap-2 text-xs font-semibold text-zinc-500 hover:text-emerald-600 transition-colors"
       >
         <div className="h-8 w-8 rounded-lg bg-zinc-50 flex items-center justify-center group-hover:bg-emerald-50 transition-colors">
           <ArrowLeft className="h-4 w-4" />
@@ -266,17 +266,17 @@ export default function TeamDetailPage() {
 
       {/* Header & Team Info */}
       {editingTeamInfo ? (
-        <div className="bg-white rounded-[2.5rem] border-2 border-amber-400 shadow-xl shadow-amber-50 p-10 space-y-10 animate-in fade-in zoom-in-95 duration-300">
+        <div className="bg-white rounded-2xl border-2 border-amber-400 shadow-xl shadow-amber-50 p-10 space-y-10 animate-in fade-in zoom-in-95 duration-300">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center">
                 <Pencil className="h-5 w-5 text-amber-600" />
               </div>
-              <h3 className="text-xl font-black text-zinc-900 uppercase tracking-tight">Επεξεργασία {team.name}</h3>
+              <h3 className="text-xl font-bold text-zinc-900 tracking-tight">Επεξεργασία {team.name}</h3>
             </div>
             <button 
               onClick={() => setEditingTeamInfo(false)} 
-              className="h-10 w-10 rounded-xl hover:bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-zinc-600 transition-colors"
+              className="h-10 w-10 rounded-xl hover:bg-zinc-50 flex items-center justify-center text-zinc-500 hover:text-zinc-600 transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -284,7 +284,7 @@ export default function TeamDetailPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div className="space-y-4">
-              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Όνομα Ομάδας</Label>
+              <Label className="text-2xs font-semibold text-zinc-500 ml-1">Όνομα Ομάδας</Label>
               <Input
                 value={editTeamName}
                 onChange={(e) => setEditTeamName(e.target.value)}
@@ -292,7 +292,7 @@ export default function TeamDetailPage() {
               />
             </div>
             <div className="space-y-4">
-              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Υπεύθυνος</Label>
+              <Label className="text-2xs font-semibold text-zinc-500 ml-1">Υπεύθυνος</Label>
               <Input
                 value={editCaptainName}
                 onChange={(e) => setEditCaptainName(e.target.value)}
@@ -300,7 +300,7 @@ export default function TeamDetailPage() {
               />
             </div>
             <div className="space-y-4">
-              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Τηλέφωνο</Label>
+              <Label className="text-2xs font-semibold text-zinc-500 ml-1">Τηλέφωνο</Label>
               <Input
                 value={editCaptainPhone}
                 onChange={(e) => setEditCaptainPhone(e.target.value)}
@@ -308,7 +308,7 @@ export default function TeamDetailPage() {
               />
             </div>
             <div className="space-y-4">
-              <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Email</Label>
+              <Label className="text-2xs font-semibold text-zinc-500 ml-1">Email</Label>
               <Input
                 type="email"
                 value={editCaptainEmail}
@@ -322,14 +322,14 @@ export default function TeamDetailPage() {
             <Button 
               onClick={() => setEditingTeamInfo(false)} 
               variant="ghost" 
-              className="h-12 px-6 rounded-xl text-[12px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-600"
+              className="h-12 px-6 rounded-xl text-2xs font-semibold text-zinc-500 hover:text-zinc-600"
             >
               Ακύρωση
             </Button>
             <Button
               onClick={handleSaveTeamInfo}
               disabled={isSavingTeam}
-              className="h-12 px-10 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-black uppercase tracking-widest text-[12px] shadow-lg shadow-amber-100"
+              className="h-12 px-10 bg-amber-600 hover:bg-amber-700 text-white rounded-xl font-semibold text-2xs shadow-lg shadow-amber-100"
             >
               {isSavingTeam ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
               Ενημέρωση
@@ -339,22 +339,22 @@ export default function TeamDetailPage() {
       ) : (
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-8 pb-8 border-b border-zinc-100">
           <div className="flex items-center gap-8">
-            <div className="h-20 w-20 rounded-[1.75rem] bg-violet-50 flex items-center justify-center text-violet-600 shadow-sm">
+            <div className="h-20 w-20 rounded-2xl bg-violet-50 flex items-center justify-center text-violet-600 shadow-sm">
               <Shield className="h-10 w-10" />
             </div>
             <div className="space-y-3">
-              <h1 className="text-4xl font-black text-zinc-900 tracking-tight uppercase">{toGreekUpperCase(team.name)}</h1>
+              <h1 className="text-4xl font-bold text-zinc-900 tracking-tight">{team.name}</h1>
               <div className="flex flex-wrap items-center gap-4">
-                <Badge variant="outline" className="h-7 px-4 rounded-lg bg-zinc-50 border-none text-[12px] font-black uppercase tracking-widest text-zinc-400">
+                <Badge variant="outline" className="h-7 px-4 rounded-lg bg-zinc-50 border-none text-2xs font-semibold text-zinc-500">
                   <User className="h-3 w-3 mr-2" />
                   {team.captainName}
                 </Badge>
-                <Badge variant="outline" className="h-7 px-4 rounded-lg bg-zinc-50 border-none text-[12px] font-black uppercase tracking-widest text-zinc-400">
+                <Badge variant="outline" className="h-7 px-4 rounded-lg bg-zinc-50 border-none text-2xs font-semibold text-zinc-500">
                   <Phone className="h-3 w-3 mr-2" />
                   {team.captainPhone}
                 </Badge>
                 {team.captainEmail && (
-                  <Badge variant="outline" className="h-7 px-4 rounded-lg bg-zinc-50 border-none text-[12px] font-black uppercase tracking-widest text-zinc-400">
+                  <Badge variant="outline" className="h-7 px-4 rounded-lg bg-zinc-50 border-none text-2xs font-semibold text-zinc-500">
                     <Mail className="h-3 w-3 mr-2" />
                     {team.captainEmail}
                   </Badge>
@@ -367,7 +367,7 @@ export default function TeamDetailPage() {
             <Button 
               variant="outline" 
               onClick={startEditTeamInfo} 
-              className="h-14 px-8 rounded-2xl border-zinc-100 text-[11px] font-black uppercase tracking-widest text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50 transition-all"
+              className="h-14 px-8 rounded-2xl border-zinc-100 text-2xs font-semibold text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50 transition-all"
             >
               <Pencil className="h-5 w-5 mr-2" />
               Επεξεργασία
@@ -375,7 +375,7 @@ export default function TeamDetailPage() {
             {!showAddForm && (
               <Button 
                 onClick={() => setShowAddForm(true)} 
-                className="h-14 px-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-lg shadow-emerald-100"
+                className="h-14 px-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-semibold text-2xs shadow-lg shadow-emerald-100"
               >
                 <Plus className="h-5 w-5 mr-2" />
                 Προσθήκη Παίκτη
@@ -393,8 +393,8 @@ export default function TeamDetailPage() {
           { label: 'Βαθμοί', value: team.stats.points, icon: Hash, color: 'amber' },
           { label: 'Κάρτες', value: players.reduce((s, p) => s + p.stats.yellowCards + p.stats.redCards, 0), icon: AlertTriangle, color: 'red' }
         ].map((stat, i) => (
-          <div key={i} className="bg-white rounded-[2rem] border border-zinc-100 shadow-sm p-6 flex items-center gap-6">
-            <div className={cn("h-14 w-14 rounded-[1.25rem] flex items-center justify-center", 
+          <div key={i} className="bg-white rounded-2xl border border-zinc-100 shadow-sm p-6 flex items-center gap-6">
+            <div className={cn("h-14 w-14 rounded-xl flex items-center justify-center", 
               stat.color === 'blue' ? 'bg-blue-50 text-blue-600' :
               stat.color === 'emerald' ? 'bg-emerald-50 text-emerald-600' :
               stat.color === 'amber' ? 'bg-amber-50 text-amber-600' :
@@ -403,8 +403,8 @@ export default function TeamDetailPage() {
               <stat.icon className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-[12px] font-black uppercase tracking-widest text-zinc-400 mb-0.5">{stat.label}</p>
-              <p className="text-2xl font-black text-zinc-900 tracking-tight">{stat.value}</p>
+              <p className="text-2xs font-semibold text-zinc-500 mb-0.5">{stat.label}</p>
+              <p className="text-2xl font-bold text-zinc-900 tracking-tight">{stat.value}</p>
             </div>
           </div>
         ))}
@@ -412,17 +412,17 @@ export default function TeamDetailPage() {
 
       {/* Add Player Form Card */}
       {showAddForm && (
-        <div className="bg-white rounded-[2.5rem] border border-emerald-100 shadow-xl shadow-emerald-50/50 p-10 space-y-10 animate-in fade-in slide-in-from-top-4 duration-500">
+        <div className="bg-white rounded-2xl border border-emerald-100 shadow-xl shadow-emerald-50/50 p-10 space-y-10 animate-in fade-in slide-in-from-top-4 duration-500">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
                 <Plus className="h-5 w-5 text-emerald-600" />
               </div>
-              <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">Νέος Παίκτης</h2>
+              <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Νέος Παίκτης</h2>
             </div>
             <button 
               onClick={resetForm} 
-              className="h-10 w-10 rounded-xl hover:bg-zinc-50 flex items-center justify-center text-zinc-400 hover:text-zinc-600 transition-colors"
+              className="h-10 w-10 rounded-xl hover:bg-zinc-50 flex items-center justify-center text-zinc-500 hover:text-zinc-600 transition-colors"
             >
               <X className="h-5 w-5" />
             </button>
@@ -431,28 +431,28 @@ export default function TeamDetailPage() {
           <form onSubmit={handleAddPlayer} className="space-y-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
               <div className="space-y-4">
-                <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Ονοματεπώνυμο *</Label>
+                <Label className="text-2xs font-semibold text-zinc-500 ml-1">Ονοματεπώνυμο *</Label>
                 <Input
                   value={playerName}
                   onChange={(e) => setPlayerName(e.target.value)}
                   placeholder="π.χ. Γιάννης Παπαδόπουλος"
-                  className="h-14 bg-zinc-50 border-none rounded-2xl px-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-emerald-500/20"
+                  className="h-14 bg-zinc-50 border-none rounded-2xl px-6 text-sm font-semibold text-zinc-900 focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
               <div className="space-y-4">
-                <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Τηλέφωνο Επικοινωνίας</Label>
+                <Label className="text-2xs font-semibold text-zinc-500 ml-1">Τηλέφωνο Επικοινωνίας</Label>
                 <Input
                   value={playerPhone}
                   onChange={(e) => setPlayerPhone(e.target.value)}
                   placeholder="69x xxx xxxx"
-                  className="h-14 bg-zinc-50 border-none rounded-2xl px-6 text-sm font-bold text-zinc-900 focus:ring-2 focus:ring-emerald-500/20"
+                  className="h-14 bg-zinc-50 border-none rounded-2xl px-6 text-sm font-semibold text-zinc-900 focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-left">
               <div className="space-y-4">
-                <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Αριθμός Φανέλας</Label>
+                <Label className="text-2xs font-semibold text-zinc-500 ml-1">Αριθμός Φανέλας</Label>
                 <Input
                   type="number"
                   min={1}
@@ -464,7 +464,7 @@ export default function TeamDetailPage() {
                 />
               </div>
               <div className="space-y-4">
-                <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Θέση</Label>
+                <Label className="text-2xs font-semibold text-zinc-500 ml-1">Θέση</Label>
                 <div className="flex items-center gap-2">
                   {(['GK', 'DEF', 'MID', 'FWD'] as const).map((pos) => {
                     const cfg = positionLabels[pos];
@@ -475,10 +475,10 @@ export default function TeamDetailPage() {
                         type="button"
                         onClick={() => setPosition(position === pos ? '' : pos)}
                         className={cn(
-                          "flex-1 h-14 rounded-2xl text-[12px] font-black uppercase tracking-widest transition-all border-2",
+                          "flex-1 h-14 rounded-2xl text-2xs font-semibold transition-all border-2",
                           isActive 
                             ? "bg-zinc-900 border-zinc-900 text-white shadow-lg" 
-                            : "bg-white border-zinc-100 text-zinc-400 hover:border-zinc-200"
+                            : "bg-white border-zinc-100 text-zinc-500 hover:border-zinc-200"
                         )}
                       >
                         {cfg.label}
@@ -488,18 +488,18 @@ export default function TeamDetailPage() {
                 </div>
               </div>
               <div className="space-y-4">
-                <Label className="text-[12px] font-black uppercase tracking-widest text-zinc-400 ml-1">Ιδιότητα</Label>
+                <Label className="text-2xs font-semibold text-zinc-500 ml-1">Ιδιότητα</Label>
                 <button
                   type="button"
                   onClick={() => setIsCaptain(!isCaptain)}
                   className={cn(
-                    "w-full h-14 rounded-2xl text-[12px] font-black uppercase tracking-widest transition-all border-2 flex items-center justify-center gap-2",
+                    "w-full h-14 rounded-2xl text-2xs font-semibold transition-all border-2 flex items-center justify-center gap-2",
                     isCaptain 
                       ? "bg-amber-50 border-amber-200 text-amber-700 shadow-sm shadow-amber-50" 
-                      : "bg-white border-zinc-100 text-zinc-400 hover:border-zinc-200"
+                      : "bg-white border-zinc-100 text-zinc-500 hover:border-zinc-200"
                   )}
                 >
-                  <User className={cn("h-4 w-4", isCaptain ? "text-amber-600" : "text-zinc-300")} />
+                  <User className={cn("h-4 w-4", isCaptain ? "text-amber-600" : "text-zinc-400")} />
                   {isCaptain ? 'Αρχηγός Ομάδας' : 'Απλός Παίκτης'}
                 </button>
               </div>
@@ -510,14 +510,14 @@ export default function TeamDetailPage() {
                 type="button" 
                 variant="ghost" 
                 onClick={resetForm} 
-                className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[12px] text-zinc-400 hover:text-zinc-600"
+                className="h-14 px-8 rounded-2xl font-semibold text-2xs text-zinc-500 hover:text-zinc-600"
               >
                 Ακύρωση
               </Button>
               <Button 
                 type="submit" 
                 disabled={isSubmitting} 
-                className="h-14 px-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-lg shadow-emerald-100"
+                className="h-14 px-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-semibold text-2xs shadow-lg shadow-emerald-100"
               >
                 {isSubmitting ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
@@ -532,33 +532,34 @@ export default function TeamDetailPage() {
 
       {/* Player List Card */}
       {sortedPlayers.length === 0 ? (
-        <div className="bg-zinc-50 rounded-[3rem] border-2 border-dashed border-zinc-100 p-20 text-center">
-          <div className="h-20 w-20 bg-white shadow-sm rounded-[2rem] mx-auto flex items-center justify-center mb-8 text-zinc-200">
+        <div className="bg-zinc-50 rounded-2xl border-2 border-dashed border-zinc-100 p-20 text-center">
+          <div className="h-20 w-20 bg-white shadow-sm rounded-2xl mx-auto flex items-center justify-center mb-8 text-zinc-400">
             <Users className="h-10 w-10" />
           </div>
-          <h3 className="text-2xl font-black text-zinc-900 mb-3 uppercase tracking-tight">Δεν υπάρχουν παίκτες</h3>
-          <p className="text-lg font-medium text-zinc-400 max-w-md mx-auto mb-10">
+          <h3 className="text-2xl font-bold text-zinc-900 mb-3 tracking-tight">Δεν υπάρχουν παίκτες</h3>
+          <p className="text-lg font-medium text-zinc-500 max-w-md mx-auto mb-10">
             Ξεκινήστε προσθέτοντας παίκτες στο ρόστερ της ομάδας.
           </p>
           <Button 
             onClick={() => setShowAddForm(true)} 
-            className="h-14 px-10 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] shadow-lg shadow-emerald-100"
+            className="h-14 px-10 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-semibold text-2xs shadow-lg shadow-emerald-100"
           >
             <Plus className="h-5 w-5 mr-2" /> Προσθήκη Πρώτου Παίκτη
           </Button>
         </div>
       ) : (
-        <div className="bg-white rounded-[2.5rem] border border-zinc-100 overflow-hidden shadow-sm">
-          <table className="w-full">
+        <div className="bg-white rounded-2xl border border-border shadow-e2 overflow-hidden">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px]">
             <thead>
               <tr className="bg-zinc-50/50 border-b border-zinc-100">
-                <th className="py-6 px-8 text-left text-[12px] font-black uppercase tracking-[0.2em] text-zinc-400">#</th>
-                <th className="py-6 px-4 text-left text-[12px] font-black uppercase tracking-[0.2em] text-zinc-400">Παίκτης</th>
-                <th className="py-6 px-4 text-center text-[12px] font-black uppercase tracking-[0.2em] text-zinc-400">Θέση</th>
-                <th className="py-6 px-4 text-center text-[12px] font-black uppercase tracking-[0.2em] text-zinc-400">Γκολ</th>
-                <th className="py-6 px-4 text-center text-[12px] font-black uppercase tracking-[0.2em] text-zinc-400">Ασ.</th>
-                <th className="py-6 px-4 text-center text-[12px] font-black uppercase tracking-[0.2em] text-zinc-400">Κάρτες</th>
-                <th className="py-6 px-8 text-right text-[12px] font-black uppercase tracking-[0.2em] text-zinc-400">Ενέργειες</th>
+                <th className="py-6 px-8 text-left text-2xs font-semibold text-zinc-500">#</th>
+                <th className="py-6 px-4 text-left text-2xs font-semibold text-zinc-500">Παίκτης</th>
+                <th className="py-6 px-4 text-center text-2xs font-semibold text-zinc-500">Θέση</th>
+                <th className="py-6 px-4 text-center text-2xs font-semibold text-zinc-500">Γκολ</th>
+                <th className="py-6 px-4 text-center text-2xs font-semibold text-zinc-500">Ασ.</th>
+                <th className="py-6 px-4 text-center text-2xs font-semibold text-zinc-500">Κάρτες</th>
+                <th className="py-6 px-8 text-right text-2xs font-semibold text-zinc-500">Ενέργειες</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-50">
@@ -607,8 +608,8 @@ export default function TeamDetailPage() {
                                 type="button"
                                 onClick={() => setEditPosition(editPosition === p ? '' : p)}
                                 className={cn(
-                                  "px-2 py-1.5 text-[11px] font-black uppercase tracking-widest rounded-lg border transition-all",
-                                  isActive ? "bg-zinc-900 border-zinc-900 text-white" : "bg-white border-zinc-100 text-zinc-400"
+                                  "px-2 py-1.5 text-2xs font-semibold rounded-lg border transition-all",
+                                  isActive ? "bg-zinc-900 border-zinc-900 text-white" : "bg-white border-zinc-100 text-zinc-500"
                                 )}
                               >
                                 {cfg.label}
@@ -623,8 +624,8 @@ export default function TeamDetailPage() {
                             type="button"
                             onClick={() => setEditIsCaptain(!editIsCaptain)}
                             className={cn(
-                              "h-10 px-4 rounded-xl text-[12px] font-black uppercase tracking-widest border transition-all flex items-center gap-2",
-                              editIsCaptain ? "bg-amber-100 border-amber-200 text-amber-700" : "bg-white border-zinc-100 text-zinc-400"
+                              "h-10 px-4 rounded-xl text-2xs font-semibold border transition-all flex items-center gap-2",
+                              editIsCaptain ? "bg-amber-100 border-amber-200 text-amber-700" : "bg-white border-zinc-100 text-zinc-500"
                             )}
                           >
                             <User className="h-3 w-3" />
@@ -634,14 +635,14 @@ export default function TeamDetailPage() {
                           <Button
                             variant="ghost"
                             onClick={() => setEditingPlayerId(null)}
-                            className="h-10 rounded-xl text-[12px] font-black uppercase tracking-widest text-zinc-400"
+                            className="h-10 rounded-xl text-2xs font-semibold text-zinc-500"
                           >
                             <X className="h-4 w-4 mr-2" /> Ακύρωση
                           </Button>
                           <Button
                             onClick={handleSavePlayer}
                             disabled={isSavingPlayer || !editPlayerName.trim()}
-                            className="h-10 px-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black uppercase tracking-widest text-[12px] shadow-lg shadow-emerald-100"
+                            className="h-10 px-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold text-2xs shadow-lg shadow-emerald-100"
                           >
                             {isSavingPlayer ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
                             Αποθήκευση
@@ -655,23 +656,23 @@ export default function TeamDetailPage() {
                 return (
                   <tr key={player.id} className="group hover:bg-zinc-50/50 transition-colors">
                     <td className="py-6 px-8">
-                      <div className="h-12 w-12 rounded-2xl bg-zinc-50 flex items-center justify-center text-lg font-black text-zinc-400 group-hover:bg-white group-hover:text-violet-600 group-hover:shadow-sm transition-all duration-300">
+                      <div className="h-12 w-12 rounded-2xl bg-zinc-50 flex items-center justify-center text-lg font-semibold text-zinc-500 group-hover:bg-white group-hover:text-violet-600 group-hover:shadow-sm transition-all duration-300">
                         {player.shirtNumber ?? '—'}
                       </div>
                     </td>
                     <td className="py-6 px-4">
                       <div className="flex items-center gap-3">
-                        <span className="text-lg font-black text-zinc-900 uppercase tracking-tight group-hover:text-violet-700 transition-colors">
+                        <span className="text-lg font-semibold text-zinc-900 tracking-tight group-hover:text-violet-700 transition-colors">
                           {player.name}
                         </span>
                         {player.isCaptain && (
-                          <Badge className="bg-amber-50 text-amber-600 border-none font-black text-[11px] uppercase tracking-widest h-5 px-1.5">
+                          <Badge className="bg-amber-50 text-amber-600 border-none font-semibold text-2xs h-5 px-1.5">
                             Αρχηγός
                           </Badge>
                         )}
                       </div>
                       {player.phone && (
-                        <div className="flex items-center gap-1.5 mt-1 text-xs font-bold text-zinc-400">
+                        <div className="flex items-center gap-1.5 mt-1 text-xs font-medium text-zinc-500">
                           <Phone className="h-3 w-3" />
                           {player.phone}
                         </div>
@@ -679,33 +680,33 @@ export default function TeamDetailPage() {
                     </td>
                     <td className="py-6 px-4 text-center">
                       {pos ? (
-                        <Badge className={cn("px-3 py-1 rounded-lg font-black text-[11px] uppercase tracking-widest", pos.className)}>
+                        <Badge className={cn("px-3 py-1 rounded-lg font-semibold text-2xs", pos.className)}>
                           {pos.label}
                         </Badge>
                       ) : (
-                        <span className="text-xs font-black text-zinc-200">—</span>
+                        <span className="text-xs font-semibold text-zinc-500">—</span>
                       )}
                     </td>
                     <td className="py-6 px-4 text-center">
-                      <span className="text-lg font-black text-zinc-900">{player.stats.goals || '0'}</span>
+                      <span className="text-lg font-semibold text-zinc-900">{player.stats.goals || '0'}</span>
                     </td>
                     <td className="py-6 px-4 text-center">
-                      <span className="text-lg font-bold text-zinc-400">{player.stats.assists || '0'}</span>
+                      <span className="text-lg font-bold text-zinc-500">{player.stats.assists || '0'}</span>
                     </td>
                     <td className="py-6 px-4 text-center">
                       <div className="flex items-center justify-center gap-2">
                         {player.stats.yellowCards > 0 && (
-                          <div className="w-5 h-7 rounded-sm bg-amber-400 shadow-sm flex items-center justify-center text-[12px] font-black text-amber-950" title="Κίτρινες">
+                          <div className="w-5 h-7 rounded-sm bg-amber-400 shadow-sm flex items-center justify-center text-2xs font-semibold text-amber-950" title="Κίτρινες">
                             {player.stats.yellowCards}
                           </div>
                         )}
                         {player.stats.redCards > 0 && (
-                          <div className="w-5 h-7 rounded-sm bg-red-600 shadow-sm flex items-center justify-center text-[12px] font-black text-white" title="Κόκκινες">
+                          <div className="w-5 h-7 rounded-sm bg-red-600 shadow-sm flex items-center justify-center text-2xs font-semibold text-white" title="Κόκκινες">
                             {player.stats.redCards}
                           </div>
                         )}
                         {player.stats.yellowCards === 0 && player.stats.redCards === 0 && (
-                          <span className="text-xs font-black text-zinc-200">—</span>
+                          <span className="text-xs font-semibold text-zinc-500">—</span>
                         )}
                       </div>
                     </td>
@@ -713,7 +714,7 @@ export default function TeamDetailPage() {
                       <div className="flex items-center justify-end gap-2">
                         <button
                           onClick={() => startEditPlayer(player)}
-                          className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 hover:bg-amber-50 hover:text-amber-600 transform hover:scale-105 transition-all"
+                          className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-500 hover:bg-amber-50 hover:text-amber-600 transform hover:scale-105 transition-all"
                           title="Επεξεργασία"
                         >
                           <Pencil className="h-4 w-4" />
@@ -721,25 +722,25 @@ export default function TeamDetailPage() {
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <button 
-                              className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 hover:bg-red-50 hover:text-red-600 transform hover:scale-105 transition-all"
+                              className="h-10 w-10 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-500 hover:bg-red-50 hover:text-red-600 transform hover:scale-105 transition-all"
                               title="Διαγραφή"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
                           </AlertDialogTrigger>
-                          <AlertDialogContent className="rounded-[2.5rem] p-10 border-none">
+                          <AlertDialogContent className="rounded-2xl p-10 border-none">
                             <AlertDialogHeader className="space-y-4">
-                              <AlertDialogTitle className="text-2xl font-black text-zinc-900 uppercase tracking-tight">Αφαίρεση Παίκτη</AlertDialogTitle>
+                              <AlertDialogTitle className="text-2xl font-bold text-zinc-900 tracking-tight">Αφαίρεση Παίκτη</AlertDialogTitle>
                               <AlertDialogDescription className="text-lg font-medium text-zinc-500">
                                 Είστε σίγουροι; Θα αφαιρέσετε τον παίκτη <span className="text-zinc-900 font-bold">&quot;{player.name}&quot;</span> από το ρόστερ της ομάδας. Αυτή η ενέργεια δεν αναιρείται.
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="pt-8 gap-4">
-                              <AlertDialogCancel className="h-14 px-8 rounded-2xl font-black uppercase tracking-widest text-[11px] border-none bg-zinc-50 hover:bg-zinc-100 text-zinc-400 hover:text-zinc-900 transition-all shadow-none">Ακύρωση</AlertDialogCancel>
+                              <AlertDialogCancel className="h-14 px-8 rounded-2xl font-semibold text-2xs border-none bg-zinc-50 hover:bg-zinc-100 text-zinc-500 hover:text-zinc-900 transition-all shadow-none">Ακύρωση</AlertDialogCancel>
                               <AlertDialogAction 
                                 variant="destructive" 
                                 onClick={() => handleDeletePlayer(player.id)} 
-                                className="h-14 px-10 rounded-2xl font-black uppercase tracking-widest text-[11px] bg-red-600 hover:bg-red-700 text-white transition-all shadow-lg shadow-red-100"
+                                className="h-14 px-10 rounded-2xl font-semibold text-2xs bg-red-600 hover:bg-red-700 text-white transition-all shadow-lg shadow-red-100"
                               >
                                 Διαγραφή Παίκτη
                               </AlertDialogAction>
@@ -753,6 +754,7 @@ export default function TeamDetailPage() {
               })}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

@@ -55,7 +55,7 @@ export default function PitchesSection() {
                    { time: '20:00', name: 'Ακαδημία K12', pitch: 'Main Pitch (11x11)', color: 'bg-orange-500' },
                  ].map((booking, idx) => (
                    <div key={idx} className="flex gap-4 relative z-10 w-full">
-                     <div className="w-[40px] text-xs text-zinc-500 font-bold pt-2">{booking.time}</div>
+                     <div className="w-[40px] text-xs text-zinc-400 font-bold pt-2">{booking.time}</div>
                      <div className="flex-1 bg-white/5 border border-white/10 rounded-xl p-4 hover:border-white/20 transition-colors cursor-pointer">
                        <div className="flex items-center gap-2 mb-1">
                          <div className={`w-2 h-2 rounded-full ${booking.color}`} />

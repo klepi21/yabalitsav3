@@ -20,7 +20,7 @@ import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel,
 } from '@/components/ui/alert-dialog';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 export default function CoachManagementPage() {
   const router = useRouter();
@@ -153,8 +153,8 @@ export default function CoachManagementPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-black text-zinc-900">
-              {toGreekUpperCase('Διαχείριση Χρηστών')}
+            <h1 className="text-2xl font-bold text-zinc-900">
+              {'Διαχείριση Χρηστών'}
             </h1>
             <p className="text-sm text-zinc-500">Διαχείριση λογαριασμών σύνδεσης</p>
           </div>
@@ -162,8 +162,8 @@ export default function CoachManagementPage() {
 
         {/* Admins Section */}
         <div className="mb-8">
-          <p className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-3 px-1">
-            {toGreekUpperCase('Διαχειριστές')} ({admins.length})
+          <p className="text-xs font-semibold text-zinc-500 mb-3 px-1">
+            {'Διαχειριστές'} ({admins.length})
           </p>
           <div className="space-y-2">
             {admins.map(admin => (
@@ -174,12 +174,12 @@ export default function CoachManagementPage() {
                       <Shield className="h-5 w-5 text-purple-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-zinc-900">{admin.name}</p>
-                      <p className="text-xs text-zinc-400">{admin.email}</p>
+                      <p className="text-sm font-semibold text-zinc-900">{admin.name}</p>
+                      <p className="text-xs text-zinc-500">{admin.email}</p>
                     </div>
                   </div>
-                  <Badge className={cn('text-[11px] font-black border-none', getRoleColor('admin'))}>
-                    {toGreekUpperCase(getRoleLabel('admin'))}
+                  <Badge className={cn('text-2xs font-semibold border-none', getRoleColor('admin'))}>
+                    {getRoleLabel('admin')}
                   </Badge>
                 </CardContent>
               </Card>
@@ -189,15 +189,15 @@ export default function CoachManagementPage() {
 
         {/* Coaches Section */}
         <div>
-          <p className="text-xs font-black text-zinc-400 uppercase tracking-wider mb-3 px-1">
-            {toGreekUpperCase('Προπονητές')} ({coaches.length})
+          <p className="text-xs font-semibold text-zinc-500 mb-3 px-1">
+            {'Προπονητές'} ({coaches.length})
           </p>
           {coaches.length === 0 ? (
             <Card className="rounded-2xl border-none shadow-sm">
               <CardContent className="p-8 text-center">
-                <Users className="h-10 w-10 text-zinc-200 mx-auto mb-3" />
-                <p className="text-sm text-zinc-400 font-bold">Δεν υπάρχουν προπονητές</p>
-                <p className="text-xs text-zinc-300 mt-1">
+                <Users className="h-10 w-10 text-zinc-400 mx-auto mb-3" />
+                <p className="text-sm text-zinc-500 font-semibold">Δεν υπάρχουν προπονητές</p>
+                <p className="text-xs text-zinc-500 mt-1">
                   Πρόσκληση μέσω Ακαδημία → Χρήστες → 3 τελίτσες → Πρόσκληση σύνδεσης
                 </p>
               </CardContent>
@@ -217,18 +217,18 @@ export default function CoachManagementPage() {
                             <Users className={cn("h-5 w-5", disabled ? "text-red-400" : "text-blue-600")} />
                           </div>
                           <div>
-                            <p className={cn("text-sm font-bold", disabled ? "text-zinc-400" : "text-zinc-900")}>{coach.name}</p>
-                            <p className="text-xs text-zinc-400">{coach.email}</p>
+                            <p className={cn("text-sm font-semibold", disabled ? "text-zinc-500" : "text-zinc-900")}>{coach.name}</p>
+                            <p className="text-xs text-zinc-500">{coach.email}</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           {disabled ? (
-                            <Badge className="text-[11px] font-black border-none bg-red-100 text-red-600">
-                              {toGreekUpperCase('Ανενεργός')}
+                            <Badge className="text-2xs font-semibold border-none bg-red-100 text-red-600">
+                              {'Ανενεργός'}
                             </Badge>
                           ) : (
-                            <Badge className={cn('text-[11px] font-black border-none', getRoleColor('coach'))}>
-                              {toGreekUpperCase(getRoleLabel('coach'))}
+                            <Badge className={cn('text-2xs font-semibold border-none', getRoleColor('coach'))}>
+                              {getRoleLabel('coach')}
                             </Badge>
                           )}
                           {disabled ? (
@@ -236,19 +236,19 @@ export default function CoachManagementPage() {
                               size="sm"
                               variant="ghost"
                               onClick={(e) => { e.stopPropagation(); handleReactivate(coach); }}
-                              className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 h-8 px-3 rounded-lg"
+                              className="text-xs font-medium text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 h-8 px-3 rounded-lg"
                             >
                               <UserCheck className="h-3 w-3 mr-1" />
                               Ενεργοποίηση
                             </Button>
                           ) : (
-                            <ChevronRight className="h-4 w-4 text-zinc-300" />
+                            <ChevronRight className="h-4 w-4 text-zinc-400" />
                           )}
                         </div>
                       </div>
                       {!disabled && (
                         <div className="flex items-center gap-3 mt-3 ml-13">
-                          <div className="flex items-center gap-1 text-xs text-zinc-400">
+                          <div className="flex items-center gap-1 text-xs text-zinc-500">
                             {viewMode === 'all_squads' ? (
                               <><Eye className="h-3 w-3" /> Όλα τα τμήματα</>
                             ) : (
@@ -268,9 +268,9 @@ export default function CoachManagementPage() {
 
       {/* Edit Coach Dialog */}
       <AlertDialog open={!!editCoach} onOpenChange={(open) => !open && setEditCoach(null)}>
-        <AlertDialogContent className="rounded-[2rem] p-8 max-w-lg">
+        <AlertDialogContent className="rounded-2xl p-8 max-w-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-black text-zinc-900">
+            <AlertDialogTitle className="text-xl font-bold text-zinc-900">
               Ρυθμίσεις Προπονητή
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-zinc-500">
@@ -281,14 +281,14 @@ export default function CoachManagementPage() {
           <div className="space-y-6 mt-4">
             {/* View Mode */}
             <div className="space-y-2">
-              <p className="text-xs font-black text-zinc-400 uppercase tracking-wider">
+              <p className="text-xs font-semibold text-zinc-500">
                 Ορατότητα τμημάτων
               </p>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => setEditViewMode('own_squads')}
                   className={cn(
-                    'flex items-center gap-2 p-3 rounded-xl border-2 text-sm font-bold transition-all',
+                    'flex items-center gap-2 p-3 rounded-xl border-2 text-sm font-semibold transition-all',
                     editViewMode === 'own_squads'
                       ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                       : 'border-zinc-100 text-zinc-500 hover:border-zinc-200'
@@ -300,7 +300,7 @@ export default function CoachManagementPage() {
                 <button
                   onClick={() => setEditViewMode('all_squads')}
                   className={cn(
-                    'flex items-center gap-2 p-3 rounded-xl border-2 text-sm font-bold transition-all',
+                    'flex items-center gap-2 p-3 rounded-xl border-2 text-sm font-semibold transition-all',
                     editViewMode === 'all_squads'
                       ? 'border-blue-500 bg-blue-50 text-blue-700'
                       : 'border-zinc-100 text-zinc-500 hover:border-zinc-200'
@@ -315,11 +315,11 @@ export default function CoachManagementPage() {
             {/* Assigned Squads */}
             {editViewMode === 'own_squads' && (
               <div className="space-y-2">
-                <p className="text-xs font-black text-zinc-400 uppercase tracking-wider">
+                <p className="text-xs font-semibold text-zinc-500">
                   Ανάθεση τμημάτων
                 </p>
                 {squads.length === 0 ? (
-                  <p className="text-sm text-zinc-400 text-center py-4">Δεν υπάρχουν τμήματα</p>
+                  <p className="text-sm text-zinc-500 text-center py-4">Δεν υπάρχουν τμήματα</p>
                 ) : (
                   <div className="grid grid-cols-2 gap-2">
                     {squads.map(squad => {
@@ -329,21 +329,21 @@ export default function CoachManagementPage() {
                           key={squad.id}
                           onClick={() => toggleSquad(squad.id)}
                           className={cn(
-                            'flex items-center gap-2 p-3 rounded-xl border-2 text-sm font-bold transition-all text-left',
+                            'flex items-center gap-2 p-3 rounded-xl border-2 text-sm font-semibold transition-all text-left',
                             isSelected
                               ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                               : 'border-zinc-100 text-zinc-500 hover:border-zinc-200'
                           )}
                         >
                           <div className={cn(
-                            'h-5 w-5 rounded-md flex items-center justify-center text-[12px] font-black',
-                            isSelected ? 'bg-emerald-600 text-white' : 'bg-zinc-100 text-zinc-300'
+                            'h-5 w-5 rounded-md flex items-center justify-center text-2xs font-semibold',
+                            isSelected ? 'bg-emerald-600 text-white' : 'bg-zinc-100 text-zinc-400'
                           )}>
                             {isSelected ? '✓' : ''}
                           </div>
                           <div>
-                            <p className="text-xs font-bold">{squad.name}</p>
-                            <p className="text-[12px] text-zinc-400">{squad.ageGroup}</p>
+                            <p className="text-xs font-medium">{squad.name}</p>
+                            <p className="text-2xs text-zinc-500">{squad.ageGroup}</p>
                           </div>
                         </button>
                       );
@@ -351,7 +351,7 @@ export default function CoachManagementPage() {
                   </div>
                 )}
                 {editViewMode === 'own_squads' && editSquadIds.length === 0 && (
-                  <div className="flex items-center gap-2 text-amber-600 text-xs font-bold bg-amber-50 rounded-xl p-3">
+                  <div className="flex items-center gap-2 text-amber-600 text-xs font-medium bg-amber-50 rounded-xl p-3">
                     <AlertCircle className="h-4 w-4" />
                     Επιλέξτε τουλάχιστον ένα τμήμα
                   </div>
@@ -363,12 +363,12 @@ export default function CoachManagementPage() {
             <div className="border-t border-zinc-100 pt-4">
               <button
                 onClick={() => { setEditCoach(null); setDeactivateConfirm(editCoach); }}
-                className="flex items-center gap-2 text-sm font-bold text-red-500 hover:text-red-600 transition-colors"
+                className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-red-600 transition-colors"
               >
                 <UserX className="h-4 w-4" />
                 Απενεργοποίηση λογαριασμού
               </button>
-              <p className="text-[12px] text-zinc-400 mt-1 ml-6">
+              <p className="text-2xs text-zinc-500 mt-1 ml-6">
                 Ο προπονητής δεν θα μπορεί να συνδεθεί
               </p>
             </div>
@@ -381,7 +381,7 @@ export default function CoachManagementPage() {
             <Button
               onClick={handleSave}
               disabled={saving || (editViewMode === 'own_squads' && editSquadIds.length === 0)}
-              className="h-12 px-6 rounded-xl bg-emerald-600 text-white font-black hover:bg-emerald-700 shadow-lg shadow-emerald-200"
+              className="h-12 px-6 rounded-xl bg-emerald-600 text-white font-semibold hover:bg-emerald-700 shadow-lg shadow-emerald-200"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
               Αποθήκευση
@@ -392,9 +392,9 @@ export default function CoachManagementPage() {
 
       {/* Deactivate Confirmation */}
       <AlertDialog open={!!deactivateConfirm} onOpenChange={(open) => !open && setDeactivateConfirm(null)}>
-        <AlertDialogContent className="rounded-[2rem] p-8 max-w-md">
+        <AlertDialogContent className="rounded-2xl p-8 max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-black text-zinc-900">
+            <AlertDialogTitle className="text-xl font-bold text-zinc-900">
               Απενεργοποίηση Λογαριασμού
             </AlertDialogTitle>
             <AlertDialogDescription className="text-sm text-zinc-500 mt-2">
@@ -409,7 +409,7 @@ export default function CoachManagementPage() {
             <Button
               onClick={handleDeactivate}
               disabled={deactivating}
-              className="h-12 px-6 rounded-xl bg-red-600 text-white font-black hover:bg-red-700 shadow-lg shadow-red-200"
+              className="h-12 px-6 rounded-xl bg-red-600 text-white font-semibold hover:bg-red-700 shadow-lg shadow-red-200"
             >
               {deactivating ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <UserCheck className="h-4 w-4 mr-2" />}
               Απενεργοποίηση

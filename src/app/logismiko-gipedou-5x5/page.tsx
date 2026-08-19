@@ -16,7 +16,7 @@ export default function LogismikoGipedou5x5Page() {
     <div className="min-h-screen bg-white text-[#040D12] font-sans selection:bg-emerald-500/30">
       
       {/* HEADER */}
-      <header className="fixed top-0 w-full z-50 bg-[#040D12] border-b border-white/5 flex items-center justify-between text-[13px] font-medium tracking-wide">
+      <header className="fixed top-0 w-full z-50 bg-[#040D12] border-b border-white/5 flex items-center justify-between text-xs font-medium tracking-wide">
         <div className="max-w-[1400px] mx-auto w-full px-6 py-5 flex items-center justify-between">
           <div className="flex items-center gap-10">
             <Link href="/">
@@ -59,21 +59,21 @@ export default function LogismikoGipedou5x5Page() {
             <span>Η Νο1 Πλατφόρμα στην Ελλάδα</span>
           </div>
           
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight mb-6 text-[#040D12]">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight mb-6 text-[#040D12]">
             Η Απόλυτη Διαχείριση <br className="hidden sm:block" />
             <span className="text-emerald-500">Γηπέδου 5x5</span> & Ακαδημίας
           </h1>
           
-          <p className="text-lg text-zinc-600 max-w-2xl mx-auto mb-10 font-medium leading-relaxed">
+          <p className="text-lg text-zinc-400 max-w-2xl mx-auto mb-10 font-medium leading-relaxed">
             Βάλτε τέλος στις διπλές κρατήσεις, τα χαμένα χαρτάκια και την πολύωρη τηλεφωνική επικοινωνία. 
             Το Yabalitsa είναι το εξειδικευμένο λογισμικό που σχεδιάστηκε για την πλήρη ψηφιακή διαχείριση σύγχρονων αθλητικών εγκαταστάσεων.
           </p>
 
-          <Link href="/for-venues" className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-black rounded-2xl transition-all shadow-xl shadow-emerald-500/20 hover:scale-105 active:scale-95 flex items-center gap-3">
+          <Link href="/for-venues" className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-2xl transition-all shadow-xl shadow-emerald-500/20 hover:scale-105 active:scale-95 flex items-center gap-3">
             Δοκιμάστε το Δωρεάν για 15 Ημέρες <ArrowRight className="w-5 h-5" />
           </Link>
           
-          <div className="flex items-center gap-6 mt-8 text-sm font-semibold text-zinc-500">
+          <div className="flex items-center gap-6 mt-8 text-sm font-semibold text-zinc-400">
             <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Δεν απαιτείται κάρτα</span>
             <span className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-emerald-500" /> Άμεση Ενεργοποίηση</span>
           </div>
@@ -82,9 +82,9 @@ export default function LogismikoGipedou5x5Page() {
 
       {/* BODY CONTENT - SEO FOCUSED */}
       <section className="py-24 bg-white">
-        <div className="max-w-4xl mx-auto px-6 prose prose-lg prose-emerald text-zinc-600">
+        <div className="max-w-4xl mx-auto px-6 prose prose-lg prose-emerald text-zinc-400">
           
-          <h2 className="text-3xl font-black text-[#040D12] mb-6">Τι είναι η Διαχείριση Γηπέδου 5x5 και γιατί χρειάζεστε Λογισμικό;</h2>
+          <h2 className="text-3xl font-bold text-[#040D12] mb-6">Τι είναι η Διαχείριση Γηπέδου 5x5 και γιατί χρειάζεστε Λογισμικό;</h2>
           <p>
             Η <strong>διαχείριση γηπέδου 5x5</strong> δεν αποτελεί πλέον μια απλή διαδικασία καταγραφής ονομάτων σε ένα τετράδιο. 
             Σε ένα άκρως ανταγωνιστικό περιβάλλον, οι ιδιοκτήτες αθλητικών εγκαταστάσεων και γηπέδων ποδοσφαίρου (5x5, 7x7, 11x11) 
@@ -104,7 +104,7 @@ export default function LogismikoGipedou5x5Page() {
                 <Calendar className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-[#040D12] mb-3">Εύκολες Κρατήσεις</h3>
-              <p className="text-sm text-zinc-600 leading-relaxed">
+              <p className="text-sm text-zinc-400 leading-relaxed">
                 Προβάλετε τη διαθεσιμότητα σε πραγματικό χρόνο και οργανώστε το ημερολόγιο χωρίς χαρτιά.
               </p>
             </div>
@@ -113,7 +113,7 @@ export default function LogismikoGipedou5x5Page() {
                 <Users className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-[#040D12] mb-3">Ακαδημίες & Συνδρομές</h3>
-              <p className="text-sm text-zinc-600 leading-relaxed">
+              <p className="text-sm text-zinc-400 leading-relaxed">
                 Πλήρης έλεγχος των αθλητών, των μηνιαίων πληρωμών και του ιατρικού τους ιστορικού.
               </p>
             </div>
@@ -122,13 +122,13 @@ export default function LogismikoGipedou5x5Page() {
                 <BarChart3 className="w-6 h-6" />
               </div>
               <h3 className="text-xl font-bold text-[#040D12] mb-3">Στατιστικά Εσόδων</h3>
-              <p className="text-sm text-zinc-600 leading-relaxed">
+              <p className="text-sm text-zinc-400 leading-relaxed">
                 Δείτε άμεσα τα ημερήσια έσοδα, τα κέρδη και αναλύστε ποιες ώρες είναι περισσότερο κερδοφόρες.
               </p>
             </div>
           </div>
 
-          <h2 className="text-3xl font-black text-[#040D12] mb-6">Τα Συχνότερα Προβλήματα που Λύνει το Yabalitsa</h2>
+          <h2 className="text-3xl font-bold text-[#040D12] mb-6">Τα Συχνότερα Προβλήματα που Λύνει το Yabalitsa</h2>
           
           <h3 className="text-xl font-bold text-[#040D12] mt-8 mb-4">1. Διπλές Κρατήσεις (Overbooking) & Ακυρώσεις</h3>
           <p>
@@ -166,7 +166,7 @@ export default function LogismikoGipedou5x5Page() {
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-6">
               Χαρακτηριστικά
             </div>
-            <h2 className="text-3xl md:text-4xl font-black mb-8 leading-tight">
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 leading-tight">
               Ολοκληρωμένο Σύστημα<br /> για Κάθε Αθλητικό Κέντρο
             </h2>
             
@@ -227,19 +227,19 @@ export default function LogismikoGipedou5x5Page() {
       {/* CALL TO ACTION */}
       <section className="py-24 bg-[#F1F4F8]">
         <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-3xl sm:text-4xl font-black text-[#040D12] mb-6">
+          <h2 className="text-3xl sm:text-4xl font-bold text-[#040D12] mb-6">
             Έτοιμοι να ψηφιοποιήσετε το Γήπεδό σας;
           </h2>
-          <p className="text-lg text-zinc-600 mb-10 max-w-2xl mx-auto">
+          <p className="text-lg text-zinc-400 mb-10 max-w-2xl mx-auto">
             Εκατοντάδες διαχειριστές εμπιστεύονται ήδη το <strong>λογισμικό διαχείρισης γηπέδου 5x5</strong> της Yabalitsa. 
             Αυξήστε τα έσοδά σας και κερδίστε χρόνο, σήμερα κιόλας.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/for-venues" className="px-10 py-5 bg-[#040D12] hover:bg-zinc-800 text-white font-black rounded-2xl transition-all shadow-xl hover:scale-105 active:scale-95 w-full sm:w-auto">
+            <Link href="/for-venues" className="px-10 py-5 bg-[#040D12] hover:bg-zinc-800 text-white font-bold rounded-2xl transition-all shadow-xl hover:scale-105 active:scale-95 w-full sm:w-auto">
               Εγγραφή - 15 Ημέρες Δωρεάν
             </Link>
-            <Link href="/for-venues" className="px-10 py-5 bg-white border border-zinc-200 hover:border-zinc-300 text-[#040D12] font-black rounded-2xl transition-all w-full sm:w-auto">
+            <Link href="/for-venues" className="px-10 py-5 bg-white border border-zinc-200 hover:border-zinc-300 text-[#040D12] font-bold rounded-2xl transition-all w-full sm:w-auto">
               Επικοινωνία μαζί μας
             </Link>
           </div>
@@ -256,9 +256,9 @@ export default function LogismikoGipedou5x5Page() {
               height={20}
               className="filter brightness-0 invert opacity-50 hover:opacity-100 transition"
             />
-            <span className="text-zinc-600 text-sm">© 2026. All rights reserved.</span>
+            <span className="text-zinc-400 text-sm">© 2026 Yabalitsa. Με επιφύλαξη παντός δικαιώματος.</span>
           </div>
-          <div className="flex items-center gap-6 text-sm text-zinc-500 font-medium">
+          <div className="flex items-center gap-6 text-sm text-zinc-400 font-medium">
             <Link href="/contact" className="hover:text-emerald-400 transition">Contact Us</Link>
             <Link href="/blog" className="hover:text-emerald-400 transition">Blog / Άρθρα</Link>
             <Link href="/terms" className="hover:text-emerald-400 transition">Terms of Service</Link>

@@ -32,7 +32,7 @@ import { GraduationCap } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -450,8 +450,8 @@ export default function ReportsPage() {
     datasets: [{
       label: 'Έσοδα (€)',
       data: revenueData,
-      borderColor: '#10b981',
-      backgroundColor: 'rgba(16, 185, 129, 0.08)',
+      borderColor: 'var(--chart-1)',
+      backgroundColor: 'rgba(58, 130, 10, 0.10)',
       tension: 0.4,
       fill: true,
       borderWidth: 2,
@@ -465,8 +465,8 @@ export default function ReportsPage() {
     datasets: [{
       label: 'Κρατήσεις',
       data: bookingsData,
-      borderColor: '#3b82f6',
-      backgroundColor: 'rgba(59, 130, 246, 0.08)',
+      borderColor: 'var(--chart-2)',
+      backgroundColor: 'rgba(29, 78, 216, 0.10)',
       tension: 0.4,
       fill: true,
       borderWidth: 2,
@@ -480,7 +480,7 @@ export default function ReportsPage() {
     datasets: [{
       label: 'Έσοδα (€)',
       data: pitches.map(p => filteredBookings.filter(b => b.pitchId === p.id).reduce((sum, b) => sum + (b.price || 0), 0)),
-      backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ef4444'],
+      backgroundColor: ['#3a820a', '#1d4ed8', '#b45309', '#7c3aed', '#0e7490'],
       borderRadius: 8,
       borderSkipped: false,
     }],
@@ -490,7 +490,7 @@ export default function ReportsPage() {
     labels: ['Ολοκληρωμένες', 'Επιβεβαιωμένες', 'Εκκρεμεί'],
     datasets: [{
       data: [completedBookings, confirmedBookings, pendingBookings],
-      backgroundColor: ['#10b981', '#3b82f6', '#f59e0b'],
+      backgroundColor: ['#3a820a', '#1d4ed8', '#b45309'],
       borderWidth: 0,
     }],
   };
@@ -507,12 +507,12 @@ export default function ReportsPage() {
                 <div className="mx-auto h-16 w-16 rounded-2xl bg-gradient-to-br from-zinc-900 to-zinc-700 flex items-center justify-center mb-4 shadow-lg">
                   <Shield className="h-8 w-8 text-white" />
                 </div>
-                <h2 className="text-2xl font-black tracking-tight text-zinc-900 mb-1">
+                <h2 className="text-2xl font-bold tracking-tight text-zinc-900 mb-1">
                   {needsSetPin ? 'Ορισμός PIN'
                     : forgotPinStep === 'none' ? 'Αναφορές & Οικονομικά'
                     : 'Επαναφορά PIN'}
                 </h2>
-                <p className="text-sm text-zinc-400 font-medium">
+                <p className="text-sm text-zinc-500 font-medium">
                   {needsSetPin ? 'Ορίστε νέο 4ψήφιο PIN πρόσβασης'
                     : forgotPinStep === 'none' ? 'Εισάγετε το 4ψήφιο PIN για πρόσβαση'
                     : forgotPinStep === 'confirm' ? 'Αποστολή κωδικού επαναφοράς'
@@ -533,7 +533,7 @@ export default function ReportsPage() {
                             type="password"
                             inputMode="numeric"
                             maxLength={1}
-                            className="w-14 h-14 text-center text-2xl font-black rounded-xl bg-zinc-50 border-2 border-zinc-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
+                            className="w-14 h-14 text-center text-2xl font-bold rounded-xl bg-zinc-50 border-2 border-zinc-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
                             value={newPin[i] || ''}
                             onChange={(e) => {
                               const val = e.target.value.replace(/[^0-9]/g, '');
@@ -564,7 +564,7 @@ export default function ReportsPage() {
                             type="password"
                             inputMode="numeric"
                             maxLength={1}
-                            className="w-14 h-14 text-center text-2xl font-black rounded-xl bg-zinc-50 border-2 border-zinc-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
+                            className="w-14 h-14 text-center text-2xl font-bold rounded-xl bg-zinc-50 border-2 border-zinc-200 focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-100 outline-none transition-all"
                             value={confirmPin[i] || ''}
                             onChange={(e) => {
                               const val = e.target.value.replace(/[^0-9]/g, '');
@@ -595,7 +595,7 @@ export default function ReportsPage() {
                     <Button
                       onClick={handleSetNewPin}
                       disabled={newPin.length !== 4 || confirmPin.length !== 4 || settingPin}
-                      className="h-12 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white text-sm shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
+                      className="h-12 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 font-semibold text-white text-sm shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
                     >
                       {settingPin ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -603,7 +603,7 @@ export default function ReportsPage() {
                         'Αποθήκευση & Είσοδος'
                       )}
                     </Button>
-                    <Button variant="ghost" asChild className="h-10 font-semibold text-zinc-400 hover:text-zinc-600 rounded-xl text-sm">
+                    <Button variant="ghost" asChild className="h-10 font-semibold text-zinc-500 hover:text-zinc-600 rounded-xl text-sm">
                       <Link href="/management/dashboard">Επιστροφή</Link>
                     </Button>
                   </div>
@@ -619,7 +619,7 @@ export default function ReportsPage() {
                           type="password"
                           inputMode="numeric"
                           maxLength={1}
-                          className={`w-14 h-14 text-center text-2xl font-black rounded-xl border-2 outline-none transition-all ${
+                          className={`w-14 h-14 text-center text-2xl font-bold rounded-xl border-2 outline-none transition-all ${
                             pinError
                               ? 'bg-red-50 border-red-300 text-red-600 animate-shake'
                               : 'bg-zinc-50 border-zinc-200 focus:border-zinc-900 focus:bg-white focus:ring-2 focus:ring-zinc-200'
@@ -667,7 +667,7 @@ export default function ReportsPage() {
                     <div className="flex flex-col gap-2 pt-1">
                       <Button
                         onClick={() => handleVerifyPin()}
-                        className="h-12 w-full rounded-xl bg-zinc-900 hover:bg-black font-bold text-white text-sm shadow-lg transition-all active:scale-[0.98]"
+                        className="h-12 w-full rounded-xl bg-zinc-900 hover:bg-black font-semibold text-white text-sm shadow-lg transition-all active:scale-[0.98]"
                       >
                         <Lock className="h-4 w-4 mr-2" />
                         Είσοδος
@@ -680,7 +680,7 @@ export default function ReportsPage() {
                         >
                           Ξέχασα το PIN
                         </Button>
-                        <Button variant="ghost" asChild className="h-9 font-semibold text-zinc-400 hover:text-zinc-600 rounded-lg text-xs px-3">
+                        <Button variant="ghost" asChild className="h-9 font-semibold text-zinc-500 hover:text-zinc-600 rounded-lg text-xs px-3">
                           <Link href="/management/dashboard">Επιστροφή</Link>
                         </Button>
                       </div>
@@ -693,15 +693,15 @@ export default function ReportsPage() {
                   <div className="flex flex-col gap-4">
                     <div className="text-center rounded-xl bg-zinc-50 p-4">
                       <p className="text-sm text-zinc-500 font-medium mb-1">Θα σταλεί κωδικός επαναφοράς στο</p>
-                      <p className="text-sm text-emerald-600 font-black">{venueOwner?.email}</p>
+                      <p className="text-sm text-emerald-600 font-semibold">{venueOwner?.email}</p>
                     </div>
                     <Button
                       onClick={handleForgotPin}
-                      className="h-12 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white text-sm shadow-lg transition-all active:scale-[0.98]"
+                      className="h-12 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 font-semibold text-white text-sm shadow-lg transition-all active:scale-[0.98]"
                     >
                       Αποστολή κωδικού
                     </Button>
-                    <Button variant="ghost" onClick={() => setForgotPinStep('none')} className="h-10 font-semibold text-zinc-400 hover:text-zinc-600 rounded-xl text-sm">
+                    <Button variant="ghost" onClick={() => setForgotPinStep('none')} className="h-10 font-semibold text-zinc-500 hover:text-zinc-600 rounded-xl text-sm">
                       Πίσω
                     </Button>
                   </div>
@@ -711,7 +711,7 @@ export default function ReportsPage() {
                 {!needsSetPin && forgotPinStep === 'sending' && (
                   <div className="flex flex-col items-center gap-4 py-4">
                     <Loader2 className="h-8 w-8 animate-spin text-emerald-600" />
-                    <p className="text-sm text-zinc-400 font-medium">Αποστολή κωδικού...</p>
+                    <p className="text-sm text-zinc-500 font-medium">Αποστολή κωδικού...</p>
                   </div>
                 )}
 
@@ -720,14 +720,14 @@ export default function ReportsPage() {
                   <div className="flex flex-col gap-4">
                     <div className="text-center rounded-xl bg-zinc-50 p-4">
                       <p className="text-sm text-zinc-500 font-medium mb-1">Κωδικός επαλήθευσης στάλθηκε στο</p>
-                      <p className="text-sm text-emerald-600 font-black">{venueOwner?.email}</p>
+                      <p className="text-sm text-emerald-600 font-semibold">{venueOwner?.email}</p>
                     </div>
                     <Input
                       type="text"
                       inputMode="numeric"
                       maxLength={6}
                       placeholder="000000"
-                      className="text-center tracking-[0.4em] text-2xl w-full h-14 rounded-xl bg-zinc-50 border-2 border-zinc-200 px-4 font-black focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
+                      className="text-center text-2xl w-full h-14 rounded-xl bg-zinc-50 border-2 border-zinc-200 px-4 font-bold focus:bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100 transition-all"
                       value={resetCode}
                       onChange={(e) => setResetCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
                       onKeyDown={(e) => {
@@ -744,7 +744,7 @@ export default function ReportsPage() {
                     <Button
                       onClick={handleVerifyResetCode}
                       disabled={resetCode.length !== 6 || forgotPinStep === 'verifying'}
-                      className="h-12 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 font-bold text-white text-sm shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
+                      className="h-12 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 font-semibold text-white text-sm shadow-lg transition-all active:scale-[0.98] disabled:opacity-50"
                     >
                       {forgotPinStep === 'verifying' ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -763,7 +763,7 @@ export default function ReportsPage() {
                       <Button
                         variant="ghost"
                         onClick={() => { setForgotPinStep('none'); setResetCode(''); setResetError(null); }}
-                        className="h-9 font-semibold text-zinc-400 hover:text-zinc-600 rounded-lg text-xs px-3"
+                        className="h-9 font-semibold text-zinc-500 hover:text-zinc-600 rounded-lg text-xs px-3"
                       >
                         Πίσω
                       </Button>
@@ -810,15 +810,15 @@ export default function ReportsPage() {
               <div className="h-9 w-9 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
                 <AlertCircle className="h-5 w-5 text-red-600" />
               </div>
-              <p className="text-red-700 font-bold text-xs">{error}</p>
+              <p className="text-red-700 font-medium text-xs">{error}</p>
             </div>
             <Button 
               variant="outline" 
               size="sm" 
               onClick={() => { setError(null); loadData(); }} 
-              className="h-8 rounded-lg border-red-200 text-red-600 hover:bg-red-50 font-bold text-[12px]"
+              className="h-8 rounded-lg border-red-200 text-red-600 hover:bg-red-50 font-medium text-2xs"
             >
-              {toGreekUpperCase('Δοκιμάστε ξανά')}
+              {'Δοκιμάστε ξανά'}
             </Button>
           </div>
         </div>
@@ -827,11 +827,11 @@ export default function ReportsPage() {
       {/* Header & Filters */}
       <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6">
         <div>
-          <h1 className="text-xl font-black tracking-tight text-zinc-900 uppercase">
-            {toGreekUpperCase('Αναφορές & Στατιστικά')}
+          <h1 className="text-xl font-bold tracking-tight text-zinc-900">
+            {'Αναφορές & Στατιστικά'}
           </h1>
-          <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight">
-            {toGreekUpperCase('Παρακολουθήστε την απόδοση της επιχείρησής σας.')}
+          <p className="text-2xs font-medium text-zinc-500 tracking-tight">
+            {'Παρακολουθήστε την απόδοση της επιχείρησής σας.'}
           </p>
         </div>
 
@@ -846,13 +846,13 @@ export default function ReportsPage() {
               <button
                 key={opt.value}
                 onClick={() => setSelectedPeriod(opt.value as 'week' | 'month' | 'year')}
-                className={`px-3 py-1.5 rounded-md text-[12px] font-bold uppercase tracking-wider transition-all ${
+                className={`px-3 py-1.5 rounded-md text-2xs font-bold uppercase tracking-wider transition-all ${
                   selectedPeriod === opt.value
                     ? 'bg-white text-zinc-900 shadow-sm'
-                    : 'text-zinc-400 hover:text-zinc-600'
+                    : 'text-zinc-500 hover:text-zinc-600'
                 }`}
               >
-                {toGreekUpperCase(opt.label)}
+                {opt.label}
               </button>
             ))}
           </div>
@@ -863,21 +863,21 @@ export default function ReportsPage() {
           <div className="flex items-center p-0.5 bg-zinc-50 rounded-lg max-w-[240px] overflow-x-auto">
             <button
               onClick={() => setSelectedPitch('all')}
-              className={`px-3 py-1.5 rounded-md text-[12px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
-                selectedPitch === 'all' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-400 hover:text-zinc-600'
+              className={`px-3 py-1.5 rounded-md text-2xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
+                selectedPitch === 'all' ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-600'
               }`}
             >
-              {toGreekUpperCase('Όλα')}
+              {'Όλα'}
             </button>
             {pitches.map((pitch) => (
               <button
                 key={pitch.id}
                 onClick={() => setSelectedPitch(pitch.id)}
-                className={`px-3 py-1.5 rounded-md text-[12px] font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
-                  selectedPitch === pitch.id ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-400 hover:text-zinc-600'
+                className={`px-3 py-1.5 rounded-md text-2xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${
+                  selectedPitch === pitch.id ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-600'
                 }`}
               >
-                {toGreekUpperCase(pitch.name)}
+                {pitch.name}
               </button>
             ))}
           </div>
@@ -906,12 +906,12 @@ export default function ReportsPage() {
               <div className={`h-8 w-8 rounded-lg ${colorStyles[metric.color]} flex items-center justify-center mb-3`}>
                 <Icon className="h-4 w-4" />
               </div>
-              <p className="text-lg font-black text-zinc-900 mb-0.5">{metric.value}</p>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase(metric.label)}</p>
+              <p className="text-lg font-semibold text-zinc-900 mb-0.5">{metric.value}</p>
+              <p className="text-2xs font-medium text-zinc-500">{metric.label}</p>
               {'hint' in metric && metric.hint && (
                 <div className="absolute top-2.5 right-2.5 group/hint">
-                  <Info className="h-3.5 w-3.5 text-zinc-300 hover:text-zinc-500 cursor-help transition-colors" />
-                  <div className="invisible group-hover/hint:visible absolute right-0 top-5 z-50 w-56 rounded-lg bg-zinc-900 text-white text-[11px] leading-relaxed p-3 shadow-lg">
+                  <Info className="h-3.5 w-3.5 text-zinc-400 hover:text-zinc-500 cursor-help transition-colors" />
+                  <div className="invisible group-hover/hint:visible absolute right-0 top-5 z-50 w-56 rounded-lg bg-zinc-900 text-white text-2xs leading-relaxed p-3 shadow-lg">
                     {metric.hint}
                   </div>
                 </div>
@@ -924,77 +924,77 @@ export default function ReportsPage() {
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Revenue Trend */}
-        <div className="bg-white p-4 rounded-xl border border-zinc-100 shadow-sm">
+        <div className="bg-white p-5 rounded-xl border border-border shadow-e2">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="h-7 w-7 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
               <TrendingUp className="h-3.5 w-3.5" />
             </div>
-            <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Τάση Εσόδων')}</h3>
+            <h3 className="text-xs font-semibold text-zinc-900 tracking-tight">{'Τάση Εσόδων'}</h3>
           </div>
-          <div className="h-[220px] w-full">
+          <div className="h-[260px] w-full">
             <Line data={revenueChartData} options={{
               ...chartOptions,
               maintainAspectRatio: false,
               scales: {
                 ...chartOptions.scales,
-                y: { ...chartOptions.scales.y, ticks: { ...chartOptions.scales.y.ticks, padding: 8, font: { weight: 'bold' as const }, callback: (v) => `€${v}` } },
-                x: { ...chartOptions.scales.x, ticks: { ...chartOptions.scales.x.ticks, padding: 8, font: { weight: 'bold' as const } } },
+                y: { ...chartOptions.scales.y, ticks: { ...chartOptions.scales.y.ticks, padding: 8, callback: (v: string | number) => `€${v}` } },
+                x: { ...chartOptions.scales.x, ticks: { ...chartOptions.scales.x.ticks, padding: 8 } },
               },
             }} />
           </div>
         </div>
 
         {/* Bookings Trend */}
-        <div className="bg-white p-4 rounded-xl border border-zinc-100 shadow-sm">
+        <div className="bg-white p-5 rounded-xl border border-border shadow-e2">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="h-7 w-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
               <CalendarDays className="h-3.5 w-3.5" />
             </div>
-            <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Τάση Κρατήσεων')}</h3>
+            <h3 className="text-xs font-semibold text-zinc-900 tracking-tight">{'Τάση Κρατήσεων'}</h3>
           </div>
-          <div className="h-[220px] w-full">
+          <div className="h-[260px] w-full">
             <Line data={bookingsChartData} options={{
               ...chartOptions,
               maintainAspectRatio: false,
               scales: {
                 ...chartOptions.scales,
-                y: { ...chartOptions.scales.y, ticks: { ...chartOptions.scales.y.ticks, padding: 8, font: { weight: 'bold' as const }, stepSize: 1 } },
-                x: { ...chartOptions.scales.x, ticks: { ...chartOptions.scales.x.ticks, padding: 8, font: { weight: 'bold' as const } } },
+                y: { ...chartOptions.scales.y, ticks: { ...chartOptions.scales.y.ticks, padding: 8, stepSize: 1 } },
+                x: { ...chartOptions.scales.x, ticks: { ...chartOptions.scales.x.ticks, padding: 8 } },
               },
             }} />
           </div>
         </div>
 
         {/* Pitch Performance */}
-        <div className="bg-white p-4 rounded-xl border border-zinc-100 shadow-sm">
+        <div className="bg-white p-5 rounded-xl border border-border shadow-e2">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="h-7 w-7 rounded-lg bg-violet-50 flex items-center justify-center text-violet-600">
               <Goal className="h-3.5 w-3.5" />
             </div>
-            <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ανά Γήπεδο')}</h3>
+            <h3 className="text-xs font-semibold text-zinc-900 tracking-tight">{'Ανά Γήπεδο'}</h3>
           </div>
-          <div className="h-[220px] w-full">
+          <div className="h-[260px] w-full">
             <Bar data={pitchPerformanceData} options={{
               ...chartOptions,
               maintainAspectRatio: false,
               scales: {
                 ...chartOptions.scales,
-                y: { ...chartOptions.scales.y, ticks: { ...chartOptions.scales.y.ticks, padding: 8, font: { weight: 'bold' as const }, callback: (v) => `€${v}` } },
-                x: { ...chartOptions.scales.x, ticks: { ...chartOptions.scales.x.ticks, padding: 8, font: { weight: 'bold' as const } } },
+                y: { ...chartOptions.scales.y, ticks: { ...chartOptions.scales.y.ticks, padding: 8, callback: (v: string | number) => `€${v}` } },
+                x: { ...chartOptions.scales.x, ticks: { ...chartOptions.scales.x.ticks, padding: 8 } },
               },
             }} />
           </div>
         </div>
 
         {/* Status Distribution */}
-        <div className="bg-white p-4 rounded-xl border border-zinc-100 shadow-sm">
+        <div className="bg-white p-5 rounded-xl border border-border shadow-e2">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="h-7 w-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
               <PieChart className="h-3.5 w-3.5" />
             </div>
-            <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Κατανομή')}</h3>
+            <h3 className="text-xs font-semibold text-zinc-900 tracking-tight">{'Κατανομή'}</h3>
           </div>
-          <div className="flex items-center justify-center h-[220px]">
+          <div className="flex items-center justify-center h-[260px]">
             <Doughnut data={statusData} options={{
               responsive: true,
               maintainAspectRatio: false,
@@ -1002,8 +1002,8 @@ export default function ReportsPage() {
                 legend: { 
                   position: 'bottom', 
                   labels: { 
-                    font: { size: 10, weight: 'bold' as const }, 
-                    color: '#000', 
+                    font: { size: 12 }, 
+                    color: '#3f3f46', 
                     padding: 15, 
                     usePointStyle: true, 
                     pointStyleWidth: 8 
@@ -1023,7 +1023,7 @@ export default function ReportsPage() {
           <div className="h-7 w-7 rounded-lg bg-zinc-100 flex items-center justify-center text-zinc-600">
             <ClipboardList className="h-3.5 w-3.5" />
           </div>
-          <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ανάλυση Κρατήσεων')}</h3>
+          <h3 className="text-xs font-semibold text-zinc-900 tracking-tight">{'Ανάλυση Κρατήσεων'}</h3>
         </div>
         <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
           {[
@@ -1034,8 +1034,8 @@ export default function ReportsPage() {
             const colorMap: Record<string, string> = { emerald: 'text-emerald-600 bg-emerald-50', blue: 'text-blue-600 bg-blue-50', amber: 'text-amber-600 bg-amber-50' };
             return (
               <div key={stat.label} className={cn("rounded-xl p-4 flex flex-col items-center justify-center text-center transition-transform hover:scale-[1.01]", colorMap[stat.color])}>
-                <p className="text-xl font-black mb-0.5">{stat.value}</p>
-                <p className="text-[8px] font-bold uppercase tracking-widest opacity-80">{toGreekUpperCase(stat.label)}</p>
+                <p className="text-xl font-bold mb-0.5">{stat.value}</p>
+                <p className="text-2xs font-medium opacity-80">{stat.label}</p>
               </div>
             );
           })}
@@ -1050,7 +1050,7 @@ export default function ReportsPage() {
             <div className="h-8 w-8 rounded-lg bg-violet-50 flex items-center justify-center text-violet-600">
               <GraduationCap className="h-4 w-4" />
             </div>
-            <h2 className="text-[15px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ανάλυση Ακαδημίας')}</h2>
+            <h2 className="text-base font-semibold text-zinc-900 tracking-tight">{'Ανάλυση Ακαδημίας'}</h2>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -1060,16 +1060,16 @@ export default function ReportsPage() {
                 <div className="h-7 w-7 rounded-lg bg-violet-50 flex items-center justify-center text-violet-600">
                   <Calendar className="h-3.5 w-3.5" />
                 </div>
-                <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ανά Μήνα')}</h3>
+                <h3 className="text-xs font-semibold text-zinc-900 tracking-tight">{'Ανά Μήνα'}</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-zinc-50/50">
-                      <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Μήνας')}</th>
-                      <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Πληρωμένοι')}</th>
-                      <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Ανεξόφλητοι')}</th>
-                      <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400 text-right">{toGreekUpperCase('Έσοδα')}</th>
+                      <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500">{'Μήνας'}</th>
+                      <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500 text-center">{'Πληρωμένοι'}</th>
+                      <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500 text-center">{'Ανεξόφλητοι'}</th>
+                      <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500 text-right">{'Έσοδα'}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-50">
@@ -1078,25 +1078,25 @@ export default function ReportsPage() {
                       const label = new Date(y, m - 1).toLocaleDateString('el-GR', { month: 'long', year: 'numeric' });
                       return (
                         <tr key={row.month} className="hover:bg-zinc-50/50 transition-colors">
-                          <td className="py-2.5 px-4 text-[11px] font-bold text-zinc-900 capitalize">{label}</td>
+                          <td className="py-2.5 px-4 text-2xs font-medium text-zinc-900 capitalize">{label}</td>
                           <td className="py-2.5 px-4 text-center">
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[12px] font-bold bg-emerald-50 text-emerald-700">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-2xs font-medium bg-emerald-50 text-emerald-700">
                               {row.paid}/{row.total}
                             </span>
                           </td>
                           <td className="py-2.5 px-4 text-center">
                             {row.unpaid > 0 ? (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[12px] font-bold bg-red-50 text-red-600">
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-2xs font-medium bg-red-50 text-red-600">
                                 {row.unpaid}
                               </span>
                             ) : (
-                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[12px] font-bold bg-emerald-50 text-emerald-600">✓</span>
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-2xs font-medium bg-emerald-50 text-emerald-600">✓</span>
                             )}
                           </td>
                           <td className="py-2.5 px-4 text-right">
-                            <span className="text-xs font-black text-zinc-900 tabular-nums">€{row.paidAmount.toFixed(0)}</span>
+                            <span className="text-xs font-semibold text-zinc-900 tabular-nums">€{row.paidAmount.toFixed(0)}</span>
                             {row.totalAmount > row.paidAmount && (
-                              <span className="text-[11px] text-zinc-400 ml-1">/ €{row.totalAmount.toFixed(0)}</span>
+                              <span className="text-2xs text-zinc-500 ml-1">/ €{row.totalAmount.toFixed(0)}</span>
                             )}
                           </td>
                         </tr>
@@ -1109,7 +1109,7 @@ export default function ReportsPage() {
                         <td colSpan={4} className="py-2">
                           <button
                             onClick={() => setShowAllMonthly(!showAllMonthly)}
-                            className="w-full flex items-center justify-center gap-1.5 text-[11px] font-bold text-violet-600 hover:text-violet-700 transition-colors py-1"
+                            className="w-full flex items-center justify-center gap-1.5 text-2xs font-medium text-violet-600 hover:text-violet-700 transition-colors py-1"
                           >
                             {showAllMonthly ? 'Απόκρυψη' : `Εμφάνιση όλων (${academyMonthlyBreakdown.length})`}
                             <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showAllMonthly ? 'rotate-180' : ''}`} />
@@ -1128,38 +1128,38 @@ export default function ReportsPage() {
                 <div className="h-7 w-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                   <Users className="h-3.5 w-3.5" />
                 </div>
-                <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ανά Τμήμα')}</h3>
+                <h3 className="text-xs font-semibold text-zinc-900 tracking-tight">{'Ανά Τμήμα'}</h3>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="bg-zinc-50/50">
-                      <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τμήμα')}</th>
-                      <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Πληρωμένοι')}</th>
-                      <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Ανεξόφλητοι')}</th>
-                      <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400 text-right">{toGreekUpperCase('Έσοδα')}</th>
+                      <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500">{'Τμήμα'}</th>
+                      <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500 text-center">{'Πληρωμένοι'}</th>
+                      <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500 text-center">{'Ανεξόφλητοι'}</th>
+                      <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500 text-right">{'Έσοδα'}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-zinc-50">
                     {(showAllSquads ? academyBySquad : academyBySquad.slice(0, 6)).map((row) => (
                       <tr key={row.squad} className="hover:bg-zinc-50/50 transition-colors">
-                        <td className="py-2.5 px-4 text-[11px] font-bold text-zinc-900">{row.squad}</td>
+                        <td className="py-2.5 px-4 text-2xs font-medium text-zinc-900">{row.squad}</td>
                         <td className="py-2.5 px-4 text-center">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[12px] font-bold bg-emerald-50 text-emerald-700">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-2xs font-medium bg-emerald-50 text-emerald-700">
                             {row.paid}/{row.total}
                           </span>
                         </td>
                         <td className="py-2.5 px-4 text-center">
                           {row.unpaid > 0 ? (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[12px] font-bold bg-red-50 text-red-600">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-2xs font-medium bg-red-50 text-red-600">
                               {row.unpaid}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[12px] font-bold bg-emerald-50 text-emerald-600">✓</span>
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-2xs font-medium bg-emerald-50 text-emerald-600">✓</span>
                           )}
                         </td>
                         <td className="py-2.5 px-4 text-right">
-                          <span className="text-xs font-black text-zinc-900 tabular-nums">€{row.paidAmount.toFixed(0)}</span>
+                          <span className="text-xs font-semibold text-zinc-900 tabular-nums">€{row.paidAmount.toFixed(0)}</span>
                         </td>
                       </tr>
                     ))}
@@ -1170,7 +1170,7 @@ export default function ReportsPage() {
                         <td colSpan={4} className="py-2">
                           <button
                             onClick={() => setShowAllSquads(!showAllSquads)}
-                            className="w-full flex items-center justify-center gap-1.5 text-[11px] font-bold text-blue-600 hover:text-blue-700 transition-colors py-1"
+                            className="w-full flex items-center justify-center gap-1.5 text-2xs font-medium text-blue-600 hover:text-blue-700 transition-colors py-1"
                           >
                             {showAllSquads ? 'Απόκρυψη' : `Εμφάνιση όλων (${academyBySquad.length})`}
                             <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showAllSquads ? 'rotate-180' : ''}`} />
@@ -1191,20 +1191,20 @@ export default function ReportsPage() {
                 <div className="h-7 w-7 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
                   <TrendingUp className="h-3.5 w-3.5" />
                 </div>
-                <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ετήσια Σύνοψη Ακαδημίας')}</h3>
+                <h3 className="text-xs font-semibold text-zinc-900 tracking-tight">{'Ετήσια Σύνοψη Ακαδημίας'}</h3>
               </div>
               <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 {academyYearlySummary.map((row) => (
                   <div key={row.year} className="rounded-xl border border-zinc-100 p-4 space-y-3">
-                    <p className="text-2xl font-black text-zinc-900">{row.year}</p>
+                    <p className="text-2xl font-bold text-zinc-900">{row.year}</p>
                     <div className="space-y-2">
                       <div className="flex justify-between items-center">
-                        <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Έσοδα')}</span>
-                        <span className="text-sm font-black text-emerald-600">€{row.paidAmount.toFixed(0)}</span>
+                        <span className="text-2xs font-medium text-zinc-500">{'Έσοδα'}</span>
+                        <span className="text-sm font-semibold text-emerald-600">€{row.paidAmount.toFixed(0)}</span>
                       </div>
                       <div className="flex justify-between items-center">
-                        <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Αναμενόμενα')}</span>
-                        <span className="text-sm font-black text-zinc-500">€{row.totalAmount.toFixed(0)}</span>
+                        <span className="text-2xs font-medium text-zinc-500">{'Αναμενόμενα'}</span>
+                        <span className="text-sm font-semibold text-zinc-500">€{row.totalAmount.toFixed(0)}</span>
                       </div>
                       <div className="w-full bg-zinc-100 rounded-full h-2">
                         <div
@@ -1212,8 +1212,8 @@ export default function ReportsPage() {
                           style={{ width: `${row.totalAmount > 0 ? (row.paidAmount / row.totalAmount) * 100 : 0}%` }}
                         />
                       </div>
-                      <p className="text-[11px] font-bold text-zinc-400 text-right">
-                        {row.paid}/{row.total} {toGreekUpperCase('πληρωμές')}
+                      <p className="text-2xs font-medium text-zinc-500 text-right">
+                        {row.paid}/{row.total} {'πληρωμές'}
                       </p>
                     </div>
                   </div>
@@ -1231,17 +1231,17 @@ export default function ReportsPage() {
             <div className="h-7 w-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
               <CreditCard className="h-3.5 w-3.5" />
             </div>
-            <h3 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Ιστορικό Πληρωμών')}</h3>
+            <h3 className="text-xs font-semibold text-zinc-900 tracking-tight">{'Ιστορικό Πληρωμών'}</h3>
           </div>
         </div>
 
         {payments.length === 0 ? (
           <div className="text-center py-12">
             <div className="mx-auto h-16 w-16 rounded-xl bg-zinc-50 flex items-center justify-center mb-6 shadow-sm">
-              <CreditCard className="h-8 w-8 text-zinc-200" />
+              <CreditCard className="h-8 w-8 text-zinc-400" />
             </div>
-            <h4 className="text-xl font-black text-zinc-900 mb-1">{toGreekUpperCase('Δεν βρέθηκαν πληρωμές')}</h4>
-            <p className="text-[11px] text-zinc-500 font-medium">{toGreekUpperCase('Δεν έχουν καταγραφεί συναλλαγές.')}</p>
+            <h4 className="text-xl font-bold text-zinc-900 mb-1">{'Δεν βρέθηκαν πληρωμές'}</h4>
+            <p className="text-2xs text-zinc-500 font-medium">{'Δεν έχουν καταγραφεί συναλλαγές.'}</p>
           </div>
         ) : (
           <div className="p-4 space-y-4">
@@ -1262,9 +1262,9 @@ export default function ReportsPage() {
                   <div key={stat.label} className={cn("p-3 rounded-lg flex items-center justify-between", colorStyles[stat.color])}>
                     <div className="flex items-center gap-2">
                       <Icon className="h-3.5 w-3.5" />
-                      <span className="font-bold text-[11px] uppercase tracking-widest">{toGreekUpperCase(stat.label)}</span>
+                      <span className="font-medium text-2xs">{stat.label}</span>
                     </div>
-                    <span className="text-lg font-black">{stat.count}</span>
+                    <span className="text-lg font-semibold">{stat.count}</span>
                   </div>
                 );
               })}
@@ -1275,11 +1275,11 @@ export default function ReportsPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-zinc-50/50">
-                    <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Ημερομηνία')}</th>
-                    <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Περιγραφή')}</th>
-                    <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Διάρκεια')}</th>
-                    <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Ποσό')}</th>
-                    <th className="py-2.5 px-4 text-[8px] font-bold uppercase tracking-widest text-zinc-400 text-center">{toGreekUpperCase('Κατάσταση')}</th>
+                    <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500">{'Ημερομηνία'}</th>
+                    <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500">{'Περιγραφή'}</th>
+                    <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500">{'Διάρκεια'}</th>
+                    <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500">{'Ποσό'}</th>
+                    <th className="py-2.5 px-4 text-2xs font-medium text-zinc-500 text-center">{'Κατάσταση'}</th>
                     <th className="py-2.5 px-4 text-right"></th>
                   </tr>
                 </thead>
@@ -1289,7 +1289,7 @@ export default function ReportsPage() {
                     .map((payment) => (
                     <tr key={payment.id} className="group hover:bg-zinc-50/50 transition-colors">
                       <td className="py-2.5 px-4">
-                        <span className="text-[11px] font-bold text-zinc-900">
+                        <span className="text-2xs font-medium text-zinc-900">
                           {(payment.paymentDate ? new Date(payment.paymentDate) : new Date(payment.createdAt)).toLocaleDateString('el-GR', {
                             day: 'numeric', month: 'short', year: 'numeric',
                           })}
@@ -1297,37 +1297,37 @@ export default function ReportsPage() {
                       </td>
                       <td className="py-2.5 px-4">
                         <div className="flex flex-col">
-                          <span className="text-[11px] font-bold text-zinc-900">{payment.planName || toGreekUpperCase('Πακέτο')}</span>
-                          <span className="text-[7px] font-bold uppercase tracking-widest text-zinc-400">
-                            {payment.paymentType === 'one_time_plan_purchase' ? toGreekUpperCase('Μιας Χρήσης') :
-                             payment.paymentType === 'subscription_payment' ? toGreekUpperCase('Συνδρομή') :
-                             payment.paymentType === 'booking_payment' ? toGreekUpperCase('Κράτηση') : '—'}
+                          <span className="text-2xs font-medium text-zinc-900">{payment.planName || 'Πακέτο'}</span>
+                          <span className="text-2xs font-medium text-zinc-500">
+                            {payment.paymentType === 'one_time_plan_purchase' ? 'Μιας Χρήσης' :
+                             payment.paymentType === 'subscription_payment' ? 'Συνδρομή' :
+                             payment.paymentType === 'booking_payment' ? 'Κράτηση' : '—'}
                           </span>
                         </div>
                       </td>
                       <td className="py-2.5 px-4">
-                        <span className="text-[11px] font-bold text-zinc-500 whitespace-nowrap">
+                        <span className="text-2xs font-medium text-zinc-500 whitespace-nowrap">
                           {payment.durationMonths ? `${payment.durationMonths} μήνες` : '—'}
                         </span>
                       </td>
                       <td className="py-2.5 px-4">
-                        <span className="text-xs font-black text-zinc-900 group-hover:text-emerald-600 transition-colors tabular-nums">
+                        <span className="text-xs font-semibold text-zinc-900 group-hover:text-emerald-600 transition-colors tabular-nums">
                           €{payment.amount.toFixed(2)}
                         </span>
                       </td>
                       <td className="py-2.5 px-4 text-center">
                         <Badge className={cn(
-                          "rounded-md px-2 py-0.5 font-bold text-[7px] uppercase tracking-widest border-none",
+                          "rounded-md px-2 py-0.5 font-medium text-2xs border-none",
                           payment.status === 'succeeded' ? 'bg-emerald-100 text-emerald-700' :
                           payment.status === 'pending' ? 'bg-amber-100 text-amber-700' :
                           payment.status === 'failed' ? 'bg-red-100 text-red-700' :
                           'bg-zinc-100 text-zinc-600'
                         )}>
-                          {payment.status === 'succeeded' ? toGreekUpperCase('Επιτυχής') :
-                           payment.status === 'pending' ? toGreekUpperCase('Εκκρεμεί') :
-                           payment.status === 'failed' ? toGreekUpperCase('Αποτυχημένη') :
-                           payment.status === 'canceled' ? toGreekUpperCase('Ακυρωμένη') :
-                           toGreekUpperCase(payment.status)}
+                          {payment.status === 'succeeded' ? 'Επιτυχής' :
+                           payment.status === 'pending' ? 'Εκκρεμεί' :
+                           payment.status === 'failed' ? 'Αποτυχημένη' :
+                           payment.status === 'canceled' ? 'Ακυρωμένη' :
+                           payment.status}
                         </Badge>
                       </td>
                       <td className="py-2.5 px-4 text-right">
@@ -1335,7 +1335,7 @@ export default function ReportsPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-7 rounded-md border border-zinc-100 bg-white shadow-sm font-bold text-[11px] hover:bg-zinc-50 transition-all px-2.5"
+                            className="h-7 rounded-md border border-zinc-100 bg-white shadow-sm font-medium text-2xs hover:bg-zinc-50 transition-all px-2.5"
                             onClick={() => handleDownloadInvoice(payment)}
                             disabled={downloadingInvoice === payment.id}
                           >

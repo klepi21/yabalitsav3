@@ -417,10 +417,10 @@ export default function TermsPage() {
               </p>
               <div className="text-center">
                 <Link 
-                  href="https://www.yabalitsa.com/for-venues" 
+                  href="/for-venues" 
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center px-6 py-3 bg-emerald-500 hover:bg-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.3)] text-black font-medium rounded-lg transition-colors"
+                  className="inline-flex items-center px-6 py-3 bg-emerald-500 hover:bg-emerald-400 shadow-[0_0_20px_rgba(116,238,22,0.3)] text-black font-medium rounded-lg transition-colors"
                 >
                   🏟️ Εγγραφή για Γήπεδα
                 </Link>

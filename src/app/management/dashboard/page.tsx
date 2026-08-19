@@ -85,7 +85,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 function CoachDashboard() {
   const { user, venueOwner, isLoading: authLoading } = useAuth();
@@ -184,8 +184,8 @@ function CoachDashboard() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-black text-zinc-900">
-            {toGreekUpperCase(`Γεια σου, ${venueOwner?.name?.split(' ')[0] || 'Προπονητή'}!`)}
+          <h1 className="text-2xl font-bold text-zinc-900">
+            {`Γεια σου, ${venueOwner?.name?.split(' ')[0] || 'Προπονητή'}!`}
           </h1>
           <p className="text-sm text-zinc-500 mt-1">Πίνακας ελέγχου προπονητή</p>
         </div>
@@ -199,8 +199,8 @@ function CoachDashboard() {
                   <Trophy className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-black text-zinc-900">{squads.length}</p>
-                  <p className="text-[12px] font-bold text-zinc-400 uppercase">Τμήματα</p>
+                  <p className="text-2xl font-bold text-zinc-900">{squads.length}</p>
+                  <p className="text-2xs font-medium text-zinc-500">Τμήματα</p>
                 </div>
               </div>
             </CardContent>
@@ -212,8 +212,8 @@ function CoachDashboard() {
                   <User className="h-5 w-5 text-blue-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-black text-zinc-900">{totalAthletes}</p>
-                  <p className="text-[12px] font-bold text-zinc-400 uppercase">Αθλητές</p>
+                  <p className="text-2xl font-bold text-zinc-900">{totalAthletes}</p>
+                  <p className="text-2xs font-medium text-zinc-500">Αθλητές</p>
                 </div>
               </div>
             </CardContent>
@@ -225,8 +225,8 @@ function CoachDashboard() {
                   <CalendarDays className="h-5 w-5 text-amber-600" />
                 </div>
                 <div>
-                  <p className="text-2xl font-black text-zinc-900">{todayTrainings.length}</p>
-                  <p className="text-[12px] font-bold text-zinc-400 uppercase">Σήμερα</p>
+                  <p className="text-2xl font-bold text-zinc-900">{todayTrainings.length}</p>
+                  <p className="text-2xs font-medium text-zinc-500">Σήμερα</p>
                 </div>
               </div>
             </CardContent>
@@ -238,8 +238,8 @@ function CoachDashboard() {
                   <HeartPulse className={cn("h-5 w-5", totalMedicalIssues > 0 ? "text-red-600" : "text-emerald-600")} />
                 </div>
                 <div>
-                  <p className="text-2xl font-black text-zinc-900">{totalMedicalIssues}</p>
-                  <p className="text-[12px] font-bold text-zinc-400 uppercase">Ιατρικά</p>
+                  <p className="text-2xl font-bold text-zinc-900">{totalMedicalIssues}</p>
+                  <p className="text-2xs font-medium text-zinc-500">Ιατρικά</p>
                 </div>
               </div>
             </CardContent>
@@ -252,7 +252,7 @@ function CoachDashboard() {
             <CardContent className="p-5">
               <div className="flex items-center gap-3 mb-3">
                 <AlertTriangle className="h-5 w-5 text-red-500" />
-                <h3 className="font-black text-zinc-900">{toGreekUpperCase('Ιατρικά Πιστοποιητικά')}</h3>
+                <h3 className="font-semibold text-zinc-900">{'Ιατρικά Πιστοποιητικά'}</h3>
               </div>
               <div className="space-y-2">
                 {medicalAlerts.expired.length > 0 && (
@@ -268,7 +268,7 @@ function CoachDashboard() {
                   </p>
                 )}
               </div>
-              <Link href="/management/academy/medical" className="text-xs font-bold text-emerald-600 hover:underline mt-3 inline-block">
+              <Link href="/management/academy/medical" className="text-xs font-medium text-emerald-600 hover:underline mt-3 inline-block">
                 Προβολή λεπτομερειών →
               </Link>
             </CardContent>
@@ -279,15 +279,15 @@ function CoachDashboard() {
         <Card className="rounded-2xl border-none shadow-sm mb-6">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-black text-zinc-900">{toGreekUpperCase('Επόμενες Προπονήσεις')}</h3>
+              <h3 className="font-semibold text-zinc-900">{'Επόμενες Προπονήσεις'}</h3>
               <Link href="/management/academy/training">
-                <Button variant="ghost" size="sm" className="text-xs font-bold text-emerald-600">
+                <Button variant="ghost" size="sm" className="text-xs font-medium text-emerald-600">
                   Όλες →
                 </Button>
               </Link>
             </div>
             {upcomingTrainings.length === 0 ? (
-              <p className="text-sm text-zinc-400 text-center py-6">Δεν υπάρχουν προγραμματισμένες προπονήσεις</p>
+              <p className="text-sm text-zinc-500 text-center py-6">Δεν υπάρχουν προγραμματισμένες προπονήσεις</p>
             ) : (
               <div className="space-y-2">
                 {upcomingTrainings.map(t => {
@@ -303,30 +303,30 @@ function CoachDashboard() {
                           "h-10 w-10 rounded-lg flex flex-col items-center justify-center text-center flex-shrink-0",
                           isToday ? "bg-emerald-600 text-white" : "bg-zinc-100 text-zinc-600"
                         )}>
-                          <span className="text-[11px] font-bold uppercase leading-none">
+                          <span className="text-2xs font-medium leading-none">
                             {new Date(t.date + 'T00:00:00').toLocaleDateString('el-GR', { weekday: 'short' })}
                           </span>
-                          <span className="text-sm font-black leading-none mt-0.5">
+                          <span className="text-sm font-semibold leading-none mt-0.5">
                             {new Date(t.date + 'T00:00:00').getDate()}
                           </span>
                         </div>
                         <div className="min-w-0">
-                          <p className="text-sm font-bold text-zinc-900 truncate">{t.title}</p>
-                          <p className="text-xs text-zinc-400 truncate">
+                          <p className="text-sm font-semibold text-zinc-900 truncate">{t.title}</p>
+                          <p className="text-xs text-zinc-500 truncate">
                             {squad ? `${squad.name} (${squad.ageGroup})` : ''} · {t.startTime} - {t.endTime}
                           </p>
                         </div>
                       </Link>
                       {isToday ? (
                         <Link href={`/coach/attendance/${t.id}`} className="sm:hidden flex-shrink-0 ml-2">
-                          <Button size="sm" className="h-8 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[12px]">
+                          <Button size="sm" className="h-8 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-2xs">
                             <ClipboardList className="h-3.5 w-3.5 mr-1" />
                             Απουσιολόγιο
                           </Button>
                         </Link>
                       ) : null}
                       {isToday ? (
-                        <Badge className="hidden sm:inline-flex bg-emerald-100 text-emerald-700 text-[11px] font-black border-none ml-2">ΣΗΜΕΡΑ</Badge>
+                        <Badge className="hidden sm:inline-flex bg-emerald-100 text-emerald-700 text-2xs font-semibold border-none ml-2">Σήμερα</Badge>
                       ) : null}
                     </div>
                   );
@@ -340,9 +340,9 @@ function CoachDashboard() {
         <Card className="rounded-2xl border-none shadow-sm">
           <CardContent className="p-5">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="font-black text-zinc-900">{toGreekUpperCase('Τα Τμήματά μου')}</h3>
+              <h3 className="font-semibold text-zinc-900">{'Τα Τμήματά μου'}</h3>
               <Link href="/management/academy/squads">
-                <Button variant="ghost" size="sm" className="text-xs font-bold text-emerald-600">
+                <Button variant="ghost" size="sm" className="text-xs font-medium text-emerald-600">
                   Όλα →
                 </Button>
               </Link>
@@ -355,8 +355,8 @@ function CoachDashboard() {
                       <Trophy className="h-5 w-5 text-emerald-600" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-zinc-900">{s.name}</p>
-                      <p className="text-xs text-zinc-400">{s.ageGroup} · {s.athleteCount || 0} αθλητές</p>
+                      <p className="text-sm font-semibold text-zinc-900">{s.name}</p>
+                      <p className="text-xs text-zinc-500">{s.ageGroup} · {s.athleteCount || 0} αθλητές</p>
                     </div>
                   </div>
                 </Link>
@@ -370,9 +370,9 @@ function CoachDashboard() {
           <Card className="rounded-2xl border-none shadow-sm sm:hidden">
             <CardContent className="p-5">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-black text-zinc-900">{toGreekUpperCase('Γρήγορη Αξιολόγηση')}</h3>
+                <h3 className="font-semibold text-zinc-900">{'Γρήγορη Αξιολόγηση'}</h3>
                 <Link href="/management/academy/evaluations">
-                  <Button variant="ghost" size="sm" className="text-xs font-bold text-emerald-600">
+                  <Button variant="ghost" size="sm" className="text-xs font-medium text-emerald-600">
                     Όλες →
                   </Button>
                 </Link>
@@ -386,15 +386,15 @@ function CoachDashboard() {
                   if (squadAthletes.length === 0) return null;
                   return (
                     <div key={squad.id}>
-                      <p className="text-[12px] font-black text-zinc-400 uppercase tracking-wider mb-2 px-1">
+                      <p className="text-2xs font-semibold text-zinc-500 mb-2 px-1">
                         {squad.name} ({squad.ageGroup})
                       </p>
                       <div className="space-y-1">
                         {squadAthletes.map(a => (
                           <div key={a.id} className="flex items-center justify-between p-2.5 rounded-xl bg-zinc-50">
-                            <p className="text-sm font-bold text-zinc-900 truncate flex-1">{a.displayName}</p>
+                            <p className="text-sm font-semibold text-zinc-900 truncate flex-1">{a.displayName}</p>
                             <Link href={`/coach/evaluate/${a.id}`}>
-                              <Button size="sm" className="h-7 px-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-bold text-[12px]">
+                              <Button size="sm" className="h-7 px-3 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-medium text-2xs">
                                 <Star className="h-3 w-3 mr-1" />
                                 Αξιολόγηση
                               </Button>
@@ -426,11 +426,11 @@ function DashboardSkeleton() {
         </div>
       </div>
       <div className="text-center space-y-1">
-        <p className="text-[11px] font-black text-zinc-900 uppercase tracking-widest animate-pulse">
-          {toGreekUpperCase('Yabalitsa Management')}
+        <p className="text-2xs font-semibold text-zinc-900 animate-pulse">
+          {'Yabalitsa Management'}
         </p>
-        <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-tight">
-          {toGreekUpperCase('Φορτωση δεδομενων...')}
+        <p className="text-2xs font-medium text-zinc-500 tracking-tight">
+          {'Φόρτωση δεδομένων…'}
         </p>
       </div>
     </div>
@@ -1003,7 +1003,7 @@ function AdminDashboard() {
           <AlertDescription>
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 py-2">
               <div>
-                <p className="font-bold text-[16px]">Σφάλμα κατά τη φόρτωση δεδομένων</p>
+                <p className="font-bold text-base">Σφάλμα κατά τη φόρτωση δεδομένων</p>
                 <p className="text-sm mt-1 opacity-90">{loadError}</p>
               </div>
               <Button
@@ -1050,12 +1050,12 @@ function AdminDashboard() {
             <LayoutDashboard className="h-7 w-7 text-emerald-500" />
           </div>
           <div className="space-y-0.5">
-            <h1 className="text-3xl font-black tracking-tighter text-zinc-900 uppercase">
-              {toGreekUpperCase('Πίνακας Ελέγχου')}
+            <h1 className="text-3xl font-bold tracking-tighter text-zinc-900">
+              {'Πίνακας Ελέγχου'}
             </h1>
             <div className="flex items-center gap-2">
-              <p className="text-[11px] font-black text-zinc-400 uppercase tracking-widest">
-                {toGreekUpperCase('Διαχειριση γηπεδου')} <span className="text-emerald-500 font-black">{venue?.name ? toGreekUpperCase(venue.name) : ''}</span>
+              <p className="text-2xs font-semibold text-zinc-500">
+                {'Διαχειριση γηπεδου'} <span className="text-emerald-500 font-semibold">{venue?.name ? venue.name : ''}</span>
               </p>
             </div>
           </div>
@@ -1064,10 +1064,10 @@ function AdminDashboard() {
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
           <Button
             onClick={() => setShowQuickBooking(true)}
-            className="h-12 px-6 rounded-2xl bg-zinc-900 hover:bg-black text-white font-black text-[11px] shadow-lg shadow-zinc-900/10 transition-all active:scale-95 group uppercase tracking-widest w-full sm:w-auto justify-center"
+            className="h-12 px-6 rounded-2xl bg-zinc-900 hover:bg-black text-white font-semibold text-2xs shadow-lg shadow-zinc-900/10 transition-all active:scale-95 group w-full sm:w-auto justify-center"
           >
             <Plus className="h-4 w-4 mr-2 text-emerald-400 group-hover:rotate-90 transition-transform duration-500" />
-            {toGreekUpperCase('Γρήγορη Κράτηση')}
+            {'Γρήγορη Κράτηση'}
           </Button>
 
           <Button
@@ -1076,9 +1076,9 @@ function AdminDashboard() {
               if (bookingPath) router.push(bookingPath);
             }}
             disabled={!bookingPath}
-            className="h-12 px-6 rounded-2xl border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-900 font-black text-[11px] transition-all active:scale-95 shadow-sm uppercase tracking-widest w-full sm:w-auto justify-center"
+            className="h-12 px-6 rounded-2xl border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-900 font-semibold text-2xs transition-all active:scale-95 shadow-sm w-full sm:w-auto justify-center"
           >
-            {toGreekUpperCase('Σελιδα Booking')}
+            {'Σελιδα Booking'}
           </Button>
         </div>
       </div>
@@ -1088,17 +1088,17 @@ function AdminDashboard() {
         {/* Quick Stats Grid - Bookings & Venues */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: 'ΚΡΑΤΗΣΕΙΣ', value: bookings.length, detail: '30 ΗΜΕΡΕΣ', icon: <CalendarCheck className="h-5 w-5 text-emerald-600" /> },
-            { label: 'LIVE', value: getLiveBookings(), detail: 'ΤΩΡΑ ΣΤΑ ΓΗΠΕΔΑ', icon: <Radio className="h-5 w-5 text-blue-600" /> },
-            { label: 'ΣΗΜΕΡΑ', value: getTodaysBookings().length, detail: 'MATCHES', icon: <FootballPitch className="h-5 w-5 text-emerald-600" /> },
-            { label: 'ΠΕΛΑΤΕΣ', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, detail: 'DATABASE', icon: <UserSearch className="h-5 w-5 text-zinc-600" /> }
+            { label: 'Κρατήσεις', value: bookings.length, detail: '30 ημέρες', icon: <CalendarCheck className="h-5 w-5 text-emerald-600" /> },
+            { label: 'LIVE', value: getLiveBookings(), detail: 'Τώρα στα γήπεδα', icon: <Radio className="h-5 w-5 text-blue-600" /> },
+            { label: 'Σήμερα', value: getTodaysBookings().length, detail: 'MATCHES', icon: <FootballPitch className="h-5 w-5 text-emerald-600" /> },
+            { label: 'Πελάτες', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, detail: 'DATABASE', icon: <UserSearch className="h-5 w-5 text-zinc-600" /> }
           ].map((stat, i) => (
             <Card key={i} className="rounded-2xl border border-zinc-200 shadow-sm overflow-hidden group transition-all duration-300 hover:shadow-md h-[100px] bg-white">
               <CardContent className="p-5 h-full flex items-center justify-between">
                 <div>
-                  <p className="text-[12px] font-black text-zinc-400 uppercase tracking-widest mb-1">{stat.label}</p>
-                  <p className="text-3xl font-black text-zinc-900 tracking-tighter leading-none">{stat.value}</p>
-                  <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight mt-1.5">{stat.detail}</p>
+                  <p className="text-2xs font-semibold text-zinc-500 mb-1">{stat.label}</p>
+                  <p className="text-3xl font-bold text-zinc-900 tracking-tighter leading-none">{stat.value}</p>
+                  <p className="text-2xs font-medium text-zinc-500 tracking-tight mt-1.5">{stat.detail}</p>
                 </div>
                 <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-colors">
                   {stat.icon}
@@ -1111,17 +1111,17 @@ function AdminDashboard() {
         {/* Academy Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           {[
-            { label: 'ΣΥΝΟΛΟ ΤΜΗΜΑΤΩΝ', value: squads.length, detail: 'ΕΝΕΡΓΑ ΤΜΗΜΑΤΑ', icon: <Trophy className="h-5 w-5 text-emerald-600" /> },
-            { label: 'ΣΥΝΟΛΟ ΑΘΛΗΤΩΝ', value: getTotalAthletes(), detail: 'ΕΝΕΡΓΟΙ ΑΘΛΗΤΕΣ', icon: <Users className="h-5 w-5 text-blue-600" /> },
-            { label: 'ΠΡΟΠΟΝΗΣΕΙΣ', value: getTodaysTrainings().length, detail: 'ΣΗΜΕΡΑ ΣΤΗΝ ΑΚΑΔΗΜΙΑ', icon: <CalendarDays className="h-5 w-5 text-amber-600" /> },
-            { label: 'ΙΑΤΡΙΚΑ', value: medicalAlerts.expired.length + medicalAlerts.expiringSoon.length, detail: 'ΕΚΚΡΕΜΟΤΗΤΕΣ', icon: <HeartPulse className="h-5 w-5 text-red-600" /> }
+            { label: 'Σύνολο τμημάτων', value: squads.length, detail: 'Ενεργά τμήματα', icon: <Trophy className="h-5 w-5 text-emerald-600" /> },
+            { label: 'Σύνολο αθλητών', value: getTotalAthletes(), detail: 'Ενεργοί αθλητές', icon: <Users className="h-5 w-5 text-blue-600" /> },
+            { label: 'Προπονήσεις', value: getTodaysTrainings().length, detail: 'Σήμερα στην ακαδημία', icon: <CalendarDays className="h-5 w-5 text-amber-600" /> },
+            { label: 'Ιατρικά', value: medicalAlerts.expired.length + medicalAlerts.expiringSoon.length, detail: 'Εκκρεμότητες', icon: <HeartPulse className="h-5 w-5 text-red-600" /> }
           ].map((stat, i) => (
             <Card key={i} className="rounded-2xl border border-zinc-200 shadow-sm transition-all hover:shadow-md h-[100px] bg-white group">
               <CardContent className="p-5 h-full flex items-center justify-between">
                 <div>
-                  <p className="text-[12px] font-black text-zinc-400 uppercase tracking-widest mb-1">{stat.label}</p>
-                  <p className="text-3xl font-black text-zinc-900 tracking-tighter leading-none">{stat.value}</p>
-                  <p className="text-[11px] font-bold text-zinc-400 uppercase tracking-tight mt-1.5">{stat.detail}</p>
+                  <p className="text-2xs font-semibold text-zinc-500 mb-1">{stat.label}</p>
+                  <p className="text-3xl font-bold text-zinc-900 tracking-tighter leading-none">{stat.value}</p>
+                  <p className="text-2xs font-medium text-zinc-500 tracking-tight mt-1.5">{stat.detail}</p>
                 </div>
                 <div className="h-12 w-12 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
                   {stat.icon}
@@ -1142,12 +1142,12 @@ function AdminDashboard() {
                 <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-500" />
               </div>
               <div className="space-y-0.5">
-                <h2 className="text-base sm:text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Σημερινές Κρατήσεις')}</h2>
-                <p className="text-[11px] sm:text-[12px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Πρόγραμμα ημέρας')}</p>
+                <h2 className="text-base sm:text-xl font-bold text-zinc-900 tracking-tight">{'Σημερινές Κρατήσεις'}</h2>
+                <p className="text-2xs sm:text-2xs font-semibold text-zinc-500">{'Πρόγραμμα ημέρας'}</p>
               </div>
             </div>
-            <Link href="/management/bookings" className="text-xs font-black text-emerald-600 hover:text-emerald-700 transition-colors shrink-0">
-              {toGreekUpperCase('Όλες →')}
+            <Link href="/management/bookings" className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors shrink-0">
+              {'Όλες →'}
             </Link>
           </div>
 
@@ -1155,9 +1155,9 @@ function AdminDashboard() {
             {getTodaysBookings().slice(0, 6).length === 0 ? (
               <Card className="rounded-2xl border-2 border-dashed border-zinc-100 bg-zinc-50/50 shadow-none flex flex-col items-center justify-center p-10 text-center">
                 <div className="h-12 w-12 rounded-xl bg-white border border-zinc-100 flex items-center justify-center mb-3">
-                  <Smile className="h-6 w-6 text-zinc-300" />
+                  <Smile className="h-6 w-6 text-zinc-400" />
                 </div>
-                <h3 className="text-zinc-900 font-black text-xs uppercase tracking-tight">{toGreekUpperCase('Δεν υπάρχουν κρατήσεις σήμερα')}</h3>
+                <h3 className="text-zinc-900 font-semibold text-xs tracking-tight">{'Δεν υπάρχουν κρατήσεις σήμερα'}</h3>
               </Card>
             ) : (
               getTodaysBookings().slice(0, 6).map((booking: Booking) => {
@@ -1166,16 +1166,16 @@ function AdminDashboard() {
                   <div key={booking.id} className="group relative flex items-center justify-between p-4 rounded-2xl bg-white border border-zinc-200 hover:border-emerald-200 hover:shadow-md transition-all duration-300">
                     <div className="flex items-center gap-4 min-w-0">
                       <div className="h-10 w-10 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-colors shrink-0">
-                        <User className="h-5 w-5 text-zinc-400 group-hover:text-emerald-600" />
+                        <User className="h-5 w-5 text-zinc-500 group-hover:text-emerald-600" />
                       </div>
                       <div className="min-w-0">
-                        <h4 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight truncate">
-                          {toGreekUpperCase(booking.userName || 'Unknown ')}
+                        <h4 className="text-xs font-semibold text-zinc-900 tracking-tight truncate">
+                          {booking.userName || 'Unknown '}
                         </h4>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[12px] font-bold text-zinc-400 uppercase">{pitch?.name || 'FIELD'}</span>
-                          <span className="text-zinc-300">•</span>
-                          <span className="text-[12px] font-bold text-emerald-600 uppercase">{new Date(booking.startTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit', hour12: false })} START</span>
+                          <span className="text-2xs font-medium text-zinc-500">{pitch?.name || 'FIELD'}</span>
+                          <span className="text-zinc-400">•</span>
+                          <span className="text-2xs font-medium text-emerald-600">{new Date(booking.startTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit', hour12: false })} START</span>
                         </div>
                       </div>
                     </div>
@@ -1184,7 +1184,7 @@ function AdminDashboard() {
                       <div className="hidden sm:block">
                         {getStatusBadge(booking.status)}
                       </div>
-                      <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50" asChild>
+                      <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50" asChild>
                         <Link href={`/management/bookings/${booking.id}`}>
                           <Eye className="h-4 w-4" />
                         </Link>
@@ -1205,12 +1205,12 @@ function AdminDashboard() {
                 <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-emerald-500" />
               </div>
               <div className="space-y-0.5">
-                <h2 className="text-base sm:text-xl font-black text-zinc-900 uppercase tracking-tight">{toGreekUpperCase('Σημερινές Προπονήσεις')}</h2>
-                <p className="text-[11px] sm:text-[12px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Πρόγραμμα ακαδημίας')}</p>
+                <h2 className="text-base sm:text-xl font-bold text-zinc-900 tracking-tight">{'Σημερινές Προπονήσεις'}</h2>
+                <p className="text-2xs sm:text-2xs font-semibold text-zinc-500">{'Πρόγραμμα ακαδημίας'}</p>
               </div>
             </div>
-            <Link href="/management/academy/training" className="text-xs font-black text-emerald-600 hover:text-emerald-700 transition-colors shrink-0">
-              {toGreekUpperCase('Όλες →')}
+            <Link href="/management/academy/training" className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors shrink-0">
+              {'Όλες →'}
             </Link>
           </div>
 
@@ -1218,9 +1218,9 @@ function AdminDashboard() {
             {getTodaysTrainings().slice(0, 6).length === 0 ? (
               <Card className="rounded-2xl border-2 border-dashed border-zinc-100 bg-zinc-50/50 shadow-none flex flex-col items-center justify-center p-10 text-center">
                 <div className="h-12 w-12 rounded-xl bg-white border border-zinc-100 flex items-center justify-center mb-3">
-                  <Smile className="h-6 w-6 text-zinc-300" />
+                  <Smile className="h-6 w-6 text-zinc-400" />
                 </div>
-                <h3 className="text-zinc-900 font-black text-xs uppercase tracking-tight">{toGreekUpperCase('Δεν υπάρχουν προπονήσεις σήμερα')}</h3>
+                <h3 className="text-zinc-900 font-semibold text-xs tracking-tight">{'Δεν υπάρχουν προπονήσεις σήμερα'}</h3>
               </Card>
             ) : (
               getTodaysTrainings().slice(0, 6).map((training: TrainingSession) => {
@@ -1229,27 +1229,27 @@ function AdminDashboard() {
                   <div key={training.id} className="group relative flex items-center justify-between p-4 rounded-2xl bg-white border border-zinc-200 hover:border-emerald-200 hover:shadow-md transition-all duration-300">
                     <div className="flex items-center gap-4 min-w-0">
                       <div className="h-10 w-10 rounded-xl bg-zinc-50 border border-zinc-100 flex items-center justify-center group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-colors shrink-0">
-                        <Activity className="h-5 w-5 text-zinc-400 group-hover:text-emerald-600" />
+                        <Activity className="h-5 w-5 text-zinc-500 group-hover:text-emerald-600" />
                       </div>
                       <div className="min-w-0">
-                        <h4 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight truncate">
-                          {toGreekUpperCase(squad?.name || 'SQUAD')}
+                        <h4 className="text-xs font-semibold text-zinc-900 tracking-tight truncate">
+                          {squad?.name || 'SQUAD'}
                         </h4>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[12px] font-bold text-zinc-400 uppercase">{training.type}</span>
-                          <span className="text-zinc-300">•</span>
-                          <span className="text-[12px] font-bold text-emerald-600 uppercase">{training.startTime} - {training.endTime}</span>
+                          <span className="text-2xs font-medium text-zinc-500">{training.type}</span>
+                          <span className="text-zinc-400">•</span>
+                          <span className="text-2xs font-medium text-emerald-600">{training.startTime} - {training.endTime}</span>
                         </div>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3 shrink-0">
                       <div className="hidden sm:block">
-                        <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 uppercase font-black text-[11px] px-2 py-0">
-                          {toGreekUpperCase(training.status)}
+                        <Badge variant="outline" className="border-emerald-200 bg-emerald-50 text-emerald-700 font-semibold text-2xs px-2 py-0">
+                          {training.status}
                         </Badge>
                       </div>
-                      <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl text-zinc-400 hover:text-zinc-900 hover:bg-zinc-50" asChild>
+                      <Button size="icon" variant="ghost" className="h-9 w-9 rounded-xl text-zinc-500 hover:text-zinc-900 hover:bg-zinc-50" asChild>
                         <Link href={`/management/academy/training/${training.id}`}>
                           <Eye className="h-4 w-4" />
                         </Link>
@@ -1280,19 +1280,19 @@ function AdminDashboard() {
                     <HeartPulse className="h-5 w-5 text-red-600" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-zinc-900 uppercase tracking-tight">Ιατρικά Πιστοποιητικά</h3>
-                    <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">Απαιτείται άμεση ενέργεια</p>
+                    <h3 className="text-sm font-semibold text-zinc-900 tracking-tight">Ιατρικά Πιστοποιητικά</h3>
+                    <p className="text-2xs font-medium text-zinc-500 mt-0.5">Απαιτείται άμεση ενέργεια</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="flex items-center gap-2 hidden sm:flex">
                     {medicalAlerts.expired.length > 0 && (
-                      <div className="px-2.5 py-1 rounded-full bg-red-50 text-red-600 text-[12px] font-black">
-                        {medicalAlerts.expired.length} ΛΗΞΑΝΤΑ
+                      <div className="px-2.5 py-1 rounded-full bg-red-50 text-red-600 text-2xs font-semibold">
+                        {medicalAlerts.expired.length} Ληγμένα
                       </div>
                     )}
                   </div>
-                  {isMedicalExpanded ? <ChevronUp className="h-4 w-4 text-zinc-400" /> : <ChevronDown className="h-4 w-4 text-zinc-400" />}
+                  {isMedicalExpanded ? <ChevronUp className="h-4 w-4 text-zinc-500" /> : <ChevronDown className="h-4 w-4 text-zinc-500" />}
                 </div>
               </div>
 
@@ -1312,9 +1312,9 @@ function AdminDashboard() {
                             <div className="h-8 w-8 rounded-lg bg-red-100 flex items-center justify-center">
                               <XCircle className="h-4 w-4 text-red-600" />
                             </div>
-                            <span className="text-sm font-bold text-zinc-900">{u.displayName}</span>
+                            <span className="text-sm font-semibold text-zinc-900">{u.displayName}</span>
                           </div>
-                          <span className="text-[12px] font-black text-red-500 uppercase bg-red-50 px-2 py-0.5 rounded-full">ΛΗΓΜΕΝΟ</span>
+                          <span className="text-2xs font-semibold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">Ληγμένο</span>
                         </div>
                       ))}
                       {medicalAlerts.expiringSoon.slice(0, 5).map((u) => (
@@ -1323,13 +1323,13 @@ function AdminDashboard() {
                             <div className="h-8 w-8 rounded-lg bg-amber-100 flex items-center justify-center">
                               <Clock className="h-4 w-4 text-amber-600" />
                             </div>
-                            <span className="text-sm font-bold text-zinc-900">{u.displayName}</span>
+                            <span className="text-sm font-semibold text-zinc-900">{u.displayName}</span>
                           </div>
-                          <span className="text-[12px] font-black text-amber-600 uppercase bg-amber-50 px-2 py-0.5 rounded-full">ΛΗΓΕΙ ΣΥΝΤΟΜΑ</span>
+                          <span className="text-2xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">Λήγει σύντομα</span>
                         </div>
                       ))}
                       {(medicalAlerts.expired.length + medicalAlerts.expiringSoon.length) > 15 && (
-                        <div className="px-6 py-2 text-center text-[12px] font-black text-zinc-400 uppercase">
+                        <div className="px-6 py-2 text-center text-2xs font-semibold text-zinc-500">
                           +{medicalAlerts.expired.length + medicalAlerts.expiringSoon.length - 15} ακόμα
                         </div>
                       )}
@@ -1338,7 +1338,7 @@ function AdminDashboard() {
                     <div className="px-6 pb-6 pt-2">
                       <Link
                         href="/management/academy/medical"
-                        className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-black uppercase tracking-widest transition-all active:scale-95"
+                        className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold transition-all active:scale-95"
                       >
                         Προβολή Ιατρικών
                       </Link>
@@ -1362,15 +1362,15 @@ function AdminDashboard() {
                     <BanknoteIcon className="h-5 w-5 text-orange-600" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-zinc-900 uppercase tracking-tight">Ανεξόφλητες Συνδρομές</h3>
-                    <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">Τρέχον έτος · {new Date().getFullYear()}</p>
+                    <h3 className="text-sm font-semibold text-zinc-900 tracking-tight">Ανεξόφλητες Συνδρομές</h3>
+                    <p className="text-2xs font-medium text-zinc-500 mt-0.5">Τρέχον έτος · {new Date().getFullYear()}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 text-[12px] font-black hidden sm:block">
-                    {paymentAlerts.length} ΑΘΛΗΤΕΣ
+                  <div className="px-2.5 py-1 rounded-full bg-orange-50 text-orange-600 text-2xs font-semibold hidden sm:block">
+                    {paymentAlerts.length} Αθλητές
                   </div>
-                  {isPaymentsExpanded ? <ChevronUp className="h-4 w-4 text-zinc-400" /> : <ChevronDown className="h-4 w-4 text-zinc-400" />}
+                  {isPaymentsExpanded ? <ChevronUp className="h-4 w-4 text-zinc-500" /> : <ChevronDown className="h-4 w-4 text-zinc-500" />}
                 </div>
               </div>
 
@@ -1390,16 +1390,16 @@ function AdminDashboard() {
                             <div className="h-8 w-8 rounded-lg bg-orange-100 flex items-center justify-center shrink-0">
                               <CreditCard className="h-4 w-4 text-orange-500" />
                             </div>
-                            <span className="text-sm font-bold text-zinc-900 truncate">{u.displayName}</span>
+                            <span className="text-sm font-semibold text-zinc-900 truncate">{u.displayName}</span>
                           </div>
                           <div className="flex flex-wrap gap-1 shrink-0 justify-end">
                             {unpaidMonths.slice(0, 4).map((m) => (
-                              <span key={m} className="text-[11px] font-black text-orange-600 bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded-md">
+                              <span key={m} className="text-2xs font-semibold text-orange-600 bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded-md">
                                 {m}
                               </span>
                             ))}
                             {unpaidMonths.length > 4 && (
-                              <span className="text-[11px] font-black text-orange-400 bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded-md">
+                              <span className="text-2xs font-semibold text-orange-400 bg-orange-50 border border-orange-100 px-1.5 py-0.5 rounded-md">
                                 +{unpaidMonths.length - 4}
                               </span>
                             )}
@@ -1407,7 +1407,7 @@ function AdminDashboard() {
                         </div>
                       ))}
                       {paymentAlerts.length > 10 && (
-                        <div className="px-6 py-2 text-center text-[12px] font-black text-zinc-400 uppercase">
+                        <div className="px-6 py-2 text-center text-2xs font-semibold text-zinc-500">
                           +{paymentAlerts.length - 10} ακόμα αθλητές
                         </div>
                       )}
@@ -1416,7 +1416,7 @@ function AdminDashboard() {
                     <div className="px-6 pb-6 pt-2">
                       <Link
                         href="/management/academy/payments"
-                        className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-black uppercase tracking-widest transition-all active:scale-95"
+                        className="flex items-center justify-center gap-2 w-full h-11 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold transition-all active:scale-95"
                       >
                         Προβολή Πληρωμών
                       </Link>
@@ -1443,10 +1443,10 @@ function AdminDashboard() {
                 <Trophy className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-sm font-black text-zinc-900 uppercase tracking-tight">
-                  {toGreekUpperCase('Ακαδημίες')}
+                <h2 className="text-sm font-semibold text-zinc-900 tracking-tight">
+                  {'Ακαδημίες'}
                 </h2>
-                <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
+                <p className="text-2xs font-medium text-zinc-500 mt-0.5">
                   Τμήματα & Ομάδες
                 </p>
               </div>
@@ -1457,7 +1457,7 @@ function AdminDashboard() {
                   <Plus className="h-4 w-4" />
                 </Link>
               </Button>
-              {isSquadsExpanded ? <ChevronUp className="h-4 w-4 text-zinc-400 shrink-0" /> : <ChevronDown className="h-4 w-4 text-zinc-400 shrink-0" />}
+              {isSquadsExpanded ? <ChevronUp className="h-4 w-4 text-zinc-500 shrink-0" /> : <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0" />}
             </div>
           </div>
 
@@ -1472,7 +1472,7 @@ function AdminDashboard() {
               >
                 <div className="p-6 space-y-4">
                   {squads.length === 0 ? (
-                    <div className="py-12 text-center bg-zinc-50 rounded-[2rem] border-2 border-dashed border-zinc-200 italic text-zinc-400 font-bold">
+                    <div className="py-12 text-center bg-zinc-50 rounded-2xl border-2 border-dashed border-zinc-200 italic text-zinc-500 font-bold">
                       Δεν υπάρχουν ακαδημίες / τμήματα
                     </div>
                   ) : (
@@ -1480,14 +1480,14 @@ function AdminDashboard() {
                       <div key={squad.id} className="group flex items-center justify-between p-4 rounded-xl bg-zinc-50/50 border border-zinc-100 hover:border-emerald-200 hover:bg-white transition-all duration-300">
                         <div className="flex items-center gap-4 min-w-0">
                           <div className="h-10 w-10 rounded-lg bg-white border border-zinc-100 flex items-center justify-center shrink-0">
-                            <Trophy className="h-5 w-5 text-zinc-400 group-hover:text-emerald-500 transition-colors" />
+                            <Trophy className="h-5 w-5 text-zinc-500 group-hover:text-emerald-500 transition-colors" />
                           </div>
                           <div className="min-w-0">
-                            <h5 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight truncate">{toGreekUpperCase(squad.name)}</h5>
-                            <p className="text-[12px] font-bold text-zinc-400 mt-0.5 uppercase tracking-wider">{toGreekUpperCase(squad.ageGroup)}</p>
+                            <h5 className="text-xs font-semibold text-zinc-900 tracking-tight truncate">{squad.name}</h5>
+                            <p className="text-2xs font-medium text-zinc-500 mt-0.5">{squad.ageGroup}</p>
                           </div>
                         </div>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-white" asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-white" asChild>
                           <Link href={`/management/academy/squads`}>
                             <Eye className="h-4 w-4" />
                           </Link>
@@ -1512,10 +1512,10 @@ function AdminDashboard() {
                 <FootballPitch className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-sm font-black text-zinc-900 uppercase tracking-tight">
-                  {toGreekUpperCase('Γήπεδα')}
+                <h2 className="text-sm font-semibold text-zinc-900 tracking-tight">
+                  {'Γήπεδα'}
                 </h2>
-                <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">
+                <p className="text-2xs font-medium text-zinc-500 mt-0.5">
                   Εγκαταστάσεις Venue
                 </p>
               </div>
@@ -1526,7 +1526,7 @@ function AdminDashboard() {
                   <Plus className="h-4 w-4" />
                 </Link>
               </Button>
-              {isPitchesExpanded ? <ChevronUp className="h-4 w-4 text-zinc-400 shrink-0" /> : <ChevronDown className="h-4 w-4 text-zinc-400 shrink-0" />}
+              {isPitchesExpanded ? <ChevronUp className="h-4 w-4 text-zinc-500 shrink-0" /> : <ChevronDown className="h-4 w-4 text-zinc-500 shrink-0" />}
             </div>
           </div>
 
@@ -1541,7 +1541,7 @@ function AdminDashboard() {
               >
                 <div className="p-6 space-y-4">
                   {pitches.length === 0 ? (
-                    <div className="py-12 text-center bg-zinc-50 rounded-[2rem] border-2 border-dashed border-zinc-200 italic text-zinc-400 font-bold">
+                    <div className="py-12 text-center bg-zinc-50 rounded-2xl border-2 border-dashed border-zinc-200 italic text-zinc-500 font-bold">
                       Δεν υπάρχουν γήπεδα
                     </div>
                   ) : (
@@ -1549,18 +1549,18 @@ function AdminDashboard() {
                       <div key={pitch.id} className="group flex items-center justify-between p-4 rounded-xl bg-zinc-50/50 border border-zinc-100 hover:border-emerald-200 hover:bg-white transition-all duration-300">
                         <div className="flex items-center gap-4 min-w-0">
                           <div className="h-10 w-14 rounded-lg bg-white border border-zinc-100 flex items-center justify-center overflow-hidden shrink-0 relative">
-                            <FootballPitch className="h-5 w-5 text-zinc-400 group-hover:text-emerald-500 transition-colors shrink-0" />
+                            <FootballPitch className="h-5 w-5 text-zinc-500 group-hover:text-emerald-500 transition-colors shrink-0" />
                           </div>
                           <div className="min-w-0">
-                            <h5 className="text-[13px] font-black text-zinc-900 uppercase tracking-tight truncate">
-                              {toGreekUpperCase(pitch.name)} <span className="text-[11px] text-zinc-400 ml-1 font-bold">{pitch.type}</span>
+                            <h5 className="text-xs font-semibold text-zinc-900 tracking-tight truncate">
+                              {pitch.name} <span className="text-2xs text-zinc-500 ml-1 font-medium">{pitch.type}</span>
                             </h5>
-                            <p className="text-[11px] font-bold text-zinc-400 mt-0.5">
-                              €{pitch.pricePerSlot} <span className="text-zinc-300 mx-1">•</span> €{getPricePerPerson(pitch.pricePerSlot, pitch.type)}/άτομο
+                            <p className="text-2xs font-medium text-zinc-500 mt-0.5">
+                              €{pitch.pricePerSlot} <span className="text-zinc-400 mx-1">•</span> €{getPricePerPerson(pitch.pricePerSlot, pitch.type)}/άτομο
                             </p>
                           </div>
                         </div>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-white" asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-zinc-500 hover:text-zinc-900 hover:bg-white" asChild>
                           <Link href={`/management/pitches/${pitch.id}`}>
                             <Pencil className="h-4 w-4" />
                           </Link>
@@ -1579,14 +1579,14 @@ function AdminDashboard() {
         <DialogContent className="max-w-xl w-[95vw] sm:w-full p-0 rounded-3xl border-0 shadow-2xl animate-in fade-in zoom-in-95 duration-300 max-h-[90vh] overflow-y-auto">
           <div className="bg-zinc-900 p-5 sm:p-8 text-white relative sticky top-0 z-10">
             <DialogHeader className="relative z-10 text-left">
-              <DialogTitle className="text-2xl font-black flex items-center gap-4 uppercase tracking-tight">
+              <DialogTitle className="text-2xl font-bold flex items-center gap-4 tracking-tight">
                 <div className="h-10 w-10 rounded-xl bg-emerald-500 flex items-center justify-center text-zinc-900 shadow-lg shadow-emerald-500/20">
                   <Plus className="h-5 w-5" />
                 </div>
-                {toGreekUpperCase('Γρήγορη Κράτηση')}
+                {'Γρήγορη Κράτηση'}
               </DialogTitle>
-              <DialogDescription className="text-zinc-400 font-bold text-xs mt-1.5 uppercase tracking-widest pl-14">
-                {toGreekUpperCase('Αμεση δημιουργια κρατησης')}
+              <DialogDescription className="text-zinc-500 font-medium text-xs mt-1.5 pl-14">
+                {'Άμεση δημιουργία κράτησης'}
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -1594,18 +1594,18 @@ function AdminDashboard() {
           <form onSubmit={handleQuickBookingSubmit} className="p-5 sm:p-8 space-y-5 sm:space-y-6 bg-white">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="userName" className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 ml-0.5">{toGreekUpperCase('Όνομα Πελάτη *')}</Label>
+                <Label htmlFor="userName" className="text-2xs font-medium text-zinc-500 ml-0.5">{'Όνομα Πελάτη *'}</Label>
                 <Input
                   id="userName"
-                  placeholder={toGreekUpperCase('Ονοματεπωνυμο')}
+                  placeholder={'Ονοματεπωνυμο'}
                   value={quickBookingData.userName}
                   onChange={(e) => setQuickBookingData({ ...quickBookingData, userName: e.target.value })}
                   required
-                  className="h-11 px-4 rounded-xl bg-zinc-50 border-none font-bold text-sm focus:bg-white transition-all uppercase"
+                  className="h-11 px-4 rounded-xl bg-zinc-50 border-none font-semibold text-sm focus:bg-white transition-all"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="userPhone" className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 ml-0.5">{toGreekUpperCase('Τηλέφωνο Επικοινωνίας *')}</Label>
+                <Label htmlFor="userPhone" className="text-2xs font-medium text-zinc-500 ml-0.5">{'Τηλέφωνο Επικοινωνίας *'}</Label>
                 <Input
                   id="userPhone"
                   type="tel"
@@ -1613,40 +1613,40 @@ function AdminDashboard() {
                   value={quickBookingData.userPhone}
                   onChange={(e) => setQuickBookingData({ ...quickBookingData, userPhone: e.target.value })}
                   required
-                  className="h-11 px-4 rounded-xl bg-zinc-50 border-none font-bold text-sm focus:bg-white transition-all"
+                  className="h-11 px-4 rounded-xl bg-zinc-50 border-none font-semibold text-sm focus:bg-white transition-all"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="pitch" className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 ml-0.5">{toGreekUpperCase('Επιλογή Γηπέδου *')}</Label>
+                <Label htmlFor="pitch" className="text-2xs font-medium text-zinc-500 ml-0.5">{'Επιλογή Γηπέδου *'}</Label>
                 <Select
                   value={quickBookingData.selectedPitchId}
                   onValueChange={(value: string) => setQuickBookingData({ ...quickBookingData, selectedPitchId: value, selectedSlot: '' })}
                   required
                 >
-                  <SelectTrigger id="pitch" className="h-11 px-4 rounded-xl bg-zinc-50 border-none font-black text-sm focus:ring-0 transition-all uppercase shadow-inner">
-                    <SelectValue placeholder={toGreekUpperCase('Επιλεξτε γηπεδο')} />
+                  <SelectTrigger id="pitch" className="h-11 px-4 rounded-xl bg-zinc-50 border-none font-semibold text-sm focus:ring-0 transition-all shadow-inner">
+                    <SelectValue placeholder={'Επιλέξτε γηπεδο'} />
                   </SelectTrigger>
                   <SelectContent className="rounded-xl border-zinc-100 shadow-2xl p-1">
                     {pitches.map((pitch) => (
-                      <SelectItem key={pitch.id} value={pitch.id} className="cursor-pointer py-2.5 font-bold text-[13px] rounded-lg hover:bg-zinc-50 uppercase">
-                        {toGreekUpperCase(`${pitch.name} (${pitch.type})`)}
+                      <SelectItem key={pitch.id} value={pitch.id} className="cursor-pointer py-2.5 font-medium text-xs rounded-lg hover:bg-zinc-50">
+                        {`${pitch.name} (${pitch.type})`}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="date" className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 ml-0.5">{toGreekUpperCase('Ημερομηνία *')}</Label>
+                <Label htmlFor="date" className="text-2xs font-medium text-zinc-500 ml-0.5">{'Ημερομηνία *'}</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full h-11 px-4 rounded-xl bg-zinc-50 border-none font-bold text-sm shadow-inner justify-start text-left",
-                        !quickBookingData.selectedDate && "text-zinc-400"
+                        "w-full h-11 px-4 rounded-xl bg-zinc-50 border-none font-semibold text-sm shadow-inner justify-start text-left",
+                        !quickBookingData.selectedDate && "text-zinc-500"
                       )}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4 text-zinc-400" />
+                      <CalendarIcon className="mr-2 h-4 w-4 text-zinc-500" />
                       {quickBookingData.selectedDate
                         ? new Date(quickBookingData.selectedDate + 'T00:00:00').toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
                         : 'Επιλέξτε ημερομηνία'}
@@ -1671,19 +1671,19 @@ function AdminDashboard() {
             </div>
 
             <div className="space-y-4">
-              <Label className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 ml-0.5">{toGreekUpperCase('Διαθέσιμες Ώρες')}</Label>
+              <Label className="text-2xs font-medium text-zinc-500 ml-0.5">{'Διαθέσιμες Ώρες'}</Label>
               {!quickBookingData.selectedPitchId || !quickBookingData.selectedDate ? (
                 <div className="p-8 text-center bg-zinc-50 rounded-2xl border border-zinc-100 flex flex-col items-center justify-center gap-2.5">
-                  <Clock className="h-6 w-6 text-zinc-200" />
-                  <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest">
-                    {toGreekUpperCase('Επιλεξτε γηπεδο και ημερομηνια')}
+                  <Clock className="h-6 w-6 text-zinc-400" />
+                  <p className="text-2xs font-medium text-zinc-500">
+                    {'Επιλέξτε γηπεδο και ημερομηνια'}
                   </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                   {generateAvailableSlots(quickBookingData.selectedPitchId, quickBookingData.selectedDate).length === 0 ? (
-                    <div className="col-span-full p-4 text-center bg-red-50 rounded-xl border border-red-100 text-red-600 text-[12px] font-bold uppercase tracking-widest">
-                      {toGreekUpperCase('Δεν υπαρχουν διαθεσιμες ωρες')}
+                    <div className="col-span-full p-4 text-center bg-red-50 rounded-xl border border-red-100 text-red-600 text-2xs font-medium">
+                      {'Δεν υπαρχουν διαθεσιμες ωρες'}
                     </div>
                   ) : (
                     generateAvailableSlots(quickBookingData.selectedPitchId, quickBookingData.selectedDate).map((slot) => (
@@ -1692,10 +1692,10 @@ function AdminDashboard() {
                         type="button"
                         onClick={() => setQuickBookingData({ ...quickBookingData, selectedSlot: slot.time })}
                         className={cn(
-                          "h-10 rounded-lg text-[11px] font-black transition-all border-2 active:scale-95 uppercase tracking-tighter",
+                          "h-10 rounded-lg text-2xs font-semibold transition-all border-2 active:scale-95 tracking-tighter",
                           quickBookingData.selectedSlot === slot.time
                             ? "bg-zinc-900 border-zinc-900 text-white scale-105 z-10"
-                            : "bg-white border-zinc-100 text-zinc-400 hover:border-emerald-200"
+                            : "bg-white border-zinc-100 text-zinc-500 hover:border-emerald-200"
                         )}
                       >
                         {slot.display}
@@ -1707,13 +1707,13 @@ function AdminDashboard() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="notes" className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 ml-0.5">{toGreekUpperCase('Σημειώσεις')}</Label>
+              <Label htmlFor="notes" className="text-2xs font-medium text-zinc-500 ml-0.5">{'Σημειώσεις'}</Label>
               <Textarea
                 id="notes"
-                placeholder={toGreekUpperCase('Παρατηρήσεις...')}
+                placeholder={'Παρατηρήσεις...'}
                 value={quickBookingData.notes}
                 onChange={(e) => setQuickBookingData({ ...quickBookingData, notes: e.target.value })}
-                className="min-h-[140px] rounded-[2rem] bg-zinc-50 border-none px-8 py-6 font-bold text-lg focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all uppercase placeholder:text-zinc-300 resize-none shadow-inner"
+                className="min-h-[140px] rounded-2xl bg-zinc-50 border-none px-8 py-6 font-bold text-lg focus:bg-white focus:ring-4 focus:ring-emerald-500/10 transition-all placeholder:text-zinc-500 resize-none shadow-inner"
               />
             </div>
 
@@ -1721,24 +1721,24 @@ function AdminDashboard() {
               <Button
                 type="button"
                 variant="outline"
-                className="flex-1 h-12 rounded-xl font-bold text-zinc-400 hover:text-zinc-600 border-none bg-zinc-50 hover:bg-zinc-100 transition-all text-sm uppercase tracking-widest"
+                className="flex-1 h-12 rounded-xl font-semibold text-zinc-500 hover:text-zinc-600 border-none bg-zinc-50 hover:bg-zinc-100 transition-all text-sm"
                 onClick={() => setShowQuickBooking(false)}
               >
-                {toGreekUpperCase('Ακύρωση')}              </Button>
+                {'Ακύρωση'}              </Button>
               <Button
                 type="submit"
-                className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black shadow-lg transition-all active:scale-[0.98] text-sm uppercase tracking-widest group"
+                className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-lg transition-all active:scale-[0.98] text-sm group"
                 disabled={isCreatingBooking}
               >
                 {isCreatingBooking ? (
                   <>
                     <Loader2 className="h-5 w-5 mr-3 animate-spin" />
-                    {toGreekUpperCase('Δημιουργία...')}
+                    {'Δημιουργία...'}
                   </>
                 ) : (
                   <>
                     <Save className="h-5 w-5 mr-3 text-emerald-300 transition-transform" />
-                    {toGreekUpperCase('Επιβεβαίωση')}
+                    {'Επιβεβαίωση'}
                   </>
                 )}
               </Button>
@@ -1761,10 +1761,10 @@ function AdminDashboard() {
             </div>
 
             <AlertDialogHeader className="text-center">
-              <AlertDialogTitle className="text-2xl font-black text-zinc-900 uppercase leading-tight">
-                {toGreekUpperCase('Αλλαγή Κατάστασης Κράτησης')}
+              <AlertDialogTitle className="text-2xl font-bold text-zinc-900 leading-tight">
+                {'Αλλαγή Κατάστασης Κράτησης'}
               </AlertDialogTitle>
-              <AlertDialogDescription className="text-[16px] font-medium text-zinc-500 mt-3 px-2">
+              <AlertDialogDescription className="text-base font-medium text-zinc-500 mt-3 px-2">
                 Πρόκειται να αλλάξετε την κατάσταση της κράτησης του/της <span className="text-zinc-900 font-bold">{statusChangeData?.userName}</span> σε <span className="font-bold text-emerald-600">
                   {statusChangeData?.newStatus === 'confirmed' ? 'Επιβεβαιωμένη' :
                     statusChangeData?.newStatus === 'pending' ? 'Εκκρεμεί' :

@@ -386,7 +386,7 @@ function CollectionTracker({
               <Banknote className="h-5 w-5 text-emerald-600" />
               Είσπραξη
             </CardTitle>
-            <p className="text-[11px] text-zinc-400 mt-1 ml-7">Βοηθητικό εργαλείο — δεν επηρεάζει τα έσοδα στις αναφορές</p>
+            <p className="text-2xs text-zinc-500 mt-1 ml-7">Βοηθητικό εργαλείο — δεν επηρεάζει τα έσοδα στις αναφορές</p>
           </div>
           <Badge
             variant="outline"
@@ -404,22 +404,22 @@ function CollectionTracker({
         {/* Summary */}
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center p-3 rounded-xl bg-emerald-50">
-            <p className="text-2xl font-black text-emerald-700">{'\u20AC'}{paidAmount.toFixed(0)}</p>
-            <p className="text-[12px] font-bold text-emerald-500 uppercase">Εισπράχθηκαν</p>
+            <p className="text-2xl font-bold text-emerald-700">{'\u20AC'}{paidAmount.toFixed(0)}</p>
+            <p className="text-2xs font-medium text-emerald-500">Εισπράχθηκαν</p>
           </div>
           <div className="text-center p-3 rounded-xl bg-amber-50">
-            <p className="text-2xl font-black text-amber-700">{'\u20AC'}{remainingAmount.toFixed(0)}</p>
-            <p className="text-[12px] font-bold text-amber-500 uppercase">Υπόλοιπο</p>
+            <p className="text-2xl font-bold text-amber-700">{'\u20AC'}{remainingAmount.toFixed(0)}</p>
+            <p className="text-2xs font-medium text-amber-500">Υπόλοιπο</p>
           </div>
           <div className="text-center p-3 rounded-xl bg-zinc-50">
-            <p className="text-2xl font-black text-zinc-700">{'\u20AC'}{pricePerPerson.toFixed(1)}</p>
-            <p className="text-[12px] font-bold text-zinc-400 uppercase">Ανά Άτομο</p>
+            <p className="text-2xl font-bold text-zinc-700">{'\u20AC'}{pricePerPerson.toFixed(1)}</p>
+            <p className="text-2xs font-medium text-zinc-500">Ανά Άτομο</p>
           </div>
         </div>
 
         {/* Player count adjuster */}
         <div className="flex items-center justify-between">
-          <p className="text-sm font-bold text-zinc-700">Αριθμός Παικτών</p>
+          <p className="text-sm font-semibold text-zinc-700">Αριθμός Παικτών</p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => handleUpdate(Math.min(paidSlots, totalSlots - 1), totalSlots - 1)}
@@ -428,7 +428,7 @@ function CollectionTracker({
             >
               <Minus className="h-4 w-4" />
             </button>
-            <span className="w-8 text-center font-black text-zinc-900">{totalSlots}</span>
+            <span className="w-8 text-center font-semibold text-zinc-900">{totalSlots}</span>
             <button
               onClick={() => handleUpdate(paidSlots, totalSlots + 1)}
               disabled={totalSlots >= 30 || isSaving}
@@ -442,14 +442,14 @@ function CollectionTracker({
         {/* Player grid */}
         <div>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-bold text-zinc-700">
+            <p className="text-sm font-semibold text-zinc-700">
               {paidSlots}/{totalSlots} πλήρωσαν
             </p>
             {paidSlots < totalSlots && (
               <button
                 onClick={() => handleUpdate(totalSlots)}
                 disabled={isSaving}
-                className="flex items-center gap-1 text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors"
+                className="flex items-center gap-1 text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors"
               >
                 <CheckCheck className="h-3.5 w-3.5" />
                 Όλοι πλήρωσαν
@@ -459,7 +459,7 @@ function CollectionTracker({
               <button
                 onClick={() => handleUpdate(0)}
                 disabled={isSaving}
-                className="flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-zinc-600 transition-colors"
+                className="flex items-center gap-1 text-xs font-medium text-zinc-500 hover:text-zinc-600 transition-colors"
               >
                 Μηδενισμός
               </button>
@@ -474,10 +474,10 @@ function CollectionTracker({
                   onClick={() => handleUpdate(isPaid ? i : i + 1)}
                   disabled={isSaving}
                   className={cn(
-                    "h-12 rounded-xl flex items-center justify-center font-bold text-sm transition-all active:scale-90",
+                    "h-12 rounded-xl flex items-center justify-center font-semibold text-sm transition-all active:scale-90",
                     isPaid
-                      ? "bg-emerald-500 text-white shadow-sm shadow-emerald-200"
-                      : "bg-zinc-100 text-zinc-400 hover:bg-zinc-200"
+                      ? "bg-emerald-500 text-zinc-950 shadow-sm shadow-emerald-200"
+                      : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
                   )}
                 >
                   {isPaid ? <Check className="h-5 w-5" /> : i + 1}
@@ -498,7 +498,7 @@ function CollectionTracker({
               style={{ width: `${totalSlots > 0 ? (paidSlots / totalSlots) * 100 : 0}%` }}
             />
           </div>
-          <p className="text-[12px] text-zinc-400 text-right font-medium">
+          <p className="text-2xs text-zinc-500 text-right font-medium">
             {totalSlots > 0 ? Math.round((paidSlots / totalSlots) * 100) : 0}% εισπράχθηκε
           </p>
         </div>

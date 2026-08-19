@@ -9,6 +9,7 @@ const SidebarWrapper = dynamic(() => import('./SidebarWrapper'), { ssr: false })
 const GoogleAnalytics = dynamic(() => import('./GoogleAnalytics'), { ssr: false });
 const CookieConsent = dynamic(() => import('./CookieConsent'), { ssr: false });
 const ChatWidget = dynamic(() => import('./ChatWidget'), { ssr: false });
+const Toaster = dynamic(() => import('./ui/toaster').then(m => m.Toaster), { ssr: false });
 
 // authService removed from static imports to prevent loading Firebase SDK on public pages
 
@@ -87,6 +88,7 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
       <>
         <CookieConsent />
         <GoogleAnalytics />
+        <Toaster />
         {children}
       </>
     );
@@ -100,11 +102,13 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
           <>
             <CookieConsent />
             <GoogleAnalytics />
+            <Toaster />
             {children}
           </>
         ) : isFullscreenAuthPage ? (
           <>
             <GoogleAnalytics />
+            <Toaster />
             {children}
           </>
         ) : (
@@ -112,6 +116,7 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
             <CookieConsent />
             <GoogleAnalytics />
             <ChatWidget />
+            <Toaster />
             {children}
           </SidebarWrapper>
         )}

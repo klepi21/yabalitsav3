@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { toast } from '@/lib/toast';
 
 const loginSchema = z.object({
   email: z.string().email('Μη έγκυρη διεύθυνση email'),
@@ -39,15 +40,39 @@ function VenueLoginContent() {
       : null
   );
   const [showPassword, setShowPassword] = useState(false);
+  const [isSendingReset, setIsSendingReset] = useState(false);
   const redirectTo = searchParams.get('redirect') || '/management/dashboard';
 
   const {
     register,
     handleSubmit,
+    getValues,
+    trigger,
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
+
+  // Δεν υπήρχε καθόλου ανάκτηση κωδικού: ο πελάτης έπρεπε να τηλεφωνήσει.
+  const handlePasswordReset = async () => {
+    const isEmailValid = await trigger('email');
+    if (!isEmailValid) return;
+
+    setIsSendingReset(true);
+    try {
+      await authService.sendPasswordReset(getValues('email'));
+    } catch (err) {
+      console.error('Password reset failed:', err);
+    } finally {
+      // Ίδιο μήνυμα ανεξάρτητα από το αποτέλεσμα, ώστε να μην
+      // αποκαλύπτεται ποια emails αντιστοιχούν σε λογαριασμούς.
+      setIsSendingReset(false);
+      toast.success(
+        'Ελέγξτε το email σας',
+        'Αν υπάρχει λογαριασμός με αυτή τη διεύθυνση, στείλαμε σύνδεσμο επαναφοράς κωδικού.'
+      );
+    }
+  };
 
   useEffect(() => {
     if (searchParams.get('error') === 'inactive') {
@@ -114,7 +139,7 @@ function VenueLoginContent() {
 
           <div className="space-y-8">
             <div className="flex items-start gap-5">
-              <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-2xl text-emerald-400 mt-1 shadow-[0_0_15px_-3px_rgba(52,211,153,0.3)]">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 p-2.5 rounded-2xl text-emerald-400 mt-1 shadow-[0_0_15px_-3px_rgba(116,238,22,0.3)]">
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>
@@ -149,7 +174,7 @@ function VenueLoginContent() {
           <p className="text-zinc-500 text-xs font-medium">
             &copy; {new Date().getFullYear()} Yabalitsa SaaS
           </p>
-          <div className="flex gap-4 text-[12px] font-black tracking-widest text-emerald-500/80">
+          <div className="flex gap-4 text-2xs font-bold tracking-widest text-emerald-500/80">
             <span>SECURE ENCRYPTED</span>
             <span>GDPR COMPLIANT</span>
           </div>
@@ -205,7 +230,17 @@ function VenueLoginContent() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-zinc-700">Κωδικός</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-zinc-700">Κωδικός</Label>
+                <button
+                  type="button"
+                  onClick={handlePasswordReset}
+                  disabled={isSendingReset}
+                  className="text-xs font-medium text-emerald-700 hover:text-emerald-800 hover:underline disabled:opacity-50 transition-colors"
+                >
+                  {isSendingReset ? 'Αποστολή…' : 'Ξεχάσατε τον κωδικό;'}
+                </button>
+              </div>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
                 <Input
@@ -218,7 +253,8 @@ function VenueLoginContent() {
                 />
                 <button
                   type="button"
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600 transition-colors"
+                  aria-label={showPassword ? 'Απόκρυψη κωδικού' : 'Εμφάνιση κωδικού'}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-800 transition-colors"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -255,9 +291,9 @@ function VenueLoginContent() {
           <div className="mt-8 text-center">
             <p className="text-sm text-zinc-500">
               Δεν έχετε λογαριασμό;{' '}
-              <a href="/for-venues" className="font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
+              <Link href="/for-venues" className="font-semibold text-emerald-700 hover:text-emerald-800 hover:underline transition-colors">
                 Εγγραφή
-              </a>
+              </Link>
             </p>
           </div>
         </div>

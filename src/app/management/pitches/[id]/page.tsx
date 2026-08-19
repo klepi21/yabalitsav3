@@ -34,7 +34,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Card, CardContent } from '@/components/ui/card';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 export default function PitchDetailsPage() {
   const router = useRouter();
@@ -107,7 +107,7 @@ export default function PitchDetailsPage() {
     return (
       <div className="text-center py-16">
         <div className="mx-auto h-12 w-12 bg-zinc-100 rounded-xl flex items-center justify-center mb-4">
-          <Building2 className="h-6 w-6 text-zinc-400" />
+          <Building2 className="h-6 w-6 text-zinc-500" />
         </div>
         <h3 className="text-lg font-semibold tracking-tight text-zinc-900">Το γήπεδο δεν βρέθηκε</h3>
         <p className="mt-1 text-sm text-zinc-500">Το γήπεδο που αναζητάτε δεν υπάρχει.</p>
@@ -144,7 +144,7 @@ export default function PitchDetailsPage() {
       <div className="space-y-6">
         <Link
           href="/management/pitches"
-          className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-widest text-zinc-400 hover:text-emerald-600 transition-all group"
+          className="inline-flex items-center gap-2 text-sm font-semibold text-zinc-500 hover:text-emerald-600 transition-all group"
         >
           <div className="h-8 w-8 rounded-xl bg-white border border-zinc-100 flex items-center justify-center group-hover:bg-emerald-50 group-hover:border-emerald-100 transition-all">
             <ArrowLeft className="h-4 w-4" />
@@ -159,8 +159,8 @@ export default function PitchDetailsPage() {
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-1">
-                <h1 className="text-xl sm:text-3xl font-black tracking-tight text-zinc-900 uppercase">{toGreekUpperCase(pitch.name)}</h1>
-                <Badge className="bg-emerald-50 text-emerald-700 border-none font-black text-[12px] uppercase tracking-wider px-3">
+                <h1 className="text-xl sm:text-3xl font-bold tracking-tight text-zinc-900">{pitch.name}</h1>
+                <Badge className="bg-emerald-50 text-emerald-700 border-none font-semibold text-2xs px-3">
                   {pitch.type}
                 </Badge>
               </div>
@@ -195,9 +195,9 @@ export default function PitchDetailsPage() {
                     <div className="h-12 w-12 rounded-2xl bg-red-50 flex items-center justify-center mb-4">
                       <Trash2 className="h-6 w-6 text-red-600" />
                     </div>
-                    <AlertDialogTitle className="text-2xl font-black text-zinc-900">Διαγραφή Γηπέδου</AlertDialogTitle>
+                    <AlertDialogTitle className="text-2xl font-bold text-zinc-900">Διαγραφή Γηπέδου</AlertDialogTitle>
                     <AlertDialogDescription className="text-zinc-500 font-medium pt-2">
-                       Είστε σίγουροι ότι θέλετε να διαγράψετε το γήπεδο <span className="text-zinc-900 font-black">&quot;{pitch.name}&quot;</span>; <br/>
+                       Είστε σίγουροι ότι θέλετε να διαγράψετε το γήπεδο <span className="text-zinc-900 font-semibold">&quot;{pitch.name}&quot;</span>; <br/>
                        Αυτή η ενέργεια είναι μόνιμη και όλες οι συνδεδεμένες κρατήσεις θα επηρεαστούν.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
@@ -238,8 +238,8 @@ export default function PitchDetailsPage() {
                   <stat.icon className="h-6 w-6" />
                 </div>
                 <div>
-                  <p className="text-[12px] font-black uppercase tracking-widest text-zinc-400 mb-0.5">{stat.label}</p>
-                  <p className="text-xl font-black text-zinc-900">{stat.value}</p>
+                  <p className="text-2xs font-semibold text-zinc-500 mb-0.5">{stat.label}</p>
+                  <p className="text-xl font-bold text-zinc-900">{stat.value}</p>
                 </div>
               </div>
             </CardContent>
@@ -257,7 +257,7 @@ export default function PitchDetailsPage() {
                   <div className="h-10 w-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
                     <Clock className="h-5 w-5 text-blue-600" />
                   </div>
-                  <h3 className="text-lg sm:text-xl font-black text-zinc-900">Ωράριο</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-zinc-900">Ωράριο</h3>
                 </div>
 
                 <div className="space-y-4">
@@ -269,7 +269,7 @@ export default function PitchDetailsPage() {
                     return (
                       <div key={day} className="flex items-center justify-between py-1">
                          <span className={cn(
-                           "text-sm font-bold capitalize",
+                           "text-sm font-semibold capitalize",
                            isWeekend ? "text-blue-600" : "text-zinc-500"
                          )}>
                            {dayNames[day]}
@@ -278,13 +278,13 @@ export default function PitchDetailsPage() {
                            {hours.isOpen ? (
                              <div className="flex flex-col items-end">
                                {getOpeningSlots(hours).map((slot: OpeningSlot, idx: number) => (
-                                 <span key={idx} className="text-sm font-black text-zinc-900 tabular-nums">
+                                 <span key={idx} className="text-sm font-semibold text-zinc-900 tabular-nums">
                                    {slot.start} - {slot.end}
                                  </span>
                                ))}
                              </div>
                            ) : (
-                             <Badge className="bg-zinc-100 text-zinc-400 border-none font-bold text-[12px]">ΚΛΕΙΣΤΟ</Badge>
+                             <Badge className="bg-zinc-100 text-zinc-500 border-none font-medium text-2xs">Κλειστό</Badge>
                            )}
                          </div>
                       </div>
@@ -301,7 +301,7 @@ export default function PitchDetailsPage() {
                 <div className="h-10 w-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0">
                   <Ban className="h-5 w-5 text-red-600" />
                 </div>
-                <h3 className="text-lg sm:text-xl font-black text-zinc-900">Εξαιρέσεις</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-zinc-900">Εξαιρέσεις</h3>
               </div>
 
               {blockedDates.length > 0 ? (
@@ -309,10 +309,10 @@ export default function PitchDetailsPage() {
                   {blockedDates.slice(0, 5).map((blockedDate) => (
                     <div key={blockedDate.id} className="p-4 rounded-2xl bg-zinc-50 border border-zinc-100 hover:bg-white hover:border-red-100 transition-all group">
                       <div className="flex items-center justify-between mb-2">
-                        <p className="text-sm font-black text-zinc-900">
+                        <p className="text-sm font-semibold text-zinc-900">
                           {new Date(blockedDate.startDate).toLocaleDateString('el-GR', { day: 'numeric', month: 'short' })}
                         </p>
-                        <Badge className="bg-white text-red-600 border border-red-50 font-bold text-[11px] uppercase">
+                        <Badge className="bg-white text-red-600 border border-red-50 font-medium text-2xs">
                           {blockedDate.isFullDay ? 'Full Day' : 'Partial'}
                         </Badge>
                       </div>
@@ -320,12 +320,12 @@ export default function PitchDetailsPage() {
                     </div>
                   ))}
                   {blockedDates.length > 5 && (
-                    <p className="text-center text-xs font-bold text-zinc-400 italic pt-2">... και ακόμα {blockedDates.length - 5} εξαιρέσεις</p>
+                    <p className="text-center text-xs font-medium text-zinc-500 italic pt-2">... και ακόμα {blockedDates.length - 5} εξαιρέσεις</p>
                   )}
                 </div>
               ) : (
                 <div className="text-center py-6 bg-zinc-50 rounded-2xl border border-dashed border-zinc-100">
-                  <p className="text-xs font-bold text-zinc-400">Δεν υπάρχουν εξαιρέσεις</p>
+                  <p className="text-xs font-medium text-zinc-500">Δεν υπάρχουν εξαιρέσεις</p>
                 </div>
               )}
             </CardContent>
@@ -341,17 +341,17 @@ export default function PitchDetailsPage() {
                   <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
                     <Calendar className="h-5 w-5 text-emerald-600" />
                   </div>
-                  <h3 className="text-lg sm:text-xl font-black text-zinc-900">Ιστορικό Κρατήσεων</h3>
+                  <h3 className="text-lg sm:text-xl font-bold text-zinc-900">Ιστορικό Κρατήσεων</h3>
                 </div>
-                <Link href="/management/bookings" className="text-xs font-black text-emerald-600 hover:text-emerald-700 transition-colors shrink-0">
-                  {toGreekUpperCase('Όλες →')}
+                <Link href="/management/bookings" className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors shrink-0">
+                  {'Όλες →'}
                 </Link>
               </div>
 
               {bookings.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-center bg-zinc-50/50 rounded-3xl border-2 border-dashed border-zinc-100">
-                   <Users className="h-12 w-12 text-zinc-200 mb-4" />
-                   <h4 className="text-lg font-black text-zinc-900">Χωρίς κρατήσεις ακόμα</h4>
+                   <Users className="h-12 w-12 text-zinc-400 mb-4" />
+                   <h4 className="text-lg font-semibold text-zinc-900">Χωρίς κρατήσεις ακόμα</h4>
                    <p className="text-zinc-500 font-medium max-w-xs">Οι μελλοντικές και προηγούμενες κρατήσεις αυτού του γηπέδου θα εμφανίζονται εδώ.</p>
                 </div>
               ) : (
@@ -359,10 +359,10 @@ export default function PitchDetailsPage() {
                   <table className="w-full">
                     <thead>
                       <tr className="border-b border-zinc-100">
-                        <th className="pb-4 text-left text-xs font-black uppercase tracking-widest text-zinc-400 px-2 sm:px-4">Πελάτης</th>
-                        <th className="pb-4 text-left text-xs font-black uppercase tracking-widest text-zinc-400 px-2 sm:px-4 hidden sm:table-cell">Ημερομηνία</th>
-                        <th className="pb-4 text-left text-xs font-black uppercase tracking-widest text-zinc-400 px-2 sm:px-4">Ώρα</th>
-                        <th className="pb-4 text-right text-xs font-black uppercase tracking-widest text-zinc-400 px-2 sm:px-4">Κατάσταση</th>
+                        <th className="pb-4 text-left text-xs font-semibold text-zinc-500 px-2 sm:px-4">Πελάτης</th>
+                        <th className="pb-4 text-left text-xs font-semibold text-zinc-500 px-2 sm:px-4 hidden sm:table-cell">Ημερομηνία</th>
+                        <th className="pb-4 text-left text-xs font-semibold text-zinc-500 px-2 sm:px-4">Ώρα</th>
+                        <th className="pb-4 text-right text-xs font-semibold text-zinc-500 px-2 sm:px-4">Κατάσταση</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zinc-50">
@@ -371,20 +371,20 @@ export default function PitchDetailsPage() {
                         return (
                           <tr key={booking.id} className="group hover:bg-zinc-50/50 transition-colors">
                             <td className="py-4 sm:py-5 px-2 sm:px-4">
-                              <p className="font-bold text-zinc-900 text-sm">{booking.userName || 'Άγνωστος'}</p>
-                              <p className="text-xs text-zinc-400 sm:hidden">
+                              <p className="font-semibold text-zinc-900 text-sm">{booking.userName || 'Άγνωστος'}</p>
+                              <p className="text-xs text-zinc-500 sm:hidden">
                                 {new Date(booking.startTime).toLocaleDateString('el-GR', { day: 'numeric', month: 'short' })}
                               </p>
                             </td>
                             <td className="py-4 sm:py-5 px-2 sm:px-4 font-medium text-zinc-500 hidden sm:table-cell">
                                {new Date(booking.startTime).toLocaleDateString('el-GR', { day: 'numeric', month: 'short', year: 'numeric' })}
                             </td>
-                            <td className="py-4 sm:py-5 px-2 sm:px-4 font-black text-zinc-900 tabular-nums text-sm">
+                            <td className="py-4 sm:py-5 px-2 sm:px-4 font-semibold text-zinc-900 tabular-nums text-sm">
                                {new Date(booking.startTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit' })}
                             </td>
                             <td className="py-4 sm:py-5 px-2 sm:px-4 text-right">
                                <Badge className={cn(
-                                 "font-black text-[11px] uppercase tracking-wider px-2 py-0.5 border-none",
+                                 "font-semibold text-2xs px-2 py-0.5 border-none",
                                  status.className
                                )}>
                                  {status.label}

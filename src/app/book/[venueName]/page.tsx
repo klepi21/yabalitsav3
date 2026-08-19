@@ -3,11 +3,12 @@
 import { useState, useEffect } from "react";
 import { use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, MapPin, ArrowLeft, X, RotateCcw, CheckCircle2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, ArrowLeft, X, RotateCcw, CheckCircle2, AlertCircle, ShieldCheck, Goal, Check } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { toast } from '@/lib/toast';
 
 interface Booking {
   id: string;
@@ -66,6 +67,86 @@ interface Pitch {
   };
 }
 
+
+const BOOKING_STEPS = [
+  { id: 'pitch', label: 'Γήπεδο' },
+  { id: 'date', label: 'Ημερομηνία' },
+  { id: 'slots', label: 'Ώρα' },
+  { id: 'confirmation', label: 'Στοιχεία' },
+] as const;
+
+type BookingStepId = (typeof BOOKING_STEPS)[number]['id'];
+
+/**
+ * Ο χρήστης πρέπει να βλέπει πού βρίσκεται και πόσο απομένει.
+ * Χωρίς αυτό, μια ροή 4 βημάτων μοιάζει ατέρμονη — και εγκαταλείπεται.
+ */
+function BookingStepper({
+  current,
+  onStepClick,
+}: {
+  current: BookingStepId;
+  onStepClick: (step: BookingStepId) => void;
+}) {
+  const currentIndex = BOOKING_STEPS.findIndex((s) => s.id === current);
+
+  return (
+    <nav aria-label="Πρόοδος κράτησης" className="mb-6">
+      <ol className="flex items-center gap-1.5 sm:gap-2">
+        {BOOKING_STEPS.map((step, i) => {
+          const isDone = i < currentIndex;
+          const isCurrent = i === currentIndex;
+          return (
+            <li key={step.id} className="flex-1 min-w-0">
+              <button
+                type="button"
+                onClick={() => isDone && onStepClick(step.id)}
+                disabled={!isDone}
+                aria-current={isCurrent ? 'step' : undefined}
+                className={cn(
+                  'group w-full text-left',
+                  isDone ? 'cursor-pointer' : 'cursor-default'
+                )}
+              >
+                <span
+                  className={cn(
+                    'block h-1.5 rounded-full transition-colors',
+                    isDone && 'bg-emerald-500 group-hover:bg-emerald-400',
+                    isCurrent && 'bg-zinc-900',
+                    !isDone && !isCurrent && 'bg-zinc-200'
+                  )}
+                />
+                <span className="mt-2 flex items-center gap-1.5">
+                  <span
+                    className={cn(
+                      'flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-2xs font-semibold transition-colors',
+                      isDone && 'bg-emerald-500 text-zinc-950',
+                      isCurrent && 'bg-zinc-900 text-white',
+                      !isDone && !isCurrent && 'bg-zinc-200 text-zinc-500'
+                    )}
+                  >
+                    {isDone ? <Check className="h-3 w-3" aria-hidden="true" /> : i + 1}
+                  </span>
+                  <span
+                    className={cn(
+                      'hidden sm:block truncate text-xs',
+                      isCurrent ? 'font-semibold text-zinc-900' : 'font-medium text-zinc-500'
+                    )}
+                  >
+                    {step.label}
+                  </span>
+                </span>
+                <span className="sr-only">
+                  {`Βήμα ${i + 1} από ${BOOKING_STEPS.length}: ${step.label}${isDone ? ' (ολοκληρώθηκε)' : ''}`}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
 
 export default function VenueBookingPage({ params }: { params: Promise<{ venueName: string }> }) {
   const { venueName } = use(params);
@@ -392,19 +473,19 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
   const handleConfirmBooking = () => {
     if (!formData.firstName || !formData.lastName || !formData.phone || !formData.email || !formData.termsAccepted) {
-      alert('Παρακαλώ συμπληρώστε όλα τα υποχρεωτικά πεδία και αποδεχτείτε τους όρους χρήσης.');
+      toast.error('Λείπουν στοιχεία', 'Συμπληρώστε τα υποχρεωτικά πεδία και αποδεχτείτε τους όρους χρήσης.');
       return;
     }
 
     // Validate Greek phone number (should be 10 digits starting with 6)
     if (!/^6\d{9}$/.test(formData.phone)) {
-      alert('Παρακαλώ εισάγετε έναν έγκυρο ελληνικό αριθμό κινητού (10 ψηφία που ξεκινούν από 6).');
+      toast.error('Μη έγκυρο κινητό', 'Χρειάζονται 10 ψηφία που ξεκινούν από 6.');
       return;
     }
 
     // Validate email
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      alert('Παρακαλώ εισάγετε ένα έγκυρο email.');
+      toast.error('Μη έγκυρο email', 'Ελέγξτε τη διεύθυνση που πληκτρολογήσατε.');
       return;
     }
 
@@ -439,7 +520,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
   // Send Email verification code
   const sendEmailVerification = async () => {
     if (!formData.email) {
-      alert('Παρακαλώ εισάγετε το email σας.');
+      toast.error('Συμπληρώστε το email σας');
       return;
     }
     try {
@@ -499,7 +580,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       }
     } catch (err) {
       console.error('verify email error', err);
-      alert('Λάθος κωδικός email. Παρακαλώ δοκιμάστε ξανά.');
+      toast.error('Λάθος κωδικός', 'Ελέγξτε τον 6ψήφιο κωδικό που λάβατε με email.');
     } finally {
       setIsVerifyingEmail(false);
     }
@@ -635,7 +716,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       
     } catch (error) {
       console.error('Error creating booking:', error);
-      alert('Σφάλμα στη δημιουργία κράτησης. Παρακαλώ δοκιμάστε ξανά.');
+      toast.error('Η κράτηση δεν ολοκληρώθηκε', 'Παρακαλώ δοκιμάστε ξανά σε λίγο.');
     }
   };
 
@@ -643,32 +724,46 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
     // Still loading
     if (!dataLoaded) {
       return (
-        <div className="min-h-screen bg-gradient-to-br from-emerald-900 to-emerald-700 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
-            <p className="text-emerald-300">Φόρτωση...</p>
+        <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center px-6">
+          <div className="w-full max-w-3xl">
+            {/* Skeleton αντί για spinner: ο χρήστης βλέπει το σχήμα
+                της σελίδας που έρχεται, χωρίς layout shift. */}
+            <div className="animate-pulse space-y-4">
+              <div className="h-3 w-32 bg-zinc-200 rounded mx-auto" />
+              <div className="h-10 w-72 max-w-full bg-zinc-200 rounded-lg mx-auto" />
+              <div className="h-6 w-48 bg-zinc-100 rounded-full mx-auto mb-8" />
+              <div className="bg-white rounded-2xl border border-zinc-200 p-6 space-y-4">
+                <div className="h-5 w-40 bg-zinc-200 rounded mx-auto" />
+                {[0, 1, 2].map((i) => (
+                  <div key={i} className="h-24 bg-zinc-100 rounded-xl" />
+                ))}
+              </div>
+            </div>
+            <p className="sr-only" role="status">Φόρτωση διαθεσιμότητας…</p>
           </div>
         </div>
       );
     }
     // Data loaded but venue/pitches not found
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-900 to-emerald-700 flex items-center justify-center">
-        <div className="text-center max-w-md px-6">
-          <div className="text-6xl mb-4">⚽</div>
-          <h1 className="text-2xl font-bold text-white mb-2">
-            {loadError || 'Το venue δεν βρέθηκε'}
+      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center px-6">
+        <div className="text-center max-w-md">
+          <div className="mx-auto mb-5 h-14 w-14 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center">
+            <AlertCircle className="h-7 w-7 text-amber-700" aria-hidden="true" />
+          </div>
+          <h1 className="text-2xl font-semibold text-zinc-900 mb-2">
+            {loadError || 'Δεν βρέθηκε το γήπεδο'}
           </h1>
-          <p className="text-emerald-200 mb-6">
+          <p className="text-sm text-zinc-600 mb-6 leading-relaxed">
             {loadError
               ? 'Παρακαλούμε δοκιμάστε ξανά αργότερα ή επικοινωνήστε απευθείας με το γήπεδο.'
-              : `Δεν μπορέσαμε να βρούμε το venue "${decodeURIComponent(venueName)}". Ελέγξτε τη διεύθυνση και δοκιμάστε ξανά.`}
+              : `Δεν μπορέσαμε να βρούμε το γήπεδο «${decodeURIComponent(venueName)}». Ελέγξτε τη διεύθυνση και δοκιμάστε ξανά.`}
           </p>
           <Link
             href="/"
-            className="inline-flex items-center px-6 py-3 bg-white text-emerald-700 rounded-xl font-medium hover:bg-emerald-50 transition-colors"
+            className="inline-flex items-center px-6 py-3 bg-zinc-900 text-white rounded-xl text-sm font-semibold hover:bg-zinc-800 transition-colors"
           >
-            Αρχική Σελίδα
+            Αρχική σελίδα
           </Link>
         </div>
       </div>
@@ -684,9 +779,9 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
             <Link href="/" className="flex items-center gap-2">
               <Image src="/yabalitsalogo.png" alt="Yabalitsa" width={120} height={32} className="h-7 w-auto object-contain" />
             </Link>
-            <div className="flex items-center gap-3">
-              <span className="hidden sm:block text-[12px] font-black text-zinc-400 uppercase tracking-widest">SECURE BOOKING</span>
-              <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="flex items-center gap-2 text-zinc-600">
+              <ShieldCheck className="h-4 w-4 text-emerald-600" aria-hidden="true" />
+              <span className="hidden sm:block text-xs font-medium">Ασφαλής κράτηση</span>
             </div>
           </div>
         </div>
@@ -696,27 +791,28 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Venue Info */}
         <div className="text-center mb-10">
-          <p className="text-[12px] font-black text-emerald-600 uppercase tracking-[0.2em] mb-2">ΚΑΛΩΣ ΗΡΘΑΤΕ ΣΤΟ</p>
-          <h1 className="text-4xl sm:text-5xl font-black text-zinc-900 tracking-tight uppercase mb-4">{venue.name}</h1>
+          <p className="text-2xs font-semibold text-emerald-600 mb-2">Καλώς ήρθατε στο</p>
+          <h1 className="text-4xl sm:text-5xl font-bold text-zinc-900 tracking-tight mb-4">{venue.name}</h1>
           <div className="flex items-center justify-center gap-4">
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-zinc-100 shadow-sm">
               <MapPin className="h-3 w-3 text-emerald-500" />
-              <span className="text-[12px] font-bold text-zinc-500 uppercase tracking-tight">{venue.address}</span>
+              <span className="text-2xs font-medium text-zinc-500 tracking-tight">{venue.address}</span>
             </div>
           </div>
         </div>
 
         {/* Booking Card */}
-        <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-emerald-900/5 border border-zinc-100/50 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-e3 border border-border overflow-hidden">
           <div className="p-6 lg:p-8">
+            <BookingStepper current={currentStep} onStepClick={goToStep} />
             <AnimatePresence mode="wait">
 
               {/* Step 1: Pitch */}
               {currentStep === 'pitch' && (
                 <motion.div key="pitch" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
                   <div className="text-center">
-                    <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">Επιλέξτε Γήπεδο</h2>
-                    <p className="text-xs font-bold text-zinc-400 mt-1 uppercase">ΔΙΑΛΕΞΤΕ ΤΟ ΓΗΠΕΔΟ ΠΟΥ ΣΑΣ ΤΑΙΡΙΑΖΕΙ</p>
+                    <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Επιλέξτε Γήπεδο</h2>
+                    <p className="text-xs font-medium text-zinc-500 mt-1">Διαλέξτε το γήπεδο που σας ταιριάζει</p>
                   </div>
                   <div className="grid grid-cols-1 gap-4">
                     {pitches.map((pitch) => (
@@ -728,17 +824,19 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                         className="group relative bg-white rounded-3xl p-6 border border-zinc-100 hover:border-emerald-200 cursor-pointer transition-all hover:bg-emerald-50/30"
                       >
                         <div className="flex items-center gap-6">
-                          <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-zinc-50 border border-zinc-100 flex items-center justify-center text-4xl group-hover:bg-white group-hover:scale-110 transition-all duration-500">🏟️</div>
+                          <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center shrink-0 group-hover:bg-emerald-100 transition-colors">
+                            <Goal className="h-7 w-7 sm:h-8 sm:w-8 text-emerald-700" aria-hidden="true" />
+                          </div>
                           <div className="flex-1 min-w-0">
-                            <h3 className="text-lg font-black text-zinc-900 uppercase tracking-tight mb-1">{pitch.name}</h3>
+                            <h3 className="text-lg font-semibold text-zinc-900 tracking-tight mb-1">{pitch.name}</h3>
                             <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="bg-zinc-50 text-zinc-500 border-zinc-100 text-[11px] font-black px-2 py-0.5 uppercase">{pitch.type}</Badge>
-                              <span className="text-[12px] font-bold text-zinc-400 group-hover:text-emerald-600 transition-colors uppercase">{pitch.slotDuration} ΛΕΠΤΑ</span>
+                              <Badge variant="outline" className="bg-zinc-50 text-zinc-500 border-zinc-100 text-2xs font-semibold px-2 py-0.5">{pitch.type}</Badge>
+                              <span className="text-2xs font-medium text-zinc-500 group-hover:text-emerald-600 transition-colors">{pitch.slotDuration} λεπτά</span>
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="text-2xl font-black text-zinc-900 tracking-tighter group-hover:text-emerald-600 transition-colors">€{pitch.pricePerSlot.toFixed(0)}</div>
-                            <p className="text-[11px] font-black text-zinc-400 uppercase">ΑΝΑ ΩΡΑ</p>
+                            <div className="text-2xl font-bold text-zinc-900 tracking-tighter group-hover:text-emerald-600 transition-colors">€{pitch.pricePerSlot.toFixed(0)}</div>
+                            <p className="text-2xs font-semibold text-zinc-500">ανά ώρα</p>
                           </div>
                         </div>
                       </motion.div>
@@ -751,25 +849,25 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
               {currentStep === 'date' && (
                 <motion.div key="date" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <button onClick={() => goToStep('pitch')} className="group flex items-center gap-2 px-4 py-2 text-zinc-400 hover:text-zinc-900 transition-colors">
+                    <button onClick={() => goToStep('pitch')} className="group flex items-center gap-2 px-4 py-2 text-zinc-500 hover:text-zinc-900 transition-colors">
                       <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                      <span className="text-[12px] font-black uppercase tracking-widest">ΠΙΣΩ ΣΤΑ ΓΗΠΕΔΑ</span>
+                      <span className="text-2xs font-semibold">Πίσω στα γήπεδα</span>
                     </button>
                     <div className="flex items-center gap-2 p-1 bg-zinc-100 rounded-xl border border-zinc-100">
                       <button onClick={() => handleWeekNavigation('prev')} className="p-2 hover:bg-white rounded-lg transition-all active:scale-90">
                         <ChevronLeft className="w-4 h-4 text-zinc-600" />
                       </button>
-                      <div className="px-4 text-[12px] font-black text-zinc-900 uppercase tracking-widest min-w-[140px] text-center">{weekRange}</div>
+                      <div className="px-4 text-2xs font-semibold text-zinc-900 min-w-[140px] text-center">{weekRange}</div>
                       <button onClick={() => handleWeekNavigation('next')} className="p-2 hover:bg-white rounded-lg transition-all active:scale-90">
                         <ChevronRight className="w-4 h-4 text-zinc-600" />
                       </button>
                     </div>
                   </div>
                   <div className="text-center">
-                    <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">Επιλέξτε Ημερομηνία</h2>
-                    <p className="text-xs font-bold text-zinc-400 mt-1 uppercase">ΔΙΑΛΕΞΤΕ ΤΗΝ ΗΜΕΡΑ ΤΗΣ ΚΡΑΤΗΣΗΣ ΣΑΣ</p>
+                    <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Επιλέξτε Ημερομηνία</h2>
+                    <p className="text-xs font-medium text-zinc-500 mt-1">Διαλέξτε την ημέρα της κράτησής σας</p>
                   </div>
-                  <div className="grid grid-cols-4 sm:grid-cols-7 gap-3 pb-4">
+                  <div className="grid grid-cols-7 gap-1.5 sm:gap-3 pb-4">
                     {weekSchedule.map((day) => (
                       <button
                         key={day.date}
@@ -777,14 +875,14 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                         disabled={!day.hasAvailability}
                         className={cn(
                           "flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all active:scale-95",
-                          !day.hasAvailability ? "bg-zinc-50 border-zinc-50 text-zinc-300 cursor-not-allowed opacity-50" :
+                          !day.hasAvailability ? "bg-zinc-50 border-zinc-50 text-zinc-400 cursor-not-allowed opacity-50" :
                           selectedDate?.toLocaleDateString('el-GR', { day: '2-digit', month: 'short' }) === day.date
                             ? "bg-zinc-900 border-zinc-900 text-white shadow-xl shadow-zinc-900/10"
-                            : "bg-white border-zinc-50 text-zinc-400 hover:border-emerald-200 hover:text-zinc-900"
+                            : "bg-white border-zinc-50 text-zinc-500 hover:border-emerald-200 hover:text-zinc-900"
                         )}
                       >
-                        <span className="text-[8px] font-black uppercase tracking-widest mb-1">{day.dayName.slice(0, 3)}</span>
-                        <span className="text-lg font-black tracking-tight">{day.dayNumber}</span>
+                        <span className="text-2xs font-semibold mb-1">{day.dayName.slice(0, 3)}</span>
+                        <span className="text-lg font-semibold tracking-tight">{day.dayNumber}</span>
                         <div className={cn("w-1 h-1 rounded-full mt-2", day.hasAvailability ? "bg-emerald-500" : "bg-zinc-200")} />
                       </button>
                     ))}
@@ -795,13 +893,13 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
               {/* Step 3: Time Slots */}
               {currentStep === 'slots' && selectedDate && (
                 <motion.div key="slots" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
-                  <button onClick={() => goToStep('date')} className="group flex items-center gap-2 px-4 py-2 text-zinc-400 hover:text-zinc-900 transition-colors">
+                  <button onClick={() => goToStep('date')} className="group flex items-center gap-2 px-4 py-2 text-zinc-500 hover:text-zinc-900 transition-colors">
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    <span className="text-[12px] font-black uppercase tracking-widest">ΠΙΣΩ ΣΤΗΝ ΗΜΕΡΟΜΗΝΙΑ</span>
+                    <span className="text-2xs font-semibold">Πίσω στην ημερομηνία</span>
                   </button>
                   <div className="text-center">
-                    <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">Επιλέξτε Ώρα</h2>
-                    <p className="text-xs font-bold text-zinc-400 mt-1 uppercase">
+                    <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Επιλέξτε Ώρα</h2>
+                    <p className="text-xs font-medium text-zinc-500 mt-1">
                       {selectedDate.toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long' })}
                     </p>
                   </div>
@@ -817,7 +915,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                       if (!selectedDay || !selectedDay.hasAvailability) {
                         return (
                           <div className="text-center py-12">
-                            <p className="text-zinc-400 font-bold text-sm">Δεν υπάρχουν διαθέσιμες ώρες για αυτή την ημερομηνία</p>
+                            <p className="text-zinc-500 font-semibold text-sm">Δεν υπάρχουν διαθέσιμες ώρες για αυτή την ημερομηνία</p>
                           </div>
                         );
                       }
@@ -835,7 +933,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                       if (filteredSlots.length === 0) {
                         return (
                           <div className="text-center py-12">
-                            <p className="text-zinc-400 font-bold text-sm">Δεν υπάρχουν διαθέσιμες ώρες για σήμερα</p>
+                            <p className="text-zinc-500 font-semibold text-sm">Δεν υπάρχουν διαθέσιμες ώρες για σήμερα</p>
                           </div>
                         );
                       }
@@ -856,9 +954,9 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                               )}
                             >
                               <div className="text-center">
-                                <div className={cn("text-sm font-black uppercase", slot.available ? "text-zinc-900" : "text-red-400")}>{slot.time}</div>
-                                <div className={cn("text-[8px] font-black uppercase mt-1", slot.available ? "text-emerald-600" : "text-red-400")}>
-                                  {slot.available ? "ΔΙΑΘΕΣΙΜΟ" : "ΚΛΕΙΣΜΕΝΟ"}
+                                <div className={cn("text-sm font-semibold", slot.available ? "text-zinc-900" : "text-red-400")}>{slot.time}</div>
+                                <div className={cn("text-2xs font-semibold mt-1", slot.available ? "text-emerald-600" : "text-red-400")}>
+                                  {slot.available ? "Διαθέσιμο" : "Κλεισμένο"}
                                 </div>
                               </div>
                             </motion.button>
@@ -873,13 +971,13 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
               {/* Step 4: Confirmation */}
               {currentStep === 'confirmation' && selectedTimeSlot && (
                 <motion.div key="confirmation" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-8">
-                  <button onClick={() => goToStep('slots')} className="group flex items-center gap-2 px-4 py-2 text-zinc-400 hover:text-zinc-900 transition-colors">
+                  <button onClick={() => goToStep('slots')} className="group flex items-center gap-2 px-4 py-2 text-zinc-500 hover:text-zinc-900 transition-colors">
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                    <span className="text-[12px] font-black uppercase tracking-widest">ΠΙΣΩ ΣΤΙΣ ΩΡΕΣ</span>
+                    <span className="text-2xs font-semibold">Πίσω στις ώρες</span>
                   </button>
                   <div className="text-center">
-                    <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight">Επιβεβαίωση Κράτησης</h2>
-                    <p className="text-xs font-bold text-zinc-400 mt-1 uppercase">ΣΥΜΠΛΗΡΩΣΤΕ ΤΑ ΣΤΟΙΧΕΙΑ ΣΑΣ ΓΙΑ ΝΑ ΟΛΟΚΛΗΡΩΣΕΤΕ</p>
+                    <h2 className="text-xl font-bold text-zinc-900 tracking-tight">Επιβεβαίωση Κράτησης</h2>
+                    <p className="text-xs font-medium text-zinc-500 mt-1">Συμπληρώστε τα στοιχεία σας για να ολοκληρώσετε</p>
                   </div>
                   <div className="grid grid-cols-1 gap-6">
                     {/* Summary Card */}
@@ -887,58 +985,58 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                       <div className="absolute top-0 right-0 p-4 opacity-10">
                         <CheckCircle2 className="h-16 w-16 text-white" />
                       </div>
-                      <h3 className="text-[12px] font-black text-white/60 uppercase tracking-[0.2em] mb-6 text-center">ΣΥΝΟΨΗ ΚΡΑΤΗΣΗΣ</h3>
+                      <h3 className="text-2xs font-semibold text-white/60 mb-6 text-center">Σύνοψη κράτησης</h3>
                       <div className="space-y-4 relative z-10">
                         <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                          <span className="text-[12px] font-black text-white/60 uppercase">ΓΗΠΕΔΟ</span>
-                          <span className="text-xs font-black text-white uppercase">{selectedPitch.name}</span>
+                          <span className="text-2xs font-semibold text-white/60">Γήπεδο</span>
+                          <span className="text-xs font-semibold text-white">{selectedPitch.name}</span>
                         </div>
                         <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                          <span className="text-[12px] font-black text-white/60 uppercase">ΗΜΕΡΟΜΗΝΙΑ</span>
-                          <span className="text-xs font-black text-white uppercase">{selectedDate?.toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+                          <span className="text-2xs font-semibold text-white/60">Ημερομηνία</span>
+                          <span className="text-xs font-semibold text-white">{selectedDate?.toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
                         </div>
                         <div className="flex items-center justify-between pb-4 border-b border-white/10">
-                          <span className="text-[12px] font-black text-white/60 uppercase">ΩΡΑ</span>
-                          <span className="text-xs font-black text-white uppercase">{selectedTimeSlot.time}</span>
+                          <span className="text-2xs font-semibold text-white/60">Ώρα</span>
+                          <span className="text-xs font-semibold text-white">{selectedTimeSlot.time}</span>
                         </div>
                         <div className="flex items-center justify-between pt-2">
-                          <span className="text-[12px] font-black text-emerald-100 uppercase">ΣΥΝΟΛΙΚΟ ΠΟΣΟ</span>
-                          <span className="text-2xl font-black text-white tracking-tighter">€{selectedPitch.pricePerSlot}</span>
+                          <span className="text-2xs font-semibold text-emerald-100">Συνολικό ποσό</span>
+                          <span className="text-2xl font-bold text-white tracking-tighter">€{selectedPitch.pricePerSlot}</span>
                         </div>
                       </div>
                     </div>
 
                     {/* Form Card */}
                     <div className="bg-white rounded-3xl p-6 border border-zinc-100 shadow-xl shadow-emerald-900/5">
-                      <h3 className="text-[12px] font-black text-zinc-400 uppercase tracking-[0.2em] mb-6">ΣΤΟΙΧΕΙΑ ΠΕΛΑΤΗ</h3>
+                      <h3 className="text-2xs font-semibold text-zinc-500 mb-6">Στοιχεία πελάτη</h3>
                       <div className="space-y-5">
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
-                            <label className="text-[12px] font-black text-zinc-400 uppercase ml-1">ΟΝΟΜΑ</label>
+                            <label className="text-2xs font-semibold text-zinc-500 ml-1">Όνομα</label>
                             <input type="text" value={formData.firstName} onChange={(e) => handleFormChange('firstName', e.target.value)}
-                              className="w-full h-12 px-4 rounded-xl bg-zinc-50 border-none font-bold text-xs focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all uppercase placeholder:text-zinc-300"
-                              placeholder="ΟΝΟΜΑ" />
+                              className="w-full h-12 px-4 rounded-xl bg-zinc-50 border-none font-medium text-xs focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all placeholder:text-zinc-500"
+                              placeholder="Όνομα" />
                           </div>
                           <div className="space-y-2">
-                            <label className="text-[12px] font-black text-zinc-400 uppercase ml-1">ΕΠΩΝΥΜΟ</label>
+                            <label className="text-2xs font-semibold text-zinc-500 ml-1">Επώνυμο</label>
                             <input type="text" value={formData.lastName} onChange={(e) => handleFormChange('lastName', e.target.value)}
-                              className="w-full h-12 px-4 rounded-xl bg-zinc-50 border-none font-bold text-xs focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all uppercase placeholder:text-zinc-300"
-                              placeholder="ΕΠΩΝΥΜΟ" />
+                              className="w-full h-12 px-4 rounded-xl bg-zinc-50 border-none font-medium text-xs focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all placeholder:text-zinc-500"
+                              placeholder="Επώνυμο" />
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[12px] font-black text-zinc-400 uppercase ml-1">ΤΗΛΕΦΩΝΟ</label>
+                          <label className="text-2xs font-semibold text-zinc-500 ml-1">Τηλέφωνο</label>
                           <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-black text-zinc-400">+30</span>
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-xs font-semibold text-zinc-500">+30</span>
                             <input type="tel" value={formData.phone} onChange={(e) => handleFormChange('phone', e.target.value.replace(/\D/g, '').slice(0, 10))}
-                              className="w-full h-12 pl-12 pr-4 rounded-xl bg-zinc-50 border-none font-bold text-xs focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all"
+                              className="w-full h-12 pl-12 pr-4 rounded-xl bg-zinc-50 border-none font-medium text-xs focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all"
                               placeholder="69XXXXXXXX" />
                           </div>
                         </div>
                         <div className="space-y-2">
-                          <label className="text-[12px] font-black text-zinc-400 uppercase ml-1">EMAIL</label>
+                          <label className="text-2xs font-semibold text-zinc-500 ml-1">Email</label>
                           <input type="email" value={formData.email} onChange={(e) => handleFormChange('email', e.target.value)}
-                            className="w-full h-12 px-4 rounded-xl bg-zinc-50 border-none font-bold text-xs focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all placeholder:text-zinc-300"
+                            className="w-full h-12 px-4 rounded-xl bg-zinc-50 border-none font-medium text-xs focus:ring-2 focus:ring-emerald-500/20 focus:bg-white transition-all placeholder:text-zinc-500"
                             placeholder="YOUR@EMAIL.COM" />
                         </div>
                         <label className="flex items-center gap-3 cursor-pointer group pt-2 px-1">
@@ -947,7 +1045,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                               className="peer appearance-none w-5 h-5 rounded-lg bg-zinc-100 border-none checked:bg-emerald-500 transition-all cursor-pointer" />
                             <CheckCircle2 className="absolute h-3 w-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity pointer-events-none" />
                           </div>
-                          <span className="text-[12px] font-bold text-zinc-500 group-hover:text-zinc-900 transition-colors">
+                          <span className="text-2xs font-medium text-zinc-500 group-hover:text-zinc-900 transition-colors">
                             Αποδοχή όρων χρήσης και πολιτικής απορρήτου
                           </span>
                         </label>
@@ -956,9 +1054,9 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
                     <button
                       onClick={handleConfirmBooking}
-                      className="w-full h-14 rounded-2xl bg-zinc-900 hover:bg-black text-white font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-zinc-900/10 transition-all active:scale-95 flex items-center justify-center gap-3 group"
+                      className="w-full h-14 rounded-2xl bg-zinc-900 hover:bg-black text-white font-semibold text-xs shadow-xl shadow-zinc-900/10 transition-all active:scale-95 flex items-center justify-center gap-3 group"
                     >
-                      ΕΠΙΒΕΒΑΙΩΣΗ ΚΡΑΤΗΣΗΣ
+                      Επιβεβαίωση κράτησης
                       <div className="h-6 w-6 rounded-full bg-white/10 flex items-center justify-center group-hover:bg-emerald-500/20 group-hover:text-emerald-400 transition-all">
                         <ArrowLeft className="h-3 w-3 rotate-180" />
                       </div>
@@ -978,12 +1076,12 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
           <motion.div
             initial={{ opacity: 0, y: 40, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            className="bg-white rounded-[2rem] p-8 max-w-md w-full shadow-2xl"
+            className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl"
           >
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h3 className="text-base font-black text-zinc-900 uppercase tracking-tight">Επιβεβαίωση Email</h3>
-                <p className="text-[12px] font-bold text-zinc-400 mt-0.5">{formData.email}</p>
+                <h3 className="text-base font-semibold text-zinc-900 tracking-tight">Επιβεβαίωση Email</h3>
+                <p className="text-2xs font-medium text-zinc-500 mt-0.5">{formData.email}</p>
               </div>
               <button onClick={() => { setShowEmailVerification(false); setEmailCode(''); setEmailSent(false); }}
                 className="h-8 w-8 rounded-xl bg-zinc-100 flex items-center justify-center hover:bg-zinc-200 transition-all active:scale-90">
@@ -993,8 +1091,8 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
 
             {!emailSent && (
               <button onClick={sendEmailVerification} disabled={isSendingEmail}
-                className="w-full h-14 rounded-2xl bg-zinc-900 hover:bg-black text-white font-black text-xs uppercase tracking-widest transition-all active:scale-95 disabled:opacity-50 mb-4">
-                {isSendingEmail ? 'ΑΠΟΣΤΟΛΗ...' : 'ΑΠΟΣΤΟΛΗ ΚΩΔΙΚΟΥ'}
+                className="w-full h-14 rounded-2xl bg-zinc-900 hover:bg-black text-white font-semibold text-xs transition-all active:scale-95 disabled:opacity-50 mb-4">
+                {isSendingEmail ? 'Αποστολή...' : 'Αποστολή κωδικού'}
               </button>
             )}
 
@@ -1048,32 +1146,32 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                         }
                       }}
                       className={cn(
-                        "w-11 h-14 text-center text-xl font-black rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/30",
+                        "w-11 h-14 text-center text-xl font-bold rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/30",
                         emailCode[index] ? "bg-emerald-50 text-emerald-700" : "bg-zinc-50 text-zinc-900"
                       )}
                     />
                   ))}
                 </div>
-                <p className="text-[12px] font-bold text-zinc-400 uppercase text-center">Εισάγετε τον 6ψήφιο κωδικό του email σας</p>
+                <p className="text-2xs font-medium text-zinc-500 text-center">Εισάγετε τον 6ψήφιο κωδικό του email σας</p>
                 <button onClick={verifyEmailCode} disabled={!emailCode || emailCode.length !== 6 || isVerifyingEmail}
-                  className="w-full h-14 rounded-2xl bg-zinc-900 hover:bg-black text-white font-black text-xs uppercase tracking-widest transition-all active:scale-95 disabled:opacity-40">
-                  {isVerifyingEmail ? 'ΕΠΙΒΕΒΑΙΩΣΗ...' : 'ΕΠΙΒΕΒΑΙΩΣΗ ΚΩΔΙΚΟΥ'}
+                  className="w-full h-14 rounded-2xl bg-zinc-900 hover:bg-black text-white font-semibold text-xs transition-all active:scale-95 disabled:opacity-40">
+                  {isVerifyingEmail ? 'Επιβεβαίωση...' : 'Επιβεβαίωση κωδικού'}
                 </button>
                 <div className="text-center">
                   {countdown > 0 ? (
-                    <p className="text-[12px] font-bold text-zinc-400 uppercase">Επαναποστολή σε {countdown}δ.</p>
+                    <p className="text-2xs font-medium text-zinc-500">Επαναποστολή σε {countdown}δ.</p>
                   ) : (
                     <button onClick={sendEmailVerification} disabled={!canResend}
-                      className="flex items-center justify-center gap-2 text-[12px] font-black text-emerald-600 uppercase tracking-widest mx-auto disabled:opacity-50">
+                      className="flex items-center justify-center gap-2 text-2xs font-semibold text-emerald-600 mx-auto disabled:opacity-50">
                       <RotateCcw className="w-3 h-3" />
-                      ΕΠΑΝΑΠΟΣΤΟΛΗ EMAIL
+                      Επαναποστολή EMAIL
                     </button>
                   )}
-                  {emailError && <p className="text-xs font-bold text-red-500 mt-3">{emailError}</p>}
+                  {emailError && <p className="text-xs font-medium text-red-500 mt-3">{emailError}</p>}
                 </div>
               </div>
             )}
-            <p className="text-[11px] font-bold text-zinc-300 text-center mt-6 uppercase">Η κράτηση ολοκληρώνεται μόνο μετά την επιβεβαίωση.</p>
+            <p className="text-2xs font-medium text-zinc-500 text-center mt-6">Η κράτηση ολοκληρώνεται μόνο μετά την επιβεβαίωση.</p>
           </motion.div>
         </div>
       )}
@@ -1089,14 +1187,14 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
           <motion.div
             initial={{ scale: 0.9, y: 40, opacity: 0 }}
             animate={{ scale: 1, y: 0, opacity: 1 }}
-            className="bg-white rounded-[2rem] shadow-2xl max-w-md w-full p-8 text-center"
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-4xl">🎉</span>
             </div>
-            <h2 className="text-xl font-black text-zinc-900 uppercase tracking-tight mb-1">Κράτηση Επιβεβαιώθηκε!</h2>
-            <p className="text-xs font-bold text-zinc-400 uppercase mb-8">Θα λάβετε επιβεβαίωση στο email σας</p>
+            <h2 className="text-xl font-bold text-zinc-900 tracking-tight mb-1">Κράτηση Επιβεβαιώθηκε!</h2>
+            <p className="text-xs font-medium text-zinc-500 mb-8">Θα λάβετε επιβεβαίωση στο email σας</p>
 
             <div className="bg-zinc-50 rounded-2xl p-6 mb-8 text-left space-y-3">
               {[
@@ -1106,18 +1204,18 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                 { label: '🕐 Ώρα', value: successBookingData.time },
               ].map(({ label, value }) => (
                 <div key={label} className="flex justify-between">
-                  <span className="text-[12px] font-black text-zinc-400 uppercase">{label}</span>
-                  <span className="text-[12px] font-black text-zinc-900 uppercase text-right max-w-[60%]">{value}</span>
+                  <span className="text-2xs font-semibold text-zinc-500">{label}</span>
+                  <span className="text-2xs font-semibold text-zinc-900 text-right max-w-[60%]">{value}</span>
                 </div>
               ))}
               <div className="flex justify-between border-t border-zinc-100 pt-3">
-                <span className="text-[12px] font-black text-emerald-600 uppercase">💰 Τιμή</span>
-                <span className="font-black text-emerald-600 text-lg tabular-nums">€{successBookingData.price}</span>
+                <span className="text-2xs font-semibold text-emerald-600">💰 Τιμή</span>
+                <span className="font-semibold text-emerald-600 text-lg tabular-nums">€{successBookingData.price}</span>
               </div>
             </div>
             <button
               onClick={() => { setShowSuccessPopup(false); setSuccessBookingData(null); }}
-              className="w-full h-14 bg-zinc-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black transition-all active:scale-95"
+              className="w-full h-14 bg-zinc-900 text-white rounded-2xl font-semibold text-xs hover:bg-black transition-all active:scale-95"
             >
               Τέλεια! 🎯
             </button>

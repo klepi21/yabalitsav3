@@ -12,7 +12,7 @@ import {
   TRAINING_TYPE_LABELS, TRAINING_TYPE_COLORS,
   ATTENDANCE_STATUS_LABELS, ATTENDANCE_STATUS_COLORS, TrainingDrill,
 } from '@/types/training';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import {
   Loader2, ArrowLeft, Dumbbell, Clock, Users, Calendar,
   CheckCircle2, XCircle, AlertCircle, Pencil, Trash2,
@@ -210,7 +210,7 @@ export default function TrainingDetailPage({ params }: PageProps) {
   if (!session) return (
     <div className="flex items-center justify-center min-h-[60vh]">
       <div className="text-center">
-        <Dumbbell className="h-8 w-8 text-zinc-300 mx-auto mb-3" />
+        <Dumbbell className="h-8 w-8 text-zinc-400 mx-auto mb-3" />
         <h2 className="text-lg font-bold text-zinc-900 mb-1">Η προπόνηση δεν βρέθηκε</h2>
         <Button asChild className="mt-4"><Link href="/management/academy/training">Πίσω</Link></Button>
       </div>
@@ -230,36 +230,36 @@ export default function TrainingDetailPage({ params }: PageProps) {
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-2 border-b border-zinc-50">
         <div className="flex items-center gap-3.5">
           <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl border-zinc-200 shrink-0" asChild>
-            <Link href="/management/academy/training"><ArrowLeft className="h-4 w-4 text-zinc-400" /></Link>
+            <Link href="/management/academy/training"><ArrowLeft className="h-4 w-4 text-zinc-500" /></Link>
           </Button>
           <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center shrink-0 shadow-lg", typeColor.bg)}>
             <Dumbbell className={cn("h-6 w-6", typeColor.text)} />
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">{toGreekUpperCase(session.title)}</h1>
-              <span className={cn("text-[8px] font-black px-2 py-1 rounded-lg border uppercase tracking-widest", typeColor.bg, typeColor.text, typeColor.border)}>
-                {toGreekUpperCase(TRAINING_TYPE_LABELS[session.type])}
+              <h1 className="text-2xl font-bold tracking-tight text-zinc-900">{session.title}</h1>
+              <span className={cn("text-2xs font-semibold px-2 py-1 rounded-lg border", typeColor.bg, typeColor.text, typeColor.border)}>
+                {TRAINING_TYPE_LABELS[session.type]}
               </span>
               <span className={cn(
-                "text-[8px] font-black px-2 py-1 rounded-lg border uppercase tracking-widest",
+                "text-2xs font-semibold px-2 py-1 rounded-lg border",
                 session.status === 'completed' ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
                 session.status === 'cancelled' ? "bg-red-50 text-red-600 border-red-100" :
                 "bg-blue-50 text-blue-600 border-blue-100"
               )}>
-                {toGreekUpperCase(statusLabel(session.status || ''))}
+                {statusLabel(session.status || '')}
               </span>
               {session.recurringGroupId && (
-                <span className="text-[8px] font-black px-2 py-1 rounded-lg border border-violet-100 bg-violet-50 text-violet-600 uppercase tracking-widest flex items-center gap-1">
+                <span className="text-2xs font-semibold px-2 py-1 rounded-lg border border-violet-100 bg-violet-50 text-violet-600 flex items-center gap-1">
                   <Repeat className="h-3 w-3" />
                   {recurringCount > 0 ? `${recurringCount} προπ.` : 'Επαναλ.'}
                 </span>
               )}
             </div>
-            <p className="text-[11px] font-bold text-zinc-400 mt-0.5 flex items-center gap-2">
+            <p className="text-2xs font-medium text-zinc-500 mt-0.5 flex items-center gap-2">
               <Calendar className="h-3.5 w-3.5 text-emerald-500" />
               {new Date(session.date + 'T00:00:00').toLocaleDateString('el-GR', { weekday: 'long', day: 'numeric', month: 'long' })}
-              <span className="text-zinc-200">|</span>
+              <span className="text-zinc-400">|</span>
               <Clock className="h-3.5 w-3.5 text-emerald-500" />
               {session.startTime} - {session.endTime}
             </p>
@@ -269,28 +269,28 @@ export default function TrainingDetailPage({ params }: PageProps) {
         <div className="flex items-center gap-2">
           {session.status === 'scheduled' && (
             <>
-              <Button variant="outline" size="sm" onClick={markCompleted} className="h-9 px-4 rounded-lg text-emerald-600 border-emerald-100 bg-emerald-50/50 hover:bg-emerald-600 hover:text-white font-bold text-[12px] uppercase">
-                <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />{toGreekUpperCase('Ολοκλήρωση')}
+              <Button variant="outline" size="sm" onClick={markCompleted} className="h-9 px-4 rounded-lg text-emerald-600 border-emerald-100 bg-emerald-50/50 hover:bg-emerald-600 hover:text-white font-medium text-2xs">
+                <CheckCircle2 className="h-3.5 w-3.5 mr-1.5" />{'Ολοκλήρωση'}
               </Button>
-              <Button variant="outline" size="sm" onClick={markCancelled} className="h-9 px-4 rounded-lg text-red-500 border-red-100 bg-red-50/50 hover:bg-red-600 hover:text-white font-bold text-[12px] uppercase">
-                <XCircle className="h-3.5 w-3.5 mr-1.5" />{toGreekUpperCase('Ακύρωση')}
+              <Button variant="outline" size="sm" onClick={markCancelled} className="h-9 px-4 rounded-lg text-red-500 border-red-100 bg-red-50/50 hover:bg-red-600 hover:text-white font-medium text-2xs">
+                <XCircle className="h-3.5 w-3.5 mr-1.5" />{'Ακύρωση'}
               </Button>
             </>
           )}
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button size="icon" variant="ghost" className="h-9 w-9 rounded-lg text-zinc-300 hover:text-red-500 hover:bg-red-50">
+              <Button size="icon" variant="ghost" className="h-9 w-9 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50">
                 <Trash2 className="h-4 w-4" />
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent className="rounded-2xl p-6 max-w-sm">
               <AlertDialogHeader>
-                <AlertDialogTitle className="text-lg font-black text-zinc-900">{toGreekUpperCase('Διαγραφή προπόνησης;')}</AlertDialogTitle>
+                <AlertDialogTitle className="text-lg font-semibold text-zinc-900">{'Διαγραφή προπόνησης;'}</AlertDialogTitle>
                 <AlertDialogDescription className="text-sm text-zinc-500">Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.</AlertDialogDescription>
               </AlertDialogHeader>
               {session.recurringGroupId && recurringCount > 1 && (
                 <div className="space-y-2 mt-3">
-                  <p className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Εύρος διαγραφής')}</p>
+                  <p className="text-2xs font-semibold text-zinc-500">{'Εύρος διαγραφής'}</p>
                   {([
                     { value: 'one' as const, label: 'Μόνο αυτή', desc: 'Διαγραφή μόνο αυτής της προπόνησης' },
                     { value: 'future' as const, label: 'Αυτή & μελλοντικές', desc: `Από ${new Date(session.date + 'T00:00:00').toLocaleDateString('el-GR', { day: 'numeric', month: 'short' })} και μετά` },
@@ -306,15 +306,15 @@ export default function TrainingDetailPage({ params }: PageProps) {
                           : "border-zinc-100 hover:border-zinc-200"
                       )}
                     >
-                      <p className="text-xs font-bold text-zinc-900">{label}</p>
-                      <p className="text-[12px] text-zinc-400">{desc}</p>
+                      <p className="text-xs font-medium text-zinc-900">{label}</p>
+                      <p className="text-2xs text-zinc-500">{desc}</p>
                     </button>
                   ))}
                 </div>
               )}
               <AlertDialogFooter className="mt-4 gap-2">
-                <AlertDialogCancel className="h-10 rounded-xl font-bold text-sm">{toGreekUpperCase('Ακύρωση')}</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} className="h-10 rounded-xl font-bold bg-red-600 hover:bg-red-700 text-white text-sm">{toGreekUpperCase('Διαγραφή')}</AlertDialogAction>
+                <AlertDialogCancel className="h-10 rounded-xl font-semibold text-sm">{'Ακύρωση'}</AlertDialogCancel>
+                <AlertDialogAction onClick={handleDelete} className="h-10 rounded-xl font-semibold bg-red-600 hover:bg-red-700 text-white text-sm">{'Διαγραφή'}</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
@@ -324,7 +324,7 @@ export default function TrainingDetailPage({ params }: PageProps) {
       {error && (
         <div className="bg-red-50 border border-red-100 rounded-2xl p-4 animate-in fade-in">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3"><AlertCircle className="h-5 w-5 text-red-500" /><p className="text-sm font-bold text-red-700">{error}</p></div>
+            <div className="flex items-center gap-3"><AlertCircle className="h-5 w-5 text-red-500" /><p className="text-sm font-semibold text-red-700">{error}</p></div>
             <Button variant="ghost" size="sm" onClick={() => setError(null)} className="text-red-400 hover:text-red-600"><X className="h-4 w-4" /></Button>
           </div>
         </div>
@@ -339,11 +339,11 @@ export default function TrainingDetailPage({ params }: PageProps) {
               key={tab.id}
               onClick={() => { setActiveTab(tab.id); if (tab.id === 'attendance') initAttendance(); }}
               className={cn(
-                "flex items-center gap-1.5 px-4 py-2 rounded-lg text-[12px] font-black uppercase tracking-wider transition-all",
-                activeTab === tab.id ? 'bg-white shadow-sm text-emerald-600' : 'text-zinc-400 hover:text-zinc-600'
+                "flex items-center gap-1.5 px-4 py-2 rounded-lg text-2xs font-semibold transition-all",
+                activeTab === tab.id ? 'bg-white shadow-sm text-emerald-600' : 'text-zinc-500 hover:text-zinc-600'
               )}
             >
-              <Icon className="h-3.5 w-3.5" />{toGreekUpperCase(tab.label)}
+              <Icon className="h-3.5 w-3.5" />{tab.label}
             </button>
           );
         })}
@@ -361,30 +361,30 @@ export default function TrainingDetailPage({ params }: PageProps) {
             ].map(({ icon: Icon, label, value, highlight }) => (
               <div key={label} className="rounded-2xl border border-zinc-100 bg-white p-4 shadow-sm">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", highlight ? "bg-emerald-50 text-emerald-500" : "bg-zinc-50 text-zinc-400")}>
+                  <div className={cn("h-8 w-8 rounded-lg flex items-center justify-center", highlight ? "bg-emerald-50 text-emerald-500" : "bg-zinc-50 text-zinc-500")}>
                     <Icon className="h-4 w-4" />
                   </div>
-                  <span className="text-[8px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase(label)}</span>
+                  <span className="text-2xs font-semibold text-zinc-500">{label}</span>
                 </div>
-                <p className={cn("text-sm font-black uppercase truncate", highlight ? "text-emerald-600" : "text-zinc-900")}>{toGreekUpperCase(value)}</p>
+                <p className={cn("text-sm font-semibold truncate", highlight ? "text-emerald-600" : "text-zinc-900")}>{value}</p>
               </div>
             ))}
           </div>
 
           {session.drills.length > 0 && (
             <div className="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
-              <h3 className="text-[11px] font-black text-zinc-400 mb-4 uppercase tracking-widest">
-                {toGreekUpperCase(`Ασκήσεις (${session.drills.reduce((s, d) => s + d.duration, 0)} λεπτά)`)}
+              <h3 className="text-2xs font-semibold text-zinc-500 mb-4">
+                {`Ασκήσεις (${session.drills.reduce((s, d) => s + d.duration, 0)} λεπτά)`}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                 {session.drills.map((drill, i) => (
                   <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-zinc-50 border border-zinc-100/50 hover:bg-white hover:shadow-sm transition-all">
-                    <div className="h-8 w-8 rounded-lg bg-emerald-100 flex items-center justify-center text-xs font-black text-emerald-700 shrink-0">{i + 1}</div>
+                    <div className="h-8 w-8 rounded-lg bg-emerald-100 flex items-center justify-center text-xs font-semibold text-emerald-700 shrink-0">{i + 1}</div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs font-bold text-zinc-900 truncate">{drill.name}</p>
-                      {drill.description && <p className="text-[12px] text-zinc-400 truncate">{drill.description}</p>}
+                      <p className="text-xs font-medium text-zinc-900 truncate">{drill.name}</p>
+                      {drill.description && <p className="text-2xs text-zinc-500 truncate">{drill.description}</p>}
                     </div>
-                    <span className="px-2 py-1 rounded-md bg-white border border-zinc-100 text-[11px] font-black text-zinc-500 shrink-0">{drill.duration}&apos;</span>
+                    <span className="px-2 py-1 rounded-md bg-white border border-zinc-100 text-2xs font-semibold text-zinc-500 shrink-0">{drill.duration}&apos;</span>
                   </div>
                 ))}
               </div>
@@ -393,7 +393,7 @@ export default function TrainingDetailPage({ params }: PageProps) {
 
           {session.notes && (
             <div className="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
-              <h3 className="text-[11px] font-black text-zinc-400 mb-3 uppercase tracking-widest">{toGreekUpperCase('Σημειώσεις')}</h3>
+              <h3 className="text-2xs font-semibold text-zinc-500 mb-3">{'Σημειώσεις'}</h3>
               <p className="text-sm text-zinc-600 whitespace-pre-wrap bg-zinc-50 rounded-xl p-4 border border-zinc-100/50">{session.notes}</p>
             </div>
           )}
@@ -401,7 +401,7 @@ export default function TrainingDetailPage({ params }: PageProps) {
           {session.attendance.length > 0 && (
             <div className="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-                <h3 className="text-[11px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase('Απουσιολόγιο')}</h3>
+                <h3 className="text-2xs font-semibold text-zinc-500">{'Απουσιολόγιο'}</h3>
                 <div className="flex gap-2 flex-wrap">
                   {[
                     { label: `Παρόντες: ${attendanceStats.present}`, color: 'bg-emerald-50 text-emerald-700 border-emerald-100', dot: 'bg-emerald-500' },
@@ -409,8 +409,8 @@ export default function TrainingDetailPage({ params }: PageProps) {
                     { label: `Απόντες: ${attendanceStats.absent}`, color: 'bg-red-50 text-red-700 border-red-100', dot: 'bg-red-500' },
                     { label: `Τραυματίες: ${attendanceStats.injured}`, color: 'bg-zinc-50 text-zinc-600 border-zinc-200', dot: 'bg-zinc-400' },
                   ].map(({ label, color, dot }) => (
-                    <div key={label} className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-black uppercase", color)}>
-                      <div className={cn("h-1.5 w-1.5 rounded-full", dot)} />{toGreekUpperCase(label)}
+                    <div key={label} className={cn("flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-2xs font-semibold", color)}>
+                      <div className={cn("h-1.5 w-1.5 rounded-full", dot)} />{label}
                     </div>
                   ))}
                 </div>
@@ -418,9 +418,9 @@ export default function TrainingDetailPage({ params }: PageProps) {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                 {session.attendance.map((a) => (
                   <div key={a.athleteId} className="flex items-center justify-between p-3 rounded-xl bg-zinc-50 border border-zinc-100/50 hover:bg-white hover:shadow-sm transition-all">
-                    <span className="text-xs font-bold text-zinc-900 uppercase truncate mr-2">{toGreekUpperCase(a.athleteName)}</span>
-                    <span className={cn("text-[8px] font-black px-2 py-1 rounded-lg border uppercase tracking-wider shrink-0", ATTENDANCE_STATUS_COLORS[a.status])}>
-                      {toGreekUpperCase(ATTENDANCE_STATUS_LABELS[a.status])}
+                    <span className="text-xs font-medium text-zinc-900 truncate mr-2">{a.athleteName}</span>
+                    <span className={cn("text-2xs font-semibold px-2 py-1 rounded-lg border shrink-0", ATTENDANCE_STATUS_COLORS[a.status])}>
+                      {ATTENDANCE_STATUS_LABELS[a.status]}
                     </span>
                   </div>
                 ))}
@@ -436,15 +436,15 @@ export default function TrainingDetailPage({ params }: PageProps) {
           <div className="rounded-2xl border border-zinc-100 bg-white p-6 shadow-sm">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
               <div>
-                <h3 className="text-base font-black text-zinc-900 uppercase">{toGreekUpperCase('Απουσιολόγιο')}</h3>
-                <p className="text-[12px] font-bold text-zinc-400 uppercase tracking-widest mt-0.5">{athletes.length} αθλητές</p>
+                <h3 className="text-base font-semibold text-zinc-900">{'Απουσιολόγιο'}</h3>
+                <p className="text-2xs font-medium text-zinc-500 mt-0.5">{athletes.length} αθλητές</p>
               </div>
               <div className="flex gap-2 flex-wrap">
-                <Button variant="outline" size="sm" onClick={() => setAttendance((prev) => prev.map((a) => ({ ...a, status: 'present' })))} className="h-9 px-4 rounded-lg text-emerald-600 border-emerald-100 bg-emerald-50/50 hover:bg-emerald-600 hover:text-white font-bold text-[12px] uppercase">
-                  {toGreekUpperCase('Όλοι Παρόντες')}
+                <Button variant="outline" size="sm" onClick={() => setAttendance((prev) => prev.map((a) => ({ ...a, status: 'present' })))} className="h-9 px-4 rounded-lg text-emerald-600 border-emerald-100 bg-emerald-50/50 hover:bg-emerald-600 hover:text-white font-medium text-2xs">
+                  {'Όλοι Παρόντες'}
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => setAttendance((prev) => prev.map((a) => ({ ...a, status: 'absent' })))} className="h-9 px-4 rounded-lg text-red-500 border-red-100 bg-red-50/50 hover:bg-red-600 hover:text-white font-bold text-[12px] uppercase">
-                  {toGreekUpperCase('Όλοι Απόντες')}
+                <Button variant="outline" size="sm" onClick={() => setAttendance((prev) => prev.map((a) => ({ ...a, status: 'absent' })))} className="h-9 px-4 rounded-lg text-red-500 border-red-100 bg-red-50/50 hover:bg-red-600 hover:text-white font-medium text-2xs">
+                  {'Όλοι Απόντες'}
                 </Button>
               </div>
             </div>
@@ -453,14 +453,14 @@ export default function TrainingDetailPage({ params }: PageProps) {
               {attendance.map((a) => (
                 <div key={a.athleteId} className="flex flex-col xl:flex-row xl:items-center gap-3 p-3 rounded-xl border border-zinc-100 bg-zinc-50/30 hover:bg-white hover:shadow-sm transition-all">
                   <div className="flex-1 min-w-0 flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-lg bg-white border border-zinc-100 flex items-center justify-center text-xs font-black text-zinc-400 shrink-0">
+                    <div className="h-9 w-9 rounded-lg bg-white border border-zinc-100 flex items-center justify-center text-xs font-semibold text-zinc-500 shrink-0">
                       {a.athleteName.charAt(0)}
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-zinc-900 uppercase">{toGreekUpperCase(a.athleteName)}</p>
+                      <p className="text-sm font-semibold text-zinc-900">{a.athleteName}</p>
                       <div className="flex items-center gap-1.5 mt-0.5">
                         <div className={cn("h-1.5 w-1.5 rounded-full", (['present', 'late'].includes(a.status)) ? "bg-emerald-500" : "bg-red-500")} />
-                        <p className="text-[8px] font-black text-zinc-400 uppercase tracking-widest">{toGreekUpperCase(ATTENDANCE_STATUS_LABELS[a.status])}</p>
+                        <p className="text-2xs font-semibold text-zinc-500">{ATTENDANCE_STATUS_LABELS[a.status]}</p>
                       </div>
                     </div>
                   </div>
@@ -471,22 +471,22 @@ export default function TrainingDetailPage({ params }: PageProps) {
                         type="button"
                         onClick={() => updateAthleteStatus(a.athleteId, status)}
                         className={cn(
-                          "h-8 px-3 rounded-lg text-[8px] font-black border transition-all uppercase tracking-wider",
+                          "h-8 px-3 rounded-lg text-2xs font-semibold border transition-all",
                           a.status === status
                             ? ATTENDANCE_STATUS_COLORS[status] + ' shadow-sm'
-                            : 'border-zinc-200 bg-white text-zinc-400 hover:border-zinc-300'
+                            : 'border-zinc-200 bg-white text-zinc-500 hover:border-zinc-300'
                         )}
                       >
-                        {toGreekUpperCase(ATTENDANCE_STATUS_LABELS[status])}
+                        {ATTENDANCE_STATUS_LABELS[status]}
                       </button>
                     ))}
                   </div>
                   <div className="w-full xl:w-48">
                     <Input
-                      placeholder={toGreekUpperCase('Σημείωση...')}
+                      placeholder={'Σημείωση...'}
                       value={a.note || ''}
                       onChange={(e) => updateAthleteNote(a.athleteId, e.target.value)}
-                      className="h-8 text-xs font-bold bg-white border-zinc-200 rounded-lg placeholder:text-zinc-300"
+                      className="h-8 text-xs font-medium bg-white border-zinc-200 rounded-lg placeholder:text-zinc-500"
                     />
                   </div>
                 </div>
@@ -495,16 +495,16 @@ export default function TrainingDetailPage({ params }: PageProps) {
 
             {attendance.length === 0 && athletes.length === 0 && (
               <div className="flex flex-col items-center justify-center py-12 bg-zinc-50/50 rounded-xl border border-dashed border-zinc-200">
-                <Users className="h-8 w-8 text-zinc-200 mb-3" />
-                <p className="text-sm font-bold text-zinc-400">{toGreekUpperCase('Δεν υπάρχουν αθλητές')}</p>
+                <Users className="h-8 w-8 text-zinc-400 mb-3" />
+                <p className="text-sm font-semibold text-zinc-500">{'Δεν υπάρχουν αθλητές'}</p>
               </div>
             )}
           </div>
 
           <div className="sticky bottom-4 z-30 max-w-md mx-auto">
-            <Button onClick={saveAttendance} disabled={isSaving} className="h-12 w-full rounded-xl bg-zinc-900 hover:bg-black text-white shadow-xl font-bold text-sm uppercase active:scale-[0.98] transition-all">
+            <Button onClick={saveAttendance} disabled={isSaving} className="h-12 w-full rounded-xl bg-zinc-900 hover:bg-black text-white shadow-xl font-semibold text-sm active:scale-[0.98] transition-all">
               {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2 text-emerald-400" />}
-              {toGreekUpperCase('Αποθήκευση Απουσιολογίου')}
+              {'Αποθήκευση Απουσιολογίου'}
             </Button>
           </div>
         </div>
@@ -516,24 +516,24 @@ export default function TrainingDetailPage({ params }: PageProps) {
           <div className="space-y-5">
             <div className="flex items-center gap-3">
               <div className="h-9 w-9 rounded-lg bg-zinc-900 flex items-center justify-center text-white"><Pencil className="h-4 w-4" /></div>
-              <h3 className="text-base font-black text-zinc-900 uppercase">{toGreekUpperCase('Βασικές Πληροφορίες')}</h3>
+              <h3 className="text-base font-semibold text-zinc-900">{'Βασικές Πληροφορίες'}</h3>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τίτλος')}</Label>
-              <Input value={editForm.title || ''} onChange={(e) => setEditForm((p) => ({ ...p, title: e.target.value }))} className="h-11 px-4 bg-zinc-50 rounded-xl border-none font-bold text-sm uppercase" />
+              <Label className="text-2xs font-semibold text-zinc-500">{'Τίτλος'}</Label>
+              <Input value={editForm.title || ''} onChange={(e) => setEditForm((p) => ({ ...p, title: e.target.value }))} className="h-11 px-4 bg-zinc-50 rounded-xl border-none font-semibold text-sm" />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τύπος')}</Label>
+              <Label className="text-2xs font-semibold text-zinc-500">{'Τύπος'}</Label>
               <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                 {TRAINING_TYPES.map((type) => {
                   const colors = TRAINING_TYPE_COLORS[type];
                   return (
                     <button key={type} type="button" onClick={() => setEditForm((p) => ({ ...p, type }))}
-                      className={cn("h-10 px-3 rounded-xl text-[11px] font-black border uppercase tracking-wider transition-all",
-                        editForm.type === type ? `${colors.bg} ${colors.text} ${colors.border} shadow-md ring-2 ring-zinc-100` : "bg-white text-zinc-400 border-zinc-100 hover:border-zinc-200"
-                      )}>{toGreekUpperCase(TRAINING_TYPE_LABELS[type])}</button>
+                      className={cn("h-10 px-3 rounded-xl text-2xs font-semibold border transition-all",
+                        editForm.type === type ? `${colors.bg} ${colors.text} ${colors.border} shadow-md ring-2 ring-zinc-100` : "bg-white text-zinc-500 border-zinc-100 hover:border-zinc-200"
+                      )}>{TRAINING_TYPE_LABELS[type]}</button>
                   );
                 })}
               </div>
@@ -541,33 +541,33 @@ export default function TrainingDetailPage({ params }: PageProps) {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Τμήμα')}</Label>
+                <Label className="text-2xs font-semibold text-zinc-500">{'Τμήμα'}</Label>
                 <Select value={editForm.squadId || ''} onValueChange={(val: string) => setEditForm((p) => ({ ...p, squadId: val }))}>
-                  <SelectTrigger className="h-11 px-4 bg-zinc-50 border-none rounded-xl font-bold text-sm uppercase"><SelectValue /></SelectTrigger>
-                  <SelectContent className="rounded-xl">{squads.map((s) => (<SelectItem key={s.id} value={s.id} className="font-bold text-sm">{toGreekUpperCase(`${s.name} (${s.ageGroup})`)}</SelectItem>))}</SelectContent>
+                  <SelectTrigger className="h-11 px-4 bg-zinc-50 border-none rounded-xl font-semibold text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent className="rounded-xl">{squads.map((s) => (<SelectItem key={s.id} value={s.id} className="font-semibold text-sm">{`${s.name} (${s.ageGroup})`}</SelectItem>))}</SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Προπονητής')}</Label>
+                <Label className="text-2xs font-semibold text-zinc-500">{'Προπονητής'}</Label>
                 <Select value={editForm.coachId || ''} onValueChange={(val: string) => setEditForm((p) => ({ ...p, coachId: val }))}>
-                  <SelectTrigger className="h-11 px-4 bg-zinc-50 border-none rounded-xl font-bold text-sm uppercase"><SelectValue /></SelectTrigger>
-                  <SelectContent className="rounded-xl">{coaches.map((c) => (<SelectItem key={c.id} value={c.id} className="font-bold text-sm">{toGreekUpperCase(c.displayName)}</SelectItem>))}</SelectContent>
+                  <SelectTrigger className="h-11 px-4 bg-zinc-50 border-none rounded-xl font-semibold text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent className="rounded-xl">{coaches.map((c) => (<SelectItem key={c.id} value={c.id} className="font-semibold text-sm">{c.displayName}</SelectItem>))}</SelectContent>
                 </Select>
               </div>
             </div>
 
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-2">
-                <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Ημερομηνία')}</Label>
-                <Input type="date" value={editForm.date || ''} onChange={(e) => setEditForm((p) => ({ ...p, date: e.target.value }))} className="h-11 px-4 bg-zinc-50 rounded-xl border-none font-bold text-sm" />
+                <Label className="text-2xs font-semibold text-zinc-500">{'Ημερομηνία'}</Label>
+                <Input type="date" value={editForm.date || ''} onChange={(e) => setEditForm((p) => ({ ...p, date: e.target.value }))} className="h-11 px-4 bg-zinc-50 rounded-xl border-none font-semibold text-sm" />
               </div>
               <div className="space-y-2">
-                <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Έναρξη')}</Label>
-                <Input type="time" value={editForm.startTime || ''} onChange={(e) => setEditForm((p) => ({ ...p, startTime: e.target.value }))} className="h-11 px-4 bg-zinc-50 rounded-xl border-none font-bold text-sm" />
+                <Label className="text-2xs font-semibold text-zinc-500">{'Έναρξη'}</Label>
+                <Input type="time" value={editForm.startTime || ''} onChange={(e) => setEditForm((p) => ({ ...p, startTime: e.target.value }))} className="h-11 px-4 bg-zinc-50 rounded-xl border-none font-semibold text-sm" />
               </div>
               <div className="space-y-2">
-                <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Λήξη')}</Label>
-                <Input type="time" value={editForm.endTime || ''} onChange={(e) => setEditForm((p) => ({ ...p, endTime: e.target.value }))} className="h-11 px-4 bg-zinc-50 rounded-xl border-none font-bold text-sm" />
+                <Label className="text-2xs font-semibold text-zinc-500">{'Λήξη'}</Label>
+                <Input type="time" value={editForm.endTime || ''} onChange={(e) => setEditForm((p) => ({ ...p, endTime: e.target.value }))} className="h-11 px-4 bg-zinc-50 rounded-xl border-none font-semibold text-sm" />
               </div>
             </div>
           </div>
@@ -576,19 +576,19 @@ export default function TrainingDetailPage({ params }: PageProps) {
           <div className="space-y-4 pt-5 border-t border-zinc-100">
             <div className="flex items-center gap-3">
               <div className="h-9 w-9 rounded-lg bg-violet-50 flex items-center justify-center"><Dumbbell className="h-4 w-4 text-violet-600" /></div>
-              <h3 className="text-base font-black text-zinc-900 uppercase">{toGreekUpperCase('Ασκήσεις')}</h3>
+              <h3 className="text-base font-semibold text-zinc-900">{'Ασκήσεις'}</h3>
             </div>
 
             {editDrills.length > 0 && (
               <div className="space-y-2">
                 {editDrills.map((drill, i) => (
                   <div key={i} className="flex items-center gap-3 p-3 rounded-xl border border-zinc-100 bg-zinc-50/50 hover:bg-white transition-all">
-                    <div className="h-8 w-8 rounded-lg bg-white border border-zinc-100 flex items-center justify-center text-sm font-black text-zinc-400">{i + 1}</div>
+                    <div className="h-8 w-8 rounded-lg bg-white border border-zinc-100 flex items-center justify-center text-sm font-semibold text-zinc-500">{i + 1}</div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-bold text-zinc-900">{drill.name}</p>
-                      <p className="text-[12px] text-zinc-400">{drill.duration} λεπτά{drill.description ? ` — ${drill.description}` : ''}</p>
+                      <p className="text-sm font-semibold text-zinc-900">{drill.name}</p>
+                      <p className="text-2xs text-zinc-500">{drill.duration} λεπτά{drill.description ? ` — ${drill.description}` : ''}</p>
                     </div>
-                    <button type="button" onClick={() => setEditDrills((p) => p.filter((_, idx) => idx !== i))} className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-300 hover:text-red-500 hover:bg-red-50 transition-all">
+                    <button type="button" onClick={() => setEditDrills((p) => p.filter((_, idx) => idx !== i))} className="h-7 w-7 rounded-lg flex items-center justify-center text-zinc-400 hover:text-red-500 hover:bg-red-50 transition-all">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </div>
@@ -598,22 +598,22 @@ export default function TrainingDetailPage({ params }: PageProps) {
 
             <div className="bg-zinc-50/50 border border-dashed border-zinc-200 rounded-xl p-4 space-y-3">
               <div className="grid grid-cols-[1fr_80px] gap-3">
-                <Input placeholder="Όνομα άσκησης..." value={newDrill.name} onChange={(e) => setNewDrill((p) => ({ ...p, name: e.target.value }))} className="h-10 bg-white border-none rounded-lg px-3 font-bold text-sm" />
-                <Input type="number" value={newDrill.duration} onChange={(e) => setNewDrill((p) => ({ ...p, duration: Number(e.target.value) || 0 }))} className="h-10 bg-white border-none rounded-lg px-3 text-center font-black text-sm" min={1} />
+                <Input placeholder="Όνομα άσκησης..." value={newDrill.name} onChange={(e) => setNewDrill((p) => ({ ...p, name: e.target.value }))} className="h-10 bg-white border-none rounded-lg px-3 font-semibold text-sm" />
+                <Input type="number" value={newDrill.duration} onChange={(e) => setNewDrill((p) => ({ ...p, duration: Number(e.target.value) || 0 }))} className="h-10 bg-white border-none rounded-lg px-3 text-center font-semibold text-sm" min={1} />
               </div>
-              <Input placeholder="Περιγραφή (προαιρετικά)..." value={newDrill.description} onChange={(e) => setNewDrill((p) => ({ ...p, description: e.target.value }))} className="h-10 bg-white border-none rounded-lg px-3 font-bold text-sm" />
-              <Button type="button" variant="outline" onClick={addEditDrill} disabled={!newDrill.name.trim()} className="h-10 w-full rounded-lg border-zinc-200 font-bold text-xs">
-                <Plus className="h-4 w-4 mr-2 text-violet-600" />{toGreekUpperCase('Προσθήκη')}
+              <Input placeholder="Περιγραφή (προαιρετικά)..." value={newDrill.description} onChange={(e) => setNewDrill((p) => ({ ...p, description: e.target.value }))} className="h-10 bg-white border-none rounded-lg px-3 font-semibold text-sm" />
+              <Button type="button" variant="outline" onClick={addEditDrill} disabled={!newDrill.name.trim()} className="h-10 w-full rounded-lg border-zinc-200 font-medium text-xs">
+                <Plus className="h-4 w-4 mr-2 text-violet-600" />{'Προσθήκη'}
               </Button>
             </div>
           </div>
 
           {/* Notes */}
           <div className="space-y-2 pt-5 border-t border-zinc-100">
-            <Label className="text-[11px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase('Σημειώσεις')}</Label>
+            <Label className="text-2xs font-semibold text-zinc-500">{'Σημειώσεις'}</Label>
             <textarea
               value={editForm.notes || ''} onChange={(e) => setEditForm((p) => ({ ...p, notes: e.target.value }))} rows={3}
-              className="w-full rounded-xl bg-zinc-50 border-none p-4 font-bold text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 placeholder:text-zinc-300 resize-none"
+              className="w-full rounded-xl bg-zinc-50 border-none p-4 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/20 placeholder:text-zinc-500 resize-none"
               placeholder="Σημειώσεις..."
             />
           </div>
@@ -621,9 +621,9 @@ export default function TrainingDetailPage({ params }: PageProps) {
           {/* Recurring edit scope */}
           {session.recurringGroupId && recurringCount > 1 && (
             <div className="space-y-2 pt-5 border-t border-zinc-100">
-              <p className="text-[11px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-1.5">
+              <p className="text-2xs font-semibold text-zinc-500 flex items-center gap-1.5">
                 <Repeat className="h-3.5 w-3.5 text-violet-500" />
-                {toGreekUpperCase('Εφαρμογή αλλαγών σε')}
+                {'Εφαρμογή αλλαγών σε'}
               </p>
               <div className="grid grid-cols-3 gap-2">
                 {([
@@ -636,10 +636,10 @@ export default function TrainingDetailPage({ params }: PageProps) {
                     type="button"
                     onClick={() => setRecurringEditScope(value)}
                     className={cn(
-                      "p-2.5 rounded-xl border text-[12px] font-bold transition-all text-center",
+                      "p-2.5 rounded-xl border text-2xs font-medium transition-all text-center",
                       recurringEditScope === value
                         ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-                        : "border-zinc-100 text-zinc-400 hover:border-zinc-200"
+                        : "border-zinc-100 text-zinc-500 hover:border-zinc-200"
                     )}
                   >
                     {label}
@@ -647,7 +647,7 @@ export default function TrainingDetailPage({ params }: PageProps) {
                 ))}
               </div>
               {recurringEditScope !== 'one' && (
-                <p className="text-[12px] text-amber-600 font-bold bg-amber-50 rounded-lg p-2 border border-amber-100">
+                <p className="text-2xs text-amber-600 font-medium bg-amber-50 rounded-lg p-2 border border-amber-100">
                   Η ημερομηνία δεν θα αλλάξει στις υπόλοιπες προπονήσεις — μόνο τίτλος, ώρα, τμήμα, προπονητής, ασκήσεις & σημειώσεις.
                 </p>
               )}
@@ -655,10 +655,10 @@ export default function TrainingDetailPage({ params }: PageProps) {
           )}
 
           <div className="flex gap-3 pt-5 border-t border-zinc-100">
-            <Button variant="outline" className="flex-1 h-11 rounded-xl font-bold text-sm text-zinc-400 border-zinc-200" onClick={() => setActiveTab('overview')}>{toGreekUpperCase('Ακύρωση')}</Button>
-            <Button className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black shadow-lg text-sm uppercase active:scale-[0.98]" onClick={saveEdit} disabled={isSaving}>
+            <Button variant="outline" className="flex-1 h-11 rounded-xl font-semibold text-sm text-zinc-500 border-zinc-200" onClick={() => setActiveTab('overview')}>{'Ακύρωση'}</Button>
+            <Button className="flex-1 h-12 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-lg text-sm active:scale-[0.98]" onClick={saveEdit} disabled={isSaving}>
               {isSaving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
-              {toGreekUpperCase(recurringEditScope !== 'one' && session.recurringGroupId ? 'Αποθήκευση Όλων' : 'Αποθήκευση')}
+              {recurringEditScope !== 'one' && session.recurringGroupId ? 'Αποθήκευση Όλων' : 'Αποθήκευση'}
             </Button>
           </div>
         </div>

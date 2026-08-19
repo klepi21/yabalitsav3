@@ -9,7 +9,7 @@ import { UserGroup, GROUP_COLORS } from '@/types/academy';
 import { Loader2, Plus, Pencil, Trash2, ClipboardList, Shield, Link2, Users, AlertCircle, Euro, HeartPulse } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -98,11 +98,11 @@ export default function UserGroupsPage() {
              <Users className="h-7 w-7 text-emerald-400" />
            </div>
            <div className="space-y-0.5">
-             <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
-               {toGreekUpperCase('Κατηγορίες')}
+             <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+               {'Κατηγορίες'}
              </h1>
-             <p className="text-sm font-bold text-zinc-400 uppercase tracking-tight">
-               {toGreekUpperCase('Ορισμος ρολων και δικαιωματων')}
+             <p className="text-sm font-semibold text-zinc-500 tracking-tight">
+               {'Ορισμος ρολων και δικαιωματων'}
              </p>
            </div>
         </div>
@@ -110,33 +110,33 @@ export default function UserGroupsPage() {
         <Button asChild className="h-12 px-8 rounded-xl bg-zinc-900 hover:bg-black text-white font-bold text-base shadow-lg transition-all active:scale-95 group">
           <Link href="/management/academy/user-groups/new" className="flex items-center gap-2">
             <Plus className="h-5 w-5 text-emerald-400 group-hover:scale-110 transition-transform" />
-            {toGreekUpperCase('Νέα Κατηγορία')}
+            {'Νέα Κατηγορία'}
           </Link>
         </Button>
       </div>
 
       {/* Stats row */}
       <div className="flex items-center gap-4 bg-white p-4 rounded-2xl border border-zinc-100 shadow-sm min-w-[240px] group hover:shadow-md transition-all duration-300 w-fit">
-        <div className="h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-300 group-hover:bg-blue-50 group-hover:text-blue-500 transition-all shadow-inner">
+        <div className="h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-blue-50 group-hover:text-blue-500 transition-all shadow-inner">
           <Users className="h-6 w-6" />
         </div>
         <div className="space-y-0.5">
-          <p className="text-2xl font-black text-zinc-900 group-hover:text-blue-600 transition-colors uppercase tracking-tight">{groups.length}</p>
-          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-400">{toGreekUpperCase('Σύνολο Κατηγοριών')}</p>
+          <p className="text-2xl font-bold text-zinc-900 group-hover:text-blue-600 transition-colors tracking-tight">{groups.length}</p>
+          <p className="text-2xs font-medium text-zinc-500">{'Σύνολο Κατηγοριών'}</p>
         </div>
       </div>
 
       {/* Groups List */}
       {groups.length === 0 ? (
-        <div className="rounded-[2.5rem] border-2 border-dashed border-zinc-100 bg-white p-20 text-center">
-            <div className="mx-auto h-24 w-24 bg-zinc-50 rounded-[2rem] flex items-center justify-center mb-8">
-                <Users className="h-12 w-12 text-zinc-200" />
+        <div className="rounded-2xl border-2 border-dashed border-zinc-100 bg-white p-20 text-center">
+            <div className="mx-auto h-24 w-24 bg-zinc-50 rounded-2xl flex items-center justify-center mb-8">
+                <Users className="h-12 w-12 text-zinc-400" />
             </div>
-          <h3 className="text-2xl font-black text-zinc-900 mb-2">Δεν υπάρχουν κατηγορίες</h3>
+          <h3 className="text-2xl font-bold text-zinc-900 mb-2">Δεν υπάρχουν κατηγορίες</h3>
           <p className="text-zinc-500 font-medium text-lg max-w-sm mx-auto">
             Ξεκινήστε δημιουργώντας την πρώτη κατηγορία χρηστών για να οργανώσετε την ακαδημία σας.
           </p>
-          <Button asChild className="mt-10 h-14 px-10 rounded-2xl bg-emerald-600 text-white font-black">
+          <Button asChild className="mt-10 h-14 px-10 rounded-2xl bg-emerald-600 text-white font-semibold">
             <Link href="/management/academy/user-groups/new">Νέα Κατηγορία</Link>
           </Button>
         </div>
@@ -155,7 +155,7 @@ export default function UserGroupsPage() {
             return (
               <div
                 key={group.id}
-                className="group flex flex-col rounded-[2rem] border border-zinc-100 bg-white p-6 transition-all duration-300 hover:shadow-lg hover:border-emerald-100"
+                className="group flex flex-col rounded-2xl border border-zinc-100 bg-white p-6 transition-all duration-300 hover:shadow-lg hover:border-emerald-100"
               >
                 <div className="flex items-start justify-between gap-4 mb-6">
                   <div className="flex items-center gap-4 min-w-0">
@@ -164,12 +164,12 @@ export default function UserGroupsPage() {
                     </div>
                     <div className="min-w-0">
                         <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                            <h3 className="text-lg font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{toGreekUpperCase(group.name)}</h3>
-                            <Badge variant="secondary" className={cn("rounded-md px-2 py-0.5 text-[11px] font-bold uppercase tracking-wider bg-zinc-100 text-zinc-500 border-none shadow-sm", (GROUP_COLORS as Record<string, string>)[group.color] || '')}>
-                                {toGreekUpperCase(group.namePlural)}
+                            <h3 className="text-lg font-semibold text-zinc-900 group-hover:text-emerald-700 transition-colors tracking-tight">{group.name}</h3>
+                            <Badge variant="secondary" className={cn("rounded-md px-2 py-0.5 text-2xs font-medium bg-zinc-100 text-zinc-500 border-none shadow-sm", (GROUP_COLORS as Record<string, string>)[group.color] || '')}>
+                                {group.namePlural}
                             </Badge>
                         </div>
-                        <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-zinc-300 truncate">ID: {group.id}</p>
+                        <p className="text-2xs font-medium text-zinc-500 truncate">ID: {group.id}</p>
                     </div>
                   </div>
 
@@ -185,7 +185,7 @@ export default function UserGroupsPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-10 w-10 rounded-xl text-zinc-300 hover:bg-red-50 hover:text-red-600 hover:border-red-100 border border-transparent transition-all active:scale-90"
+                          className="h-10 w-10 rounded-xl text-zinc-400 hover:bg-red-50 hover:text-red-600 hover:border-red-100 border border-transparent transition-all active:scale-90"
                           onClick={() => setDeleteConfirm(group.id)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -193,19 +193,19 @@ export default function UserGroupsPage() {
                       </AlertDialogTrigger>
                       <AlertDialogContent className="rounded-3xl border-none shadow-2xl p-10 max-w-md">
                         <div className="text-center">
-                            <div className="mx-auto h-20 w-20 bg-red-50 rounded-[1.5rem] flex items-center justify-center mb-6">
+                            <div className="mx-auto h-20 w-20 bg-red-50 rounded-xl flex items-center justify-center mb-6">
                                 <Trash2 className="h-10 w-10 text-red-500" />
                             </div>
                             <AlertDialogHeader>
-                            <AlertDialogTitle className="text-2xl font-black text-zinc-900">Διαγραφή Κατηγορίας</AlertDialogTitle>
+                            <AlertDialogTitle className="text-2xl font-bold text-zinc-900">Διαγραφή Κατηγορίας</AlertDialogTitle>
                             <AlertDialogDescription className="text-lg font-medium text-zinc-500 mt-2">
-                                Είστε σίγουροι ότι θέλετε να διαγράψετε την κατηγορία <span className="font-black text-zinc-900">&quot;{group.name}&quot;</span>;
+                                Είστε σίγουροι ότι θέλετε να διαγράψετε την κατηγορία <span className="font-semibold text-zinc-900">&quot;{group.name}&quot;</span>;
                                 <br />Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.
                             </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-10 flex flex-col gap-3 sm:flex-row">
                                 <AlertDialogCancel className="h-14 rounded-2xl border-zinc-100 font-bold text-zinc-500 flex-1 m-0">Ακύρωση</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDelete(group.id)} className="h-14 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black flex-1 m-0">
+                                <AlertDialogAction onClick={() => handleDelete(group.id)} className="h-14 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-semibold flex-1 m-0">
                                     Διαγραφή
                                 </AlertDialogAction>
                             </AlertDialogFooter>
@@ -218,20 +218,20 @@ export default function UserGroupsPage() {
                 <div className="space-y-4">
                     {/* Fields Section */}
                     <div>
-                        <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-2.5">{toGreekUpperCase('Επιπλέον Πεδία')}</p>
-                        <div className="flex flex-wrap gap-1.5 text-zinc-400">
+                        <p className="text-2xs font-medium text-zinc-500 mb-2.5">{'Επιπλέον Πεδία'}</p>
+                        <div className="flex flex-wrap gap-1.5 text-zinc-500">
                             {group.fields.length > 0 ? (
                                 group.fields.map((field) => (
                                     <span
                                         key={field.key}
-                                        className="inline-flex items-center rounded-lg bg-zinc-50 px-3 py-1.5 text-[12px] font-bold uppercase tracking-tight text-zinc-600 border border-zinc-100 shadow-sm"
+                                        className="inline-flex items-center rounded-lg bg-zinc-50 px-3 py-1.5 text-2xs font-medium tracking-tight text-zinc-600 border border-zinc-100 shadow-sm"
                                     >
-                                        {toGreekUpperCase(field.label)}
-                                        {field.required && <span className="text-red-500 ml-1 font-black">*</span>}
+                                        {field.label}
+                                        {field.required && <span className="text-red-500 ml-1 font-semibold">*</span>}
                                     </span>
                                 ))
                             ) : (
-                                <span className="text-[12px] font-bold text-zinc-300 uppercase tracking-widest">{toGreekUpperCase('Κανένα επιπλέον πεδίο')}</span>
+                                <span className="text-2xs font-medium text-zinc-500">{'Κανένα επιπλέον πεδίο'}</span>
                             )}
                         </div>
                     </div>
@@ -239,36 +239,36 @@ export default function UserGroupsPage() {
                     {/* Capabilities Section */}
                     {group.capabilities.length > 0 && (
                         <div>
-                            <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-2.5">{toGreekUpperCase('Δυνατότητες')}</p>
+                            <p className="text-2xs font-medium text-zinc-500 mb-2.5">{'Δυνατότητες'}</p>
                             <div className="flex flex-wrap gap-1.5">
                                 {group.capabilities.includes('squad_assignment') && (
-                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-blue-600 border-none bg-blue-50/50">
+                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-2xs font-medium text-blue-600 border-none bg-blue-50/50">
                                         <Shield className="h-3.5 w-3.5 mr-1.5" />
-                                        {toGreekUpperCase('Ανάθεση σε τμήμα')}
+                                        {'Ανάθεση σε τμήμα'}
                                     </Badge>
                                 )}
                                 {group.capabilities.includes('parent_linking') && (
-                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-amber-600 border-none bg-amber-50/50">
+                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-2xs font-medium text-amber-600 border-none bg-amber-50/50">
                                         <Link2 className="h-3.5 w-3.5 mr-1.5" />
-                                        {toGreekUpperCase('Σύνδεση γονέα')}
+                                        {'Σύνδεση γονέα'}
                                     </Badge>
                                 )}
                                 {group.capabilities.includes('coach_squads') && (
-                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-emerald-600 border-none bg-emerald-50/50">
+                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-2xs font-medium text-emerald-600 border-none bg-emerald-50/50">
                                         <ClipboardList className="h-3.5 w-3.5 mr-1.5" />
-                                        {toGreekUpperCase('Ανάθεση τμημάτων')}
+                                        {'Ανάθεση τμημάτων'}
                                     </Badge>
                                 )}
                                 {group.capabilities.includes('monthly_payment') && (
-                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-teal-600 border-none bg-teal-50/50">
+                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-2xs font-medium text-teal-600 border-none bg-teal-50/50">
                                         <Euro className="h-3.5 w-3.5 mr-1.5" />
-                                        {toGreekUpperCase('Μηνιαία πληρωμή')}
+                                        {'Μηνιαία πληρωμή'}
                                     </Badge>
                                 )}
                                 {group.capabilities.includes('medical_tracking') && (
-                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-red-600 border-none bg-red-50/50">
+                                    <Badge variant="outline" className="rounded-lg px-3 py-1.5 text-2xs font-medium text-red-600 border-none bg-red-50/50">
                                         <HeartPulse className="h-3.5 w-3.5 mr-1.5" />
-                                        {toGreekUpperCase('Ιατρικό πιστοποιητικό')}
+                                        {'Ιατρικό πιστοποιητικό'}
                                     </Badge>
                                 )}
                             </div>

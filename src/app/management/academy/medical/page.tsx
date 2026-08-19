@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -65,7 +65,7 @@ const STATUS_CONFIG: Record<MedicalStatus, { label: string; color: string; bg: s
   expired: { label: 'Ληγμένο', color: 'text-red-600', bg: 'bg-red-50 border-red-200', icon: XCircle },
   expiring_soon: { label: 'Λήγει σύντομα', color: 'text-amber-600', bg: 'bg-amber-50 border-amber-200', icon: Clock },
   valid: { label: 'Σε ισχύ', color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200', icon: CheckCircle2 },
-  missing: { label: 'Χωρίς πιστοποιητικό', color: 'text-zinc-400', bg: 'bg-zinc-50 border-zinc-200', icon: HelpCircle },
+  missing: { label: 'Χωρίς πιστοποιητικό', color: 'text-zinc-500', bg: 'bg-zinc-50 border-zinc-200', icon: HelpCircle },
 };
 
 export default function MedicalTrackingPage() {
@@ -252,11 +252,11 @@ export default function MedicalTrackingPage() {
             <HeartPulse className="h-7 w-7" />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
-              {toGreekUpperCase('Ιατρικά Πιστοποιητικά')}
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+              {'Ιατρικά Πιστοποιητικά'}
             </h1>
-            <p className="text-sm font-bold text-zinc-400 uppercase tracking-tight">
-              {toGreekUpperCase('Παρακολούθηση λήξης πιστοποιητικών')}
+            <p className="text-sm font-semibold text-zinc-500 tracking-tight">
+              {'Παρακολούθηση λήξης πιστοποιητικών'}
             </p>
           </div>
         </div>
@@ -269,7 +269,7 @@ export default function MedicalTrackingPage() {
             <AlertTriangle className="h-6 w-6 text-red-600" />
           </div>
           <div>
-            <p className="text-lg font-black text-red-700">
+            <p className="text-lg font-semibold text-red-700">
               {stats.expired} {stats.expired === 1 ? 'αθλητής έχει' : 'αθλητές έχουν'} ληγμένο ιατρικό πιστοποιητικό!
             </p>
             <p className="text-sm text-red-500 font-medium mt-1">
@@ -285,7 +285,7 @@ export default function MedicalTrackingPage() {
             <Clock className="h-6 w-6 text-amber-600" />
           </div>
           <div>
-            <p className="text-lg font-black text-amber-700">
+            <p className="text-lg font-semibold text-amber-700">
               {stats.expiring_soon} {stats.expiring_soon === 1 ? 'αθλητής' : 'αθλητές'} με πιστοποιητικό που λήγει εντός 30 ημερών
             </p>
             <p className="text-sm text-amber-500 font-medium mt-1">
@@ -301,7 +301,7 @@ export default function MedicalTrackingPage() {
           { key: 'expired' as const, label: 'Ληγμένα', icon: XCircle, color: 'text-red-600', bg: 'bg-red-50', count: stats.expired },
           { key: 'expiring_soon' as const, label: 'Λήγουν σύντομα', icon: Clock, color: 'text-amber-600', bg: 'bg-amber-50', count: stats.expiring_soon },
           { key: 'valid' as const, label: 'Σε ισχύ', icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50', count: stats.valid },
-          { key: 'missing' as const, label: 'Χωρίς', icon: HelpCircle, color: 'text-zinc-400', bg: 'bg-zinc-50', count: stats.missing },
+          { key: 'missing' as const, label: 'Χωρίς', icon: HelpCircle, color: 'text-zinc-500', bg: 'bg-zinc-50', count: stats.missing },
         ]).map((stat) => (
           <button
             key={stat.key}
@@ -314,9 +314,9 @@ export default function MedicalTrackingPage() {
             )}
           >
             <stat.icon className={cn("h-5 w-5 mb-2", statusFilter === stat.key ? 'text-white' : stat.color)} />
-            <p className={cn("text-2xl font-black", statusFilter === stat.key ? 'text-white' : 'text-zinc-900')}>{stat.count}</p>
-            <p className={cn("text-[11px] font-bold uppercase tracking-widest", statusFilter === stat.key ? 'text-zinc-400' : 'text-zinc-400')}>
-              {toGreekUpperCase(stat.label)}
+            <p className={cn("text-2xl font-bold", statusFilter === stat.key ? 'text-white' : 'text-zinc-900')}>{stat.count}</p>
+            <p className={cn("text-2xs font-medium", statusFilter === stat.key ? 'text-zinc-500' : 'text-zinc-500')}>
+              {stat.label}
             </p>
           </button>
         ))}
@@ -324,9 +324,9 @@ export default function MedicalTrackingPage() {
 
       {/* Search */}
       <div className="relative group max-w-md">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-300 group-focus-within:text-emerald-500 transition-colors" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400 group-focus-within:text-emerald-500 transition-colors" />
         <Input
-          placeholder={toGreekUpperCase('Αναζήτηση αθλητή...')}
+          placeholder={'Αναζήτηση αθλητή...'}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="h-11 pl-11 bg-white rounded-xl"
@@ -335,11 +335,11 @@ export default function MedicalTrackingPage() {
 
       {/* Athletes list */}
       {athletes.length === 0 ? (
-        <div className="rounded-[2rem] border-2 border-dashed border-zinc-100 bg-white p-16 text-center">
-          <div className="mx-auto h-20 w-20 bg-zinc-50 rounded-[1.5rem] flex items-center justify-center mb-6">
-            <HeartPulse className="h-10 w-10 text-zinc-200" />
+        <div className="rounded-2xl border-2 border-dashed border-zinc-100 bg-white p-16 text-center">
+          <div className="mx-auto h-20 w-20 bg-zinc-50 rounded-xl flex items-center justify-center mb-6">
+            <HeartPulse className="h-10 w-10 text-zinc-400" />
           </div>
-          <h3 className="text-xl font-black text-zinc-900 mb-2">Δεν υπάρχουν αθλητές</h3>
+          <h3 className="text-xl font-bold text-zinc-900 mb-2">Δεν υπάρχουν αθλητές</h3>
           <p className="text-zinc-500 max-w-md mx-auto">
             Ενεργοποιήστε τη δυνατότητα &quot;Ιατρικό πιστοποιητικό&quot; σε μια κατηγορία χρηστών για να ξεκινήσετε την παρακολούθηση.
           </p>
@@ -367,17 +367,17 @@ export default function MedicalTrackingPage() {
 
                 {/* Athlete info */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-black text-zinc-900 uppercase tracking-tight truncate">
-                    {toGreekUpperCase(athlete.user.displayName)}
+                  <p className="text-sm font-semibold text-zinc-900 tracking-tight truncate">
+                    {athlete.user.displayName}
                   </p>
                   <div className="flex items-center gap-2 mt-0.5">
                     {athlete.squad && (
-                      <span className="text-[12px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
+                      <span className="text-2xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">
                         {athlete.squad.name}
                       </span>
                     )}
                     {athlete.user.fields?.birth_year && (
-                      <span className="text-[12px] font-bold text-zinc-400">
+                      <span className="text-2xs font-medium text-zinc-500">
                         {athlete.user.fields.birth_year}
                       </span>
                     )}
@@ -388,10 +388,10 @@ export default function MedicalTrackingPage() {
                 <div className="text-right shrink-0">
                   {athlete.expiryDate ? (
                     <>
-                      <p className={cn("text-sm font-black", cfg.color)}>
+                      <p className={cn("text-sm font-semibold", cfg.color)}>
                         {new Date(athlete.expiryDate).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric' })}
                       </p>
-                      <p className={cn("text-[12px] font-bold", cfg.color)}>
+                      <p className={cn("text-2xs font-medium", cfg.color)}>
                         {athlete.status === 'expired'
                           ? `Ληγμένο ${Math.abs(athlete.daysUntilExpiry!)} ημέρες`
                           : athlete.status === 'expiring_soon'
@@ -401,7 +401,7 @@ export default function MedicalTrackingPage() {
                       </p>
                     </>
                   ) : (
-                    <p className="text-sm font-bold text-zinc-300">Δεν έχει οριστεί</p>
+                    <p className="text-sm font-semibold text-zinc-500">Δεν έχει οριστεί</p>
                   )}
                 </div>
 
@@ -417,7 +417,7 @@ export default function MedicalTrackingPage() {
                           ? "text-emerald-500"
                           : athlete.user.lastMedicalNotifiedAt
                             ? "text-amber-400 hover:text-amber-600 hover:bg-amber-50"
-                            : "text-zinc-300 hover:text-amber-500 hover:bg-amber-50"
+                            : "text-zinc-400 hover:text-amber-500 hover:bg-amber-50"
                       )}
                       onClick={() => setNotifyConfirm(athlete)}
                       disabled={notifying === athlete.user.id}
@@ -452,15 +452,15 @@ export default function MedicalTrackingPage() {
 
           {filtered.length === 0 && (
             <div className="py-12 text-center">
-              <Users className="h-8 w-8 text-zinc-200 mx-auto mb-3" />
-              <p className="text-zinc-400 font-bold">Δεν βρέθηκαν αθλητές</p>
+              <Users className="h-8 w-8 text-zinc-400 mx-auto mb-3" />
+              <p className="text-zinc-500 font-bold">Δεν βρέθηκαν αθλητές</p>
             </div>
           )}
         </div>
       )}
       {/* Notify Confirmation Dialog */}
       <AlertDialog open={notifyConfirm !== null} onOpenChange={(open) => !open && setNotifyConfirm(null)}>
-        <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl p-0 max-w-sm overflow-hidden">
+        <AlertDialogContent className="rounded-2xl border-none shadow-2xl p-0 max-w-sm overflow-hidden">
           {notifyConfirm && (() => {
             const contact = getNotificationEmail(notifyConfirm.user);
             const cfg = STATUS_CONFIG[notifyConfirm.status];
@@ -471,7 +471,7 @@ export default function MedicalTrackingPage() {
                     <HeartPulse className="h-6 w-6 text-white" />
                   </div>
                   <AlertDialogHeader>
-                    <AlertDialogTitle className="text-lg font-black text-white tracking-tight">
+                    <AlertDialogTitle className="text-lg font-semibold text-white tracking-tight">
                       Ειδοποίηση Πιστοποιητικού
                     </AlertDialogTitle>
                     <AlertDialogDescription className="text-red-100 text-sm mt-1">
@@ -486,8 +486,8 @@ export default function MedicalTrackingPage() {
                       <cfg.icon className={cn("h-5 w-5", cfg.color)} />
                     </div>
                     <div>
-                      <p className="text-sm font-black text-zinc-900">{notifyConfirm.user.displayName}</p>
-                      <p className={cn("text-[11px] font-bold", cfg.color)}>
+                      <p className="text-sm font-semibold text-zinc-900">{notifyConfirm.user.displayName}</p>
+                      <p className={cn("text-2xs font-medium", cfg.color)}>
                         {notifyConfirm.expiryDate
                           ? `${cfg.label} — ${new Date(notifyConfirm.expiryDate).toLocaleDateString('el-GR')}`
                           : 'Χωρίς πιστοποιητικό'
@@ -497,14 +497,14 @@ export default function MedicalTrackingPage() {
                   </div>
 
                   <div className="space-y-2.5">
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-300">{toGreekUpperCase('Παραλήπτης')}</p>
+                    <p className="text-2xs font-medium text-zinc-500">{'Παραλήπτης'}</p>
                     <div className="flex items-center gap-2.5">
                       <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
                         <Users className="h-3.5 w-3.5 text-blue-500" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-zinc-900">{contact?.name || '—'}</p>
-                        <p className="text-[11px] text-zinc-400 font-medium">
+                        <p className="text-sm font-semibold text-zinc-900">{contact?.name || '—'}</p>
+                        <p className="text-2xs text-zinc-500 font-medium">
                           {contact?.email || 'Δεν υπάρχει email'}
                           {contact?.isParent && <span className="ml-1 text-blue-400">(Γονέας)</span>}
                         </p>
@@ -517,7 +517,7 @@ export default function MedicalTrackingPage() {
                   <div className="px-8">
                     <div className="flex items-center gap-2 p-2.5 bg-amber-50 rounded-lg">
                       <CheckCircle2 className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-                      <p className="text-[11px] text-amber-700 font-medium">
+                      <p className="text-2xs text-amber-700 font-medium">
                         Τελευταία ειδοποίηση: {new Date(notifyConfirm.user.lastMedicalNotifiedAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
@@ -531,12 +531,12 @@ export default function MedicalTrackingPage() {
                         handleNotify(notifyConfirm);
                         setNotifyConfirm(null);
                       }}
-                      className="h-12 w-full rounded-xl bg-zinc-900 hover:bg-black text-white font-bold text-sm shadow-lg transition-all active:scale-[0.98] m-0"
+                      className="h-12 w-full rounded-xl bg-zinc-900 hover:bg-black text-white font-semibold text-sm shadow-lg transition-all active:scale-[0.98] m-0"
                     >
                       <Send className="h-4 w-4 mr-2" />
                       Αποστολή Email
                     </AlertDialogAction>
-                    <AlertDialogCancel className="h-10 w-full rounded-xl border-none bg-transparent text-zinc-400 hover:text-zinc-600 font-bold text-sm m-0">
+                    <AlertDialogCancel className="h-10 w-full rounded-xl border-none bg-transparent text-zinc-500 hover:text-zinc-600 font-semibold text-sm m-0">
                       Ακύρωση
                     </AlertDialogCancel>
                   </AlertDialogFooter>

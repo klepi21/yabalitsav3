@@ -52,7 +52,7 @@ export default function KnockoutBracket({ matches, teams }: KnockoutBracketProps
               {/* Round label */}
               <div className="mb-4 px-4">
                 <span className={cn(
-                  "text-[11px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg border",
+                  "text-2xs font-semibold px-3 py-1.5 rounded-lg border",
                   isLast ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-zinc-50 text-zinc-500 border-zinc-200"
                 )}>
                   {isLast && <Trophy className="h-3 w-3 inline mr-1 -mt-0.5" />}
@@ -81,19 +81,19 @@ export default function KnockoutBracket({ matches, teams }: KnockoutBracketProps
                           "flex items-center gap-2 px-3 py-2.5 border-b border-zinc-100",
                           homeWon && "bg-emerald-50/50"
                         )}>
-                          <div className="h-6 w-6 rounded-md bg-zinc-100 flex items-center justify-center text-[11px] font-black text-zinc-400 shrink-0">
+                          <div className="h-6 w-6 rounded-md bg-zinc-100 flex items-center justify-center text-2xs font-semibold text-zinc-500 shrink-0">
                             {homeTeam?.name.charAt(0) || '?'}
                           </div>
                           <span className={cn(
-                            "text-xs font-bold flex-1 truncate",
-                            homeWon ? "text-emerald-700" : homeTeam ? "text-zinc-700" : "text-zinc-300 italic"
+                            "text-xs font-medium flex-1 truncate",
+                            homeWon ? "text-emerald-700" : homeTeam ? "text-zinc-700" : "text-zinc-400 italic"
                           )}>
                             {homeTeam?.name || 'TBD'}
                           </span>
                           {match && match.status !== 'scheduled' && (
                             <span className={cn(
-                              "text-sm font-black min-w-[20px] text-center",
-                              homeWon ? "text-emerald-600" : "text-zinc-400"
+                              "text-sm font-semibold min-w-[20px] text-center",
+                              homeWon ? "text-emerald-600" : "text-zinc-500"
                             )}>
                               {match.homeScore ?? '-'}
                             </span>
@@ -105,19 +105,19 @@ export default function KnockoutBracket({ matches, teams }: KnockoutBracketProps
                           "flex items-center gap-2 px-3 py-2.5",
                           awayWon && "bg-emerald-50/50"
                         )}>
-                          <div className="h-6 w-6 rounded-md bg-zinc-100 flex items-center justify-center text-[11px] font-black text-zinc-400 shrink-0">
+                          <div className="h-6 w-6 rounded-md bg-zinc-100 flex items-center justify-center text-2xs font-semibold text-zinc-500 shrink-0">
                             {awayTeam?.name.charAt(0) || '?'}
                           </div>
                           <span className={cn(
-                            "text-xs font-bold flex-1 truncate",
-                            awayWon ? "text-emerald-700" : awayTeam ? "text-zinc-700" : "text-zinc-300 italic"
+                            "text-xs font-medium flex-1 truncate",
+                            awayWon ? "text-emerald-700" : awayTeam ? "text-zinc-700" : "text-zinc-400 italic"
                           )}>
                             {awayTeam?.name || 'TBD'}
                           </span>
                           {match && match.status !== 'scheduled' && (
                             <span className={cn(
-                              "text-sm font-black min-w-[20px] text-center",
-                              awayWon ? "text-emerald-600" : "text-zinc-400"
+                              "text-sm font-semibold min-w-[20px] text-center",
+                              awayWon ? "text-emerald-600" : "text-zinc-500"
                             )}>
                               {match.awayScore ?? '-'}
                             </span>
@@ -127,7 +127,7 @@ export default function KnockoutBracket({ matches, teams }: KnockoutBracketProps
                         {/* Penalties */}
                         {hasPenalties && (
                           <div className="text-center py-1 bg-amber-50 border-t border-amber-100">
-                            <span className="text-[8px] font-black text-amber-600 uppercase tracking-wider">
+                            <span className="text-2xs font-semibold text-amber-600">
                               PEN {match.penalties!.home} - {match.penalties!.away}
                             </span>
                           </div>
@@ -138,13 +138,13 @@ export default function KnockoutBracket({ matches, teams }: KnockoutBracketProps
                       {match && (
                         <div className="text-center mt-1.5">
                           {match.status === 'scheduled' && match.scheduledDate && (
-                            <p className="text-[8px] font-bold text-zinc-300">
+                            <p className="text-2xs font-medium text-zinc-400">
                               {new Date(match.scheduledDate instanceof Date ? match.scheduledDate : match.scheduledDate).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit' })}
                               {match.scheduledTime && ` ${match.scheduledTime}`}
                             </p>
                           )}
                           {match.status === 'live' && (
-                            <span className="text-[8px] font-black text-red-500 uppercase animate-pulse">LIVE</span>
+                            <span className="text-2xs font-semibold text-red-500 animate-pulse">LIVE</span>
                           )}
                         </div>
                       )}

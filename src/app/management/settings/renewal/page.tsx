@@ -5,6 +5,7 @@ import { ArrowLeft, Check, CreditCard, Loader2, Calendar, Sparkles, Shield, Lock
 import Link from 'next/link';
 import { loadStripe } from '@stripe/stripe-js';
 import { pricingUtils } from '@/lib/pricing';
+import { toast } from '@/lib/toast';
 
 const PLAN_HIERARCHY: Record<string, number> = {
   basic: 1,
@@ -178,7 +179,7 @@ export default function SubscriptionRenewalPage() {
       const { getAuth } = await import('firebase/auth');
       const auth = getAuth();
       if (!auth.currentUser?.uid) {
-        alert('Παρακαλώ συνδεθείτε πρώτα');
+        toast.error('Απαιτείται σύνδεση', 'Συνδεθείτε ξανά για να συνεχίσετε με την πληρωμή.');
         return;
       }
 
@@ -201,15 +202,15 @@ export default function SubscriptionRenewalPage() {
       });
 
       const { clientSecret, error } = await response.json();
-      if (error) { alert('Σφάλμα: ' + error); return; }
+      if (error) { toast.error('Η πληρωμή δεν ολοκληρώθηκε', error); return; }
 
       const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
-      if (!stripe) { alert('Σφάλμα φόρτωσης Stripe'); return; }
+      if (!stripe) { toast.error('Πρόβλημα φόρτωσης πληρωμών', 'Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.'); return; }
 
       window.location.href = `/payment/checkout?payment_intent=${clientSecret}`;
     } catch (error) {
       console.error('Payment error:', error);
-      alert('Υπήρξε σφάλμα με την πληρωμή. Παρακαλώ δοκιμάστε ξανά.');
+      toast.error('Υπήρξε σφάλμα με την πληρωμή', 'Δεν χρεωθήκατε. Παρακαλώ δοκιμάστε ξανά.');
     } finally {
       setIsLoading(false);
     }
@@ -297,22 +298,22 @@ export default function SubscriptionRenewalPage() {
               >
                 {status === 'current' && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[12px] font-semibold bg-emerald-600 text-white">
-                      ΕΝΕΡΓΟ
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-2xs font-semibold bg-emerald-600 text-white">
+                      Ενεργό
                     </span>
                   </div>
                 )}
                 {isRenewal && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[12px] font-semibold bg-amber-500 text-white">
-                      ΑΝΑΝΕΩΣΗ
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-2xs font-semibold bg-amber-500 text-white">
+                      Ανανέωση
                     </span>
                   </div>
                 )}
                 {plan.popular && status !== 'current' && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[12px] font-semibold bg-emerald-600 text-white">
-                      ΔΗΜΟΦΙΛΕΣ
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-2xs font-semibold bg-emerald-600 text-white">
+                      Δημοφιλές
                     </span>
                   </div>
                 )}
@@ -320,29 +321,29 @@ export default function SubscriptionRenewalPage() {
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
                     <div className={`flex items-center justify-center w-10 h-10 rounded-xl ${isDisabled
-                      ? 'bg-zinc-100 text-zinc-400'
+                      ? 'bg-zinc-100 text-zinc-500'
                       : isSelected ? 'bg-emerald-100 text-emerald-600' : 'bg-zinc-100 text-zinc-500'
                       }`}>
                       {isDisabled ? <Lock className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
                     </div>
                     <div>
-                      <h3 className={`text-lg font-semibold ${isDisabled ? 'text-zinc-400' : 'text-zinc-900'}`}>{plan.name}</h3>
+                      <h3 className={`text-lg font-semibold ${isDisabled ? 'text-zinc-500' : 'text-zinc-900'}`}>{plan.name}</h3>
                       <p className="text-xs text-zinc-500">{duration} {duration === 1 ? 'μήνας' : 'μήνες'}</p>
                     </div>
                   </div>
 
                   <div>
                     <div className="flex items-baseline gap-1">
-                      <span className={`text-2xl font-semibold tracking-tight ${isDisabled ? 'text-zinc-400' : 'text-zinc-900'}`}>
+                      <span className={`text-2xl font-semibold tracking-tight ${isDisabled ? 'text-zinc-500' : 'text-zinc-900'}`}>
                         {pricingUtils.formatPrice(totalPrice)}
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-400 mt-0.5">
+                    <p className="text-xs text-zinc-500 mt-0.5">
                       {pricingUtils.formatPrice(monthlyPrice)}/μήνα με ΦΠΑ
                     </p>
                     {discount > 0 && (
                       <span className={`inline-flex items-center mt-2 px-2 py-0.5 rounded-md text-xs font-medium border ${isDisabled
-                        ? 'bg-zinc-50 text-zinc-400 border-zinc-200'
+                        ? 'bg-zinc-50 text-zinc-500 border-zinc-200'
                         : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                         }`}>
                         Έκπτωση {discount}%
@@ -352,8 +353,8 @@ export default function SubscriptionRenewalPage() {
 
                   <ul className="space-y-1.5">
                     {plan.features.map((feature, i) => (
-                      <li key={i} className={`flex items-center gap-2 text-sm ${isDisabled ? 'text-zinc-400' : 'text-zinc-600'}`}>
-                        <Check className={`h-3.5 w-3.5 shrink-0 ${isDisabled ? 'text-zinc-300' : 'text-emerald-500'}`} />
+                      <li key={i} className={`flex items-center gap-2 text-sm ${isDisabled ? 'text-zinc-500' : 'text-zinc-600'}`}>
+                        <Check className={`h-3.5 w-3.5 shrink-0 ${isDisabled ? 'text-zinc-400' : 'text-emerald-500'}`} />
                         {feature}
                       </li>
                     ))}
@@ -366,7 +367,7 @@ export default function SubscriptionRenewalPage() {
                     </p>
                   )}
                   {status === 'downgrade' && (
-                    <p className="text-xs text-zinc-400 font-medium text-center pt-2 border-t border-zinc-100">
+                    <p className="text-xs text-zinc-500 font-medium text-center pt-2 border-t border-zinc-100">
                       Διαθέσιμο μετά τη λήξη της συνδρομής
                     </p>
                   )}
@@ -419,7 +420,7 @@ export default function SubscriptionRenewalPage() {
                 <button
                   onClick={handleApplyCoupon}
                   disabled={!couponInput.trim() || couponLoading}
-                  className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-200 disabled:text-zinc-400 text-white text-sm font-medium rounded-lg transition-colors disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 disabled:bg-zinc-200 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {couponLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : 'Εφαρμογή'}
                 </button>
@@ -521,7 +522,7 @@ export default function SubscriptionRenewalPage() {
                 <button
                   onClick={(e) => { e.preventDefault(); handlePayment(); }}
                   disabled={isLoading}
-                  className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-200 disabled:text-zinc-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-200 disabled:text-zinc-500 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
                     <><Loader2 className="h-4 w-4 animate-spin" />Επεξεργασία...</>
@@ -535,7 +536,7 @@ export default function SubscriptionRenewalPage() {
             <button
               onClick={(e) => { e.preventDefault(); handlePayment(); }}
               disabled={!selectedPlan || isLoading}
-              className="w-full mt-6 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-200 disabled:text-zinc-400 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full mt-6 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-200 disabled:text-zinc-500 text-white font-medium rounded-lg transition-colors disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
                 <>
@@ -550,7 +551,7 @@ export default function SubscriptionRenewalPage() {
               )}
             </button>
           )}
-          <p className="text-xs text-zinc-400 text-center mt-2">Ασφαλής πληρωμή μέσω Stripe</p>
+          <p className="text-xs text-zinc-500 text-center mt-2">Ασφαλής πληρωμή μέσω Stripe</p>
         </div>
       )}
     </div>

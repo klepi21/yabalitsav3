@@ -17,7 +17,7 @@ import { Tournament } from '@/types/tournament';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { cn, toGreekUpperCase } from '@/lib/utils';
+import { cn } from '@/lib/utils';
 
 
 const statusConfig: Record<string, { label: string; className: string }> = {
@@ -132,21 +132,21 @@ export default function TournamentsPage() {
              <Trophy className="h-6 w-6 text-emerald-400" />
            </div>
            <div className="space-y-0.5">
-             <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
-               {toGreekUpperCase('Τουρνουά')}
+             <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+               {'Τουρνουά'}
              </h1>
              <div className="flex items-center gap-2">
                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-               <p className="text-[12px] font-black text-zinc-400 uppercase tracking-widest">
-                 {toGreekUpperCase('Διαχειριση πρωταθληματων και διοργανωσεων')}
+               <p className="text-2xs font-semibold text-zinc-500">
+                 {'Διαχειριση πρωταθληματων και διοργανωσεων'}
                </p>
              </div>
            </div>
         </div>
-        <Button asChild className="h-10 px-6 rounded-xl bg-zinc-900 hover:bg-black text-white font-black shadow-md transition-all active:scale-95 text-[11px]">
+        <Button asChild className="h-10 px-6 rounded-xl bg-zinc-900 hover:bg-black text-white font-semibold shadow-md transition-all active:scale-95 text-2xs">
           <Link href="/management/tournaments/new" className="flex items-center gap-2">
             <Plus className="h-4 w-4 text-emerald-400 group-hover:scale-110 transition-transform" />
-            {toGreekUpperCase('Νέο Τουρνουά')}
+            {'Νέο Τουρνουά'}
           </Link>
         </Button>
       </div>
@@ -160,12 +160,12 @@ export default function TournamentsPage() {
           { label: 'Ολοκληρωμένα', value: tournaments.filter(t => t.status === 'completed').length, icon: Calendar, color: 'emerald' },
         ].map((stat, i) => (
           <div key={i} className="flex items-center gap-4 bg-white p-6 rounded-2xl border border-zinc-100 shadow-sm group hover:shadow-xl hover:shadow-emerald-900/5 transition-all duration-500">
-            <div className="h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-400 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-inner">
+            <div className="h-12 w-12 rounded-xl bg-zinc-50 flex items-center justify-center text-zinc-500 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-300 shadow-inner">
               <stat.icon className="h-6 w-6" />
             </div>
             <div className="space-y-1">
-              <p className="text-3xl font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight">{stat.value}</p>
-              <p className="text-[12px] font-black uppercase tracking-widest text-zinc-400">{toGreekUpperCase(stat.label)}</p>
+              <p className="text-3xl font-bold text-zinc-900 group-hover:text-emerald-700 transition-colors tracking-tight">{stat.value}</p>
+              <p className="text-2xs font-semibold text-zinc-500">{stat.label}</p>
             </div>
           </div>
         ))}
@@ -174,12 +174,12 @@ export default function TournamentsPage() {
       {/* Filters & Search */}
       <div className="flex flex-col xl:flex-row gap-3">
       <div className="relative flex-1">
-        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-300" />
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
         <Input
-          placeholder={toGreekUpperCase('Αναζήτηση...')}
+          placeholder={'Αναζήτηση...'}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="h-10 pl-10 pr-4 bg-white rounded-lg border-zinc-100 shadow-sm focus:ring-emerald-500 font-bold text-xs placeholder:text-zinc-300 uppercase"
+          className="h-10 pl-10 pr-4 bg-white rounded-lg border-zinc-100 shadow-sm focus:ring-emerald-500 font-medium text-xs placeholder:text-zinc-500"
         />
       </div>
         <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-zinc-100 shadow-sm overflow-x-auto whitespace-nowrap">
@@ -188,13 +188,13 @@ export default function TournamentsPage() {
               key={f.value}
               onClick={() => setFilterStatus(f.value)}
               className={cn(
-                "px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider rounded-md transition-all",
+                "px-3 py-1.5 text-2xs font-medium rounded-md transition-all",
                 filterStatus === f.value
                   ? "bg-zinc-900 text-white shadow-sm"
-                  : "text-zinc-400 hover:text-zinc-600 hover:bg-zinc-50"
+                  : "text-zinc-500 hover:text-zinc-600 hover:bg-zinc-50"
               )}
             >
-              {toGreekUpperCase(f.label)}
+              {f.label}
             </button>
           ))}
         </div>
@@ -204,9 +204,9 @@ export default function TournamentsPage() {
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-zinc-100 bg-white p-12 text-center">
           <div className="mx-auto h-16 w-16 bg-zinc-50 rounded-xl flex items-center justify-center mb-6 shadow-inner">
-            <Trophy className="h-8 w-8 text-zinc-200" />
+            <Trophy className="h-8 w-8 text-zinc-400" />
           </div>
-          <h3 className="text-lg font-black text-zinc-900 mb-1">
+          <h3 className="text-lg font-semibold text-zinc-900 mb-1">
             {searchTerm || filterStatus !== 'all' ? 'Δεν βρέθηκαν τουρνουά' : 'Δεν υπάρχουν τουρνουά'}
           </h3>
           <p className="text-zinc-500 font-medium text-xs">
@@ -215,7 +215,7 @@ export default function TournamentsPage() {
               : 'Ξεκινήστε δημιουργώντας την πρώτη σας διοργάνωση!'}
           </p>
           {!(searchTerm || filterStatus !== 'all') && (
-            <Button asChild className="mt-8 h-12 px-8 rounded-xl bg-zinc-900 text-white font-black uppercase text-[12px] transition-all">
+            <Button asChild className="mt-8 h-12 px-8 rounded-xl bg-zinc-900 text-white font-semibold text-2xs transition-all">
               <Link href="/management/tournaments/new">Δημιουργία Τουρνουά</Link>
             </Button>
           )}
@@ -238,40 +238,40 @@ export default function TournamentsPage() {
                         <Trophy className="h-4 w-4" />
                       </div>
                       <div>
-                        <h3 className="text-base font-black text-zinc-900 group-hover:text-emerald-700 transition-colors uppercase tracking-tight truncate max-w-[160px] sm:max-w-none">
+                        <h3 className="text-base font-semibold text-zinc-900 group-hover:text-emerald-700 transition-colors tracking-tight truncate max-w-[160px] sm:max-w-none">
                           {tournament.name}
                         </h3>
-                        <p className="text-[8px] font-bold uppercase tracking-wider text-zinc-400">
-                          {toGreekUpperCase(typeLabels[tournament.type] || tournament.type)}
+                        <p className="text-2xs font-medium text-zinc-500">
+                          {typeLabels[tournament.type] || tournament.type}
                         </p>
                       </div>
                     </div>
-                    <Badge className={cn("rounded-md px-2.5 py-0.5 font-bold text-[8px] uppercase tracking-wider border-none", status.className)}>
-                      {toGreekUpperCase(status.label)}
+                    <Badge className={cn("rounded-md px-2.5 py-0.5 font-medium text-2xs border-none", status.className)}>
+                      {status.label}
                     </Badge>
                   </div>
 
                   {/* Details Grid */}
                   <div className="grid grid-cols-2 gap-3 py-3 border-y border-zinc-50">
                     <div className="space-y-0.5">
-                      <p className="text-[8px] font-bold uppercase tracking-wider text-zinc-400">Τύπος Γηπέδου</p>
-                      <p className="text-[11px] font-bold text-zinc-900">{tournament.pitchType}</p>
+                      <p className="text-2xs font-medium text-zinc-500">Τύπος Γηπέδου</p>
+                      <p className="text-2xs font-medium text-zinc-900">{tournament.pitchType}</p>
                     </div>
                     <div className="space-y-0.5">
-                      <p className="text-[8px] font-bold uppercase tracking-wider text-zinc-400">Συμμετοχές</p>
-                      <p className="text-[11px] font-bold text-zinc-900">{tournament.teamCount} / {tournament.maxTeams} Ομάδες</p>
+                      <p className="text-2xs font-medium text-zinc-500">Συμμετοχές</p>
+                      <p className="text-2xs font-medium text-zinc-900">{tournament.teamCount} / {tournament.maxTeams} Ομάδες</p>
                     </div>
                   </div>
 
                   {/* Footer Details */}
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-zinc-400">
+                    <div className="flex items-center gap-2 text-zinc-500">
                       <Calendar className="h-3 w-3" />
-                      <span className="text-[12px] font-bold">
+                      <span className="text-2xs font-medium">
                         {new Date(tournament.startDate).toLocaleDateString('el-GR')} - {new Date(tournament.endDate).toLocaleDateString('el-GR')}
                       </span>
                     </div>
-                    <div className="h-8 w-8 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-400 group-hover:bg-zinc-900 group-hover:text-white transition-all">
+                    <div className="h-8 w-8 rounded-lg bg-zinc-50 border border-zinc-100 flex items-center justify-center text-zinc-500 group-hover:bg-zinc-900 group-hover:text-white transition-all">
                       <Swords className="h-3.5 w-3.5" />
                     </div>
                   </div>

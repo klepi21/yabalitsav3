@@ -19,7 +19,6 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { toGreekUpperCase } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -389,7 +388,7 @@ export default function PaymentsDashboardPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <AlertCircle className="h-5 w-5 text-red-500" />
-              <p className="text-sm font-bold text-red-700">{error}</p>
+              <p className="text-sm font-semibold text-red-700">{error}</p>
             </div>
             <Button variant="ghost" size="sm" onClick={() => setError(null)} className="text-red-400 hover:text-red-600">
               <X className="h-4 w-4" />
@@ -405,11 +404,11 @@ export default function PaymentsDashboardPage() {
             <Euro className="h-7 w-7 text-emerald-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-zinc-900 uppercase">
-              {toGreekUpperCase('Πληρωμές')}
+            <h1 className="text-2xl font-bold tracking-tight text-zinc-900">
+              {'Πληρωμές'}
             </h1>
-            <p className="text-sm font-bold text-zinc-400 uppercase tracking-tight">
-              {toGreekUpperCase('Ετήσια επισκόπηση πληρωμών')}
+            <p className="text-sm font-semibold text-zinc-500 tracking-tight">
+              {'Ετήσια επισκόπηση πληρωμών'}
             </p>
           </div>
         </div>
@@ -417,7 +416,7 @@ export default function PaymentsDashboardPage() {
           <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl" onClick={() => setSelectedYear((y) => y - 1)}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-lg font-black text-zinc-900 min-w-[80px] text-center">{selectedYear}</span>
+          <span className="text-lg font-semibold text-zinc-900 min-w-[80px] text-center">{selectedYear}</span>
           <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl" onClick={() => setSelectedYear((y) => y + 1)} disabled={selectedYear >= currentYear}>
             <ChevronRight className="h-4 w-4" />
           </Button>
@@ -441,17 +440,17 @@ export default function PaymentsDashboardPage() {
               }`}
               onClick={() => setFocusedMonth(i)}
             >
-              <p className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">{GREEK_MONTHS[i]}</p>
+              <p className="text-2xs font-medium text-zinc-500">{GREEK_MONTHS[i]}</p>
               {athletes.length > 0 ? (
                 <>
-                  <p className="text-sm font-black text-emerald-600 mt-1">{stats.paid}</p>
-                  <p className="text-[8px] font-bold text-zinc-300">/{stats.count}</p>
+                  <p className="text-sm font-semibold text-emerald-600 mt-1">{stats.paid}</p>
+                  <p className="text-2xs font-medium text-zinc-500">/{stats.count}</p>
                   {stats.unpaid > 0 && (
-                    <p className="text-[8px] font-bold text-red-400 mt-0.5">{stats.unpaid} ανεξόφλ.</p>
+                    <p className="text-2xs font-medium text-red-400 mt-0.5">{stats.unpaid} ανεξόφλ.</p>
                   )}
                 </>
               ) : (
-                <p className="text-[11px] font-bold text-zinc-300 mt-2">—</p>
+                <p className="text-2xs font-medium text-zinc-500 mt-2">—</p>
               )}
             </div>
           );
@@ -466,17 +465,17 @@ export default function PaymentsDashboardPage() {
           onChange={(e) => setSearch(e.target.value)}
           className="h-11 max-w-sm bg-white"
         />
-        <span className="text-sm font-bold text-zinc-400">
-          {filteredAthletes.length} {toGreekUpperCase('αθλητές')}
+        <span className="text-sm font-semibold text-zinc-500">
+          {filteredAthletes.length} {'αθλητές'}
         </span>
       </div>
 
       {athletes.length === 0 ? (
-        <div className="rounded-[2rem] border-2 border-dashed border-zinc-100 bg-white p-16 text-center">
-          <div className="mx-auto h-20 w-20 bg-zinc-50 rounded-[1.5rem] flex items-center justify-center mb-6">
-            <Users className="h-10 w-10 text-zinc-200" />
+        <div className="rounded-2xl border-2 border-dashed border-zinc-100 bg-white p-16 text-center">
+          <div className="mx-auto h-20 w-20 bg-zinc-50 rounded-xl flex items-center justify-center mb-6">
+            <Users className="h-10 w-10 text-zinc-400" />
           </div>
-          <h3 className="text-xl font-black text-zinc-900 mb-2">Δεν υπάρχουν αθλητές με πληρωμές</h3>
+          <h3 className="text-xl font-bold text-zinc-900 mb-2">Δεν υπάρχουν αθλητές με πληρωμές</h3>
           <p className="text-zinc-500 max-w-md mx-auto">
             Βεβαιωθείτε ότι έχετε δημιουργήσει κατηγορία χρηστών με τη δυνατότητα &quot;Μηνιαία πληρωμή&quot; ενεργοποιημένη.
           </p>
@@ -487,18 +486,18 @@ export default function PaymentsDashboardPage() {
             <table className="w-full min-w-[900px]">
               <thead>
                 <tr className="border-b border-zinc-100">
-                  <th className="text-left p-3 text-[11px] font-bold uppercase tracking-widest text-zinc-400 sticky left-0 bg-white z-10 min-w-[200px]">
-                    {toGreekUpperCase('Αθλητής')}
+                  <th className="text-left p-3 text-2xs font-medium text-zinc-500 sticky left-0 bg-white z-10 min-w-[200px]">
+                    {'Αθλητής'}
                   </th>
                   {Array.from({ length: 12 }, (_, i) => {
                     const isCurrentMonth = i === currentMonth && selectedYear === currentYear;
                     return (
                       <th
                         key={i}
-                        className={`text-center p-2 text-[11px] font-bold uppercase tracking-wider ${
+                        className={`text-center p-2 text-2xs font-bold uppercase tracking-wider ${
                           focusedMonth === i
                             ? 'text-emerald-700 bg-emerald-100/60'
-                            : isCurrentMonth ? 'text-emerald-600 bg-emerald-50/50' : 'text-zinc-400'
+                            : isCurrentMonth ? 'text-emerald-600 bg-emerald-50/50' : 'text-zinc-500'
                         }`}
                       >
                         <div>{GREEK_MONTHS[i]}</div>
@@ -515,15 +514,15 @@ export default function PaymentsDashboardPage() {
                       <td className="p-3 sticky left-0 bg-zinc-50 z-10" colSpan={1}>
                         <div className="flex items-center gap-2">
                           <span className="text-sm">📋</span>
-                          <span className="text-[12px] font-black uppercase tracking-widest text-zinc-500">
-                            {squad ? toGreekUpperCase(squad.name) : toGreekUpperCase('Χωρίς τμήμα')}
+                          <span className="text-2xs font-semibold text-zinc-500">
+                            {squad ? squad.name : 'Χωρίς τμήμα'}
                           </span>
-                          <span className="text-[11px] font-bold text-zinc-300 ml-1">
+                          <span className="text-2xs font-medium text-zinc-500 ml-1">
                             ({squadAthletes.length})
                           </span>
-                          <span className="text-[11px] font-bold text-emerald-500 ml-auto">
+                          <span className="text-2xs font-medium text-emerald-500 ml-auto">
                             €{squad?.monthlyAmount || defaultAmount}/μήνα
-                            {!squad?.monthlyAmount && <span className="text-zinc-300 ml-1"></span>}
+                            {!squad?.monthlyAmount && <span className="text-zinc-400 ml-1"></span>}
                           </span>
                         </div>
                       </td>
@@ -544,12 +543,12 @@ export default function PaymentsDashboardPage() {
                                 {group?.icon || '⚽'}
                               </div>
                               <div>
-                                <p className="text-sm font-bold text-zinc-900">{athlete.displayName}</p>
+                                <p className="text-sm font-semibold text-zinc-900">{athlete.displayName}</p>
                                 {parent && (
-                                  <p className="text-[12px] text-zinc-400">
+                                  <p className="text-2xs text-zinc-500">
                                     {parent.displayName}
                                     {parent.fields?.email && (
-                                      <span className="ml-1 text-zinc-300">({parent.fields.email as string})</span>
+                                      <span className="ml-1 text-zinc-400">({parent.fields.email as string})</span>
                                     )}
                                   </p>
                                 )}
@@ -588,11 +587,11 @@ export default function PaymentsDashboardPage() {
                                       <X className="h-3.5 w-3.5" />
                                     )}
                                   </button>
-                                  <span className="text-[8px] font-bold text-zinc-400">
+                                  <span className="text-2xs font-medium text-zinc-500">
                                     €{amount}
                                   </span>
                                   {isPaid && payment?.paymentMethod && (
-                                    <span className="text-[7px] font-bold text-emerald-400 opacity-0 group-hover/cell:opacity-100 transition-opacity">
+                                    <span className="text-2xs font-medium text-emerald-400 opacity-0 group-hover/cell:opacity-100 transition-opacity">
                                       {PAYMENT_METHOD_LABELS[payment.paymentMethod]}
                                     </span>
                                   )}
@@ -600,10 +599,10 @@ export default function PaymentsDashboardPage() {
                                     <button
                                       onClick={() => setNotifyConfirm({ athlete, month })}
                                       disabled={notifying === key}
-                                      className={`text-[8px] transition-colors ${
+                                      className={`text-2xs transition-colors ${
                                         payment?.lastNotifiedAt
                                           ? 'text-amber-400 hover:text-amber-600'
-                                          : 'text-zinc-300 hover:text-amber-500'
+                                          : 'text-zinc-400 hover:text-amber-500'
                                       }`}
                                       title={payment?.lastNotifiedAt
                                         ? `Τελευταία ειδοποίηση: ${new Date(payment.lastNotifiedAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
@@ -654,22 +653,22 @@ export default function PaymentsDashboardPage() {
             return (
               <>
                 <div className="rounded-2xl border border-zinc-100 bg-white p-5">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
-                    {toGreekUpperCase('Εισπράξεις')} {selectedYear}
+                  <p className="text-2xs font-medium text-zinc-500 mb-2">
+                    {'Εισπράξεις'} {selectedYear}
                   </p>
-                  <p className="text-2xl font-black text-emerald-600">&euro;{totalPaid.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-emerald-600">&euro;{totalPaid.toLocaleString()}</p>
                 </div>
                 <div className="rounded-2xl border border-zinc-100 bg-white p-5">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
-                    {toGreekUpperCase('Ανεξόφλητα')} {selectedYear}
+                  <p className="text-2xs font-medium text-zinc-500 mb-2">
+                    {'Ανεξόφλητα'} {selectedYear}
                   </p>
-                  <p className="text-2xl font-black text-red-500">&euro;{(totalUnpaid + virtualUnpaid).toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-red-500">&euro;{(totalUnpaid + virtualUnpaid).toLocaleString()}</p>
                 </div>
                 <div className="rounded-2xl border border-zinc-100 bg-white p-5">
-                  <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-400 mb-2">
-                    {toGreekUpperCase('Σύνολο')} {selectedYear}
+                  <p className="text-2xs font-medium text-zinc-500 mb-2">
+                    {'Σύνολο'} {selectedYear}
                   </p>
-                  <p className="text-2xl font-black text-zinc-900">&euro;{(totalPaid + totalUnpaid + virtualUnpaid).toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-zinc-900">&euro;{(totalPaid + totalUnpaid + virtualUnpaid).toLocaleString()}</p>
                 </div>
               </>
             );
@@ -679,7 +678,7 @@ export default function PaymentsDashboardPage() {
 
       {/* Payment Confirmation Dialog */}
       <AlertDialog open={payConfirm !== null} onOpenChange={(open) => !open && setPayConfirm(null)}>
-        <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl p-0 max-w-sm overflow-hidden">
+        <AlertDialogContent className="rounded-2xl border-none shadow-2xl p-0 max-w-sm overflow-hidden">
           {payConfirm && (() => {
             const { athlete } = payConfirm;
             const group = groups.find((g) => g.id === athlete.groupId);
@@ -691,7 +690,7 @@ export default function PaymentsDashboardPage() {
                     <Check className="h-6 w-6 text-white" />
                   </div>
                   <AlertDialogHeader>
-                    <AlertDialogTitle className="text-lg font-black text-white tracking-tight">
+                    <AlertDialogTitle className="text-lg font-semibold text-white tracking-tight">
                       Επιβεβαίωση Πληρωμής
                     </AlertDialogTitle>
                     <AlertDialogDescription className="text-emerald-100 text-sm mt-1">
@@ -705,18 +704,18 @@ export default function PaymentsDashboardPage() {
                       {group?.icon || '⚽'}
                     </div>
                     <div>
-                      <p className="text-sm font-black text-zinc-900">{athlete.displayName}</p>
-                      <p className="text-[11px] text-zinc-400 font-medium">
+                      <p className="text-sm font-semibold text-zinc-900">{athlete.displayName}</p>
+                      <p className="text-2xs text-zinc-500 font-medium">
                         {GREEK_MONTHS_FULL[payConfirm.month]} {selectedYear}
                       </p>
                     </div>
                     <div className="ml-auto">
-                      <span className="text-lg font-black text-emerald-600">&euro;{amount}</span>
+                      <span className="text-lg font-semibold text-emerald-600">&euro;{amount}</span>
                     </div>
                   </div>
                   <div className="space-y-2.5">
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-300">
-                      {toGreekUpperCase('Τρόπος Πληρωμής')}
+                    <p className="text-2xs font-medium text-zinc-500">
+                      {'Τρόπος Πληρωμής'}
                     </p>
                     <div className="grid grid-cols-2 gap-2">
                       {(Object.keys(PAYMENT_METHOD_LABELS) as PaymentMethod[]).map((method) => (
@@ -742,12 +741,12 @@ export default function PaymentsDashboardPage() {
                   <AlertDialogFooter className="flex flex-col gap-2.5 sm:flex-col">
                     <AlertDialogAction
                       onClick={handleConfirmPayment}
-                      className="h-12 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-lg transition-all active:scale-[0.98] m-0"
+                      className="h-12 w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-lg transition-all active:scale-[0.98] m-0"
                     >
                       <Check className="h-4 w-4 mr-2" />
                       Εξοφλήθηκε
                     </AlertDialogAction>
-                    <AlertDialogCancel className="h-10 w-full rounded-xl border-none bg-transparent text-zinc-400 hover:text-zinc-600 font-bold text-sm m-0">
+                    <AlertDialogCancel className="h-10 w-full rounded-xl border-none bg-transparent text-zinc-500 hover:text-zinc-600 font-semibold text-sm m-0">
                       Ακύρωση
                     </AlertDialogCancel>
                   </AlertDialogFooter>
@@ -760,7 +759,7 @@ export default function PaymentsDashboardPage() {
 
       {/* Unpay Confirmation Dialog */}
       <AlertDialog open={unpayConfirm !== null} onOpenChange={(open) => !open && setUnpayConfirm(null)}>
-        <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl p-0 max-w-sm overflow-hidden">
+        <AlertDialogContent className="rounded-2xl border-none shadow-2xl p-0 max-w-sm overflow-hidden">
           {unpayConfirm && (() => {
             const { athlete, payment } = unpayConfirm;
             const group = groups.find((g) => g.id === athlete.groupId);
@@ -771,7 +770,7 @@ export default function PaymentsDashboardPage() {
                     <X className="h-6 w-6 text-white" />
                   </div>
                   <AlertDialogHeader>
-                    <AlertDialogTitle className="text-lg font-black text-white tracking-tight">
+                    <AlertDialogTitle className="text-lg font-semibold text-white tracking-tight">
                       Αναίρεση Πληρωμής
                     </AlertDialogTitle>
                     <AlertDialogDescription className="text-red-100 text-sm mt-1">
@@ -785,15 +784,15 @@ export default function PaymentsDashboardPage() {
                       {group?.icon || '⚽'}
                     </div>
                     <div>
-                      <p className="text-sm font-black text-zinc-900">{athlete.displayName}</p>
-                      <p className="text-[11px] text-zinc-400 font-medium">
+                      <p className="text-sm font-semibold text-zinc-900">{athlete.displayName}</p>
+                      <p className="text-2xs text-zinc-500 font-medium">
                         {GREEK_MONTHS_FULL[unpayConfirm.month]} {selectedYear}
                       </p>
                     </div>
                     <div className="ml-auto text-right">
-                      <span className="text-lg font-black text-emerald-600">&euro;{payment.amount}</span>
+                      <span className="text-lg font-semibold text-emerald-600">&euro;{payment.amount}</span>
                       {payment.paymentMethod && (
-                        <p className="text-[12px] text-zinc-400">{PAYMENT_METHOD_LABELS[payment.paymentMethod]}</p>
+                        <p className="text-2xs text-zinc-500">{PAYMENT_METHOD_LABELS[payment.paymentMethod]}</p>
                       )}
                     </div>
                   </div>
@@ -802,12 +801,12 @@ export default function PaymentsDashboardPage() {
                   <AlertDialogFooter className="flex flex-col gap-2.5 sm:flex-col">
                     <AlertDialogAction
                       onClick={handleConfirmUnpay}
-                      className="h-12 w-full rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm shadow-lg transition-all active:scale-[0.98] m-0"
+                      className="h-12 w-full rounded-xl bg-red-600 hover:bg-red-700 text-white font-semibold text-sm shadow-lg transition-all active:scale-[0.98] m-0"
                     >
                       <X className="h-4 w-4 mr-2" />
                       Αναίρεση Πληρωμής
                     </AlertDialogAction>
-                    <AlertDialogCancel className="h-10 w-full rounded-xl border-none bg-transparent text-zinc-400 hover:text-zinc-600 font-bold text-sm m-0">
+                    <AlertDialogCancel className="h-10 w-full rounded-xl border-none bg-transparent text-zinc-500 hover:text-zinc-600 font-semibold text-sm m-0">
                       Ακύρωση
                     </AlertDialogCancel>
                   </AlertDialogFooter>
@@ -820,7 +819,7 @@ export default function PaymentsDashboardPage() {
 
       {/* Notify Parent Confirmation Dialog */}
       <AlertDialog open={notifyConfirm !== null} onOpenChange={(open) => !open && setNotifyConfirm(null)}>
-        <AlertDialogContent className="rounded-[2rem] border-none shadow-2xl p-0 max-w-sm overflow-hidden">
+        <AlertDialogContent className="rounded-2xl border-none shadow-2xl p-0 max-w-sm overflow-hidden">
           {notifyConfirm && (() => {
             const contact = getNotificationEmail(notifyConfirm.athlete);
             const payment = getPayment(notifyConfirm.athlete.id, notifyConfirm.month);
@@ -833,7 +832,7 @@ export default function PaymentsDashboardPage() {
                     <Send className="h-6 w-6 text-white" />
                   </div>
                   <AlertDialogHeader>
-                    <AlertDialogTitle className="text-lg font-black text-white tracking-tight">
+                    <AlertDialogTitle className="text-lg font-semibold text-white tracking-tight">
                       Αποστολή Υπενθύμισης
                     </AlertDialogTitle>
                     <AlertDialogDescription className="text-amber-100 text-sm mt-1">
@@ -847,22 +846,22 @@ export default function PaymentsDashboardPage() {
                       {group?.icon || '⚽'}
                     </div>
                     <div>
-                      <p className="text-sm font-black text-zinc-900">{notifyConfirm.athlete.displayName}</p>
-                      <p className="text-[11px] text-zinc-400 font-medium">{GREEK_MONTHS_FULL[notifyConfirm.month]} {selectedYear}</p>
+                      <p className="text-sm font-semibold text-zinc-900">{notifyConfirm.athlete.displayName}</p>
+                      <p className="text-2xs text-zinc-500 font-medium">{GREEK_MONTHS_FULL[notifyConfirm.month]} {selectedYear}</p>
                     </div>
                     <div className="ml-auto">
-                      <span className="text-lg font-black text-red-500">&euro;{amount}</span>
+                      <span className="text-lg font-semibold text-red-500">&euro;{amount}</span>
                     </div>
                   </div>
                   <div className="space-y-2.5">
-                    <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-300">{toGreekUpperCase('Παραλήπτης')}</p>
+                    <p className="text-2xs font-medium text-zinc-500">{'Παραλήπτης'}</p>
                     <div className="flex items-center gap-2.5">
                       <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center">
                         <Users className="h-3.5 w-3.5 text-blue-500" />
                       </div>
                       <div>
-                        <p className="text-sm font-bold text-zinc-900">{contact?.name || '—'}</p>
-                        <p className="text-[11px] text-zinc-400 font-medium">
+                        <p className="text-sm font-semibold text-zinc-900">{contact?.name || '—'}</p>
+                        <p className="text-2xs text-zinc-500 font-medium">
                           {contact?.email || 'Δεν υπάρχει email'}
                           {contact?.isParent && <span className="ml-1 text-blue-400">(Γονέας)</span>}
                         </p>
@@ -872,7 +871,7 @@ export default function PaymentsDashboardPage() {
                   {payment?.lastNotifiedAt && (
                     <div className="flex items-center gap-2 p-2.5 bg-amber-50 rounded-lg">
                       <CheckCircle2 className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-                      <p className="text-[11px] text-amber-700 font-medium">
+                      <p className="text-2xs text-amber-700 font-medium">
                         Τελευταία ειδοποίηση: {new Date(payment.lastNotifiedAt).toLocaleDateString('el-GR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                       </p>
                     </div>
@@ -885,12 +884,12 @@ export default function PaymentsDashboardPage() {
                         handleNotifyParent(notifyConfirm.athlete, notifyConfirm.month);
                         setNotifyConfirm(null);
                       }}
-                      className="h-12 w-full rounded-xl bg-zinc-900 hover:bg-black text-white font-bold text-sm shadow-lg transition-all active:scale-[0.98] m-0"
+                      className="h-12 w-full rounded-xl bg-zinc-900 hover:bg-black text-white font-semibold text-sm shadow-lg transition-all active:scale-[0.98] m-0"
                     >
                       <Send className="h-4 w-4 mr-2" />
                       Αποστολή Email
                     </AlertDialogAction>
-                    <AlertDialogCancel className="h-10 w-full rounded-xl border-none bg-transparent text-zinc-400 hover:text-zinc-600 font-bold text-sm m-0">
+                    <AlertDialogCancel className="h-10 w-full rounded-xl border-none bg-transparent text-zinc-500 hover:text-zinc-600 font-semibold text-sm m-0">
                       Ακύρωση
                     </AlertDialogCancel>
                   </AlertDialogFooter>

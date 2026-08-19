@@ -180,11 +180,11 @@ export default function NewSquadPage() {
                         <div className={`h-9 w-9 rounded-lg flex items-center justify-center shrink-0 ${
                           isSelected ? 'bg-emerald-100' : 'bg-zinc-100'
                         }`}>
-                          <Trophy className={`h-4 w-4 ${isSelected ? 'text-emerald-600' : 'text-zinc-400'}`} />
+                          <Trophy className={`h-4 w-4 ${isSelected ? 'text-emerald-600' : 'text-zinc-500'}`} />
                         </div>
                         <div>
                           <p className="text-sm font-medium text-zinc-900">{coach.displayName}</p>
-                          <p className="text-xs text-zinc-400">{coach.fields.specialization}</p>
+                          <p className="text-xs text-zinc-500">{coach.fields.specialization}</p>
                         </div>
                       </div>
                     </label>
@@ -210,8 +210,8 @@ export default function NewSquadPage() {
                 )} />
               </div>
               <div>
-                <p className="text-sm font-bold text-zinc-900">Ενεργοποίηση μηνιαίων πληρωμών</p>
-                <p className="text-xs text-zinc-400">Αν ενεργοποιηθεί, το τμήμα θα εμφανίζεται στη σελίδα πληρωμών</p>
+                <p className="text-sm font-semibold text-zinc-900">Ενεργοποίηση μηνιαίων πληρωμών</p>
+                <p className="text-xs text-zinc-500">Αν ενεργοποιηθεί, το τμήμα θα εμφανίζεται στη σελίδα πληρωμών</p>
               </div>
             </label>
 
