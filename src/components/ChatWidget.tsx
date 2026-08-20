@@ -2,8 +2,9 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
-import { MessageCircle, X, Send, Loader2, Sparkles, Bot } from 'lucide-react';
+import { X, Send, Loader2, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import BotAvatar from './BotAvatar';
 
 interface Message {
   id: string;
@@ -213,17 +214,22 @@ export default function ChatWidget() {
       {/* Floating button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-label={isOpen ? 'Κλείσιμο βοηθού' : 'Άνοιγμα βοηθού'}
+        aria-expanded={isOpen}
         className={cn(
-          "fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110",
-          isOpen
-            ? "bg-zinc-800 hover:bg-zinc-700"
-            : "bg-emerald-600 hover:bg-emerald-700"
+          'bot-wake fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full flex items-center justify-center',
+          'shadow-[0_6px_20px_-6px_rgb(24_24_27/0.35)] transition-colors duration-200',
+          'hover:shadow-[0_10px_28px_-8px_rgb(24_24_27/0.45)]',
+          isOpen ? 'bg-zinc-900 hover:bg-zinc-800' : 'bg-emerald-700 hover:bg-emerald-800'
         )}
+        // Το χρώμα των ματιών ακολουθεί το φόντο του κουμπιού, ώστε να
+        // διαβάζονται ως κοψίματα και όχι ως κηλίδες.
+        style={{ ['--bot-face' as string]: isOpen ? '#18181b' : '#2f6b09' }}
       >
         {isOpen ? (
-          <X className="h-6 w-6 text-white" />
+          <X className="h-6 w-6 text-white" aria-hidden="true" />
         ) : (
-          <MessageCircle className="h-6 w-6 text-white" />
+          <BotAvatar className="h-9 w-9 text-white" id="bot-launcher" />
         )}
       </button>
 
@@ -232,8 +238,11 @@ export default function ChatWidget() {
         <div className="fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-48px)] h-[520px] max-h-[calc(100vh-160px)] bg-white rounded-2xl shadow-2xl border border-zinc-200 flex flex-col overflow-hidden animate-in slide-in-from-bottom-4 fade-in duration-300">
           {/* Header */}
           <div className="bg-gradient-to-r from-emerald-600 to-emerald-700 p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-white/20 flex items-center justify-center">
-              <Bot className="h-5 w-5 text-white" />
+            <div
+              className="h-10 w-10 rounded-xl bg-white/15 flex items-center justify-center"
+              style={{ ['--bot-face' as string]: '#2f6b09' }}
+            >
+              <BotAvatar className="h-7 w-7 text-white" id="bot-header" />
             </div>
             <div className="flex-1">
               <h3 className="text-white font-semibold text-sm">Yabalitsa Assistant</h3>

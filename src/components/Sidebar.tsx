@@ -100,7 +100,7 @@ function SidebarSkeleton() {
       <div className="flex h-20 items-center px-6 shrink-0 mb-2">
         <div className="h-9 w-40 bg-zinc-100 rounded-lg" />
       </div>
-      <nav className="flex-1 px-3 py-2">
+      <nav className="flex-1 min-h-0 px-3 py-2 overflow-hidden">
         <div className="space-y-4">
           <div>
             <div className="h-3 w-12 bg-zinc-100 rounded mx-4 mb-3" />
@@ -126,7 +126,7 @@ function SidebarSkeleton() {
           </div>
         </div>
       </nav>
-      <div className="p-4 space-y-4">
+      <div className="shrink-0 p-4 space-y-3">
         <div className="h-32 bg-zinc-100 rounded-2xl" />
         <div className="h-10 bg-zinc-50 rounded-xl" />
       </div>
@@ -181,7 +181,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-2 overflow-y-auto scrollbar-hide">
+      <nav className="flex-1 min-h-0 px-3 py-2 overflow-y-auto scrollbar-hide">
         <div className="space-y-4">
           {/* Main Menu Group */}
           <div>
@@ -339,7 +339,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
         )}
       </nav>
 
-      <div className="p-4 space-y-4">
+      <div className="shrink-0 p-4 space-y-3">
         {/* Bookings Status Toggle (Admin Only) */}
         {perms.showBookingsToggle && (
           <div className="px-4 py-3 rounded-2xl bg-zinc-50 border border-zinc-100/50 flex items-center justify-between gap-3 shadow-inner group">
@@ -374,7 +374,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                 onNavigate?.();
               }}
               className={cn(
-                "block relative overflow-hidden rounded-2xl p-5 group transition-all duration-500",
+                "block relative overflow-hidden rounded-2xl p-4 group transition-all duration-500",
                 bookingsEnabled 
                   ? "bg-zinc-900 border-0 cursor-pointer hover:shadow-xl hover:shadow-emerald-900/10" 
                   : "bg-zinc-100 border border-zinc-200 cursor-not-allowed opacity-80"
@@ -404,7 +404,7 @@ function NavContent({ onNavigate }: { onNavigate?: () => void }) {
                       {bookingsEnabled ? 'Δημιουργήστε το QR Code' : 'QR Code Ανενεργό'}
                     </p>
                     <p className={cn(
-                      "text-2xs font-medium mt-0.5",
+                      "text-2xs font-medium mt-0.5 [@media(max-height:760px)]:hidden",
                       bookingsEnabled ? "text-emerald-400/80" : "text-zinc-400/60"
                     )}>
                       {bookingsEnabled ? 'για τη σελίδα BOOKING' : 'Online Κρατήσεις: OFF'}
@@ -456,7 +456,7 @@ export default function Sidebar({
       </Sheet>
 
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-30 lg:flex lg:w-[260px] lg:flex-col">
-        <div className="flex flex-col flex-grow">
+        <div className="flex flex-col flex-grow min-h-0">
           <NavContent />
         </div>
       </div>

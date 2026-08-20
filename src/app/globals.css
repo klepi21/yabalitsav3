@@ -286,6 +286,67 @@ input[type="time"] {
   transform: translateY(-1px);
 }
 
+/* ============================================================
+   BOT — το εικονίδιο του βοηθού.
+
+   Γιατί όχι πραγματικό 3D: ένα WebGL canvas (three.js/Spline) θα
+   κόστιζε 400KB–1MB και θα έτρεχε μόνιμα σε κάθε σελίδα, ενώ σε
+   πλάτος 56px δεν γίνεται καν αντιληπτή η γεωμετρία. Ο όγκος εδώ
+   χτίζεται με προοπτική, βαθμώσεις και σκίαση — μηδενικό βάρος.
+
+   Όλες οι κινήσεις σταματούν από τον κανόνα prefers-reduced-motion
+   στο τέλος του αρχείου.
+   ============================================================ */
+
+.bot-stage {
+  perspective: 220px;
+  transform-style: preserve-3d;
+}
+
+/* Αργό «κοίταγμα γύρω»: μικρό εύρος, ώστε να διαβάζεται ως όγκος και
+   όχι ως τρεμόπαιγμα. */
+@keyframes bot-look {
+  0%, 100% { transform: rotateY(-11deg) rotateX(3deg) translateY(0); }
+  35%      { transform: rotateY(9deg) rotateX(-2deg) translateY(-1.5px); }
+  65%      { transform: rotateY(4deg) rotateX(2deg) translateY(-0.5px); }
+}
+
+/* Το ανοιγόκλεισμα κρατά ελάχιστα μέσα σε μακρύ κύκλο, ώστε να μοιάζει
+   τυχαίο και όχι μηχανικό. */
+@keyframes bot-blink {
+  0%, 92%, 100% { transform: scaleY(1); }
+  95%           { transform: scaleY(0.12); }
+}
+
+@keyframes bot-antenna {
+  0%, 100% { opacity: 1; transform: translateY(0); }
+  50%      { opacity: 0.4; transform: translateY(0.4px); }
+}
+
+.bot-body {
+  transform-style: preserve-3d;
+  animation: bot-look 7s ease-in-out infinite;
+}
+.bot-eye {
+  transform-origin: center;
+  animation: bot-blink 5.4s ease-in-out infinite;
+}
+/* Ελαφρώς μετατοπισμένο ώστε τα μάτια να μη κλείνουν απόλυτα μαζί. */
+.bot-eye--right { animation-delay: 60ms; }
+.bot-antenna {
+  transform-origin: center;
+  animation: bot-antenna 2.4s ease-in-out infinite;
+}
+
+/* Στο hover στρέφεται προς τον χρήστη και «ξυπνά». */
+.bot-wake:hover .bot-body {
+  animation-play-state: paused;
+  transform: rotateY(0deg) rotateX(-4deg) scale(1.06);
+  transition: transform 260ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.bot-wake:hover .bot-eye { animation-duration: 2.2s; }
+.bot-wake:hover .bot-antenna { animation-duration: 0.9s; }
+
 @keyframes bounce-slow {
   0%, 100% {
     transform: translateY(-5%);

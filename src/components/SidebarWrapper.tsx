@@ -53,7 +53,6 @@ const ROUTE_TITLES: Array<[string, string]> = [
   ['/management/tournaments', 'Τουρνουά'],
   ['/management/reports', 'Αναφορές'],
   ['/management/settings', 'Ρυθμίσεις'],
-  ['/management/guides', 'Οδηγοί'],
   ['/management/admin-panel', 'Admin panel'],
 ];
 

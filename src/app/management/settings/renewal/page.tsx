@@ -12,6 +12,7 @@ import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 import UpgradeDueCard from '@/components/UpgradeDueCard';
 import { useSubscriptionQuoteRaw } from '@/lib/queries';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Tier { id: string; label: string; upTo: number | null; monthly: number | null; custom?: true }
 interface Quote {
@@ -49,12 +50,19 @@ const DURATION_LABEL: Record<number, string> = {
 };
 
 export default function SubscriptionRenewalPage() {
+  /* Το venueId έρχεται από το AuthContext, που ΠΕΡΙΜΕΝΕΙ την επαναφορά της
+     συνεδρίας. Πριν, η σελίδα διάβαζε `getAuth().currentUser` κατευθείαν
+     στο mount: σε refresh το Firebase δεν έχει ακόμα αποκαταστήσει το
+     session, οπότε είτε έβγαινε νωρίς χωρίς να ξαναδοκιμάσει, είτε
+     έτρεχε query με μη έτοιμο token και έπαιρνε
+     «Missing or insufficient permissions». */
+  const { venueOwner, isLoading: authLoading } = useAuth();
+  const venueId = venueOwner?.venueId;
+
   const [venueData, setVenueData] = useState<Record<string, unknown> | null>(null);
   /* Το quote έρχεται από την κοινή cache: ανανεώνεται στο focus και
      μοιράζεται με το top bar, οπότε δεν μπορούν να διαφωνήσουν. */
-  const { raw: quote, isLoading: isLoadingQuote } = useSubscriptionQuoteRaw<QuoteResponse>(
-    (venueData?.id as string) || undefined
-  );
+  const { raw: quote, isLoading: isLoadingQuote } = useSubscriptionQuoteRaw<QuoteResponse>(venueId);
   const [duration, setDuration] = useState<1 | 6 | 12>(12);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -72,30 +80,21 @@ export default function SubscriptionRenewalPage() {
   const requiresContact = !!quote?.requiresContact;
 
   const load = useCallback(async () => {
+    if (!venueId) return;
     try {
-      const { collection, query, where, getDocs } = await import('firebase/firestore');
+      const { doc, getDoc } = await import('firebase/firestore');
       const { db } = await import('@/lib/firebase');
-      const { getAuth } = await import('firebase/auth');
-
-      const auth = getAuth();
-      if (!auth.currentUser?.uid) return;
-
-      const snap = await getDocs(
-        query(collection(db, 'yabalitsa_venues'), where('ownerId', '==', auth.currentUser.uid))
-      );
-      if (snap.empty) return;
-
-      const venue = { id: snap.docs[0].id, ...snap.docs[0].data() } as Record<string, unknown>;
-      setVenueData(venue);
-
+      const snap = await getDoc(doc(db, 'yabalitsa_venues', venueId));
+      if (snap.exists()) setVenueData({ id: snap.id, ...snap.data() });
     } catch (error) {
       console.error('Error loading renewal data:', error);
     }
-  }, []);
+  }, [venueId]);
 
   useEffect(() => {
+    if (authLoading) return;
     load();
-  }, [load]);
+  }, [authLoading, load]);
 
   const handleApplyCoupon = async () => {
     if (!couponInput.trim() || !venueData || !selected) return;
@@ -193,7 +192,7 @@ export default function SubscriptionRenewalPage() {
         </p>
       </div>
 
-      {isLoadingQuote ? (
+      {authLoading || isLoadingQuote ? (
         <div className="surface p-6 animate-pulse space-y-4">
           <div className="h-5 w-40 bg-zinc-200 rounded" />
           <div className="h-24 bg-zinc-100 rounded-xl" />

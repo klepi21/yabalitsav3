@@ -21,6 +21,7 @@ import {
   BarChart3,
   Settings,
   Bug,
+  Mail,
   Lightbulb,
   HelpCircle,
   AlertTriangle,
@@ -29,7 +30,6 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { venueService } from '@/lib/firebase-services';
 import { Venue } from '@/types';
-import SupportEmail from '@/components/SupportEmail';
 import { calculateDaysRemaining, getSubscriptionEndDate } from '@/lib/subscription-utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -808,7 +808,7 @@ export default function SettingsPage() {
                     </div>
                     <div>
                       <h3 className="text-sm font-semibold text-zinc-900">Άμεση υποστήριξη</h3>
-                      <p className="text-xs text-zinc-500 mt-0.5">Απαντάμε συνήθως εντός της ημέρας</p>
+                      <p className="text-xs text-zinc-500 mt-0.5">Απαντάμε εντός της ημέρας</p>
                     </div>
                   </div>
                 </CardHeader>
@@ -819,28 +819,30 @@ export default function SettingsPage() {
             );
           })()}
 
-          {/* Help & Support */}
-          <Card className="border-none shadow-sm overflow-hidden">
-            <div className="bg-zinc-50 border-b border-border p-6">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="h-11 w-11 rounded-xl bg-white border border-border text-zinc-700 flex items-center justify-center shrink-0">
-                  <LifeBuoy className="h-5 w-5" />
+          {/* Βοήθεια. Δεύτερο κανάλι μετά τη φόρμα από πάνω, οπότε
+              κρατιέται ήσυχο: ίδια επιφάνεια με τις άλλες κάρτες, χωρίς
+              μεγάλο κουμπί που να ανταγωνίζεται τη φόρμα. */}
+          <Card className="border border-border shadow-e2">
+            <CardContent className="p-5">
+              <div className="flex items-start gap-3">
+                <div className="h-9 w-9 rounded-lg bg-zinc-100 flex items-center justify-center shrink-0">
+                  <LifeBuoy className="h-4 w-4 text-zinc-700" aria-hidden="true" />
                 </div>
-                <div>
-                  <h3 className="text-base font-semibold text-zinc-900">{'Χρειάζεστε βοήθεια;'}</h3>
-                  <p className="text-xs text-zinc-500 font-medium">
-                    Η ομάδα μας είναι διαθέσιμη για οποιαδήποτε απορία.
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-semibold text-zinc-900">Χρειάζεστε βοήθεια;</h3>
+                  <p className="text-xs text-zinc-500 mt-0.5">
+                    Απαντάμε εντός 24 ωρών, Δευτέρα έως Παρασκευή.
                   </p>
+                  <a
+                    href="mailto:support@yabalitsa.com"
+                    className="mt-3 inline-flex items-center gap-2 h-9 px-3 rounded-lg border border-border bg-white text-sm font-medium text-zinc-900 hover:bg-zinc-50 transition-colors"
+                  >
+                    <Mail className="h-4 w-4 text-zinc-500" aria-hidden="true" />
+                    support@yabalitsa.com
+                  </a>
                 </div>
               </div>
-              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                <SupportEmail variant="highlighted" />
-                <div className="flex items-center gap-1.5 text-2xs font-medium text-blue-500">
-                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                  Απάντηση σε &lt;24 ώρες
-                </div>
-              </div>
-            </div>
+            </CardContent>
           </Card>
         </div>
       </div>
