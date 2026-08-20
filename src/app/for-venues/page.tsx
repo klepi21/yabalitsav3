@@ -325,7 +325,7 @@ export default function ForVenuesPage() {
       </div>
 
       {/* Right panel — form */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 min-h-0 overflow-y-auto">
         <div className="max-w-[560px] mx-auto px-6 py-10 lg:py-12">
           {/* Mobile header */}
           <div className="lg:hidden mb-8">
