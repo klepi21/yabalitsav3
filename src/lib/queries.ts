@@ -110,6 +110,21 @@ export interface SubscriptionQuote {
   atAthleteLimit: boolean;
   requiresContact: boolean;
   upgrade: UpgradeQuote;
+  /** Χρειάζεται πληρωμή για να προστεθεί η επόμενη εγγραφή; */
+  pitchNeedsUnlock: boolean;
+  pitchUnlockAmount: number;
+  athleteNeedsUnlock: boolean;
+  athleteUnlockAmount: number;
+  /** Τι πληρώνει σήμερα ανά μήνα με ΦΠΑ· null αν δεν υπάρχει στιγμιότυπο. */
+  billedMonthly: number | null;
+  quotes?: Array<{ duration: 1 | 6 | 12; monthlyWithVat: number }>;
+  venue?: { plan: string | null; planType: string | null; daysRemaining: number; active: boolean };
+  headroom?: {
+    pitchesToNextTier: number | null;
+    athletesToNextTier: number | null;
+    platformTierLabel: string;
+    academyTierLabel: string | null;
+  };
 }
 
 /**
@@ -125,9 +140,23 @@ export function useSubscriptionQuote(venueId?: string) {
     atAthleteLimit: !!data?.atAthleteLimit,
     requiresContact: !!data?.requiresContact,
     upgrade: data?.upgrade,
+    pitchNeedsUnlock: !!data?.pitchNeedsUnlock,
+    pitchUnlockAmount: data?.pitchUnlockAmount ?? 0,
+    athleteNeedsUnlock: !!data?.athleteNeedsUnlock,
+    athleteUnlockAmount: data?.athleteUnlockAmount ?? 0,
+    billedMonthly: data?.billedMonthly ?? null,
+    quotes: data?.quotes,
+    venue: data?.venue,
+    headroom: data?.headroom,
     error,
     isLoading,
   };
+}
+
+/** Ολόκληρη η απάντηση του quote, για οθόνες που τη χρειάζονται πλήρη. */
+export function useSubscriptionQuoteRaw<T = Raw>(venueId?: string) {
+  const { data, error, isLoading, mutate } = useSWR<T>(keys.quote(venueId));
+  return { raw: data, error, isLoading, refresh: mutate };
 }
 
 export function usePendingBookings(venueId?: string) {

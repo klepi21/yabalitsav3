@@ -44,24 +44,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const venue = await venueService.getById(venueId);
       if (!venue) return;
 
-      // Check if explicitly deactivated
-      if (venue.active === false) {
-        await forceLogout('inactive');
-        return;
-      }
+      /* Ο ΣΥΓΚΕΚΡΙΜΕΝΟΣ λόγος πρώτα. Το `active: false` το γράφει το
+         ημερήσιο Cloud Function ως ΣΥΝΕΠΕΙΑ της λήξης, οπότε όταν
+         ελεγχόταν πρώτο κατέπινε πάντα τους ειδικούς λόγους: ένας
+         πληρωμένος συνδρομητής έβλεπε «η δοκιμαστική περίοδος έληξε».
+         Το σκέτο `inactive` μένει για χειροκίνητη απενεργοποίηση. */
+      const outOfDays = typeof venue.daysRemaining === 'number' && venue.daysRemaining <= 0;
 
-      // Check if subscription expired (daysRemaining <= 0 and not trial)
-      if (venue.plan === 'subscription' && typeof venue.daysRemaining === 'number' && venue.daysRemaining <= 0) {
-        // Mark venue as inactive
-        await venueService.update(venueId, { active: false });
+      if (outOfDays && venue.plan === 'subscription') {
+        if (venue.active !== false) await venueService.update(venueId, { active: false });
         await forceLogout('expired');
         return;
       }
 
-      // Check if trial expired
-      if (venue.plan === 'trial' && typeof venue.daysRemaining === 'number' && venue.daysRemaining <= 0) {
-        await venueService.update(venueId, { active: false });
+      if (outOfDays && venue.plan === 'trial') {
+        if (venue.active !== false) await venueService.update(venueId, { active: false });
         await forceLogout('trial_expired');
+        return;
+      }
+
+      // Χειροκίνητη απενεργοποίηση (έχει ακόμα ημέρες αλλά είναι κλειστός).
+      if (venue.active === false) {
+        await forceLogout('inactive');
         return;
       }
     } catch (error) {

@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useSubscriptionQuote } from '@/lib/queries';
 import PlanLimitNotice from '@/components/PlanLimitNotice';
+import UnlockCapacityNotice from '@/components/UnlockCapacityNotice';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -100,13 +101,14 @@ export default function NewPitchPage() {
     }
   });
 
-  const { atPitchLimit, usage, limits } = useSubscriptionQuote(venueOwner?.venueId);
+  const { atPitchLimit, usage, limits, pitchNeedsUnlock, pitchUnlockAmount } =
+    useSubscriptionQuote(venueOwner?.venueId);
 
   const handleFormSubmit = async (data: PitchFormData) => {
     if (!venueOwner) return;
     // Δεύτερος έλεγχος: το κουμπί δεν φαίνεται καν στο όριο, αλλά η
     // υποβολή μπορεί να γίνει και με πληκτρολόγιο.
-    if (atPitchLimit) return;
+    if (atPitchLimit || pitchNeedsUnlock) return;
 
     setIsLoading(true);
     try {
@@ -133,6 +135,15 @@ export default function NewPitchPage() {
     return (
       <div className="max-w-3xl mx-auto py-4">
         <PlanLimitNotice kind="pitches" current={usage.pitches} limit={limits.pitches} />
+      </div>
+    );
+  }
+
+  // Η προσθήκη βγάζει εκτός της πληρωμένης ζώνης: πρώτα η διαφορά.
+  if (pitchNeedsUnlock && usage) {
+    return (
+      <div className="max-w-3xl mx-auto py-4">
+        <UnlockCapacityNotice kind="pitches" current={usage.pitches} amount={pitchUnlockAmount} />
       </div>
     );
   }

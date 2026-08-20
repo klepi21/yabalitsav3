@@ -11,8 +11,9 @@ import { pricingUtils } from '@/lib/pricing';
 import { toast } from '@/lib/toast';
 import { cn } from '@/lib/utils';
 import UpgradeDueCard from '@/components/UpgradeDueCard';
+import { useSubscriptionQuoteRaw } from '@/lib/queries';
 
-interface Tier { id: string; label: string; upTo: number | null; monthly: number }
+interface Tier { id: string; label: string; upTo: number | null; monthly: number | null; custom?: true }
 interface Quote {
   duration: 1 | 6 | 12;
   platformTier: Tier;
@@ -29,6 +30,9 @@ interface QuoteResponse {
   usage: { pitches: number; athletes: number; hasAcademy: boolean };
   quotes: Quote[];
   requiresContact?: boolean;
+  venue?: { plan: string | null; planType: string | null; daysRemaining: number; active: boolean };
+  /** Τι πληρώνει σήμερα, με ΦΠΑ — από το στιγμιότυπο της αγοράς. */
+  billedMonthly?: number | null;
   upgrade?: import('@/lib/queries').UpgradeQuote;
   headroom: {
     pitchesToNextTier: number | null;
@@ -46,10 +50,13 @@ const DURATION_LABEL: Record<number, string> = {
 
 export default function SubscriptionRenewalPage() {
   const [venueData, setVenueData] = useState<Record<string, unknown> | null>(null);
-  const [quote, setQuote] = useState<QuoteResponse | null>(null);
+  /* Το quote έρχεται από την κοινή cache: ανανεώνεται στο focus και
+     μοιράζεται με το top bar, οπότε δεν μπορούν να διαφωνήσουν. */
+  const { raw: quote, isLoading: isLoadingQuote } = useSubscriptionQuoteRaw<QuoteResponse>(
+    (venueData?.id as string) || undefined
+  );
   const [duration, setDuration] = useState<1 | 6 | 12>(12);
   const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingQuote, setIsLoadingQuote] = useState(true);
 
   const [couponInput, setCouponInput] = useState('');
   const [couponApplied, setCouponApplied] = useState(false);
@@ -57,8 +64,10 @@ export default function SubscriptionRenewalPage() {
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponDiscount, setCouponDiscount] = useState(0);
 
-  const daysRemaining = (venueData?.daysRemaining as number) || 0;
-  const isTrial = venueData?.plan === 'trial';
+  /* Οι ημέρες και το plan έρχονται από την κοινή cache (ανανεώνεται στο
+     focus), όχι από το τοπικό fetch που παγώνει στο mount. */
+  const daysRemaining = quote?.venue?.daysRemaining ?? (venueData?.daysRemaining as number) ?? 0;
+  const isTrial = (quote?.venue?.plan ?? venueData?.plan) === 'trial';
   const selected = quote?.quotes.find((q) => q.duration === duration);
   const requiresContact = !!quote?.requiresContact;
 
@@ -79,17 +88,8 @@ export default function SubscriptionRenewalPage() {
       const venue = { id: snap.docs[0].id, ...snap.docs[0].data() } as Record<string, unknown>;
       setVenueData(venue);
 
-      const token = await auth.currentUser.getIdToken();
-      const res = await fetch('/api/subscription/quote', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ venueId: venue.id }),
-      });
-      if (res.ok) setQuote(await res.json());
     } catch (error) {
       console.error('Error loading renewal data:', error);
-    } finally {
-      setIsLoadingQuote(false);
     }
   }, []);
 
@@ -207,79 +207,148 @@ export default function SubscriptionRenewalPage() {
         <>
           {quote.upgrade?.owed && <UpgradeDueCard upgrade={quote.upgrade} />}
 
-          {/* ---------- Τρέχουσα κατάσταση ---------- */}
-          <div className="surface p-5">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="rounded-lg bg-zinc-50 p-4 text-center">
-                <p className="text-2xl font-semibold text-zinc-900 tabular-nums">{daysRemaining}</p>
-                <p className="text-xs text-zinc-600 mt-0.5">ημέρες που απομένουν</p>
-              </div>
-              <div className="rounded-lg bg-zinc-50 p-4 text-center">
-                <p className="text-base font-semibold text-zinc-900">
+          {/* ---------- Τι ισχύει τώρα ---------- */}
+          <div className="surface p-5 space-y-4">
+            <h2 className="text-sm font-semibold text-zinc-900">Τι ισχύει τώρα</h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              <div className="rounded-lg bg-zinc-50 border border-border p-4">
+                <p className="text-2xs text-zinc-500">Κατάσταση</p>
+                <p className="text-sm font-semibold text-zinc-900 mt-1">
                   {isTrial ? 'Δωρεάν δοκιμή' : 'Ενεργή συνδρομή'}
                 </p>
-                <p className="text-xs text-zinc-600 mt-0.5">τρέχον πλάνο</p>
+              </div>
+              <div className="rounded-lg bg-zinc-50 border border-border p-4">
+                <p className="text-2xs text-zinc-500">Απομένουν</p>
+                <p className="text-sm font-semibold text-zinc-900 mt-1 tabular-nums">
+                  {daysRemaining} {daysRemaining === 1 ? 'ημέρα' : 'ημέρες'}
+                </p>
+              </div>
+              {/* Τρεις καταστάσεις, τρεις ειλικρινείς απαντήσεις:
+                  γνωστή χρέωση · δοκιμή · συνδρομή χωρίς καταγραφή
+                  (παλιός συνδρομητής πριν τη μετάβαση). Το σκέτο «—»
+                  ερχόταν σε αντίφαση με την κάρτα των ρυθμίσεων, που
+                  δήλωνε τιμή σαν βεβαιότητα. */}
+              <div className="rounded-lg bg-zinc-50 border border-border p-4 col-span-2 sm:col-span-1">
+                <p className="text-2xs text-zinc-500">
+                  {quote.billedMonthly != null || isTrial ? 'Πληρώνετε' : 'Τιμή μεγέθους'}
+                </p>
+                <p className="text-sm font-semibold text-zinc-900 mt-1 tabular-nums">
+                  {quote.billedMonthly != null
+                    ? `${pricingUtils.formatPrice(quote.billedMonthly)}/μήνα`
+                    : isTrial
+                      ? 'Τίποτα ακόμα'
+                      : selected
+                        ? `${pricingUtils.formatPrice(
+                            selected.monthlyBeforeDiscount * 1.24
+                          )}/μήνα`
+                        : '—'}
+                </p>
               </div>
             </div>
           </div>
 
-          {/* ---------- Το μέγεθός σας ---------- */}
+          {/* ---------- Μέγεθος ΚΑΙ τιμή σε ένα σημείο ----------
+               Πριν ήταν δύο ξεχωριστές κάρτες («Το μέγεθός σας» και
+               «Ανάλυση») που επαναλάμβαναν τις ίδιες ζώνες — μία με
+               περιθώριο, μία με τιμή. Ο χρήστης δεν καταλάβαινε ποια
+               είναι η διαφορά τους. Τώρα: μία γραμμή ανά άξονα. */}
           <div className="surface p-5 space-y-4">
-            <div className="flex items-center justify-between">
+            <div>
               <h2 className="text-sm font-semibold text-zinc-900">Το μέγεθός σας</h2>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="rounded-xl border border-border p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Building2 className="h-4 w-4 text-zinc-500" aria-hidden="true" />
-                  <span className="text-xs font-medium text-zinc-600">Πλατφόρμα</span>
-                </div>
-                <p className="text-sm font-semibold text-zinc-900">
-                  {quote.usage.pitches} {quote.usage.pitches === 1 ? 'γήπεδο' : 'γήπεδα'}
-                </p>
-                <p className="text-xs text-zinc-600 mt-0.5">{quote.headroom.platformTierLabel}</p>
-                {quote.headroom.pitchesToNextTier !== null && (
-                  <p className="text-2xs text-zinc-500 mt-2">
-                    {quote.headroom.pitchesToNextTier > 0
-                      ? `Περιθώριο για ${quote.headroom.pitchesToNextTier} ακόμα στην ίδια τιμή`
-                      : 'Στο όριο της ζώνης — το επόμενο γήπεδο αλλάζει τιμή'}
-                  </p>
-                )}
-              </div>
-
-              <div className="rounded-xl border border-border p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <Users className="h-4 w-4 text-zinc-500" aria-hidden="true" />
-                  <span className="text-xs font-medium text-zinc-600">Ακαδημία</span>
-                </div>
-                {quote.usage.hasAcademy ? (
-                  <>
-                    <p className="text-sm font-semibold text-zinc-900">
-                      {quote.usage.athletes} {quote.usage.athletes === 1 ? 'αθλητής' : 'αθλητές'}
-                    </p>
-                    <p className="text-xs text-zinc-600 mt-0.5">{quote.headroom.academyTierLabel}</p>
-                    {quote.headroom.athletesToNextTier !== null && (
-                      <p className="text-2xs text-zinc-500 mt-2">
-                        {quote.headroom.athletesToNextTier > 0
-                          ? `Περιθώριο για ${quote.headroom.athletesToNextTier} ακόμα στην ίδια τιμή`
-                          : 'Στο όριο της ζώνης — ο επόμενος αθλητής αλλάζει τιμή'}
-                      </p>
-                    )}
-                  </>
-                ) : (
-                  <p className="text-sm text-zinc-600">Δεν χρησιμοποιείται — δεν χρεώνεται</p>
-                )}
-              </div>
-            </div>
-
-            <div className="flex items-start gap-2 rounded-lg bg-blue-50 border border-blue-100 p-3">
-              <Info className="h-4 w-4 text-blue-700 shrink-0 mt-0.5" aria-hidden="true" />
-              <p className="text-xs text-blue-800 leading-relaxed">
-                Αν μεγαλώσετε πέρα από τη ζώνη σας, <strong>τίποτα δεν κλειδώνει</strong>. Η νέα
-                τιμή ισχύει από την επόμενη ανανέωση και τη βλέπετε πάντα από πριν.
+              <p className="text-xs text-zinc-600 mt-0.5">
+                {isTrial
+                  ? 'Από εδώ θα προκύψει η τιμή σας όταν λήξει η δοκιμή. Οι τιμές είναι ανά μήνα, προ έκπτωσης διάρκειας.'
+                  : 'Από εδώ προκύπτει η τιμή. Οι τιμές είναι ανά μήνα, προ έκπτωσης διάρκειας.'}
               </p>
             </div>
+
+            <div className="divide-y divide-border rounded-xl border border-border overflow-hidden">
+              {/* --- Πλατφόρμα --- */}
+              <div className="flex items-start gap-3 p-4">
+                <Building2 className="h-4 w-4 text-zinc-500 mt-0.5 shrink-0" aria-hidden="true" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="text-sm font-semibold text-zinc-900">
+                      {quote.usage.pitches} {quote.usage.pitches === 1 ? 'γήπεδο' : 'γήπεδα'}
+                    </p>
+                    <p className="text-sm font-semibold text-zinc-900 tabular-nums shrink-0">
+                      {selected?.platformTier?.monthly != null
+                        ? `${pricingUtils.formatPrice(selected.platformTier.monthly)}/μήνα`
+                        : 'Κατόπιν συνεννόησης'}
+                    </p>
+                  </div>
+                  <p className="text-xs text-zinc-600 mt-0.5">
+                    Πλατφόρμα · ζώνη {quote.headroom.platformTierLabel.toLowerCase()}
+                  </p>
+                  {quote.headroom.pitchesToNextTier !== null && (
+                    <p className="text-2xs text-zinc-500 mt-1.5">
+                      {quote.headroom.pitchesToNextTier > 0
+                        ? `Περιθώριο για ${quote.headroom.pitchesToNextTier} ακόμα στην ίδια τιμή`
+                        : 'Στο όριο της ζώνης — το επόμενο γήπεδο αλλάζει τιμή'}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* --- Ακαδημία --- */}
+              <div className="flex items-start gap-3 p-4">
+                <Users className="h-4 w-4 text-zinc-500 mt-0.5 shrink-0" aria-hidden="true" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="text-sm font-semibold text-zinc-900">
+                      {quote.usage.hasAcademy
+                        ? `${quote.usage.athletes} ${quote.usage.athletes === 1 ? 'αθλητής' : 'αθλητές'}`
+                        : 'Δεν χρησιμοποιείται'}
+                    </p>
+                    <p className="text-sm font-semibold text-zinc-900 tabular-nums shrink-0">
+                      {selected?.academyTier?.monthly != null
+                        ? `${pricingUtils.formatPrice(selected.academyTier.monthly)}/μήνα`
+                        : selected?.academyTier
+                          ? 'Κατόπιν συνεννόησης'
+                          : '€0,00'}
+                    </p>
+                  </div>
+                  <p className="text-xs text-zinc-600 mt-0.5">
+                    {quote.usage.hasAcademy
+                      ? `Ακαδημία · ζώνη ${quote.headroom.academyTierLabel?.toLowerCase()}`
+                      : 'Ακαδημία · δεν χρεώνεται'}
+                  </p>
+                  {quote.usage.hasAcademy && quote.headroom.athletesToNextTier !== null && (
+                    <p className="text-2xs text-zinc-500 mt-1.5">
+                      {quote.headroom.athletesToNextTier > 0
+                        ? `Περιθώριο για ${quote.headroom.athletesToNextTier} ακόμα στην ίδια τιμή`
+                        : 'Στο όριο της ζώνης — ο επόμενος αθλητής αλλάζει τιμή'}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {/* --- Άθροισμα --- */}
+              {selected && !selected.requiresContact && (
+                <div className="flex items-baseline justify-between gap-3 p-4 bg-zinc-50">
+                  <p className="text-sm font-semibold text-zinc-900">
+                    {isTrial ? 'Θα κοστίζει' : 'Σύνολο ανά μήνα'}
+                  </p>
+                  <p className="text-sm font-semibold text-zinc-900 tabular-nums">
+                    {pricingUtils.formatPrice(selected.monthlyBeforeDiscount)}/μήνα
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Στη ζώνη «κατόπιν συνεννόησης» δεν υπάρχει διαφορά να
+                καλυφθεί — το μήνυμα θα ερχόταν σε αντίφαση με το πλαίσιο
+                ακριβώς από κάτω. */}
+            {!requiresContact && (
+              <div className="flex items-start gap-2 rounded-lg bg-blue-50 border border-blue-100 p-3">
+                <Info className="h-4 w-4 text-blue-700 shrink-0 mt-0.5" aria-hidden="true" />
+                <p className="text-xs text-blue-800 leading-relaxed">
+                  Όσα έχετε ήδη δουλεύουν πάντα. Όταν προσθέτετε πέρα από τη ζώνη σας, καλύπτετε
+                  μόνο τη <strong>διαφορά για τις ημέρες που απομένουν</strong> — και τη βλέπετε
+                  πριν χρεωθείτε.
+                </p>
+              </div>
+            )}
           </div>
 
           {requiresContact ? (
@@ -300,7 +369,12 @@ export default function SubscriptionRenewalPage() {
           <>
           {/* ---------- Διάρκεια ---------- */}
           <div className="surface p-5 space-y-4">
-            <h2 className="text-sm font-semibold text-zinc-900">Διάρκεια χρέωσης</h2>
+            <div>
+              <h2 className="text-sm font-semibold text-zinc-900">Νέα περίοδος</h2>
+              <p className="text-xs text-zinc-600 mt-0.5">
+                Επιλέξτε διάρκεια. Οι ημέρες που απομένουν προστίθενται — δεν χάνονται.
+              </p>
+            </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {quote.quotes.map((q) => {
@@ -350,23 +424,19 @@ export default function SubscriptionRenewalPage() {
           {/* ---------- Ανάλυση & πληρωμή ---------- */}
           {selected && (
             <div className="surface p-5 space-y-4">
-              <h2 className="text-sm font-semibold text-zinc-900">Ανάλυση χρέωσης</h2>
+              <div>
+                <h2 className="text-sm font-semibold text-zinc-900">Σύνολο</h2>
+              </div>
 
               <dl className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <dt className="text-zinc-600">Πλατφόρμα · {selected.platformTier.label}</dt>
+                  <dt className="text-zinc-600">
+                    Συνδρομή × {selected.duration} {selected.duration === 1 ? 'μήνας' : 'μήνες'}
+                  </dt>
                   <dd className="text-zinc-900 tabular-nums">
-                    {pricingUtils.formatPrice(selected.platformTier.monthly)}/μήνα
+                    {pricingUtils.formatPrice(selected.monthlyBeforeDiscount * selected.duration * 1.24)}
                   </dd>
                 </div>
-                {selected.academyTier && (
-                  <div className="flex justify-between">
-                    <dt className="text-zinc-600">Ακαδημία · {selected.academyTier.label}</dt>
-                    <dd className="text-zinc-900 tabular-nums">
-                      {pricingUtils.formatPrice(selected.academyTier.monthly)}/μήνα
-                    </dd>
-                  </div>
-                )}
 
                 {selected.discountPercent > 0 && (
                   <div className="flex justify-between text-emerald-700">

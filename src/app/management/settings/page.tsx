@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { useForm } from 'react-hook-form';
@@ -39,7 +39,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import { useSubscriptionQuote } from '@/lib/queries';
-import { resolveTier, platformTiers } from '@/lib/pricing';
+import { resolveTier, platformTiers, pricingUtils } from '@/lib/pricing';
 
 // Form validation schema
 const venueSettingsSchema = z.object({
@@ -62,10 +62,24 @@ export default function SettingsPage() {
 
   const [venue, setVenue] = useState<Venue | null>(null);
   // Το μέγεθος και η ζώνη έρχονται από την ίδια πηγή με τη σελίδα συνδρομής.
-  const { usage: subUsage } = useSubscriptionQuote(venueOwner?.venueId);
+  const { usage: subUsage, billedMonthly, quotes: subQuotes, venue: subVenue } =
+    useSubscriptionQuote(venueOwner?.venueId);
+
+  /* Η κατάσταση συνδρομής (ημέρες, plan, active) αλλάζει εκτός της σελίδας
+     — π.χ. από το ημερήσιο Cloud Function ή μετά από πληρωμή. Το τοπικό
+     `venue` φορτώνεται μία φορά στο mount και μένει παγωμένο, οπότε τα
+     πεδία αυτά έρχονται από την κοινή cache που κάνει revalidate. */
+  const liveVenue = useMemo(
+    () => (venue ? ({ ...venue, ...(subVenue ?? {}) } as typeof venue) : null),
+    [venue, subVenue]
+  );
   const currentTierLabel = subUsage
-    ? resolveTier(platformTiers, subUsage.pitches).id.replace(/^./, (c) => c.toUpperCase())
+    ? resolveTier(platformTiers, subUsage.pitches).label
     : null;
+  /* Τι πληρώνει σήμερα. Αν λείπει στιγμιότυπο αγοράς (δοκιμή ή παλιά
+     συνδρομή), δείχνουμε τι θα κόστιζε στο σημερινό μέγεθος. */
+  const monthlyNow =
+    billedMonthly ?? subQuotes?.find((q) => q.duration === 1)?.monthlyWithVat ?? null;
   const [lastPayment, setLastPayment] = useState<{
     id: string;
     venueId: string;
@@ -153,13 +167,18 @@ export default function SettingsPage() {
             updatedAt: typeof p.updatedAt === 'string' ? p.updatedAt : new Date(p.updatedAt as number).toISOString(),
           }));
 
-          // Sort by payment date and get the most recent
-          const sortedPayments = payments.sort((a: { paymentDate?: string }, b: { paymentDate?: string }) => {
+          /* Μόνο ΕΠΙΤΥΧΕΙΣ πληρωμές. Κάθε εγκαταλελειμμένο checkout αφήνει
+             εγγραφή `pending` που μένει για πάντα — δούλευε κατά τύχη μόνο
+             επειδή οι pending δεν έχουν `paymentDate` και βυθίζονταν. */
+          const succeeded = payments.filter(
+            (p: { status?: string }) => p.status === 'succeeded'
+          );
+          const sortedPayments = succeeded.sort((a: { paymentDate?: string }, b: { paymentDate?: string }) => {
             const dateA = a.paymentDate ? new Date(a.paymentDate).getTime() : 0;
             const dateB = b.paymentDate ? new Date(b.paymentDate).getTime() : 0;
             return dateB - dateA;
           });
-          setLastPayment(sortedPayments[0]);
+          if (sortedPayments.length > 0) setLastPayment(sortedPayments[0]);
         }
       }
     } catch (error) {
@@ -363,12 +382,13 @@ export default function SettingsPage() {
         </div>
 
         {/* Subscription Status Badge */}
-        {venue && (() => {
+        {liveVenue && (() => {
+          const venue = liveVenue;
           const daysRemaining = calculateDaysRemaining(venue);
           /* Η ζώνη προκύπτει από το τρέχον μέγεθος, όχι από το
              αποθηκευμένο planType — αλλιώς το badge εδώ και η σελίδα
              συνδρομής δείχνουν διαφορετικά πράγματα. */
-          const planName = currentTierLabel ?? venue.planType ?? '—';
+          const planName = venue.plan === 'subscription' ? 'Συνδρομή' : 'Δωρεάν δοκιμή';
 
           if (venue.plan === 'subscription') {
             const isWarning = daysRemaining !== null && daysRemaining <= 7;
@@ -389,7 +409,9 @@ export default function SettingsPage() {
                 )} />
                 <div className="flex flex-col">
                   <span className="text-2xs opacity-40 font-semibold">Πλάνο</span>
-                  <span className="text-xs font-semibold tracking-tight">{planName} • {daysRemaining} ημέρες</span>
+                  <span className="text-xs font-semibold tracking-tight">
+                    {planName} • {daysRemaining} {daysRemaining === 1 ? 'ημέρα' : 'ημέρες'}
+                  </span>
                 </div>
               </div>
             );
@@ -620,7 +642,9 @@ export default function SettingsPage() {
         {/* Right Column: Current Plan & Pricing Packages */}
         <div className="flex flex-col gap-8">
           {/* Current Plan Info */}
-          {venue && (
+          {liveVenue && (() => {
+          const venue = liveVenue;
+          return (
             <Card className="border border-border bg-white shadow-e3 overflow-hidden">
               <CardHeader className="pb-2">
                 <CardTitle className="eyebrow">Τρέχον πλάνο</CardTitle>
@@ -630,21 +654,41 @@ export default function SettingsPage() {
                   {/* Η ζώνη προκύπτει από το τρέχον μέγεθος, όπως και το
                       badge πάνω και η σελίδα συνδρομής. Το αποθηκευμένο
                       planType είναι στιγμιότυπο αγοράς και ξεπερνιέται. */}
-                  <div className="flex flex-col gap-1">
-                    <div className="flex items-baseline gap-2.5">
+                  {/* Σε μοντέλο βάσει μεγέθους δεν υπάρχει «πακέτο» να
+                      ονομαστεί — υπάρχει μέγεθος και τιμή. Το «Growth»
+                      ήταν εσωτερικό id ζώνης και δεν έλεγε τίποτα στον
+                      πελάτη· επιπλέον η δημόσια σελίδα τιμών μιλά μόνο
+                      με μεγέθη, οπότε ήταν και ασυνεπές. */}
+                  <div className="flex flex-col gap-1.5">
+                    {venue.plan === 'subscription' ? (
+                      <div className="flex flex-col gap-0.5">
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-4xl font-semibold text-zinc-900 tracking-tight tabular-nums">
+                            {monthlyNow != null ? pricingUtils.formatPrice(monthlyNow) : '—'}
+                          </span>
+                          <span className="text-sm text-zinc-500">/ μήνα</span>
+                        </div>
+                        {/* Χωρίς στιγμιότυπο αγοράς δεν ξέρουμε τι πλήρωσε —
+                            η τιμή είναι υπολογισμός στο σημερινό μέγεθος. */}
+                        {billedMonthly == null && (
+                          <span className="text-2xs text-zinc-500">
+                            υπολογισμός στο μέγεθός σας
+                          </span>
+                        )}
+                      </div>
+                    ) : (
                       <span className="text-4xl font-semibold text-zinc-900 tracking-tight">
-                        {venue.plan === 'subscription' ? (currentTierLabel ?? '—') : 'Δοκιμή'}
+                        Δωρεάν δοκιμή
                       </span>
-                      <span className="text-xs text-zinc-500">
-                        {venue.plan === 'subscription' ? 'βάσει μεγέθους' : 'δωρεάν περίοδος'}
-                      </span>
-                    </div>
+                    )}
+
                     {subUsage && (
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-xs text-zinc-600">
                         {subUsage.pitches} {subUsage.pitches === 1 ? 'γήπεδο' : 'γήπεδα'}
                         {subUsage.hasAcademy
                           ? ` · ${subUsage.athletes} ${subUsage.athletes === 1 ? 'αθλητής' : 'αθλητές'}`
                           : ''}
+                        {currentTierLabel ? ` · ζώνη ${currentTierLabel.toLowerCase()}` : ''}
                       </p>
                     )}
                   </div>
@@ -654,7 +698,9 @@ export default function SettingsPage() {
                       <p className="text-2xs text-zinc-500 mb-1">Υπόλοιπο</p>
                       <p className="text-2xl font-semibold text-zinc-900 tabular-nums">
                         {calculateDaysRemaining(venue) ?? 0}{' '}
-                        <span className="text-xs font-normal text-zinc-500">ημέρες</span>
+                        <span className="text-xs font-normal text-zinc-500">
+                          {calculateDaysRemaining(venue) === 1 ? 'ημέρα' : 'ημέρες'}
+                        </span>
                       </p>
                     </div>
 
@@ -681,10 +727,11 @@ export default function SettingsPage() {
                 </div>
               </CardContent>
             </Card>
-          )}
+          );
+          })()}
 
           {/* Last Payment Info */}
-          {venue && venue.plan === 'subscription' && lastPayment && (
+          {liveVenue && liveVenue.plan === 'subscription' && lastPayment && (
             <Card className="border border-border shadow-e2">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-semibold flex items-center justify-between text-zinc-900">
@@ -719,7 +766,13 @@ export default function SettingsPage() {
                   <div className="h-px bg-zinc-200/50" />
                   <div className="flex items-center gap-3 text-xs font-medium text-zinc-500">
                     <BarChart3 className="h-4 w-4" />
-                    {lastPayment.planName || 'Συνδρομή'} • {lastPayment.durationMonths || 1}{' '}
+                    {/* Τα παλιά ονόματα (Basic/Pro/Enterprise) ήταν στην
+                        πραγματικότητα διάρκειες πληρωμής και δεν λένε
+                        τίποτα στον πελάτη — εμφανίζονται ως «Συνδρομή». */}
+                    {['Basic', 'Pro', 'Enterprise', 'Legacy'].includes(lastPayment.planName || '')
+                      ? 'Συνδρομή'
+                      : lastPayment.planName || 'Συνδρομή'}{' '}
+                    • {lastPayment.durationMonths || 1}{' '}
                     {(lastPayment.durationMonths || 1) === 1 ? 'μήνας' : 'μήνες'}
                   </div>
                 </div>
@@ -728,7 +781,8 @@ export default function SettingsPage() {
           )}
 
           {/* Instant Support via Telegram */}
-          {venue && (() => {
+          {liveVenue && (() => {
+            const venue = liveVenue;
             const isTrial = venue.plan !== 'subscription';
             const trialActive = isTrial && (calculateDaysRemaining(venue) ?? 0) > 0;
             /* Πριν: η υποστήριξη ήταν κλειδωμένη σε planType 'pro'/'enterprise'.

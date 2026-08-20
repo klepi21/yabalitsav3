@@ -315,7 +315,7 @@ export default function ForVenuesPage() {
 
         <div className="relative z-10 flex items-center justify-between pt-8 border-t border-white/10 mt-10">
           <p className="text-zinc-500 text-xs font-medium">
-            &copy; {new Date().getFullYear()} Yabalitsa SaaS
+            &copy; {new Date().getFullYear()} Yabalitsa
           </p>
           <div className="flex gap-4 text-2xs font-bold tracking-widest text-emerald-500/80">
             <span>SECURE ENCRYPTED</span>

@@ -267,6 +267,43 @@ export function calculateUpgrade(
   };
 }
 
+/**
+ * Καλύπτει το πληρωμένο πλάνο μια υποθετική χρήση;
+ *
+ * Χρησιμοποιείται πριν τη δημιουργία γηπέδου/αθλητή: αν η προσθήκη βγάζει
+ * τον πελάτη εκτός της ζώνης που έχει πληρώσει, ζητάμε πρώτα τη διαφορά.
+ * Δεν κλείνει τίποτα από όσα ήδη έχει — αφορά μόνο τη ΝΕΑ εγγραφή.
+ */
+export function isCoveredByBilled(
+  usage: UsageSnapshot,
+  billed: BilledSnapshot | null | undefined
+): boolean {
+  // Χωρίς στιγμιότυπο (δοκιμή, ή συνδρομή πριν τη μετάβαση) δεν μπλοκάρουμε.
+  if (!billed) return true;
+
+  const platform = resolveTier(platformTiers, usage.pitches);
+  if (platform.id !== billed.platformTierId) return false;
+
+  if (!usage.hasAcademy) return true;
+  const academy = resolveTier(academyTiers, usage.athletes);
+  return academy.id === billed.academyTierId;
+}
+
+/** Τι θα κόστιζε να καλυφθεί μια υποθετική χρήση για τις υπόλοιπες ημέρες. */
+export function quoteUnlock(
+  usage: UsageSnapshot,
+  billed: BilledSnapshot | null | undefined,
+  daysRemaining: number,
+  target: { pitches?: number; athletes?: number }
+): UpgradeQuote {
+  const hypothetical: UsageSnapshot = {
+    pitches: target.pitches ?? usage.pitches,
+    athletes: target.athletes ?? usage.athletes,
+    hasAcademy: usage.hasAcademy || (target.athletes ?? 0) > 0,
+  };
+  return calculateUpgrade(hypothetical, billed, daysRemaining);
+}
+
 /** Δημιουργεί το στιγμιότυπο που αποθηκεύεται μετά από επιτυχή πληρωμή. */
 export function buildBilledSnapshot(
   breakdown: PriceBreakdown,
@@ -291,10 +328,18 @@ export function describeBreakdown(b: PriceBreakdown): { planType: string; planNa
   if (b.requiresContact) return { planType: 'Custom', planName: 'Κατόπιν συνεννόησης' };
 
   const platform = b.platformTier;
+
+  /* `planType` είναι ΕΣΩΤΕΡΙΚΟ: μπαίνει στη βάση και στο admin panel για
+     reporting και υποστήριξη. Δεν εμφανίζεται στον πελάτη.
+
+     `planName` είναι ό,τι βλέπει ο πελάτης (π.χ. στο ιστορικό πληρωμών),
+     οπότε περιγράφεται με ΜΕΓΕΘΗ — την ίδια γλώσσα με τη δημόσια σελίδα
+     τιμών και τη σελίδα συνδρομής. Πριν έγραφε «Growth + Ακαδημία (…)»,
+     δηλαδή ξαναέφερνε το εσωτερικό όνομα μπροστά στον πελάτη. */
   const planType = platform.id.charAt(0).toUpperCase() + platform.id.slice(1);
   const planName = b.academyTier
-    ? `${planType} + Ακαδημία (${b.academyTier.label})`
-    : planType;
+    ? `${platform.label} + ακαδημία ${b.academyTier.label.toLowerCase()}`
+    : platform.label;
 
   return { planType, planName };
 }
@@ -314,8 +359,19 @@ export const pricingUtils = {
   },
 
   // Format price for display
-  formatPrice(price: number): string {
-    return `€${price.toFixed(2)}`;
+  /**
+   * Ελληνική μορφοποίηση: κόμμα για δεκαδικά, τελεία για χιλιάδες.
+   * Πριν έβγαζε «€1160.64» — αγγλικό πρότυπο σε ελληνικό προϊόν, και
+   * ασυνεπές με τις κάρτες αναβάθμισης που ήδη χρησιμοποιούσαν el-GR.
+   */
+  formatPrice(price: number | null | undefined): string {
+    // Οι ζώνες «κατόπιν συνεννόησης» δεν έχουν τιμή. Ένα null δεν πρέπει
+    // να ρίχνει ολόκληρη τη σελίδα με TypeError.
+    if (price == null || !Number.isFinite(price)) return '—';
+    return `€${price.toLocaleString('el-GR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
   },
 
   // Apply coupon discount to a total price

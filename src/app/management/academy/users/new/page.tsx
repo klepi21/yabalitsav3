@@ -11,6 +11,7 @@ import { Loader2, ArrowLeft, UserPlus, AlertCircle, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSubscriptionQuote } from '@/lib/queries';
 import PlanLimitNotice from '@/components/PlanLimitNotice';
+import UnlockCapacityNotice from '@/components/UnlockCapacityNotice';
 
 export default function NewAcademyUserPage() {
   const router = useRouter();
@@ -57,10 +58,11 @@ export default function NewAcademyUserPage() {
     [groups]
   );
 
-  const { atAthleteLimit, usage, limits } = useSubscriptionQuote(venueId);
+  const { atAthleteLimit, usage, limits, athleteNeedsUnlock, athleteUnlockAmount } =
+    useSubscriptionQuote(venueId);
 
   const handleSubmit = async (data: Omit<AcademyUser, 'id' | 'createdAt' | 'updatedAt'>) => {
-    if (atAthleteLimit) return;
+    if (atAthleteLimit || athleteNeedsUnlock) return;
     try {
       setIsLoading(true);
       setError(null);
@@ -118,6 +120,15 @@ export default function NewAcademyUserPage() {
     return (
       <div className="max-w-3xl mx-auto py-4">
         <PlanLimitNotice kind="athletes" current={usage.athletes} limit={limits.athletes} />
+      </div>
+    );
+  }
+
+  // Η προσθήκη βγάζει εκτός της πληρωμένης ζώνης: πρώτα η διαφορά.
+  if (athleteNeedsUnlock && usage) {
+    return (
+      <div className="max-w-3xl mx-auto py-4">
+        <UnlockCapacityNotice kind="athletes" current={usage.athletes} amount={athleteUnlockAmount} />
       </div>
     );
   }

@@ -20,7 +20,7 @@ export default function FinalCTASection() {
               href="/for-venues" 
               className="w-full sm:w-auto px-8 py-4 font-bold text-black bg-emerald-400 hover:bg-emerald-300 rounded-2xl transition-all shadow-[0_0_30px_rgba(116,238,22,0.3)] hover:shadow-[0_0_50px_rgba(116,238,22,0.6)] flex items-center justify-center gap-3 hover:-translate-y-1"
             >
-              Αποκτήστε Πρόσβαση (SaaS) <ChevronRight className="h-4 w-4" />
+              Αποκτήστε Πρόσβαση<ChevronRight className="h-4 w-4" />
             </Link>
             <p className="mt-6 text-zinc-400 text-2xs md:text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 opacity-80">
               <Zap className="w-3.5 h-3.5 text-emerald-500 fill-emerald-500" />

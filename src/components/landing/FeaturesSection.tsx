@@ -19,7 +19,7 @@ export default function FeaturesSection() {
             <span className="text-emerald-400">Σε μία μοναδική πλατφόρμα.</span>
           </h2>
           <p className="text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto font-light leading-relaxed">
-            Αφήστε πίσω τα σημειωματάρια και τα πολύπλοκα excel. Το Yabalitsa SaaS είναι σχεδιασμένο για την απόλυτη ψηφιακή αναβάθμιση του αθλητικού σας κέντρου.
+            Αφήστε πίσω τα σημειωματάρια και τα πολύπλοκα excel. Το Yabalitsa είναι σχεδιασμένο για την απόλυτη ψηφιακή αναβάθμιση του αθλητικού σας κέντρου.
           </p>
         </div>
 

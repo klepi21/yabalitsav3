@@ -11,3 +11,12 @@ export function toGreekUpperCase(str: string): string {
     .replace(/[\u0300-\u036f]/g, "")
     .toUpperCase();
 }
+
+
+/**
+ * «1 ημέρα» / «5 ημέρες». Γράφεται σε ένα σημείο ώστε να μη χρειάζεται
+ * να θυμάται κανείς τον ενικό σε κάθε νέο μήνυμα.
+ */
+export function days(n: number): string {
+  return `${n} ${Math.abs(n) === 1 ? 'ημέρα' : 'ημέρες'}`;
+}

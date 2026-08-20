@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
+import { cn, days } from '@/lib/utils';
 import { usePagination } from '@/hooks/usePagination';
 import { Pagination } from '@/components/ui/pagination';
 import {
@@ -397,10 +397,8 @@ export default function MedicalTrackingPage() {
                       </p>
                       <p className={cn("text-2xs font-medium", cfg.color)}>
                         {athlete.status === 'expired'
-                          ? `Ληγμένο ${Math.abs(athlete.daysUntilExpiry!)} ημέρες`
-                          : athlete.status === 'expiring_soon'
-                            ? `Λήγει σε ${athlete.daysUntilExpiry} ημέρες`
-                            : `Λήγει σε ${athlete.daysUntilExpiry} ημέρες`
+                          ? `Ληγμένο ${days(Math.abs(athlete.daysUntilExpiry!))}`
+                          : `Λήγει σε ${days(athlete.daysUntilExpiry!)}`
                         }
                       </p>
                     </>

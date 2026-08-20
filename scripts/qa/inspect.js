@@ -6,7 +6,7 @@
  */
 const {
   init, findVenue, measureUsage, priceFor, resolveTier,
-  platformTiers, academyTiers, SELF_SERVE_LIMITS, TRIAL_DAYS, eur, upgradeOwed,
+  platformTiers, academyTiers, SELF_SERVE_LIMITS, TRIAL_DAYS, VAT, eur, upgradeOwed, unlockCost,
 } = require('./lib');
 
 const EMAIL = process.argv[2] || 'nikoskoukis99@gmail.com';
@@ -78,6 +78,7 @@ const expect = (screen, what) => console.log('  \x1b[36m▸\x1b[0m ' + screen.pa
   const billed = d.billing || null;
   const up = upgradeOwed(usage, billed, days);
 
+
   h('ΑΝΑΒΑΘΜΙΣΗ ΕΝΤΟΣ ΠΕΡΙΟΔΟΥ');
   if (!billed) {
     kv('στιγμιότυπο πληρωμής', '— (δοκιμή ή συνδρομή πριν τη μετάβαση)');
@@ -87,6 +88,11 @@ const expect = (screen, what) => console.log('  \x1b[36m▸\x1b[0m ' + screen.pa
     kv('πληρωμένη ζώνη', `${billed.platformTierId}${billed.academyTierId ? ' + ' + billed.academyTierId : ''}`);
     kv('πληρωμένη βάση / τρέχουσα', `€${up.billedBase} → €${up.currentBase} (προ ΦΠΑ, ανά μήνα)`);
     kv('οφείλεται διαφορά;', up.owed ? `ΝΑΙ — ${eur(up.amountWithVat)} για ${days} ημέρες` : 'όχι');
+
+    const nextP = unlockCost(usage, billed, days, { pitches: usage.pitches + 1 });
+    const nextA = unlockCost(usage, billed, days, { athletes: usage.athletes + 1 });
+    kv('προσθήκη γηπέδου', nextP.owed ? `ΚΛΕΙΔΩΜΕΝΗ — ${eur(nextP.amountWithVat)}` : 'ελεύθερη');
+    kv('προσθήκη αθλητή', nextA.owed ? `ΚΛΕΙΔΩΜΕΝΗ — ${eur(nextA.amountWithVat)}` : 'ελεύθερη');
   }
 
   /* ---------------------------------------------------------------- */
@@ -114,13 +120,34 @@ const expect = (screen, what) => console.log('  \x1b[36m▸\x1b[0m ' + screen.pa
           + ` + κουμπί «${isTrial ? 'Επιλογή πλάνου' : 'Ανανέωση'}»`
         : 'ΚΡΥΦΟ (εμφανίζεται μόνο στις τελευταίες 7 ημέρες)');
 
+  const billedMonthly = billed
+    ? billed.monthlyBase * (1 - billed.discountPercent / 100) * (1 + VAT)
+    : priceFor(usage, 1).monthlyWithVat;
+
+  expect('Ρυθμίσεις (κάρτα πλάνου)',
+    isSub
+      ? `headline «${eur(billedMonthly)} / μήνα» + «${usage.pitches} γήπεδα · ${usage.athletes} αθλητές · ζώνη ${pTier.label.toLowerCase()}»`
+      : 'headline «Δωρεάν δοκιμή»');
+
   expect('Ρυθμίσεις (badge πλάνου)',
-    isSub ? `«${tierLabel} • ${days} ημέρες»` + (days <= 7 ? ' με κίτρινη κουκκίδα' : ' με πράσινη')
+    isSub ? `«Συνδρομή • ${days} ημέρες»` + (days <= 7 ? ' με κίτρινη κουκκίδα' : ' με πράσινη')
       : isTrial ? `«Δωρεάν δοκιμή • ${days} ${days === 1 ? 'ημέρα' : 'ημέρες'}»` + (days <= 7 ? ' με κίτρινη κουκκίδα' : '')
       : '«Χωρίς πλάνο»');
 
   expect('Ρυθμίσεις (Telegram)',
-    (isTrial && days > 0) || isSub ? 'ΟΡΑΤΗ η φόρμα υποστήριξης' : 'ΚΡΥΦΗ');
+    !active ? '— (δεν φτάνει εκεί)'
+      : (isTrial && days > 0) || isSub ? 'ΟΡΑΤΗ η φόρμα υποστήριξης'
+      : 'ΚΡΥΦΗ');
+
+  if (!active || days <= 0) {
+    const reason = days <= 0 && isSub ? 'expired' : days <= 0 && isTrial ? 'trial_expired' : 'inactive';
+    const msg = {
+      expired: 'Η συνδρομή σας έληξε. Ανανεώστε την για να συνεχίσετε.',
+      trial_expired: 'Η δωρεάν δοκιμή σας έληξε. Επιλέξτε πλάνο για να συνεχίσετε.',
+      inactive: 'Ο λογαριασμός σας δεν είναι ενεργός. Επικοινωνήστε μαζί μας.',
+    }[reason];
+    expect('Login μετά το logout', `?error=${reason} → «${msg}»`);
+  }
 
   expect('Συνδρομή — μέγεθος',
     `«${usage.pitches} ${usage.pitches === 1 ? 'γήπεδο' : 'γήπεδα'}» / ` +
@@ -145,18 +172,27 @@ const expect = (screen, what) => console.log('  \x1b[36m▸\x1b[0m ' + screen.pa
       ? 'ΚΙΤΡΙΝΟ πλαίσιο «Κατόπιν συνεννόησης» + κουμπί Επικοινωνία (ΧΩΡΙΣ επιλογή διάρκειας/ταμείο)'
       : `3 επιλογές διάρκειας + κουμπί «Πληρωμή ${eur(priceFor(usage, 12).totalWithVat)}» (προεπιλογή: ετήσια)`);
 
+  const nextPitch = unlockCost(usage, billed, days, { pitches: usage.pitches + 1 });
+  const nextAthlete = unlockCost(usage, billed, days, { athletes: usage.athletes + 1 });
+
   expect('Νέο γήπεδο',
-    atPitch ? 'ΜΠΛΟΚ: κίτρινη ειδοποίηση «Ξεπεράσατε το αυτόματο πλάνο» αντί για φόρμα' : 'κανονική φόρμα');
+    atPitch ? 'ΜΠΛΟΚ (κίτρινο): «Ξεπεράσατε το αυτόματο πλάνο»'
+      : nextPitch.owed
+        ? `ΜΠΛΟΚ (λευκό): «Προσθήκη γηπέδου» + κουμπί «Πληρωμή ${eur(nextPitch.amountWithVat)} και προσθήκη»`
+        : 'κανονική φόρμα');
 
   expect('Νέος χρήστης ακαδημίας',
-    atAthlete ? 'ΜΠΛΟΚ: κίτρινη ειδοποίηση αντί για φόρμα' : 'κανονική φόρμα');
+    atAthlete ? 'ΜΠΛΟΚ (κίτρινο): «Ξεπεράσατε το αυτόματο πλάνο»'
+      : nextAthlete.owed
+        ? `ΜΠΛΟΚ (λευκό): «Προσθήκη αθλητή» + κουμπί «Πληρωμή ${eur(nextAthlete.amountWithVat)} και προσθήκη»`
+        : 'κανονική φόρμα');
 
   expect('Checkout (API)',
     q.requiresContact ? '409 + μήνυμα επικοινωνίας' : 'δημιουργεί PaymentIntent');
 
   h('ΣΗΜΕΙΩΣΕΙΣ');
   console.log(`  Νέες εγγραφές παίρνουν daysRemaining = ${TRIAL_DAYS}.`);
-  if (d.planType && !['Starter', 'Growth', 'Scale', 'Custom'].includes(d.planType)) {
+  if (d.planType && !['Starter', 'Growth', 'Scale', 'Custom', 'Trial'].includes(d.planType)) {
     console.log(`  \x1b[33m⚠ Το planType «${d.planType}» είναι παλιό. Τρέξε: node scripts/migrate-pricing-model.js --apply\x1b[0m`);
   }
   console.log('');

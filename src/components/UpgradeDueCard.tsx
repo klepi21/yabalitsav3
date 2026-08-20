@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { ArrowUpCircle, Loader2 } from 'lucide-react';
 import { toast } from '@/lib/toast';
 import type { UpgradeQuote } from '@/lib/queries';
+import { pricingUtils } from '@/lib/pricing';
+import { days } from '@/lib/utils';
 
-const eur = (n: number) =>
-  '€' + n.toLocaleString('el-GR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const eur = (n: number) => pricingUtils.formatPrice(n);
 
 /**
  * Εμφανίζεται όταν η χρήση ξεπέρασε ό,τι πληρώθηκε.
@@ -72,7 +73,7 @@ export default function UpgradeDueCard({ upgrade }: { upgrade: UpgradeQuote }) {
             <h2 className="text-base font-semibold text-emerald-950">Εκκρεμεί αναβάθμιση</h2>
             <p className="text-sm text-emerald-900/90 mt-1 leading-relaxed">
               Προσθέσατε {what || 'περισσότερα από όσα καλύπτει η συνδρομή σας'}. Για να
-              καλυφθούν οι <strong>{Math.round(upgrade.daysRemaining)} ημέρες</strong> που
+              καλυφθούν οι <strong>{days(Math.round(upgrade.daysRemaining))}</strong> που
               απομένουν, η διαφορά είναι{' '}
               <strong>{eur(upgrade.amountWithVat)}</strong> με ΦΠΑ.
             </p>

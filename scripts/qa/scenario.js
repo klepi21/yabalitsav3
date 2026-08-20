@@ -22,9 +22,21 @@ const FV = admin.firestore.FieldValue;
 
 /** Σενάρια: τι θέλουμε να επικυρώσουμε σε κάθε ένα. */
 const SCENARIOS = {
-  'trial-fresh':    { desc: 'Νέα δοκιμή 30 ημερών', venue: { plan: 'trial', daysRemaining: 30, active: true } },
-  'trial-warning':  { desc: 'Δοκιμή που λήγει σε 5 ημέρες — banner + κίτρινο badge', venue: { plan: 'trial', daysRemaining: 5, active: true } },
-  'trial-last-day': { desc: 'Τελευταία ημέρα δοκιμής (ενικός: «1 ημέρα»)', venue: { plan: 'trial', daysRemaining: 1, active: true } },
+  'trial-fresh':    {
+    desc: 'Νέα δοκιμή 30 ημερών — σαν να μόλις έγινε εγγραφή',
+    clearBilling: true,
+    venue: { plan: 'trial', daysRemaining: 30, active: true, planType: 'Trial' },
+  },
+  'trial-warning':  {
+    desc: 'Δοκιμή που λήγει σε 5 ημέρες — banner + κίτρινο badge',
+    clearBilling: true,
+    venue: { plan: 'trial', daysRemaining: 5, active: true, planType: 'Trial' },
+  },
+  'trial-last-day': {
+    desc: 'Τελευταία ημέρα δοκιμής (ενικός: «1 ημέρα»)',
+    clearBilling: true,
+    venue: { plan: 'trial', daysRemaining: 1, active: true, planType: 'Trial' },
+  },
   'sub-healthy':    { desc: 'Ενεργή συνδρομή, άφθονες ημέρες', venue: { plan: 'subscription', daysRemaining: 200, active: true } },
   'sub-expiring':   { desc: 'Συνδρομή που λήγει σε 3 ημέρες', venue: { plan: 'subscription', daysRemaining: 3, active: true } },
   'expired':        { desc: 'Ληγμένος — force logout στο login', venue: { plan: 'subscription', daysRemaining: 0, active: false } },
@@ -48,6 +60,22 @@ const SCENARIOS = {
         platformTierId: 'starter',
         academyTierId: null,
         monthlyBase: 29,
+        durationMonths: 12,
+        discountPercent: 12,
+        chargedAt: '2026-01-01T00:00:00.000Z',
+      },
+    },
+  },
+  'paid-exact':     {
+    desc: 'Πλήρωσε ΑΚΡΙΒΩΣ το τρέχον μέγεθος — η επόμενη προσθήκη ζητά τη διαφορά',
+    venue: {
+      plan: 'subscription',
+      daysRemaining: 273,
+      active: true,
+      billing: {
+        platformTierId: 'growth',
+        academyTierId: 'academy_s',
+        monthlyBase: 78,
         durationMonths: 12,
         discountPercent: 12,
         chargedAt: '2026-01-01T00:00:00.000Z',

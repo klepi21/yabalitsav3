@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { Zap, Bell, User, Menu, LogOut, Settings as SettingsIcon, ChevronRight } from 'lucide-react';
-import { useEffect, useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import Sidebar from './Sidebar';
@@ -17,16 +17,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
-import { usePendingBookings } from '@/lib/queries';
+import { usePendingBookings, useSubscriptionQuote } from '@/lib/queries';
 
-interface VenueData {
-  id: string;
-  ownerId: string;
-  plan?: string;
-  planType?: string;
-  daysRemaining?: number;
-  [key: string]: unknown;
-}
 
 interface PendingBooking {
   id: string;
@@ -84,12 +76,14 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, venueOwner, signOut } = useAuth();
-  const [venueData, setVenueData] = useState<VenueData | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   // Στοχευμένο query: status=pending, limit 5 — αντί για ολόκληρη τη
   // συλλογή. Το αποτέλεσμα είναι μοιρασμένο στην cache, οπότε η αλλαγή
   // σελίδας δεν προκαλεί νέο request.
   const { pending } = usePendingBookings(venueOwner?.venueId);
+  // Ίδια πηγή με τις υπόλοιπες οθόνες: ανανεώνεται στο focus και στις
+  // μεταλλάξεις, χωρίς ξεχωριστό Firestore round-trip ανά σελίδα.
+  const { venue: venueData } = useSubscriptionQuote(venueOwner?.venueId);
   const pendingBookings = pending as unknown as PendingBooking[];
   const { title, isSubPage, parent, href } = useBreadcrumb(pathname);
 
@@ -102,30 +96,6 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
     pathname === '/privacy' ||
     pathname === '/fse';
 
-  // Fetch venue data for subscription info
-  useEffect(() => {
-    if (user?.uid) {
-      const fetchVenueData = async () => {
-        try {
-          const { collection, query, where, getDocs } = await import('firebase/firestore');
-          const { db } = await import('@/lib/firebase');
-
-          const venuesRef = collection(db, 'yabalitsa_venues');
-          const q = query(venuesRef, where('ownerId', '==', user.uid));
-          const querySnapshot = await getDocs(q);
-
-          if (!querySnapshot.empty) {
-            const venueDoc = querySnapshot.docs[0];
-            setVenueData({ id: venueDoc.id, ...venueDoc.data() } as VenueData);
-          }
-        } catch (error) {
-          console.error('Error fetching venue data:', error);
-        }
-      };
-
-      fetchVenueData();
-    }
-  }, [user?.uid]);
 
   if (isPublicPage) {
     return <>{children}</>;

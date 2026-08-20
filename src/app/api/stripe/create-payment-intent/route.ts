@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import {
   pricingUtils, calculateSubscription, describeBreakdown,
-  calculateUpgrade, buildBilledSnapshot,
+  calculateUpgrade, buildBilledSnapshot, quoteUnlock, SELF_SERVE_LIMITS,
 } from '@/lib/pricing';
 import { getVenueUsage } from '@/lib/venue-usage';
 import { verifyAuth, isAuthError } from '@/lib/api-auth';
@@ -19,8 +19,10 @@ export async function POST(request: NextRequest) {
     const authResult = await verifyAuth(request);
     if (isAuthError(authResult)) return authResult.response;
 
-    const { planId, duration, userUid, customerEmail, customerName, couponCode, mode } =
-      await request.json();
+    const {
+      planId, duration, userUid, customerEmail, customerName, couponCode, mode,
+      targetPitches, targetAthletes,
+    } = await request.json();
     const isUpgrade = mode === 'upgrade';
 
     // Verify the token uid matches the claimed userUid
@@ -71,7 +73,35 @@ export async function POST(request: NextRequest) {
 
     // Στην αναβάθμιση κρατάμε τη διάρκεια που είχε αγοραστεί.
     const effectiveDuration = (isUpgrade ? billed?.durationMonths ?? 1 : Number(duration)) as 1 | 6 | 12;
-    const breakdown = calculateSubscription(usage, effectiveDuration);
+
+    /* Η αναβάθμιση μπορεί να αφορά χωρητικότητα που ο πελάτης ΔΕΝ έχει
+       ακόμα (θέλει να προσθέσει γήπεδο/αθλητή). Τιμολογούμε τον στόχο,
+       ώστε η δημιουργία να ξεκλειδώσει αμέσως μετά την πληρωμή. */
+    const wantsPitches = Math.max(usage.pitches, Number(targetPitches) || 0);
+    const wantsAthletes = Math.max(usage.athletes, Number(targetAthletes) || 0);
+    const targetUsage = isUpgrade
+      ? {
+          pitches: wantsPitches,
+          athletes: wantsAthletes,
+          hasAcademy: usage.hasAcademy || wantsAthletes > 0,
+        }
+      : usage;
+
+    if (
+      isUpgrade &&
+      (wantsPitches > SELF_SERVE_LIMITS.pitches || wantsAthletes > SELF_SERVE_LIMITS.athletes)
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            'Το μέγεθος που ζητάτε ξεπερνά το πλάνο που τιμολογείται αυτόματα. Επικοινωνήστε μαζί μας.',
+          requiresContact: true,
+        },
+        { status: 409 }
+      );
+    }
+
+    const breakdown = calculateSubscription(targetUsage, effectiveDuration);
 
     // Πάνω από το self-serve μέγεθος δεν υπάρχει αυτόματη τιμή να χρεωθεί.
     if (breakdown.requiresContact) {
@@ -87,7 +117,10 @@ export async function POST(request: NextRequest) {
 
     let upgradeQuote = null;
     if (isUpgrade) {
-      upgradeQuote = calculateUpgrade(usage, billed, (venue.daysRemaining as number) || 0);
+      upgradeQuote = quoteUnlock(usage, billed, (venue.daysRemaining as number) || 0, {
+        pitches: wantsPitches,
+        athletes: wantsAthletes,
+      });
       if (!upgradeQuote.owed) {
         return NextResponse.json(
           { error: 'Δεν εκκρεμεί αναβάθμιση για τον λογαριασμό σας.' },

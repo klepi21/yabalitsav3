@@ -87,6 +87,7 @@ import {
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { useSubscriptionQuote } from '@/lib/queries';
+import { days } from '@/lib/utils';
 import UpgradeDueCard from '@/components/UpgradeDueCard';
 
 function CoachDashboard() {
@@ -474,7 +475,8 @@ function AdminDashboard() {
   const [isSquadsExpanded, setIsSquadsExpanded] = useState(false);
   const [isPitchesExpanded, setIsPitchesExpanded] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
-  const { upgrade: subQuote } = useSubscriptionQuote(venueOwner?.venueId);
+  const { upgrade: subQuote, usage: subUsage, venue: subVenue } =
+    useSubscriptionQuote(venueOwner?.venueId);
   const [_isVenueInfoExpanded, _setIsVenueInfoExpanded] = useState(false);
   const [showQuickBooking, setShowQuickBooking] = useState(false);
   const [_showBookingMenu, _setShowBookingMenu] = useState(false);
@@ -740,8 +742,15 @@ function AdminDashboard() {
     }).length;
   };
 
+  /**
+   * Ο αριθμός αθλητών έρχεται από τον server, από την ΙΔΙΑ πηγή που
+   * τιμολογεί (src/lib/venue-usage.ts). Έτσι ο πελάτης βλέπει τον ίδιο
+   * αριθμό εδώ και στον λογαριασμό του.
+   *
+   * Εφεδρεία όσο φορτώνει: ο παλιός υπολογισμός βάσει κατηγορίας.
+   */
   const getTotalAthletes = () => {
-    // Group IDs with 'squad_assignment' capability
+    if (subUsage) return subUsage.athletes;
     const athleteGroupIds = new Set(userGroups.filter(g => g.capabilities?.includes('squad_assignment')).map(g => g.id));
     return academyUsers.filter(u => athleteGroupIds.has(u.groupId)).length;
   };
@@ -1031,18 +1040,23 @@ function AdminDashboard() {
           Πριν έλεγχε μόνο `plan === 'subscription'`, οπότε ο δοκιμαστικός
           χρήστης δεν έβλεπε ΚΑΜΙΑ προειδοποίηση και απλά κλειδωνόταν έξω
           τη μέρα που μηδένιζε ο μετρητής. */}
-      {venue && (venue.daysRemaining || 0) <= 7 && (venue.daysRemaining || 0) > 0 && (
+      {/* Οι ημέρες από την κοινή cache: το τοπικό `venue` φορτώνεται μία
+          φορά και δεν παρακολουθεί αλλαγές εκτός της σελίδας. */}
+      {venue && (subVenue?.daysRemaining ?? venue.daysRemaining ?? 0) <= 7 &&
+        (subVenue?.daysRemaining ?? venue.daysRemaining ?? 0) > 0 && (
         <div className="rounded-2xl border-2 border-amber-200 bg-amber-50 p-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
               <div>
                 <p className="font-bold text-amber-800">
-                  {venue.plan === 'trial' ? 'Η δωρεάν δοκιμή σας λήγει' : 'Η συνδρομή σας λήγει'} σε{' '}
-                  {venue.daysRemaining} {venue.daysRemaining === 1 ? 'ημέρα' : 'ημέρες'}
+                  {(subVenue?.plan ?? venue.plan) === 'trial'
+                    ? 'Η δωρεάν δοκιμή σας λήγει'
+                    : 'Η συνδρομή σας λήγει'}{' '}
+                  σε {days(subVenue?.daysRemaining ?? venue.daysRemaining ?? 0)}
                 </p>
                 <p className="text-sm text-amber-700 mt-0.5">
-                  {venue.plan === 'trial'
+                  {(subVenue?.plan ?? venue.plan) === 'trial'
                     ? 'Επιλέξτε πλάνο για να συνεχίσετε χωρίς διακοπή.'
                     : 'Ανανεώστε τώρα για αδιάκοπη πρόσβαση.'}
                 </p>
@@ -1050,7 +1064,7 @@ function AdminDashboard() {
             </div>
             <Link href="/management/settings/renewal">
               <Button className="bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl">
-                {venue.plan === 'trial' ? 'Επιλογή πλάνου' : 'Ανανέωση'}
+                {(subVenue?.plan ?? venue.plan) === 'trial' ? 'Επιλογή πλάνου' : 'Ανανέωση'}
               </Button>
             </Link>
           </div>

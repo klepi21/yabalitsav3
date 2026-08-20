@@ -11,6 +11,8 @@ import {
   exceedsSelfServe,
   SELF_SERVE_LIMITS,
   calculateUpgrade,
+  quoteUnlock,
+  pricingConfig,
 } from '@/lib/pricing';
 
 /**
@@ -38,11 +40,16 @@ export async function POST(request: NextRequest) {
     // Τι πληρώθηκε και τι χρησιμοποιείται τώρα — για τυχόν αναβάθμιση.
     const venueDoc = await db.collection('yabalitsa_venues').doc(venueId).get();
     const venueData = venueDoc.data() ?? {};
-    const upgrade = calculateUpgrade(
-      usage,
-      venueData.billing,
-      (venueData.daysRemaining as number) || 0
-    );
+    const upgrade = calculateUpgrade(usage, venueData.billing, (venueData.daysRemaining as number) || 0);
+
+    /* Μπλοκάρισμα ΝΕΩΝ εγγραφών που βγάζουν τον πελάτη εκτός της ζώνης
+       που έχει πληρώσει. Υπολογίζουμε και το κόστος ξεκλειδώματος, ώστε
+       η οθόνη να δείχνει ακριβώς τι κοστίζει η προσθήκη. */
+    const billed = venueData.billing;
+    const days = (venueData.daysRemaining as number) || 0;
+
+    const nextPitch = quoteUnlock(usage, billed, days, { pitches: usage.pitches + 1 });
+    const nextAthlete = quoteUnlock(usage, billed, days, { athletes: usage.athletes + 1 });
 
     const durations = [1, 6, 12] as const;
 
@@ -59,7 +66,28 @@ export async function POST(request: NextRequest) {
       success: true,
       usage,
       limits: SELF_SERVE_LIMITS,
+      /* Το top bar ζει στο layout και δεν ξαναφορτώνεται στις πλοηγήσεις.
+         Παίρνοντας την κατάσταση από εδώ, μοιράζεται την ίδια cache με
+         τις υπόλοιπες οθόνες και ανανεώνεται μαζί τους. */
+      venue: {
+        plan: venueData.plan ?? null,
+        planType: venueData.planType ?? null,
+        daysRemaining: venueData.daysRemaining ?? 0,
+        active: venueData.active !== false,
+      },
       upgrade,
+      // Χρειάζεται πληρωμή για να προστεθεί η επόμενη εγγραφή;
+      pitchNeedsUnlock: nextPitch.owed,
+      pitchUnlockAmount: nextPitch.amountWithVat,
+      athleteNeedsUnlock: nextAthlete.owed,
+      athleteUnlockAmount: nextAthlete.amountWithVat,
+      /* Τι πληρώνει σήμερα: η βάση που αγοράστηκε, με την έκπτωση που
+         ίσχυσε και ΦΠΑ. `null` όταν δεν υπάρχει στιγμιότυπο (δοκιμή). */
+      billedMonthly: venueData.billing
+        ? venueData.billing.monthlyBase *
+          (1 - venueData.billing.discountPercent / 100) *
+          (1 + pricingConfig.vatRate)
+        : null,
       // «At limit» = έφτασε το όριο, άρα δεν επιτρέπεται ΝΕΑ δημιουργία.
       atPitchLimit: usage.pitches >= SELF_SERVE_LIMITS.pitches,
       atAthleteLimit: usage.hasAcademy && usage.athletes >= SELF_SERVE_LIMITS.athletes,

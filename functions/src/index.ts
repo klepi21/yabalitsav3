@@ -100,3 +100,69 @@ export const decrementDaysRemaining = onSchedule(
     }
   }
 );
+
+/**
+ * Καθαρίζει εγκαταλελειμμένες προσπάθειες πληρωμής.
+ *
+ * Κάθε άνοιγμα του ταμείου δημιουργεί εγγραφή `pending` στο
+ * `yabalitsa_payments`. Αν ο πελάτης δεν ολοκληρώσει, η εγγραφή έμενε για
+ * πάντα: στο demo είχαν συσσωρευτεί 11 από 16 συνολικά. Με πραγματικούς
+ * πελάτες η συλλογή θα γέμιζε θόρυβο, και κάθε query που ξεχνάει το
+ * φίλτρο `status` θα έβγαζε λάθος νούμερα.
+ *
+ * Τα PaymentIntents του Stripe λήγουν ούτως ή άλλως, οπότε μια `pending`
+ * παλαιότερη από 24 ώρες δεν πρόκειται να ολοκληρωθεί ποτέ.
+ */
+export const cleanupStalePayments = onSchedule(
+  {
+    schedule: "30 3 * * *", // Καθημερινά στις 03:30, μακριά από το decrement
+    timeZone: "Europe/Athens",
+    memory: "256MiB",
+    maxInstances: 1,
+  },
+  async () => {
+    const db = getFirestore();
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+
+    logger.info("Starting stale pending payment cleanup", { cutoff });
+
+    try {
+      const snapshot = await db
+        .collection('yabalitsa_payments')
+        .where('status', '==', 'pending')
+        .get();
+
+      // Το createdAt είναι ISO string, οπότε το φιλτράρισμα γίνεται εδώ
+      // αντί για query — αποφεύγει και την ανάγκη νέου composite index.
+      const stale = snapshot.docs.filter((doc) => {
+        const createdAt = doc.data().createdAt as string | undefined;
+        return typeof createdAt === 'string' && createdAt < cutoff;
+      });
+
+      if (stale.length === 0) {
+        logger.info("No stale pending payments found");
+        return;
+      }
+
+      let deleted = 0;
+      for (let i = 0; i < stale.length; i += 450) {
+        const batch = db.batch();
+        for (const doc of stale.slice(i, i + 450)) {
+          batch.delete(doc.ref);
+          deleted++;
+        }
+        await batch.commit();
+      }
+
+      logger.info("Stale payment cleanup completed", {
+        scanned: snapshot.size,
+        deleted,
+      });
+    } catch (error) {
+      logger.error("Error in stale payment cleanup", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      throw error;
+    }
+  }
+);

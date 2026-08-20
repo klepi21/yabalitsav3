@@ -20,7 +20,7 @@ export const metadata: Metadata = {
     default: 'Yabalitsa | Λογισμικό Διαχείρισης Γηπέδων 5x5 & Ακαδημιών',
     template: '%s | Yabalitsa'
   },
-  description: 'Η Νο.1 πλατφόρμα (SaaS) για διαχείριση αθλητικών κέντρων, γηπέδων 5x5 και ακαδημιών ποδοσφαίρου στην Ελλάδα. Online κρατήσεις, player passport και οικονομικά reports.',
+  description: 'Η Νο.1 πλατφόρμα για διαχείριση αθλητικών κέντρων, γηπέδων 5x5 και ακαδημιών ποδοσφαίρου στην Ελλάδα. Online κρατήσεις, player passport και οικονομικά reports.',
   keywords: [
     'διαχείριση ακαδημιών ποδοσφαίρου',
     'λογισμικό γηπέδων 5x5',
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     'έλεγχος συνδρομών ακαδημίας',
     'booking γηπέδων Ελλάδα',
     'κράτηση 5x5',
-    'ποδόσφαιρο SaaS',
+    'ποδόσφαιρο',
     'sports facility management software',
     'football academy software'
   ],
@@ -59,7 +59,7 @@ export const metadata: Metadata = {
         url: 'https://www.yabalitsa.com/ogpreview.jpg',
         width: 1200,
         height: 630,
-        alt: 'Yabalitsa SaaS - Διαχείριση Γηπέδων & Ακαδημιών',
+        alt: 'Yabalitsa - Διαχείριση Γηπέδων & Ακαδημιών',
         type: 'image/jpeg',
       },
     ],

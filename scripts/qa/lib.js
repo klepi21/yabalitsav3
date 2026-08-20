@@ -92,19 +92,37 @@ function priceFor(usage, duration) {
   };
 }
 
-/** Μετράει το μέγεθος με τον ΙΔΙΟ ορισμό που χρησιμοποιεί η εφαρμογή. */
+/**
+ * Μετράει το μέγεθος με τον ΙΔΙΟ ορισμό που χρησιμοποιεί η εφαρμογή
+ * (βλ. src/lib/venue-usage.ts): αθλητής = όποιος έχει ίχνος διαχείρισης
+ * ως αθλητής — τμήμα, πληρωμή ή αξιολόγηση. Όχι η κατηγορία, που την
+ * ελέγχει ο πελάτης.
+ */
 async function measureUsage(db, venueId) {
-  const [pitches, groups, users] = await Promise.all([
+  const [pitches, groups, users, payments, evals] = await Promise.all([
     db.collection('yabalitsa_pitches').where('venueId', '==', venueId).get(),
     db.collection('yabalitsa_user_groups').where('venueId', '==', venueId).get(),
     db.collection('yabalitsa_academy_users').where('venueId', '==', venueId).get(),
+    db.collection('yabalitsa_academy_payments').where('venueId', '==', venueId).get(),
+    db.collection('yabalitsa_player_evaluations').where('venueId', '==', venueId).get(),
   ]);
 
   const activePitches = pitches.docs.filter((d) => d.data().active !== false);
+
+  const paidUserIds = new Set(payments.docs.map((d) => d.data().userId).filter(Boolean));
+  const evaluatedUserIds = new Set(
+    evals.docs.map((d) => d.data().userId || d.data().athleteId).filter(Boolean)
+  );
+
+  const athletes = users.docs.filter((d) => {
+    const u = d.data();
+    const inSquad = !!(u.squad_id || (Array.isArray(u.squad_ids) && u.squad_ids.length > 0));
+    return inSquad || paidUserIds.has(d.id) || evaluatedUserIds.has(d.id);
+  });
+
   const athleteGroupIds = new Set(
     groups.docs.filter((g) => (g.data().capabilities || []).includes('squad_assignment')).map((g) => g.id)
   );
-  const athletes = users.docs.filter((u) => athleteGroupIds.has(u.data().groupId));
 
   return {
     pitches: activePitches.length,
@@ -128,11 +146,29 @@ function upgradeOwed(usage, billed, daysRemaining) {
   return { owed: true, amountWithVat: amount, billedBase: billed.monthlyBase, currentBase };
 }
 
+/** Καλύπτει το πληρωμένο πλάνο μια υποθετική χρήση; */
+function coveredByBilled(usage, billed) {
+  if (!billed) return true;
+  if (resolveTier(platformTiers, usage.pitches).id !== billed.platformTierId) return false;
+  if (!usage.hasAcademy) return true;
+  return resolveTier(academyTiers, usage.athletes).id === billed.academyTierId;
+}
+
+/** Τι κοστίζει να ξεκλειδώσει η επόμενη εγγραφή. */
+function unlockCost(usage, billed, days, target) {
+  const hyp = {
+    pitches: target.pitches ?? usage.pitches,
+    athletes: target.athletes ?? usage.athletes,
+    hasAcademy: usage.hasAcademy || (target.athletes ?? 0) > 0,
+  };
+  return upgradeOwed(hyp, billed, days);
+}
+
 const eur = (n) =>
   '€' + n.toLocaleString('el-GR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 module.exports = {
   admin, init, findVenue, measureUsage, priceFor, resolveTier,
   platformTiers, academyTiers, SELF_SERVE_LIMITS, TRIAL_DAYS, VAT, DISCOUNTS,
-  QA_MARK, eur, ROOT, upgradeOwed,
+  QA_MARK, eur, ROOT, upgradeOwed, coveredByBilled, unlockCost,
 };

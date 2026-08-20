@@ -30,11 +30,11 @@ function VenueLoginContent() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(
     searchParams.get('error') === 'inactive'
-      ? 'Ο λογαριασμός σας έχει απενεργοποιηθεί. Επικοινωνήστε μαζί μας.'
+      ? 'Ο λογαριασμός σας δεν είναι ενεργός. Επικοινωνήστε μαζί μας.'
       : searchParams.get('error') === 'expired'
-      ? 'Η συνδρομή σας έχει λήξει. Ανανεώστε για να συνεχίσετε.'
+      ? 'Η συνδρομή σας έληξε. Ανανεώστε την για να συνεχίσετε.'
       : searchParams.get('error') === 'trial_expired'
-      ? 'Η δοκιμαστική περίοδος έληξε. Επιλέξτε πλάνο για να συνεχίσετε.'
+      ? 'Η δωρεάν δοκιμή σας έληξε. Επιλέξτε πλάνο για να συνεχίσετε.'
       : searchParams.get('error') === 'disabled'
       ? 'Ο λογαριασμός σας έχει απενεργοποιηθεί. Επικοινωνήστε με τον διαχειριστή.'
       : null
@@ -73,12 +73,6 @@ function VenueLoginContent() {
       );
     }
   };
-
-  useEffect(() => {
-    if (searchParams.get('error') === 'inactive') {
-      setError('Η δοκιμαστική περίοδος του λογαριασμού σας έχει λήξει. Επικοινωνήστε μαζί μας για αναβάθμιση.');
-    }
-  }, [searchParams]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -172,7 +166,7 @@ function VenueLoginContent() {
 
         <div className="relative z-10 flex items-center justify-between pt-8 border-t border-white/10 mt-10">
           <p className="text-zinc-500 text-xs font-medium">
-            &copy; {new Date().getFullYear()} Yabalitsa SaaS
+            &copy; {new Date().getFullYear()} Yabalitsa
           </p>
           <div className="flex gap-4 text-2xs font-bold tracking-widest text-emerald-500/80">
             <span>SECURE ENCRYPTED</span>
