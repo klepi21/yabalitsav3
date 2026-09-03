@@ -834,11 +834,11 @@ export default function SettingsPage() {
                     Απαντάμε εντός 24 ωρών, Δευτέρα έως Παρασκευή.
                   </p>
                   <a
-                    href="mailto:support@yabalitsa.com"
+                    href="mailto:nikoskoukis99@gmail.com"
                     className="mt-3 inline-flex items-center gap-2 h-9 px-3 rounded-lg border border-border bg-white text-sm font-medium text-zinc-900 hover:bg-zinc-50 transition-colors"
                   >
                     <Mail className="h-4 w-4 text-zinc-500" aria-hidden="true" />
-                    support@yabalitsa.com
+                    nikoskoukis99@gmail.com
                   </a>
                 </div>
               </div>

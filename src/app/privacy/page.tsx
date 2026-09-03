@@ -283,7 +283,7 @@ export default function PrivacyPage() {
                   🏟️ Εγγραφή για Γήπεδα
                 </Link>
                 <div className="text-sm text-zinc-400">
-                  <p>Email: support@yabalitsa.com</p>
+                  <p>Email: nikoskoukis99@gmail.com</p>
                 </div>
               </div>
             </div>

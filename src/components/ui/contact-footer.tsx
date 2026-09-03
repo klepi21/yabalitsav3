@@ -12,8 +12,8 @@ export function ContactFooter() {
           <Link href="https://instagram.com/yabalitsa" target="_blank" rel="noopener noreferrer">
             <ComesInGoesOutUnderline label="INSTAGRAM" direction="right" />
           </Link>
-          <Link href="mailto:support@yabalitsa.com">
-            <CenterUnderline label="SUPPORT@YABALITSA.COM" />
+          <Link href="mailto:nikoskoukis99@gmail.com">
+            <CenterUnderline label="nikoskoukis99@gmail.com" />
           </Link>
         </ul>
       </div>

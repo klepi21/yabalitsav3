@@ -25,11 +25,11 @@ export default function SupportEmail({
 
   return (
     <a 
-      href="mailto:support@yabalitsa.com"
+      href="mailto:nikoskoukis99@gmail.com"
       className={classes}
     >
       {showIcon && <Mail className="h-5 w-5 mr-2" />}
-      <span>support@yabalitsa.com</span>
+      <span>nikoskoukis99@gmail.com</span>
     </a>
   );
 }
