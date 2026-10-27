@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, MapPin, ArrowLeft, X, RotateCcw, CheckCircle2, AlertCircle, ShieldCheck, Goal, Check } from "lucide-react";
+import { ChevronLeft, ChevronRight, MapPin, ArrowLeft, X, RotateCcw, CheckCircle2, AlertCircle, ShieldCheck, Goal, Check, Users, Store } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -146,6 +146,13 @@ function BookingStepper({
       </ol>
     </nav>
   );
+}
+
+/** Παίκτες ανά μέγεθος γηπέδου (δύο ομάδες), για την τιμή ανά άτομο. */
+const PLAYERS_BY_TYPE: Record<string, number> = { '5x5': 10, '6x6': 12, '7x7': 14, '8x8': 16, '9x9': 18 };
+
+function formatEuro(n: number): string {
+  return `€${n.toLocaleString('el-GR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 }
 
 /** 'YYYY-MM-DD' της τοπικής ημέρας (ο επισκέπτης είναι στην Ελλάδα). */
@@ -943,8 +950,40 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                         </div>
                         <div className="flex items-center justify-between pt-2">
                           <span className="text-2xs font-semibold text-emerald-100">Συνολικό ποσό</span>
-                          <span className="text-2xl font-bold text-white tracking-tighter">€{selectedPitch.pricePerSlot}</span>
+                          <span className="text-2xl font-bold text-white tracking-tighter tabular-nums">{formatEuro(selectedPitch.pricePerSlot)}</span>
                         </div>
+
+                        {(() => {
+                          const players = PLAYERS_BY_TYPE[selectedPitch.type];
+                          return (
+                            <div className={cn("grid grid-cols-1 gap-3 pt-2", players && "sm:grid-cols-2")}>
+                              {players && (
+                                <div className="rounded-2xl bg-white/10 ring-1 ring-white/15 p-4">
+                                  <div className="flex items-center gap-2 text-emerald-100">
+                                    <Users className="h-4 w-4" aria-hidden="true" />
+                                    <span className="text-2xs font-semibold">Ανά άτομο</span>
+                                  </div>
+                                  <p className="mt-2 text-2xl font-bold text-white tracking-tighter tabular-nums">
+                                    {formatEuro(selectedPitch.pricePerSlot / players)}
+                                  </p>
+                                  <p className="text-2xs font-medium text-white/70 mt-0.5">για {players} παίκτες ({selectedPitch.type})</p>
+                                </div>
+                              )}
+                              <div className="rounded-2xl bg-white p-4">
+                                <div className="flex items-center gap-2 text-emerald-700">
+                                  <Store className="h-4 w-4" aria-hidden="true" />
+                                  <span className="text-2xs font-semibold">Πληρωμή στο γήπεδο</span>
+                                </div>
+                                <p className="mt-2 text-xs font-semibold text-zinc-900 leading-snug">
+                                  Δεν χρειάζεται κάρτα.
+                                </p>
+                                <p className="text-2xs font-medium text-zinc-500 mt-0.5 leading-snug">
+                                  Πληρώνετε στο γήπεδο την ημέρα του αγώνα.
+                                </p>
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </div>
                     </div>
 
@@ -1152,8 +1191,12 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
               ))}
               <div className="flex justify-between border-t border-zinc-100 pt-3">
                 <span className="text-2xs font-semibold text-emerald-600">💰 Τιμή</span>
-                <span className="font-semibold text-emerald-600 text-lg tabular-nums">€{successBookingData.price}</span>
+                <span className="font-semibold text-emerald-600 text-lg tabular-nums">{formatEuro(successBookingData.price)}</span>
               </div>
+              <p className="flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2 text-2xs font-semibold text-emerald-800">
+                <Store className="h-4 w-4 shrink-0" aria-hidden="true" />
+                Η πληρωμή γίνεται στο γήπεδο.
+              </p>
             </div>
             <button
               onClick={() => { setShowSuccessPopup(false); setSuccessBookingData(null); }}
