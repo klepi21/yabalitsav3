@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { use } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight, MapPin, ArrowLeft, X, RotateCcw, CheckCircle2, AlertCircle, ShieldCheck, Goal, Check } from "lucide-react";
@@ -148,6 +148,11 @@ function BookingStepper({
   );
 }
 
+/** 'YYYY-MM-DD' της τοπικής ημέρας (ο επισκέπτης είναι στην Ελλάδα). */
+function toIsoDay(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 export default function VenueBookingPage({ params }: { params: Promise<{ venueName: string }> }) {
   const { venueName } = use(params);
   
@@ -161,6 +166,8 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<{ date: string; time: string } | null>(null);
   const [currentWeek, setCurrentWeek] = useState(new Date());
   const [existingBookings, setExistingBookings] = useState<Booking[]>([]);
+  // Κλειστές ημερομηνίες ανά γήπεδο ('YYYY-MM-DD', ώρα Ελλάδας), από τον server.
+  const [blockedByPitch, setBlockedByPitch] = useState<Record<string, Array<{ start: string; end: string }>>>({});
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -340,6 +347,22 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
   }, [venueName]);
 
 
+  useEffect(() => {
+    const pitchId = selectedPitch?.id;
+    if (!pitchId || blockedByPitch[pitchId]) return;
+    fetch(`/api/booking/availability?pitchId=${encodeURIComponent(pitchId)}`)
+      .then((r) => (r.ok ? r.json() : { blocked: [] }))
+      .then((j: { blocked?: Array<{ start: string; end: string }> }) =>
+        setBlockedByPitch((prev) => ({ ...prev, [pitchId]: j.blocked ?? [] })))
+      .catch(() => setBlockedByPitch((prev) => ({ ...prev, [pitchId]: [] })));
+  }, [selectedPitch?.id, blockedByPitch]);
+
+  const reloadBookings = useCallback(async () => {
+    const { bookingService } = await import('@/lib/firebase-services');
+    const all = await Promise.all(pitches.map((p) => bookingService.getByPitch(p.id)));
+    setExistingBookings(all.flat().filter(Boolean));
+  }, [pitches]);
+
   const generateWeekSchedule = (): DaySchedule[] => {
     if (!selectedPitch) return [];
     
@@ -361,8 +384,10 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
       
       // Check if the pitch has opening hours for this day
       const dayOpeningHours = selectedPitch.defaultOpeningHours[dayKey];
+      const dayIso = toIsoDay(date);
+      const isBlockedDay = (blockedByPitch[selectedPitch.id] ?? []).some((b) => dayIso >= b.start && dayIso <= b.end);
       
-      if (dayOpeningHours?.isOpen && dayOpeningHours.slots && dayOpeningHours.slots.length > 0) {
+      if (!isBlockedDay && dayOpeningHours?.isOpen && dayOpeningHours.slots && dayOpeningHours.slots.length > 0) {
         hasAvailability = true;
         
         // Generate slots based on the actual opening hours
@@ -548,175 +573,92 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
     }
   };
 
-  // Verify Email code
+  // Επαλήθευση κωδικού και δημιουργία κράτησης σε ΕΝΑ βήμα, στον server.
   const verifyEmailCode = async () => {
-    if (!emailCode || !formData.email) return;
+    if (!emailCode || !formData.email || !selectedPitch || !selectedDate || !selectedTimeSlot || !venue) return;
     try {
       setIsVerifyingEmail(true);
-      const res = await fetch('/api/verification/verify', {
+      const res = await fetch('/api/booking/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: formData.email, code: emailCode })
+        body: JSON.stringify({
+          venueId: venue.id,
+          pitchId: selectedPitch.id,
+          date: toIsoDay(selectedDate),
+          time: selectedTimeSlot.time,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          email: formData.email,
+          code: emailCode,
+        }),
       });
+      const j = await res.json().catch(() => ({} as { error?: string; attemptsRemaining?: number }));
+
       if (!res.ok) {
-        const j = await res.json().catch(() => ({}));
-        throw new Error(j.error || 'invalid_code');
+        const error: string = j.error || 'internal_error';
+        // Η ώρα δεν είναι πια διαθέσιμη: πίσω στις ώρες, με φρέσκα δεδομένα.
+        if (['slot_taken', 'date_blocked', 'slot_in_past', 'outside_opening_hours'].includes(error)) {
+          setShowEmailVerification(false);
+          setSelectedTimeSlot(null);
+          setCurrentStep('slots');
+          reloadBookings().catch(() => {});
+          if (error === 'date_blocked' && selectedPitch) {
+            setBlockedByPitch((prev) => { const next = { ...prev }; delete next[selectedPitch.id]; return next; });
+          }
+          toast.error(
+            'Η ώρα δεν είναι πλέον διαθέσιμη',
+            error === 'slot_taken' ? 'Μόλις την έκλεισε κάποιος άλλος. Διαλέξτε άλλη ώρα.' : 'Διαλέξτε άλλη ώρα.'
+          );
+          return;
+        }
+        if (error === 'invalid_code') {
+          toast.error('Λάθος κωδικός', typeof j.attemptsRemaining === 'number'
+            ? `Ελέγξτε τον 6ψήφιο κωδικό. Απομένουν ${j.attemptsRemaining} προσπάθειες.`
+            : 'Ελέγξτε τον 6ψήφιο κωδικό που λάβατε με email.');
+          return;
+        }
+        if (error === 'expired' || error === 'not_found' || error === 'too_many_attempts') {
+          setEmailSent(false);
+          setEmailCode('');
+          toast.error('Ο κωδικός δεν ισχύει πια', 'Ζητήστε νέο κωδικό και δοκιμάστε ξανά.');
+          return;
+        }
+        if (error === 'bookings_disabled') {
+          setShowEmailVerification(false);
+          setLoadError('Οι online κρατήσεις δεν είναι διαθέσιμες αυτή τη στιγμή. Επικοινωνήστε απευθείας με το γήπεδο.');
+          return;
+        }
+        if (error === 'too_many_requests') {
+          toast.error('Πολλές προσπάθειες', 'Δοκιμάστε ξανά σε λίγα λεπτά.');
+          return;
+        }
+        toast.error('Η κράτηση δεν ολοκληρώθηκε', 'Παρακαλώ δοκιμάστε ξανά σε λίγο.');
+        return;
       }
-      await createBooking();
+
+      setSuccessBookingData({
+        userName: `${formData.firstName} ${formData.lastName}`,
+        userPhone: `+30 ${formData.phone}`,
+        pitchName: selectedPitch.name,
+        date: selectedDate.toLocaleDateString('el-GR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
+        time: selectedTimeSlot.time,
+        price: selectedPitch.pricePerSlot
+      });
       setShowEmailVerification(false);
       setEmailCode('');
       setEmailSent(false);
-
-      if (selectedPitch && selectedDate && selectedTimeSlot) {
-        setSuccessBookingData({
-          userName: `${formData.firstName} ${formData.lastName}`,
-          userPhone: `+30 ${formData.phone}`,
-          pitchName: selectedPitch.name,
-          date: selectedDate.toLocaleDateString('el-GR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
-          time: selectedTimeSlot.time,
-          price: selectedPitch.pricePerSlot
-        });
-        setShowSuccessPopup(true);
-      }
-    } catch (err) {
-      console.error('verify email error', err);
-      toast.error('Λάθος κωδικός', 'Ελέγξτε τον 6ψήφιο κωδικό που λάβατε με email.');
-    } finally {
-      setIsVerifyingEmail(false);
-    }
-  };
-
-  // Create booking in database
-  const createBooking = async () => {
-    if (!selectedPitch || !selectedDate || !selectedTimeSlot || !venue) return;
-    
-    // Safety check again
-    if ((venue.bookingsEnabled ?? true) === false) {
-      setLoadError('Οι online κρατήσεις είναι απενεργοποιημένες.');
-      return;
-    }
-
-    try {
-      const { bookingService, userService } = await import('@/lib/firebase-services');
-      
-      // Parse the selected time to get start time (format is "HH:00")
-      const [hours, minutes] = selectedTimeSlot.time.split(':').map(Number);
-      
-      // Ensure selectedDate is valid
-      if (!selectedDate) {
-        throw new Error('No date selected');
-      }
-      
-      const startDateTime = new Date(selectedDate);
-      startDateTime.setHours(hours, minutes, 0, 0);
-      
-      // Validate the final datetime
-      if (isNaN(startDateTime.getTime())) {
-        throw new Error('Invalid start time calculated');
-      }
-      
-      // Calculate end time based on slot duration
-      const endDateTime = new Date(startDateTime);
-      endDateTime.setMinutes(endDateTime.getMinutes() + selectedPitch.slotDuration);
-      
-      // Validate the end datetime
-      if (isNaN(endDateTime.getTime())) {
-        throw new Error('Invalid end time calculated');
-      }
-
-      // Check if customer already exists with this phone number
-      let customerId = '';
-      const existingCustomers = await userService.getAll();
-      const existingCustomer = existingCustomers.find(customer => 
-        customer.phone === formData.phone
-      );
-
-      if (existingCustomer) {
-        // Customer exists - check if they have bookings for this venue
-        const hasVenueBookings = existingCustomer.venueIds && 
-          existingCustomer.venueIds.includes(venue?.id || '');
-        
-        if (!hasVenueBookings) {
-          // Customer exists but not for this venue - add this venue to their list
-          customerId = existingCustomer.id;
-          await userService.addVenueToCustomer(customerId, venue?.id || '');
-          console.log('✅ Added venue to existing customer:', customerId);
-        } else {
-          // Customer exists and has bookings for this venue - use existing ID
-          customerId = existingCustomer.id;
-          console.log('✅ Using existing customer:', customerId);
-        }
-      } else {
-        // New customer - create customer record
-        const newCustomerData = {
-          name: `${formData.firstName} ${formData.lastName}`,
-          email: formData.email,
-          phone: formData.phone,
-          venueIds: [venue?.id || ''], // This is their first venue
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
-        
-        customerId = await userService.create(newCustomerData as Omit<import('@/types').User, 'id' | 'createdAt' | 'updatedAt'>);
-        console.log('✅ New customer created:', customerId);
-      }
-
-      const newBooking: Omit<Booking, 'id' | 'createdAt'> = {
-        slotId: '', // Will be generated
-        pitchId: selectedPitch.id,
-        venueId: venue?.id || '',
-        userId: customerId, // Use the customer ID we just created/found
-        userName: `${formData.firstName} ${formData.lastName}`,
-        userEmail: formData.email,
-        userPhone: formData.phone,
-        startTime: startDateTime,
-        endTime: endDateTime,
-        price: selectedPitch.pricePerSlot,
-        status: 'pending',
-        notes: ''
-      };
-
-      await bookingService.create(newBooking);
-      
-      // Send confirmation email
-      try {
-        await fetch('/api/booking/finalize', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            email: formData.email,
-            phone: formData.phone,
-            pitchName: selectedPitch.name,
-            venueName: venue?.name || '',
-            venuePhone: venue?.phone || '',
-            venueEmail: venue?.email || '',
-            venueAddress: venue?.address || '',
-            date: selectedDate.toLocaleDateString('el-GR', { 
-              weekday: 'long', 
-              year: 'numeric', 
-              month: 'long', 
-              day: 'numeric' 
-            }),
-            time: selectedTimeSlot.time,
-            price: selectedPitch.pricePerSlot
-          })
-        });
-      } catch (emailError) {
-        console.error('Failed to send confirmation email:', emailError);
-        // Don't fail the booking if email fails
-      }
-      
-      // Reset form and go back to start
+      setShowSuccessPopup(true);
       setFormData({ firstName: '', lastName: '', phone: '', email: '', termsAccepted: false });
       setSelectedDate(null);
       setSelectedTimeSlot(null);
       setCurrentStep('pitch');
-      
-    } catch (error) {
-      console.error('Error creating booking:', error);
-      toast.error('Η κράτηση δεν ολοκληρώθηκε', 'Παρακαλώ δοκιμάστε ξανά σε λίγο.');
+      reloadBookings().catch(() => {});
+    } catch (err) {
+      console.error('booking create error', err);
+      toast.error('Η κράτηση δεν ολοκληρώθηκε', 'Ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.');
+    } finally {
+      setIsVerifyingEmail(false);
     }
   };
 
@@ -981,7 +923,7 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
                   </div>
                   <div className="grid grid-cols-1 gap-6">
                     {/* Summary Card */}
-                    <div className="premium-card bg-emerald-600 border-0 rounded-3xl p-6 shadow-xl shadow-emerald-900/10 overflow-hidden relative">
+                    <div className="bg-emerald-600 border-0 rounded-3xl p-6 shadow-xl shadow-emerald-900/10 overflow-hidden relative">
                       <div className="absolute top-0 right-0 p-4 opacity-10">
                         <CheckCircle2 className="h-16 w-16 text-white" />
                       </div>
@@ -1193,8 +1135,8 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
             <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6">
               <span className="text-4xl">🎉</span>
             </div>
-            <h2 className="text-xl font-bold text-zinc-900 tracking-tight mb-1">Κράτηση Επιβεβαιώθηκε!</h2>
-            <p className="text-xs font-medium text-zinc-500 mb-8">Θα λάβετε επιβεβαίωση στο email σας</p>
+            <h2 className="text-xl font-bold text-zinc-900 tracking-tight mb-1">Η κράτηση καταχωρήθηκε!</h2>
+            <p className="text-xs font-medium text-zinc-500 mb-8">Το γήπεδο θα την επιβεβαιώσει σύντομα. Θα βρείτε τα στοιχεία της στο email σας.</p>
 
             <div className="bg-zinc-50 rounded-2xl p-6 mb-8 text-left space-y-3">
               {[

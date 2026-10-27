@@ -17,6 +17,7 @@ import { Separator } from '@/components/ui/separator';
 import { useSubscriptionQuote } from '@/lib/queries';
 import PlanLimitNotice from '@/components/PlanLimitNotice';
 import UnlockCapacityNotice from '@/components/UnlockCapacityNotice';
+import { FEATURES } from '@/config/features';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -101,8 +102,9 @@ export default function NewPitchPage() {
     }
   });
 
+  // Δωρεάν διάθεση: χωρίς όρια γηπέδων, οπότε δεν ζητείται καν το quote.
   const { atPitchLimit, usage, limits, pitchNeedsUnlock, pitchUnlockAmount } =
-    useSubscriptionQuote(venueOwner?.venueId);
+    useSubscriptionQuote(FEATURES.billing ? venueOwner?.venueId : undefined);
 
   const handleFormSubmit = async (data: PitchFormData) => {
     if (!venueOwner) return;

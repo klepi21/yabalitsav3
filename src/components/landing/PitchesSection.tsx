@@ -15,18 +15,18 @@ export default function PitchesSection() {
           
           <div>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest mb-6">
-              Διαχειριση Κρατησεων
+              Ημερολόγιο κρατήσεων
             </div>
             <h2 className="text-3xl md:text-5xl font-medium tracking-tight mb-6 leading-tight">
               Το ημερολόγιο που <br/>
               δεν κάνει <span className="underline decoration-emerald-500 underline-offset-8">λάθη.</span>
             </h2>
             <p className="text-zinc-400 text-lg mb-8 font-light leading-relaxed">
-              Το booking system είναι καρδιά της εγκατάστασης. Σχεδιάσαμε ένα Mobile-First ημερολόγιο που σας επιτρέπει να προσθέτετε κρατήσεις &quot;στο φτερό&quot;, χωρίς overlaps και με ξεκάθαρη εικόνα του τζίρου.
+              Οι κρατήσεις είναι η καρδιά του γηπέδου. Το ημερολόγιο δουλεύει άψογα και από το κινητό, ώστε να προσθέτετε κρατήσεις στο λεπτό, χωρίς επικαλύψεις και με καθαρή εικόνα του προγράμματος.
             </p>
             
             <ul className="space-y-4 mb-10">
-              {['Live έλεγχος διαθεσιμότητας', 'Ρύθμιση τιμοκαταλόγου ανά γήπεδο 5x5 / 7x7 / 11x11', 'Αυτόματος υπολογισμός "Τιμή ανά Άτομο"', 'QR Code Scanning για γρήγορο Check-In'].map((feature, idx) => (
+              {['Έλεγχος διαθεσιμότητας σε πραγματικό χρόνο', 'Τιμή και ωράριο για κάθε γήπεδο, από 5x5 έως 9x9', 'Αυτόματος υπολογισμός τιμής ανά άτομο', 'Online κράτηση από link και QR'].map((feature, idx) => (
                 <li key={idx} className="flex items-center gap-3 text-zinc-300">
                   <CheckCircle2 className="h-5 w-5 text-blue-400 shrink-0" />
                   <span>{feature}</span>
@@ -51,8 +51,8 @@ export default function PitchesSection() {
                  
                  {[
                    { time: '17:00', name: 'Ομάδα Γιώργου', pitch: 'Γήπεδο 1 (5x5)', color: 'bg-emerald-500' },
-                   { time: '18:30', name: 'Εταιρικό Τουρνουά', pitch: 'Γήπεδο 2 (7x7)', color: 'bg-blue-500' },
-                   { time: '20:00', name: 'Ακαδημία K12', pitch: 'Main Pitch (11x11)', color: 'bg-orange-500' },
+                   { time: '18:30', name: 'Εταιρική ομάδα', pitch: 'Γήπεδο 2 (7x7)', color: 'bg-blue-500' },
+                   { time: '20:00', name: 'Online κράτηση: Νίκος Α.', pitch: 'Γήπεδο 1 (5x5)', color: 'bg-orange-500' },
                  ].map((booking, idx) => (
                    <div key={idx} className="flex gap-4 relative z-10 w-full">
                      <div className="w-[40px] text-xs text-zinc-400 font-bold pt-2">{booking.time}</div>

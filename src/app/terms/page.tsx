@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { FEATURES } from '@/config/features';
 import { ArrowLeft } from 'lucide-react';
 import { platformTiers, academyTiers, SELF_SERVE_LIMITS } from '@/lib/pricing';
 
@@ -162,7 +163,26 @@ export default function TermsPage() {
             </div>
           </div>
 
+          {/* Δωρεάν διάθεση: οι όροι συνδρομής και πληρωμών μένουν στον κώδικα για όταν επανέλθει η χρέωση. */}
+          {!FEATURES.billing && (
+            <div className="mb-8">
+              <h3 className="text-xl font-semibold text-zinc-100 mb-4">Δωρεάν Χρήση</h3>
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4 space-y-3 text-zinc-400">
+                <p>
+                  Η χρήση του συστήματος κρατήσεων του Yabalitsa παρέχεται <strong>δωρεάν</strong> στις επιχειρήσεις
+                  που εγγράφονται στην πλατφόρμα. Δεν απαιτείται πιστωτική κάρτα και δεν υπάρχει δέσμευση.
+                </p>
+                <p>
+                  Η δωρεάν διάθεση ισχύει για την τρέχουσα περίοδο. Η Yabalitsa διατηρεί το δικαίωμα να εισαγάγει
+                  χρεώσεις στο μέλλον. Σε αυτή την περίπτωση θα ενημερώσει τους εγγεγραμμένους χρήστες πριν από
+                  οποιαδήποτε χρέωση, και καμία χρέωση δεν θα γίνει χωρίς τη ρητή αποδοχή τους.
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Subscription Plans */}
+          {FEATURES.billing && <>
           <div className="mb-8">
             <h3 className="text-xl font-semibold text-zinc-100 mb-4">💳 Πλάνα Συνδρομής</h3>
             <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4">
@@ -252,6 +272,7 @@ export default function TermsPage() {
               </div>
             </div>
           </div>
+          </>}
 
           {/* Legal Rights and Obligations */}
           <div className="mb-8">
@@ -263,7 +284,7 @@ export default function TermsPage() {
               <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4">
                 <ul className="text-red-300 space-y-2 text-sm">
                   <li>• <strong>Διακοπή υπηρεσιών</strong> σε περίπτωση παραβίασης των όρων</li>
-                  <li>• <strong>Τροποποίηση τιμών</strong> και πλάνων συνδρομής με προειδοποίηση 30 ημερών</li>
+                  {FEATURES.billing && <li>• <strong>Τροποποίηση τιμών</strong> και πλάνων συνδρομής με προειδοποίηση 30 ημερών</li>}
                   <li>• <strong>Πρόσβαση στα δεδομένα</strong> για τεχνική υποστήριξη και βελτίωση υπηρεσιών</li>
                   <li>• <strong>Δημιουργία αντιγράφων ασφαλείας</strong> των δεδομένων για λόγους προστασίας</li>
                   <li>• <strong>Ενημέρωση της πλατφόρμας</strong> και των όρων χρήσης κατά καιρούς</li>
@@ -278,7 +299,7 @@ export default function TermsPage() {
                 <ul className="text-blue-300 space-y-2 text-sm">
                   <li>• <strong>Παροχή ακριβών πληροφοριών</strong> κατά την εγγραφή και χρήση</li>
                   <li>• <strong>Σεβασμός των νόμων</strong> περί προστασίας προσωπικών δεδομένων (GDPR)</li>
-                  <li>• <strong>Πληρωμή χρεώσεων</strong> εγκαίρως και συμμόρφωση με τα πλάνα συνδρομής</li>
+                  {FEATURES.billing && <li>• <strong>Πληρωμή χρεώσεων</strong> εγκαίρως και συμμόρφωση με τα πλάνα συνδρομής</li>}
                   <li>• <strong>Δεν παραβιάζουν</strong> τα δικαιώματα άλλων χρηστών ή της πλατφόρμας</li>
                   <li>• <strong>Ενημερώνουν άμεσα</strong> για οποιεσδήποτε αλλαγές στα στοιχεία τους</li>
                 </ul>
@@ -394,7 +415,7 @@ export default function TermsPage() {
                 <li>• <strong>Force Majeure:</strong> Διακοπές λόγω φυσικών καταστροφών, πολέμων, κυβερνητικών ενεργειών</li>
                 <li>• <strong>Τεχνικά προβλήματα:</strong> Προσπάθεια επίλυσης εντός 24-48 ωρών</li>
                 <li>• <strong>Maintenance:</strong> Προγραμματισμένες διακοπές με προειδοποίηση 48 ωρών</li>
-                <li>• <strong>Αποζημίωση:</strong> Παράταση συνδρομής για διακοπές άνω των 24 ωρών</li>
+                {FEATURES.billing && <li>• <strong>Αποζημίωση:</strong> Παράταση συνδρομής για διακοπές άνω των 24 ωρών</li>}
                 <li>• <strong>Backup:</strong> Δημιουργία αντιγράφων ασφαλείας κάθε 24 ώρες</li>
               </ul>
             </div>

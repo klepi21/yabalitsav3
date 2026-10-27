@@ -89,6 +89,7 @@ import { cn } from '@/lib/utils';
 import { useSubscriptionQuote } from '@/lib/queries';
 import { days } from '@/lib/utils';
 import UpgradeDueCard from '@/components/UpgradeDueCard';
+import { FEATURES } from '@/config/features';
 
 function CoachDashboard() {
   const { user, venueOwner, isLoading: authLoading } = useAuth();
@@ -450,6 +451,16 @@ export default function DashboardPage() {
 
   // Coach gets a dedicated simplified dashboard
   if (venueOwner && isCoach) {
+    if (!FEATURES.academy) {
+      return (
+        <Card className="rounded-2xl border border-zinc-200 shadow-sm bg-white max-w-lg mx-auto mt-10">
+          <CardContent className="p-8 text-center space-y-2">
+            <h1 className="text-lg font-semibold text-zinc-900">Η πρόσβαση προπονητή δεν είναι διαθέσιμη</h1>
+            <p className="text-sm text-zinc-500">Η ενότητα ακαδημίας είναι προσωρινά κλειστή. Επικοινωνήστε με τον διαχειριστή του γηπέδου.</p>
+          </CardContent>
+        </Card>
+      );
+    }
     return <CoachDashboard />;
   }
 
@@ -476,7 +487,7 @@ function AdminDashboard() {
   const [isPitchesExpanded, setIsPitchesExpanded] = useState(false);
   const [dataLoading, setDataLoading] = useState(true);
   const { upgrade: subQuote, usage: subUsage, venue: subVenue } =
-    useSubscriptionQuote(venueOwner?.venueId);
+    useSubscriptionQuote(FEATURES.billing ? venueOwner?.venueId : undefined);
   const [_isVenueInfoExpanded, _setIsVenueInfoExpanded] = useState(false);
   const [showQuickBooking, setShowQuickBooking] = useState(false);
   const [_showBookingMenu, _setShowBookingMenu] = useState(false);
@@ -559,7 +570,7 @@ function AdminDashboard() {
       // Πριν: τρεις σειριακοί κύκλοι (squads+trainings -> users+groups ->
       // payments). Κάθε κύκλος περίμενε τον προηγούμενο χωρίς λόγο —
       // καμία κλήση δεν εξαρτάται από τις άλλες. Τώρα ένας κύκλος.
-      try {
+      if (FEATURES.academy) try {
         const [squadsData, trainingsData, usersData, groupsData, paymentsData] = await Promise.all([
           squadService.getByVenue(venueOwner.venueId),
           trainingService.getByVenue(venueOwner.venueId),
@@ -766,6 +777,19 @@ function AdminDashboard() {
         const bookingDate = new Date(booking.startTime);
         return bookingDate >= today && bookingDate < tomorrow && booking.status !== 'completed';
       })
+      .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+  };
+
+  const getUpcomingBookings = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return bookings.filter(b => new Date(b.startTime) >= today && b.status !== 'cancelled');
+  };
+
+  const getPendingBookings = () => {
+    const now = new Date();
+    return bookings
+      .filter(b => b.status === 'pending' && new Date(b.endTime) > now)
       .sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
   };
 
@@ -1034,7 +1058,7 @@ function AdminDashboard() {
       )}
 
 
-      {subQuote?.owed && <UpgradeDueCard upgrade={subQuote} />}
+      {FEATURES.billing && subQuote?.owed && <UpgradeDueCard upgrade={subQuote} />}
 
       {/* Banner λήξης — ισχύει και για trial και για συνδρομή.
           Πριν έλεγχε μόνο `plan === 'subscription'`, οπότε ο δοκιμαστικός
@@ -1042,7 +1066,7 @@ function AdminDashboard() {
           τη μέρα που μηδένιζε ο μετρητής. */}
       {/* Οι ημέρες από την κοινή cache: το τοπικό `venue` φορτώνεται μία
           φορά και δεν παρακολουθεί αλλαγές εκτός της σελίδας. */}
-      {venue && (subVenue?.daysRemaining ?? venue.daysRemaining ?? 0) <= 7 &&
+      {FEATURES.billing && venue && (subVenue?.daysRemaining ?? venue.daysRemaining ?? 0) <= 7 &&
         (subVenue?.daysRemaining ?? venue.daysRemaining ?? 0) > 0 && (
         <div className="rounded-2xl border-2 border-amber-200 bg-amber-50 p-4">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
@@ -1116,10 +1140,10 @@ function AdminDashboard() {
         {/* Quick Stats Grid - Bookings & Venues */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: 'Κρατήσεις', value: bookings.length, detail: '30 ημέρες', icon: <CalendarCheck className="h-5 w-5 text-emerald-600" /> },
-            { label: 'LIVE', value: getLiveBookings(), detail: 'Τώρα στα γήπεδα', icon: <Radio className="h-5 w-5 text-blue-600" /> },
-            { label: 'Σήμερα', value: getTodaysBookings().length, detail: 'MATCHES', icon: <FootballPitch className="h-5 w-5 text-emerald-600" /> },
-            { label: 'Πελάτες', value: new Set(bookings.map(b => b.userName).filter(name => name && name.trim() !== '')).size, detail: 'DATABASE', icon: <UserSearch className="h-5 w-5 text-zinc-600" /> }
+            { label: 'Σήμερα', value: getTodaysBookings().length, detail: 'Κρατήσεις ημέρας', icon: <FootballPitch className="h-5 w-5 text-emerald-600" /> },
+            { label: 'Τώρα', value: getLiveBookings(), detail: 'Σε εξέλιξη στα γήπεδα', icon: <Radio className="h-5 w-5 text-blue-600" /> },
+            { label: 'Επερχόμενες', value: getUpcomingBookings().length, detail: 'Από σήμερα και μετά', icon: <CalendarCheck className="h-5 w-5 text-emerald-600" /> },
+            { label: 'Προς επιβεβαίωση', value: getPendingBookings().length, detail: 'Περιμένουν απάντηση', icon: <UserSearch className="h-5 w-5 text-amber-600" /> }
           ].map((stat, i) => (
             <Card key={i} className="rounded-2xl border border-zinc-200 shadow-sm overflow-hidden group transition-all duration-300 hover:shadow-md h-[100px] bg-white">
               <CardContent className="p-5 h-full flex items-center justify-between">
@@ -1137,7 +1161,7 @@ function AdminDashboard() {
         </div>
 
         {/* Academy Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+        {FEATURES.academy && <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
           {[
             { label: 'Σύνολο τμημάτων', value: squads.length, detail: 'Ενεργά τμήματα', icon: <Trophy className="h-5 w-5 text-emerald-600" /> },
             { label: 'Σύνολο αθλητών', value: getTotalAthletes(), detail: 'Ενεργοί αθλητές', icon: <Users className="h-5 w-5 text-blue-600" /> },
@@ -1157,7 +1181,7 @@ function AdminDashboard() {
               </CardContent>
             </Card>
           ))}
-        </div>
+        </div>}
       </div>
 
       {/* Today's Schedules - Split Row */}
@@ -1198,12 +1222,12 @@ function AdminDashboard() {
                       </div>
                       <div className="min-w-0">
                         <h4 className="text-xs font-semibold text-zinc-900 tracking-tight truncate">
-                          {booking.userName || 'Unknown '}
+                          {booking.userName || 'Χωρίς όνομα'}
                         </h4>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-2xs font-medium text-zinc-500">{pitch?.name || 'FIELD'}</span>
+                          <span className="text-2xs font-medium text-zinc-500">{pitch?.name || 'Γήπεδο'}</span>
                           <span className="text-zinc-400">•</span>
-                          <span className="text-2xs font-medium text-emerald-600">{new Date(booking.startTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit', hour12: false })} START</span>
+                          <span className="text-2xs font-medium text-emerald-600">{new Date(booking.startTime).toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
                         </div>
                       </div>
                     </div>
@@ -1225,8 +1249,70 @@ function AdminDashboard() {
           </div>
         </div>
 
+        {!FEATURES.academy && (
+          <div className="space-y-8">
+            <div className="flex items-center justify-between pb-2">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg hover:border-amber-200 transition-colors shrink-0">
+                  <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-500" />
+                </div>
+                <div className="space-y-0.5">
+                  <h2 className="text-base sm:text-xl font-bold text-zinc-900 tracking-tight">Προς επιβεβαίωση</h2>
+                  <p className="text-2xs sm:text-2xs font-semibold text-zinc-500">Online κρατήσεις που περιμένουν απάντηση</p>
+                </div>
+              </div>
+              <Link href="/management/bookings" className="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition-colors shrink-0">
+                {'Όλες →'}
+              </Link>
+            </div>
+
+            <div className="space-y-3">
+              {getPendingBookings().length === 0 ? (
+                <Card className="rounded-2xl border-2 border-dashed border-zinc-100 bg-zinc-50/50 shadow-none flex flex-col items-center justify-center p-10 text-center">
+                  <div className="h-12 w-12 rounded-xl bg-white border border-zinc-100 flex items-center justify-center mb-3">
+                    <Smile className="h-6 w-6 text-zinc-400" />
+                  </div>
+                  <h3 className="text-zinc-900 font-semibold text-xs tracking-tight">Καμία κράτηση σε αναμονή</h3>
+                </Card>
+              ) : (
+                getPendingBookings().slice(0, 6).map((booking: Booking) => {
+                  const pitch = pitches.find(p => p.id === booking.pitchId);
+                  const start = new Date(booking.startTime);
+                  return (
+                    <Link
+                      key={booking.id}
+                      href={`/management/bookings/${booking.id}`}
+                      className="group flex items-center justify-between gap-4 p-4 rounded-2xl bg-white border border-amber-200/70 hover:border-amber-300 hover:shadow-md transition-all duration-300"
+                    >
+                      <div className="flex items-center gap-4 min-w-0">
+                        <div className="h-10 w-10 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center shrink-0">
+                          <User className="h-5 w-5 text-amber-600" />
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-semibold text-zinc-900 tracking-tight truncate">
+                            {booking.userName || 'Χωρίς όνομα'}
+                          </h4>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-2xs font-medium text-zinc-500 truncate">{pitch?.name || 'Γήπεδο'}</span>
+                            <span className="text-zinc-400">•</span>
+                            <span className="text-2xs font-medium text-amber-700 whitespace-nowrap">
+                              {start.toLocaleDateString('el-GR', { weekday: 'short', day: 'numeric', month: 'short' })}{' '}
+                              {start.toLocaleTimeString('el-GR', { hour: '2-digit', minute: '2-digit', hour12: false })}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-2xs font-semibold text-amber-700 group-hover:text-amber-800 shrink-0">Άνοιγμα →</span>
+                    </Link>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Today's Trainings */}
-        <div className="space-y-8">
+        {FEATURES.academy && <div className="space-y-8">
           <div className="flex items-center justify-between pb-2">
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-2xl bg-white border border-zinc-100 flex items-center justify-center shadow-lg hover:border-emerald-200 transition-colors shrink-0">
@@ -1288,11 +1374,11 @@ function AdminDashboard() {
               })
             )}
           </div>
-        </div>
+        </div>}
       </div>
 
       {/* Alerts Row: Medical + Payments */}
-      {(medicalAlerts.expired.length > 0 || medicalAlerts.expiringSoon.length > 0 || paymentAlerts.length > 0) && (
+      {FEATURES.academy && (medicalAlerts.expired.length > 0 || medicalAlerts.expiringSoon.length > 0 || paymentAlerts.length > 0) && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
           {/* Medical Alerts - Left */}
@@ -1459,9 +1545,9 @@ function AdminDashboard() {
       )}
 
       {/* 50/50 Row for Academies and Pitches */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
+      <div className={cn("grid grid-cols-1 gap-8 pt-4", FEATURES.academy && "lg:grid-cols-2")}>
         {/* Academies List - Left Side */}
-        <div className="rounded-2xl bg-white border border-zinc-200 overflow-hidden shadow-sm h-fit">
+        {FEATURES.academy && <div className="rounded-2xl bg-white border border-zinc-200 overflow-hidden shadow-sm h-fit">
           <div
             className="flex items-center justify-between cursor-pointer group/header px-6 py-5 bg-white hover:bg-zinc-50 transition-colors border-b border-zinc-100"
             onClick={() => setIsSquadsExpanded(!isSquadsExpanded)}
@@ -1527,7 +1613,7 @@ function AdminDashboard() {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </div>}
 
         {/* Pitches List - Right Side */}
         <div className="rounded-2xl bg-white border border-zinc-200 overflow-hidden shadow-sm h-fit">

@@ -12,7 +12,7 @@ const FeaturesSection = dynamic(() => import('@/components/landing/FeaturesSecti
   loading: () => <div className="py-32 h-[500px]" />,
   ssr: true
 });
-const AcademiesSection = dynamic(() => import('@/components/landing/AcademiesSection'), {
+const HowItWorksSection = dynamic(() => import('@/components/landing/HowItWorksSection'), {
   loading: () => <div className="py-24 h-[500px]" />,
   ssr: true
 });
@@ -24,17 +24,12 @@ const ReportsSection = dynamic(() => import('@/components/landing/ReportsSection
   loading: () => <div className="py-24 h-[500px]" />,
   ssr: true
 });
-const PricingSection = dynamic(() => import('@/components/landing/PricingSection'), {
+const FreeSection = dynamic(() => import('@/components/landing/FreeSection'), {
   loading: () => <div className="py-32 h-[500px]" />,
   ssr: true
 });
 const FinalCTASection = dynamic(() => import('@/components/landing/FinalCTASection'), {
   loading: () => <div className="py-32 h-[300px]" />,
-  ssr: true
-});
-
-const StatsSection = dynamic(() => import('@/components/landing/StatsSection'), {
-  loading: () => <div className="py-24 h-[100px]" />,
   ssr: true
 });
 
@@ -65,9 +60,9 @@ export default function RootPage() {
             </Link>
             <nav className="hidden lg:flex items-center gap-8 text-zinc-300">
               <Link href="#features" className="hover:text-emerald-400 transition">Λειτουργίες</Link>
-              <Link href="#academies" className="hover:text-emerald-400 transition">Ακαδημίες</Link>
-              <Link href="#pitches" className="hover:text-emerald-400 transition">Γήπεδα</Link>
-              <Link href="#reports" className="hover:text-emerald-400 transition">Αναφορές</Link>
+              <Link href="#how" className="hover:text-emerald-400 transition">Πώς ξεκινάτε</Link>
+              <Link href="#pitches" className="hover:text-emerald-400 transition">Ημερολόγιο</Link>
+              <Link href="#free" className="hover:text-emerald-400 transition">Δωρεάν</Link>
               <Link href="/blog" className="hover:text-emerald-400 transition">Blog </Link>
             </nav>
           </div>
@@ -89,22 +84,21 @@ export default function RootPage() {
           {/* Text Content Container (No large backgrounds) */}
           <div className="flex flex-col items-center text-center max-w-[1000px] w-full mx-auto relative z-10">
             <h1 className="text-[2.2rem] sm:text-[3.2rem] md:text-[4.2rem] lg:text-[4.8rem] font-bold leading-[1.1] tracking-tight mb-4 mt-6 max-w-[1100px]">
-              <span className="text-zinc-50 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Διαχειρίσου το γήπεδό σου</span><br />
-              <span className="text-white flex items-center justify-center gap-2 md:gap-4 flex-wrap mt-1 sm:mt-3 drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] uppercase">
-                και την ακαδημία σου
-              </span>
+              <span className="text-zinc-50 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Βάλε online κρατήσεις</span><br />
+              <span className="text-zinc-50 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">στα γήπεδά σου </span>
+              <span className="text-emerald-400 drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)] uppercase">δωρεάν</span>
             </h1>
 
             <p className="text-emerald-400 text-lg md:text-2xl max-w-3xl mx-auto mb-10 font-bold leading-relaxed tracking-wide drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] px-4">
-              Κρατήσεις, πληρωμές, αθλητές — <span className="text-white border-b-2 border-emerald-500">όλα σε ένα.</span>
+              Ημερολόγιο, σελίδα κρατήσεων και QR. <span className="text-white border-b-2 border-emerald-500">Χωρίς συνδρομή.</span>
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16 md:mb-24">
               <Link
-                href="/venue-login"
+                href="/for-venues"
                 className="group px-8 py-3.5 md:px-10 md:py-4 font-bold text-white bg-emerald-500 hover:bg-emerald-400 rounded-2xl transition-all duration-300 overflow-hidden shadow-[0_0_30px_-5px_rgba(116,238,22,0.4)] hover:shadow-[0_0_40px_-5px_rgba(116,238,22,0.6)] flex items-center gap-3 hover:scale-105 active:scale-95 text-sm md:text-base w-full sm:w-auto justify-center"
               >
-                <span>Μπείτε στη Νέα Εποχή</span>
+                <span>Ξεκινήστε δωρεάν</span>
               </Link>
               
               <Link
@@ -116,12 +110,17 @@ export default function RootPage() {
               </Link>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-2xs md:text-xs font-bold text-white/90 uppercase tracking-[0.2em] -mt-10 md:-mt-16 mb-24 md:mb-36 drop-shadow-lg">
-              <span className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-emerald-400" /> 30 Ημερες Δωρεαν Δοκιμη</span>
-              <span className="hidden sm:block w-1.5 h-1.5 bg-white/20 rounded-full" />
-              <span className="flex items-center gap-2"><Zap className="w-3.5 h-3.5 text-emerald-400" /> Χωρις Πιστωτικη Καρτα</span>
-              <span className="hidden sm:block w-1.5 h-1.5 bg-white/20 rounded-full" />
-              <span className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Καμια Δεσμευση</span>
+            <div className="-mt-10 md:-mt-16 mb-24 md:mb-36 flex flex-col items-center gap-4">
+              <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-3 text-2xs md:text-xs font-bold text-white/90 uppercase tracking-[0.2em] drop-shadow-lg">
+                <span className="flex items-center gap-2"><Shield className="w-3.5 h-3.5 text-emerald-400" /> Δωρεάν</span>
+                <span className="hidden sm:block w-1.5 h-1.5 bg-white/20 rounded-full" />
+                <span className="flex items-center gap-2"><Zap className="w-3.5 h-3.5 text-emerald-400" /> Χωρίς πιστωτική κάρτα</span>
+                <span className="hidden sm:block w-1.5 h-1.5 bg-white/20 rounded-full" />
+                <span className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Καμία δέσμευση</span>
+              </div>
+              <p className="text-2xs text-white/50 drop-shadow">
+                Η δωρεάν χρήση ενδέχεται να αλλάξει στο μέλλον.
+              </p>
             </div>
           </div>
 
@@ -129,16 +128,13 @@ export default function RootPage() {
         </main>
       </section>
 
-      {/* ================= STATISTICS SECTION ================= */}
-      <StatsSection />
-
       {/* ================= OFF-SCREEN SECTIONS (DYNAMICALLY LOADED) ================= */}
       <FeaturesSection />
-      <AcademiesSection />
+      <HowItWorksSection />
       <PitchesSection />
       <ReportsSection />
+      <FreeSection />
       <BookDemo />
-      <PricingSection />
       <FinalCTASection />
 
       {/* ================= FOOTER ================= */}

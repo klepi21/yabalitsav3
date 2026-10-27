@@ -35,7 +35,7 @@ export default function BookDemo() {
           {/* Subheading */}
           <p className="text-base sm:text-lg text-zinc-400 max-w-xl mx-auto mb-10 leading-relaxed">
             Κλείστε ένα δωρεάν ραντεβού 30 λεπτών και θα σας δείξουμε πώς το Yabalitsa
-            μπορεί να απλοποιήσει τη διαχείριση του κέντρου ή της ακαδημίας σας.
+            μπορεί να απλοποιήσει τις κρατήσεις του γηπέδου σας.
           </p>
 
           {/* CTA Buttons */}

@@ -109,7 +109,7 @@ export default async function BlogPostPage({ params }: Props) {
         
         <div className="bg-[#0B151C] border border-[#74ee16]/20 rounded-3xl p-8 text-center shadow-[0_0_30px_rgba(116,238,22,0.1)]">
           <h3 className="text-2xl font-bold mb-4 text-white">Είστε ιδιοκτήτης αθλητικού κέντρου;</h3>
-          <p className="text-zinc-400 mb-8">Η κορυφαία πλατφόρμα διαχείρισης γηπέδων 5x5 και ακαδημιών στην Ελλάδα σας δίνει τον έλεγχο.</p>
+          <p className="text-zinc-400 mb-8">Βάλτε online κρατήσεις στο γήπεδό σας δωρεάν, με ημερολόγιο, σελίδα κρατήσεων και QR.</p>
           <Link 
             href="/for-venues"
             target="_blank"

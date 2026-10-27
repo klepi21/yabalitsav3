@@ -2,7 +2,7 @@
 
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import Image from 'next/image';
+import DashboardMock from '@/components/landing/DashboardMock';
 
 export default function AnimatedLaptop() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -49,16 +49,9 @@ export default function AnimatedLaptop() {
           
           {/* Screen Content */}
           <div className="relative rounded-t-xl sm:rounded-t-2xl overflow-hidden bg-[#fafafa] ring-1 ring-white/10">
-            <Image
-              src="/dashboard-preview.png"
-              alt="Yabalitsa Dashboard Preview"
-              width={1920}
-              height={1080}
-              quality={75}
-              priority
-              sizes="(max-width: 1200px) 100vw, 1200px"
-              className="w-full h-auto object-contain block group-hover:scale-[1.03] transition-transform duration-[1500ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] origin-top"
-            />
+            <div className="group-hover:scale-[1.02] transition-transform duration-[1500ms] ease-[cubic-bezier(0.2,0.8,0.2,1)] origin-top">
+              <DashboardMock />
+            </div>
           </div>
           
           {/* Moving Screen Glare */}

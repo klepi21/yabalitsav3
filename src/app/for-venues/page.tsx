@@ -22,7 +22,7 @@ import {
   PartyPopper,
   ChevronDown,
   CheckCircle2,
-  Trophy,
+  QrCode,
   LineChart,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -272,12 +272,12 @@ export default function ForVenuesPage() {
         <div className="relative z-10 mb-8 mt-auto">
           <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-full px-3 py-1 inline-flex items-center gap-2 mb-6 shadow-[0_0_15px_-3px_rgba(116,238,22,0.3)]">
             <Sparkles className="h-4 w-4 text-emerald-400" />
-            <span className="text-xs font-semibold text-emerald-400">30 ημέρες δωρεάν δοκιμή</span>
+            <span className="text-xs font-semibold text-emerald-400">Δωρεάν, χωρίς κάρτα</span>
           </div>
           
           <h1 className="text-3xl sm:text-4xl font-medium text-white leading-tight tracking-tight mb-10">
-            Ολοκληρωμένη διαχείριση<br/>
-            για το <span className="text-emerald-400 font-bold">αθλητικό σας κέντρο</span>
+            Online κρατήσεις<br/>
+            για το <span className="text-emerald-400 font-bold">γήπεδό σας</span>
           </h1>
 
           <div className="space-y-8">
@@ -286,18 +286,18 @@ export default function ForVenuesPage() {
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-white font-semibold text-lg">Αστραπιαίες Κρατήσεις</h3>
-                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Αυτόματο ημερολόγιο γηπέδων 5x5, αυτόματος έλεγχος διαθεσιμότητας και οργάνωση πελατολογίου.</p>
+                <h3 className="text-white font-semibold text-lg">Ημερολόγιο κρατήσεων</h3>
+                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Όλα τα γήπεδά σας σε ένα ημερολόγιο, με αυτόματο έλεγχο διαθεσιμότητας και χωρίς διπλοκρατήσεις.</p>
               </div>
             </div>
             
             <div className="flex items-start gap-5">
               <div className="bg-blue-500/10 border border-blue-500/20 p-2.5 rounded-2xl text-blue-400 mt-1 shadow-[0_0_15px_-3px_rgba(59,130,246,0.3)]">
-                <Trophy className="w-6 h-6" />
+                <QrCode className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-white font-semibold text-lg">Λογισμικό Ακαδημίας</h3>
-                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Διαχείριση ιατρικών πιστοποιητικών, οργάνωση ηλικιακών τμημάτων ομάδων και αυτόματο Player Passport.</p>
+                <h3 className="text-white font-semibold text-lg">Online κράτηση 24/7</h3>
+                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Οι παίκτες κλείνουν μόνοι τους από τη σελίδα και το QR του γηπέδου σας.</p>
               </div>
             </div>
 
@@ -306,8 +306,8 @@ export default function ForVenuesPage() {
                 <LineChart className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-white font-semibold text-lg">Οικονομικά Reports</h3>
-                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Πλήρης έλεγχος των μηνιαίων συνδρομών, έξυπνες ειδοποιήσεις για ανεξόφλητες καρτέλες αθλητών.</p>
+                <h3 className="text-white font-semibold text-lg">Πελάτες και έσοδα</h3>
+                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Ιστορικό κάθε πελάτη και καθαρή εικόνα για τα έσοδα από τις κρατήσεις σας.</p>
               </div>
             </div>
           </div>
@@ -342,7 +342,7 @@ export default function ForVenuesPage() {
             <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 text-center">
               <div className="flex items-center justify-center gap-2 mb-1">
                 <Sparkles className="h-4 w-4 text-emerald-600" />
-                <span className="text-sm font-semibold text-emerald-800">30 ημέρες δωρεάν</span>
+                <span className="text-sm font-semibold text-emerald-800">Δωρεάν για το γήπεδό σας</span>
               </div>
               <p className="text-xs text-emerald-700">Χωρίς πιστωτική κάρτα. Χωρίς δεσμεύσεις.</p>
             </div>

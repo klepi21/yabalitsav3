@@ -30,7 +30,7 @@ export default function ContactPage() {
             </Link>
             <nav className="hidden lg:flex items-center gap-8 text-zinc-300">
               <Link href="/#features" className="hover:text-emerald-400 transition">Λειτουργίες</Link>
-              <Link href="/#academies" className="hover:text-emerald-400 transition">Ακαδημίες</Link>
+              <Link href="/#how" className="hover:text-emerald-400 transition">Πώς ξεκινάτε</Link>
               <Link href="/#pitches" className="hover:text-emerald-400 transition">Γήπεδα</Link>
               <Link href="/#reports" className="hover:text-emerald-400 transition">Αναφορές</Link>
               <Link href="/blog" className="hover:text-emerald-400 transition">Blog</Link>

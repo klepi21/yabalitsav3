@@ -3,6 +3,7 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
+import { FEATURES } from '@/config/features';
 
 const SWRProvider = dynamic(() => import('./SWRProvider'), { ssr: false });
 const AuthProvider = dynamic(() => import('@/contexts/AuthContext').then(m => m.AuthProvider), { ssr: false });
@@ -25,8 +26,6 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
   // Pages that should not have AuthProvider or SidebarWrapper
   const isPublicPage = useMemo(() =>
     pathname === '/' ||
-    pathname === '/fse' ||
-    pathname === '/venues' ||
     pathname === '/for-venues' ||
     pathname === '/contact' ||
     pathname === '/logismiko-gipedou-5x5' ||
@@ -117,7 +116,7 @@ export default function ConditionalWrapper({ children }: ConditionalWrapperProps
           <SidebarWrapper>
             <CookieConsent />
             <GoogleAnalytics />
-            <ChatWidget />
+            {FEATURES.aiChat && <ChatWidget />}
             <Toaster />
             {children}
           </SidebarWrapper>

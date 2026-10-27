@@ -5,6 +5,7 @@ import { User as FirebaseUser } from 'firebase/auth';
 import { authService, venueOwnerService, venueService } from '@/lib/firebase-services';
 import { VenueOwner } from '@/types';
 import { useRouter } from 'next/navigation';
+import { FEATURES } from '@/config/features';
 
 interface AuthContextType {
   user: FirebaseUser | null;
@@ -43,6 +44,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const venue = await venueService.getById(venueId);
       if (!venue) return;
+
+      /* Δωρεάν διάθεση: καμία λήξη. Τα γήπεδα που είχε ήδη κλειδώσει η
+         λήξη της δοκιμής (`active: false` με μηδενικές ημέρες) ξαναενεργο-
+         ποιούνται αυτόματα στην επόμενη σύνδεση. */
+      if (!FEATURES.billing) {
+        const lockedByExpiry = venue.active === false &&
+          typeof venue.daysRemaining === 'number' && venue.daysRemaining <= 0;
+        if (lockedByExpiry) {
+          await venueService.update(venueId, { active: true });
+          return;
+        }
+        if (venue.active === false) await forceLogout('inactive');
+        return;
+      }
 
       /* Ο ΣΥΓΚΕΚΡΙΜΕΝΟΣ λόγος πρώτα. Το `active: false` το γράφει το
          ημερήσιο Cloud Function ως ΣΥΝΕΠΕΙΑ της λήξης, οπότε όταν

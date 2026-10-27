@@ -17,23 +17,21 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Yabalitsa | Λογισμικό Διαχείρισης Γηπέδων 5x5 & Ακαδημιών',
+    default: 'Yabalitsa | Δωρεάν Online Κρατήσεις για Γήπεδα 5x5',
     template: '%s | Yabalitsa'
   },
-  description: 'Η Νο.1 πλατφόρμα για διαχείριση αθλητικών κέντρων, γηπέδων 5x5 και ακαδημιών ποδοσφαίρου στην Ελλάδα. Online κρατήσεις, player passport και οικονομικά reports.',
+  description: 'Δωρεάν σύστημα κρατήσεων για γήπεδα 5x5. Ημερολόγιο χωρίς διπλοκρατήσεις, δική σας σελίδα online κρατήσεων με QR, πελάτες και αναφορές εσόδων.',
   keywords: [
-    'διαχείριση ακαδημιών ποδοσφαίρου',
+    'δωρεάν πρόγραμμα κρατήσεων γηπέδου',
     'λογισμικό γηπέδων 5x5',
     'online κρατήσεις γηπέδων 5x5',
-    'πρόγραμμα ακαδημιών',
     'management αθλητικών κέντρων',
     'εφαρμογή για γήπεδα 5x5',
-    'έλεγχος συνδρομών ακαδημίας',
     'booking γηπέδων Ελλάδα',
     'κράτηση 5x5',
     'ποδόσφαιρο',
     'sports facility management software',
-    'football academy software'
+    'football pitch booking software'
   ],
   authors: [{ name: 'Yabalitsa Team' }],
   creator: 'Yabalitsa',
@@ -52,22 +50,22 @@ export const metadata: Metadata = {
     locale: 'el_GR',
     url: 'https://yabalitsa.com',
     siteName: 'Yabalitsa',
-    title: 'Yabalitsa | Λογισμικό Διαχείρισης Γηπέδων 5x5 & Ακαδημιών',
-    description: 'Εκσυγχρονίστε το αθλητικό σας κέντρο. Αυτόματο ημερολόγιο κρατήσεων 5x5 και ψηφιακό Player Passport για ακαδημίες.',
+    title: 'Yabalitsa | Δωρεάν Online Κρατήσεις για Γήπεδα 5x5',
+    description: 'Βάλτε online κρατήσεις στα γήπεδά σας δωρεάν. Ημερολόγιο, σελίδα κρατήσεων και QR.',
     images: [
       {
         url: 'https://www.yabalitsa.com/ogpreview.jpg',
         width: 1200,
         height: 630,
-        alt: 'Yabalitsa - Διαχείριση Γηπέδων & Ακαδημιών',
+        alt: 'Yabalitsa, online κρατήσεις γηπέδων',
         type: 'image/jpeg',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Yabalitsa | Λογισμικό Διαχείρισης Γηπέδων 5x5',
-    description: 'Εκσυγχρονίστε το αθλητικό σας κέντρο με το Yabalitsa. Αυτόματο ημερολόγιο κρατήσεων και Player Passport για ακαδημίες.',
+    title: 'Yabalitsa | Δωρεάν Online Κρατήσεις για Γήπεδα 5x5',
+    description: 'Βάλτε online κρατήσεις στα γήπεδά σας δωρεάν. Ημερολόγιο, σελίδα κρατήσεων και QR.',
     images: ['https://www.yabalitsa.com/ogpreview.jpg'],
     creator: '@yabalitsa',
   },

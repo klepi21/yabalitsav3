@@ -16,7 +16,7 @@ export default function ReportsSection() {
             Ξέρετε πόσα <span className="text-purple-400 font-serif italic">βγάλατε;</span>
           </h2>
           <p className="text-zinc-400 text-lg mb-12 font-light leading-relaxed">
-            Ασφαλές Reports Dashboard – προστατευμένο με PIN – που σας δείχνει τα έσοδα από κρατήσεις και ακαδημίες σε πραγματικό χρόνο. Γραφήματα, metrics και ανάλυση που βοηθάει κάθε μάνατζερ να κάνει καλύτερες επιλογές.
+            Οι αναφορές σας δείχνουν τα έσοδα από τις κρατήσεις ανά ημέρα, ανά γήπεδο και ανά περίοδο. Προστατεύονται με PIN, ώστε να τις βλέπετε μόνο εσείς.
           </p>
           <div className="bg-[#0B151C] border border-white/10 rounded-3xl p-8 max-w-[600px] mx-auto shadow-2xl relative overflow-hidden group">
              {/* Fake chart visualization */}
@@ -26,7 +26,7 @@ export default function ReportsSection() {
                 ))}
              </div>
              <div className="flex justify-between items-center relative z-10 text-sm">
-                <span className="text-zinc-400 font-bold uppercase tracking-widest">Εσοδα Μηνα</span>
+                <span className="text-zinc-400 font-bold uppercase tracking-widest">Έσοδα μήνα</span>
                 <span className="text-2xl font-bold text-white">€12,450</span>
              </div>
              <div className="absolute inset-0 bg-gradient-to-t from-[#0B151C] via-transparent to-transparent pointer-events-none" />

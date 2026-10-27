@@ -40,6 +40,7 @@ import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
 import { useSubscriptionQuote } from '@/lib/queries';
 import { resolveTier, platformTiers, pricingUtils } from '@/lib/pricing';
+import { FEATURES } from '@/config/features';
 
 // Form validation schema
 const venueSettingsSchema = z.object({
@@ -63,7 +64,7 @@ export default function SettingsPage() {
   const [venue, setVenue] = useState<Venue | null>(null);
   // Το μέγεθος και η ζώνη έρχονται από την ίδια πηγή με τη σελίδα συνδρομής.
   const { usage: subUsage, billedMonthly, quotes: subQuotes, venue: subVenue } =
-    useSubscriptionQuote(venueOwner?.venueId);
+    useSubscriptionQuote(FEATURES.billing ? venueOwner?.venueId : undefined);
 
   /* Η κατάσταση συνδρομής (ημέρες, plan, active) αλλάζει εκτός της σελίδας
      — π.χ. από το ημερήσιο Cloud Function ή μετά από πληρωμή. Το τοπικό
@@ -382,7 +383,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Subscription Status Badge */}
-        {liveVenue && (() => {
+        {FEATURES.billing && liveVenue && (() => {
           const venue = liveVenue;
           const daysRemaining = calculateDaysRemaining(venue);
           /* Η ζώνη προκύπτει από το τρέχον μέγεθος, όχι από το
@@ -584,7 +585,7 @@ export default function SettingsPage() {
           </Card>
 
           {/* Coach Management Section */}
-          <Link href="/management/settings/coaches" className="block">
+          {FEATURES.academy && <Link href="/management/settings/coaches" className="block">
             <Card className="border border-border shadow-e2 hover:shadow-e3 transition-shadow cursor-pointer">
               <CardContent className="p-6 flex items-center justify-between">
                 <div className="flex items-center gap-4">
@@ -603,7 +604,7 @@ export default function SettingsPage() {
                 <ArrowUpCircle className="h-5 w-5 text-zinc-400 rotate-90" />
               </CardContent>
             </Card>
-          </Link>
+          </Link>}
 
           {/* Management PIN Section */}
           <Card className="border border-border shadow-e2">
@@ -642,7 +643,7 @@ export default function SettingsPage() {
         {/* Right Column: Current Plan & Pricing Packages */}
         <div className="flex flex-col gap-8">
           {/* Current Plan Info */}
-          {liveVenue && (() => {
+          {FEATURES.billing && liveVenue && (() => {
           const venue = liveVenue;
           return (
             <Card className="border border-border bg-white shadow-e3 overflow-hidden">
@@ -731,7 +732,7 @@ export default function SettingsPage() {
           })()}
 
           {/* Last Payment Info */}
-          {liveVenue && liveVenue.plan === 'subscription' && lastPayment && (
+          {FEATURES.billing && liveVenue && liveVenue.plan === 'subscription' && lastPayment && (
             <Card className="border border-border shadow-e2">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-semibold flex items-center justify-between text-zinc-900">
@@ -793,11 +794,12 @@ export default function SettingsPage() {
             const planType = (venue.planType || '').toLowerCase();
             const isLargeTier = planType === 'scale' || planType === 'enterprise';
             const isMidTier = planType === 'growth' || planType === 'pro';
-            const showTelegram = trialActive || venue.plan === 'subscription';
+            const showTelegram = !FEATURES.billing || trialActive || venue.plan === 'subscription';
 
             if (!showTelegram) return null;
 
-            const rateLimitHours = isLargeTier ? 1 : isMidTier ? 2 : 3;
+            // Ο server επιτρέπει 1 μήνυμα/ώρα σε όλους· στη δωρεάν διάθεση δεν υπάρχουν ζώνες.
+            const rateLimitHours = !FEATURES.billing ? 1 : isLargeTier ? 1 : isMidTier ? 2 : 3;
 
             return (
               <Card className="border border-border shadow-e2 overflow-hidden">

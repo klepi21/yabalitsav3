@@ -33,6 +33,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { FEATURES } from '@/config/features';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -239,12 +240,12 @@ export default function ReportsPage() {
         createdAt: new Date(p.createdAt as string),
         updatedAt: new Date(p.updatedAt as string),
       })));
-      setPayments((data.payments || []).map((p: Record<string, unknown>) => ({
+      if (FEATURES.billing) setPayments((data.payments || []).map((p: Record<string, unknown>) => ({
         ...p,
         createdAt: p.createdAt,
         updatedAt: p.updatedAt,
       })));
-      setAcademyPayments((data.academyPayments || []).map((p: Record<string, unknown>) => ({
+      if (FEATURES.academy) setAcademyPayments((data.academyPayments || []).map((p: Record<string, unknown>) => ({
         ...p,
         createdAt: new Date(p.createdAt as string),
         updatedAt: new Date(p.updatedAt as string),
@@ -885,11 +886,17 @@ export default function ReportsPage() {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className={cn("grid grid-cols-2 gap-4", FEATURES.academy ? "lg:grid-cols-5" : "lg:grid-cols-4")}>
         {[
-          { label: 'Συνολικά Έσοδα', value: `€${totalRevenue.toFixed(0)}`, icon: Euro, color: 'emerald', hint: 'Βασίζεται στην τιμή κράτησης (όχι στην είσπραξη). Υπολογίζεται μόνο από ολοκληρωμένες κρατήσεις + ακαδημία.' },
-          { label: 'Έσοδα Κρατήσεων', value: `€${bookingRevenue.toFixed(0)}`, icon: Calendar, color: 'blue', hint: 'Άθροισμα τιμών ολοκληρωμένων κρατήσεων. Η είσπραξη είναι βοηθητικό εργαλείο και δεν επηρεάζει αυτό το ποσό.' },
-          { label: 'Έσοδα Ακαδημίας', value: `€${academyRevenue.toFixed(0)}`, icon: Users, color: 'violet' },
+          ...(FEATURES.academy ? [
+            { label: 'Συνολικά Έσοδα', value: `€${totalRevenue.toFixed(0)}`, icon: Euro, color: 'emerald', hint: 'Βασίζεται στην τιμή κράτησης (όχι στην είσπραξη). Υπολογίζεται μόνο από ολοκληρωμένες κρατήσεις + ακαδημία.' },
+          ] : []),
+          { label: 'Έσοδα Κρατήσεων', value: `€${bookingRevenue.toFixed(0)}`, icon: Euro, color: 'emerald', hint: 'Άθροισμα τιμών ολοκληρωμένων κρατήσεων. Η είσπραξη είναι βοηθητικό εργαλείο και δεν επηρεάζει αυτό το ποσό.' },
+          ...(FEATURES.academy ? [
+            { label: 'Έσοδα Ακαδημίας', value: `€${academyRevenue.toFixed(0)}`, icon: Users, color: 'violet' },
+          ] : [
+            { label: 'Κρατήσεις', value: allFiltered.length.toString(), icon: Calendar, color: 'blue' },
+          ]),
           { label: 'Μέση Κράτηση', value: `€${averageBookingValue.toFixed(0)}`, icon: TrendingUp, color: 'cyan' },
           { label: 'Σε Αναμονή', value: pendingBookings.toString(), icon: Clock, color: 'amber' },
         ].map((metric) => {
@@ -1235,7 +1242,7 @@ export default function ReportsPage() {
       )}
 
       {/* Payment History */}
-      <div className="bg-white rounded-xl border border-zinc-100 shadow-sm overflow-hidden">
+      {FEATURES.billing && <div className="bg-white rounded-xl border border-zinc-100 shadow-sm overflow-hidden">
         <div className="p-4 pb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-2.5">
             <div className="h-7 w-7 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
@@ -1372,7 +1379,7 @@ export default function ReportsPage() {
             </div>
           </div>
         )}
-      </div>
+      </div>}
     </div>
   );
 }

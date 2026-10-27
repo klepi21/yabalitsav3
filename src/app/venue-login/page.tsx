@@ -6,10 +6,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { authService } from '@/lib/firebase-services';
-import { Mail, Lock, Eye, EyeOff, Loader2, ArrowRight, CheckCircle2, Trophy, LineChart } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Loader2, ArrowRight, CheckCircle2, QrCode, LineChart } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Image from 'next/image';
 import Link from 'next/link';
+import { FEATURES } from '@/config/features';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -32,9 +33,9 @@ function VenueLoginContent() {
     searchParams.get('error') === 'inactive'
       ? 'Ο λογαριασμός σας δεν είναι ενεργός. Επικοινωνήστε μαζί μας.'
       : searchParams.get('error') === 'expired'
-      ? 'Η συνδρομή σας έληξε. Ανανεώστε την για να συνεχίσετε.'
+      ? (FEATURES.billing ? 'Η συνδρομή σας έληξε. Ανανεώστε την για να συνεχίσετε.' : 'Συνδεθείτε ξανά για να συνεχίσετε.')
       : searchParams.get('error') === 'trial_expired'
-      ? 'Η δωρεάν δοκιμή σας έληξε. Επιλέξτε πλάνο για να συνεχίσετε.'
+      ? (FEATURES.billing ? 'Η δωρεάν δοκιμή σας έληξε. Επιλέξτε πλάνο για να συνεχίσετε.' : 'Συνδεθείτε ξανά για να συνεχίσετε.')
       : searchParams.get('error') === 'disabled'
       ? 'Ο λογαριασμός σας έχει απενεργοποιηθεί. Επικοινωνήστε με τον διαχειριστή.'
       : null
@@ -127,8 +128,8 @@ function VenueLoginContent() {
 
         <div className="relative z-10 mb-8 mt-auto">
           <h1 className="text-3xl sm:text-4xl font-medium text-white leading-tight tracking-tight mb-10">
-            Ολοκληρωμένη διαχείριση<br/>
-            για το <span className="text-emerald-400 font-bold">αθλητικό σας κέντρο</span>
+            Όλες οι κρατήσεις<br/>
+            του <span className="text-emerald-400 font-bold">γηπέδου σας</span> σε ένα σημείο
           </h1>
 
           <div className="space-y-8">
@@ -137,18 +138,18 @@ function VenueLoginContent() {
                 <CheckCircle2 className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-white font-semibold text-lg">Αστραπιαίες Κρατήσεις</h3>
-                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Αυτόματο ημερολόγιο γηπέδων 5x5, αυτόματος έλεγχος διαθεσιμότητας και οργάνωση πελατολογίου.</p>
+                <h3 className="text-white font-semibold text-lg">Ημερολόγιο κρατήσεων</h3>
+                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Όλα τα γήπεδά σας σε ένα ημερολόγιο, με αυτόματο έλεγχο διαθεσιμότητας και χωρίς διπλοκρατήσεις.</p>
               </div>
             </div>
             
             <div className="flex items-start gap-5">
               <div className="bg-blue-500/10 border border-blue-500/20 p-2.5 rounded-2xl text-blue-400 mt-1 shadow-[0_0_15px_-3px_rgba(59,130,246,0.3)]">
-                <Trophy className="w-6 h-6" />
+                <QrCode className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-white font-semibold text-lg">Λογισμικό Ακαδημίας</h3>
-                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Διαχείριση ιατρικών πιστοποιητικών, οργάνωση ηλικιακών τμημάτων ομάδων και αυτόματο Player Passport.</p>
+                <h3 className="text-white font-semibold text-lg">Online κράτηση 24/7</h3>
+                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Οι παίκτες κλείνουν μόνοι τους από τη σελίδα και το QR του γηπέδου σας, ακόμα και όταν δεν σηκώνετε το τηλέφωνο.</p>
               </div>
             </div>
 
@@ -157,8 +158,8 @@ function VenueLoginContent() {
                 <LineChart className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-white font-semibold text-lg">Οικονομικά Reports</h3>
-                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Πλήρης έλεγχος των μηνιαίων συνδρομών, έξυπνες ειδοποιήσεις για ανεξόφλητες καρτέλες αθλητών.</p>
+                <h3 className="text-white font-semibold text-lg">Πελάτες και έσοδα</h3>
+                <p className="text-zinc-400 text-sm mt-1 leading-relaxed">Ιστορικό κάθε πελάτη και καθαρή εικόνα για τα έσοδα από τις κρατήσεις σας.</p>
               </div>
             </div>
           </div>

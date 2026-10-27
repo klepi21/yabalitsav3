@@ -95,3 +95,38 @@ export async function incrementAttempts(email: string) {
     stored.attempts += 1;
   }
 }
+
+export const MAX_VERIFICATION_ATTEMPTS = 5;
+
+export type VerificationError = 'not_found' | 'too_many_attempts' | 'expired' | 'invalid_code';
+
+/**
+ * Ελέγχει τον κωδικό και, αν είναι σωστός, τον «καταναλώνει» (διαγράφεται).
+ * Κοινή λογική για την επαλήθευση της εγγραφής και για τη δημόσια κράτηση,
+ * ώστε ο server να μην εμπιστεύεται ποτέ ένα «επαληθεύτηκε» από τον client.
+ */
+export async function consumeVerificationCode(
+  email: string,
+  code: string,
+): Promise<{ ok: true } | { ok: false; error: VerificationError; attemptsRemaining?: number }> {
+  const stored = await getVerificationCode(email);
+  if (!stored) return { ok: false, error: 'not_found' };
+
+  if (stored.attempts >= MAX_VERIFICATION_ATTEMPTS) {
+    await deleteVerificationCode(email);
+    return { ok: false, error: 'too_many_attempts' };
+  }
+
+  if (Date.now() > stored.expiresAt) {
+    await deleteVerificationCode(email);
+    return { ok: false, error: 'expired' };
+  }
+
+  if (String(stored.code) !== String(code)) {
+    await incrementAttempts(email);
+    return { ok: false, error: 'invalid_code', attemptsRemaining: MAX_VERIFICATION_ATTEMPTS - stored.attempts - 1 };
+  }
+
+  await deleteVerificationCode(email);
+  return { ok: true };
+}

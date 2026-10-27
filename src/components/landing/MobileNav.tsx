@@ -6,10 +6,10 @@ import { Menu, X } from 'lucide-react';
 
 const LINKS = [
   { href: '#features', label: 'Λειτουργίες' },
-  { href: '#academies', label: 'Ακαδημίες' },
-  { href: '#pitches', label: 'Γήπεδα' },
+  { href: '#how', label: 'Πώς ξεκινάτε' },
+  { href: '#pitches', label: 'Ημερολόγιο' },
   { href: '#reports', label: 'Αναφορές' },
-  { href: '#pricing', label: 'Τιμές' },
+  { href: '#free', label: 'Δωρεάν' },
   { href: '/blog', label: 'Άρθρα' },
 ];
 

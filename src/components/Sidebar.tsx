@@ -30,6 +30,7 @@ import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 
 import { SIDEBAR_PERMISSIONS, type AppRole } from '@/config/roles';
+import { FEATURES } from '@/config/features';
 
 interface NavChild {
   name: string;
@@ -77,7 +78,8 @@ function getFilteredNavigation(role: AppRole | null): NavItem[] {
 
   return navigation
     .filter(item => {
-      if (item.isAcademy) return true; // academy filtered by children
+      if (item.isAcademy) return FEATURES.academy; // academy filtered by children
+      if (item.href === '/management/tournaments' && !FEATURES.tournaments) return false;
       if (item.href) return perms.visibleRoutes.includes(item.href);
       return true;
     })

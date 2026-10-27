@@ -136,13 +136,13 @@ export const emailTemplates = {
     time: string;
     price: number;
   }) => ({
-    subject: 'Επιβεβαίωση Κράτησης - Yabalitsa',
+    subject: 'Η κράτησή σας καταχωρήθηκε - Yabalitsa',
     html: `
       <div style="font-family: Inter, system-ui, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: #f8fafc;">
         <div style="background: white; border-radius: 12px; padding: 32px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
           <div style="text-align: center; margin-bottom: 32px;">
             <h1 style="color: #0a7e4a; font-size: 28px; font-weight: 700; margin: 0 0 8px 0;">Yabalitsa</h1>
-            <p style="color: #64748b; font-size: 16px; margin: 0;">Η κράτησή σας επιβεβαιώθηκε!</p>
+            <p style="color: #64748b; font-size: 16px; margin: 0;">Λάβαμε την κράτησή σας!</p>
           </div>
 
           <div style="margin-bottom: 24px;">
@@ -150,7 +150,7 @@ export const emailTemplates = {
               Γεια σου ${bookingData.firstName}! 🎉
             </p>
             <p style="color: #64748b; font-size: 16px; margin: 8px 0 0 0;">
-              Η κράτησή σας για το γήπεδο επιβεβαιώθηκε με επιτυχία.
+              Η κράτησή σας καταχωρήθηκε και το γήπεδο θα την επιβεβαιώσει σύντομα. Αν χρειαστεί κάποια αλλαγή, θα επικοινωνήσουν μαζί σας.
             </p>
           </div>
 
@@ -273,7 +273,7 @@ export const emailTemplates = {
     </div>
 
     <!-- Countdown bar -->
-    <div class="countdown">⏱ Η δωρεαν δοκιμη σου: 30 ημερες — ξεκινησε τωρα</div>
+    <div class="countdown">Οι online κρατήσεις σου είναι δωρεάν</div>
 
     <!-- Hero -->
     <div class="hero">
@@ -284,34 +284,34 @@ export const emailTemplates = {
     <!-- Body intro -->
     <div class="body-section">
       <p>Γεια σου ${firstName},</p>
-      <p>Χαιρόμαστε που είσαι μαζί μας! Έχεις μπροστά σου <strong>30 ημέρες δωρεάν πρόσβαση</strong> σε όλες τις λειτουργίες του Yabalitsa — χωρίς πιστωτική κάρτα, χωρίς δεσμεύσεις.</p>
-      <p>Για να αξιοποιήσεις στο έπακρο τη δοκιμαστική σου περίοδο, θέλαμε να σου παρουσιάσουμε τα <strong>3 πιο δυνατά χαρακτηριστικά</strong> που οι πελάτες μας αγαπούν περισσότερο:</p>
+      <p>Χαιρόμαστε που είσαι μαζί μας! Το σύστημα κρατήσεων του Yabalitsa είναι <strong>δωρεάν</strong> για το γήπεδό σου, χωρίς πιστωτική κάρτα και χωρίς δεσμεύσεις.</p>
+      <p>Δες τι μπορείς να κάνεις από σήμερα:</p>
     </div>
 
     <!-- Features -->
     <div class="body-section" style="padding-top: 0;">
 
       <div class="feature-block">
-        <h3>📅 Αστραπιαίες Κρατήσεις</h3>
-        <p>Διαχειρίσου όλες τις κρατήσεις γηπέδων από ένα έξυπνο ημερολόγιο. Αυτόματος έλεγχος διαθεσιμότητας, QR check-in και ξεκάθαρη εικόνα του τζίρου σε πραγματικό χρόνο — από το κινητό σου.</p>
+        <h3>📅 Ημερολόγιο κρατήσεων</h3>
+        <p>Όλες οι κρατήσεις των γηπέδων σου σε ένα ημερολόγιο, με αυτόματο έλεγχο διαθεσιμότητας. Δουλεύει άψογα και από το κινητό.</p>
       </div>
 
       <div class="feature-block">
-        <h3>🏃 Player Passport</h3>
-        <p>Κάθε αθλητής έχει τη δική του ψηφιακή καρτέλα: πληρωμές, ιατρικά πιστοποιητικά (με αυτόματες ειδοποιήσεις λήξης), αξιολογήσεις και ομαδοποίηση σε squads. Ποτέ ξανά "ποιος χρωστάει;"</p>
+        <h3>📲 Online κράτηση και QR</h3>
+        <p>Το γήπεδό σου έχει δική του σελίδα κρατήσεων. Στείλε το link στους πελάτες σου ή τύπωσε το QR, και οι κρατήσεις έρχονται κατευθείαν στο ημερολόγιο.</p>
       </div>
 
       <div class="feature-block">
-        <h3>📊 Business Στατιστικά</h3>
-        <p>Το reports dashboard σου δείχνει έσοδα από κρατήσεις και ακαδημίες σε πραγματικό χρόνο, πληρότητα γηπέδων ανά μέρα/ώρα και ανάλυση που σε βοηθά να παίρνεις καλύτερες αποφάσεις.</p>
+        <h3>📊 Έσοδα και πελάτες</h3>
+        <p>Οι αναφορές σου δείχνουν τα έσοδα από τις κρατήσεις ανά γήπεδο και ανά περίοδο, προστατευμένες με PIN, μαζί με το ιστορικό κάθε πελάτη.</p>
       </div>
 
     </div>
 
     <!-- CTA -->
     <div class="cta-section">
-      <a href="https://yabalitsa.com" class="cta-button">Μπες στο Dashboard →</a>
-      <p class="cta-subtext">Χρειάζεσαι βοήθεια; Απάντησε σε αυτό το email — είμαστε εδώ.</p>
+      <a href="https://www.yabalitsa.com/venue-login" class="cta-button">Μπες στο Dashboard →</a>
+      <p class="cta-subtext">Χρειάζεσαι βοήθεια; Απάντησε σε αυτό το email και θα σε βοηθήσουμε.</p>
     </div>
 
     <hr class="divider" />
@@ -322,15 +322,15 @@ export const emailTemplates = {
 
       <div class="tip-row">
         <span class="tip-number">1</span>
-        <span class="tip-text"><strong>Πρόσθεσε τα γήπεδά σου</strong> — ρύθμισε τιμοκατάλογο ανά γήπεδο (5x5, 7x7, 11x11) and ώρες διαθεσιμότητας.</span>
+        <span class="tip-text"><strong>Πρόσθεσε τα γήπεδά σου.</strong> Όρισε μέγεθος, τιμή και ωράριο για κάθε γήπεδο.</span>
       </div>
       <div class="tip-row">
         <span class="tip-number">2</span>
-        <span class="tip-text"><strong>Κάνε την πρώτη σου κράτηση</strong> — δοκίμασε το ημερολόγιο και δες πόσο γρήγορα γίνεται από το κινητό.</span>
+        <span class="tip-text"><strong>Κάνε την πρώτη σου κράτηση.</strong> Δοκίμασε το ημερολόγιο και δες πόσο γρήγορα γίνεται από το κινητό.</span>
       </div>
       <div class="tip-row">
         <span class="tip-number">3</span>
-        <span class="tip-text"><strong>Πρόσθεσε έναν αθλητή</strong> — δημιούργησε το πρώτο Player Passport και εξερεύνησε τη λειτουργία της Ακαδημίας.</span>
+        <span class="tip-text"><strong>Μοιράσου τη σελίδα κρατήσεων.</strong> Φτιάξε το QR από το μενού και στείλε το link στους πελάτες σου.</span>
       </div>
     </div>
 

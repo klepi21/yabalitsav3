@@ -5,7 +5,7 @@ import { Calendar, Users, BarChart3, CheckCircle2, ArrowRight, Smartphone, Layou
 
 export const metadata: Metadata = {
   title: 'Διαχείριση Γηπέδου 5x5 | Σύγχρονο Λογισμικό Yabalitsa',
-  description: 'Ανακαλύψτε το κορυφαίο λογισμικό για διαχείριση γηπέδου 5x5, 7x7 και αθλητικών εγκαταστάσεων. Ηλεκτρονικές κρατήσεις, συνδρομές ακαδημιών και reports.',
+  description: 'Δωρεάν λογισμικό κρατήσεων για γήπεδα 5x5 και 7x7. Ημερολόγιο χωρίς διπλοκρατήσεις, online κράτηση με QR, πελάτες και αναφορές εσόδων.',
   alternates: {
     canonical: 'https://www.yabalitsa.com/logismiko-gipedou-5x5'
   }
@@ -30,7 +30,7 @@ export default function LogismikoGipedou5x5Page() {
             </Link>
             <nav className="hidden lg:flex items-center gap-8 text-zinc-300">
               <Link href="/#features" className="hover:text-emerald-400 transition">Λειτουργίες</Link>
-              <Link href="/#academies" className="hover:text-emerald-400 transition">Ακαδημίες</Link>
+              <Link href="/#how" className="hover:text-emerald-400 transition">Πώς ξεκινάτε</Link>
               <Link href="/#pitches" className="hover:text-emerald-400 transition">Γήπεδα</Link>
               <Link href="/#reports" className="hover:text-emerald-400 transition">Αναφορές</Link>
               <Link href="/blog" className="hover:text-emerald-400 transition">Blog</Link>
@@ -56,12 +56,12 @@ export default function LogismikoGipedou5x5Page() {
         <div className="max-w-[1000px] mx-auto px-6 relative z-10 flex flex-col items-center text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100/50 border border-emerald-200 text-emerald-700 text-sm font-bold mb-8">
             <SparklesIcon className="w-4 h-4" />
-            <span>Η Νο1 Πλατφόρμα στην Ελλάδα</span>
+            <span>Δωρεάν για γήπεδα</span>
           </div>
           
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight mb-6 text-[#040D12]">
-            Η Απόλυτη Διαχείριση <br className="hidden sm:block" />
-            <span className="text-emerald-500">Γηπέδου 5x5</span> & Ακαδημίας
+            Λογισμικό κρατήσεων <br className="hidden sm:block" />
+            για <span className="text-emerald-500">Γήπεδα 5x5</span>
           </h1>
           
           <p className="text-lg text-zinc-400 max-w-2xl mx-auto mb-10 font-medium leading-relaxed">
@@ -70,7 +70,7 @@ export default function LogismikoGipedou5x5Page() {
           </p>
 
           <Link href="/for-venues" className="px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-white font-bold rounded-2xl transition-all shadow-xl shadow-emerald-500/20 hover:scale-105 active:scale-95 flex items-center gap-3">
-            Δοκιμάστε το Δωρεάν για 30 Ημέρες <ArrowRight className="w-5 h-5" />
+            Ξεκινήστε Δωρεάν <ArrowRight className="w-5 h-5" />
           </Link>
           
           <div className="flex items-center gap-6 mt-8 text-sm font-semibold text-zinc-400">
@@ -89,7 +89,7 @@ export default function LogismikoGipedou5x5Page() {
             Η <strong>διαχείριση γηπέδου 5x5</strong> δεν αποτελεί πλέον μια απλή διαδικασία καταγραφής ονομάτων σε ένα τετράδιο. 
             Σε ένα άκρως ανταγωνιστικό περιβάλλον, οι ιδιοκτήτες αθλητικών εγκαταστάσεων και γηπέδων ποδοσφαίρου (5x5, 7x7, 11x11) 
             καλούνται να αντιμετωπίσουν καθημερινά μια σειρά προκλήσεων: ταυτόχρονες τηλεφωνικές κλήσεις, ακυρώσεις της τελευταίας στιγμής, 
-            ανεξόφλητα υπόλοιπα από πελάτες ή ακαδημίες και κακή εξυπηρέτηση λόγω ανθρώπινων λαθών.
+            διπλοκρατήσεις και κακή εξυπηρέτηση λόγω ανθρώπινων λαθών.
           </p>
           <p>
             Η υιοθέτηση ενός <strong>λογισμικού διαχείρισης γηπέδου (software management)</strong> όπως το Yabalitsa 
@@ -112,9 +112,9 @@ export default function LogismikoGipedou5x5Page() {
               <div className="w-12 h-12 rounded-xl bg-white shadow-sm flex items-center justify-center mb-6 text-emerald-500">
                 <Users className="w-6 h-6" />
               </div>
-              <h3 className="text-xl font-bold text-[#040D12] mb-3">Ακαδημίες & Συνδρομές</h3>
+              <h3 className="text-xl font-bold text-[#040D12] mb-3">Online Κράτηση & QR</h3>
               <p className="text-sm text-zinc-400 leading-relaxed">
-                Πλήρης έλεγχος των αθλητών, των μηνιαίων πληρωμών και του ιατρικού τους ιστορικού.
+                Οι πελάτες σας κλείνουν μόνοι τους από τη σελίδα κρατήσεων του γηπέδου σας ή από το QR.
               </p>
             </div>
             <div className="bg-[#F1F4F8] p-8 rounded-3xl border border-zinc-100 relative">
@@ -140,18 +140,16 @@ export default function LogismikoGipedou5x5Page() {
 
           <h3 className="text-xl font-bold text-[#040D12] mt-8 mb-4">2. Χαμένα Έσοδα & Ανεξόφλητα Υπόλοιπα</h3>
           <p>
-            Πόσες φορές ψάχνατε να βρείτε ποια ακαδημία δεν έχει πληρώσει τον τρέχοντα μήνα ή ποια παρέα έφυγε αφήνοντας 
-            απλήρωτο το γήπεδο; Η πλατφόρμα μας σας παρέχει μία ξεκάθαρη εικόνα με το <strong>ποιος χρωστάει και πόσα</strong>, 
-            δίνοντάς σας παράλληλα οικονομικές αναφορές (Reports) ανά μήνα και ανά πηγή εσόδων (Ακαδημίες ή Απλές Κρατήσεις).
+            Πόσες φορές μια παρέα έφυγε αφήνοντας απλήρωτο μέρος του γηπέδου; Με την <strong>είσπραξη ανά παίκτη</strong> βλέπετε 
+            ποιος πλήρωσε και τι απομένει σε κάθε κράτηση, ενώ οι οικονομικές αναφορές (Reports) σας δείχνουν τα έσοδα 
+            ανά ημέρα, ανά γήπεδο και ανά περίοδο.
           </p>
 
-          <h3 className="text-xl font-bold text-[#040D12] mt-8 mb-4">3. Δυσκολία στην Οργάνωση της Αθλητικής Ακαδημίας</h3>
+          <h3 className="text-xl font-bold text-[#040D12] mt-8 mb-4">3. Ατελείωτα Τηλέφωνα για Κρατήσεις</h3>
           <p>
-            Αν διαθέτετε αθλητική ακαδημία (Ακαδημία Ποδοσφαίρου κ.ά.), τότε γνωρίζετε τον εφιάλτη της γραφειοκρατίας: 
-            ιατρικά δελτία που λήγουν, επικοινωνία με τους προπονητές, δημιουργία γκρουπ προπόνησης (squads) και 
-            έλεγχος των μηνιαίων συνδρομών. Το χαρακτηριστικό μας, <strong>Player Passport</strong>, δημιουργεί μια ψηφιακή 
-            καρτέλα για κάθε αθλητή. Εκεί μπορείτε να βλέπετε τις συνδρομές του, τις αξιολογήσεις του, και να λαμβάνετε 
-            ειδοποιήσεις όταν λήγει το ιατρικό του δελτίο!
+            Κάθε κράτηση από το τηλέφωνο σημαίνει διακοπή στη δουλειά σας και κίνδυνο λάθους. Με τη <strong>σελίδα online 
+            κρατήσεων</strong> του Yabalitsa οι πελάτες βλέπουν τις ελεύθερες ώρες και κλείνουν μόνοι τους, από link ή από 
+            το QR που έχετε στο γήπεδο. Κάθε κράτηση επιβεβαιώνεται με κωδικό στο email τους και εσείς την εγκρίνετε με ένα πάτημα.
           </p>
 
         </div>
@@ -167,7 +165,7 @@ export default function LogismikoGipedou5x5Page() {
               Χαρακτηριστικά
             </div>
             <h2 className="text-3xl md:text-4xl font-bold mb-8 leading-tight">
-              Ολοκληρωμένο Σύστημα<br /> για Κάθε Αθλητικό Κέντρο
+              Ό,τι Χρειάζεται<br /> για τις Κρατήσεις σας
             </h2>
             
             <ul className="space-y-6">
@@ -178,7 +176,7 @@ export default function LogismikoGipedou5x5Page() {
                 <div>
                   <h4 className="text-lg font-bold mb-1">Πίνακας Ελέγχου Αναφορών (Reports)</h4>
                   <p className="text-zinc-400 text-sm leading-relaxed">
-                    Δείτε τα έσοδά σας, το ποσοστό πληρότητας των γηπέδων (5x5, 7x7) και συγκρίνετε απόδοση μήνα με το μήνα.
+                    Δείτε τα έσοδά σας ανά γήπεδο και ανά περίοδο, και συγκρίνετε την απόδοση από μήνα σε μήνα.
                   </p>
                 </div>
               </li>
@@ -187,9 +185,9 @@ export default function LogismikoGipedou5x5Page() {
                   <Target className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
-                  <h4 className="text-lg font-bold mb-1">Οργάνωση Squads & Προπονητών</h4>
+                  <h4 className="text-lg font-bold mb-1">Σταθερές Ομάδες</h4>
                   <p className="text-zinc-400 text-sm leading-relaxed">
-                    Χωρίστε τους αθλητές της ακαδημίας σας σε τμήματα, ορίστε προπονητές και διατηρήστε το ημερολόγιο προπονήσεων καθαρό.
+                    Η ομάδα που παίζει κάθε εβδομάδα την ίδια ώρα κλείνεται μία φορά, με επαναλαμβανόμενη κράτηση.
                   </p>
                 </div>
               </li>
@@ -217,7 +215,7 @@ export default function LogismikoGipedou5x5Page() {
                 <div className="pt-16 p-8 flex flex-col justify-center h-full gap-4 text-center">
                   <BarChart3 className="w-16 h-16 text-emerald-500/50 mx-auto" />
                   <h3 className="text-2xl font-bold text-white">Yabalitsa Dashboard</h3>
-                  <p className="text-zinc-400">Διαθέσιμο με 30 Ημέρες Δωρεάν Δοκιμή</p>
+                  <p className="text-zinc-400">Δωρεάν για το γήπεδό σας</p>
                 </div>
              </div>
           </div>
@@ -231,15 +229,16 @@ export default function LogismikoGipedou5x5Page() {
             Έτοιμοι να ψηφιοποιήσετε το Γήπεδό σας;
           </h2>
           <p className="text-lg text-zinc-400 mb-10 max-w-2xl mx-auto">
-            Εκατοντάδες διαχειριστές εμπιστεύονται ήδη το <strong>λογισμικό διαχείρισης γηπέδου 5x5</strong> της Yabalitsa. 
-            Αυξήστε τα έσοδά σας και κερδίστε χρόνο, σήμερα κιόλας.
+            Βάλτε online κρατήσεις στο γήπεδό σας με το <strong>λογισμικό διαχείρισης γηπέδου 5x5</strong> της Yabalitsa. 
+            Δωρεάν, χωρίς κάρτα και χωρίς δέσμευση.
+            <span className="block mt-3 text-xs">Η δωρεάν χρήση ενδέχεται να αλλάξει στο μέλλον.</span>
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/for-venues" className="px-10 py-5 bg-[#040D12] hover:bg-zinc-800 text-white font-bold rounded-2xl transition-all shadow-xl hover:scale-105 active:scale-95 w-full sm:w-auto">
-              Εγγραφή - 30 Ημέρες Δωρεάν
+              Δωρεάν Εγγραφή
             </Link>
-            <Link href="/for-venues" className="px-10 py-5 bg-white border border-zinc-200 hover:border-zinc-300 text-[#040D12] font-bold rounded-2xl transition-all w-full sm:w-auto">
+            <Link href="/contact" className="px-10 py-5 bg-white border border-zinc-200 hover:border-zinc-300 text-[#040D12] font-bold rounded-2xl transition-all w-full sm:w-auto">
               Επικοινωνία μαζί μας
             </Link>
           </div>

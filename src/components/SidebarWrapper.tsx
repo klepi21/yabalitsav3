@@ -18,6 +18,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { usePendingBookings, useSubscriptionQuote } from '@/lib/queries';
+import { FEATURES } from '@/config/features';
 
 
 interface PendingBooking {
@@ -82,7 +83,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
   const { pending } = usePendingBookings(venueOwner?.venueId);
   // Ίδια πηγή με τις υπόλοιπες οθόνες: ανανεώνεται στο focus και στις
   // μεταλλάξεις, χωρίς ξεχωριστό Firestore round-trip ανά σελίδα.
-  const { venue: venueData } = useSubscriptionQuote(venueOwner?.venueId);
+  const { venue: venueData } = useSubscriptionQuote(FEATURES.billing ? venueOwner?.venueId : undefined);
   const pendingBookings = pending as unknown as PendingBooking[];
   const { title, isSubPage, parent, href } = useBreadcrumb(pathname);
 
@@ -160,7 +161,7 @@ export default function SidebarWrapper({ children }: SidebarWrapperProps) {
 
               <div className="flex items-center gap-1 sm:gap-2 shrink-0">
                 {/* Πλάνο συνδρομής */}
-                {venueData && (
+                {FEATURES.billing && venueData && (
                   <button
                     onClick={() => router.push('/management/settings')}
                     className={cn(

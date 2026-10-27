@@ -18,6 +18,13 @@ initializeApp();
 setGlobalOptions({ maxInstances: 10 });
 
 /**
+ * Η πλατφόρμα διατίθεται δωρεάν (βλ. `FEATURES.billing` στο web app):
+ * όσο είναι `true`, ΚΑΝΕΝΑ γήπεδο δεν χάνει ημέρες ούτε απενεργοποιείται.
+ * Κρατήστε το συγχρονισμένο με το `src/config/features.ts`.
+ */
+const FREE_MODE = true;
+
+/**
  * Scheduled function that runs daily at midnight Athens time
  * to decrement days remaining for all venues and handle expired periods.
  *
@@ -34,6 +41,11 @@ export const decrementDaysRemaining = onSchedule(
   async () => {
     const db = getFirestore();
     const venuesRef = db.collection('yabalitsa_venues');
+
+    if (FREE_MODE) {
+      logger.info("Free mode: skipping days remaining decrement");
+      return;
+    }
 
     logger.info("Starting daily days remaining decrement job");
 

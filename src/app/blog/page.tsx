@@ -5,7 +5,7 @@ import { ArrowLeft, Clock, Calendar } from 'lucide-react';
 
 export const metadata = {
   title: 'Blog | Yabalitsa',
-  description: 'Τα τελευταία νέα, συμβουλές και οδηγοί για επαγγελματίες διαχείρισης γηπέδων 5x5 και αθλητικών ακαδημιών στην Ελλάδα.',
+  description: 'Νέα, συμβουλές και οδηγοί για ιδιοκτήτες γηπέδων 5x5 στην Ελλάδα.',
 };
 
 export default function BlogIndexPage() {
@@ -30,7 +30,7 @@ export default function BlogIndexPage() {
             Yabalitsa <span className="text-[#74ee16]">Blog</span>
           </h1>
           <p className="text-xl text-zinc-400 max-w-2xl mx-auto">
-            Insights, συμβουλές και οδηγοί για τη ψηφιοποίηση των αθλητικών κέντρων, των ακαδημιών και των γηπέδων 5x5.
+            Συμβουλές και οδηγοί για την ψηφιοποίηση των γηπέδων 5x5 και των κρατήσεών τους.
           </p>
         </div>
 
