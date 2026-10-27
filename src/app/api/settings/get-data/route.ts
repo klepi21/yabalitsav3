@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { FEATURES } from '@/config/features';
 import { db, verifyAuth, verifyVenueAccess, isAuthError } from '@/lib/api-auth';
 
 export async function POST(request: NextRequest) {
@@ -28,10 +29,10 @@ export async function POST(request: NextRequest) {
     } : null;
 
     // Fetch payments for this venue
-    const paymentsSnapshot = await db
-      .collection('yabalitsa_payments')
-      .where('venueId', '==', venueId)
-      .get();
+    // Οι πληρωμές συνδρομής δεν εμφανίζονται όσο η πλατφόρμα είναι δωρεάν.
+    const paymentsSnapshot = FEATURES.billing
+      ? await db.collection('yabalitsa_payments').where('venueId', '==', venueId).get()
+      : { docs: [] as FirebaseFirestore.QueryDocumentSnapshot[] };
 
     const payments = paymentsSnapshot.docs.map(doc => {
       const data = doc.data();

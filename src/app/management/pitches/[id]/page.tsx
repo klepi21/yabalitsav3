@@ -44,6 +44,7 @@ export default function PitchDetailsPage() {
 
   const [pitch, setPitch] = useState<Pitch | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [totalBookings, setTotalBookings] = useState<number | null>(null);
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -68,11 +69,16 @@ export default function PitchDetailsPage() {
         setPitch(pitchData);
 
         // Load bookings and blocked dates for this pitch
-        const [bookingsData, blockedDatesData] = await Promise.all([
-          bookingService.getByPitch(pitchId),
-          blockedDateService.getByPitch(pitchId)
+        // Πρόσφατες και επερχόμενες κρατήσεις για τη λίστα· το σύνολο ως count.
+        const since = new Date();
+        since.setDate(since.getDate() - 90);
+        const [bookingsData, blockedDatesData, total] = await Promise.all([
+          bookingService.getByPitchSince(pitchData.venueId, pitchId, since),
+          blockedDateService.getByPitch(pitchId),
+          bookingService.countByPitch(pitchId).catch(() => null)
         ]);
         setBookings(bookingsData || []);
+        setTotalBookings(total);
         setBlockedDates(blockedDatesData || []);
       }
     } catch (error) {
@@ -223,7 +229,7 @@ export default function PitchDetailsPage() {
         {[
           { label: 'Τιμή (Slot)', value: `\u20AC${pitch.pricePerSlot?.toFixed(2)}`, icon: Euro, color: 'emerald' },
           { label: 'Διάρκεια', value: `${pitch.slotDuration}\'`, icon: Timer, color: 'blue' },
-          { label: 'Κρατήσεις', value: bookings.length, icon: Users, color: 'violet' },
+          { label: 'Κρατήσεις', value: totalBookings ?? bookings.length, icon: Users, color: 'violet' },
           { label: 'Τύπος', value: pitch.type, icon: Goal, color: 'amber' }
         ].map((stat, idx) => (
           <Card key={idx} className="premium-card border-0 hover:translate-y-[-2px] transition-all">

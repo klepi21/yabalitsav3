@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { FEATURES } from '@/config/features';
 import { db, verifyAuth, verifyVenueAccess, isAuthError } from '@/lib/api-auth';
 
 export async function POST(request: NextRequest) {
@@ -14,10 +15,14 @@ export async function POST(request: NextRequest) {
     const accessError = await verifyVenueAccess(venueId, authResult.decodedToken);
     if (accessError) return accessError;
 
-    // Fetch bookings for this venue
+    /* Η μεγαλύτερη περίοδος των αναφορών είναι «Έτος» (τελευταίοι 12 μήνες).
+       Παλαιότερες κρατήσεις δεν εμφανίζονται πουθενά, οπότε δεν διαβάζονται. */
+    const since = new Date();
+    since.setMonth(since.getMonth() - 13);
     const bookingsSnapshot = await db
       .collection('yabalitsa_bookings')
       .where('venueId', '==', venueId)
+      .where('startTime', '>=', since)
       .get();
 
     const bookings = bookingsSnapshot.docs.map(doc => {
@@ -49,10 +54,11 @@ export async function POST(request: NextRequest) {
     });
 
     // Fetch payments for this venue
-    const paymentsSnapshot = await db
-      .collection('yabalitsa_payments')
-      .where('venueId', '==', venueId)
-      .get();
+    // Κρυμμένες λειτουργίες (βλ. src/config/features.ts): δεν διαβάζονται καν.
+    const empty = { docs: [] as FirebaseFirestore.QueryDocumentSnapshot[] };
+    const paymentsSnapshot = FEATURES.billing
+      ? await db.collection('yabalitsa_payments').where('venueId', '==', venueId).get()
+      : empty;
 
     const payments = paymentsSnapshot.docs.map(doc => {
       const data = doc.data();
@@ -65,10 +71,9 @@ export async function POST(request: NextRequest) {
     });
 
     // Fetch ALL academy payments for this venue (paid + unpaid for full stats)
-    const academyPaymentsSnapshot = await db
-      .collection('yabalitsa_academy_payments')
-      .where('venueId', '==', venueId)
-      .get();
+    const academyPaymentsSnapshot = FEATURES.academy
+      ? await db.collection('yabalitsa_academy_payments').where('venueId', '==', venueId).get()
+      : empty;
 
     const academyPayments = academyPaymentsSnapshot.docs.map(doc => {
       const data = doc.data();
@@ -82,10 +87,9 @@ export async function POST(request: NextRequest) {
     });
 
     // Fetch squads for grouping
-    const squadsSnapshot = await db
-      .collection('yabalitsa_squads')
-      .where('venueId', '==', venueId)
-      .get();
+    const squadsSnapshot = FEATURES.academy
+      ? await db.collection('yabalitsa_squads').where('venueId', '==', venueId).get()
+      : empty;
 
     const squads = squadsSnapshot.docs.map(doc => ({
       id: doc.id,
@@ -93,10 +97,9 @@ export async function POST(request: NextRequest) {
     }));
 
     // Fetch academy users for squad mapping
-    const academyUsersSnapshot = await db
-      .collection('yabalitsa_academy_users')
-      .where('venueId', '==', venueId)
-      .get();
+    const academyUsersSnapshot = FEATURES.academy
+      ? await db.collection('yabalitsa_academy_users').where('venueId', '==', venueId).get()
+      : empty;
 
     const academyUsers = academyUsersSnapshot.docs.map(doc => {
       const data = doc.data();

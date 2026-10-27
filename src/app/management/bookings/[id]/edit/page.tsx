@@ -166,10 +166,13 @@ export default function EditBookingPage() {
 
   const loadBookingData = useCallback(async (bookingId: string) => {
     try {
-      const [bookingData, bookingsData] = await Promise.all([
-        bookingService.getById(bookingId),
-        bookingService.getByVenue(venueOwner?.venueId || '')
-      ]);
+      const bookingData = await bookingService.getById(bookingId);
+      /* Για τον έλεγχο επικαλύψεων αρκούν οι κρατήσεις από την αρχική ημέρα
+         της κράτησης (ή από σήμερα) και μετά· όχι όλο το ιστορικό. */
+      const since = new Date(Math.min(Date.now(), bookingData ? new Date(bookingData.startTime).getTime() : Date.now()));
+      since.setHours(0, 0, 0, 0);
+      since.setDate(since.getDate() - 1);
+      const bookingsData = await bookingService.getByVenueSince(venueOwner?.venueId || '', since);
 
       if (bookingData) {
         setBooking(bookingData);

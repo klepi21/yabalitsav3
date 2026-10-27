@@ -41,6 +41,7 @@ import { cn } from '@/lib/utils';
 import { useSubscriptionQuote } from '@/lib/queries';
 import { resolveTier, platformTiers, pricingUtils } from '@/lib/pricing';
 import { FEATURES } from '@/config/features';
+import { venueSlug } from '@/lib/venue-slug';
 
 // Form validation schema
 const venueSettingsSchema = z.object({
@@ -213,6 +214,8 @@ export default function SettingsPage() {
     try {
       await venueService.update(venue.id, {
         name: data.name,
+        // Η σελίδα κρατήσεων βρίσκεται με αυτό· αλλάζει μαζί με το όνομα (και το link/QR).
+        slug: venueSlug(data.name),
         address: data.address,
         city: data.city,
         contactDetails: {

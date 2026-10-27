@@ -12,19 +12,10 @@ import { toast } from '@/lib/toast';
 
 interface Booking {
   id: string;
-  slotId: string;
   pitchId: string;
-  venueId: string;
-  userId: string;
-  userName: string;
-  userEmail: string;
-  userPhone: string;
   startTime: Date;
   endTime: Date;
-  price: number;
   status: 'confirmed' | 'pending' | 'completed' | 'cancelled';
-  notes?: string;
-  createdAt: Date;
 }
 
 interface TimeSlot {
@@ -48,8 +39,6 @@ interface Venue {
   phone: string;
   email: string;
   imageUrl: string;
-  rating: number;
-  reviewCount: number;
   bookingsEnabled?: boolean;
 }
 
@@ -205,170 +194,97 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
     price: number;
   } | null>(null);
 
-  // Load real data from Firebase
-  useEffect(() => {
-    const loadVenueData = async () => {
-      try {
-        // Import services dynamically to avoid SSR issues
-        const { venueService, pitchService } = await import('@/lib/firebase-services');
-        
-        // Get all venues and find the one matching the URL
-        const allVenues = await venueService.getAll();
-        const decodedVenueName = decodeURIComponent(venueName);
-        const foundVenue = allVenues.find(v => 
-          v.name && v.name.toLowerCase().replace(/\s+/g, '') === decodedVenueName.toLowerCase().replace(/\s+/g, '')
-        );
-
-        console.log('All venues found:', allVenues.map(v => v.name));
-        console.log('Looking for:', decodedVenueName);
-
-        if (foundVenue) {
-          console.log('Loading Venue:', {
-            id: foundVenue.id,
-            name: foundVenue.name,
-            bookingsEnabled: foundVenue.bookingsEnabled
-          });
-          if (foundVenue.bookingsEnabled === false) {
-            console.log('Bookings are DISABLED for this venue');
-            setLoadError('Οι online κρατήσεις δεν είναι διαθέσιμες αυτή τη στιγμή. Επικοινωνήστε απευθείας με το γήπεδο.');
-            setDataLoaded(true);
-            return;
-          }
-        } else {
-          console.warn('Venue not found matching:', decodedVenueName);
-        }
-
-        if (foundVenue) {
-          // Set venue data
-          const venueData: Venue = {
-            id: foundVenue.id,
-            name: foundVenue.name,
-            address: foundVenue.address || 'Διεύθυνση δεν είναι διαθέσιμη',
-            phone: foundVenue.phone || 'Δεν υπάρχει τηλέφωνο',
-            email: foundVenue.email || 'Δεν υπάρχει email',
-            imageUrl: '/yaba.png',
-            rating: 4.8,
-            reviewCount: 127
-          };
-          setVenue(venueData);
-
-          // Get pitches for this venue
-          const allPitchesData = await pitchService.getByVenue(foundVenue.id);
-          const pitchesData = allPitchesData.filter(p => p.active === true);
-          console.log('Pitches found:', pitchesData?.length || 0);
-          if (pitchesData && pitchesData.length > 0) {
-            // Get existing bookings for all pitches in this venue
-            try {
-              const { bookingService } = await import('@/lib/firebase-services');
-              const allBookings: Booking[] = [];
-
-              for (const pitch of pitchesData) {
-                const pitchBookings = await bookingService.getByPitch(pitch.id);
-                if (pitchBookings) {
-                  // Add all bookings for this pitch
-                  allBookings.push(...pitchBookings);
-                }
-              }
-
-              setExistingBookings(allBookings);
-            } catch (error) {
-              console.error('Error loading existing bookings:', error);
-            }
-            // Convert to our Pitch interface format
-            const convertedPitches: Pitch[] = pitchesData.map(pitch => {
-              // Convert the database opening hours to our format
-              const convertedOpeningHours: { [key: string]: { isOpen: boolean; slots: Array<{ start: string; end: string }> } } = {};
-
-              // Map database opening hours to our interface
-              if (pitch.defaultOpeningHours) {
-                Object.entries(pitch.defaultOpeningHours).forEach(([day, hours]) => {
-                  if (hours && typeof hours === 'object') {
-                    // Handle both old and new format
-                    if ('isOpen' in hours && 'slots' in hours) {
-                      // New format
-                      convertedOpeningHours[day] = {
-                        isOpen: hours.isOpen,
-                        slots: hours.slots || []
-                      };
-                    } else if ('start' in hours && 'end' in hours) {
-                      // Old format - single time slot
-                      convertedOpeningHours[day] = {
-                        isOpen: true,
-                        slots: [{
-                          start: String(hours.start),
-                          end: String(hours.end)
-                        }]
-                      };
-                    } else {
-                      // Fallback - closed
-                      convertedOpeningHours[day] = {
-                        isOpen: false,
-                        slots: []
-                      };
-                    }
-                  }
-                });
-              }
-
-              // Set default opening hours if none exist
-              if (Object.keys(convertedOpeningHours).length === 0) {
-                convertedOpeningHours.monday = { isOpen: false, slots: [] };
-                convertedOpeningHours.tuesday = { isOpen: false, slots: [] };
-                convertedOpeningHours.wednesday = { isOpen: false, slots: [] };
-                convertedOpeningHours.thursday = { isOpen: false, slots: [] };
-                convertedOpeningHours.friday = { isOpen: false, slots: [] };
-                convertedOpeningHours.saturday = { isOpen: false, slots: [] };
-                convertedOpeningHours.sunday = { isOpen: false, slots: [] };
-              }
-
-              return {
-                id: pitch.id,
-                name: pitch.name,
-                type: pitch.type || 'football',
-                pricePerSlot: pitch.pricePerSlot || 0,
-                slotDuration: pitch.slotDuration || 60,
-                defaultOpeningHours: convertedOpeningHours
-              };
-            });
-
-            setPitches(convertedPitches);
-            setSelectedPitch(convertedPitches[0]);
-          } else {
-            console.error('No pitches found for venue:', foundVenue.name);
-            setLoadError('Δεν βρέθηκαν γήπεδα για αυτό το venue.');
-          }
-        } else {
-          console.error('Venue not found for slug:', venueName);
-          setLoadError('Το venue δεν βρέθηκε.');
-        }
-      } catch (error) {
-        console.error('Error loading venue data:', error);
-        console.error('venueName:', venueName);
-        setLoadError('Σφάλμα φόρτωσης: ' + (error instanceof Error ? error.message : 'Άγνωστο σφάλμα'));
-      } finally {
-        setDataLoaded(true);
+  /* Μία κλήση στον server για γήπεδο, ενεργά γήπεδα, επερχόμενες κρατήσεις
+     (χωρίς στοιχεία πελατών) και κλειστές ημερομηνίες. Το `fresh` παρακάμπτει
+     το σύντομο cache του CDN, π.χ. αμέσως μετά από μια κράτηση. */
+  const loadVenueData = useCallback(async (fresh = false) => {
+    try {
+      const qs = `slug=${encodeURIComponent(decodeURIComponent(venueName))}${fresh ? `&t=${Date.now()}` : ''}`;
+      const res = await fetch(`/api/booking/venue?${qs}`, fresh ? { cache: 'no-store' } : undefined);
+      if (res.status === 404) {
+        setLoadError('Το γήπεδο δεν βρέθηκε. Ελέγξτε τον σύνδεσμο.');
+        return;
       }
-    };
+      if (res.status === 503) {
+        setLoadError('Οι online κρατήσεις δεν είναι διαθέσιμες αυτή τη στιγμή. Δοκιμάστε ξανά αργότερα ή καλέστε απευθείας το γήπεδο.');
+        return;
+      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json() as {
+        venue: { id: string; name: string; address: string; city: string; phone: string; email: string; bookingsEnabled: boolean };
+        pitches: Array<{ id: string; name: string; type: string; pricePerSlot: number; slotDuration: number; defaultOpeningHours: Record<string, unknown> }>;
+        bookings: Array<{ id: string; pitchId: string; startTime: string; endTime: string; status: Booking['status'] }>;
+        blocked: Record<string, Array<{ start: string; end: string }>>;
+      };
 
-    loadVenueData();
+      if (!data.venue.bookingsEnabled) {
+        setLoadError('Οι online κρατήσεις δεν είναι διαθέσιμες αυτή τη στιγμή. Επικοινωνήστε απευθείας με το γήπεδο.');
+        return;
+      }
+
+      setVenue({
+        id: data.venue.id,
+        name: data.venue.name,
+        address: data.venue.address || data.venue.city,
+        phone: data.venue.phone,
+        email: data.venue.email,
+        imageUrl: '/yaba.png',
+        bookingsEnabled: true,
+      });
+      setExistingBookings(data.bookings.map((b) => ({
+        id: b.id,
+        pitchId: b.pitchId,
+        startTime: new Date(b.startTime),
+        endTime: new Date(b.endTime),
+        status: b.status,
+      })));
+      setBlockedByPitch(data.blocked ?? {});
+
+      if (data.pitches.length === 0) {
+        setLoadError('Δεν υπάρχουν διαθέσιμα γήπεδα για online κράτηση.');
+        return;
+      }
+
+      // Το ωράριο μπορεί να είναι αποθηκευμένο σε παλιά ή νέα μορφή.
+      const convertedPitches: Pitch[] = data.pitches.map((pitch) => {
+        const convertedOpeningHours: { [key: string]: { isOpen: boolean; slots: Array<{ start: string; end: string }> } } = {};
+        for (const day of ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday']) {
+          const hours = pitch.defaultOpeningHours?.[day] as Record<string, unknown> | undefined;
+          if (hours && Array.isArray(hours.slots)) {
+            convertedOpeningHours[day] = { isOpen: hours.isOpen !== false, slots: hours.slots as Array<{ start: string; end: string }> };
+          } else if (hours && hours.start && hours.end) {
+            convertedOpeningHours[day] = { isOpen: true, slots: [{ start: String(hours.start), end: String(hours.end) }] };
+          } else if (hours && hours.isOpen && hours.open && hours.close) {
+            convertedOpeningHours[day] = { isOpen: true, slots: [{ start: String(hours.open), end: String(hours.close) }] };
+          } else {
+            convertedOpeningHours[day] = { isOpen: false, slots: [] };
+          }
+        }
+        return {
+          id: pitch.id,
+          name: pitch.name,
+          type: pitch.type || 'football',
+          pricePerSlot: pitch.pricePerSlot,
+          slotDuration: pitch.slotDuration,
+          defaultOpeningHours: convertedOpeningHours,
+        };
+      });
+
+      setPitches(convertedPitches);
+      setSelectedPitch((prev) => convertedPitches.find((p) => p.id === prev?.id) ?? convertedPitches[0]);
+    } catch (error) {
+      console.error('Error loading venue data:', error);
+      setLoadError('Δεν ήταν δυνατή η φόρτωση της σελίδας. Δοκιμάστε ξανά σε λίγο.');
+    } finally {
+      setDataLoaded(true);
+    }
   }, [venueName]);
 
-
   useEffect(() => {
-    const pitchId = selectedPitch?.id;
-    if (!pitchId || blockedByPitch[pitchId]) return;
-    fetch(`/api/booking/availability?pitchId=${encodeURIComponent(pitchId)}`)
-      .then((r) => (r.ok ? r.json() : { blocked: [] }))
-      .then((j: { blocked?: Array<{ start: string; end: string }> }) =>
-        setBlockedByPitch((prev) => ({ ...prev, [pitchId]: j.blocked ?? [] })))
-      .catch(() => setBlockedByPitch((prev) => ({ ...prev, [pitchId]: [] })));
-  }, [selectedPitch?.id, blockedByPitch]);
+    loadVenueData();
+  }, [loadVenueData]);
 
-  const reloadBookings = useCallback(async () => {
-    const { bookingService } = await import('@/lib/firebase-services');
-    const all = await Promise.all(pitches.map((p) => bookingService.getByPitch(p.id)));
-    setExistingBookings(all.flat().filter(Boolean));
-  }, [pitches]);
+  const reloadBookings = useCallback(() => loadVenueData(true), [loadVenueData]);
 
   const generateWeekSchedule = (): DaySchedule[] => {
     if (!selectedPitch) return [];
@@ -610,9 +526,6 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
           setSelectedTimeSlot(null);
           setCurrentStep('slots');
           reloadBookings().catch(() => {});
-          if (error === 'date_blocked' && selectedPitch) {
-            setBlockedByPitch((prev) => { const next = { ...prev }; delete next[selectedPitch.id]; return next; });
-          }
           toast.error(
             'Η ώρα δεν είναι πλέον διαθέσιμη',
             error === 'slot_taken' ? 'Μόλις την έκλεισε κάποιος άλλος. Διαλέξτε άλλη ώρα.' : 'Διαλέξτε άλλη ώρα.'
@@ -634,6 +547,10 @@ export default function VenueBookingPage({ params }: { params: Promise<{ venueNa
         if (error === 'bookings_disabled') {
           setShowEmailVerification(false);
           setLoadError('Οι online κρατήσεις δεν είναι διαθέσιμες αυτή τη στιγμή. Επικοινωνήστε απευθείας με το γήπεδο.');
+          return;
+        }
+        if (error === 'service_busy') {
+          toast.error('Προσωρινό πρόβλημα', 'Οι online κρατήσεις δεν είναι διαθέσιμες αυτή τη στιγμή. Δοκιμάστε ξανά αργότερα ή καλέστε το γήπεδο.');
           return;
         }
         if (error === 'too_many_requests') {

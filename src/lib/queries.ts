@@ -161,8 +161,9 @@ export function useSubscriptionQuoteRaw<T = Raw>(venueId?: string) {
 
 export function usePendingBookings(venueId?: string) {
   const { data, error, isLoading } = useSWR<BookingsPayload>(keys.pendingBookings(venueId), {
-    // Το καμπανάκι είναι σε κάθε σελίδα — μια ήπια περιοδική ανανέωση αρκεί.
-    refreshInterval: 120_000,
+    // Το καμπανάκι είναι σε κάθε σελίδα· κάθε 3 λεπτά, μόνο με ορατή καρτέλα
+    // (προεπιλογή του SWR). Κοστίζει έως 5 αναγνώσεις τη φορά.
+    refreshInterval: 180_000,
   });
   return { pending: data?.bookings ?? [], error, isLoading };
 }

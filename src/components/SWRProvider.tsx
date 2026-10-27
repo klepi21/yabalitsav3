@@ -20,9 +20,10 @@ export default function SWRProvider({ children }: { children: React.ReactNode })
         fetcher: swrFetcher,
         // Ίδιο κλειδί μέσα σε 5s => ένα request.
         dedupingInterval: 5000,
-        // Επαναφορά στο tab: μόνο αν τα δεδομένα είναι παλιότερα από 30s.
+        // Επαναφορά στο tab: το πολύ μία ανανέωση ανά 2 λεπτά (όριο
+        // αναγνώσεων του δωρεάν πλάνου Firebase).
         revalidateOnFocus: true,
-        focusThrottleInterval: 30_000,
+        focusThrottleInterval: 120_000,
         revalidateOnReconnect: true,
         // Κρατάμε τα προηγούμενα δεδομένα ενώ αλλάζει το κλειδί (π.χ. σελίδα
         // στο pagination) ώστε να μη «τρεμοπαίζει» η λίστα.

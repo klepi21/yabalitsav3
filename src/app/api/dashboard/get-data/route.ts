@@ -6,7 +6,8 @@ import { db, verifyAuth, verifyVenueAccess, isAuthError } from '@/lib/api-auth';
  * κρατήσεις — καμία ιστορική άθροιση. Δεν υπάρχει λόγος να κατεβαίνει
  * ολόκληρο το ιστορικό του γηπέδου σε κάθε φόρτωση.
  */
-const LOOKBACK_DAYS = 7;
+// Μία ημέρα πίσω αρκεί για «τώρα» και «σήμερα»· οι επερχόμενες έρχονται όλες.
+const LOOKBACK_DAYS = 1;
 
 function isMissingIndex(err: unknown): boolean {
   const e = err as { code?: number | string; message?: string };

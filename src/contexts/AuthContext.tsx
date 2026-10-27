@@ -45,9 +45,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const venue = await venueService.getById(venueId);
       if (!venue) return;
 
-      /* Δωρεάν διάθεση: καμία λήξη. Τα γήπεδα που είχε ήδη κλειδώσει η
-         λήξη της δοκιμής (`active: false` με μηδενικές ημέρες) ξαναενεργο-
-         ποιούνται αυτόματα στην επόμενη σύνδεση. */
+      /* Δωρεάν διάθεση: καμία λήξη. Τα γήπεδα που είχε κλειδώσει η λήξη της
+         δοκιμής (`active: false` με μηδενικές ημέρες, από το παλιό ημερήσιο
+         Cloud Function που πλέον δεν υπάρχει) ξαναενεργοποιούνται αυτόματα
+         στην επόμενη σύνδεση. */
       if (!FEATURES.billing) {
         const lockedByExpiry = venue.active === false &&
           typeof venue.daysRemaining === 'number' && venue.daysRemaining <= 0;
@@ -118,9 +119,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             } catch { /* default true */ }
           }
 
-          // Start periodic check every 5 minutes
+          // Start periodic check every 5 minutes (μόνο όταν υπάρχει λήξη συνδρομής)
           if (checkIntervalRef.current) clearInterval(checkIntervalRef.current);
-          if (owner?.venueId) {
+          if (owner?.venueId && FEATURES.billing) {
             checkIntervalRef.current = setInterval(() => {
               checkSubscription(owner.venueId);
             }, 5 * 60 * 1000);

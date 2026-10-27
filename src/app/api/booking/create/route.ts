@@ -199,7 +199,16 @@ export async function POST(request: Request) {
     const bookings = db.collection('yabalitsa_bookings');
     const bookingRef = bookings.doc();
     const conflict = await db.runTransaction(async (tx) => {
-      const snap = await tx.get(bookings.where('pitchId', '==', pitchId));
+      /* Μόνο οι κρατήσεις γύρω από την ώρα (όχι όλο το ιστορικό του γηπέδου).
+         Καμία κράτηση δεν κρατά πάνω από 24 ώρες, άρα όποια επικαλύπτεται
+         ξεκινά μέσα σε αυτό το διάστημα. Index: venueId+pitchId+startTime. */
+      const snap = await tx.get(
+        bookings
+          .where('venueId', '==', venueId)
+          .where('pitchId', '==', pitchId)
+          .where('startTime', '>', Timestamp.fromDate(new Date(start.getTime() - 24 * 60 * 60 * 1000)))
+          .where('startTime', '<', Timestamp.fromDate(end)),
+      );
       const overlaps = snap.docs.some((doc) => {
         const b = doc.data();
         if (b.status === 'cancelled') return false;
@@ -254,6 +263,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, bookingId: bookingRef.id });
   } catch (err) {
     console.error('booking/create error', err);
+    // Δωρεάν πλάνο Firebase: εξαντλήθηκε το ημερήσιο όριο.
+    if ((err as { code?: number }).code === 8) return fail('service_busy', 503);
     return fail('internal_error', 500);
   }
 }

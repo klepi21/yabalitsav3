@@ -9,7 +9,11 @@ import {
   getDoc, 
   query, 
   where,
-  serverTimestamp 
+  serverTimestamp,
+  Timestamp,
+  getCountFromServer,
+  type QuerySnapshot,
+  type DocumentData
 } from 'firebase/firestore';
 import { 
   signInWithEmailAndPassword,
@@ -346,6 +350,17 @@ export const userService = {
   }
 };
 
+function mapBookings(snapshot: QuerySnapshot<DocumentData>): Booking[] {
+  return snapshot.docs.map(d => ({
+    id: d.id,
+    ...d.data(),
+    startTime: d.data().startTime?.toDate() || new Date(),
+    endTime: d.data().endTime?.toDate() || new Date(),
+    createdAt: d.data().createdAt?.toDate() || new Date(),
+    updatedAt: d.data().updatedAt?.toDate() || new Date()
+  })) as Booking[];
+}
+
 // Booking Services
 export const bookingService = {
   // Create a new booking
@@ -386,6 +401,49 @@ export const bookingService = {
       createdAt: doc.data().createdAt?.toDate() || new Date(),
       updatedAt: doc.data().updatedAt?.toDate() || new Date()
     })) as Booking[];
+  },
+
+  /* Στοχευμένα queries αντί για ολόκληρο το ιστορικό. Το δωρεάν πλάνο της
+     Firebase μετράει κάθε έγγραφο που διαβάζεται, οπότε μια σελίδα που
+     κατέβαζε όλες τις κρατήσεις ενός γηπέδου κόστιζε όλο και περισσότερο
+     όσο περνούσε ο καιρός. Χρησιμοποιούν τα υπάρχοντα indexes
+     (venueId+startTime, venueId+pitchId+startTime). */
+
+  // Κρατήσεις γηπέδου από μια ημερομηνία και μετά
+  async getByVenueSince(venueId: string, since: Date): Promise<Booking[]> {
+    const q = query(
+      collection(db, 'yabalitsa_bookings'),
+      where('venueId', '==', venueId),
+      where('startTime', '>=', Timestamp.fromDate(since))
+    );
+    return mapBookings(await getDocs(q));
+  },
+
+  // Κρατήσεις ενός γηπέδου (pitch) από μια ημερομηνία και μετά
+  async getByPitchSince(venueId: string, pitchId: string, since: Date): Promise<Booking[]> {
+    const q = query(
+      collection(db, 'yabalitsa_bookings'),
+      where('venueId', '==', venueId),
+      where('pitchId', '==', pitchId),
+      where('startTime', '>=', Timestamp.fromDate(since))
+    );
+    return mapBookings(await getDocs(q));
+  },
+
+  // Κρατήσεις ενός πελάτη σε ένα γήπεδο
+  async getByVenueAndUser(venueId: string, userId: string): Promise<Booking[]> {
+    const q = query(
+      collection(db, 'yabalitsa_bookings'),
+      where('venueId', '==', venueId),
+      where('userId', '==', userId)
+    );
+    return mapBookings(await getDocs(q));
+  },
+
+  // Πλήθος κρατήσεων ενός pitch, χωρίς να διαβαστούν τα έγγραφα
+  async countByPitch(pitchId: string): Promise<number> {
+    const snap = await getCountFromServer(query(collection(db, 'yabalitsa_bookings'), where('pitchId', '==', pitchId)));
+    return snap.data().count;
   },
 
   // Get bookings by pitch

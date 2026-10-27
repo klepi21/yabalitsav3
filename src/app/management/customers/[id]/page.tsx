@@ -72,10 +72,7 @@ export default function CustomerDetailsPage() {
         }
         setCustomer(customerData);
 
-        const allBookings = await bookingService.getByVenue(venueOwner.venueId);
-        const customerVenueBookings = allBookings.filter(booking =>
-          booking.userId === customerId
-        );
+        const customerVenueBookings = await bookingService.getByVenueAndUser(venueOwner.venueId, customerId);
         setCustomerBookings(customerVenueBookings.sort((a, b) =>
           new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
         ));

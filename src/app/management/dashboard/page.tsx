@@ -90,6 +90,7 @@ import { useSubscriptionQuote } from '@/lib/queries';
 import { days } from '@/lib/utils';
 import UpgradeDueCard from '@/components/UpgradeDueCard';
 import { FEATURES } from '@/config/features';
+import { venueSlug } from '@/lib/venue-slug';
 
 function CoachDashboard() {
   const { user, venueOwner, isLoading: authLoading } = useAuth();
@@ -671,63 +672,32 @@ function AdminDashboard() {
     }
   }, [venueOwner?.venueId, loadDashboardData]);
 
-  // Smart refresh: 5 minutes when active, pause when inactive
+  /* Ανανέωση με μέτρο: κάθε 15 λεπτά όσο η καρτέλα είναι ορατή, και όταν
+     ο χρήστης επιστρέφει σε αυτή (αν πέρασαν 2+ λεπτά). Το δωρεάν πλάνο της
+     Firebase έχει ημερήσιο όριο αναγνώσεων κοινό για όλα τα γήπεδα, και ένα
+     dashboard ανοιχτό όλη μέρα στη ρεσεψιόν ανανεωνόταν κάθε 5 λεπτά.
+     Οι νέες online κρατήσεις φαίνονται έτσι κι αλλιώς στο καμπανάκι. */
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    let isActive = true;
-
-    const startRefresh = () => {
-      interval = setInterval(() => {
-        if (venueOwner?.venueId && isActive) {
-          loadDashboardData();
-        }
-      }, 300000); // 5 minutes
+    if (!venueOwner?.venueId) return;
+    let lastLoad = Date.now();
+    const refresh = () => {
+      lastLoad = Date.now();
+      loadDashboardData();
     };
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        isActive = false;
-        if (interval) clearInterval(interval);
-      } else {
-        isActive = true;
-        startRefresh();
-      }
+    const interval = setInterval(() => {
+      if (!document.hidden) refresh();
+    }, 15 * 60 * 1000);
+    const onVisible = () => {
+      if (!document.hidden && Date.now() - lastLoad > 2 * 60 * 1000) refresh();
     };
-
-    const handleUserActivity = () => {
-      if (!isActive) {
-        isActive = true;
-        startRefresh();
-      }
-    };
-
-    // Start refresh when component mounts
-    startRefresh();
-
-    // Pause refresh when tab is hidden
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // Resume refresh on user activity
-    document.addEventListener('mousemove', handleUserActivity);
-    document.addEventListener('keydown', handleUserActivity);
-    document.addEventListener('click', handleUserActivity);
-
+    document.addEventListener('visibilitychange', onVisible);
     return () => {
-      if (interval) clearInterval(interval);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      document.removeEventListener('mousemove', handleUserActivity);
-      document.removeEventListener('keydown', handleUserActivity);
-      document.removeEventListener('click', handleUserActivity);
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisible);
     };
   }, [venueOwner?.venueId, loadDashboardData]);
 
-  // Helper: create slug for /book/[venueName]
-  function getVenueSlug(name?: string) {
-    if (!name) return '';
-    return name.toLowerCase().replace(/\s+/g, '');
-  }
-
-  const bookingPath = venue ? `/book/${getVenueSlug(venue.name)}` : '';
+  const bookingPath = venue ? `/book/${venueSlug(venue.name)}` : '';
 
   // Show loading while checking authentication or fetching initial data
   if (authLoading || (dataLoading && (bookings.length === 0 || pitches.length === 0))) {

@@ -3,6 +3,7 @@ import { db, auth } from '@/lib/api-auth';
 import { FieldValue } from 'firebase-admin/firestore';
 import { sendEmail, emailTemplates } from '@/lib/email-service';
 import { TRIAL_DAYS } from '@/lib/pricing';
+import { venueSlug } from '@/lib/venue-slug';
 
 export async function POST(request: NextRequest) {
   try {
@@ -56,6 +57,7 @@ export async function POST(request: NextRequest) {
     // Create venue document
     const venueDocRef = await db.collection('yabalitsa_venues').add({
       name: venueName,
+      slug: venueSlug(venueName),
       address: venueAddress,
       city: venueCity,
       contactDetails: {

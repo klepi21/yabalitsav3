@@ -11,6 +11,7 @@ export interface VenueCoupon {
 export interface Venue {
   id: string;
   name: string;
+  slug?: string; // /book/[slug], βλ. src/lib/venue-slug.ts
   city?: string;
   phone?: string;
   email?: string;
